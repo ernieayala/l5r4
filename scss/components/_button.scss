@@ -6,6 +6,17 @@
 
 @use "../base/variables" as *;
 
+// The urban sprite's pass, played by the roll face here and by the Trait roll (features/_traits-rings.scss)
+@keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+  }
+
+  to {
+    mask-position: 0 0;
+  }
+}
+
 .l5r4-button.-roll {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
   border-radius: 0;

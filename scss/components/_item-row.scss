@@ -192,8 +192,10 @@
       inline-size: 16px;
     }
 
-    // The name keeps the posted card's `title` class; it takes the section heading's look and wraps
-    .title {
+    // The name keeps the posted card's `title` class; it takes the section heading's look and wraps. An NPC attack
+    // row is never posted, so its name carries the row's element class alone
+    .title,
+    &.-attacks .l5r4-item-row-name {
       text-wrap: revert;
 
       @include title-row;

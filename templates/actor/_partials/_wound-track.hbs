@@ -1,0 +1,29 @@
+{{!-- The actor's Wound Ranks as a table (wound-track.md): name, penalty, threshold, and the current rank; in the
+wound configuration window an NPC's manual track, edited in place. Parameters: levels (system.woundLevels, or
+system.visibleWoundLevels on an NPC), editable (the manual track's inputs). --}}
+<div class="l5r4-wound-track">
+  <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
+  <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
+  <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
+  {{#if editable}}
+    <span>{{localize "l5r4.ui.common.active"}}</span>
+    {{#each levels as |lvl name|}}
+      <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
+      <div><input type="number" name="manualWoundLevels.{{name}}.penalty" value="{{penalty}}" data-action="update-field" data-type="Number" min="0" /></div>
+      <div><input type="number" name="manualWoundLevels.{{name}}.value" value="{{value}}" data-action="update-field" data-type="Number" min="0" /></div>
+      <div><input type="checkbox" name="manualWoundLevels.{{name}}.active" {{checked active}} data-action="update-field" data-type="Boolean" /></div>
+    {{/each}}
+  {{else}}
+    <span>{{localize "l5r4.ui.common.current"}}</span>
+    {{#each levels as |lvl name|}}
+      <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
+      <div>{{penaltyEff}}</div>
+      <div>{{value}}</div>
+      <div>
+        {{#if current}}
+          <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
+        {{/if}}
+      </div>
+    {{/each}}
+  {{/if}}
+</div>

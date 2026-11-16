@@ -164,7 +164,7 @@ export function registerDeprecationsTests(quench) {
           ]);
           await actor.sheet.render({ force: true });
           const control = actor.sheet.element.querySelector(
-            `.item[data-item-id="${skill.id}"] [data-action="delete-item"]`
+            `[data-item-id="${skill.id}"] [data-action="delete-item"]`
           );
           const answered = answerNextDialog("yes");
           const deleted = new Promise(resolve => Hooks.once("deleteItem", resolve));

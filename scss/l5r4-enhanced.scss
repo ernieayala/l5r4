@@ -30,7 +30,6 @@
 @use "./components/grid";
 @use "./components/section";
 @use "./components/item-row";
-@use "./components/animations";
 @use "./components/rank-control";
 @use "./components/rules-editor";
 @use "./components/ledger-dialog";
@@ -40,6 +39,7 @@
 @use "./components/request-card";
 @use "./apps/compendium-browser";
 @use "./components/item-summary-card";
+@use "./components/tabs";
 
 // Features
 @use "./features/pc-info";

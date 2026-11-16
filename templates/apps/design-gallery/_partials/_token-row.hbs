@@ -1,0 +1,14 @@
+{{!-- One row of a foundations token table: the token, its value (filled in by module/apps/design-gallery.js), and a
+sample drawn from what the entry names. Parameters: token, and one of step (a type sample), bar (a space bar), frame
+(a frame sample), or core (the core variable a face is built on); an entry with none has no sample. --}}
+<tr class="l5r4-design-gallery-token" data-token="{{token}}">
+  <td><code>{{token}}</code></td>
+  <td data-token-value></td>
+  <td>
+    {{~#if step}}<span class="l5r4-design-gallery-type -{{step}}">{{localize "l5r4.apps.designGallery.foundations.typeSample"}}</span>
+    {{~else if bar}}<span class="l5r4-design-gallery-bar -{{bar}}"></span>
+    {{~else if frame}}<span class="l5r4-design-gallery-frame -{{frame}}">{{localize "l5r4.apps.designGallery.foundations.frameSample"}}</span>
+    {{~else if core}}{{localize "l5r4.apps.designGallery.foundations.builtOn" core=core}}
+    {{~/if~}}
+  </td>
+</tr>

@@ -396,7 +396,7 @@ Template wave (C1 attributes, C2 markup), each by decision 17:
 Copy wave (C4), each by decision 17:
 
 - Three gaps in `lang/sentence-case` fixed with a failing fixture first: it now accepts the words of the book's Skill and arrow names (voice.md **Names of game things**), the plural Emphases, and the book's own titles (Core Rulebook, the Little Truths setting).
-- Plural groups: the two migration notifications are `{one, other}` groups, read through `pluralKeyOf` (`module/utils/localization.js`), which picks the Intl category and falls back to `other`. localization.md says Russian adds `few` and `many`, but `lang/translation-key` refuses a translation key `lang/en.json` lacks; the check wins (smallest change) and Russian reads `other` until the two agree. For review.
+- Plural groups: the two migration notifications are `{one, other}` groups, read through `pluralKeyOf` (`module/utils/localization.js`), which picks the Intl category and falls back to `other`. Russian adds `few` and `many`, which `lang/translation-key` accepts under a plural group (Ernie's ruling below).
 - Placeholders follow localization.md: `{name}` replaces `{actor}`, `{character}`, and `{creature}` in three values and every translation, with their callers.
 - Key renames: `disadvantageCapTooltip` → `changeDisadvantageCap`, `fear.clickToTest` → `fear.rollForSelected` (fear-block.md), `socialResistanceDescription` → `socialResistanceHint`, `equipment.weapons.tnHint` → `tnOnFootHint`, `ui.grants.schoolRankHint` → `ui.check.schoolRankHint`.
 - Left: the stance error keys at depth 6 (two targets fit); `unskilledHint`, `npcInitiativeHint`, `masteryXpHint` with no sibling field (copy judgment); "this actor" in the two permission notifications (naming the actor needs data at about 17 call sites); `transfer.exported` / `importedCount` read "1 items" for one item (no check covers it); 14 `glossary/term-case` hits that read placeholders (`{ring}`, `{skill}`) or typed link syntax as words.
@@ -459,6 +459,43 @@ SCSS wave (C3), part 3, one owner, by decision 17:
 - Not taken (decision 9): Wound track rows keep 25px (the 24px target token would take 8px off the track); the wound configuration window's manual table keeps its look (`:not(:where(...))` on the grid rule) where the grid's frame would change row height and text size.
 - Left: `_chat-card.scss` styles posted cards that share no `l5r4-` root; the window and `traits-rings` scopes wait on template classes (the templates wave); class-pattern hits on core and fixed classes.
 - The spell slots' cursor stays the default and turns to the pointer with Shift held, as the code had it; spell-slots.md said the pointer always. For review.
+
+Templates wave (E), one owner for templates, SCSS, and the selectors they break, by decision 17:
+
+- Repeated markup became partials, each registered in `module/setup/preload-templates.js`, named on its component page, and sampled in the gallery: `_traits-rings`, `_ring`, `_trait`, `_rank-control`, `_rank-track`, `_void-points`, `_spell-slot`, `_wound-track`, `_note-section`, `_limited` under `templates/actor/_partials/`; `_details`, `_detail-text`, `_bio-row`, `_text-section` under `templates/cards/_partials/`; `_advantage-details`, `_mastery-details` for the item sheet; `_wealth-change` for the wealth manager; two gallery token partials. Posted item cards render byte-identical HTML (111 of 111 compared): a partial inside posted markup is included at column 0, because core compiles partials with `preventIndent` (`handlebars.mjs:41`).
+- Controls with `data-action` are native buttons (Trait and Void Ring values, the ranks ledger, the Skill Emphasis link, the item sheet tabs, which the item sheet re-enables on a locked document as core's tabs stay usable). Classes carry `l5r4-` (`l5r4-traits-rings`, `l5r4-ring-roll`, `l5r4-void-point`); the sheet windows carry `l5r4-actor-sheet` / `l5r4-item-sheet`, with `pc`, `npc`, `item` kept for outside code. The effect tab's controls select by `data-effect-*`.
+- Visible, by the docs (states.md): the Ring image and Void Point hovers read the hover filter in place of a scale. The keyframes moved beside their readers and `_animations.scss` is gone.
+- Quench selects by `data-*`, `name`, or element everywhere; HTML in tests is built with DOM APIs.
+- Computed-style snapshots before and after (PC, NPC, weapon, skill, kata, kiho sheets per tab, XP, wealth, and wound windows, gallery, chat; both themes): the differences left are the converted buttons' own boxes (text in place), core's button transition and icon `pointer-events`, the Emphasis link's `inline-block`, and `display: contents` wrappers.
+
+### Ernie's rulings on the review items (2026-11-15)
+
+| Item | Ruling |
+|------|--------|
+| Sheets importing app classes | Allowed: sheets open the system's windows. CLAUDE.md Layers, DEVELOPER.md, modules.md, and the Sheets import rule in `eslint.config.mjs` say so |
+| Spell slot cursor | Default, pointer while Shift is held, as the code has it; spell-slots.md matches |
+| Controls on `:focus-within` | Kept, as states.md rule 3 says; controls stay shown after a click until focus leaves the row |
+| Wound track 25px rows, wound configuration manual table | Kept as they look; recorded as exceptions in the size and wound-track pages |
+| Verbs `log`, `warn`, `export`, `settle` | Added to naming.md's vocabulary; `logError`, `warnVoidLimit`, `exportItemFolder`, `settleStarts` stay |
+| Compendium browser icon | A glyph core does not use beside it, in place of `fa-book-atlas`; iconography.md follows |
+| Actor windows that do not follow their actor live | Left as they are: registering a form re-renders it under the user's typing |
+| Theme tokens on `.window-content` | Kept; color.md C4 says `.window-content` |
+| 1.25rem list indents | Kept at 20px; `space-24` and an indent token stay undeclared |
+| Russian plural forms | The translation-key check accepts a translation's extra plural categories when `en.json` has the group's `one` / `other` |
+| `freeRaisesToTN` | The variable becomes `freeRaisesToTn`; the stored message field keeps its key |
+| Files over their size limit | Split along their responsibilities where a file does two jobs, behavior unchanged; a file that is one job gets a written reason |
+| `<field>Hint` keys with no sibling field | Paired with the field each describes and renamed, or the suffix dropped where it hints no single field |
+| `socialResistanceDescription`, `disadvantageCapTooltip` | Renamed to `*Hint` keys, the English tooltip gaining its final period |
+| Quench fixtures with `attack.type: "Slashing"` and an `action` field | Fixtures write only schema fields with valid values |
+| PC and NPC derived data | Runs in `L5R4Actor.prepareDerivedData`, in place of the `prepareSubtypeData` seam; Quench tests call `actor.prepareData()`, the full cycle, never `prepareDerivedData()` alone |
+| Immunity notice from `L5R4ActiveEffect` | A system hook (`l5r4-enhanced.immuneStatus`) the hooks module wires to the notice; `L5R4Combat.askInitiativeBonuses` stays a slot, since it returns a value. foundry-patterns.md records both |
+| Code citations in `docs/` | A file and a symbol, never a line number; a convention test fails when the symbol is not in the file |
+| Roll button partial (button.md B4) | `tools/coverage` reads a `data-action` passed to a partial as a hash argument; one `_roll-button.hbs` serves every card |
+| Sort header (sort-header.md H6) | Each list's columns are a value in `module/config/` that the sort code and one `_sort-header.hbs` both read |
+| Fixed classes outside their component's file | `styles/one-component` exempts naming.md's fixed chat-card classes; `l5r4-citation` and `l5r4-rule-lines` join that list |
+| `_text-section.hbs` root | Takes an `l5r4-` class; new cards carry it, no style depends on it |
+| Item sheet effect controls | Native buttons with `data-action`, routed through the sheet's actions, `aria-pressed` on the toggle |
+| Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |
 
 ### Progress (handoff, 2026-11-15)
 

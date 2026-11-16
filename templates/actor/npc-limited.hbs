@@ -1,8 +1,3 @@
 <form class="l5r4-sheet {{cssClass}}" autocomplete="off">
-  <div class="l5r4-limited flexcol -gap-lg">
-    <h1 class="l5r4-limited-name flex0">{{actor.name}}</h1>
-    <div class="flexcol flex1">
-      <img class="l5r4-portrait" src="{{actor.img}}" data-edit="img" data-actor-image alt="{{actor.name}}" data-tooltip="{{actor.name}}" />
-    </div>
-  </div>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_limited.hbs" actor=actor}}
 </form>

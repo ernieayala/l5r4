@@ -1,7 +1,7 @@
-<nav class="l5r4-tabs -sheet sheet-tabs tabs" data-group="primary">
+<nav class="l5r4-tabs -sheet sheet-tabs tabs" role="tablist" data-group="primary">
   {{#each tabs as |tab|}}
-    <a class="l5r4-tabs-tab {{tab.cssClass}}" data-action="change-tab" data-tab="{{tab.id}}">
+    <button type="button" role="tab" class="l5r4-tabs-tab{{#if tab.active}} active{{/if}}" data-action="change-tab" data-tab="{{tab.id}}" aria-selected="{{#if tab.active}}true{{else}}false{{/if}}">
       {{tab.label}}
-    </a>
+    </button>
   {{/each}}
 </nav>

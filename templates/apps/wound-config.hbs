@@ -61,18 +61,7 @@
 
     {{#if (and (eq actor.type "npc") (eq woundMode "manual"))}}
       <div class="l5r4-grid">
-        <div class="l5r4-wound-track">
-          <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
-          <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
-          <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
-          <span>{{localize "l5r4.ui.common.active"}}</span>
-          {{#each visibleManualWoundLevels as |lvl name|}}
-            <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-            <div><input type="number" name="manualWoundLevels.{{name}}.penalty" value="{{penalty}}" data-action="update-field" data-type="Number" min="0" /></div>
-            <div><input type="number" name="manualWoundLevels.{{name}}.value" value="{{value}}" data-action="update-field" data-type="Number" min="0" /></div>
-            <div><input type="checkbox" name="manualWoundLevels.{{name}}.active" {{checked active}} data-action="update-field" data-type="Boolean" /></div>
-          {{/each}}
-        </div>
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=visibleManualWoundLevels editable=true}}
       </div>
     {{/if}}
   </div>

@@ -10,7 +10,7 @@ export function answerCheckDialog(values = {}) {
   return new Promise(resolve => {
     Hooks.once("renderDialogV2", app => {
       const form = app.element.querySelector("form") ?? app.element;
-      const labels = [...app.element.querySelectorAll(".l5r4-check-dialog-modifier-label")].map(e =>
+      const labels = [...app.element.querySelectorAll("[data-modifier-label]")].map(e =>
         e.textContent.trim()
       );
       for (const [name, value] of Object.entries(values)) {
@@ -216,6 +216,7 @@ export function revealChatPopupsAtOnce() {
   new MutationObserver(records => {
     for (const record of records) {
       for (const node of record.addedNodes) {
+        // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/chat/notifications.hbs
         if (node.classList?.contains("spacer") && node.closest("#chat-notifications")) {
           for (const animation of node.getAnimations()) {
             animation.finish();
@@ -237,6 +238,7 @@ export async function settleChatNotifications() {
   await wait(CHAT_NOTIFICATION_START_MS);
   const deadline = Date.now() + CHAT_NOTIFICATION_TIMEOUT_MS;
   while (document.querySelector(PENDING_CHAT_CARD) && Date.now() < deadline) {
+    // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/chat/notifications.hbs
     for (const spacer of document.querySelectorAll("#chat-notifications .chat-log .spacer")) {
       for (const animation of spacer.getAnimations()) {
         animation.finish();

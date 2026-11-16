@@ -305,7 +305,7 @@ export function registerAuthoringTests(quench) {
               roll: 1
             });
             assert.isNull(
-              sheet.element.querySelector(".l5r4-rules-editor-error"),
+              sheet.element.querySelector("[data-rule-error]"),
               "the rule is valid as authored"
             );
             // A second rule (valid as added: selector "any") deleted again leaves the first
@@ -365,7 +365,7 @@ export function registerAuthoringTests(quench) {
             sheet.element.querySelector('[data-action="change-tab"][data-tab="rules"]').click();
             await sheet.render();
             assert.isNull(
-              sheet.element.querySelector(".l5r4-rules-editor-error"),
+              sheet.element.querySelector("[data-rule-error]"),
               "no error over the rules"
             );
             assert.equal(

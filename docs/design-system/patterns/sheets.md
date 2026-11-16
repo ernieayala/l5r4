@@ -244,9 +244,8 @@ classes item cards post to chat stay as they are. A component's styles sit under
 Conforming, `scss/apps/_effect-panel.scss:6-60`: every rule sits under `.l5r4-effect-panel`.
 
 Non-conforming (modeled): a section rule scoped under `.l5r4.pc` and `.l5r4.npc`, so a window outside the sheet copies
-its look. Under the window scope today, for want of an `l5r4-` class on the element: `scss/sheets/_actor-sheet.scss`,
-`scss/sheets/_item-sheet.scss`, and `scss/features/_traits-rings.scss` (`docs/code-system/templates-and-styles.md`,
-Rules and selectors).
+its look. The window's own rules sit under the window's block class, `l5r4-actor-sheet` or `l5r4-item-sheet`
+(`scss/sheets/_actor-sheet.scss`, `scss/sheets/_item-sheet.scss`).
 
 ### 8. Tabs use core's tab markup with a kebab-case action
 
@@ -263,9 +262,11 @@ Conforming, modeled on `templates/item/_partials/_tabs.hbs:3`:
   data-tab="{{tab.id}}" aria-selected="{{#if tab.active}}true{{else}}false{{/if}}">{{tab.label}}</button>
 ```
 
-Non-conforming, `templates/item/_partials/_tabs.hbs:3`: `<a class="item {{tab.cssClass}}" data-action="changeTab">`.
-Core's ApplicationV2 also offers `static TABS` with its own `tab` action; moving the item sheet onto it is a
-`docs/code-system/foundry-patterns.md` question, decided in review.
+Non-conforming (modeled): `<a class="item {{tab.cssClass}}" data-action="changeTab">`. Core disables every button of
+a sheet the viewer cannot edit, so the item sheet enables its tab buttons again after each render
+(`module/sheets/item-sheet.js`, `_onRender`): a tab writes nothing. Core's ApplicationV2 also offers `static TABS` with
+its own `tab` action; moving the item sheet onto it is a `docs/code-system/foundry-patterns.md` question, decided in
+review.
 
 ## Partials and parameters
 

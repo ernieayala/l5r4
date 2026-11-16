@@ -34,6 +34,8 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/item/_partials/_tab-description.hbs`,
     `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
     `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_advantage-details.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_mastery-details.hbs`,
 
     // Rules editor, on item and Active Effect sheets
     `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`,
@@ -92,6 +94,16 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/actor/_partials/_fear.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_bio.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_unified-item-create.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_traits-rings.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_ring.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_trait.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_rank-control.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_void-points.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_rank-track.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_spell-slot.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_wound-track.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_note-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_limited.hbs`,
 
     // Actor Partials - Item Sections
     `systems/${SYS_ID}/templates/actor/_partials/_skill-section.hbs`,
@@ -124,6 +136,10 @@ export async function registerTemplates() {
     // Card Partials
     `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
     `systems/${SYS_ID}/templates/cards/_partials/_activate.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_details.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_detail-text.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_text-section.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_bio-row.hbs`,
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/check.hbs`,
@@ -156,9 +172,12 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/apps/effect-panel.hbs`,
     `systems/${SYS_ID}/templates/apps/compendium-browser.hbs`,
     `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`,
+    `systems/${SYS_ID}/templates/apps/_partials/_wealth-change.hbs`,
 
-    // Design gallery (module/apps/design-gallery.js): its parts include this partial
-    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_sample.hbs`
+    // Design gallery (module/apps/design-gallery.js): its parts include these partials
+    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_sample.hbs`,
+    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_token-head.hbs`,
+    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_token-row.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

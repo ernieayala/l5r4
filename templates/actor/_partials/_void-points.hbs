@@ -1,0 +1,17 @@
+{{!-- The actor's Void Points as nine dots under the Void Ring (void-point-dots.md); the sheet fills the dots after
+render (VoidPointsHandler.updateVoidDots). Parameters: value (system.rings.void.value). --}}
+<div class="l5r4-void-points">
+  <button type="button" class="l5r4-void-points-dots" data-action="adjust-void-points" data-value="{{value}}"
+      data-tooltip="{{localize "l5r4.ui.hints.voidPointsClickAdjust"}}" aria-label="{{localize "l5r4.ui.hints.voidPointsClickAdjust"}}">
+    <span class="l5r4-void-point" data-idx="1"></span>
+    <span class="l5r4-void-point" data-idx="2"></span>
+    <span class="l5r4-void-point" data-idx="3"></span>
+    <span class="l5r4-void-point" data-idx="4"></span>
+    <span class="l5r4-void-point" data-idx="5"></span>
+    <span class="l5r4-void-point" data-idx="6"></span>
+    <span class="l5r4-void-point" data-idx="7"></span>
+    <span class="l5r4-void-point" data-idx="8"></span>
+    <span class="l5r4-void-point" data-idx="9"></span>
+  </button>
+  <p class="l5r4-void-points-label">{{localize "l5r4.ui.mechanics.rings.voidPoints"}}</p>
+</div>

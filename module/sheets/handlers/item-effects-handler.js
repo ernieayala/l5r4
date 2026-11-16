@@ -22,10 +22,10 @@ export class ItemEffectsHandler {
    * Bind delegated event listeners for ActiveEffect UI actions.
    *
    * Attaches click handlers to the sheet root element for:
-   * - .effect-create: Create new effect and open config sheet
-   * - .effect-edit: Open existing effect config sheet
-   * - .effect-toggle: Toggle effect disabled state
-   * - .effect-delete: Delete effect with confirmation
+   * - [data-effect-create]: Create new effect and open config sheet
+   * - [data-effect-edit]: Open existing effect config sheet
+   * - [data-effect-toggle]: Toggle effect disabled state
+   * - [data-effect-delete]: Delete effect with confirmation
    *
    * Idempotent: Uses data-effects-bound flag to prevent duplicate bindings.
    * Safe to call multiple times (e.g., during sheet re-renders).
@@ -47,28 +47,28 @@ export class ItemEffectsHandler {
     root.dataset.effectsBound = "1";
 
     on(root, "click", {
-      selector: ".effect-create",
+      selector: "[data-effect-create]",
       handler: async ev => {
         await this.create(context, ev, ev.target);
       }
     });
 
     on(root, "click", {
-      selector: ".effect-edit",
+      selector: "[data-effect-edit]",
       handler: (ev, el) => {
         this.openEffectSheet(context, ev, el);
       }
     });
 
     on(root, "click", {
-      selector: ".effect-toggle",
+      selector: "[data-effect-toggle]",
       handler: async (ev, el) => {
         await this.updateEffectDisabled(context, ev, el);
       }
     });
 
     on(root, "click", {
-      selector: ".effect-delete",
+      selector: "[data-effect-delete]",
       handler: async (ev, el) => {
         await this.deleteEffect(context, ev, el);
       }
@@ -90,7 +90,7 @@ export class ItemEffectsHandler {
    *
    * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document to add the effect to
-   * @param {Event} event - Click event from .effect-create button
+   * @param {Event} event - Click event from [data-effect-create] button
    * @param {HTMLElement} _targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
@@ -133,7 +133,7 @@ export class ItemEffectsHandler {
    *
    * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-edit button
+   * @param {Event} event - Click event from [data-effect-edit] button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {void}
    */
@@ -165,7 +165,7 @@ export class ItemEffectsHandler {
    *
    * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-toggle button
+   * @param {Event} event - Click event from [data-effect-toggle] button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
@@ -206,7 +206,7 @@ export class ItemEffectsHandler {
    *
    * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-delete button
+   * @param {Event} event - Click event from [data-effect-delete] button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */

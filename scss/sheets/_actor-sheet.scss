@@ -4,9 +4,8 @@
  * rule 7): the window's column layout and the reset of the sheet's bare fields
  */
 
-// The window carries no l5r4- class of its own, only core's and the sheet's `l5r4 pc` / `l5r4 npc`
-.l5r4.pc,
-.l5r4.npc {
+// The sheet window's block class (module/sheets/base-actor-sheet.js)
+.l5r4-actor-sheet {
   display: flex;
   flex-direction: column;
 

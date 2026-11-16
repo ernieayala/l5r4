@@ -1,0 +1,19 @@
+{{!-- One rank track of the PC sidebar (rank-control.md, track variant): the label and rank.points under the value
+button whose sprite plays on hover. Parameters: track (honor, glory, status, shadowTaint, the stored field),
+label (i18n key), rank, points. --}}
+<div class="l5r4-rank-control -track">
+  <div class="l5r4-rank-control-under">
+    <span>{{localize label}}</span>
+    <span>{{rank}}.{{points}}</span>
+  </div>
+  <button
+    type="button"
+    class="flexcol -gap-xs l5r4-rank-control-value"
+    data-action="adjust-rank-points"
+    data-key="{{track}}"
+    data-tooltip="{{localize "l5r4.ui.hints.shiftClickRankPoints"}}"
+  >
+    <span>{{localize label}}</span>
+    <span>{{rank}}.{{points}}</span>
+  </button>
+</div>

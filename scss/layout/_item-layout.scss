@@ -55,3 +55,18 @@
 .l5r4-item-modifiers {
   display: contents;
 }
+
+// The Skill's emphasis manager control, a <button> in its fieldset legend laid out as the link it replaced: every
+// declaration undoes core's button face
+.l5r4-item-details .l5r4-item-details-emphases {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: inline;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  text-rendering: inherit;
+}

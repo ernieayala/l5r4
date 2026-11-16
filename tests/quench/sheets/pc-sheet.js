@@ -93,8 +93,10 @@ export function registerPcSheetTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = sheet.element;
-          // Traits use data-trait attribute on rank spans
-          const traitElements = element.querySelectorAll(".l5r4-rank-control.-trait[data-trait]");
+          // Each Trait's rank value carries its key
+          const traitElements = element.querySelectorAll(
+            "[data-action='adjust-trait'][data-trait]"
+          );
 
           assert.isAtLeast(traitElements.length, 1, "Trait elements found");
         });
@@ -105,7 +107,7 @@ export function registerPcSheetTests(quench) {
 
           const element = sheet.element;
           // Check for main sheet structure instead of tabs
-          const mainSheet = element.querySelector(".l5r4-sheet-body");
+          const mainSheet = element.querySelector("[data-sheet-body]");
 
           assert.exists(mainSheet, "Main sheet structure exists");
         });

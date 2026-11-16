@@ -96,6 +96,9 @@ built from a section and a grid) has no SCSS file.
 | [inline-link.md](inline-link.md)               | Check, Damage, Condition, and Fear text links           | Journals, descriptions    |
 | [floating-number.md](floating-number.md)       | Wound and Void Point changes drawn on the canvas        | Canvas                    |
 
+A sheet partial that draws no component of its own is named here: `templates/actor/_partials/_limited.hbs`, the
+Limited view (`../patterns/sheets.md` rule 5).
+
 ## Adding a page
 
 Follow **Adding a component** in `../README.md`, then add the page to the table above. A page names only partials,

@@ -764,11 +764,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
       `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/cards/skill.hbs`
     ],
-    scss: [
-      "scss/components/_button.scss",
-      "scss/components/_animations.scss",
-      "scss/features/_traits-rings.scss"
-    ],
+    scss: ["scss/components/_button.scss", "scss/features/_traits-rings.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.coreButton",
@@ -863,9 +859,32 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "form-field",
-    partials: [`${T}/item/_partials/_tab-details.hbs`, `${T}/item/_partials/_tab-modifiers.hbs`],
+    partials: [
+      `${T}/item/_partials/_tab-details.hbs`,
+      `${T}/item/_partials/_tab-modifiers.hbs`,
+      `${T}/item/_partials/_advantage-details.hbs`,
+      `${T}/item/_partials/_mastery-details.hbs`,
+      `${T}/apps/_partials/_wealth-change.hbs`
+    ],
     scss: ["scss/components/_form-field.scss"],
     samples: [
+      {
+        partial: `${T}/item/_partials/_advantage-details.hbs`,
+        scope: "item",
+        context: "item",
+        with: { system: { type: "physical", cost: 2 } }
+      },
+      {
+        partial: `${T}/item/_partials/_mastery-details.hbs`,
+        scope: "item",
+        context: "item",
+        with: { system: { ring: "fire", mastery: 2 } }
+      },
+      {
+        partial: `${T}/apps/_partials/_wealth-change.hbs`,
+        context: "plain",
+        with: { field: "add" }
+      },
       {
         label: "l5r4.apps.designGallery.samples.coreFields",
         partial: `${T}/item/_partials/_tab-details.hbs`,
@@ -903,10 +922,16 @@ export const GALLERY_COMPONENTS = Object.freeze([
     partials: [
       `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/actor/_partials/_item-section.hbs`,
-      `${T}/actor/_partials/_bio.hbs`
+      `${T}/actor/_partials/_bio.hbs`,
+      `${T}/actor/_partials/_note-section.hbs`
     ],
     scss: ["scss/components/_section.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_note-section.hbs`,
+        scope: "pc",
+        context: "pc"
+      },
       {
         label: "l5r4.apps.designGallery.samples.listOpen",
         partial: `${T}/actor/_partials/_skill-section.hbs`,
@@ -970,10 +995,36 @@ export const GALLERY_COMPONENTS = Object.freeze([
       `${T}/actor/_partials/_kata-section.hbs`,
       `${T}/actor/_partials/_tattoo-section.hbs`,
       `${T}/actor/_partials/_advantage-section.hbs`,
-      `${T}/actor/_partials/_disadvantage-section.hbs`
+      `${T}/actor/_partials/_disadvantage-section.hbs`,
+      `${T}/cards/_partials/_details.hbs`,
+      `${T}/cards/_partials/_detail-text.hbs`,
+      `${T}/cards/_partials/_bio-row.hbs`
     ],
     scss: ["scss/components/_item-row.scss"],
     samples: [
+      {
+        partial: `${T}/cards/_partials/_details.hbs`,
+        scope: "pc",
+        context: "plain",
+        with: { rules: DESCRIPTION, description: DESCRIPTION }
+      },
+      {
+        partial: `${T}/cards/_partials/_detail-text.hbs`,
+        scope: "pc",
+        context: "plain",
+        with: { description: DESCRIPTION }
+      },
+      {
+        partial: `${T}/cards/_partials/_bio-row.hbs`,
+        scope: "pc",
+        context: "plain",
+        with: {
+          name: "Crane",
+          docId: "galleryClan",
+          inSheet: true,
+          system: { description: DESCRIPTION }
+        }
+      },
       {
         label: "l5r4.apps.designGallery.samples.skillRows",
         partial: `${T}/actor/_partials/_skill-section.hbs`,
@@ -1080,7 +1131,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
   {
     page: "tabs",
     partials: [`${T}/item/_partials/_tabs.hbs`],
-    scss: ["scss/apps/_compendium-browser.scss"],
+    scss: ["scss/components/_tabs.scss", "scss/apps/_compendium-browser.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.twoTabs",
@@ -1089,8 +1140,8 @@ export const GALLERY_COMPONENTS = Object.freeze([
         context: "item",
         with: {
           tabs: [
-            { id: "details", label: { i18n: "l5r4.ui.tabs.details" }, cssClass: "active" },
-            { id: "description", label: { i18n: "l5r4.ui.tabs.description" }, cssClass: "" }
+            { id: "details", label: { i18n: "l5r4.ui.tabs.details" }, active: true },
+            { id: "description", label: { i18n: "l5r4.ui.tabs.description" }, active: false }
           ]
         }
       },
@@ -1101,15 +1152,15 @@ export const GALLERY_COMPONENTS = Object.freeze([
         context: "item",
         with: {
           tabs: [
-            { id: "details", label: { i18n: "l5r4.ui.tabs.details" }, cssClass: "" },
-            { id: "modifiers", label: { i18n: "l5r4.ui.tabs.modifiers" }, cssClass: "active" },
-            { id: "description", label: { i18n: "l5r4.ui.tabs.description" }, cssClass: "" },
-            { id: "effects", label: { i18n: "l5r4.ui.tabs.effects" }, cssClass: "" },
-            { id: "rules", label: { i18n: "l5r4.ui.tabs.rules" }, cssClass: "" },
+            { id: "details", label: { i18n: "l5r4.ui.tabs.details" }, active: false },
+            { id: "modifiers", label: { i18n: "l5r4.ui.tabs.modifiers" }, active: true },
+            { id: "description", label: { i18n: "l5r4.ui.tabs.description" }, active: false },
+            { id: "effects", label: { i18n: "l5r4.ui.tabs.effects" }, active: false },
+            { id: "rules", label: { i18n: "l5r4.ui.tabs.rules" }, active: false },
             {
               id: "extra",
               label: { i18n: "l5r4.apps.designGallery.sample.longName" },
-              cssClass: ""
+              active: false
             }
           ]
         }
@@ -1145,9 +1196,33 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "ring-trait-block",
-    partials: [`${T}/actor/_partials/_stats.hbs`, `${T}/actor/_partials/_stats-npc.hbs`],
+    partials: [
+      `${T}/actor/_partials/_stats.hbs`,
+      `${T}/actor/_partials/_stats-npc.hbs`,
+      `${T}/actor/_partials/_traits-rings.hbs`,
+      `${T}/actor/_partials/_ring.hbs`,
+      `${T}/actor/_partials/_trait.hbs`
+    ],
     scss: ["scss/features/_traits-rings.scss", "scss/features/_pc-info.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_traits-rings.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { showVoidPoints: true }
+      },
+      {
+        partial: `${T}/actor/_partials/_ring.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { ring: "earth", rank: 1 }
+      },
+      {
+        partial: `${T}/actor/_partials/_trait.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { trait: "sta", name: "stamina", ring: "earth", rank: 1 }
+      },
       {
         label: "l5r4.apps.designGallery.samples.pcHeader",
         partial: `${T}/actor/_partials/_stats.hbs`,
@@ -1166,13 +1241,31 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "rank-control",
-    partials: [`${T}/actor/_partials/_ranks.hbs`],
-    scss: [
-      "scss/features/_ranks.scss",
-      "scss/components/_rank-control.scss",
-      "scss/components/_animations.scss"
+    partials: [
+      `${T}/actor/_partials/_ranks.hbs`,
+      `${T}/actor/_partials/_rank-control.hbs`,
+      `${T}/actor/_partials/_rank-track.hbs`
     ],
+    scss: ["scss/features/_ranks.scss", "scss/components/_rank-control.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_rank-control.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { variant: "trait", trait: "sta", value: 1 }
+      },
+      {
+        partial: `${T}/actor/_partials/_rank-control.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { variant: "void", value: 2 }
+      },
+      {
+        partial: `${T}/actor/_partials/_rank-track.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { track: "honor", label: "l5r4.character.ranks.honorRank", rank: 6, points: 5 }
+      },
       {
         label: "l5r4.apps.designGallery.samples.rankTracks",
         partial: `${T}/actor/_partials/_ranks.hbs`,
@@ -1186,17 +1279,30 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "void-point-dots",
-    partials: [`${T}/actor/_partials/_stats.hbs`],
+    partials: [`${T}/actor/_partials/_void-points.hbs`],
     scss: ["scss/features/_traits-rings.scss"],
-    samples: [],
+    samples: [
+      {
+        partial: `${T}/actor/_partials/_void-points.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { value: 1 }
+      }
+    ],
     seeAlso: ["ring-trait-block"],
     notes: ["l5r4.apps.designGallery.notes.voidDots"]
   },
   {
     page: "wound-track",
-    partials: [`${T}/actor/_partials/_wounds.hbs`],
+    partials: [`${T}/actor/_partials/_wounds.hbs`, `${T}/actor/_partials/_wound-track.hbs`],
     scss: ["scss/features/_wound-track.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_wound-track.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { levels: WOUND_LEVELS }
+      },
       {
         label: "l5r4.apps.designGallery.samples.healthy",
         partial: `${T}/actor/_partials/_wounds.hbs`,
@@ -1342,9 +1448,15 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "spell-slots",
-    partials: [`${T}/actor/_partials/_spell-section.hbs`],
+    partials: [`${T}/actor/_partials/_spell-section.hbs`, `${T}/actor/_partials/_spell-slot.hbs`],
     scss: ["scss/components/_section.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_spell-slot.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { ring: "water", count: 0 }
+      },
       {
         label: "l5r4.apps.designGallery.samples.slotCounts",
         partial: `${T}/actor/_partials/_spell-section.hbs`,
@@ -1692,10 +1804,17 @@ export const GALLERY_COMPONENTS = Object.freeze([
     partials: [
       `${T}/cards/skill.hbs`,
       `${T}/chat/item-summary.hbs`,
-      `${T}/item/_partials/_tab-description.hbs`
+      `${T}/item/_partials/_tab-description.hbs`,
+      `${T}/cards/_partials/_text-section.hbs`
     ],
     scss: ["scss/components/_item-summary-card.scss", "scss/components/_chat-card.scss"],
     samples: [
+      {
+        partial: `${T}/cards/_partials/_text-section.hbs`,
+        scope: "chat",
+        context: "plain",
+        with: { label: "l5r4.ui.sheets.description", text: DESCRIPTION }
+      },
       {
         label: "l5r4.apps.designGallery.samples.postedItem",
         partial: `${T}/cards/skill.hbs`,
@@ -2142,6 +2261,7 @@ export const GALLERY_PATTERNS = Object.freeze([
         with: { editable: true }
       },
       { partial: `${T}/actor/_partials/_combat.hbs`, scope: "pc", context: "pc" },
+      { partial: `${T}/actor/_partials/_limited.hbs`, scope: "pc", context: "pc" },
       { partial: `${T}/actor/_partials/_armor.hbs`, scope: "pc", context: "pc" },
       { partial: `${T}/actor/_partials/_wounds.hbs`, scope: "pc", context: "pc" }
     ]

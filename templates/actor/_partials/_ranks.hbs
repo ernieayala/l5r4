@@ -1,71 +1,11 @@
 <section class="l5r4-ranks">
-  <div class="l5r4-rank-control -track">
-    <div class="l5r4-rank-control-under">
-      <span>{{localize "l5r4.character.ranks.honorRank"}}</span>
-      <span>{{system.honor.rank}}.{{system.honor.points}}</span>
-    </div>
-    <button
-      type="button"
-      class="flexcol -gap-xs l5r4-rank-control-value"
-      data-action="adjust-rank-points"
-      data-key="honor"
-      data-tooltip="{{localize "l5r4.ui.hints.shiftClickRankPoints"}}"
-    >
-      <span>{{localize "l5r4.character.ranks.honorRank"}}</span>
-      <span>{{system.honor.rank}}.{{system.honor.points}}</span>
-    </button>
-  </div>
-  <div class="l5r4-rank-control -track">
-    <div class="l5r4-rank-control-under">
-      <span>{{localize "l5r4.character.ranks.gloryRank"}}</span>
-      <span>{{system.glory.rank}}.{{system.glory.points}}</span>
-    </div>
-    <button
-      type="button"
-      class="flexcol -gap-xs l5r4-rank-control-value"
-      data-action="adjust-rank-points"
-      data-key="glory"
-      data-tooltip="{{localize "l5r4.ui.hints.shiftClickRankPoints"}}"
-    >
-      <span>{{localize "l5r4.character.ranks.gloryRank"}}</span>
-      <span>{{system.glory.rank}}.{{system.glory.points}}</span>
-    </button>
-  </div>
-  <div class="l5r4-rank-control -track">
-    <div class="l5r4-rank-control-under">
-      <span>{{localize "l5r4.character.ranks.statusRank"}}</span>
-      <span>{{system.status.rank}}.{{system.status.points}}</span>
-    </div>
-    <button
-      type="button"
-      class="flexcol -gap-xs l5r4-rank-control-value"
-      data-action="adjust-rank-points"
-      data-key="status"
-      data-tooltip="{{localize "l5r4.ui.hints.shiftClickRankPoints"}}"
-    >
-      <span>{{localize "l5r4.character.ranks.statusRank"}}</span>
-      <span>{{system.status.rank}}.{{system.status.points}}</span>
-    </button>
-  </div>
-  <div class="l5r4-rank-control -track">
-    <div class="l5r4-rank-control-under">
-      <span>{{localize "l5r4.character.ranks.taintRank"}}</span>
-      <span>{{system.shadowTaint.rank}}.{{system.shadowTaint.points}}</span>
-    </div>
-    <button
-      type="button"
-      class="flexcol -gap-xs l5r4-rank-control-value"
-      data-action="adjust-rank-points"
-      data-key="shadowTaint"
-      data-tooltip="{{localize "l5r4.ui.hints.shiftClickRankPoints"}}"
-    >
-      <span>{{localize "l5r4.character.ranks.taintRank"}}</span>
-      <span>{{system.shadowTaint.rank}}.{{system.shadowTaint.points}}</span>
-    </button>
-  </div>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="honor" label="l5r4.character.ranks.honorRank" rank=system.honor.rank points=system.honor.points}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="glory" label="l5r4.character.ranks.gloryRank" rank=system.glory.rank points=system.glory.points}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="status" label="l5r4.character.ranks.statusRank" rank=system.status.rank points=system.status.points}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="shadowTaint" label="l5r4.character.ranks.taintRank" rank=system.shadowTaint.rank points=system.shadowTaint.points}}
   {{#if editable}}
-    <a class="l5r4-ranks-ledger" data-action="open-ledger" data-tooltip="{{localize "l5r4.ui.ledger.hint"}}">
+    <button type="button" class="l5r4-ranks-ledger" data-action="open-ledger" data-tooltip="{{localize "l5r4.ui.ledger.hint"}}">
       <i class="fa-solid fa-book-bookmark" inert></i> {{localize "l5r4.ui.ledger.title"}}
-    </a>
+    </button>
   {{/if}}
 </section>

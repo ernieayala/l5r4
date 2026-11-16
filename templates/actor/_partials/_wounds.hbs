@@ -44,35 +44,11 @@
         /></div>
     {{/if}}
 
-    <div class="l5r4-wound-track">
-      <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
-      <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
-      <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
-      <span>{{localize "l5r4.ui.common.current"}}</span>
-      {{#if (eq actor.type "npc")}}
-        {{#each system.visibleWoundLevels as |lvl name|}}
-          <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-          <div>{{penaltyEff}}</div>
-          <div>{{value}}</div>
-          <div>
-            {{#if current}}
-              <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
-            {{/if}}
-          </div>
-        {{/each}}
-      {{else}}
-        {{#each system.woundLevels as |lvl name|}}
-          <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-          <div>{{penaltyEff}}</div>
-          <div>{{value}}</div>
-          <div>
-            {{#if current}}
-              <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
-            {{/if}}
-          </div>
-        {{/each}}
-      {{/if}}
-    </div>
+    {{#if (eq actor.type "npc")}}
+      {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=system.visibleWoundLevels editable=false}}
+    {{else}}
+      {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=system.woundLevels editable=false}}
+    {{/if}}
   </div>
 
 </section>

@@ -1,0 +1,9 @@
+{{!-- One text section of a posted item card (item-summary-card.md): a heading over the item's rich text, nothing
+when the text is empty. Parameters: label (i18n key), text. A card includes it at the line's start: posted messages
+store this HTML, so its indentation is the card's, byte for byte. --}}
+{{#if text}}
+      <h5>{{localize label}}</h5>
+      <p>
+        {{{text}}}
+      </p>
+{{/if}}

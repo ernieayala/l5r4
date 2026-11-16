@@ -77,7 +77,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    */
   static DEFAULT_OPTIONS = {
     id: "l5r4-item",
-    classes: ["l5r4", "sheet", "item"],
+    classes: ["l5r4", "l5r4-item-sheet", "sheet", "item"],
     form: { submitOnChange: true },
     window: { contentClasses: ["standard-form"] },
     actions: {
@@ -288,8 +288,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context.tabs = availableTabs.map(tabId => ({
       id: tabId,
       label: game.i18n.localize(`l5r4.ui.tabs.${tabId}`),
-      active: tabId === this.#currentTab,
-      cssClass: tabId === this.#currentTab ? "active" : "" // Used by tab navigation
+      active: tabId === this.#currentTab
     }));
     context.currentTab = this.#currentTab;
 
@@ -391,10 +390,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * Delegates ActiveEffect UI operations to ItemEffectsHandler for event delegation.
    *
    * ItemEffectsHandler binds delegated click handlers for:
-   * - .effect-create: Create new effect and open config
-   * - .effect-edit: Open effect configuration sheet
-   * - .effect-toggle: Enable/disable effect
-   * - .effect-delete: Remove effect from item.
+   * - [data-effect-create]: Create new effect and open config
+   * - [data-effect-edit]: Open effect configuration sheet
+   * - [data-effect-toggle]: Enable/disable effect
+   * - [data-effect-delete]: Remove effect from item.
    *
    * @param {object} context - Rendered context data
    * @param {ApplicationRenderOptions} options - Render options
@@ -409,6 +408,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     }
 
     ItemEffectsHandler.bind({ item: this.item, element: root });
+    // A tab writes nothing, so a viewer core disabled the form for still changes tabs (components/tabs.md)
+    root.querySelectorAll("[data-action='change-tab']").forEach(tab => (tab.disabled = false));
   }
 
   /**

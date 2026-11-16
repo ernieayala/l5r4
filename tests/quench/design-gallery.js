@@ -115,13 +115,14 @@ export function registerDesignGalleryTests(quench) {
           clean(async function () {
             this.timeout(20_000);
             await gallery()?.close({ animate: false });
-            const menu = game.settings.menus.get(`${SYS_ID}.designGallery`);
+            const menuKey = `${SYS_ID}.designGallery`;
+            const menu = game.settings.menus.get(menuKey);
             assert.isTrue(menu.restricted, "the menu is restricted to GMs");
             const config = new foundry.applications.settings.SettingsConfig();
             await config.render({ force: true });
             try {
               config.element
-                .querySelector(`[data-action="openSubmenu"][data-key="${SYS_ID}.designGallery"]`)
+                .querySelector(`[data-action="openSubmenu"][data-key="${menuKey}"]`)
                 .click();
               assert.isTrue(await waitFor(() => gallery()?.rendered, 15_000), "the gallery opens");
             } finally {
@@ -266,7 +267,7 @@ export function registerDesignGalleryTests(quench) {
             const dialog = await opened;
             try {
               assert.isNotNull(
-                dialog.element.querySelector(".l5r4-check-dialog"),
+                dialog.element.querySelector("[data-check-dialog]"),
                 "the check dialog's content"
               );
             } finally {

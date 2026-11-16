@@ -19,22 +19,7 @@
 
   <div class="l5r4-wealth-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.apps.wealthManager.addMoney"}}</h3>
-    <div class="form-group">
-      <label>{{localize "l5r4.apps.wealthManager.amount"}}</label>
-      <div class="form-fields">
-        <input type="number" data-field="add-amount" name="add-amount" step="1" value="1" min="0" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "l5r4.apps.wealthManager.denomination"}}</label>
-      <div class="form-fields">
-        <select data-field="add-denomination" name="add-denomination">
-          <option value="koku">{{localize "l5r4.world.wealth.koku"}}</option>
-          <option value="bu">{{localize "l5r4.world.wealth.bu"}}</option>
-          <option value="zeni">{{localize "l5r4.world.wealth.zeni"}}</option>
-        </select>
-      </div>
-    </div>
+    {{> "systems/l5r4-enhanced/templates/apps/_partials/_wealth-change.hbs" field="add"}}
     <div class="form-group">
       <div class="form-fields">
         <button type="button" data-action="add-money">
@@ -47,22 +32,7 @@
 
   <div class="l5r4-wealth-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.apps.wealthManager.removeMoney"}}</h3>
-    <div class="form-group">
-      <label>{{localize "l5r4.apps.wealthManager.amount"}}</label>
-      <div class="form-fields">
-        <input type="number" data-field="remove-amount" name="remove-amount" step="1" value="1" min="0" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "l5r4.apps.wealthManager.denomination"}}</label>
-      <div class="form-fields">
-        <select data-field="remove-denomination" name="remove-denomination">
-          <option value="koku">{{localize "l5r4.world.wealth.koku"}}</option>
-          <option value="bu">{{localize "l5r4.world.wealth.bu"}}</option>
-          <option value="zeni">{{localize "l5r4.world.wealth.zeni"}}</option>
-        </select>
-      </div>
-    </div>
+    {{> "systems/l5r4-enhanced/templates/apps/_partials/_wealth-change.hbs" field="remove"}}
     <div class="form-group">
       <div class="form-fields">
         <button type="button" data-action="remove-money">

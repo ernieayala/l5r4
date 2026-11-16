@@ -68,6 +68,7 @@ async function dismissNewWindows(baseline, keep) {
  * @returns {HTMLElement[]}
  */
 function actionElements(app) {
+  // eslint-disable-next-line no-restricted-syntax -- core markup, the window frame [src: client/applications/api/application.mjs:861]
   const content = app.element.querySelector(".window-content") ?? app.element;
   return [...content.querySelectorAll("[data-action]")].filter(el => !el.closest("prose-mirror"));
 }
@@ -331,7 +332,7 @@ export function registerSheetsAndAppsTests(quench) {
               await sheet.render({ force: true });
               assert.isTrue(sheet.element.classList.contains("theme-light"));
               const backdrop = getComputedStyle(
-                sheet.element.querySelector(".l5r4-ring-rank.-earth"),
+                sheet.element.querySelector("[data-ring-disc='earth']"),
                 "::before"
               );
               assert.include(backdrop.backgroundImage, "parchment");

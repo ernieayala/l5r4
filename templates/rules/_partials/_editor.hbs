@@ -22,7 +22,7 @@
             </button>
           {{/if}}
         </legend>
-        {{#if rule.error}}<p class="l5r4-rules-editor-error">{{rule.error}}</p>{{/if}}
+        {{#if rule.error}}<p class="l5r4-rules-editor-error" data-rule-error>{{rule.error}}</p>{{/if}}
         {{#each rule.fields as |field|}}
           <div class="form-group l5r4-rules-editor-field" data-kind="{{field.kind}}">
             <label>{{field.name}}</label>

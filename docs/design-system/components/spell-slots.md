@@ -6,7 +6,7 @@ it. A press adds a slot, a right-press uses one; the count stays between 0 and 9
 
 | Item        | Detail                                                                                                                                               |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/actor/_partials/_spell-slot.hbs` (target), five uses in `_spell-section.hbs`. Today written out five times (`_spell-section.hbs:6-50`)    |
+| Partial     | `templates/actor/_partials/_spell-slot.hbs`, five uses in `_spell-section.hbs`                                                                       |
 | Parameters  | `ring` (`water`, `air`, `fire`, `earth`, `void`), `count` (`system.spellSlots.<ring>`)                                                               |
 | SCSS        | `scss/features/_spell-slots.scss` (target), holding `_sections.scss:39-70`                                                                           |
 | Block class | `l5r4-spell-slots` on the group; `l5r4-spell-slot -<ring>` on each slot                                                                              |

@@ -10,8 +10,20 @@
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
 
+  // A <button> laid out as the link it replaced: everything but `grid-column` and `text-align` undoes core's
+  // button face
   .l5r4-ranks-ledger {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
     grid-column: 1 / -1;
+    height: auto;
+    min-height: 0;
+    padding: 0;
     text-align: center;
+    text-rendering: inherit;
   }
 }

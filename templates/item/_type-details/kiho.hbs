@@ -1,23 +1,11 @@
-<div class="form-group">
-  <label>{{localize "l5r4.ui.common.ring"}}</label>
-  <div class="form-fields">
-    <select name="system.ring">
-      {{selectOptions config.rings selected=system.ring localize=true}}
-    </select>
-  </div>
-</div>
-<div class="form-group">
-  <label>{{localize "l5r4.ui.common.mastery"}}</label>
-  <div class="form-fields">
-    <input name="system.mastery" type="number" value="{{system.mastery}}" data-type="Number" />
-  </div>
-  <p class="hint">{{localize "l5r4.ui.common.masteryXpHint"}}</p>
-</div>
-<div class="form-group">
-  <label>{{localize "l5r4.ui.common.type"}}</label>
-  <div class="form-fields">
-    <select name="system.type">
-      {{selectOptions config.kihoTypes selected=system.type localize=true}}
-    </select>
+<div class="l5r4-item-details">
+  {{> "systems/l5r4-enhanced/templates/item/_partials/_mastery-details.hbs" system=system config=config}}
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.type"}}</label>
+    <div class="form-fields">
+      <select name="system.type">
+        {{selectOptions config.kihoTypes selected=system.type localize=true}}
+      </select>
+    </div>
   </div>
 </div>

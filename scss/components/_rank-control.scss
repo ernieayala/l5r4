@@ -1,41 +1,20 @@
 /**
  * Rank Control
  * The Honor, Glory, Status, and Taint rank blocks: a label under a value button whose brush-stroke sprite plays on
- * hover (components/rank-control.md). The 2 by 2 track layout is in features/_ranks.scss
+ * hover (components/rank-control.md). The 2 by 2 track layout is in features/_ranks.scss; the Trait and Void Ring
+ * variants are in features/_traits-rings.scss
  */
 
 @use "../base/variables" as *;
 
-// A <button>: `font` and `min-height` undo core's button face, so the value reads as before. Besides the hover and
-// press looks, core's focus ring (`box-shadow`, `outline`) eases in
-.l5r4-rank-control-value {
-  cursor: pointer;
-  display: flex;
-  font: inherit;
-  font-size: var(--l5r4-font-size-label);
-  line-height: 1;
-  min-height: 0;
-  padding: var(--l5r4-space-4) 0;
-  text-align: center;
-  transition:
-    box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard),
-    filter var(--l5r4-duration-fast) var(--l5r4-easing-standard),
-    outline var(--l5r4-duration-fast) var(--l5r4-easing-standard),
-    transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-
-  &:hover {
-    filter: var(--l5r4-state-hover-filter);
+// The nature sprite's pass, played by the track's value on hover
+@keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
   }
 
-  &:active {
-    filter: var(--l5r4-state-pressed-filter);
-    transform: var(--l5r4-state-pressed-transform);
-  }
-
-  span:first-child {
-    font-family: var(--l5r4-font-label);
-    font-size: var(--l5r4-font-size-title);
-    font-weight: bold;
+  to {
+    mask-position: 100% 0;
   }
 }
 
@@ -61,6 +40,8 @@
     width: 100%;
   }
 
+  // A <button>: `font` and `min-height` undo core's button face, so the value reads as before. Besides the hover and
+  // press looks, core's focus ring (`box-shadow`, `outline`) eases in
   .l5r4-rank-control-value {
     align-items: center;
     background: var(--l5r4-color-header);
@@ -70,18 +51,41 @@
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    font: inherit;
+    font-size: var(--l5r4-font-size-label);
     font-weight: bold;
     gap: var(--l5r4-space-4);
     height: 100%;
     justify-content: center;
+    line-height: 1;
     mask: url("../assets/animation/nature-sprite.webp");
     mask-position: 0 0;
     mask-size: 2300% 100%;
+    min-height: 0;
+    padding: var(--l5r4-space-4) 0;
+    text-align: center;
+    transition:
+      box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      filter var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      outline var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
     width: 100%;
 
     &:hover {
       animation: mask-forward-nature var(--l5r4-duration-sprite) steps($nature-sprite-steps)
         forwards;
+      filter: var(--l5r4-state-hover-filter);
+    }
+
+    &:active {
+      filter: var(--l5r4-state-pressed-filter);
+      transform: var(--l5r4-state-pressed-transform);
+    }
+
+    span:first-child {
+      font-family: var(--l5r4-font-label);
+      font-size: var(--l5r4-font-size-title);
+      font-weight: bold;
     }
   }
 }

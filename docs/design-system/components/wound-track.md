@@ -4,15 +4,15 @@ The actor's Wound Ranks as a table: each rank's name, its penalty, the Wounds it
 the actor is at now. On a sheet the track is read-only; in the wound configuration window an NPC's manual track is
 edited in place.
 
-| Item        | Detail                                                                                                                                                                                        |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/actor/_partials/_wound-track.hbs` (target), included by `_wounds.hbs` and `templates/apps/wound-config.hbs`. Today written out in `_wounds.hbs:43-71` and `wound-config.hbs:63-76` |
-| Parameters  | `levels` (`system.woundLevels`, or `system.visibleWoundLevels` on an NPC), `editable` (the wound configuration window's manual track)                                                         |
-| SCSS        | `scss/features/_wound-track.scss`, the rename of `scss/features/_wound-track.scss`                                                                                                            |
-| Block class | `l5r4-wound-track`                                                                                                                                                                            |
-| Shows in    | The Wounds section of the PC and NPC sidebar (`_wounds.hbs`), inside a full-row grid cell (`grid.md`); the wound configuration window                                                         |
-| Game terms  | Wound, Wound Rank (`game-rules/33_wounds.md, p.82`; `game-rules/34_ambush_falling_drowning.md, p.84`)                                                                                         |
-| Gallery     | A PC track at Healthy, at a middle rank, and at the last rank; an NPC track; the editable track; light and dark                                                                               |
+| Item        | Detail                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/actor/_partials/_wound-track.hbs`, included by `_wounds.hbs` and `templates/apps/wound-config.hbs`                         |
+| Parameters  | `levels` (`system.woundLevels`, or `system.visibleWoundLevels` on an NPC), `editable` (the wound configuration window's manual track) |
+| SCSS        | `scss/features/_wound-track.scss`, the rename of `scss/features/_wound-track.scss`                                                    |
+| Block class | `l5r4-wound-track`                                                                                                                    |
+| Shows in    | The Wounds section of the PC and NPC sidebar (`_wounds.hbs`), inside a full-row grid cell (`grid.md`); the wound configuration window |
+| Game terms  | Wound, Wound Rank (`game-rules/33_wounds.md, p.82`; `game-rules/34_ambush_falling_drowning.md, p.84`)                                 |
+| Gallery     | A PC track at Healthy, at a middle rank, and at the last rank; an NPC track; the editable track; light and dark                       |
 
 The section around the track is a compact section (`section.md`) and a grid (`grid.md`): Wounds suffered, the heal
 rate on a PC, and maximum Wounds on an NPC with a manual track.

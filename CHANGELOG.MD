@@ -93,6 +93,12 @@ their styles are unchanged.
 - `void-points-dots` -> `l5r4-void-points-dots`
 - `-filled` (Void Point dot) -> `is-filled`
 - `void-points-name` -> `l5r4-void-points-label`
+- `void-dot` -> `l5r4-void-point`
+- `traits-rings` -> `l5r4-traits-rings`
+- `ring-roll` -> `l5r4-ring-roll`
+- `effect-create`, `effect-edit`, `effect-toggle`, `effect-delete` -> `(removed)`; the controls carry `data-effect-create`, `data-effect-edit`, `data-effect-toggle`, `data-effect-delete`
+- `title` (NPC attack row name) -> `(removed)`; the name keeps `l5r4-item-row-name`
+- PC and NPC sheet windows add `l5r4-actor-sheet`, the item sheet window `l5r4-item-sheet`
 - `spells` (spell slot group) -> `l5r4-spell-slots`
 - `slots` -> `l5r4-spell-slot`
 - `wealth` (item section fields) -> `l5r4-wealth`

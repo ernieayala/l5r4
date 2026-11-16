@@ -1,0 +1,8 @@
+{{!-- The details cell of an item row in a sheet (item-row.md), never posted to chat: the item's rules and
+description. Parameters: rules, description (the item's rich text). A row with lines of its own before them writes
+the cell and includes _detail-text.hbs. --}}
+{{#if (or rules description)}}
+  <div class="l5r4-item-row-details">
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_detail-text.hbs" rules=rules description=description}}
+  </div>
+{{/if}}

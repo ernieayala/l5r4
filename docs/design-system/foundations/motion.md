@@ -25,7 +25,7 @@ token.
 | ------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Rank block hover and press            | `scss/components/_rank-control.scss:20-33`                                             | `box-shadow`, `filter`, `outline`, `transform` over `--l5r4-duration-fast`: the hover and pressed looks, core's focus ring | Instant: the hover and pressed looks (states.md) apply with no transition                    |
 | Rank step arrows slide out            | `scss/features/_traits-rings.scss:49-52`                                               | `opacity`, `top`, `bottom` over `--l5r4-duration-fast`                                                                     | Instant: the arrows appear at their open position                                            |
-| Ring image hover                      | `scss/features/_traits-rings.scss:184-193`                                             | `transform` to `scale(1.1)` over `--l5r4-duration-fast`                                                                    | Instant                                                                                      |
+| Ring image hover                      | `scss/features/_traits-rings.scss`                                                     | `filter` to the drop shadow plus `--l5r4-state-hover-filter` over `--l5r4-duration-fast`                                   | Instant                                                                                      |
 | Trait roll sprite (urban)             | `scss/features/_traits-rings.scss:259-262`                                             | `mask-reverse-urban` over `--l5r4-duration-sprite`, `forwards`; none on a disabled face                                    | The animation runs for `0ms` and holds its last frame, so the hovered look shows at once     |
 | Roll button sprite (urban)            | `scss/components/_button.scss:44-46`                                                   | `mask-reverse-urban` over `--l5r4-duration-sprite`, `forwards`; none on a disabled face                                    | As the Trait roll sprite                                                                     |
 | Rank block sprite (nature)            | `scss/components/_rank-control.scss:82-85`                                             | `mask-forward-nature` over `--l5r4-duration-sprite`, `forwards`                                                            | As the Trait roll sprite                                                                     |
@@ -34,8 +34,9 @@ token.
 | Attack animations                     | `module/services/animations/attack-animations.js`                                      | Sequencer one-shot on a hit                                                                                                | Target: not played; the chat card carries the result (rule 5)                                |
 | Loading spinner                       | Core's `fa-spin` (states.md, Loading)                                                  | Font Awesome spin                                                                                                          | Font Awesome's own reduced-motion rule stops it (`public/fonts/fontawesome/css/all.min.css`) |
 
-The keyframes in `scss/components/_animations.scss` are the two the sprites play, `mask-reverse-urban` and
-`mask-forward-nature`. No duration other than the two tokens exists.
+The keyframes are the two the sprites play, each in the file of the component that owns its sprite:
+`mask-reverse-urban` in `scss/components/_button.scss` (the Trait roll in `scss/features/_traits-rings.scss` plays it
+too) and `mask-forward-nature` in `scss/components/_rank-control.scss`. No duration other than the two tokens exists.
 
 What does not animate: section and item expand and collapse (`scss/components/_section.scss:22-26`,
 `scss/components/_item-row.scss:171-181`) switch at once, and inline item controls appear at once on hover
@@ -149,10 +150,10 @@ border for the whole encounter.
 
 ## Partials and files
 
-| Item          | Where                                                                                                                        |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Tokens        | `scss/base/_variables.scss`                                                                                                  |
-| Sprites       | `assets/animation/urban-sprite.webp`, `assets/animation/nature-sprite.webp`; keyframes in `scss/components/_animations.scss` |
-| CSS users     | `scss/components/_button.scss`, `scss/components/_rank-control.scss`, `scss/features/_traits-rings.scss`                     |
-| Canvas motion | `module/services/scrolling-text.js`, `module/services/animations/`                                                           |
-| Markup        | `templates/actor/_partials/_stats.hbs`, `_stats-npc.hbs`, `_ranks.hbs`                                                       |
+| Item          | Where                                                                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens        | `scss/base/_variables.scss`                                                                                                                                    |
+| Sprites       | `assets/animation/urban-sprite.webp`, `assets/animation/nature-sprite.webp`; keyframes in `scss/components/_button.scss`, `scss/components/_rank-control.scss` |
+| CSS users     | `scss/components/_button.scss`, `scss/components/_rank-control.scss`, `scss/features/_traits-rings.scss`                                                       |
+| Canvas motion | `module/services/scrolling-text.js`, `module/services/animations/`                                                                                             |
+| Markup        | `templates/actor/_partials/_stats.hbs`, `_stats-npc.hbs`, `_ranks.hbs`                                                                                         |

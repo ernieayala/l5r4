@@ -1,4 +1,4 @@
-<div class="l5r4-check-dialog standard-form">
+<div class="l5r4-check-dialog standard-form" data-check-dialog>
   <p class="l5r4-check-dialog-pool">{{localize "l5r4.ui.check.pool"}}: <strong>{{pool}}</strong></p>
 
   {{#if modifiers.length}}
@@ -7,7 +7,7 @@
       {{#each modifiers}}
         <label class="l5r4-check-dialog-modifier" data-range="{{range}}">
           <input type="checkbox" name="modifier.{{@index}}" {{checked enabled}} />
-          <span class="l5r4-check-dialog-modifier-label">{{label}}</span>
+          <span class="l5r4-check-dialog-modifier-label" data-modifier-label>{{label}}</span>
           <span class="l5r4-check-dialog-modifier-value">{{text}}</span>
         </label>
       {{/each}}
@@ -20,7 +20,7 @@
       {{#each substitutes}}
         <label class="l5r4-check-dialog-modifier">
           <input type="checkbox" name="substitute.{{@index}}" />
-          <span class="l5r4-check-dialog-modifier-label">{{label}}</span>
+          <span class="l5r4-check-dialog-modifier-label" data-modifier-label>{{label}}</span>
           <span class="l5r4-check-dialog-modifier-value">{{text}}</span>
         </label>
       {{/each}}

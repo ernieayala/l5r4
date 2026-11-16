@@ -3,61 +3,11 @@
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.spells"}}</h4>
     <div class="flexrow -gap-sm l5r4-spell-slots">
         <span>{{localize "l5r4.ui.sheets.spellSlots"}}:</span>
-        <div class="l5r4-spell-slot">
-          <img src="{{iconPath 'water.webp'}}" alt="" data-tooltip="{{localize "l5r4.ui.mechanics.rings.water"}}" />
-          <button
-            type="button"
-            class="l5r4-spell-slot-count"
-            data-action="adjust-spell-slot"
-            data-path="system.spellSlots.water"
-            data-tooltip="{{localize "l5r4.ui.mechanics.rings.water"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
-            {{system.spellSlots.water}}
-          </button>
-        </div>
-        <div class="l5r4-spell-slot">
-            <img src="{{iconPath 'air.webp'}}" alt="" data-tooltip="{{localize "l5r4.ui.mechanics.rings.air"}}" />
-            <button
-              type="button"
-              class="l5r4-spell-slot-count"
-              data-action="adjust-spell-slot"
-              data-path="system.spellSlots.air"
-              data-tooltip="{{localize "l5r4.ui.mechanics.rings.air"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
-              {{system.spellSlots.air}}
-            </button>
-        </div>
-        <div class="l5r4-spell-slot">
-            <img src="{{iconPath 'fire.webp'}}" alt="" data-tooltip="{{localize "l5r4.ui.mechanics.rings.fire"}}" />
-            <button
-              type="button"
-              class="l5r4-spell-slot-count"
-              data-action="adjust-spell-slot"
-              data-path="system.spellSlots.fire"
-              data-tooltip="{{localize "l5r4.ui.mechanics.rings.fire"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
-              {{system.spellSlots.fire}}
-            </button>
-        </div>
-        <div class="l5r4-spell-slot">
-            <img src="{{iconPath 'earth.webp'}}" alt="" data-tooltip="{{localize "l5r4.ui.mechanics.rings.earth"}}" />
-            <button
-              type="button"
-              class="l5r4-spell-slot-count"
-              data-action="adjust-spell-slot"
-              data-path="system.spellSlots.earth"
-              data-tooltip="{{localize "l5r4.ui.mechanics.rings.earth"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
-              {{system.spellSlots.earth}}
-            </button>
-        </div>
-        <div class="l5r4-spell-slot">
-            <img src="{{iconPath 'void.webp'}}" alt="" data-tooltip="{{localize "l5r4.ui.mechanics.rings.void"}}" />
-            <button
-              type="button"
-              class="l5r4-spell-slot-count"
-              data-action="adjust-spell-slot"
-              data-path="system.spellSlots.void"
-              data-tooltip="{{localize "l5r4.ui.mechanics.rings.void"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
-              {{system.spellSlots.void}}
-            </button>
-        </div>
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="water" count=system.spellSlots.water}}
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="air" count=system.spellSlots.air}}
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="fire" count=system.spellSlots.fire}}
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="earth" count=system.spellSlots.earth}}
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="void" count=system.spellSlots.void}}
     </div>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.spells}}

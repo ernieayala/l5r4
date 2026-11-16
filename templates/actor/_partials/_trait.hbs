@@ -1,0 +1,10 @@
+{{!-- One Trait row of the Ring and Trait block (ring-trait-block.md): its roll button and its rank control.
+Parameters: trait (key, sta), name (the Trait's variant, stamina), ring (earth, air, water, fire), rank (the
+effective rank shown); the roll reads the base rank from system.traits. --}}
+<div class="l5r4-trait -{{ring}} -{{name}}" data-trait-block>
+  <div class="l5r4-button -roll draggable">
+    <span class="l5r4-button-under">{{localize (concat "l5r4.ui.mechanics.traits." trait)}}</span>
+    <button type="button" class="l5r4-button-face" data-action="roll-trait" data-trait-rank="{{lookup system.traits trait}}" data-trait-name="{{localize (concat "l5r4.ui.mechanics.traits." trait)}}" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize (concat "l5r4.ui.mechanics.traits." trait)}}</button>
+  </div>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-control.hbs" variant="trait" trait=trait value=rank}}
+</div>

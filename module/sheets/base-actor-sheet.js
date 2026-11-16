@@ -30,14 +30,15 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)
 ) {
   /**
-   * This class's own options: the "l5r4" class and saving each field as it changes. ApplicationV2 merges every
+   * This class's own options: the "l5r4" class, the "l5r4-actor-sheet" block class the sheet's own styles sit under
+   * (scss/sheets/_actor-sheet.scss), and saving each field as it changes. ApplicationV2 merges every
    * class's DEFAULT_OPTIONS up the chain and concatenates arrays [src: client/applications/api/application.mjs:437-484],
    * so a class lists only its own entries; copying the parent's in would repeat them.
    *
    * @type {object}
    */
   static DEFAULT_OPTIONS = {
-    classes: ["l5r4"],
+    classes: ["l5r4", "l5r4-actor-sheet"],
     form: { submitOnChange: true }
   };
 
@@ -229,12 +230,12 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    */
   async _onDragStart(event) {
     const target = event.currentTarget;
-    const key = target.classList.contains("ring-roll")
-      ? target.dataset.ringKey
-      : target.classList.contains("l5r4-button") && target.classList.contains("-roll")
-        ? target.closest("[data-trait-block]")?.querySelector("[data-action='adjust-trait']")
-            ?.dataset.trait
-        : null;
+    // The Ring roll carries its key; a Trait's roll button sits in its Trait row with the rank control's key
+    const key =
+      target.dataset.ringKey ??
+      target.closest("[data-trait-block]")?.querySelector("[data-action='adjust-trait']")?.dataset
+        .trait ??
+      null;
     if (key) {
       event.dataTransfer.setData(
         "text/plain",

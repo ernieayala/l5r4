@@ -37,61 +37,29 @@ theme by module/apps/design-gallery.js. A token the stylesheet does not declare 
 
   <h3>{{localize "l5r4.apps.designGallery.foundations.typography"}}</h3>
   <table class="l5r4-design-gallery-tokens">
-    <thead>
-      <tr>
-        <th>{{localize "l5r4.apps.designGallery.foundations.token"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.value"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.sample"}}</th>
-      </tr>
-    </thead>
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
     <tbody>
       {{#each type.faces}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td>{{localize "l5r4.apps.designGallery.foundations.builtOn" core=core}}</td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
       {{#each type.steps}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td><span class="l5r4-design-gallery-type -{{step}}">{{localize "l5r4.apps.designGallery.foundations.typeSample"}}</span></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
     </tbody>
   </table>
 
   <h3>{{localize "l5r4.apps.designGallery.foundations.space"}}</h3>
   <table class="l5r4-design-gallery-tokens">
-    <thead>
-      <tr>
-        <th>{{localize "l5r4.apps.designGallery.foundations.token"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.value"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.sample"}}</th>
-      </tr>
-    </thead>
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
     <tbody>
       {{#each space.steps}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td><span class="l5r4-design-gallery-bar -{{bar}}"></span></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
       {{#each space.semantic}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td><span class="l5r4-design-gallery-bar -{{bar}}"></span></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
       {{#each space.sizes}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
     </tbody>
   </table>
@@ -109,27 +77,13 @@ theme by module/apps/design-gallery.js. A token the stylesheet does not declare 
 
   <h3>{{localize "l5r4.apps.designGallery.foundations.frames"}}</h3>
   <table class="l5r4-design-gallery-tokens">
-    <thead>
-      <tr>
-        <th>{{localize "l5r4.apps.designGallery.foundations.token"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.value"}}</th>
-        <th>{{localize "l5r4.apps.designGallery.foundations.sample"}}</th>
-      </tr>
-    </thead>
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
     <tbody>
       {{#each frames.frames}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td><span class="l5r4-design-gallery-frame -{{frame}}">{{localize "l5r4.apps.designGallery.foundations.frameSample"}}</span></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
       {{#each frames.others}}
-        <tr data-token="{{token}}">
-          <td><code>{{token}}</code></td>
-          <td data-token-value></td>
-          <td></td>
-        </tr>
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
       {{/each}}
     </tbody>
   </table>

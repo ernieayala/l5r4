@@ -34,8 +34,14 @@ Fixed template names (Stage 17 decision 2): `templates/item/_type-details/<subty
 the stored subtype (`module/config/item-types.js:15-31`, `templates/item/_partials/_tab-details.hbs:3`,
 `templates/item/_partials/_tab-modifiers.hbs:3`), so a rename breaks every item of that type.
 
-Not conforming, `templates/actor/_partials/_stats-npc.hbs`: 225 of its 292 lines repeat `_stats.hbs`, and the Trait
-block repeats eight times in each file instead of one partial.
+Not conforming (modeled): the Ring and Trait block written out in both actor sheets, its Trait row eight times in
+each, in place of `templates/actor/_partials/_traits-rings.hbs` and `_trait.hbs`.
+
+A partial whose output posts to chat (`templates/cards/_partials/_text-section.hbs`) is included at the line's start:
+core compiles partials with `preventIndent` [src: client/applications/handlebars.mjs:41], which writes the include's
+indent once before the partial's output, so an indented include would add spaces to stored messages, and to nothing
+when the partial renders empty. Its own lines carry the card's indentation. Its heading carries no class, as posted
+cards always had, so the `templates/root-class` check counts it.
 
 ### Structure
 
@@ -174,11 +180,15 @@ overrides the grid's cell rules. A reset that every component should override is
 no class weight (`scss/sheets/_actor-sheet.scss`). Core's CSS sits in cascade layers below the system's, so a system
 rule beats core's at any specificity; specificity only orders the system's own rules.
 
-Left under the window scope, each for want of an `l5r4-` class on the element: `scss/sheets/_actor-sheet.scss` and
-`_item-sheet.scss` (the sheet window carries only `l5r4 pc`, `l5r4 npc`, `l5r4 sheet item`);
-`scss/features/_traits-rings.scss` (its root is `traits-rings`); `scss/components/_chat-card.scss` (posted cards share
-no `l5r4-` root). `scss/components/_item-summary-card.scss` styles `l5r4-citation` and `l5r4-rule-lines`, which carry
-no `l5r4-item-summary-` element name.
+A sheet window's own rules sit under the block class its sheet class adds to the window: `l5r4-actor-sheet`
+(`module/sheets/base-actor-sheet.js`) in `scss/sheets/_actor-sheet.scss`, `l5r4-item-sheet`
+(`module/sheets/item-sheet.js`) in `scss/sheets/_item-sheet.scss`. The window keeps `pc`, `npc`, and `item` beside it
+for code outside the system; no system rule reads them.
+
+Fixed chat-card classes keep their names and their rules, so they sit outside a file's block: `scss/components/_chat-card.scss`
+styles posted cards, which share no `l5r4-` root, and `scss/components/_item-summary-card.scss` styles `l5r4-citation`
+and `l5r4-rule-lines`, which posted messages store (`naming.md` **Fixed names**) and so carry no `l5r4-item-summary-`
+element name.
 
 Conforming, modeled on `scss/apps/_effect-panel.scss:20-31`, with the tokens
 `docs/design-system/foundations/space-and-size.md` declares:

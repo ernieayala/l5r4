@@ -365,11 +365,18 @@ export function registerActiveEffectsTests(quench) {
           // An unsaved message: renderHTML still fires renderChatMessageHTML, and nothing is posted to the chat log,
           // whose pop-up card rejects when its message is deleted mid-animation
           // [src: client/applications/sidebar/tabs/chat.mjs:1318-1321]
-          const message = new ChatMessage.implementation({
-            content:
-              '<button data-action="apply-wounds" data-damage="7"></button>' +
-              '<button data-action="reduce-wounds-void" data-damage="15"></button>'
-          });
+          // The two damage buttons of a posted card, built as elements and stored as the message's HTML
+          const card = document.createElement("div");
+          for (const [action, damage] of [
+            ["apply-wounds", "7"],
+            ["reduce-wounds-void", "15"]
+          ]) {
+            const button = document.createElement("button");
+            button.dataset.action = action;
+            button.dataset.damage = damage;
+            card.append(button);
+          }
+          const message = new ChatMessage.implementation({ content: card.innerHTML });
           return message.renderHTML();
         }
 

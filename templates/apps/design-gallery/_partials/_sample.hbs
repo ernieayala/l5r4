@@ -1,15 +1,13 @@
 {{!-- One gallery sample. Parameters: label (i18n key, optional), partial (the template that rendered html),
-scope, html. The scope wraps the sample in the classes its stylesheet is scoped to today: the sheet window's
-classes for sheet partials, core's chat message for cards, the window's root class for the effect panel and the
-compendium browser. --}}
+scope, html. The scope wraps the sample in the block class the sheet window carries (pc and npc: the actor sheet's,
+item: the item sheet's), core's chat message for cards, or the window's root class for the effect panel and the
+compendium browser, so sheet-wide rules reach it as they do in the sheet. --}}
 <figure class="l5r4-design-gallery-sample" data-gallery-partial="{{partial}}">
   {{#if label}}<figcaption>{{localize label}}</figcaption>{{/if}}
-  {{#if (eq scope "pc")}}
-    <div class="l5r4 pc">{{{html}}}</div>
-  {{else if (eq scope "npc")}}
-    <div class="l5r4 npc">{{{html}}}</div>
+  {{#if (or (eq scope "pc") (eq scope "npc"))}}
+    <div class="l5r4-actor-sheet">{{{html}}}</div>
   {{else if (eq scope "item")}}
-    <div class="l5r4 item">{{{html}}}</div>
+    <div class="l5r4-item-sheet">{{{html}}}</div>
   {{else if (eq scope "chat")}}
     <div class="chat-message"><div class="message-content">{{{html}}}</div></div>
   {{else if (eq scope "effect-panel")}}

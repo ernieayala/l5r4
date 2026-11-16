@@ -1083,7 +1083,7 @@ export function registerPacksTests(quench) {
               app.search = "";
               app.choices = { ring: "fire", mastery: "2" };
               await app.render();
-              const rows = [...app.element.querySelectorAll(".l5r4-compendium-browser-row")];
+              const rows = [...app.element.querySelectorAll("[data-uuid]")];
               assert.lengthOf(rows, expected);
               for (const row of rows) {
                 assert.include(row.textContent, "Fire, Mastery Level 2");
@@ -1103,9 +1103,9 @@ export function registerPacksTests(quench) {
             await item.sheet.render({ force: true });
             try {
               assert.isTrue(
-                await waitFor(() => item.sheet.element?.querySelector(".l5r4-citation"))
+                await waitFor(() => item.sheet.element?.querySelector("[data-citation]"))
               );
-              const citation = item.sheet.element.querySelector(".l5r4-citation");
+              const citation = item.sheet.element.querySelector("[data-citation]");
               assert.equal(citation.textContent.trim(), "Core Rulebook p.204");
             } finally {
               await item.sheet.close({ animate: false });
@@ -1137,11 +1137,11 @@ export function registerPacksTests(quench) {
               app.choices = { folder: "Swords", size: "medium" };
               app.search = "ka";
               await app.render();
-              const names = [...app.element.querySelectorAll(".l5r4-compendium-browser-name")].map(
+              const names = [...app.element.querySelectorAll("[data-action='open-entry']")].map(
                 a => a.textContent
               );
               assert.sameMembers(names, ["Katana"]);
-              const row = app.element.querySelector(".l5r4-compendium-browser-row");
+              const row = app.element.querySelector("[data-uuid]");
               assert.include(row.textContent, "DR 3k2");
               assert.include(row.textContent, "Core Rulebook p.204");
             } finally {
@@ -1167,7 +1167,7 @@ export function registerPacksTests(quench) {
 
               app.search = "Kappa";
               await app.render();
-              const row = app.element.querySelector(".l5r4-compendium-browser-row");
+              const row = app.element.querySelector("[data-uuid]");
               const entry = await fromUuid(row.dataset.uuid);
               row.querySelector("[data-action='open-entry']").click();
               assert.isTrue(await waitFor(() => entry.sheet?.rendered), "the entry's sheet opens");
@@ -1217,9 +1217,7 @@ export function registerPacksTests(quench) {
               await app.render();
               // A user grabs the icon or the name, which carry no draggable attribute
               // [src: client/game.mjs:2239-2245]
-              const icon = app.element.querySelector(
-                ".l5r4-compendium-browser-row .l5r4-compendium-browser-icon"
-              );
+              const icon = app.element.querySelector("[data-uuid] img");
               const transfer = new DataTransfer();
               const event = new DragEvent("dragstart", {
                 dataTransfer: transfer,
@@ -1256,7 +1254,7 @@ export function registerPacksTests(quench) {
               const reopened = await openOn("equipment");
               reopened.search = "Quench Lantern";
               await reopened.render();
-              assert.lengthOf(reopened.element.querySelectorAll(".l5r4-compendium-browser-row"), 1);
+              assert.lengthOf(reopened.element.querySelectorAll("[data-uuid]"), 1);
               await reopened.close({ animate: false });
             } finally {
               await pack.deleteCompendium();

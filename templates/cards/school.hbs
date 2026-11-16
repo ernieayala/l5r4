@@ -1,13 +1,1 @@
-<div class="item l5r4-item-row -bio{{#if system.description}} -expandable{{/if}}"
-  data-item-id="{{coalesce docId this.id _id}}"
-  data-document-id="{{coalesce docId this.id _id}}">
-  <h4 class="flexrow -gap-sm title">{{name}}</h4>
-  {{#if inSheet}}
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
-    {{#if system.description}}
-      <div class="l5r4-item-row-details">
-        <p>{{{system.description}}}</p>
-      </div>
-    {{/if}}
-  {{/if}}
-</div>
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_bio-row.hbs"}}

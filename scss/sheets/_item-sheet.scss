@@ -3,8 +3,8 @@
  * Rules for the item sheet as a whole that no component or feature owns (docs/design-system/patterns/sheets.md rule 7)
  */
 
-// The window carries no l5r4- class of its own, only core's and the sheet's `l5r4 sheet item`
-.l5r4.item {
+// The sheet window's block class (module/sheets/item-sheet.js)
+.l5r4-item-sheet {
   .window-content {
     gap: var(--l5r4-space-8);
     overflow: auto;

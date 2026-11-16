@@ -507,7 +507,7 @@ export function registerNpcSheetTests(quench) {
 
         it("should collapse the Skills section and keep it collapsed after a render", async () => {
           const title = () =>
-            sheet.element.querySelector('.l5r4-section-title[data-scope="skills"]');
+            sheet.element.querySelector('[data-section-title][data-scope="skills"]');
           const toggle = () => title().querySelector('[data-action="expand-section"]');
           assert.equal(toggle().getAttribute("aria-expanded"), "true", "open before the click");
           toggle().click();
