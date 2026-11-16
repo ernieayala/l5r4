@@ -10,6 +10,7 @@
  * - Roll buttons for NPC attacks
  * - Wound tracking for NPCs
  * - Skill item CRUD operations (edit, delete)
+ * - Skill sorting by the Roll and Emphasis heads
  * - NPC Attack Editor integration
  * - Roll/keep display formatting
  *
@@ -18,7 +19,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestNPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { waitFor } from "../helpers.js";
+import { cleanTest, waitFor } from "../helpers.js";
 
 /**
  * Register NPC sheet tests
@@ -550,6 +551,71 @@ export function registerNpcSheetTests(quench) {
             await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
           }
         });
+      });
+
+      describe("NPC sheet Skill sorting", () => {
+        const clean = cleanTest(assert);
+        let actor, sheet;
+
+        // Name, roll, and Emphasis each give the three Skills a different order: Agility 2 makes the rolls 7, 5, 3
+        beforeEach(async () => {
+          actor = await createTestNPC({ name: "NPC sheet: sorted Skills NPC" });
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Athletics", 5, "agi", { system: { trainedEmphases: ["Climbing"] } }),
+            createSkillData("Hunting", 3, "agi", { system: { trainedEmphases: ["Ambush"] } }),
+            createSkillData("Kenjutsu", 1, "agi", { system: { trainedEmphases: ["Katana"] } })
+          ]);
+          sheet = actor.sheet;
+          await sheet.render(true);
+        });
+
+        afterEach(async () => {
+          await sheet?.close({ animate: false });
+          await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
+          await actor?.delete();
+        });
+
+        /** The Skill rows' names, top to bottom. */
+        const rowNames = () =>
+          [...sheet.element.querySelectorAll("[data-item-id]")].map(
+            row => actor.items.get(row.dataset.itemId).name
+          );
+
+        /** The Skills header's head for a sort key. */
+        const head = key =>
+          sheet.element.querySelector(
+            `[data-sort-header][data-scope='skills'] [data-sort-by='${key}']`
+          );
+
+        /**
+         * Click a head, then check the rows took its ascending order and the head alone shows as pressed.
+         * @param {string} key  The head's sort key
+         * @param {string[]} order  The Skill names the sort gives
+         */
+        const sortsBy = async (key, order) => {
+          assert.deepEqual(rowNames(), ["Athletics", "Hunting", "Kenjutsu"], "by name first");
+          head(key).click();
+
+          assert.isTrue(
+            await waitFor(() => rowNames().join() === order.join(), 1500),
+            `the rows read ${order.join(", ")}, not ${rowNames().join(", ")}`
+          );
+          assert.equal(head(key).getAttribute("aria-pressed"), "true", `${key} pressed`);
+          assert.isTrue(head(key).classList.contains("is-active"), `${key} active`);
+          assert.equal(head(key).dataset.dir, "asc", `${key} ascending`);
+          assert.equal(head("name").getAttribute("aria-pressed"), "false", "name released");
+          assert.isFalse(head("name").classList.contains("is-active"), "name inactive");
+        };
+
+        it(
+          "should sort the Skills by roll when the Roll head is clicked, and mark that head",
+          clean(() => sortsBy("roll", ["Kenjutsu", "Hunting", "Athletics"]))
+        );
+
+        it(
+          "should sort the Skills by Emphasis when the Emphasis head is clicked, and mark that head",
+          clean(() => sortsBy("emphasis", ["Hunting", "Athletics", "Kenjutsu"]))
+        );
       });
     },
     { displayName: "L5R4: NPC sheet" }

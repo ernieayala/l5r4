@@ -199,6 +199,10 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Classes no style or script read: `info-group`, `sized`, `effects` (item effects tab wrapper), `message` (design
   gallery), `rules` (Active Effect Rules tab)
 
+### Fixed
+
+- NPC sheet Skills sort by their Roll and Emphasis heads, which did nothing before
+
 ---
 
 ## [3.2.1] - 2025-11-03
