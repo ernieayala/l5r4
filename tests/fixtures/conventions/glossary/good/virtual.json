@@ -2,7 +2,7 @@
   "files": {
     "module/utils/armor-penalties.js": "export function getArmorTnPenalty({ roll, keep }) {\n  return roll + keep;\n}\n\nexport class TNModifierRule {}\n",
     "templates/actor/_partials/_armor.hbs": "<span class=\"l5r4-armor-tn\">{{system.armorTn.current}}</span>\n",
-    "lang/en.json": "{ \"l5r4\": { \"ui\": { \"links\": { \"checkTn\": \"Spend a Void Point (+1k1)\", \"taint\": \"Shadowlands Taint\", \"roll\": \"Damage roll: make a Skill Roll\" }, \"ruleSummary\": { \"TNModifier\": \"TN modifier\" } } } }\n",
+    "lang/en.json": "{ \"l5r4\": { \"ui\": { \"links\": { \"checkTn\": \"Spend a Void Point (+1k1)\", \"taint\": \"Shadowlands Taint\", \"roll\": \"Damage roll: make a Skill Roll\", \"errors\": { \"unknownKey\": \"unknown key; use skill, trait, ring, or tn\" }, \"spell\": \"{ring}, Mastery Level {mastery}\", \"socialHint\": \"Rules select Social Skills with skill-tag:social.\" }, \"ruleSummary\": { \"TNModifier\": \"TN modifier\" } } } }\n",
     "docs/code-system/glossary.md": "# Glossary\n\n## Terms\n\n| Term | Key |\n| ---- | --- |\n| Shadowlands Taint | `l5r4.ui.links.taint` |\n| Stance | none |\n"
   }
 }

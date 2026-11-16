@@ -1066,16 +1066,14 @@
           "weaponAttackRoll": "{weapon} Attack roll"
         },
         "stances": {
+          "addFailed": "Failed to add stance",
           "attack": "Attack Stance",
           "center": "Center Stance",
           "defense": "Defense Stance",
-          "errors": {
-            "addFailed": "Failed to add stance",
-            "removeFailed": "Failed to remove stance"
-          },
           "fullAttack": "Full Attack Stance",
           "fullDefense": "Full Defense Stance",
-          "fullDefenseHint": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
+          "fullDefenseHint": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance.",
+          "removeFailed": "Failed to remove stance"
         },
         "traits": {
           "agi": "Agility",

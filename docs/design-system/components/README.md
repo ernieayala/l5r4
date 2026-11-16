@@ -85,4 +85,4 @@ A sheet partial that draws no component of its own is named here: `templates/act
 
 ## Adding a page
 
-Follow **Adding a component** in `../README.md`, then add the page to the table above. A page names only partials, SCSS files, and tokens that exist, or marks a path in the **Target paths** form until a change creates it (`tests/conventions/design-system.test.js`).
+Follow **Adding a component** in `../README.md`, then add the page to the table above. A page names only partials and SCSS files that exist and tokens that `scss/` declares or a foundations table defines in its `Token` column, or marks a path in the **Target paths** form until a change creates it (`tests/conventions/design-system.test.js`).

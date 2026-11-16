@@ -1257,17 +1257,6 @@ body > * {
 .l5r4-traits-rings .l5r4-ring-rank.-void {
   cursor: pointer;
 }
-.l5r4-traits-rings .l5r4-ring-rank.-void .l5r4-ring-rank-face {
-  background-color: var(--l5r4-color-ring-void-tint);
-  border-color: var(--l5r4-color-ring-void);
-  color: inherit;
-  cursor: inherit;
-  font: inherit;
-  height: auto;
-  line-height: 1;
-  min-height: 0;
-  padding: 0;
-}
 .l5r4-traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
 .l5r4-traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4-traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-up,
 .l5r4-traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-down {
@@ -1307,6 +1296,17 @@ body > * {
 }
 .l5r4-traits-rings .l5r4-ring-rank.-void .l5r4-rank-control-arrow.-down {
   bottom: 0;
+}
+.l5r4-traits-rings .l5r4-ring-rank.-void .l5r4-ring-rank-face {
+  background-color: var(--l5r4-color-ring-void-tint);
+  border-color: var(--l5r4-color-ring-void);
+  color: inherit;
+  cursor: inherit;
+  font: inherit;
+  height: auto;
+  line-height: 1;
+  min-height: 0;
+  padding: 0;
 }
 .l5r4-traits-rings .l5r4-ring-rank .l5r4-ring-rank-face {
   align-items: center;

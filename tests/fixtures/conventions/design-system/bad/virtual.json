@@ -4,6 +4,7 @@
     "scss/components/_section.scss": ".l5r4-section {\n  display: flex;\n}\n",
     "templates/actor/_partials/_expand.hbs": "<button type=\"button\" class=\"l5r4-expand-control\"><i class=\"fa-solid fa-xmark\" inert></i></button>\n",
     "docs/design-system/components/section.md": "# Section\n\nPartial `templates/actor/_partials/_missing.hbs`, styles in `scss/components/_section.scss` (target), padding `--l5r4-space-unknown`.\n",
+    "docs/design-system/foundations/color.md": "# Color\n\n## Role tokens\n\n| Token | Built on |\n| --- | --- |\n| `--l5r4-color-surface` | `--l5r4-space-unknown` |\n",
     "docs/design-system/foundations/iconography.md": "# Iconography\n\n### 3. One icon per meaning, one meaning per icon\n\n| Meaning | Icon |\n| ------- | ---- |\n| Delete | `fa-trash` |\n",
     "module/config/design-gallery/components.js": "export const GALLERY = [];\n"
   }

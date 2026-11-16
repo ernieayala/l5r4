@@ -24,14 +24,22 @@ export function templateActions(text) {
 }
 
 /**
- * The keys of each `actions: { ... }` object in a module: its own keys, not those it spreads in or nests.
+ * A module's code with its comments removed.
  * @param {string} text
+ * @returns {string}
+ */
+function codeOf(text) {
+  return text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
+/**
+ * The top-level text of each object literal whose opening `{` ends a match: its own entries, not what they nest.
+ * @param {string} code - Code without comments
+ * @param {RegExp} opener - A global pattern ending at the object's `{`
  * @returns {string[]}
  */
-export function optionActions(text) {
-  const code = text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-  const keys = [];
-  for (const match of code.matchAll(/\bactions:\s*\{/g)) {
+function objectTops(code, opener) {
+  return [...code.matchAll(opener)].map(match => {
     let depth = 1;
     let top = "";
     for (let i = match.index + match[0].length; i < code.length && depth > 0; i++) {
@@ -41,13 +49,57 @@ export function optionActions(text) {
         top += char;
       }
     }
-    for (const [, quoted, bare] of top.matchAll(
+    return top;
+  });
+}
+
+/**
+ * The keys an object literal's top-level text names: quoted, bare, and method keys.
+ * @param {string} top
+ * @returns {string[]}
+ */
+function keysOf(top) {
+  return [
+    ...top.matchAll(
       /(?:^|[,\n])\s*(?:async\s+)?(?:["']([\w-]+)["']|([A-Za-z_$][\w$]*))\s*(?=[:(])/g
-    )) {
-      keys.push(quoted ?? bare);
-    }
-  }
-  return keys;
+    )
+  ].map(([, quoted, bare]) => quoted ?? bare);
+}
+
+/**
+ * The keys of each `actions: { ... }` object in a module: its own keys, not those it spreads in or nests.
+ * @param {string} text
+ * @returns {string[]}
+ */
+export function optionActions(text) {
+  return objectTops(codeOf(text), /\bactions:\s*\{/g).flatMap(keysOf);
+}
+
+/**
+ * The shared action sets a module's `actions` take: a constant given as `actions` itself or spread into an
+ * `actions: { ... }` object (docs/code-system/foundry-patterns.md, Actions).
+ * @param {string} text
+ * @returns {string[]} The constants' names
+ */
+export function optionActionSets(text) {
+  const code = codeOf(text);
+  return [
+    ...[...code.matchAll(/\bactions:\s*([A-Z][A-Z0-9_]*)\b/g)].map(([, name]) => name),
+    ...objectTops(code, /\bactions:\s*\{/g).flatMap(top =>
+      [...top.matchAll(/\.\.\.([A-Z][A-Z0-9_]*)\b/g)].map(([, name]) => name)
+    )
+  ];
+}
+
+/**
+ * The keys of a module's frozen object constant: `NAME = Object.freeze({ ... })`.
+ * @param {string} text
+ * @param {string} name - The constant
+ * @returns {string[]}
+ */
+export function frozenObjectKeys(text, name) {
+  const opener = new RegExp(String.raw`\b${name}\s*=\s*Object\.freeze\(\{`, "g");
+  return objectTops(codeOf(text), opener).flatMap(keysOf);
 }
 
 /**

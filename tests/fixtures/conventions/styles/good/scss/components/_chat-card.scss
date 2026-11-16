@@ -6,3 +6,10 @@
 .l5r4-chat-card {
   display: block;
 }
+
+// The one named unscoped selector (docs/code-system/templates-and-styles.md, Stylesheets)
+.message-content {
+  .item {
+    display: block;
+  }
+}

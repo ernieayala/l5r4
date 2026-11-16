@@ -16,6 +16,12 @@
     margin-block-start: var(--l5r4-space-4);
   }
 
+  // Core's classes keep core's names inside a system block (docs/code-system/naming.md, Core-owned names)
+  .inline-control.button,
+  .message-content .hint {
+    cursor: pointer;
+  }
+
   @media (width <= 420px) {
     display: block;
   }

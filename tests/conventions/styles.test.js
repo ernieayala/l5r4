@@ -1,6 +1,8 @@
 import { posix } from "node:path";
+import { describe, expect, it } from "vitest";
 import {
   codeSpansOf,
+  getFixtureTrees,
   getRepoTree,
   parseScss,
   registerConventionSuite,
@@ -158,18 +160,48 @@ function isAtRule(prelude) {
   return prelude.startsWith("@");
 }
 
+/**
+ * The one selector that sits under no system block, by file (docs/code-system/templates-and-styles.md, Stylesheets):
+ * the posted item card's root `item` also roots every sheet item row, so core's message wrapper tells the card apart.
+ */
+const UNSCOPED = Object.freeze({ "scss/components/_chat-card.scss": ".message-content .item" });
+
+/**
+ * Whether a top-level block is the file's named unscoped selector: one selector, no declarations of its own, and
+ * every child block joined to it gives exactly the name in `UNSCOPED`.
+ * @param {{path: string, blocks: object[], statements: object[]}} sheet - The parsed file
+ * @param {string} prelude - The top-level block's selector
+ * @returns {boolean} True for the named exemption
+ */
+function isNamedUnscoped({ path, blocks, statements }, prelude) {
+  const named = UNSCOPED[path];
+  const children = blocks
+    .filter(({ chain }) => chain.length === 2 && chain[0] === prelude)
+    .flatMap(({ chain }) => splitTop(chain[1], /,/));
+  return (
+    Boolean(named) &&
+    splitTop(prelude, /,/).length === 1 &&
+    !statements.some(({ chain }) => chain.length === 1 && chain[0] === prelude) &&
+    children.length > 0 &&
+    children.every(child => `${prelude} ${child}` === named)
+  );
+}
+
 /** docs/code-system/templates-and-styles.md, Stylesheets; docs/design-system/foundations/. */
 const RULES = {
   "styles/block-class": tree =>
     sheetsOf(tree)
       .filter(({ path }) => !path.startsWith(BASE))
-      .flatMap(({ path, blocks }) =>
-        blocks
+      .flatMap(sheet =>
+        sheet.blocks
           .filter(({ chain }) => chain.length === 1 && !isAtRule(chain[0]))
+          .filter(({ chain }) => !isNamedUnscoped(sheet, chain[0]))
           .flatMap(({ chain, line }) =>
             splitTop(chain[0], /,/)
               .filter(selector => !/^\.l5r4-[a-z0-9-]+/.test(selector))
-              .map(selector => `${path}:${line}: "${selector}" sits under no l5r4- block class`)
+              .map(
+                selector => `${sheet.path}:${line}: "${selector}" sits under no l5r4- block class`
+              )
           )
       ),
 
@@ -177,10 +209,12 @@ const RULES = {
     const fixed = fixedCardClassesOf();
     return sheetsOf(tree)
       .filter(({ path }) => /^scss\/(components|apps)\//.test(path))
-      .flatMap(({ path, blocks }) => {
+      .flatMap(sheet => {
+        const { path, blocks } = sheet;
         const block = blockOf(path);
         return blocks
           .filter(({ chain }) => chain.length === 1 && !isAtRule(chain[0]))
+          .filter(({ chain }) => !isNamedUnscoped(sheet, chain[0]))
           .flatMap(({ chain, line }) =>
             splitTop(chain[0], /,/)
               .filter(selector => !isFixedCardSelector(selector, fixed))
@@ -403,3 +437,15 @@ const RULES = {
 };
 
 registerConventionSuite("Stylesheets", RULES, "styles");
+
+describe("The named unscoped selector", () => {
+  it.each(["styles/block-class", "styles/one-component"])(
+    "should fail %s on a selector the exemption does not name",
+    key => {
+      const found = RULES[key](getFixtureTrees("styles").bad).filter(line =>
+        line.startsWith("scss/components/_chat-card.scss:")
+      );
+      expect(found).toEqual([expect.stringContaining('".message-content"')]);
+    }
+  );
+});

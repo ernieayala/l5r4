@@ -189,16 +189,32 @@ function casedTermsOf() {
     .filter(term => /\s/.test(term) || CAPITALIZED_WORDS.includes(term));
 }
 
+/** The group whose values name the text link keys a user types, written as typed (voice.md, Abbreviations). */
+const LINK_ERRORS = "l5r4.ui.links.errors.";
+
+/**
+ * A value with what is not copy blanked, offsets kept: each `{placeholder}`, and each word holding `:` or `=` before
+ * more text, such as the selector `skill-tag:social`, which is syntax a user types (voice.md, Abbreviations).
+ * @param {string} value - The copy
+ * @returns {string} The value with placeholders and syntax blanked
+ */
+function copyOf(value) {
+  return value.replace(/\{[^}]*\}|\S*[:=]\S+/g, match => " ".repeat(match.length));
+}
+
 /**
  * The places a value writes a term with other capitals than the glossary's. A lowercase term may take a capital as
- * the first word of the value or of a sentence.
- * @param {string} value - The copy
+ * the first word of the value or of a sentence. In the link error messages, a term written in lower case is the link
+ * key a user types.
+ * @param {{key: string, value: string}} leaf - The copy and its key
  * @param {string} term - The glossary term
  * @returns {string[]} The wrong spellings found
  */
-function miscasedIn(value, term) {
+function miscasedIn({ key, value }, term) {
   const pattern = new RegExp(String.raw`\b${escapeRegExp(term)}(e?s)?\b`, "gi");
-  return [...value.matchAll(pattern)]
+  const copy = copyOf(value);
+  return [...copy.matchAll(pattern)]
+    .filter(match => !(key.startsWith(LINK_ERRORS) && match[0] === match[0].toLowerCase()))
     .filter(match => {
       const written = match[0].slice(0, term.length);
       if (written === term) {
@@ -250,7 +266,7 @@ const RULES = {
   "glossary/term-case": tree =>
     englishOf(tree).flatMap(({ key, value }) =>
       casedTermsOf().flatMap(term =>
-        miscasedIn(value, term).map(
+        miscasedIn({ key, value }, term).map(
           written => `lang/en.json ${key}: "${written}" is written "${term}"`
         )
       )

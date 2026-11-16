@@ -207,11 +207,11 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @override
    */
   _onActionChange(action, event, element) {
-    if (action === "update-item-field") {
-      return this._onInlineItemEdit(event, element);
-    }
-    if (action === "apply-stance") {
-      return StanceHandler.applyStance(this._getHandlerContext(), event, element);
+    switch (action) {
+      case "update-item-field":
+        return this._onInlineItemEdit(event, element);
+      case "apply-stance":
+        return StanceHandler.applyStance(this._getHandlerContext(), event, element);
     }
   }
 

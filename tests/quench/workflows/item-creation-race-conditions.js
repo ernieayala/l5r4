@@ -171,15 +171,11 @@ export function registerItemCreationRaceConditionTests(quench) {
           });
 
           // ACT - Create all items
-          const startTime = Date.now();
           const items = await actor.createEmbeddedDocuments("Item", itemData);
-          const creationTime = Date.now() - startTime;
 
           // ASSERT
           assert.equal(items.length, 100, "All 100 items created");
           assert.equal(actor.items.size, 100, "Actor has 100 items");
-
-          console.log(`L5R4 | Created 100 items in ${creationTime}ms`);
 
           // Verify data integrity
           for (const item of items) {
@@ -202,8 +198,6 @@ export function registerItemCreationRaceConditionTests(quench) {
           const prepTime = Date.now() - startTime;
 
           // ASSERT - Should complete in reasonable time (< 100ms target)
-          console.log(`L5R4 | reset with 100 items: ${prepTime}ms`);
-
           // Verify XP calculated correctly
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP breakdown exists");

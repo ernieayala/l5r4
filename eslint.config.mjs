@@ -164,14 +164,14 @@ const HOOKS_SYNTAX = {
 
 // Imports a layer never makes (CLAUDE.md Layers: imports flow downward).
 const layerImports = (pattern, from) => [
-  "warn",
+  "error",
   { patterns: [{ regex: pattern, message: `${from} never import this layer (CLAUDE.md Layers).` }] }
 ];
 
 // docs/code-system/documentation.md, JSDoc template.
 const JSDOC_RULES = {
   "jsdoc/require-jsdoc": [
-    "warn",
+    "error",
     {
       publicOnly: true,
       require: {
@@ -183,23 +183,23 @@ const JSDOC_RULES = {
       contexts: ["ExportNamedDeclaration > VariableDeclaration"]
     }
   ],
-  "jsdoc/require-description": "warn",
+  "jsdoc/require-description": "error",
   // The summary is a sentence ending with a period, then any citation lines (documentation.md, JSDoc template).
   // require-description-complete-sentence would fail every citation line, which starts in lower case.
   "jsdoc/match-description": [
-    "warn",
+    "error",
     {
       matchDescription: String.raw`^[A-Z\x60\d_\[#\(][\s\S]*?[.?!\x60\)](\s*\ngame-rules/\d+_[a-z0-9_]+\.md, p\.\d+(-\d+)?(, \d+(-\d+)?)*)*\s*$`,
       message: "The summary is a sentence ending with a period; citation lines follow it"
     }
   ],
-  "jsdoc/require-param": "warn",
-  "jsdoc/check-param-names": "warn",
-  "jsdoc/require-hyphen-before-param-description": "warn",
-  "jsdoc/require-returns": "warn",
-  "jsdoc/require-returns-check": "warn",
-  "jsdoc/check-types": "warn",
-  "jsdoc/check-tag-names": "warn"
+  "jsdoc/require-param": "error",
+  "jsdoc/check-param-names": "error",
+  "jsdoc/require-hyphen-before-param-description": "error",
+  "jsdoc/require-returns": "error",
+  "jsdoc/require-returns-check": "error",
+  "jsdoc/check-types": "error",
+  "jsdoc/check-tag-names": "error"
 };
 
 export default [
@@ -247,8 +247,8 @@ export default [
       }
     },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-console": ["error", { allow: ["warn", "error"] }],
       "prefer-const": "error",
       "no-var": "error",
       eqeqeq: ["error", "always", { null: "ignore" }],
@@ -265,24 +265,24 @@ export default [
     files: SYSTEM,
     rules: {
       ...JSDOC_RULES,
-      "l5r4/naming": "warn",
-      "l5r4/import-order": "warn",
-      "l5r4/module-shape": "warn",
-      "l5r4/doc-format": ["warn", { header: true }],
+      "l5r4/naming": "error",
+      "l5r4/import-order": "error",
+      "l5r4/module-shape": "error",
+      "l5r4/doc-format": ["error", { header: true }],
       // docs/design-system/content/localization.md, One key per meaning: copy, titles included, is one key with
       // placeholders
       "l5r4/joined-title": "error",
       "l5r4/joined-copy": "error",
       camelcase: ["error", { properties: "never", ignoreImports: true, ignoreGlobals: true }],
       "new-cap": [
-        "warn",
+        "error",
         { capIsNewExceptions: ["T", "F", "R", "TEMPLATE"], capIsNewExceptionPattern: "Mixin$" }
       ],
-      "max-params": ["warn", 3],
+      "max-params": ["error", 3],
       // docs/code-system/functions.md, Function length: near the 90th percentile of the system's functions
-      "max-lines-per-function": ["warn", { max: 30, skipBlankLines: true, skipComments: true }],
-      "no-else-return": "warn",
-      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS],
+      "max-lines-per-function": ["error", { max: 30, skipBlankLines: true, skipComments: true }],
+      "no-else-return": "error",
+      "no-restricted-globals": ["error", ...DEPRECATED_GLOBALS],
       "no-restricted-properties": [
         "error",
         { property: "CHAT_MESSAGE_TYPES", message: "Use CONST.CHAT_MESSAGE_STYLES." },
@@ -296,17 +296,17 @@ export default [
         },
         { property: "appv1", message: "Use ApplicationV2 (foundry.applications.api)." }
       ],
-      "no-restricted-syntax": ["warn", ...SYSTEM_PRESENTATION_SYNTAX]
+      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX]
     }
   },
   {
     files: ["module/**/*.js"],
     ignores: ["module/hooks/**"],
-    rules: { "no-restricted-syntax": ["warn", ...SYSTEM_PRESENTATION_SYNTAX, HOOKS_SYNTAX] }
+    rules: { "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, HOOKS_SYNTAX] }
   },
   {
     files: ["module/**/*.js"],
-    rules: { "l5r4/member-order": "warn" }
+    rules: { "l5r4/member-order": "error" }
   },
   {
     // docs/code-system/foundry-patterns.md, Preparation order: re-prepare with reset(), tests included
@@ -328,7 +328,7 @@ export default [
     // docs/code-system/modules.md: the localization API reads game.i18n by design
     ignores: ["module/utils/localization.js"],
     rules: {
-      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS, ...FOUNDRY_GLOBAL_RESTRICTIONS]
+      "no-restricted-globals": ["error", ...DEPRECATED_GLOBALS, ...FOUNDRY_GLOBAL_RESTRICTIONS]
     }
   },
   {
@@ -347,14 +347,14 @@ export default [
         "(^|/)(documents|services|mixins|apps|sheets|setup|hooks)/",
         "Data models"
       ),
-      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS, ...UI_GLOBAL_RESTRICTIONS]
+      "no-restricted-globals": ["error", ...DEPRECATED_GLOBALS, ...UI_GLOBAL_RESTRICTIONS]
     }
   },
   {
     files: ["module/documents/**/*.js"],
     rules: {
       "no-restricted-imports": [
-        "warn",
+        "error",
         {
           patterns: [
             {
@@ -368,7 +368,7 @@ export default [
           ]
         }
       ],
-      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS, ...UI_GLOBAL_RESTRICTIONS]
+      "no-restricted-globals": ["error", ...DEPRECATED_GLOBALS, ...UI_GLOBAL_RESTRICTIONS]
     }
   },
   {
@@ -392,17 +392,17 @@ export default [
   {
     // docs/code-system/documentation.md also holds for the repo's tools
     files: ["tools/**/*.mjs"],
-    rules: { ...JSDOC_RULES, "l5r4/doc-format": ["warn", { header: true }] }
+    rules: { ...JSDOC_RULES, "l5r4/doc-format": ["error", { header: true }] }
   },
   {
     // Tests cite pages on a comment line above the test (docs/code-system/testing.md, Citations)
     files: ["tests/**/*.js"],
-    rules: { "l5r4/doc-format": "warn" }
+    rules: { "l5r4/doc-format": "error" }
   },
   {
     // A Quench test that selects by class breaks when a class is renamed (templates-and-styles.md)
     files: ["tests/quench/**/*.js"],
-    rules: { "no-restricted-syntax": ["warn", ...PRESENTATION_SYNTAX] }
+    rules: { "no-restricted-syntax": ["error", ...PRESENTATION_SYNTAX] }
   },
   {
     // Vitest, the fixture world builder, and the pack tools run in Node.

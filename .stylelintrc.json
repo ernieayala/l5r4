@@ -11,19 +11,17 @@
         { "type": "rule", "selector": "^&[:.\\[]" },
         "rules",
         { "type": "at-rule", "name": "media" }
-      ],
-      { "severity": "warning" }
+      ]
     ],
     "selector-class-pattern": [
-      "^(l5r4(-[a-z0-9]+)*|-[a-z0-9]+(-[a-z0-9]+)*|-commonItem|is-[a-z0-9]+(-[a-z0-9]+)*|fa-[a-z0-9-]+|flexrow|flexcol|form-group|form-fields|active|theme-light|theme-dark|window-content|chat-card|card-content|dice-flavor|check-note|check-applied|check-free-raises|check-conditions|damage-actions|flow-actions|healing-card|weapon|item|title|apply-wounds-btn|reduce-wounds-btn)$",
+      "^(l5r4(-[a-z0-9]+)*|-[a-z0-9]+(-[a-z0-9]+)*|-commonItem|is-[a-z0-9]+(-[a-z0-9]+)*|fa-[a-z0-9-]+|flexrow|flexcol|flex0|flex1|flex2|flex3|form-group|form-fields|standard-form|hint|active|theme-light|theme-dark|window-content|scrollable|draggable|button|inline-control|icon|tabs|sheet-tabs|tab|editor|editor-content|chat-message|message-content|chat-card|card-content|dice-flavor|check-note|check-applied|check-free-raises|check-conditions|damage-actions|flow-actions|healing-card|weapon|item|title|apply-wounds-btn|reduce-wounds-btn)$",
       {
-        "message": "A system class is l5r4-<block>[-<element>], a -<variant>, or an is-<state>; core and fixed chat-card classes keep their names (docs/code-system/naming.md)",
-        "severity": "warning"
+        "message": "A system class is l5r4-<block>[-<element>], a -<variant>, or an is-<state>; core and fixed chat-card classes keep their names (docs/code-system/naming.md)"
       }
     ],
     "scss/dollar-variable-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
-    "selector-attribute-name-disallowed-list": [["data-action"], { "severity": "warning" }],
-    "max-nesting-depth": [4, { "severity": "warning" }],
+    "selector-attribute-name-disallowed-list": ["data-action"],
+    "max-nesting-depth": 4,
     "property-disallowed-list": [
       [
         "margin-top",
@@ -40,31 +38,24 @@
         "border-left"
       ],
       {
-        "message": "Box sides are logical properties: margin-block-start, not margin-top",
-        "severity": "warning"
+        "message": "Box sides are logical properties: margin-block-start, not margin-top"
       }
     ],
-    "color-no-hex": [true, { "severity": "warning" }],
-    "color-named": ["never", { "severity": "warning" }],
+    "color-no-hex": true,
+    "color-named": "never",
     "declaration-no-important": true,
     "at-rule-disallowed-list": ["extend"],
-    "declaration-property-value-disallowed-list": [
-      {
-        "transition": ["/\\ball\\b/"],
-        "transition-property": ["all"],
-        "text-transform": ["/.*/"]
-      },
-      { "severity": "warning" }
-    ],
-    "declaration-property-value-allowed-list": [
-      {
-        "font-family": ["/^var\\(--l5r4-font-/", "inherit"],
-        "font-size": ["/^var\\(--l5r4-(font-size|size-icon)-/", "inherit"],
-        "font-weight": ["normal", "bold"],
-        "line-height": ["1", "inherit", "/var\\(--input-height\\)/"]
-      },
-      { "severity": "warning" }
-    ],
+    "declaration-property-value-disallowed-list": {
+      "transition": ["/\\ball\\b/"],
+      "transition-property": ["all"],
+      "text-transform": ["/.*/"]
+    },
+    "declaration-property-value-allowed-list": {
+      "font-family": ["/^var\\(--l5r4-font-/", "inherit"],
+      "font-size": ["/^var\\(--l5r4-(font-size|size-icon)-/", "inherit"],
+      "font-weight": ["normal", "bold"],
+      "line-height": ["1", "inherit", "/var\\(--input-height\\)/"]
+    },
     "no-descending-specificity": null,
     "no-duplicate-selectors": null
   },

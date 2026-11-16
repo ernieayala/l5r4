@@ -14,7 +14,7 @@ How `lang/en.json` is organized: key paths, one key per meaning, placeholders, p
 
 ## Key paths
 
-**Rule.** Every key sits under `l5r4.` as `l5r4.<area>.<group>.<key>`, with at most one subgroup between group and key (depth 4 or 5; 1094 of the 1096 leaves under `l5r4.`, the two others at depth 6 in `l5r4.ui.mechanics.stances.errors` (`lang/en.json`)). A plural group adds one level (**Plurals**). The one group outside `l5r4.` is `TYPES`, which core requires for subtype labels. Settings and status effect names sit under `l5r4.` with the rest.
+**Rule.** Every key sits under `l5r4.` as `l5r4.<area>.<group>.<key>`, with at most one subgroup between group and key (depth 4 or 5, where every leaf under `l5r4.` sits). A plural group adds one level (**Plurals**). The one group outside `l5r4.` is `TYPES`, which core requires for subtype labels. Settings and status effect names sit under `l5r4.` with the rest.
 
 | Area | Holds | Example |
 | --- | --- | --- |

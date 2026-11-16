@@ -143,6 +143,8 @@
     &.-void {
       cursor: pointer;
 
+      @include rank-arrows;
+
       // The face is the rank control's value <button>: `color` through `padding` undo core's button face, and
       // `line-height` restores the face's after `font` resets it
       .l5r4-ring-rank-face {
@@ -156,8 +158,6 @@
         min-height: 0;
         padding: 0;
       }
-
-      @include rank-arrows;
     }
 
     .l5r4-ring-rank-face {

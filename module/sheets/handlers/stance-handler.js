@@ -136,7 +136,7 @@ export class StanceHandler {
       await applyEffect(actor, stanceId);
     } catch (err) {
       console.error(`${SYS_ID} StanceHandler: Failed to add stance "${stanceId}"`, err);
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.stances.errors.addFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.stances.addFailed"));
     }
   }
 
@@ -157,7 +157,7 @@ export class StanceHandler {
       }
     } catch (err) {
       console.error(`${SYS_ID} StanceHandler: Failed to remove stances`, err);
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.stances.errors.removeFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.stances.removeFailed"));
     }
   }
 }

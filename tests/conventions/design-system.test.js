@@ -5,7 +5,8 @@ import {
   lineOf,
   parseScss,
   registerConventionSuite,
-  tableAfter
+  tableAfter,
+  tablesUnder
 } from "../../tools/conventions/shared.mjs";
 
 const { basename } = posix;
@@ -70,19 +71,25 @@ function galleryOf(tree) {
 }
 
 /**
- * The tokens a page may name before they are declared: color.md's reserved role tokens.
+ * The tokens a page may name that no stylesheet declares: each token a foundations table defines in its `Token`
+ * column (components/README.md: the foundations define every token a page names), such as color.md's reserved role
+ * tokens, the surface core paints, and the canvas-only floating number colors, and each old name in a
+ * `Renamed tokens` table.
  * @param {import("../../tools/conventions/shared.mjs").Tree} tree - The tree
- * @returns {Set<string>} The reserved tokens
+ * @returns {Set<string>} The defined tokens
  */
-function reservedTokensOf(tree) {
-  const page = "docs/design-system/foundations/color.md";
-  if (!tree.has(page)) {
-    return new Set();
-  }
+function definedTokensOf(tree) {
   return new Set(
-    tableAfter(tree.text(page), "Role tokens")
-      .filter(row => row["Read by"] === "Reserved")
-      .flatMap(row => codeSpansOf(row.Token))
+    tree.files("docs/design-system/foundations", /\.md$/).flatMap(path => {
+      const page = tree.text(path);
+      const headings = [
+        ...new Set([...page.matchAll(/^#+\s+(.+?)\s*$/gm)].map(([, text]) => text))
+      ];
+      return [
+        ...headings.flatMap(heading => tablesUnder(page, heading).flat()),
+        ...tableAfter(page, "Renamed tokens").map(row => ({ Token: row.Old }))
+      ].flatMap(row => codeSpansOf(row.Token ?? ""));
+    })
   );
 }
 
@@ -178,10 +185,10 @@ const RULES = {
 
   "design-system/doc-token": tree => {
     const declared = declaredTokensOf(tree);
-    const reserved = reservedTokensOf(tree);
+    const defined = definedTokensOf(tree);
     return docSpansOf(tree)
       .filter(({ code }) => /^--l5r4-[\w-]+$/.test(code) && !/[<*{]/.test(code))
-      .filter(({ code }) => !declared.has(code) && !reserved.has(code))
+      .filter(({ code }) => !declared.has(code) && !defined.has(code))
       .map(({ path, line, code }) => `${path}:${line}: ${code} is not declared in scss/`);
   },
 
