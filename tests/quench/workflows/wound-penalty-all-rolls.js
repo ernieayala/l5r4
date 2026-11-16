@@ -52,9 +52,9 @@ function answerDialog(values) {
  * Register Quench test batch for wound penalty integration tests.
  * @param {object} quench  The Quench API object.
  */
-export function register(quench) {
+export function registerWoundPenaltyAllRollsTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.rolls.wound-penalty-all-rolls`,
+    `${SYS_ID}.workflows.wound-penalty-all-rolls`,
     context => {
       const { describe, it, assert, before, after } = context;
       const messages = [];

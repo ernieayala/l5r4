@@ -38,9 +38,8 @@ Picked by majority: alphabetical imports (29 of 42 files), no header (30 of 42),
 Conforming, `tests/unit/utils/check.test.js:1-14`: `buildPool` from `module/utils/check.js`, in
 `tests/unit/utils/check.test.js`.
 
-Not conforming, `tests/unit/utils/insight-rank.test.js:22`: it tests a copy of `calculateInsightRank` written inside
-the test and imports no module file. `tests/unit/services/xp-formatter.test.js` tests
-`module/services/xp/xp-formatter.js` but drops the `xp/` folder.
+Not conforming (modeled): a test that copies the function it checks into the test file and imports no module file;
+`tests/unit/services/formatter.test.js` for `module/services/xp/formatter.js`, which drops the `xp/` folder.
 
 ### Quench
 

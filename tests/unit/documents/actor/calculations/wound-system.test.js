@@ -21,7 +21,7 @@ import {
   prepareCurrentWoundLevel,
   prepareNpcFormulaWounds,
   prepareNpcManualWounds
-} from "../../../module/documents/actor/calculations/wound-system.js";
+} from "../../../../../module/documents/actor/calculations/wound-system.js";
 
 // game-rules/99_creatures.md, p.318
 describe("prepareNpcManualWounds", () => {

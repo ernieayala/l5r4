@@ -26,15 +26,16 @@ const manifest = (changes = {}) => ({
   ...changes
 });
 
-describe("coverage audit (roadmap/STAGE-16)", () => {
-  it("reads page lists", () => {
+// roadmap/STAGE-16
+describe("Coverage audit", () => {
+  it("should read page lists", () => {
     expect(pagesOf("82")).toEqual([82]);
     expect(pagesOf("86-88, 90")).toEqual([86, 87, 88, 90]);
     expect(pagesOf("88-86")).toEqual([]);
     expect(pagesOf("p.82")).toEqual([]);
   });
 
-  it("lists a page no manifest entry classifies, with its headings", () => {
+  it("should list a page no manifest entry classifies, with its headings", () => {
     const { unclassified, stale } = rulesReport(fixture, manifest());
     expect(unclassified).toEqual([
       { file: "01_fixture.md", page: 3, headings: ["Unclassified Rule"] }
@@ -42,19 +43,19 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     expect(stale).toEqual([]);
   });
 
-  it("lists a manifest page its rule file does not mark", () => {
+  it("should list a manifest page its rule file does not mark", () => {
     const rules = [...manifest().rules, { file: "01_fixture.md", pages: "4", status: "advice" }];
     expect(rulesReport(fixture, manifest({ rules })).stale).toEqual(["01_fixture.md p.4"]);
   });
 
-  it("fails an automated entry whose code cites none of its pages", () => {
+  it("should fail an automated entry whose code cites none of its pages", () => {
     const rules = [{ ...manifest().rules[0], code: ["module/uncited.js"] }];
     const { uncited, invalid } = citationsReport(fixture, manifest({ rules }));
     expect(invalid).toEqual([]);
     expect(uncited).toEqual(["01_fixture.md p.1: module/uncited.js cite none of its pages"]);
   });
 
-  it("fails an automated entry whose test path does not exist, and a manual one with no decision", () => {
+  it("should fail an automated entry whose test path does not exist, and a manual one with no decision", () => {
     const rules = [
       { ...manifest().rules[0], tests: ["tests/unit/gone.js"] },
       { file: "01_fixture.md", pages: "2", status: "manual" }
@@ -65,7 +66,7 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     ]);
   });
 
-  it("fails a citation to a page no manifest entry covers", () => {
+  it("should fail a citation to a page no manifest entry covers", () => {
     const { uncovered, uncited } = citationsReport(fixture, manifest());
     expect(uncited).toEqual([]);
     expect(uncovered).toContain("module/rule.js:3 cites p.9");
@@ -73,7 +74,7 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     expect(uncovered).toContain("src/packs/things.json:0 cites p.3");
   });
 
-  it("finds template and option actions", () => {
+  it("should find template and option actions", () => {
     expect(templateActions('<a data-action="edit-item"></a><a data-action="{{x}}"></a>')).toEqual([
       "edit-item"
     ]);
@@ -82,7 +83,7 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     ).toEqual(["a", "b-c", "d"]);
   });
 
-  it("lists an action no test triggers, and an accepted one no longer", async () => {
+  it("should list an action no test triggers, and an accepted one no longer", async () => {
     const report = await actionsReport(fixture, manifest());
     expect(report.untested).toEqual([{ action: "lonely", source: "templates/sheet.hbs" }]);
     const accepted = await actionsReport(
@@ -93,11 +94,11 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     expect(accepted.stale).toEqual(["untested.actions accepts clicked, which is tested"]);
   });
 
-  it("lists a setting no test sets", () => {
+  it("should list a setting no test sets", () => {
     expect(settingsReport(fixture, manifest()).untested).toEqual(["untested"]);
   });
 
-  it("fails a full or partial pack entry no batch checks, and a partial or none one left undecided", () => {
+  it("should fail a full or partial pack entry no batch checks, and a partial or none one left undecided", () => {
     const report = packsReport(fixture, manifest());
     expect(report.unchecked).toEqual([
       "things: Full Thing (p.1, full)",
@@ -118,7 +119,7 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
     expect(checked.unchecked).toEqual([]);
   });
 
-  it("reads a stage file's open questions, numbered or bulleted", () => {
+  it("should read a stage file's open questions, numbered or bulleted", () => {
     const stage =
       "## Decisions\n\n1. Done.\n\n### Still open\n\n1. First\n   wraps.\n- Second\n\n## Out of scope\n";
     expect(openQuestions(stage)).toEqual(["First wraps.", "Second"]);

@@ -341,13 +341,13 @@
         "tests/quench/documents/combat-modifiers.js",
         "tests/quench/packs.js",
         "tests/quench/roll-pipeline.js",
-        "tests/quench/rolls/wound-penalty-all-rolls.js",
         "tests/quench/rules.js",
         "tests/quench/services/initiative.js",
         "tests/quench/table-tools.js",
         "tests/quench/workflows/status-effects-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
         "tests/quench/world-upgrade.js",
-        "tests/unit/documents/wound-calculations.test.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/damage.test.js",
         "tests/unit/utils/effects.test.js",
@@ -376,11 +376,11 @@
         "tests/quench/combat.js",
         "tests/quench/packs.js",
         "tests/quench/roll-pipeline.js",
-        "tests/quench/rolls/wound-penalty-all-rolls.js",
         "tests/quench/rules.js",
         "tests/quench/table-tools.js",
         "tests/quench/workflows/status-effects-workflow.js",
-        "tests/unit/documents/wound-calculations.test.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/damage.test.js",
         "tests/unit/utils/effects.test.js"
@@ -408,11 +408,11 @@
         "tests/quench/combat.js",
         "tests/quench/packs.js",
         "tests/quench/roll-pipeline.js",
-        "tests/quench/rolls/wound-penalty-all-rolls.js",
         "tests/quench/rules.js",
         "tests/quench/table-tools.js",
         "tests/quench/workflows/status-effects-workflow.js",
-        "tests/unit/documents/wound-calculations.test.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/damage.test.js",
         "tests/unit/utils/effects.test.js"
@@ -460,10 +460,10 @@
         "tests/quench/workflows/skill-stance-combinations.js",
         "tests/quench/workflows/stance-edge-cases.js",
         "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
-        "tests/unit/utils/stances.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/utils/stances.test.js"
       ]
     },
     {
@@ -502,10 +502,10 @@
         "tests/quench/workflows/skill-stance-combinations.js",
         "tests/quench/workflows/stance-edge-cases.js",
         "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
-        "tests/unit/utils/stances.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/utils/stances.test.js"
       ]
     },
     {
@@ -544,10 +544,10 @@
         "tests/quench/workflows/skill-stance-combinations.js",
         "tests/quench/workflows/stance-edge-cases.js",
         "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
-        "tests/unit/utils/stances.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/utils/stances.test.js"
       ]
     },
     {
@@ -610,8 +610,8 @@
         "tests/quench/combat.js",
         "tests/quench/effects.js",
         "tests/quench/workflows/status-effects-workflow.js",
-        "tests/unit/utils/damage.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/damage.test.js"
       ]
     },
     {
@@ -652,11 +652,11 @@
         "tests/quench/workflows/stance-switching-workflow.js",
         "tests/quench/workflows/status-effects-all-rolls.js",
         "tests/quench/workflows/status-effects-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
         "tests/unit/utils/stances.test.js",
-        "tests/unit/utils/status-effects.test.js",
         "tests/unit/utils/ten-dice.test.js"
       ]
     },
@@ -697,11 +697,11 @@
         "tests/quench/workflows/stance-switching-workflow.js",
         "tests/quench/workflows/status-effects-all-rolls.js",
         "tests/quench/workflows/status-effects-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
         "tests/unit/utils/stances.test.js",
-        "tests/unit/utils/status-effects.test.js",
         "tests/unit/utils/ten-dice.test.js"
       ]
     },
@@ -733,10 +733,10 @@
         "tests/quench/effects.js",
         "tests/quench/table-tools.js",
         "tests/quench/workflows/fear-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/floating-text.test.js",
         "tests/unit/utils/link-syntax.test.js",
-        "tests/unit/utils/rule-engine.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/utils/rule-engine.test.js"
       ]
     },
     {
@@ -772,10 +772,10 @@
         "tests/quench/effects.js",
         "tests/quench/table-tools.js",
         "tests/quench/workflows/fear-workflow.js",
+        "tests/unit/config/status-effects.test.js",
         "tests/unit/utils/floating-text.test.js",
         "tests/unit/utils/link-syntax.test.js",
-        "tests/unit/utils/rule-engine.test.js",
-        "tests/unit/utils/status-effects.test.js"
+        "tests/unit/utils/rule-engine.test.js"
       ]
     },
     {
@@ -1263,8 +1263,8 @@
       "tests": [
         "tests/quench/packs.js",
         "tests/quench/roll-pipeline.js",
-        "tests/quench/rolls/wound-penalty-all-rolls.js",
         "tests/quench/workflows/spell-casting-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
         "tests/unit/utils/mechanics.test.js"
       ]
     },
@@ -1286,8 +1286,8 @@
         "tests/quench/effects.js",
         "tests/quench/packs.js",
         "tests/quench/roll-pipeline.js",
-        "tests/quench/rolls/wound-penalty-all-rolls.js",
-        "tests/quench/workflows/spell-casting-workflow.js"
+        "tests/quench/workflows/spell-casting-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js"
       ]
     },
     {
@@ -1850,7 +1850,7 @@
       ],
       "tests": [
         "tests/quench/packs.js",
-        "tests/unit/documents/wound-calculations.test.js"
+        "tests/unit/documents/actor/calculations/wound-system.test.js"
       ]
     },
     {
@@ -1869,7 +1869,7 @@
       "tests": [
         "tests/quench/combat.js",
         "tests/quench/packs.js",
-        "tests/unit/documents/wound-calculations.test.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
         "tests/unit/utils/damage.test.js"
       ]
     },
@@ -1883,7 +1883,7 @@
       "tests": [
         "tests/packs.test.js",
         "tests/quench/packs.js",
-        "tests/unit/documents/wound-calculations.test.js"
+        "tests/unit/documents/actor/calculations/wound-system.test.js"
       ]
     },
     {
