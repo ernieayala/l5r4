@@ -214,6 +214,103 @@ export function registerRollPipelineTests(quench) {
           })
         );
 
+        /**
+         * Run a body while recording every warning notification it shows.
+         * @param {function(): Promise<*>} body
+         * @returns {Promise<{result: *, warnings: string[]}>}
+         */
+        const withWarnings = async body => {
+          const warnings = [];
+          const warn = ui.notifications.warn;
+          ui.notifications.warn = (message, options) => {
+            warnings.push(message);
+            return warn.call(ui.notifications, message, options);
+          };
+          try {
+            return { result: await body(), warnings };
+          } finally {
+            ui.notifications.warn = warn;
+          }
+        };
+
+        // game-rules/66_magic_and_spell_casting.md, p.163
+        for (const [slot, slots] of [
+          ["Fire", { fire: 1, void: 0 }],
+          ["Void", { fire: 0, void: 1 }]
+        ]) {
+          it(
+            "should spend the last " +
+              slot +
+              " slot once when two casts overlap, refusing the other",
+            clean(async () => {
+              const { actor } = await swordsman();
+              await actor.update({ "system.spellSlots": slots });
+              const [spell] = await actor.createEmbeddedDocuments("Item", [
+                { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+              ]);
+              const { result, warnings } = await withWarnings(() =>
+                Promise.all([
+                  rollSpellCast({ actor, spell, showDialog: false }),
+                  rollSpellCast({ actor, spell, showDialog: false })
+                ])
+              );
+              result.filter(Boolean).forEach(keep);
+              const key = slot === "Void" ? "void" : "fire";
+              const refused = game.i18n.localize("l5r4.ui.notifications.noSpellSlots");
+              assert.equal(
+                warnings.filter(message => message === refused).length,
+                1,
+                "the other cast is refused"
+              );
+              assert.equal(actor._source.system.spellSlots[key], 0, "one slot spent");
+              assert.isAtLeast(actor.system.spellSlots[key], 0, "never negative");
+            })
+          );
+        }
+
+        it(
+          "should refuse a spell of an unknown Ring, naming the Ring",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Wood Spell", type: "spell", system: { ring: "wood", mastery: 1 } }
+            ]);
+            const slots = { ...actor._source.system.spellSlots };
+            const { result, warnings } = await withWarnings(() =>
+              rollSpellCast({ actor, spell, showDialog: false })
+            );
+            if (result) {
+              keep(result);
+            }
+            assert.isNull(result, "no cast");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.notifications.invalidRingForSpell", { ring: "wood" })
+            ]);
+            assert.isFalse(
+              warnings.some(message => message.includes("l5r4.")),
+              "no raw key"
+            );
+            assert.deepEqual(actor._source.system.spellSlots, slots, "no slot spent");
+          })
+        );
+
+        it(
+          "should refuse a cast with no caster",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const { result, warnings } = await withWarnings(() =>
+              rollSpellCast({ actor: null, spell, showDialog: false })
+            );
+            assert.isNull(result, "no cast");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.notifications.noActorForVoid")
+            ]);
+          })
+        );
+
         // game-rules/66_magic_and_spell_casting.md, p.163
         it(
           "should roll the Void Ring for a Void spell",

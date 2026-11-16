@@ -1,5 +1,25 @@
 import { buildPool, parseRollAndKeep, getPoolFormula } from "../../module/utils/check.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { getSlotStatus, spendSlot } from "../../module/services/dice/check/spell-slots.js";
+
+/**
+ * Spend a spell slot the way a cast does (module/services/dice/check/spell-slots.js): the slot the choice names,
+ * then the spend under the caster's lock, which checks the count again.
+ * @param {Actor|object} actor  The caster
+ * @param {string} ring  The Ring the spell is cast in
+ * @param {{isVoid?: boolean}} [options]  Spend a Void slot in place of the Ring's
+ * @returns {Promise<{success: boolean, message: string|null, label: string}>} The spend, with the slot's card label
+ *   when a slot was spent
+ */
+export async function spendCastSlot(actor, ring, { isVoid = false } = {}) {
+  const slot = getSlotStatus(actor, ring, isVoid ? "void" : "elemental");
+  const result = await spendSlot(actor, slot.path);
+  return {
+    ...result,
+    message: result.message ?? slot.message,
+    label: result.success ? slot.label : ""
+  };
+}
 
 /**
  * Answer the next check dialog: set its fields, then click Roll.

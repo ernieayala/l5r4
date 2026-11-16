@@ -10,16 +10,14 @@
  * CRITICAL: These tests FIND BUGS, not validate working code.
  * Each test creates a specific failure condition to verify handling.
  *
- * @see module/services/dice/resources/spell-slots.js
+ * Each check and spend goes through the casting path: module/services/dice/check/spell-slots.js `getSlotStatus`, and
+ * `spendSlot` under the caster's lock through `spendCastSlot`.
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
+import { getSlotStatus } from "../../../module/services/dice/check/spell-slots.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import {
-  validateSpellSlot,
-  spendElementalSlot,
-  spendVoidSlot
-} from "../../../module/services/dice/resources/spell-slots.js";
+import { spendCastSlot } from "../helpers.js";
 
 /**
  * Register Spell Slots resource management tests
@@ -58,7 +56,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should fail validation when Fire slots are 0", () => {
           // ARRANGE: Actor with 0 Fire slots
-          const validation = validateSpellSlot(actor, "fire", false);
+          const validation = getSlotStatus(actor, "fire", "elemental");
 
           // ACT & ASSERT: Validation must fail
           assert.isFalse(validation.valid, "Validation fails with 0 slots");
@@ -72,7 +70,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.fire, 0);
 
           // ACT: Attempt to spend Fire slot
-          const result = await spendElementalSlot(actor, "fire");
+          const result = await spendCastSlot(actor, "fire");
 
           // ASSERT: Spending fails
           assert.isFalse(result.success, "Spending fails");
@@ -88,9 +86,9 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.water, 0);
 
           // ACT: Multiple spend attempts
-          await spendElementalSlot(actor, "water");
-          await spendElementalSlot(actor, "water");
-          await spendElementalSlot(actor, "water");
+          await spendCastSlot(actor, "water");
+          await spendCastSlot(actor, "water");
+          await spendCastSlot(actor, "water");
 
           // ASSERT: Slots never go negative
           const finalValue = actor.system.spellSlots.water;
@@ -104,7 +102,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.air, 2, "null reset to the initial 2");
 
           // ACT: Attempt to spend from a null that bypassed the schema
-          const result = await spendElementalSlot({ system: { spellSlots: { air: null } } }, "air");
+          const result = await spendCastSlot({ system: { spellSlots: { air: null } } }, "air");
 
           // ASSERT: Fails gracefully without crash
           assert.isFalse(result.success, "Spending fails gracefully");
@@ -117,7 +115,7 @@ export function registerSpellSlotsTests(quench) {
           assert.isObject(actor.system.spellSlots, "Structure kept");
 
           // ACT: Validate an actor whose data has no spellSlots at all
-          const validation = validateSpellSlot({ system: {} }, "earth", false);
+          const validation = getSlotStatus({ system: {} }, "earth", "elemental");
 
           // ASSERT: Fails gracefully without crash
           assert.isFalse(validation.valid, "Validation fails gracefully");
@@ -129,7 +127,7 @@ export function registerSpellSlotsTests(quench) {
           const elements = ["water", "air", "fire", "earth"];
 
           for (const element of elements) {
-            const validation = validateSpellSlot(actor, element, false);
+            const validation = getSlotStatus(actor, element, "elemental");
             assert.isFalse(validation.valid, `${element} validation fails`);
             assert.equal(validation.current, 0, `${element} slots are 0`);
           }
@@ -167,7 +165,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.void, 2);
 
           // ACT: Validate Void slot
-          const validation = validateSpellSlot(actor, "void", true);
+          const validation = getSlotStatus(actor, "void", "void");
 
           // ASSERT: Void slot validates
           assert.isTrue(validation.valid, "Void slot validates");
@@ -180,7 +178,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.void, 2);
 
           // ACT: Spend Void slot
-          const result = await spendVoidSlot(actor);
+          const result = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Spending succeeds
           assert.isTrue(result.success, "Spending succeeds");
@@ -196,7 +194,7 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.void": 0 });
 
           // ACT: Attempt to spend Void slot
-          const result = await spendVoidSlot(actor);
+          const result = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Spending fails
           assert.isFalse(result.success, "Spending fails");
@@ -208,8 +206,8 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.void, 2);
 
           // ACT: Spend both
-          const result1 = await spendVoidSlot(actor);
-          const result2 = await spendVoidSlot(actor);
+          const result1 = await spendCastSlot(actor, "void", { isVoid: true });
+          const result2 = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Both succeed
           assert.isTrue(result1.success, "First spend succeeds");
@@ -222,9 +220,9 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.void, 2);
 
           // ACT: Attempt 3 spends
-          await spendVoidSlot(actor);
-          await spendVoidSlot(actor);
-          const result3 = await spendVoidSlot(actor);
+          await spendCastSlot(actor, "void", { isVoid: true });
+          await spendCastSlot(actor, "void", { isVoid: true });
+          const result3 = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Third fails
           assert.isFalse(result3.success, "Third spend fails");
@@ -236,8 +234,8 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.fire": 1 });
 
           // ACT: Spend elemental vs Void
-          const elementalResult = await spendElementalSlot(actor, "fire");
-          const voidResult = await spendVoidSlot(actor);
+          const elementalResult = await spendCastSlot(actor, "fire");
+          const voidResult = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Labels differ
           assert.isTrue(elementalResult.success, "Elemental spend succeeds");
@@ -278,8 +276,8 @@ export function registerSpellSlotsTests(quench) {
 
           // ACT: Attempt simultaneous spending (race condition)
           const [result1, result2] = await Promise.all([
-            spendElementalSlot(actor, "fire"),
-            spendElementalSlot(actor, "fire")
+            spendCastSlot(actor, "fire"),
+            spendCastSlot(actor, "fire")
           ]);
 
           // ASSERT: Only one succeeds
@@ -297,9 +295,9 @@ export function registerSpellSlotsTests(quench) {
 
           // ACT: Three simultaneous attempts
           const [r1, r2, r3] = await Promise.all([
-            spendElementalSlot(actor, "water"),
-            spendElementalSlot(actor, "water"),
-            spendElementalSlot(actor, "water")
+            spendCastSlot(actor, "water"),
+            spendCastSlot(actor, "water"),
+            spendCastSlot(actor, "water")
           ]);
 
           // ASSERT: Only one succeeds
@@ -317,8 +315,8 @@ export function registerSpellSlotsTests(quench) {
 
           // ACT: Simultaneous Void slot spends
           const [result1, result2] = await Promise.all([
-            spendVoidSlot(actor),
-            spendVoidSlot(actor)
+            spendCastSlot(actor, "void", { isVoid: true }),
+            spendCastSlot(actor, "void", { isVoid: true })
           ]);
 
           // ASSERT: Only one succeeds
@@ -336,8 +334,8 @@ export function registerSpellSlotsTests(quench) {
 
           // ACT: Simultaneous different element spends
           const [fireResult, waterResult] = await Promise.all([
-            spendElementalSlot(actor, "fire"),
-            spendElementalSlot(actor, "water")
+            spendCastSlot(actor, "fire"),
+            spendCastSlot(actor, "water")
           ]);
 
           // ASSERT: Both succeed (different resources)
@@ -352,7 +350,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.air, 1);
 
           // ACT: Race condition
-          await Promise.all([spendElementalSlot(actor, "air"), spendElementalSlot(actor, "air")]);
+          await Promise.all([spendCastSlot(actor, "air"), spendCastSlot(actor, "air")]);
 
           // ASSERT: Actor data structure intact
           assert.exists(actor.system.spellSlots, "Spell slots structure intact");
@@ -388,7 +386,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should validate slots at 99", () => {
           // ACT: Validate Fire slots at 99
-          const validation = validateSpellSlot(actor, "fire", false);
+          const validation = getSlotStatus(actor, "fire", "elemental");
 
           // ASSERT: Validates successfully
           assert.isTrue(validation.valid, "99 slots validates");
@@ -400,7 +398,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.fire, 99);
 
           // ACT: Spend one slot
-          const result = await spendElementalSlot(actor, "fire");
+          const result = await spendCastSlot(actor, "fire");
 
           // ASSERT: Spending succeeds
           assert.isTrue(result.success, "Spending succeeds");
@@ -412,8 +410,8 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.water": 999 });
 
           // ACT: Validate and spend
-          const validation = validateSpellSlot(actor, "water", false);
-          const result = await spendElementalSlot(actor, "water");
+          const validation = getSlotStatus(actor, "water", "elemental");
+          const result = await spendCastSlot(actor, "water");
 
           // ASSERT: Handles large numbers
           assert.isTrue(validation.valid, "Validates large number");
@@ -426,7 +424,7 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.air": Number.MAX_SAFE_INTEGER });
 
           // ACT: Validate
-          const validation = validateSpellSlot(actor, "air", false);
+          const validation = getSlotStatus(actor, "air", "elemental");
 
           // ASSERT: Validates (or handles gracefully)
           assert.exists(validation.valid, "Handles MAX_SAFE_INTEGER");
@@ -438,7 +436,7 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.earth": overflow });
 
           // ACT: Spend
-          const result = await spendElementalSlot(actor, "earth");
+          const result = await spendCastSlot(actor, "earth");
 
           // ASSERT: Handles overflow gracefully
           assert.exists(result.success, "Handles overflow");
@@ -449,8 +447,8 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.void": Infinity });
 
           // ACT: Validate and spend
-          const validation = validateSpellSlot(actor, "void", true);
-          const result = await spendVoidSlot(actor);
+          const validation = getSlotStatus(actor, "void", "void");
+          const result = await spendCastSlot(actor, "void", { isVoid: true });
 
           // ASSERT: Handles Infinity
           assert.exists(validation.valid, "Handles Infinity validation");
@@ -485,7 +483,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle invalid ring key", () => {
           // ACT: Validate invalid ring
-          const validation = validateSpellSlot(actor, "invalid", false);
+          const validation = getSlotStatus(actor, "invalid", "elemental");
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "Invalid ring fails");
@@ -494,7 +492,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle empty string ring key", () => {
           // ACT: Validate empty string
-          const validation = validateSpellSlot(actor, "", false);
+          const validation = getSlotStatus(actor, "", "elemental");
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "Empty string fails");
@@ -502,7 +500,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle null ring key", () => {
           // ACT: Validate null ring
-          const validation = validateSpellSlot(actor, null, false);
+          const validation = getSlotStatus(actor, null, "elemental");
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "Null ring fails");
@@ -510,7 +508,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle uppercase ring key", () => {
           // ACT: Validate uppercase (should normalize)
-          const validation = validateSpellSlot(actor, "FIRE", false);
+          const validation = getSlotStatus(actor, "FIRE", "elemental");
 
           // ASSERT: Normalizes and validates
           assert.isTrue(validation.valid, "Normalizes uppercase");
@@ -519,7 +517,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle mixed case ring key", () => {
           // ACT: Validate mixed case
-          const validation = validateSpellSlot(actor, "WaTeR", false);
+          const validation = getSlotStatus(actor, "WaTeR", "elemental");
 
           // ASSERT: Normalizes and validates
           assert.isTrue(validation.valid, "Normalizes mixed case");
@@ -531,7 +529,7 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.fire": "3" });
 
           // ACT: Validate
-          const validation = validateSpellSlot(actor, "fire", false);
+          const validation = getSlotStatus(actor, "fire", "elemental");
 
           // ASSERT: Coerces to number
           assert.isTrue(validation.valid, "Validates string as number");
@@ -543,7 +541,7 @@ export function registerSpellSlotsTests(quench) {
           await actor.update({ "system.spellSlots.water": -1 });
 
           // ACT: Validate
-          const validation = validateSpellSlot(actor, "water", false);
+          const validation = getSlotStatus(actor, "water", "elemental");
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "Negative value fails");
@@ -556,10 +554,10 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.air, before, "NaN not stored");
 
           // ACT: Validate a NaN that bypassed the schema
-          const validation = validateSpellSlot(
+          const validation = getSlotStatus(
             { system: { spellSlots: { air: NaN } } },
             "air",
-            false
+            "elemental"
           );
 
           // ASSERT: Fails validation
@@ -569,7 +567,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle null actor", () => {
           // ACT: Validate null actor
-          const validation = validateSpellSlot(null, "fire", false);
+          const validation = getSlotStatus(null, "fire", "elemental");
 
           // ASSERT: Fails with message
           assert.isFalse(validation.valid, "Null actor fails");
@@ -579,7 +577,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle undefined actor", () => {
           // ACT: Validate undefined actor
-          const validation = validateSpellSlot(undefined, "earth", false);
+          const validation = getSlotStatus(undefined, "earth", "elemental");
 
           // ASSERT: Fails with message
           assert.isFalse(validation.valid, "Undefined actor fails");

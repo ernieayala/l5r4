@@ -2,7 +2,6 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../module/config/status-effects.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
-import { spendElementalSlot } from "../../module/services/dice/resources/spell-slots.js";
 import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
 import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
 import { applyLongRest } from "../../module/services/rest.js";
@@ -13,6 +12,7 @@ import { buildXpHistory } from "../../module/services/xp/calculator.js";
 import { migrateEffectFreeTraitBase } from "../../module/setup/migrations/actors/xp-free-trait-base.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createBow, createKatana } from "../fixtures/item-fixtures.js";
+import { spendCastSlot } from "./helpers.js";
 
 /**
  * A Family or School item whose TraitAdjust rule adds +1 to a Trait (the form a 3.2.1 Trait effect migrates to).
@@ -186,7 +186,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.spellSlots.fire": 1 })
           ]);
-          const result = await spendElementalSlot(actor, "fire");
+          const result = await spendCastSlot(actor, "fire");
           assert.isTrue(result.success);
           assert.equal(actor._source.system.spellSlots.fire, 1, "stored 2 - 1");
           assert.equal(actor.system.spellSlots.fire, 2, "prepared 1 + 1");

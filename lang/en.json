@@ -644,12 +644,10 @@
         "shugenja": "Shugenja",
         "shugenjaSchool": "Shugenja School",
         "shugenjaSchoolHint": "Spell Casting Rolls add this School's Rank. Without one, they add the Insight Rank.",
-        "slotsEmpty": "{element}: 0",
         "slotsRestored": "All spell slots restored to maximum",
         "slotSuffix": "[Use spell slot {element}]",
         "useSpellSlot": "Use spell slot",
         "voidSlot": "Use Void spell slot",
-        "voidSlots": "Void spell slots",
         "voidSlotSuffix": "[Use Void spell slot]"
       }
     },

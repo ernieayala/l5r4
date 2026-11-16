@@ -2,8 +2,8 @@
  * Spell Slots Edge Case Tests
  *
  * Tests edge cases in spell slot management that could break spellcasting. Slots are one number per Ring in
- * `system.spellSlots` (water, fire, earth, air, void), spent through
- * module/services/dice/resources/spell-slots.js.
+ * `system.spellSlots` (water, fire, earth, air, void), checked and spent through the casting path,
+ * module/services/dice/check/spell-slots.js.
  *
  * **What Can Break:**
  * - Casting with no slots
@@ -14,12 +14,9 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import {
-  spendElementalSlot,
-  spendVoidSlot,
-  validateSpellSlot
-} from "../../../module/services/dice/resources/spell-slots.js";
+import { getSlotStatus } from "../../../module/services/dice/check/spell-slots.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { spendCastSlot } from "../helpers.js";
 
 /**
  * Register spell slots edge case tests
@@ -52,8 +49,8 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
           await actor.update({ "system.spellSlots.fire": 0 });
 
           assert.equal(actor.system.spellSlots.fire, 0, "Fire slots at 0");
-          assert.isFalse(validateSpellSlot(actor, "fire").valid, "No Fire slot to spend");
-          const result = await spendElementalSlot(actor, "fire");
+          assert.isFalse(getSlotStatus(actor, "fire", "elemental").valid, "No Fire slot to spend");
+          const result = await spendCastSlot(actor, "fire");
           assert.isFalse(result.success, "Spending fails");
           assert.equal(actor.system.spellSlots.fire, 0, "Still 0");
         });
@@ -61,9 +58,9 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         it("should fall back to a Void slot when element slots are empty", async () => {
           await actor.update({ "system.spellSlots.fire": 0, "system.spellSlots.void": 2 });
 
-          assert.isFalse(validateSpellSlot(actor, "fire").valid, "Fire slots empty");
-          assert.isTrue(validateSpellSlot(actor, "fire", true).valid, "Void slot available");
-          const result = await spendVoidSlot(actor);
+          assert.isFalse(getSlotStatus(actor, "fire", "elemental").valid, "Fire slots empty");
+          assert.isTrue(getSlotStatus(actor, "fire", "void").valid, "Void slot available");
+          const result = await spendCastSlot(actor, "void", { isVoid: true });
           assert.isTrue(result.success, "Void slot spent");
           assert.equal(actor.system.spellSlots.void, 1, "One Void slot left");
         });
@@ -71,18 +68,18 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         it("should refuse casting with no slots and no Void slots", async () => {
           await actor.update({ "system.spellSlots.fire": 0, "system.spellSlots.void": 0 });
 
-          assert.isFalse(validateSpellSlot(actor, "fire").valid, "No Fire slots");
-          assert.isFalse(validateSpellSlot(actor, "fire", true).valid, "No Void slots");
+          assert.isFalse(getSlotStatus(actor, "fire", "elemental").valid, "No Fire slots");
+          assert.isFalse(getSlotStatus(actor, "fire", "void").valid, "No Void slots");
         });
 
         it("should treat a negative slot count as no slots", async () => {
           await actor.update({ "system.spellSlots.fire": -1 });
 
           assert.equal(actor.system.spellSlots.fire, -1, "Stored as given");
-          const validation = validateSpellSlot(actor, "fire");
+          const validation = getSlotStatus(actor, "fire", "elemental");
           assert.isFalse(validation.valid, "No slot to spend");
           assert.equal(validation.current, 0, "Reported as 0");
-          const result = await spendElementalSlot(actor, "fire");
+          const result = await spendCastSlot(actor, "fire");
           assert.isFalse(result.success, "Spending fails");
           assert.equal(actor.system.spellSlots.fire, -1, "Not decremented further");
         });
@@ -109,20 +106,20 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
           assert.equal(actor.system.spellSlots.fire, 3, "Starting with 3 slots");
 
           for (let i = 0; i < 3; i++) {
-            assert.isTrue((await spendElementalSlot(actor, "fire")).success, `Spend ${i + 1}`);
+            assert.isTrue((await spendCastSlot(actor, "fire")).success, `Spend ${i + 1}`);
           }
 
           assert.equal(actor.system.spellSlots.fire, 0, "All slots consumed");
-          assert.isFalse((await spendElementalSlot(actor, "fire")).success, "Fourth spend fails");
+          assert.isFalse((await spendCastSlot(actor, "fire")).success, "Fourth spend fails");
         });
 
         it("should serialize concurrent slot spending", async () => {
           assert.equal(actor.system.spellSlots.fire, 3, "Starting with 3 slots");
 
           const results = await Promise.all([
-            spendElementalSlot(actor, "fire"),
-            spendElementalSlot(actor, "fire"),
-            spendElementalSlot(actor, "fire")
+            spendCastSlot(actor, "fire"),
+            spendCastSlot(actor, "fire"),
+            spendCastSlot(actor, "fire")
           ]);
 
           assert.isTrue(
@@ -135,8 +132,8 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         it("should not spend below zero", async () => {
           await actor.update({ "system.spellSlots.fire": 1 });
 
-          assert.isTrue((await spendElementalSlot(actor, "fire")).success, "Last slot spent");
-          assert.isFalse((await spendElementalSlot(actor, "fire")).success, "Next spend fails");
+          assert.isTrue((await spendCastSlot(actor, "fire")).success, "Last slot spent");
+          assert.isFalse((await spendCastSlot(actor, "fire")).success, "Next spend fails");
           assert.equal(actor.system.spellSlots.fire, 0, "Stops at 0");
         });
 
@@ -169,7 +166,7 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
           await actor.update({ "system.spellSlots.fire": 99 });
 
           assert.equal(actor.system.spellSlots.fire, 99, "High slot count stored");
-          assert.isTrue((await spendElementalSlot(actor, "fire")).success, "Spendable");
+          assert.isTrue((await spendCastSlot(actor, "fire")).success, "Spendable");
           assert.equal(actor.system.spellSlots.fire, 98, "Decremented");
         });
 
@@ -209,8 +206,8 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         });
 
         it("should spend slots from different elements", async () => {
-          await spendElementalSlot(actor, "fire");
-          await spendElementalSlot(actor, "water");
+          await spendCastSlot(actor, "fire");
+          await spendCastSlot(actor, "water");
 
           const slots = actor.system.spellSlots;
           assert.equal(slots.fire, 2, "Fire reduced");
@@ -226,8 +223,8 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
           });
 
           assert.equal(actor.system.spellSlots.air, 4, "Air slots remain");
-          assert.isTrue(validateSpellSlot(actor, "air").valid, "Can cast Air");
-          assert.isFalse(validateSpellSlot(actor, "earth").valid, "Cannot cast Earth");
+          assert.isTrue(getSlotStatus(actor, "air", "elemental").valid, "Can cast Air");
+          assert.isFalse(getSlotStatus(actor, "earth", "elemental").valid, "Cannot cast Earth");
         });
       });
     },

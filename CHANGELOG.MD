@@ -210,6 +210,8 @@ Data attributes and prepared values renamed (none is stored in world data):
 
 - NPC sheet Skills sort by their Roll and Emphasis heads, which did nothing before
 - NPC sheet attack rows show the attack's damage type in the Type column, which was always empty
+- Two overlapping casts could spend one spell slot twice or leave a negative count; an unknown Ring or a missing
+  caster now gets its own message
 
 ---
 

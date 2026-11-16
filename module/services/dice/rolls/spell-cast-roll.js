@@ -20,7 +20,12 @@ import {
 } from "../../../utils/spell-casting.js";
 import { formatShiftedLabel } from "../check/message-data.js";
 import { rollCheck } from "../check/roll-check.js";
-import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
+import {
+  getCastingRefusal,
+  getSlotToSpend,
+  getSlotDialogData,
+  spendSlot
+} from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
 import { askGmAllow } from "../../gm-allow.js";
 
@@ -43,6 +48,11 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
   const spellRing = String(spell.system.ring).toLowerCase();
   const ring = spellRing === "all" ? await askElement(spell) : spellRing;
   if (!ring) {
+    return null;
+  }
+  const refusal = getCastingRefusal(actor, ring);
+  if (refusal) {
+    ui.notifications?.warn(refusal);
     return null;
   }
   const ranks = await validateCastingRanks(actor, spell, ring);
