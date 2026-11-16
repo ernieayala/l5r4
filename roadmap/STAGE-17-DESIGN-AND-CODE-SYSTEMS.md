@@ -401,6 +401,13 @@ Copy wave (C4), each by decision 17:
 - Key renames: `disadvantageCapTooltip` → `changeDisadvantageCap`, `fear.clickToTest` → `fear.rollForSelected` (fear-block.md), `socialResistanceDescription` → `socialResistanceHint`, `equipment.weapons.tnHint` → `tnOnFootHint`, `ui.grants.schoolRankHint` → `ui.check.schoolRankHint`.
 - Left: the stance error keys at depth 6 (two targets fit); `unskilledHint`, `npcInitiativeHint`, `masteryXpHint` with no sibling field (copy judgment); "this actor" in the two permission notifications (naming the actor needs data at about 17 call sites); `transfer.exported` / `importedCount` read "1 items" for one item (no check covers it); 14 `glossary/term-case` hits that read placeholders (`{ring}`, `{skill}`) or typed link syntax as words.
 
+SCSS wave (C3), part 1, each by decision 17:
+
+- Tokens are declared only once a rule reads them (strict `styles/token-used`), so this part declared what it used: the Ring palette and domain colors, shadow colors, `--l5r4-space-4/8/12`, border widths, radii, shadows, `--l5r4-duration-sprite` with its reduced-motion block, and the sprite step counts as SCSS variables.
+- Visible, by the docs: the Air Ring color moves from `#889eb3` to color.md's `#64798d`, its contrast fix (Air Trait boxes, band, rank disc, roll button). Users who ask for reduced motion see the brush sprites jump to their last frame. `-gap-xs` reads `--l5r4-space-4` (0.125rem to 0.25rem). Void Point dots sit 4px apart in place of 2px (space-and-size.md's mapping; the row is 16px wider and stays centered). A few paddings round up by under 2px. Sort header text goes from weight 600 to bold (typography.md T3).
+- Not taken: the wound track cells' 0.1rem block padding would have rounded to 0.25rem and grown each row by about 4px; they read `padding: 0 var(--l5r4-space-4)`, so the 25px min-height sets the row as before (decision 9).
+- Left for part 2, one owner for every SCSS file: the tokens nothing read yet (larger spaces, semantic spacing, type, the remaining color roles, layers, fast duration), which the partition agents could not declare without a reader in the same change.
+
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |

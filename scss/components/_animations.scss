@@ -10,7 +10,7 @@
 .l5r4.pc,
 .l5r4.npc {
   .l5r4-button.-roll {
-    border: 1px solid var(--color-header-background);
+    border: var(--l5r4-border-width-thin) solid var(--color-header-background);
     border-radius: 0;
     overflow: hidden;
     position: relative;
@@ -45,13 +45,14 @@
       width: 100%;
 
       &:hover {
-        animation: mask-reverse-urban $mask-animation-duration steps(29) forwards;
+        animation: mask-reverse-urban var(--l5r4-duration-sprite) steps($urban-sprite-steps)
+          forwards;
       }
     }
   }
 
   .l5r4-rank-control.-track {
-    border: 1px solid var(--color-header-background);
+    border: var(--l5r4-border-width-thin) solid var(--color-header-background);
     height: 64px;
     overflow: hidden;
     position: relative;
@@ -63,7 +64,7 @@
       display: flex;
       flex-direction: column;
       font-weight: bold;
-      gap: 0.25rem;
+      gap: var(--l5r4-space-4);
       height: 100%;
       justify-content: center;
       line-height: 1;
@@ -83,7 +84,7 @@
       display: flex;
       flex-direction: column;
       font-weight: bold;
-      gap: 0.25rem;
+      gap: var(--l5r4-space-4);
       height: 100%;
       justify-content: center;
       mask: url("../assets/animation/nature-sprite.webp");
@@ -92,7 +93,8 @@
       width: 100%;
 
       &:hover {
-        animation: mask-forward-nature $mask-animation-duration steps(22) forwards;
+        animation: mask-forward-nature var(--l5r4-duration-sprite) steps($nature-sprite-steps)
+          forwards;
       }
     }
   }

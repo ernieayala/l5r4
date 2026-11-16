@@ -27,16 +27,16 @@
 
   .l5r4-rules-editor-card {
     border: 1px solid var(--color-border-dark-tertiary);
-    border-radius: 4px;
+    border-radius: var(--l5r4-radius-sm);
     margin: 0;
-    padding: 0.5rem;
+    padding: var(--l5r4-space-8);
 
     legend {
       align-items: center;
       display: flex;
       font-weight: bold;
-      gap: 0.5rem;
-      padding: 0 0.25rem;
+      gap: var(--l5r4-space-8);
+      padding: 0 var(--l5r4-space-4);
     }
   }
 
@@ -57,7 +57,7 @@
   .l5r4-rules-editor-error {
     color: var(--color-level-error);
     font-size: var(--font-size-12);
-    margin: 0 0 0.25rem;
+    margin: 0 0 var(--l5r4-space-4);
   }
 
   .l5r4-rules-editor-field textarea {

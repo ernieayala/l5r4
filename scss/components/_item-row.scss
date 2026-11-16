@@ -9,15 +9,15 @@
   .l5r4-item-row-list {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--l5r4-space-4);
 
     &.l5r4-sort-header {
       background: var(--table-header-bg-color);
-      border: 1px solid var(--table-header-border-color);
+      border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
       border-inline-start: none;
       color: var(--table-header-text-color);
-      font-weight: 600;
-      padding: 0.5rem;
+      font-weight: bold;
+      padding: var(--l5r4-space-8);
 
       .l5r4-item-row {
         padding: 0;
@@ -137,10 +137,10 @@
 
   .l5r4-item-row {
     align-items: center;
-    column-gap: 0.25rem;
+    column-gap: var(--l5r4-space-4);
     display: grid;
     grid-template-rows: min-content min-content;
-    padding: 0 0.5rem;
+    padding: 0 var(--l5r4-space-8);
 
     // Keyboard focus shows the row's controls; :focus-visible keeps a mouse press from leaving them shown
     &:hover,
@@ -169,7 +169,7 @@
 
     select,
     input[type="number"] {
-      border: 1px solid var(--input-border-color);
+      border: var(--l5r4-border-width-thin) solid var(--input-border-color);
       height: 2em;
       min-height: 2em;
     }

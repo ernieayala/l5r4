@@ -1,17 +1,52 @@
 /**
  * Base Variables
- * CSS custom properties and SCSS variables used throughout the system
+ * CSS custom properties and SCSS variables used throughout the system. Each token's name and value come from
+ * docs/design-system/foundations/; a token is declared here once something reads it
  */
 
-// CSS Custom Properties (Ring Colors, sizes, state looks)
+// Tokens that hold literals or read only other system tokens: the same in every theme
 :root {
-  --air-ring-color: 136, 158, 179; // #889EB3
-  --l5r4-color-ring-water: #405984;
-  --l5r4-color-ring-earth: #594839;
-  --l5r4-color-ring-fire: #ab4913;
-  --l5r4-color-ring-void: #7d6862;
+  // Palette primitives (foundations/color.md), read only by the role and domain tokens below
   --l5r4-palette-amber-500: #ab6600;
+  --l5r4-palette-black: #000;
+  --l5r4-palette-blue-600: #405984;
+  --l5r4-palette-brown-700: #594839;
+  --l5r4-palette-mauve-500: #7d6862;
+  --l5r4-palette-rust-600: #ab4913;
+  --l5r4-palette-slate-500: #64798d;
+
+  // Domain and role colors built on the palette (foundations/color.md)
+  --l5r4-color-ring-air: var(--l5r4-palette-slate-500);
+  --l5r4-color-ring-earth: var(--l5r4-palette-brown-700);
+  --l5r4-color-ring-fire: var(--l5r4-palette-rust-600);
+  --l5r4-color-ring-void: var(--l5r4-palette-mauve-500);
+  --l5r4-color-ring-water: var(--l5r4-palette-blue-600);
+  --l5r4-color-shadow: color-mix(in srgb, var(--l5r4-palette-black) 50%, transparent);
+  --l5r4-color-shadow-strong: var(--l5r4-palette-black);
+
+  // Space scale (foundations/space-and-size.md)
+  --l5r4-space-4: 0.25rem;
+  --l5r4-space-8: 0.5rem;
+  --l5r4-space-12: 0.75rem;
+
+  // Size scale (foundations/space-and-size.md)
   --l5r4-size-column-controls: 102px;
+
+  // Frames (foundations/frames.md)
+  --l5r4-border-width-thin: 1px;
+  --l5r4-border-width-thick: 2px;
+  --l5r4-border-width-band: 32px;
+  --l5r4-radius-sm: 4px;
+  --l5r4-radius-round: 50%;
+  --l5r4-shadow-raised: 0 0 2px 1px var(--l5r4-color-shadow);
+  --l5r4-shadow-drop: drop-shadow(0 0 3px var(--l5r4-color-shadow));
+  --l5r4-shadow-text-halo:
+    1px 1px 1px var(--l5r4-color-shadow-strong), -1px -1px 1px var(--l5r4-color-shadow-strong);
+
+  // Motion (foundations/motion.md); every duration is zeroed in the reduced-motion block below
+  --l5r4-duration-sprite: 500ms;
+
+  // States (foundations/states.md)
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
   --l5r4-state-pressed-transform: scale(0.98);
@@ -39,6 +74,14 @@
   --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
+// The one reduced-motion rule (foundations/motion.md rule 3): a transition switches at once, and a sprite animation
+// with `forwards` runs for 0ms and holds its last frame
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --l5r4-duration-sprite: 0ms;
+  }
+}
+
 // SCSS Variables (Asset Paths)
 $air-ring-img: url("../assets/icons/air.webp");
 $water-ring-img: url("../assets/icons/water.webp");
@@ -46,5 +89,6 @@ $earth-ring-img: url("../assets/icons/earth.webp");
 $fire-ring-img: url("../assets/icons/fire.webp");
 $void-ring-img: url("../assets/icons/void.webp");
 
-// Animation Timing
-$mask-animation-duration: 0.5s;
+// Sprite frame counts less one, the N of each sprite's steps(N) (foundations/motion.md)
+$urban-sprite-steps: 29;
+$nature-sprite-steps: 22;

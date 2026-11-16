@@ -24,7 +24,7 @@
       li {
         align-items: center;
         display: flex;
-        gap: 0.5rem;
+        gap: var(--l5r4-space-8);
         justify-content: space-between;
         margin: 0;
 
@@ -36,7 +36,7 @@
           align-items: center;
           display: flex;
           flex: 1;
-          gap: 0.25rem;
+          gap: var(--l5r4-space-4);
         }
       }
     }

@@ -21,9 +21,9 @@
     li {
       border-block-end: 1px solid var(--color-border);
       display: flex;
-      gap: 0.5rem;
+      gap: var(--l5r4-space-8);
       justify-content: space-between;
-      padding: 0.25rem;
+      padding: var(--l5r4-space-4);
 
       &:last-child {
         border-block-end: none;

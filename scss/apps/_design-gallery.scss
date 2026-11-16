@@ -1,15 +1,9 @@
 /**
  * Design Gallery
  * The GM's gallery of foundations, components, and patterns (module/apps/design-gallery.js). Its own layout reads
- * core's variables; each foundation sample reads the design-system token it shows, so a token the stylesheet does
- * not declare yet draws nothing.
+ * the system's space tokens and core's variables; each foundation sample reads the design-system token it shows, so a
+ * token the stylesheet does not declare yet draws nothing.
  */
-
-// The scales the samples draw, as docs/design-system/foundations/ names them
-$type-steps: meta, body, label, title, rank, medallion;
-$space-bars:
-  space-4, space-8, space-12, space-16, space-24, space-gap-tight, space-gap, space-control-block,
-  space-control-inline, space-card, space-section, space-indent;
 
 .l5r4-design-gallery {
   .window-content {
@@ -22,13 +16,13 @@ $space-bars:
   .l5r4-design-gallery-part {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-8);
+    gap: var(--l5r4-space-8);
   }
 
   .l5r4-design-gallery-toolbar {
     align-items: center;
     display: flex;
-    gap: var(--spacer-8);
+    gap: var(--l5r4-space-8);
 
     h2 {
       flex: 1;
@@ -73,20 +67,24 @@ $space-bars:
     }
   }
 
+  // The type steps, as docs/design-system/foundations/typography.md names them
   .l5r4-design-gallery-type {
-    @each $step in $type-steps {
+    @each $step in meta, body, label, title, rank, medallion {
       &.-#{$step} {
         font-size: var(--l5r4-font-size-#{$step});
       }
     }
   }
 
+  // The space steps and semantic spacing, as docs/design-system/foundations/space-and-size.md names them
   .l5r4-design-gallery-bar {
     background: var(--color-text-primary);
     block-size: 0.5rem;
     display: block;
 
-    @each $bar in $space-bars {
+    @each $bar in space-4, space-8, space-12, space-16, space-24, space-gap-tight, space-gap,
+      space-control-block, space-control-inline, space-card, space-section, space-indent
+    {
       &.-#{$bar} {
         inline-size: var(--l5r4-#{$bar}, 0);
       }
@@ -116,12 +114,12 @@ $space-bars:
     }
 
     &.-radius-sm {
-      border-radius: var(--l5r4-radius-sm, 0);
+      border-radius: var(--l5r4-radius-sm);
       border-width: 1px;
     }
 
     &.-radius-round {
-      border-radius: var(--l5r4-radius-round, 0);
+      border-radius: var(--l5r4-radius-round);
       border-width: 1px;
     }
 
@@ -140,7 +138,7 @@ $space-bars:
 
   .l5r4-design-gallery-icons {
     display: grid;
-    gap: var(--spacer-4) var(--spacer-16);
+    gap: var(--l5r4-space-4) var(--spacer-16);
     grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
     list-style: none;
     margin: 0;
@@ -149,7 +147,7 @@ $space-bars:
     li {
       align-items: center;
       display: grid;
-      gap: var(--spacer-8);
+      gap: var(--l5r4-space-8);
       grid-template-columns: 3rem 1fr;
     }
 
@@ -161,7 +159,7 @@ $space-bars:
 
   .l5r4-design-gallery-glyphs {
     display: inline-flex;
-    gap: var(--spacer-4);
+    gap: var(--l5r4-space-4);
     grid-row: span 2;
   }
 
@@ -169,8 +167,8 @@ $space-bars:
     border-block-start: var(--sidebar-separator);
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-8);
-    padding-block-start: var(--spacer-8);
+    gap: var(--l5r4-space-8);
+    padding-block-start: var(--l5r4-space-8);
 
     h3 {
       margin: 0;
@@ -180,7 +178,7 @@ $space-bars:
   .l5r4-design-gallery-facts {
     display: grid;
     font-size: var(--font-size-12);
-    gap: var(--spacer-4) var(--spacer-8);
+    gap: var(--l5r4-space-4) var(--l5r4-space-8);
     grid-template-columns: max-content 1fr;
     margin: 0;
 
@@ -203,12 +201,12 @@ $space-bars:
   .l5r4-design-gallery-sample {
     border: 1px dashed var(--color-border);
     margin: 0;
-    padding: var(--spacer-8);
+    padding: var(--l5r4-space-8);
 
     figcaption {
       font-size: var(--font-size-12);
       font-weight: bold;
-      margin-block-end: var(--spacer-4);
+      margin-block-end: var(--l5r4-space-4);
     }
   }
 }

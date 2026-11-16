@@ -8,7 +8,7 @@
 .l5r4.npc {
   .l5r4-ranks {
     display: grid;
-    gap: 0.2rem;
+    gap: var(--l5r4-space-4);
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
   }
@@ -16,7 +16,7 @@
   // A <button>: `font` and `min-height` undo core's button face, so the value reads as before
   .l5r4-rank-control-value {
     background: var(--table-header-bg-color);
-    border: 1px solid var(--table-header-border-color);
+    border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
     color: var(--table-header-text-color);
     cursor: pointer;
     display: flex;
@@ -24,7 +24,7 @@
     font-size: var(--font-size-16);
     line-height: 1;
     min-height: 0;
-    padding: 0.25rem 0;
+    padding: var(--l5r4-space-4) 0;
     text-align: center;
     transition: all 150ms ease-out;
 
@@ -40,7 +40,7 @@
     span:first-child {
       font-family: var(--font-h4);
       font-size: var(--font-size-18);
-      font-weight: 600;
+      font-weight: bold;
     }
   }
 }

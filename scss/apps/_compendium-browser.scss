@@ -7,7 +7,7 @@
   .window-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--l5r4-space-8);
     overflow: hidden;
   }
 
@@ -15,26 +15,26 @@
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--l5r4-space-8);
   }
 
   .l5r4-compendium-browser-results-part {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--l5r4-space-4);
     min-height: 0;
   }
 
   .l5r4-tabs.-filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: var(--l5r4-space-4);
   }
 
   .l5r4-tabs-tab {
     flex: 0 0 auto;
-    padding: 0.2rem 0.5rem;
+    padding: var(--l5r4-space-4) var(--l5r4-space-8);
     width: auto;
 
     // Selected (states.md): bold with the selected outline in place of core's active ring, so focus shows its own
@@ -53,7 +53,7 @@
     align-items: end;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--l5r4-space-8);
   }
 
   .l5r4-compendium-browser-filter {
@@ -61,7 +61,7 @@
     flex: 0 1 9rem;
     flex-direction: column;
     font-size: var(--font-size-12);
-    gap: 0.15rem;
+    gap: var(--l5r4-space-4);
   }
 
   .l5r4-compendium-browser-search {
@@ -82,7 +82,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--l5r4-space-4);
     list-style: none;
     margin: 0;
     overflow-y: auto;
@@ -93,7 +93,7 @@
     align-items: center;
     cursor: grab;
     display: flex;
-    gap: 0.5rem;
+    gap: var(--l5r4-space-8);
   }
 
   .l5r4-compendium-browser-icon {
@@ -133,7 +133,7 @@
 
   .l5r4-compendium-browser-button {
     flex: 0 0 auto;
-    padding: 0.2rem 0.5rem;
+    padding: var(--l5r4-space-4) var(--l5r4-space-8);
     width: auto;
   }
 

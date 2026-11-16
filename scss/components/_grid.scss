@@ -6,31 +6,31 @@
 .l5r4.pc,
 .l5r4.npc {
   .l5r4-grid {
-    border: 1px solid var(--table-header-border-color);
+    border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
     border-block-end: none;
     display: grid;
     grid-template-columns: 1fr 1fr;
 
     > span,
     > div {
-      border-block-end: 1px solid var(--table-header-border-color);
+      border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
     }
 
     > span {
       align-items: center;
       background: var(--table-header-bg-color);
-      border-inline-end: 1px solid var(--table-header-border-color);
+      border-inline-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
       display: inline-flex;
       font-family: var(--font-h4);
       font-size: var(--font-size-16);
       height: 100%;
-      padding: 0.25rem;
+      padding: var(--l5r4-space-4);
     }
 
     > div {
       align-items: center;
       font-size: var(--font-size-16);
-      padding: 0.25rem;
+      padding: var(--l5r4-space-4);
 
       > input,
       > select {
@@ -39,7 +39,7 @@
       }
 
       > span {
-        padding: 0 0.5rem;
+        padding: 0 var(--l5r4-space-8);
       }
     }
   }

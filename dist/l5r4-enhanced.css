@@ -12,16 +12,38 @@
  */
 /**
  * Base Variables
- * CSS custom properties and SCSS variables used throughout the system
+ * CSS custom properties and SCSS variables used throughout the system. Each token's name and value come from
+ * docs/design-system/foundations/; a token is declared here once something reads it
  */
 :root {
-  --air-ring-color: 136, 158, 179;
-  --l5r4-color-ring-water: #405984;
-  --l5r4-color-ring-earth: #594839;
-  --l5r4-color-ring-fire: #ab4913;
-  --l5r4-color-ring-void: #7d6862;
   --l5r4-palette-amber-500: #ab6600;
+  --l5r4-palette-black: #000;
+  --l5r4-palette-blue-600: #405984;
+  --l5r4-palette-brown-700: #594839;
+  --l5r4-palette-mauve-500: #7d6862;
+  --l5r4-palette-rust-600: #ab4913;
+  --l5r4-palette-slate-500: #64798d;
+  --l5r4-color-ring-air: var(--l5r4-palette-slate-500);
+  --l5r4-color-ring-earth: var(--l5r4-palette-brown-700);
+  --l5r4-color-ring-fire: var(--l5r4-palette-rust-600);
+  --l5r4-color-ring-void: var(--l5r4-palette-mauve-500);
+  --l5r4-color-ring-water: var(--l5r4-palette-blue-600);
+  --l5r4-color-shadow: color-mix(in srgb, var(--l5r4-palette-black) 50%, transparent);
+  --l5r4-color-shadow-strong: var(--l5r4-palette-black);
+  --l5r4-space-4: 0.25rem;
+  --l5r4-space-8: 0.5rem;
+  --l5r4-space-12: 0.75rem;
   --l5r4-size-column-controls: 102px;
+  --l5r4-border-width-thin: 1px;
+  --l5r4-border-width-thick: 2px;
+  --l5r4-border-width-band: 32px;
+  --l5r4-radius-sm: 4px;
+  --l5r4-radius-round: 50%;
+  --l5r4-shadow-raised: 0 0 2px 1px var(--l5r4-color-shadow);
+  --l5r4-shadow-drop: drop-shadow(0 0 3px var(--l5r4-color-shadow));
+  --l5r4-shadow-text-halo:
+    1px 1px 1px var(--l5r4-color-shadow-strong), -1px -1px 1px var(--l5r4-color-shadow-strong);
+  --l5r4-duration-sprite: 500ms;
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
   --l5r4-state-pressed-transform: scale(0.98);
@@ -47,6 +69,11 @@
   --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --l5r4-duration-sprite: 0ms;
+  }
+}
 /**
  * Base Reset
  * System-specific browser resets and base element styling
@@ -57,22 +84,23 @@ body > * {
 
 /**
  * Utility Classes
- * Reusable single-purpose utility classes for spacing and layout
+ * Reusable single-purpose utility classes for spacing and layout. Each gap reads one step of the space scale
+ * (docs/design-system/foundations/space-and-size.md, Gap utilities)
  */
 .-gap-xs {
-  gap: 0.125rem;
+  gap: var(--l5r4-space-4);
 }
 
 .-gap-sm {
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 
 .-gap-md {
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 
 .-gap-lg {
-  gap: 0.75rem;
+  gap: var(--l5r4-space-12);
 }
 
 /**
@@ -86,7 +114,7 @@ body > * {
 .message-content .item h5 {
   border-block-end: var(--sidebar-separator);
   font-size: var(--font-size-16);
-  margin-block-start: 0.5rem;
+  margin-block-start: var(--l5r4-space-8);
 }
 .message-content .item p {
   margin: 0;
@@ -94,7 +122,7 @@ body > * {
 .message-content .l5r4-roll {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .message-content .l5r4-damage-button,
 .message-content .l5r4-check-damage {
@@ -113,7 +141,7 @@ body > * {
 .message-content .l5r4-damage-result {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .message-content .flow-actions {
   flex-direction: column;
@@ -129,12 +157,12 @@ body > * {
 .l5r4-check-dialog .l5r4-check-dialog-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .l5r4-check-dialog .l5r4-check-dialog-modifier {
   align-items: center;
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-check-dialog .l5r4-check-dialog-modifier-label {
   flex: 1;
@@ -212,14 +240,14 @@ body > * {
  * Layouts for item sheets
  */
 .l5r4.item .window-content {
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
   overflow: auto;
 }
 .l5r4.item .tab {
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .l5r4.item .tab .l5r4-item-description-heading {
-  margin: 0.5rem 0 0;
+  margin: var(--l5r4-space-8) 0 0;
 }
 .l5r4.item .l5r4-item-header-fields > h1 {
   margin: 0;
@@ -238,7 +266,7 @@ body > * {
   padding: 0;
 }
 .l5r4.item .l5r4-effect-list .l5r4-effect-list-row {
-  margin-block-start: 0.5rem;
+  margin-block-start: var(--l5r4-space-8);
 }
 .l5r4.item .l5r4-inline-control {
   flex-wrap: nowrap;
@@ -280,7 +308,7 @@ body > * {
   line-height: var(--input-height);
   margin: 0;
   min-width: 20px;
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
   text-align: inherit;
   user-select: text;
   width: calc(100% - 2px);
@@ -303,7 +331,7 @@ body > * {
  */
 .l5r4.pc .l5r4-grid,
 .l5r4.npc .l5r4-grid {
-  border: 1px solid var(--table-header-border-color);
+  border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   border-block-end: none;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -312,24 +340,24 @@ body > * {
 .l5r4.pc .l5r4-grid > div,
 .l5r4.npc .l5r4-grid > span,
 .l5r4.npc .l5r4-grid > div {
-  border-block-end: 1px solid var(--table-header-border-color);
+  border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
 }
 .l5r4.pc .l5r4-grid > span,
 .l5r4.npc .l5r4-grid > span {
   align-items: center;
   background: var(--table-header-bg-color);
-  border-inline-end: 1px solid var(--table-header-border-color);
+  border-inline-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   display: inline-flex;
   font-family: var(--font-h4);
   font-size: var(--font-size-16);
   height: 100%;
-  padding: 0.25rem;
+  padding: var(--l5r4-space-4);
 }
 .l5r4.pc .l5r4-grid > div,
 .l5r4.npc .l5r4-grid > div {
   align-items: center;
   font-size: var(--font-size-16);
-  padding: 0.25rem;
+  padding: var(--l5r4-space-4);
 }
 .l5r4.pc .l5r4-grid > div > input,
 .l5r4.pc .l5r4-grid > div > select,
@@ -340,7 +368,7 @@ body > * {
 }
 .l5r4.pc .l5r4-grid > div > span,
 .l5r4.npc .l5r4-grid > div > span {
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
 }
 
 /**
@@ -354,7 +382,7 @@ body > * {
   color: var(--color-light-1);
   flex-wrap: nowrap;
   margin: 0;
-  padding: 0.5rem;
+  padding: var(--l5r4-space-8);
 }
 .l5r4.pc .l5r4-section-title.is-collapsed ~ .l5r4-item-row-list,
 .l5r4.npc .l5r4-section-title.is-collapsed ~ .l5r4-item-row-list {
@@ -395,7 +423,7 @@ body > * {
 }
 .l5r4.pc .l5r4-section-title .l5r4-spell-slot img,
 .l5r4.npc .l5r4-section-title .l5r4-spell-slot img {
-  border-radius: 50%;
+  border-radius: var(--l5r4-radius-round);
   height: 32px;
   width: 32px;
 }
@@ -404,7 +432,7 @@ body > * {
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
   border: none;
-  border-radius: 50%;
+  border-radius: var(--l5r4-radius-round);
   cursor: var(--conditional-cursor);
   display: inline-flex;
   font: inherit;
@@ -414,14 +442,14 @@ body > * {
   min-height: 0;
   padding: 0;
   position: absolute;
-  text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;
+  text-shadow: var(--l5r4-shadow-text-halo);
   top: 0;
   transition: none;
   width: 32px;
 }
 .l5r4.pc .l5r4-section-body,
 .l5r4.npc .l5r4-section-body {
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
 }
 .l5r4.pc .title,
 .l5r4.pc .l5r4-section-heading,
@@ -454,17 +482,17 @@ body > * {
 .l5r4-xp-manager .l5r4-item-row-list {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .l5r4.pc .l5r4-item-row-list.l5r4-sort-header,
 .l5r4.npc .l5r4-item-row-list.l5r4-sort-header,
 .l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header {
   background: var(--table-header-bg-color);
-  border: 1px solid var(--table-header-border-color);
+  border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   border-inline-start: none;
   color: var(--table-header-text-color);
-  font-weight: 600;
-  padding: 0.5rem;
+  font-weight: bold;
+  padding: var(--l5r4-space-8);
 }
 .l5r4.pc .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row,
 .l5r4.npc .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row,
@@ -575,10 +603,10 @@ body > * {
 .l5r4.npc .l5r4-item-row,
 .l5r4-xp-manager .l5r4-item-row {
   align-items: center;
-  column-gap: 0.25rem;
+  column-gap: var(--l5r4-space-4);
   display: grid;
   grid-template-rows: min-content min-content;
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
 }
 .l5r4.pc .l5r4-item-row:hover .inline-control, .l5r4.pc .l5r4-item-row:has(:focus-visible) .inline-control,
 .l5r4.npc .l5r4-item-row:hover .inline-control,
@@ -609,7 +637,7 @@ body > * {
 .l5r4.npc .l5r4-item-row input[type=number],
 .l5r4-xp-manager .l5r4-item-row select,
 .l5r4-xp-manager .l5r4-item-row input[type=number] {
-  border: 1px solid var(--input-border-color);
+  border: var(--l5r4-border-width-thin) solid var(--input-border-color);
   height: 2em;
   min-height: 2em;
 }
@@ -665,7 +693,7 @@ body > * {
  */
 .l5r4.pc .l5r4-button.-roll,
 .l5r4.npc .l5r4-button.-roll {
-  border: 1px solid var(--color-header-background);
+  border: var(--l5r4-border-width-thin) solid var(--color-header-background);
   border-radius: 0;
   overflow: hidden;
   position: relative;
@@ -701,11 +729,11 @@ body > * {
 }
 .l5r4.pc .l5r4-button.-roll .l5r4-button-face:hover,
 .l5r4.npc .l5r4-button.-roll .l5r4-button-face:hover {
-  animation: mask-reverse-urban 0.5s steps(29) forwards;
+  animation: mask-reverse-urban var(--l5r4-duration-sprite) steps(29) forwards;
 }
 .l5r4.pc .l5r4-rank-control.-track,
 .l5r4.npc .l5r4-rank-control.-track {
-  border: 1px solid var(--color-header-background);
+  border: var(--l5r4-border-width-thin) solid var(--color-header-background);
   height: 64px;
   overflow: hidden;
   position: relative;
@@ -718,7 +746,7 @@ body > * {
   display: flex;
   flex-direction: column;
   font-weight: bold;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
   height: 100%;
   justify-content: center;
   line-height: 1;
@@ -738,7 +766,7 @@ body > * {
   display: flex;
   flex-direction: column;
   font-weight: bold;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
   height: 100%;
   justify-content: center;
   mask: url("../assets/animation/nature-sprite.webp");
@@ -748,7 +776,7 @@ body > * {
 }
 .l5r4.pc .l5r4-rank-control.-track .l5r4-rank-control-value:hover,
 .l5r4.npc .l5r4-rank-control.-track .l5r4-rank-control-value:hover {
-  animation: mask-forward-nature 0.5s steps(22) forwards;
+  animation: mask-forward-nature var(--l5r4-duration-sprite) steps(22) forwards;
 }
 
 @keyframes mask-forward-urban {
@@ -806,16 +834,16 @@ body > * {
 }
 .l5r4-rules-editor .l5r4-rules-editor-card {
   border: 1px solid var(--color-border-dark-tertiary);
-  border-radius: 4px;
+  border-radius: var(--l5r4-radius-sm);
   margin: 0;
-  padding: 0.5rem;
+  padding: var(--l5r4-space-8);
 }
 .l5r4-rules-editor .l5r4-rules-editor-card legend {
   align-items: center;
   display: flex;
   font-weight: bold;
-  gap: 0.5rem;
-  padding: 0 0.25rem;
+  gap: var(--l5r4-space-8);
+  padding: 0 var(--l5r4-space-4);
 }
 .l5r4-rules-editor .l5r4-rules-editor-delete {
   background: none;
@@ -832,7 +860,7 @@ body > * {
 .l5r4-rules-editor .l5r4-rules-editor-error {
   color: var(--color-level-error);
   font-size: var(--font-size-12);
-  margin: 0 0 0.25rem;
+  margin: 0 0 var(--l5r4-space-4);
 }
 .l5r4-rules-editor .l5r4-rules-editor-field textarea {
   font-family: var(--font-monospace);
@@ -854,14 +882,14 @@ body > * {
  */
 .l5r4-ledger-dialog .l5r4-ledger-dialog-entries {
   font-size: var(--font-size-12);
-  margin: 0.5rem 0 0;
+  margin: var(--l5r4-space-8) 0 0;
   max-height: 12rem;
   overflow-y: auto;
   padding-inline-start: 1.25rem;
 }
 .l5r4-ledger-dialog .l5r4-ledger-dialog-entries li {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-ledger-dialog .l5r4-ledger-dialog-entries .l5r4-ledger-dialog-points {
   font-weight: bold;
@@ -871,12 +899,12 @@ body > * {
  * Inline Control
  * Small controls inside a row: the kata or kiho activation toggle
  */
-.l5r4 .l5r4-inline-control-activate.active {
+.l5r4-inline-control-activate.active {
   box-shadow: none;
   color: var(--l5r4-color-accent);
   outline: none;
 }
-.l5r4 .l5r4-inline-control-activate.active:focus-visible {
+.l5r4-inline-control-activate.active:focus-visible {
   box-shadow: var(--l5r4-state-focus-shadow);
   outline: var(--l5r4-state-focus-outline);
 }
@@ -886,12 +914,12 @@ body > * {
  * The effect panel window (module/apps/effect-panel.js)
  */
 .l5r4-effect-panel .l5r4-effect-panel-actor {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--l5r4-space-8);
 }
 .l5r4-effect-panel .l5r4-effect-panel-list {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -899,7 +927,7 @@ body > * {
 .l5r4-effect-panel .l5r4-effect-panel-row {
   align-items: center;
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-effect-panel .l5r4-effect-panel-icon {
   border: none;
@@ -923,7 +951,7 @@ body > * {
 .l5r4-effect-panel .l5r4-effect-panel-button {
   flex: 0 0 auto;
   line-height: 1;
-  padding: 0.25rem 0.4rem;
+  padding: var(--l5r4-space-4) var(--l5r4-space-8);
   width: auto;
 }
 .l5r4-effect-panel .l5r4-effect-panel-empty {
@@ -937,15 +965,15 @@ body > * {
  */
 .l5r4-inline-link,
 .l5r4-inline-link-request {
-  border: 1px solid var(--color-border-light-tertiary);
-  border-radius: 3px;
+  border: var(--l5r4-border-width-thin) solid var(--color-border-light-tertiary);
+  border-radius: var(--l5r4-radius-sm);
   cursor: pointer;
-  padding: 0 0.25rem;
+  padding: 0 var(--l5r4-space-4);
   white-space: nowrap;
 }
 
 .l5r4-inline-link-request {
-  margin-inline-start: 0.15rem;
+  margin-inline-start: var(--l5r4-space-4);
 }
 
 .l5r4-inline-link.-broken {
@@ -971,30 +999,30 @@ body > * {
 .l5r4-compendium-browser .window-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
   overflow: hidden;
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-controls {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-results-part {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
   min-height: 0;
 }
 .l5r4-compendium-browser .l5r4-tabs.-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 .l5r4-compendium-browser .l5r4-tabs-tab {
   flex: 0 0 auto;
-  padding: 0.2rem 0.5rem;
+  padding: var(--l5r4-space-4) var(--l5r4-space-8);
   width: auto;
 }
 .l5r4-compendium-browser .l5r4-tabs-tab.active {
@@ -1009,14 +1037,14 @@ body > * {
   align-items: end;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-filter {
   display: flex;
   flex: 0 1 9rem;
   flex-direction: column;
   font-size: var(--font-size-12);
-  gap: 0.15rem;
+  gap: var(--l5r4-space-4);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-search {
   flex-basis: 14rem;
@@ -1033,7 +1061,7 @@ body > * {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
   list-style: none;
   margin: 0;
   overflow-y: auto;
@@ -1043,7 +1071,7 @@ body > * {
   align-items: center;
   cursor: grab;
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-icon {
   border: none;
@@ -1077,7 +1105,7 @@ body > * {
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-button {
   flex: 0 0 auto;
-  padding: 0.2rem 0.5rem;
+  padding: var(--l5r4-space-4) var(--l5r4-space-8);
   width: auto;
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-empty {
@@ -1091,18 +1119,18 @@ body > * {
 .l5r4-citation {
   font-size: var(--font-size-12);
   font-style: italic;
-  margin: 0.15rem 0 0;
+  margin: var(--l5r4-space-4) 0 0;
 }
 
 .l5r4-rule-lines {
-  margin: 0.25rem 0 0.5rem;
+  margin: var(--l5r4-space-4) 0 var(--l5r4-space-8);
   padding-inline-start: 1.25rem;
 }
 
 .l5r4-item-summary {
-  border-top: 1px solid var(--color-border-light-tertiary);
-  margin-top: 0.25rem;
-  padding-top: 0.25rem;
+  border-block-start: var(--l5r4-border-width-thin) solid var(--color-border-light-tertiary);
+  margin-block-start: var(--l5r4-space-4);
+  padding-block-start: var(--l5r4-space-4);
 }
 
 /**
@@ -1182,13 +1210,13 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-ring-rank,
 .l5r4.npc .traits-rings .l5r4-ring-rank {
   background-color: var(--content-link-background);
-  border: 1px solid var(--table-header-border-color);
-  border-radius: 50%;
+  border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
+  border-radius: var(--l5r4-radius-round);
   color: var(--color-text-primary);
   display: grid;
   font-family: var(--font-h1);
   font-size: 29px;
-  font-weight: 600;
+  font-weight: bold;
   height: 32px;
   margin: 0;
   place-content: center center;
@@ -1202,8 +1230,8 @@ body > * {
   background-image: var(--l5r4-image-ring-rank-backdrop);
   background-position: center;
   background-size: cover;
-  border: 2px solid transparent;
-  border-radius: 50%;
+  border: var(--l5r4-border-width-thick) solid transparent;
+  border-radius: var(--l5r4-radius-round);
   content: "";
   inset: -4px;
   position: absolute;
@@ -1220,8 +1248,8 @@ body > * {
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-air span,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-air span {
-  background-color: rgb(var(--air-ring-color), 0.1);
-  border-color: rgb(var(--air-ring-color));
+  background-color: color-mix(in srgb, var(--l5r4-color-ring-air) 10%, transparent);
+  border-color: var(--l5r4-color-ring-air);
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-water span,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-water span {
@@ -1262,7 +1290,7 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void .l5r4-rank-control-arrow.-down {
   align-items: center;
   background-color: inherit;
-  border: 1px solid black;
+  border: var(--l5r4-border-width-thin) solid;
   border-color: inherit;
   border-radius: 0;
   color: inherit;
@@ -1292,9 +1320,9 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-ring-rank span,
 .l5r4.npc .traits-rings .l5r4-ring-rank span {
   align-items: center;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.5);
+  border: var(--l5r4-border-width-thick) solid transparent;
+  border-radius: var(--l5r4-radius-round);
+  box-shadow: var(--l5r4-shadow-raised);
   display: flex;
   inset: -1px;
   justify-content: center;
@@ -1321,8 +1349,8 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-roll img,
 .l5r4.npc .traits-rings .ring-roll img {
-  border-radius: 50%;
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+  border-radius: var(--l5r4-radius-round);
+  filter: var(--l5r4-shadow-drop);
   height: 96px;
   position: relative;
   transition: all 150ms ease-out;
@@ -1334,7 +1362,7 @@ body > * {
 }
 .l5r4.pc .traits-rings .l5r4-void-points,
 .l5r4.npc .traits-rings .l5r4-void-points {
-  column-gap: 0.5rem;
+  column-gap: var(--l5r4-space-8);
 }
 .l5r4.pc .traits-rings .l5r4-trait,
 .l5r4.pc .traits-rings .l5r4-void-points,
@@ -1370,7 +1398,7 @@ body > * {
   font-weight: bold;
   height: 100%;
   justify-content: center;
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
   pointer-events: none;
   position: absolute;
   text-align: center;
@@ -1381,7 +1409,6 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face {
   align-items: center;
-  background: #000;
   border: none;
   border-radius: 0;
   color: #fff;
@@ -1395,14 +1422,14 @@ body > * {
   mask-position: 100% 0;
   mask-size: 3000% 100%;
   min-height: 0;
-  padding: 0 0.5rem;
+  padding: 0 var(--l5r4-space-8);
   width: 100%;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover {
-  animation: mask-reverse-urban 0.5s steps(29) forwards;
+  animation: mask-reverse-urban var(--l5r4-duration-sprite) steps(29) forwards;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait,
@@ -1413,7 +1440,7 @@ body > * {
   display: flex;
   font-family: var(--font-h3);
   font-size: 22px;
-  font-weight: 600;
+  font-weight: bold;
   grid-area: rank;
   height: 28px;
   justify-content: center;
@@ -1465,7 +1492,7 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait .l5r4-rank-control-arrow.-down {
   align-items: center;
   background-color: inherit;
-  border: 1px solid black;
+  border: var(--l5r4-border-width-thin) solid;
   border-color: inherit;
   border-radius: 0;
   color: inherit;
@@ -1535,27 +1562,27 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-perception,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness {
-  margin-block-start: 8px;
+  margin-block-start: var(--l5r4-space-8);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina,
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-stamina,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower {
-  border-inline-end: 32px solid var(--l5r4-color-ring-earth);
+  border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-earth);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-rank-control.-trait,
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-rank-control.-trait {
   background-color: color-mix(in srgb, var(--l5r4-color-ring-earth) 90%, transparent);
-  border: 1px solid var(--l5r4-color-ring-earth);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-earth);
   color: #fff;
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll,
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll {
-  border: 1px solid var(--l5r4-color-ring-earth);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-earth);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll .l5r4-button-face,
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll .l5r4-button-face,
@@ -1567,21 +1594,21 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-trait.-water.-perception,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-strength,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-perception {
-  border-inline-end: 32px solid var(--l5r4-color-ring-water);
+  border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-water);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-water.-strength .l5r4-rank-control.-trait,
 .l5r4.pc .traits-rings .l5r4-trait.-water.-perception .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-strength .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-perception .l5r4-rank-control.-trait {
   background-color: color-mix(in srgb, var(--l5r4-color-ring-water) 90%, transparent);
-  border: 1px solid var(--l5r4-color-ring-water);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-water);
   color: #fff;
 }
 .l5r4.pc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll,
 .l5r4.pc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll {
-  border: 1px solid var(--l5r4-color-ring-water);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-water);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll .l5r4-button-face,
 .l5r4.pc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll .l5r4-button-face,
@@ -1593,21 +1620,21 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-agility,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence {
-  border-inline-start: 32px solid var(--l5r4-color-ring-fire);
+  border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-fire);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-agility .l5r4-rank-control.-trait,
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-agility .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-rank-control.-trait {
   background-color: color-mix(in srgb, var(--l5r4-color-ring-fire) 90%, transparent);
-  border: 1px solid var(--l5r4-color-ring-fire);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-fire);
   color: #fff;
 }
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll,
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll {
-  border: 1px solid var(--l5r4-color-ring-fire);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-fire);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll .l5r4-button-face,
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll .l5r4-button-face,
@@ -1619,27 +1646,27 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-trait.-air.-awareness,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness {
-  border-inline-start: 32px solid rgb(var(--air-ring-color));
+  border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-air);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-rank-control.-trait,
 .l5r4.pc .traits-rings .l5r4-trait.-air.-awareness .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-rank-control.-trait,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-rank-control.-trait {
-  background-color: rgb(var(--air-ring-color), 0.9);
-  border: 1px solid rgb(var(--air-ring-color));
+  background-color: color-mix(in srgb, var(--l5r4-color-ring-air) 90%, transparent);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-air);
   color: #fff;
 }
 .l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll,
 .l5r4.pc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll {
-  border: 1px solid rgb(var(--air-ring-color));
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-air);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll .l5r4-button-face,
 .l5r4.pc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll .l5r4-button-face,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll .l5r4-button-face,
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll .l5r4-button-face {
-  background: rgb(var(--air-ring-color));
+  background: var(--l5r4-color-ring-air);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower,
 .l5r4.pc .traits-rings .l5r4-trait.-water.-perception,
@@ -1732,7 +1759,7 @@ body > * {
   grid-column: 6/7;
   grid-row: 5/6;
   justify-self: end;
-  margin-inline-end: -12px;
+  margin-inline-end: calc(-1 * var(--l5r4-space-12));
 }
 .l5r4.pc .traits-rings .l5r4-trait.-water.-strength,
 .l5r4.npc .traits-rings .l5r4-trait.-water.-strength {
@@ -1764,7 +1791,7 @@ body > * {
   grid-column: 11/12;
   grid-row: 5/6;
   justify-self: start;
-  margin-inline-start: -12px;
+  margin-inline-start: calc(-1 * var(--l5r4-space-12));
 }
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-agility,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-agility {
@@ -1787,7 +1814,7 @@ body > * {
   align-self: start;
   grid-column: 8/10;
   grid-row: 6/7;
-  margin-block-start: -12px;
+  margin-block-start: calc(-1 * var(--l5r4-space-12));
   text-align: center;
 }
 .l5r4.pc .traits-rings .l5r4-ring.-void,
@@ -1805,10 +1832,10 @@ body > * {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--l5r4-space-4);
   grid-column: 1/18;
   grid-row: 10/11;
-  margin-block-start: 4px;
+  margin-block-start: var(--l5r4-space-4);
   width: max-content;
 }
 .l5r4.pc .traits-rings .l5r4-void-points-label,
@@ -1823,15 +1850,15 @@ body > * {
   border-radius: 0;
   cursor: pointer;
   display: flex;
-  gap: 2px;
+  gap: var(--l5r4-space-4);
   height: auto;
   min-height: 0;
   padding: 0;
 }
 .l5r4.pc .traits-rings .void-dot,
 .l5r4.npc .traits-rings .void-dot {
-  border: 2px solid #666;
-  border-radius: 50%;
+  border: var(--l5r4-border-width-thick) solid #666;
+  border-radius: var(--l5r4-radius-round);
   height: 12px;
   pointer-events: auto;
   width: 12px;
@@ -1858,14 +1885,14 @@ body > * {
 .l5r4.pc .l5r4-ranks,
 .l5r4.npc .l5r4-ranks {
   display: grid;
-  gap: 0.2rem;
+  gap: var(--l5r4-space-4);
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
 }
 .l5r4.pc .l5r4-rank-control-value,
 .l5r4.npc .l5r4-rank-control-value {
   background: var(--table-header-bg-color);
-  border: 1px solid var(--table-header-border-color);
+  border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   color: var(--table-header-text-color);
   cursor: pointer;
   display: flex;
@@ -1873,7 +1900,7 @@ body > * {
   font-size: var(--font-size-16);
   line-height: 1;
   min-height: 0;
-  padding: 0.25rem 0;
+  padding: var(--l5r4-space-4) 0;
   text-align: center;
   transition: all 150ms ease-out;
 }
@@ -1890,7 +1917,7 @@ body > * {
 .l5r4.npc .l5r4-rank-control-value span:first-child {
   font-family: var(--font-h4);
   font-size: var(--font-size-18);
-  font-weight: 600;
+  font-weight: bold;
 }
 
 /**
@@ -1911,14 +1938,14 @@ body > * {
 .l5r4-wound-config .l5r4-grid .l5r4-wound-track > span {
   align-items: center;
   background: var(--table-header-bg-color);
-  border-block-end: 1px solid var(--table-header-border-color);
+  border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   border-inline-end: none;
   display: inline-flex;
   font-family: var(--font-h4);
   font-size: var(--font-size-16);
   height: 100%;
   justify-content: center;
-  padding: 0.25rem;
+  padding: var(--l5r4-space-4);
 }
 .l5r4.pc .l5r4-grid .l5r4-wound-track > span:first-child,
 .l5r4.npc .l5r4-grid .l5r4-wound-track > span:first-child,
@@ -1929,11 +1956,11 @@ body > * {
 .l5r4.npc .l5r4-grid .l5r4-wound-track > div,
 .l5r4-wound-config .l5r4-grid .l5r4-wound-track > div {
   align-items: center;
-  border-block-end: 1px solid var(--table-header-border-color);
+  border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
   display: inline-flex;
   justify-content: center;
   min-height: 25px;
-  padding: 0.1rem 0.25rem;
+  padding: 0 var(--l5r4-space-4);
 }
 .l5r4.pc .l5r4-grid .l5r4-wound-track > div:nth-child(4n+1),
 .l5r4.npc .l5r4-grid .l5r4-wound-track > div:nth-child(4n+1),
@@ -1975,9 +2002,9 @@ body > * {
 .l5r4-xp-manager .l5r4-xp-manager-breakdown li {
   border-block-end: 1px solid var(--color-border);
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
   justify-content: space-between;
-  padding: 0.25rem;
+  padding: var(--l5r4-space-4);
 }
 .l5r4-xp-manager .l5r4-xp-manager-breakdown li:last-child {
   border-block-end: none;
@@ -2033,7 +2060,7 @@ body > * {
 .l5r4-emphasis-manager-body .l5r4-emphasis-manager-list ul li {
   align-items: center;
   display: flex;
-  gap: 0.5rem;
+  gap: var(--l5r4-space-8);
   justify-content: space-between;
   margin: 0;
 }
@@ -2044,14 +2071,14 @@ body > * {
   align-items: center;
   display: flex;
   flex: 1;
-  gap: 0.25rem;
+  gap: var(--l5r4-space-4);
 }
 
 /**
  * Design Gallery
  * The GM's gallery of foundations, components, and patterns (module/apps/design-gallery.js). Its own layout reads
- * core's variables; each foundation sample reads the design-system token it shows, so a token the stylesheet does
- * not declare yet draws nothing.
+ * the system's space tokens and core's variables; each foundation sample reads the design-system token it shows, so a
+ * token the stylesheet does not declare yet draws nothing.
  */
 .l5r4-design-gallery .window-content {
   display: flex;
@@ -2062,12 +2089,12 @@ body > * {
 .l5r4-design-gallery .l5r4-design-gallery-part {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
+  gap: var(--l5r4-space-8);
 }
 .l5r4-design-gallery .l5r4-design-gallery-toolbar {
   align-items: center;
   display: flex;
-  gap: var(--spacer-8);
+  gap: var(--l5r4-space-8);
 }
 .l5r4-design-gallery .l5r4-design-gallery-toolbar h2 {
   flex: 1;
@@ -2182,11 +2209,11 @@ body > * {
   border-inline-start-width: var(--l5r4-border-width-band, 0);
 }
 .l5r4-design-gallery .l5r4-design-gallery-frame.-radius-sm {
-  border-radius: var(--l5r4-radius-sm, 0);
+  border-radius: var(--l5r4-radius-sm);
   border-width: 1px;
 }
 .l5r4-design-gallery .l5r4-design-gallery-frame.-radius-round {
-  border-radius: var(--l5r4-radius-round, 0);
+  border-radius: var(--l5r4-radius-round);
   border-width: 1px;
 }
 .l5r4-design-gallery .l5r4-design-gallery-frame.-shadow-raised {
@@ -2200,7 +2227,7 @@ body > * {
 }
 .l5r4-design-gallery .l5r4-design-gallery-icons {
   display: grid;
-  gap: var(--spacer-4) var(--spacer-16);
+  gap: var(--l5r4-space-4) var(--spacer-16);
   grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
   list-style: none;
   margin: 0;
@@ -2209,7 +2236,7 @@ body > * {
 .l5r4-design-gallery .l5r4-design-gallery-icons li {
   align-items: center;
   display: grid;
-  gap: var(--spacer-8);
+  gap: var(--l5r4-space-8);
   grid-template-columns: 3rem 1fr;
 }
 .l5r4-design-gallery .l5r4-design-gallery-icons code {
@@ -2218,15 +2245,15 @@ body > * {
 }
 .l5r4-design-gallery .l5r4-design-gallery-glyphs {
   display: inline-flex;
-  gap: var(--spacer-4);
+  gap: var(--l5r4-space-4);
   grid-row: span 2;
 }
 .l5r4-design-gallery .l5r4-design-gallery-entry {
   border-block-start: var(--sidebar-separator);
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
-  padding-block-start: var(--spacer-8);
+  gap: var(--l5r4-space-8);
+  padding-block-start: var(--l5r4-space-8);
 }
 .l5r4-design-gallery .l5r4-design-gallery-entry h3 {
   margin: 0;
@@ -2234,7 +2261,7 @@ body > * {
 .l5r4-design-gallery .l5r4-design-gallery-facts {
   display: grid;
   font-size: var(--font-size-12);
-  gap: var(--spacer-4) var(--spacer-8);
+  gap: var(--l5r4-space-4) var(--l5r4-space-8);
   grid-template-columns: max-content 1fr;
   margin: 0;
 }
@@ -2253,12 +2280,12 @@ body > * {
 .l5r4-design-gallery .l5r4-design-gallery-sample {
   border: 1px dashed var(--color-border);
   margin: 0;
-  padding: var(--spacer-8);
+  padding: var(--l5r4-space-8);
 }
 .l5r4-design-gallery .l5r4-design-gallery-sample figcaption {
   font-size: var(--font-size-12);
   font-weight: bold;
-  margin-block-end: var(--spacer-4);
+  margin-block-end: var(--l5r4-space-4);
 }
 
 /**
