@@ -29,32 +29,12 @@ const bioTypes = new Set(["clan", "family", "school"]);
  */
 export async function preparePurchase(actor, data) {
   const rules = Array.isArray(data.system?.rules) ? data.system.rules : [];
-  const unmet = getUnmetPrerequisites(rules, actor.rollOptions);
-  if (unmet.length) {
-    const list = unmet.map(p => p.label || JSON.stringify(p.requires)).join("; ");
-    if (!game.user.isGM) {
-      ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
-      return null;
-    }
-    const bypass = await foundry.applications.api.DialogV2.confirm({
-      window: { title: T("l5r4.ui.purchase.unmetTitle") },
-      content: await R(DIALOG_TEMPLATES.confirm, {
-        question: F("l5r4.ui.purchase.unmet", { name: data.name, list }),
-        consequence: T("l5r4.ui.purchase.addAnyway")
-      })
-    });
-    if (!bypass) {
-      return null;
-    }
+  if (!(await canAddItem(actor, data, rules))) {
+    return null;
   }
-
-  const selections = {};
-  for (const choice of openChoices(rules)) {
-    const selection = await askChoice(data.name, choice);
-    if (selection === null) {
-      return null;
-    }
-    selections[choice.index] = selection;
+  const selections = await askOpenChoices(data.name, rules);
+  if (!selections) {
+    return null;
   }
   if (!Object.keys(selections).length) {
     return data;
@@ -102,6 +82,54 @@ export async function createPurchasedItem(actor, source) {
     await actor.update(buildBioLinks(data.type, created));
   }
   return created;
+}
+
+/**
+ * Whether an item may be added to the actor: its prerequisites are met, or a GM adds it anyway when asked. A player
+ * whose character does not meet them is told which.
+ * @param {Actor} actor
+ * @param {object} data - The item's source data
+ * @param {object[]} rules - The item's rules
+ * @returns {Promise<boolean>}
+ */
+async function canAddItem(actor, data, rules) {
+  const unmet = getUnmetPrerequisites(rules, actor.rollOptions);
+  if (!unmet.length) {
+    return true;
+  }
+  const list = unmet.map(p => p.label || JSON.stringify(p.requires)).join("; ");
+  if (!game.user.isGM) {
+    ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
+    return false;
+  }
+  const bypass = await foundry.applications.api.DialogV2.confirm({
+    window: { title: T("l5r4.ui.purchase.unmetTitle") },
+    content: await R(DIALOG_TEMPLATES.confirm, {
+      question: F("l5r4.ui.purchase.unmet", { name: data.name, list }),
+      consequence: T("l5r4.ui.purchase.addAnyway")
+    }),
+    yes: { label: T("l5r4.ui.purchase.bypass") },
+    no: { label: T("l5r4.ui.common.cancel") }
+  });
+  return Boolean(bypass);
+}
+
+/**
+ * Ask each open choice of an item's rules, in order.
+ * @param {string} itemName
+ * @param {object[]} rules - The item's rules
+ * @returns {Promise<Record<number, string>|null>} The selections by rule index, or null when the buyer cancels one
+ */
+async function askOpenChoices(itemName, rules) {
+  const selections = {};
+  for (const choice of openChoices(rules)) {
+    const selection = await askChoice(itemName, choice);
+    if (selection === null) {
+      return null;
+    }
+    selections[choice.index] = selection;
+  }
+  return selections;
 }
 
 /**
@@ -162,7 +190,7 @@ async function askChoice(itemName, choice) {
       options: options.map(({ value, label }) => ({ value, label }))
     }),
     ok: {
-      label: T("l5r4.ui.common.ok"),
+      label: T("l5r4.ui.purchase.makeChoice"),
       callback: (_event, button) => button.form.elements.selection.value || null
     },
     rejectClose: false,

@@ -52,6 +52,24 @@ export class ItemCrudHandler {
   }
 
   /**
+   * Asks whether to remove an item.
+   *
+   * @param {Item} item - The item to remove
+   * @returns {Promise<boolean|null>} Whether the user chose Remove; null when the dialog is closed
+   */
+  static async #askItemRemoval(item) {
+    // No is the default button [src: client/applications/api/dialog.mjs:346-354]; closing the dialog resolves null
+    return foundry.applications.api.DialogV2.confirm({
+      window: { title: "l5r4.ui.dialogs.deleteItem.title" },
+      content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
+        question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name })
+      }),
+      yes: { label: "l5r4.ui.common.delete" },
+      no: { label: "l5r4.ui.common.cancel" }
+    });
+  }
+
+  /**
    * Creates a new embedded Item on the actor.
    * Prompts user for item type and name via unified dialog.
    * Auto-detects preferred item type based on the clicked section's data-scope attribute.
@@ -71,7 +89,7 @@ export class ItemCrudHandler {
 
     const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
 
-    if (result.cancelled) {
+    if (!result) {
       return [];
     }
 
@@ -172,18 +190,8 @@ export class ItemCrudHandler {
     }
 
     // Skip confirmation if Shift key is held
-    if (!event.shiftKey) {
-      // No is the default button [src: client/applications/api/dialog.mjs:346-354]; closing the dialog resolves null
-      const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: "l5r4.ui.dialogs.deleteItem.title" },
-        content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
-          question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name })
-        })
-      });
-
-      if (!confirmed) {
-        return;
-      }
+    if (!event.shiftKey && !(await this.#askItemRemoval(item))) {
+      return;
     }
 
     try {
@@ -303,27 +311,7 @@ export class ItemCrudHandler {
       return;
     }
 
-    let value = el.value;
-    switch (el.dataset.dtype) {
-      case "Integer":
-        value = toInt(value, 0);
-        break;
-      case "Number":
-        value = Number.isFinite(+value) ? +value : 0;
-        break;
-      case "Boolean": {
-        // For checkboxes, use checked property instead of value
-        if (el.type === "checkbox") {
-          value = el.checked;
-        } else {
-          const s = String(value).toLowerCase();
-          value = s === "true" || s === "1" || s === "on" || s === "yes";
-        }
-        break;
-      }
-      default:
-        value = String(value ?? "");
-    }
+    const value = this.#toFieldValue(el);
 
     // Update the item
     const item = context.actor.items.get(id);
@@ -338,6 +326,46 @@ export class ItemCrudHandler {
       el.checked = value;
     }
 
+    await this.#renderFieldChange(context, { item, field, row });
+  }
+
+  /**
+   * An inline field's value coerced by its `data-dtype`: Integer, Number, Boolean (a checkbox's checked state, or a
+   * truthy word), else text.
+   * @param {HTMLInputElement} el - The edited input
+   * @returns {number|boolean|string}
+   */
+  static #toFieldValue(el) {
+    const value = el.value;
+    switch (el.dataset.dtype) {
+      case "Integer":
+        return toInt(value, 0);
+      case "Number":
+        return Number.isFinite(+value) ? +value : 0;
+      case "Boolean": {
+        // For checkboxes, use checked property instead of value
+        if (el.type === "checkbox") {
+          return el.checked;
+        }
+        const s = String(value).toLowerCase();
+        return s === "true" || s === "1" || s === "on" || s === "yes";
+      }
+      default:
+        return String(value ?? "");
+    }
+  }
+
+  /**
+   * Update the sheet parts an inline edit changes, without re-rendering the sheet for a skill's Trait: its roll
+   * buttons show the new pool. An equipped change re-renders, since the Armor TN shows in the header.
+   * @param {object} context - Handler context from actor sheet
+   * @param {object} edit
+   * @param {Item} edit.item - The edited item
+   * @param {string} edit.field - The edited field path
+   * @param {HTMLElement} edit.row - The item's row
+   * @returns {Promise<void>}
+   */
+  static async #renderFieldChange(context, { item, field, row }) {
     // Update affected DOM elements without re-rendering entire sheet
     if (field === "system.trait" && item.type === "skill") {
       // Trait change: update roll formula buttons for this skill

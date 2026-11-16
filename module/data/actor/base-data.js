@@ -24,7 +24,7 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
 
   /** @override */
   static defineSchema() {
-    const { ObjectField, SchemaField } = foundry.data.fields;
+    const { SchemaField } = foundry.data.fields;
     return {
       traits: new SchemaField(Object.fromEntries(TRAIT_KEYS.map(key => [key, numberField(2)]))),
       rings: new SchemaField({
@@ -48,13 +48,7 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
       }),
       shadowTaint: rankPointsField(0),
       notes: htmlField(),
-      // Targets for Active Effect changes with free-form keys, e.g. system.bonuses.skill.kenjutsu.roll
-      // (module/services/dice/effects/bonus-applicator.js).
-      bonuses: new SchemaField({
-        skill: new ObjectField(),
-        trait: new ObjectField(),
-        ring: new ObjectField()
-      })
+      bonuses: bonusesField()
     };
   }
 
@@ -76,4 +70,18 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
       useVoid: booleanField(false)
     };
   }
+}
+
+/**
+ * The targets for Active Effect changes with free-form keys, e.g. system.bonuses.skill.kenjutsu.roll
+ * (module/services/dice/effects/bonus-applicator.js).
+ * @returns {foundry.data.fields.SchemaField}
+ */
+function bonusesField() {
+  const { ObjectField, SchemaField } = foundry.data.fields;
+  return new SchemaField({
+    skill: new ObjectField(),
+    trait: new ObjectField(),
+    ring: new ObjectField()
+  });
 }

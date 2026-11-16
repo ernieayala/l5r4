@@ -169,6 +169,21 @@ export class ItemEffectsHandler {
     wrap.dataset.busy = "1";
 
     try {
+      await this.#deleteItemEffect(item, id);
+    } finally {
+      // Always clear busy flag to prevent UI lockup
+      delete wrap.dataset.busy;
+    }
+  }
+
+  /**
+   * Delete one of the Item's effects; one already gone is skipped, and any other failure is logged and shown.
+   * @param {Item} item
+   * @param {string} id - The effect's id
+   * @returns {Promise<void>}
+   */
+  static async #deleteItemEffect(item, id) {
+    try {
       const eff = item.effects.get(id);
       if (!eff) {
         return;
@@ -183,9 +198,6 @@ export class ItemEffectsHandler {
 
       console.error("L5R4 ItemEffectsHandler: Failed to delete effect", err);
       ui.notifications?.error(err.message ?? game.i18n.localize("l5r4.system.errors.deleteEffect"));
-    } finally {
-      // Always clear busy flag to prevent UI lockup
-      delete wrap.dataset.busy;
     }
   }
 }

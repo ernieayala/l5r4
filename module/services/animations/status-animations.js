@@ -69,47 +69,9 @@ export async function startAnimation(actor, statusId, isStance = false) {
   // Play animation on each token
   for (const token of tokens) {
     try {
-      // Build Sequencer sequence
-      const sequence = new Sequence();
-
-      // Configure effect
-      let effectSection = sequence.effect().file(animConfig.file).attachTo(token);
-
-      // Apply configuration
-      if (animConfig.scale !== undefined) {
-        effectSection = effectSection.scale(animConfig.scale);
-      }
-
-      if (animConfig.opacity !== undefined) {
-        effectSection = effectSection.opacity(animConfig.opacity);
-      }
-
-      if (animConfig.belowTokens) {
-        effectSection = effectSection.belowTokens();
-      }
-
-      if (animConfig.persist) {
-        effectSection = effectSection.persist();
-      }
-
-      if (animConfig.duration !== null && animConfig.duration !== undefined) {
-        effectSection = effectSection.duration(animConfig.duration);
-      }
-
-      // Set effect name for later cleanup
+      // The effect's name, by which a removal finds it
       const effectName = `${SYS_ID}.${statusId}.${token.id}`;
-      effectSection = effectSection.name(effectName);
-
-      // Play the sequence; a removal of this effect waits for it (see `starting`)
-      const start = sequence.play();
-      starting.set(effectName, start);
-      try {
-        await start;
-      } finally {
-        if (starting.get(effectName) === start) {
-          starting.delete(effectName);
-        }
-      }
+      await startSequence(buildAnimationSequence(animConfig, token, effectName), effectName);
     } catch (error) {
       console.warn(`L5R4 | Failed to play animation ${statusId} for ${actor.name}:`, error);
     }
@@ -193,6 +155,54 @@ export async function deleteAllAnimations(actor) {
       await Sequencer.EffectManager.endEffects({ name: `${SYS_ID}.*${token.id}` });
     } catch (error) {
       console.warn(`L5R4 | Failed to remove all animations for ${actor.name}:`, error);
+    }
+  }
+}
+
+/**
+ * Build the Sequencer sequence of one token's animation: the effect file attached to the token, configured by the
+ * animation's settings, and named for later cleanup.
+ * @param {object} animConfig - The animation settings from asset-library.js
+ * @param {Token} token - The token the effect attaches to
+ * @param {string} effectName - The effect's name
+ * @returns {Sequence} The sequence, ready to play
+ */
+function buildAnimationSequence(animConfig, token, effectName) {
+  const sequence = new Sequence();
+  let effectSection = sequence.effect().file(animConfig.file).attachTo(token);
+  if (animConfig.scale !== undefined) {
+    effectSection = effectSection.scale(animConfig.scale);
+  }
+  if (animConfig.opacity !== undefined) {
+    effectSection = effectSection.opacity(animConfig.opacity);
+  }
+  if (animConfig.belowTokens) {
+    effectSection = effectSection.belowTokens();
+  }
+  if (animConfig.persist) {
+    effectSection = effectSection.persist();
+  }
+  if (animConfig.duration !== null && animConfig.duration !== undefined) {
+    effectSection = effectSection.duration(animConfig.duration);
+  }
+  effectSection.name(effectName);
+  return sequence;
+}
+
+/**
+ * Play a sequence and wait for it, tracked in `starting` so a removal of this effect waits for it.
+ * @param {Sequence} sequence - The sequence to play
+ * @param {string} effectName - The name of its effect
+ * @returns {Promise<void>}
+ */
+async function startSequence(sequence, effectName) {
+  const start = sequence.play();
+  starting.set(effectName, start);
+  try {
+    await start;
+  } finally {
+    if (starting.get(effectName) === start) {
+      starting.delete(effectName);
     }
   }
 }

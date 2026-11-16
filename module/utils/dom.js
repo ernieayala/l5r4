@@ -47,26 +47,33 @@ export function on(root, type, { selector, handler, capture = false }) {
     return;
   }
 
-  root.addEventListener(
-    type,
-    ev => {
-      let el = null;
-      // Only process events from Element nodes (not text nodes, etc.)
-      if (ev.target instanceof Element) {
-        try {
-          // Find closest ancestor (including target) matching selector
-          el = ev.target.closest(selector);
-        } catch (e) {
-          // Invalid selector syntax - log and skip
-          logError("on() invalid selector caused closest() error", e, { selector });
-          return;
-        }
-      }
-      // Only call handler if matching element found and is within root
-      if (el && root.contains(el)) {
-        handler(ev, el);
-      }
-    },
-    capture
-  );
+  root.addEventListener(type, ev => onDelegatedEvent(ev, { root, selector, handler }), capture);
+}
+
+/**
+ * Handle one event on the root: call the handler with the closest element matching the selector, when the event
+ * came from an Element and that element is within the root.
+ * @param {Event} ev - The event the root received
+ * @param {object} listener
+ * @param {Element|Document} listener.root - The element the listener is attached to
+ * @param {string} listener.selector - CSS selector for target elements
+ * @param {Function} listener.handler - Event handler function (ev, el) => void
+ */
+function onDelegatedEvent(ev, { root, selector, handler }) {
+  let el = null;
+  // Only process events from Element nodes (not text nodes, etc.)
+  if (ev.target instanceof Element) {
+    try {
+      // Find closest ancestor (including target) matching selector
+      el = ev.target.closest(selector);
+    } catch (e) {
+      // Invalid selector syntax - log and skip
+      logError("on() invalid selector caused closest() error", e, { selector });
+      return;
+    }
+  }
+  // Only call handler if matching element found and is within root
+  if (el && root.contains(el)) {
+    handler(ev, el);
+  }
 }

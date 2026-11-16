@@ -142,11 +142,11 @@ name the outliers and nothing else.
 | `module/data/`          | 200   | `rules/rule-models.js` 609         | `rules/rule-models.js`                        |
 | `module/documents/`     | 300   | `actor.js` 291                     | none                                          |
 | `module/services/`      | 350   | `dice/check/collect.js` 389        | `dice/check/collect.js`, `combat/duel.js` 382 |
-| `module/mixins/`        | 200   | `keyboard-behavior-mixin.js` 156   | none                                          |
-| `module/apps/`          | 400   | `xp-manager.js` 408                | `xp-manager.js`                               |
-| `module/sheets/`        | 500   | `base-actor-sheet.js` 622          | `base-actor-sheet.js`, `item-sheet.js` 542    |
+| `module/mixins/`        | 200   | `keyboard-behavior-mixin.js` 180   | none                                          |
+| `module/apps/`          | 400   | `xp-manager.js` 436                | `xp-manager.js`                               |
+| `module/sheets/`        | 500   | `base-actor-sheet.js` 684          | `base-actor-sheet.js`, `item-sheet.js` 575    |
 | `module/setup/`         | 250   | `migrations/items/emphasis.js` 243 | none                                          |
-| `module/hooks/`         | 150   | `register-all.js` 134              | none                                          |
+| `module/hooks/`         | 150   | `register-all.js` 154              | `register-all.js`                             |
 | `dist/l5r4-enhanced.js` | 300   | 264                                | none                                          |
 
 | Rule                                                                                                                    | Enforced by                      |

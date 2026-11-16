@@ -46,21 +46,7 @@ export function KeyboardBehaviorMixin(Base) {
      * @param {HTMLElement} root - The root element of the sheet, as a rule this.element
      */
     _setupConditionalCursor(root) {
-      // Create and store bound handlers for cleanup (must be same reference to remove)
-      if (!this._keyboardHandlers) {
-        this._keyboardHandlers = {
-          keydown: this._onKeyDown.bind(this),
-          keyup: this._onKeyUp.bind(this)
-        };
-      }
-
-      // Remove any existing listeners to prevent duplicates (idempotent setup)
-      document.removeEventListener("keydown", this._keyboardHandlers.keydown);
-      document.removeEventListener("keyup", this._keyboardHandlers.keyup);
-
-      // Add fresh listeners to document (not element) to track Shift globally
-      document.addEventListener("keydown", this._keyboardHandlers.keydown);
-      document.addEventListener("keyup", this._keyboardHandlers.keyup);
+      bindShiftKeys(this);
 
       // Initialize cursor to default state
       this._updateConditionalCursor(root, false);
@@ -144,13 +130,51 @@ export function KeyboardBehaviorMixin(Base) {
      * @override
      */
     async close(options = {}) {
-      if (this._keyboardHandlers) {
-        document.removeEventListener("keydown", this._keyboardHandlers.keydown);
-        document.removeEventListener("keyup", this._keyboardHandlers.keyup);
-        this._keyboardHandlers = null;
-      }
+      deleteShiftKeys(this);
 
       return super.close(options);
     }
   };
+}
+
+/**
+ * Listen for Shift on the document, with the sheet's handlers, bound once and kept for removal; listeners already
+ * added are removed first, so a second render adds none twice.
+ * @param {Application} app - A sheet with the mixin
+ */
+function bindShiftKeys(app) {
+  // Create and store bound handlers for cleanup (must be same reference to remove)
+  if (!app._keyboardHandlers) {
+    app._keyboardHandlers = {
+      keydown: app._onKeyDown.bind(app),
+      keyup: app._onKeyUp.bind(app)
+    };
+  }
+
+  // Remove any existing listeners to prevent duplicates (idempotent setup)
+  deleteShiftListeners(app._keyboardHandlers);
+
+  // Add fresh listeners to document (not element) to track Shift globally
+  document.addEventListener("keydown", app._keyboardHandlers.keydown);
+  document.addEventListener("keyup", app._keyboardHandlers.keyup);
+}
+
+/**
+ * Remove the sheet's Shift listeners from the document and drop its handlers, when it has them.
+ * @param {Application} app - A sheet with the mixin
+ */
+function deleteShiftKeys(app) {
+  if (app._keyboardHandlers) {
+    deleteShiftListeners(app._keyboardHandlers);
+    app._keyboardHandlers = null;
+  }
+}
+
+/**
+ * Remove a pair of Shift listeners from the document.
+ * @param {{keydown: Function, keyup: Function}} handlers
+ */
+function deleteShiftListeners(handlers) {
+  document.removeEventListener("keydown", handlers.keydown);
+  document.removeEventListener("keyup", handlers.keyup);
 }

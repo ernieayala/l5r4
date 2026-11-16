@@ -108,19 +108,8 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
       context.attackKey = this.attackKey;
       context.damageKey = this.damageKey;
       context.attackNum = this.attackKey.replace("attack", "");
-      context.attack = {
-        name: attackData.name ?? "",
-        roll: attackData.roll ?? 2,
-        keep: attackData.keep ?? 2,
-        modifier: attackData.modifier ?? 0,
-        type: attackData.type ?? ""
-      };
-      context.damage = {
-        roll: damageData.roll ?? 2,
-        keep: damageData.keep ?? 2,
-        modifier: damageData.modifier ?? 0,
-        type: damageData.type ?? ""
-      };
+      context.attack = buildAttackFields(attackData);
+      context.damage = buildDamageFields(damageData);
       context.config = {
         actionTypes: ACTION_TYPES
       };
@@ -195,4 +184,33 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
   static async #onSaveAttack(_event, _element) {
     this.element.requestSubmit();
   }
+}
+
+/**
+ * The attack form's values: the stored attack's, each defaulted when unset.
+ * @param {object} attackData - The stored attack slot
+ * @returns {{name: string, roll: number, keep: number, modifier: number, type: string}}
+ */
+function buildAttackFields(attackData) {
+  return {
+    name: attackData.name ?? "",
+    roll: attackData.roll ?? 2,
+    keep: attackData.keep ?? 2,
+    modifier: attackData.modifier ?? 0,
+    type: attackData.type ?? ""
+  };
+}
+
+/**
+ * The damage form's values: the stored damage's, each defaulted when unset.
+ * @param {object} damageData - The stored damage slot
+ * @returns {{roll: number, keep: number, modifier: number, type: string}}
+ */
+function buildDamageFields(damageData) {
+  return {
+    roll: damageData.roll ?? 2,
+    keep: damageData.keep ?? 2,
+    modifier: damageData.modifier ?? 0,
+    type: damageData.type ?? ""
+  };
 }

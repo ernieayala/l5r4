@@ -14,7 +14,13 @@ import { isVoidOverLimit, voidSpentOf } from "../../module/services/effects/uses
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
-import { autoAnswerRolls, createDrawnToken, settleChatNotifications, waitFor } from "./helpers.js";
+import {
+  autoAnswerRolls,
+  buttonLabelsOf,
+  createDrawnToken,
+  settleChatNotifications,
+  waitFor
+} from "./helpers.js";
 
 /**
  * Registers the `effects` batch (roadmap Stage 9): stances, conditions, and timed effects as Active Effects whose
@@ -345,15 +351,19 @@ export function registerEffectsTests(quench) {
           await game.time.advance(3600);
           assert.isTrue(actor.statuses.has("feared"), "world time alone does not end it");
           let question = "";
+          let labels = {};
           const answered = new Promise(resolve => {
             Hooks.once("renderDialogV2", app => {
               question = app.element.querySelector("form").textContent;
+              labels = buttonLabelsOf(app);
               app.element.querySelector('[data-action="yes"]').click();
               resolve();
             });
           });
           await Promise.all([answered, endEncounter()]);
           assert.include(question, game.i18n.localize("l5r4.ui.effects.endEncounterConfirm"));
+          assert.equal(labels.yes, game.i18n.localize("l5r4.ui.effects.endEncounter"));
+          assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
         });
 

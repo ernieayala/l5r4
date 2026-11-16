@@ -73,21 +73,35 @@ async function postContestResult(attack, sides) {
     });
     return;
   }
-  const { knockdown, disarm } = attack.system.maneuvers;
-  const winner = sides[result.winner];
-  const lines = [F("l5r4.ui.check.contestWinner", { name: winner.name })];
-  if (result.winner === "attacker") {
-    if (knockdown) {
-      if (!sides.target.statuses.has("prone")) {
-        await applyEffectAnywhere(sides.target, "prone");
-      }
-      lines.push(F("l5r4.ui.combat.knockedDown", { name: sides.target.name }));
-    }
-    if (disarm) {
-      lines.push(F("l5r4.ui.combat.disarmed", { name: sides.target.name }));
-    }
-  }
+  const lines = await applyContestOutcome(attack, sides, result.winner);
   await ChatMessage.create({ speaker, content: await R(CHAT_TEMPLATES.note, { lines }) });
+}
+
+/**
+ * Apply what the contest's winner gains: the attacker winning knocks the target Prone for a Knockdown and disarms him
+ * for a Disarm, which the card tells the GM.
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {ChatMessage} attack - The attack message
+ * @param {{attacker: Actor, target: Actor}} sides - Each side's actor
+ * @param {"attacker"|"target"} winnerSide - The side that won
+ * @returns {Promise<string[]>} The card's lines: the winner, then each maneuver's outcome
+ */
+async function applyContestOutcome(attack, sides, winnerSide) {
+  const { knockdown, disarm } = attack.system.maneuvers;
+  const lines = [F("l5r4.ui.check.contestWinner", { name: sides[winnerSide].name })];
+  if (winnerSide !== "attacker") {
+    return lines;
+  }
+  if (knockdown) {
+    if (!sides.target.statuses.has("prone")) {
+      await applyEffectAnywhere(sides.target, "prone");
+    }
+    lines.push(F("l5r4.ui.combat.knockedDown", { name: sides.target.name }));
+  }
+  if (disarm) {
+    lines.push(F("l5r4.ui.combat.disarmed", { name: sides.target.name }));
+  }
+  return lines;
 }
 
 /**

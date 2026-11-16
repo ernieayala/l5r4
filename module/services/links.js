@@ -86,23 +86,43 @@ export function checkRequestOf(actor, spec) {
  */
 export async function onLinkClick(spec) {
   if (spec.type === "Check" || spec.type === "Damage") {
-    const actor = getRollActor();
-    if (!actor) {
-      ui.notifications?.warn(T("l5r4.ui.links.noActor"));
-      return null;
-    }
-    if (spec.type === "Damage") {
-      return rollCheck({
-        actor,
-        kind: "damage",
-        label: formatLinkText(spec),
-        base: spec.pool,
-        askForOptions: true
-      });
-    }
-    const request = checkRequestOf(actor, spec);
-    return request ? rollCheck(request) : null;
+    return rollLink(spec);
   }
+  return applyLinkToTargets(spec);
+}
+
+/**
+ * Roll a Check or Damage link for the acting character: a Check through its request (checkRequestOf), Damage as a
+ * damage card.
+ * @param {import("../utils/link-syntax.js").LinkSpec} spec - A Check or Damage link
+ * @returns {Promise<ChatMessage|null>} The roll's message, or null when nothing is rolled
+ */
+async function rollLink(spec) {
+  const actor = getRollActor();
+  if (!actor) {
+    ui.notifications?.warn(T("l5r4.ui.links.noActor"));
+    return null;
+  }
+  if (spec.type === "Damage") {
+    return rollCheck({
+      actor,
+      kind: "damage",
+      label: formatLinkText(spec),
+      base: spec.pool,
+      askForOptions: true
+    });
+  }
+  const request = checkRequestOf(actor, spec);
+  return request ? rollCheck(request) : null;
+}
+
+/**
+ * Run a Condition or Fear link on its targets (getLinkTargets): the status applied, or a Fear test at the link's
+ * Rank.
+ * @param {import("../utils/link-syntax.js").LinkSpec} spec - A Condition or Fear link
+ * @returns {Promise<null>}
+ */
+async function applyLinkToTargets(spec) {
   const actors = getLinkTargets();
   if (!actors.length) {
     ui.notifications?.warn(T("l5r4.ui.links.noTargets"));

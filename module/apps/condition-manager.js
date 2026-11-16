@@ -65,7 +65,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    */
   get title() {
     const baseTitle = T("l5r4.apps.conditionManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**
@@ -192,16 +192,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    * @param {Event} event - The change event from multi-checkbox component
    */
   async _onCheckboxChange(event) {
-    const multiCheckbox = event.target;
-
-    // Convert multi-checkbox value to Set for efficient lookup
-    // Value can be array, single value, or empty
-    let selectedValues = new Set();
-    if (Array.isArray(multiCheckbox.value)) {
-      selectedValues = new Set(multiCheckbox.value);
-    } else if (multiCheckbox.value) {
-      selectedValues = new Set([multiCheckbox.value]);
-    }
+    const selectedValues = toConditionSet(event.target.value);
 
     const previouslyActive = getActiveConditions(this.actor);
 
@@ -212,23 +203,8 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
     const toRemove = Array.from(previouslyActive).filter(id => !selectedValues.has(id));
 
     try {
-      // Create the status effect for each newly selected condition, with its rules and duration
-      for (const conditionId of toAdd) {
-        if (STATUS_EFFECTS.some(s => s.id === conditionId)) {
-          await applyEffect(this.actor, conditionId);
-        }
-      }
-
-      // Delete ActiveEffect documents for deselected conditions
-      for (const conditionId of toRemove) {
-        const effectToRemove = this.actor.effects.find(
-          e => !e.disabled && e.statuses?.has(conditionId)
-        );
-
-        if (effectToRemove) {
-          await effectToRemove.delete();
-        }
-      }
+      await applyConditions(this.actor, toAdd);
+      await deleteConditions(this.actor, toRemove);
 
       // Refresh token displays if any conditions changed
       if (toAdd.length > 0 || toRemove.length > 0) {
@@ -273,4 +249,49 @@ function getActiveConditions(actor) {
   }
 
   return conditions;
+}
+
+/**
+ * The multi-checkbox's value as a set of condition ids: an array, a single value, or empty.
+ * @param {string[]|string|null} value
+ * @returns {Set<string>}
+ */
+function toConditionSet(value) {
+  if (Array.isArray(value)) {
+    return new Set(value);
+  }
+  if (value) {
+    return new Set([value]);
+  }
+  return new Set();
+}
+
+/**
+ * Create the status effect for each newly selected condition, with its rules and duration.
+ * @param {Actor} actor
+ * @param {string[]} conditionIds - Ids not yet active; one that is not a status effect is skipped
+ * @returns {Promise<void>}
+ */
+async function applyConditions(actor, conditionIds) {
+  for (const conditionId of conditionIds) {
+    if (STATUS_EFFECTS.some(s => s.id === conditionId)) {
+      await applyEffect(actor, conditionId);
+    }
+  }
+}
+
+/**
+ * Delete the enabled ActiveEffect that carries each deselected condition.
+ * @param {Actor} actor
+ * @param {string[]} conditionIds - Ids active before the change
+ * @returns {Promise<void>}
+ */
+async function deleteConditions(actor, conditionIds) {
+  for (const conditionId of conditionIds) {
+    const effectToRemove = actor.effects.find(e => !e.disabled && e.statuses?.has(conditionId));
+
+    if (effectToRemove) {
+      await effectToRemove.delete();
+    }
+  }
 }

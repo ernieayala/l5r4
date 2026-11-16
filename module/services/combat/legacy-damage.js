@@ -21,53 +21,68 @@ export function bindLegacyDamageCard(message, html) {
     return;
   }
   // renderChatMessageHTML passes an HTMLElement, not jQuery
-  const element = html;
+  bindDebouncedClick(html.querySelector("[data-action='apply-wounds']"), event =>
+    applyWoundsToToken(parseInt(event.currentTarget.dataset.damage) || 0)
+  );
+  bindDebouncedClick(html.querySelector("[data-action='reduce-wounds-void']"), event => {
+    const button = event.currentTarget;
+    return applyWoundsWithVoid(parseInt(button.dataset.damage) || 0, button.dataset.actorId);
+  });
+}
 
-  // Apply wounds button
-  const applyButton = element.querySelector("[data-action='apply-wounds']");
-  if (applyButton) {
-    let isProcessing = false;
-    applyButton.addEventListener("click", async event => {
-      event.preventDefault();
+/**
+ * Wire a card button's click, ignored while the click before it is still being handled.
+ * @param {HTMLElement|null} button - The button, when the card has it
+ * @param {function(MouseEvent): Promise<void>} onClick - What the click does
+ */
+function bindDebouncedClick(button, onClick) {
+  if (!button) {
+    return;
+  }
+  let isProcessing = false;
+  button.addEventListener("click", async event => {
+    event.preventDefault();
 
-      // Debounce protection: prevent multiple simultaneous clicks
-      if (isProcessing) {
-        return;
-      }
-      isProcessing = true;
+    // Debounce protection: prevent multiple simultaneous clicks
+    if (isProcessing) {
+      return;
+    }
+    isProcessing = true;
 
-      try {
-        const damage = parseInt(event.currentTarget.dataset.damage) || 0;
-        await applyWoundsToToken(damage);
-      } finally {
-        isProcessing = false;
-      }
-    });
+    try {
+      await onClick(event);
+    } finally {
+      isProcessing = false;
+    }
+  });
+}
+
+/**
+ * The actor of the first selected token, when the user may change it; otherwise a warning and null.
+ * @returns {Actor|null}
+ */
+function validateSelectedActor() {
+  const tokens = canvas.tokens?.controlled ?? [];
+
+  if (tokens.length === 0) {
+    ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
+    return null;
   }
 
-  // Reduce with void button
-  const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
-  if (reduceButton) {
-    let isProcessing = false;
-    reduceButton.addEventListener("click", async event => {
-      event.preventDefault();
+  const token = tokens[0];
+  const actor = token.actor;
 
-      // Debounce protection: prevent multiple simultaneous clicks
-      if (isProcessing) {
-        return;
-      }
-      isProcessing = true;
-
-      try {
-        const button = event.currentTarget;
-        const damage = parseInt(button.dataset.damage) || 0;
-        const actorId = button.dataset.actorId;
-        await applyWoundsWithVoid(damage, actorId);
-      } finally {
-        isProcessing = false;
-      }
-    });
+  if (!actor) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.tokenNoActor"));
+    return null;
   }
+
+  // Permission check: Only owner or GM can apply wounds
+  if (!actor.isOwner && !game?.user?.isGM) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  return actor;
 }
 
 /**
@@ -77,24 +92,8 @@ export function bindLegacyDamageCard(message, html) {
  * @returns {Promise<void>}
  */
 async function applyWoundsToToken(damage) {
-  const tokens = canvas.tokens?.controlled ?? [];
-
-  if (tokens.length === 0) {
-    ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
-    return;
-  }
-
-  const token = tokens[0];
-  const actor = token.actor;
-
+  const actor = validateSelectedActor();
   if (!actor) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.tokenNoActor"));
-    return;
-  }
-
-  // Permission check: Only owner or GM can apply wounds
-  if (!actor.isOwner && !game?.user?.isGM) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return;
   }
 
@@ -140,24 +139,8 @@ async function applyWoundsToToken(damage) {
  * @returns {Promise<void>}
  */
 async function applyWoundsWithVoid(damage, _actorId) {
-  const tokens = canvas.tokens?.controlled ?? [];
-
-  if (tokens.length === 0) {
-    ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
-    return;
-  }
-
-  const token = tokens[0];
-  const targetActor = token.actor;
-
+  const targetActor = validateSelectedActor();
   if (!targetActor) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.tokenNoActor"));
-    return;
-  }
-
-  // Permission check: Only owner or GM can apply wounds
-  if (!targetActor.isOwner && !game?.user?.isGM) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return;
   }
 
@@ -186,23 +169,28 @@ async function applyWoundsWithVoid(damage, _actorId) {
     ...buildVoidUseUpdate(targetActor)
   });
 
-  // Show notification with both reductions if armor applied
+  ui.notifications?.info(
+    formatVoidReducedWounds(targetActor.name, { damage, afterVoid, armorReduction, finalDamage })
+  );
+}
+
+/**
+ * The notification for wounds reduced with a Void Point: both reductions when the armor lowered the damage, the
+ * Wounds applied otherwise.
+ * @param {string} name - The damaged actor's name
+ * @param {{damage: number, afterVoid: number, armorReduction: number, finalDamage: number}} amounts - The damage
+ *   before, after the Void Point, the armor's Reduction, and the final damage
+ * @returns {string}
+ */
+function formatVoidReducedWounds(name, { damage, afterVoid, armorReduction, finalDamage }) {
   if (armorReduction > 0 && finalDamage < afterVoid) {
-    ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.reducedWithArmor", {
-        original: damage,
-        afterVoid: afterVoid,
-        reduction: armorReduction,
-        final: finalDamage,
-        name: targetActor.name
-      })
-    );
-  } else {
-    ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.reducedApplied", {
-        amount: finalDamage,
-        name: targetActor.name
-      })
-    );
+    return F("l5r4.ui.mechanics.wounds.reducedWithArmor", {
+      original: damage,
+      afterVoid: afterVoid,
+      reduction: armorReduction,
+      final: finalDamage,
+      name
+    });
   }
+  return F("l5r4.ui.mechanics.wounds.reducedApplied", { amount: finalDamage, name });
 }

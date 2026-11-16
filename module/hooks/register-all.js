@@ -58,12 +58,29 @@ const EFFECT_PANEL_REDRAWS = Object.freeze([
 /**
  * Register all system hooks, once during `init` in the system entry point.
  *
- * Each feature registers in the order below; the comment above each group names what it adds. Handlers on the same
- * hook run in this order: the token controls list their buttons in it.
+ * Each feature registers in the order below; the comment on each step names what it adds. Handlers on the same hook
+ * run in this order: the token controls list their buttons in it.
  * @returns {void}
  */
 export function registerAllHooks() {
-  // Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active
+  registerAnimationHooks();
+  registerEffectHooks();
+  registerChatCardHooks();
+  registerInterfaceHooks();
+  registerCombatHooks();
+
+  // Item folders: export and import items with their rules
+  Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
+
+  // Damage buttons on cards posted by 3.x
+  Hooks.on("renderChatMessageHTML", bindLegacyDamageCard);
+
+  // Spell system: Memorization XP tracking
+  registerSpellMemorizationHooks();
+}
+
+/** Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active. */
+function registerAnimationHooks() {
   if (hasAnimationModules()) {
     Hooks.on("createActiveEffect", onCreateActiveEffectAnimation);
     Hooks.on("updateActiveEffect", onUpdateActiveEffectAnimation);
@@ -71,16 +88,23 @@ export function registerAllHooks() {
     Hooks.on("deleteActor", onDeleteActorAnimation);
     Hooks.on("createChatMessage", onCreateChatMessageAnimation);
   }
+}
 
-  // Effects: timed effects of unlinked tokens, Prone from Wounds, Concentration checks, the Full Defense roll, the
-  // GM's "End encounter" control, and the notice for an effect dropped because the actor is immune to its status
+/**
+ * Effects: timed effects of unlinked tokens, Prone from Wounds, Concentration checks, the Full Defense roll, the GM's
+ * "End encounter" control, and the notice for an effect dropped because the actor is immune to its status.
+ */
+function registerEffectHooks() {
   Hooks.once("ready", registerTokenEffects);
   Hooks.on("preUpdateActor", onPreUpdateActorWounds);
   Hooks.on("updateActor", onUpdateActorWounds);
   Hooks.on("createActiveEffect", onCreateActiveEffectFullDefense);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsEncounter);
   Hooks.on(IMMUNE_STATUS_HOOK, onImmuneStatus);
+}
 
+/** Chat cards and chat input: the roll, effect prompt, and Check request cards, and inline Roll & Keep notation. */
+function registerChatCardHooks() {
   // Chat integration: the damage button of cards posted before 4.0.0, inline Roll & Keep notation, and the roll
   // card's buttons and context menu entries
   Hooks.on("renderChatMessageHTML", bindLegacyAttackCard);
@@ -93,7 +117,10 @@ export function registerAllHooks() {
 
   // Request cards from a GM's Check link: each player's Roll button
   Hooks.on("renderChatMessageHTML", bindCheckRequestCard);
+}
 
+/** The interface around the sheets: the effect panel, hotbar macros, floating numbers, and the compendium browser. */
+function registerInterfaceHooks() {
   // Effect panel: its token-controls button and redraws
   Hooks.on("getSceneControlButtons", EffectPanel.onGetSceneControlButtons);
   for (const hook of EFFECT_PANEL_REDRAWS) {
@@ -111,24 +138,17 @@ export function registerAllHooks() {
   // Compendium browser: its index fields and the Compendium sidebar's button
   CompendiumBrowser.registerIndexFields();
   Hooks.on("renderCompendiumDirectory", CompendiumBrowser.onRenderCompendiumDirectory);
+}
 
-  // Combat loop: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple), and the
-  // duel and Guard token controls
+/**
+ * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple),
+ * the duel and Guard token controls, and the GM's "New session" control for once-per-session abilities.
+ */
+function registerCombatHooks() {
   Hooks.on("renderChatMessageHTML", bindAttackCard);
   Hooks.on("renderChatMessageHTML", bindDamageCards);
   Hooks.on("renderChatMessageHTML", bindFlowCards);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsDuel);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsGuard);
-
-  // Game sessions: the GM's "New session" control for once-per-session abilities
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsSession);
-
-  // Item folders: export and import items with their rules
-  Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
-
-  // Damage buttons on cards posted by 3.x
-  Hooks.on("renderChatMessageHTML", bindLegacyDamageCard);
-
-  // Spell system: Memorization XP tracking
-  registerSpellMemorizationHooks();
 }

@@ -17,10 +17,7 @@ import { getSortPref } from "../services/sort-preferences.js";
 import { getSectionCollapsedMap } from "../services/section-state.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
-import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
-import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { NpcActionsHandler } from "./handlers/npc-actions-handler.js";
-import { RestHandler } from "./handlers/rest-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 
@@ -72,6 +69,32 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       scrollable: [".scrollable-content"]
     }
   };
+
+  /**
+   * The NPC sheet's click actions: the shared ones (BaseActorSheet.CLICK_ACTIONS) and the NPC's own, the Ring roll
+   * from its stat block, the attack slots' rolls and configuration, the Fear test, and the Trait adjustments without
+   * a family bonus.
+   *
+   * @type {Readonly<Record<string, function(L5R4NpcSheet, Event, HTMLElement): unknown>>}
+   */
+  static CLICK_ACTIONS = Object.freeze({
+    ...super.CLICK_ACTIONS,
+    "roll-ring": (sheet, event, element) =>
+      RollHandler.rollClickedNpcRing(sheet._getHandlerContext(), event, element),
+    "roll-attack": (sheet, event, element) => sheet._onAttackRoll(event, element),
+    "roll-damage": (sheet, event, element) => sheet._onDamageRoll(event, element),
+    "test-fear": (sheet, event, element) =>
+      NpcActionsHandler.testFear(sheet._getHandlerContext(), event, element),
+    "adjust-trait": (sheet, event, element) => sheet._onTraitAdjust(event, element, +1),
+    "increase-trait": (sheet, event, element) =>
+      TraitHandler.updateTraitRankUp(sheet._getHandlerContext(), event, element),
+    "decrease-trait": (sheet, event, element) =>
+      TraitHandler.updateTraitRankDown(sheet._getHandlerContext(), event, element),
+    "edit-attack": openAttackConfig,
+    "add-attack": openAttackConfig,
+    "delete-attack": (sheet, event, element) =>
+      NpcActionsHandler.deleteAttack(sheet._getHandlerContext(), event, element)
+  });
 
   /**
    * Prepares template context data for rendering the NPC sheet.
@@ -137,111 +160,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     prepareItemSheetOptions(context);
     context.config.stances = STANCES;
     return context;
-  }
-
-  /**
-   * Routes click events on [data-action] elements to appropriate handlers.
-   *
-   * Implements event delegation pattern for all user interactions on the sheet.
-   * Actions are identified by data-action attribute values on interactive elements.
-   *
-   * **Supported Actions:**
-   * - update-item-field: Update item properties in the sheet
-   * - create-item, delete-item, edit-item, expand-item, post-item: Item CRUD operations
-   * - expand-section: Collapse or expand an item list section
-   * - sort-items: Change sort field/direction for item lists
-   * - adjust-void-ring: Adjust Void Ring rank (Shift+Click, NPC-specific)
-   * - roll-ring/skill/trait/attack/damage/weapon-attack: Initiate dice rolls
-   * - test-fear: Trigger Fear test for selected tokens
-   * - adjust-trait: Adjust trait ranks (Shift+Click)
-   * - adjust-void-points: Spend/regain Void Points
-   * - open-combat-config: Open combat configuration dialog (initiative/movement)
-   * - open-wound-config: Open wound threshold configuration dialog
-   *
-   * **Implementation Note:**
-   * Most actions delegate to BaseActorSheet or specialized handlers. NPC-specific
-   * actions include adjust-void-ring (direct Void Ring editing) and test-fear.
-   *
-   * @param {string} action - The data-action attribute value from the clicked element
-   * @param {Event} event - The click event
-   * @param {HTMLElement} element - The element that was clicked
-   * @override
-   */
-  _onAction(action, event, element) {
-    switch (action) {
-      case "apply-healing":
-        return RestHandler.applyHealing(this._getHandlerContext(), event, element);
-      case "update-item-field":
-        return this._onInlineItemEdit(event, element);
-      case "create-item":
-        return this._onItemCreate(event, element);
-      case "delete-item":
-        return this._onItemDelete(event, element);
-      case "edit-item":
-        return this._onItemEdit(event, element);
-      case "expand-item":
-        return this._onItemExpand(event, element);
-      case "expand-section":
-        return ItemCrudHandler.updateSectionCollapsed(this._getHandlerContext(), event, element);
-      case "post-item":
-        return this._onItemHeaderToChat(event, element);
-      case "sort-items":
-        return this._onUnifiedSortClick(event, element);
-      case "adjust-void-ring":
-        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
-      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
-      case "increase-void-ring":
-        return TraitHandler.updateVoidRing(
-          this._getHandlerContext(),
-          { preventDefault: () => event.preventDefault(), shiftKey: true },
-          element,
-          +1
-        );
-      case "decrease-void-ring":
-        return TraitHandler.updateVoidRing(
-          this._getHandlerContext(),
-          { preventDefault: () => event.preventDefault(), shiftKey: true },
-          element,
-          -1
-        );
-      case "roll-ring":
-        return RollHandler.rollClickedNpcRing(this._getHandlerContext(), event, element);
-      case "roll-skill":
-        return this._onSkillRoll(event, element);
-      case "roll-trait":
-        return this._onTraitRoll(event, element);
-      case "roll-attack":
-        return this._onAttackRoll(event, element);
-      case "roll-damage":
-        return this._onDamageRoll(event, element);
-      case "roll-weapon-attack":
-        return this._onWeaponAttackRoll(event, element);
-      case "cast-spell":
-        return RollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
-      case "test-fear":
-        return NpcActionsHandler.testFear(this._getHandlerContext(), event, element);
-      case "adjust-trait":
-        return this._onTraitAdjust(event, element, +1);
-      case "increase-trait":
-        return TraitHandler.updateTraitRankUp(this._getHandlerContext(), event, element);
-      case "decrease-trait":
-        return TraitHandler.updateTraitRankDown(this._getHandlerContext(), event, element);
-      case "adjust-void-points":
-        return this._onVoidPointsAdjust(event, element, +1);
-      case "toggle-movement-type":
-        return StanceHandler.updateMovementType(this._getHandlerContext(), event);
-      case "open-condition-manager":
-        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
-      case "open-combat-config":
-        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
-      case "open-wound-config":
-        return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
-      case "edit-attack":
-      case "add-attack":
-        return NpcActionsHandler.openAttackConfig(this._getHandlerContext(), event, element);
-      case "delete-attack":
-        return NpcActionsHandler.deleteAttack(this._getHandlerContext(), event, element);
-    }
   }
 
   /**
@@ -416,6 +334,17 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       items: all.filter(i => i.type === "item" || i.type === "commonItem")
     };
   }
+}
+
+/**
+ * Open the configuration of the clicked attack slot, an empty one when adding.
+ * @param {L5R4NpcSheet} sheet
+ * @param {Event} event - The click
+ * @param {HTMLElement} element - The edit or add button, with data-attack-key
+ * @returns {Promise<void>}
+ */
+function openAttackConfig(sheet, event, element) {
+  return NpcActionsHandler.openAttackConfig(sheet._getHandlerContext(), event, element);
 }
 
 /**

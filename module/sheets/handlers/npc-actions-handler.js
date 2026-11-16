@@ -101,7 +101,9 @@ export class NpcActionsHandler {
         window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
         content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
           question: game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name })
-        })
+        }),
+        yes: { label: "l5r4.ui.common.delete" },
+        no: { label: "l5r4.ui.common.cancel" }
       });
       if (!confirmed) {
         return;

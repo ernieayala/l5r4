@@ -117,21 +117,9 @@ function parseCheck(values) {
   const skill = values.skill ?? "";
   const trait = (values.trait ?? "").toLowerCase();
   const ring = (values.ring ?? "").toLowerCase();
-  if (trait && ring) {
-    return buildFailure("l5r4.ui.links.errors.traitAndRing");
-  }
-  if (!skill && !trait && !ring) {
-    return buildFailure("l5r4.ui.links.errors.nothingToRoll");
-  }
-  if (skill && ring) {
-    return buildFailure("l5r4.ui.links.errors.skillWithRing");
-  }
-  // A Skill may be rolled with the Void Ring in place of a Trait (#7)
-  if (trait && !TRAIT_KEYS.includes(trait) && !(skill && trait === "void")) {
-    return buildFailure("l5r4.ui.links.errors.trait");
-  }
-  if (ring && !RING_KEYS.includes(ring)) {
-    return buildFailure("l5r4.ui.links.errors.ring");
+  const rollError = getCheckRollError({ skill, trait, ring });
+  if (rollError) {
+    return buildFailure(rollError);
   }
   let tn = null;
   if (values.tn !== undefined) {
@@ -141,6 +129,32 @@ function parseCheck(values) {
     }
   }
   return { ok: true, skill, trait, ring, tn };
+}
+
+/**
+ * What is wrong with what a Check link rolls. It rolls a Skill, a Trait, or a Ring; a Trait never with a Ring, a Ring
+ * never with a Skill; and only names it knows.
+ * @param {{skill: string, trait: string, ring: string}} roll - The link's values, Trait and Ring in lower case
+ * @returns {string|null} Localization key of the first problem, or null for none
+ */
+function getCheckRollError({ skill, trait, ring }) {
+  if (trait && ring) {
+    return "l5r4.ui.links.errors.traitAndRing";
+  }
+  if (!skill && !trait && !ring) {
+    return "l5r4.ui.links.errors.nothingToRoll";
+  }
+  if (skill && ring) {
+    return "l5r4.ui.links.errors.skillWithRing";
+  }
+  // A Skill may be rolled with the Void Ring in place of a Trait (#7)
+  if (trait && !TRAIT_KEYS.includes(trait) && !(skill && trait === "void")) {
+    return "l5r4.ui.links.errors.trait";
+  }
+  if (ring && !RING_KEYS.includes(ring)) {
+    return "l5r4.ui.links.errors.ring";
+  }
+  return null;
 }
 
 /**

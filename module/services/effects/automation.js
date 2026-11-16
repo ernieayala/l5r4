@@ -54,7 +54,9 @@ export async function endEncounter() {
     window: { title: T("l5r4.ui.effects.endEncounter") },
     content: await R(DIALOG_TEMPLATES.confirm, {
       question: T("l5r4.ui.effects.endEncounterConfirm")
-    })
+    }),
+    yes: { label: T("l5r4.ui.effects.endEncounter") },
+    no: { label: T("l5r4.ui.common.cancel") }
   });
   if (confirmed) {
     await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});

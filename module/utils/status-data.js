@@ -24,6 +24,21 @@ export function buildStatusEffectUpdate(source) {
   if (statuses.length === 0) {
     return null;
   }
+  const update = buildStatusFields(source, statuses);
+  if (Object.keys(update).length === 0) {
+    return null;
+  }
+  return source._id ? { _id: source._id, ...update } : update;
+}
+
+/**
+ * The fields an effect's source lacks that its statuses give: rules when it has none, the group, a level (a 3.2.1
+ * Fear effect's `flags.<id>.fearRank` first), and the expiry event of an untimed duration.
+ * @param {object} source - ActiveEffect source data
+ * @param {object[]} statuses - Its statuses' entries of STATUS_EFFECTS
+ * @returns {object} Update data by path; empty when nothing changes
+ */
+function buildStatusFields(source, statuses) {
   const system = source.system ?? {};
   const update = {};
   const rules = statuses.flatMap(status => structuredClone(status.system?.rules ?? []));
@@ -44,8 +59,5 @@ export function buildStatusEffectUpdate(source) {
   if (!source.duration?.expiry && expiry) {
     update["duration.expiry"] = expiry;
   }
-  if (Object.keys(update).length === 0) {
-    return null;
-  }
-  return source._id ? { _id: source._id, ...update } : update;
+  return update;
 }

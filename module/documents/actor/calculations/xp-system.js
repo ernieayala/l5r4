@@ -78,44 +78,10 @@ export function updateXpFlags(actor, changed) {
       return;
     }
 
-    const oldSys = actor._source.system;
+    const raised = raisedTraitsOf(actor, changed);
     const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
-
-    // Raised Traits, and the Void Ring, which a Family or School can raise as well
-    // game-rules/48_character_creation_expanded.md, p.102
-    const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => [
-      key,
-      value,
-      oldSys.traits[key]
-    ]);
-    if (changed?.system?.rings?.void?.rank !== undefined) {
-      raised.push(["void", changed.system.rings.void.rank, oldSys.rings.void.rank]);
-    }
-
-    for (const [k, v, old] of raised) {
-      const newBase = toInt(v);
-      const oldBase = toInt(old);
-      if (!Number.isFinite(newBase) || newBase <= oldBase) {
-        continue;
-      }
-      // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so every
-      // stored rank is bought and costs its multiple of the new rank with the bonus.
-      // game-rules/48_character_creation_expanded.md, p.103
-      const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
-      const freeBase = toInt(freeTraitBase[k] ?? 0);
-
-      // The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family and a School
-      // raising the same Trait give two
-      // game-rules/48_character_creation_expanded.md, p.102
-      let free = freeBase;
-      for (let r = oldBase + 1; r <= newBase; r++) {
-        if (free < legacyBonus && r === 3 + free) {
-          free++;
-        }
-      }
-      if (free !== freeBase) {
-        foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${k}`, free);
-      }
+    for (const raise of raised) {
+      updateFreeTraitBase(actor, changed, { ...raise, freeTraitBase });
     }
 
     // Reset retroactive version to recalculate XP
@@ -136,35 +102,30 @@ export function updateXpFlags(actor, changed) {
 function xpBuildOf(actor) {
   const flags = actor.flags?.[SYS_ID] ?? {};
   const xpManual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
-  const traitDiscounts = flags.traitDiscounts ?? {};
-  const freeTraitBase = flags.xpFreeTraitBase ?? {};
-  const stored = actor._source.system;
-
-  const items = [];
-  for (const item of actor.items) {
-    if (["advantage", "disadvantage"].includes(item.type)) {
-      items.push({ id: item.id, type: item.type, name: item.name, cost: toInt(item.system.cost) });
-    } else if (
-      ["kata", "kiho"].includes(item.type) ||
-      (item.type === "spell" && item.system.memorized === true)
-    ) {
-      // A kata, a kiho, and a memorized spell cost their Mastery Level (#43)
-      // game-rules/66_magic_and_spell_casting.md, p.164
-      // game-rules/80_brotherhood_of_shinsei.md, p.231
-      // game-rules/86_kata.md, p.259
-      items.push({
-        id: item.id,
-        type: item.type,
-        name: item.name,
-        cost: toInt(item.system.mastery)
-      });
-    }
-  }
+  const items = xpItemsOf(actor);
 
   return {
     base: Number.isFinite(+flags.xpBase) ? Number(flags.xpBase) : 40,
     manual: xpManual.reduce((sum, e) => sum + toInt(e?.delta), 0),
     disadvantageCap: Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10,
+    ...xpRanksOf(actor, flags),
+    skills: xpSkillsOf(actor),
+    items
+  };
+}
+
+/**
+ * The Traits and the Void Ring as XP prices them: each stored rank with its legacy free ranks, its Family and School
+ * bonus, and its discount.
+ * @param {Actor} actor
+ * @param {object} flags - The actor's system flags
+ * @returns {{traits: import("../../../utils/xp-ledger.js").XpTrait[], void: object}}
+ */
+function xpRanksOf(actor, flags) {
+  const traitDiscounts = flags.traitDiscounts ?? {};
+  const freeTraitBase = flags.xpFreeTraitBase ?? {};
+  const stored = actor._source.system;
+  return {
     traits: Object.keys(stored.traits).map(key => ({
       key,
       stored: toInt(stored.traits[key]),
@@ -177,17 +138,112 @@ function xpBuildOf(actor) {
       freeBase: toInt(freeTraitBase.void ?? 0),
       bonus: toInt(getCreationFreeBonus(actor, "void")),
       discount: toInt(traitDiscounts.void ?? 0)
-    },
-    skills: actor.items
-      .filter(item => item.type === "skill")
-      .map(item => ({
-        name: item.name,
-        type: item.system.type,
-        rank: toInt(item.system.rank),
-        freeRanks: toInt(item.system.freeRanks),
-        emphases: item.system.trainedEmphases.filter(Boolean),
-        freeEmphasis: toInt(item.system.freeEmphasis)
-      })),
-    items
+    }
   };
+}
+
+/**
+ * The Skills as XP prices them.
+ * @param {Actor} actor
+ * @returns {import("../../../utils/xp-ledger.js").XpSkill[]}
+ */
+function xpSkillsOf(actor) {
+  return actor.items
+    .filter(item => item.type === "skill")
+    .map(item => ({
+      name: item.name,
+      type: item.system.type,
+      rank: toInt(item.system.rank),
+      freeRanks: toInt(item.system.freeRanks),
+      emphases: item.system.trainedEmphases.filter(Boolean),
+      freeEmphasis: toInt(item.system.freeEmphasis)
+    }));
+}
+
+/**
+ * The priced items: Advantages and Disadvantages at their cost; a kata, a kiho, and a memorized spell at their
+ * Mastery Level (#43).
+ * game-rules/66_magic_and_spell_casting.md, p.164
+ * game-rules/80_brotherhood_of_shinsei.md, p.231
+ * game-rules/86_kata.md, p.259
+ * @param {Actor} actor
+ * @returns {import("../../../utils/xp-ledger.js").XpItem[]}
+ */
+function xpItemsOf(actor) {
+  const items = [];
+  for (const item of actor.items) {
+    if (["advantage", "disadvantage"].includes(item.type)) {
+      items.push({ id: item.id, type: item.type, name: item.name, cost: toInt(item.system.cost) });
+    } else if (
+      ["kata", "kiho"].includes(item.type) ||
+      (item.type === "spell" && item.system.memorized === true)
+    ) {
+      items.push({
+        id: item.id,
+        type: item.type,
+        name: item.name,
+        cost: toInt(item.system.mastery)
+      });
+    }
+  }
+  return items;
+}
+
+/**
+ * The Traits, and the Void Ring, that an update raises or sets: each key with its new and its stored value. A Family
+ * or School can raise the Void Ring as well.
+ * game-rules/48_character_creation_expanded.md, p.102
+ * @param {Actor} actor
+ * @param {object} changed - The update's changed data
+ * @returns {{key: string, value: *, old: *}[]}
+ */
+function raisedTraitsOf(actor, changed) {
+  const oldSys = actor._source.system;
+  const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => ({
+    key,
+    value,
+    old: oldSys.traits[key]
+  }));
+  if (changed?.system?.rings?.void?.rank !== undefined) {
+    raised.push({
+      key: "void",
+      value: changed.system.rings.void.rank,
+      old: oldSys.rings.void.rank
+    });
+  }
+  return raised;
+}
+
+/**
+ * Mark in `changed` the legacy free ranks one raised Trait reaches. Only the legacy fields are a stored rank: a
+ * TraitAdjust rule adds on top of the stored rank, so every stored rank is bought and costs its multiple of the new
+ * rank with the bonus. The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family
+ * and a School raising the same Trait give two.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * @param {Actor} actor
+ * @param {object} changed - The update's changed data, extended in place
+ * @param {object} raise
+ * @param {string} raise.key - The Trait key, or "void"
+ * @param {*} raise.value - The new value
+ * @param {*} raise.old - The stored value
+ * @param {Record<string, number>} raise.freeTraitBase - The free ranks already marked, by key
+ */
+function updateFreeTraitBase(actor, changed, { key, value, old, freeTraitBase }) {
+  const newBase = toInt(value);
+  const oldBase = toInt(old);
+  if (!Number.isFinite(newBase) || newBase <= oldBase) {
+    return;
+  }
+  const legacyBonus = toInt(getCreationFreeBonusSources(actor, key).legacy);
+  const freeBase = toInt(freeTraitBase[key] ?? 0);
+
+  let free = freeBase;
+  for (let r = oldBase + 1; r <= newBase; r++) {
+    if (free < legacyBonus && r === 3 + free) {
+      free++;
+    }
+  }
+  if (free !== freeBase) {
+    foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${key}`, free);
+  }
 }

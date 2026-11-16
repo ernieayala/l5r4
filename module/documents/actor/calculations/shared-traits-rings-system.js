@@ -33,59 +33,11 @@ export function ringsOf(t) {
  */
 export function prepareTraitsAndRings(sys) {
   try {
-    // Initialize derived data structure
-    sys._derived = sys._derived || {};
-    sys._derived.traitsEff = {};
-
-    // Normalize all trait values to integers
-    // Handles both {rank: X} format and direct numeric values
-    for (const k of TRAIT_KEYS) {
-      const v = sys.traits?.[k];
-      sys._derived.traitsEff[k] = toInt(v?.rank ?? v);
-    }
-
-    const t = sys._derived.traitsEff;
-
-    // Preserve Void Ring state before recalculating rings
-    // Void is bought on its own and tracks current/max points
-    const existingVoidRank = toInt(sys.rings?.void?.rank ?? 0);
-    const existingVoidValue = sys.rings?.void?.value;
-    const existingVoidMax = sys.rings?.void?.max;
-
-    // Calculate Ring values using L5R4 formula: min(trait1, trait2)
-    // This ensures a character must balance both traits to increase a Ring
-    sys.rings = {
-      ...ringsOf(t),
-      void: {
-        rank: existingVoidRank,
-        // Current Void Points (spent during play)
-        value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
-        // Maximum Void Points (total available)
-        max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
-      }
-    };
+    prepareEffectiveTraits(sys);
+    prepareRings(sys);
   } catch (err) {
     logError("Failed to prepare traits and rings", err);
-
-    // Provide safe fallback - default Ring values
-    sys._derived = sys._derived || {};
-    sys._derived.traitsEff = {
-      sta: 2,
-      wil: 2,
-      str: 2,
-      per: 2,
-      ref: 2,
-      awa: 2,
-      agi: 2,
-      int: 2
-    };
-    sys.rings = {
-      air: 2,
-      earth: 2,
-      fire: 2,
-      water: 2,
-      void: { rank: 2, value: 2, max: 2 }
-    };
+    prepareFallbackTraitsAndRings(sys);
   }
 }
 
@@ -108,4 +60,67 @@ export function prepareMovement(sys) {
   sys.movement.freeAction = effectiveWater * 5 * movementMultiplier + movementModifier;
   sys.movement.simpleAction = effectiveWater * 10 * movementMultiplier + movementModifier;
   sys.movement.maximum = effectiveWater * 20 * movementMultiplier + movementModifier;
+}
+
+/**
+ * Prepare `sys._derived.traitsEff`: every Trait as an integer, whether stored as `{rank}` or as a number.
+ * @param {object} sys - Actor's system data object to modify
+ */
+function prepareEffectiveTraits(sys) {
+  sys._derived = sys._derived || {};
+  sys._derived.traitsEff = {};
+
+  for (const k of TRAIT_KEYS) {
+    const v = sys.traits?.[k];
+    sys._derived.traitsEff[k] = toInt(v?.rank ?? v);
+  }
+}
+
+/**
+ * Prepare `sys.rings` from the effective Traits. The Void Ring is bought on its own: it keeps its rank, and its
+ * current and maximum Void Points fall back to the rank when unset.
+ * game-rules/25_rings_and_traits.md, p.76
+ * @param {object} sys - Actor's system data object to modify, after prepareEffectiveTraits
+ */
+function prepareRings(sys) {
+  // Read the Void Ring before the Rings are replaced
+  const existingVoidRank = toInt(sys.rings?.void?.rank ?? 0);
+  const existingVoidValue = sys.rings?.void?.value;
+  const existingVoidMax = sys.rings?.void?.max;
+
+  sys.rings = {
+    ...ringsOf(sys._derived.traitsEff),
+    void: {
+      rank: existingVoidRank,
+      // Current Void Points (spent during play)
+      value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
+      // Maximum Void Points (total available)
+      max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
+    }
+  };
+}
+
+/**
+ * Set every Trait and Ring to 2 after a failed preparation, so the rest of preparation goes on.
+ * @param {object} sys - Actor's system data object to modify
+ */
+function prepareFallbackTraitsAndRings(sys) {
+  sys._derived = sys._derived || {};
+  sys._derived.traitsEff = {
+    sta: 2,
+    wil: 2,
+    str: 2,
+    per: 2,
+    ref: 2,
+    awa: 2,
+    agi: 2,
+    int: 2
+  };
+  sys.rings = {
+    air: 2,
+    earth: 2,
+    fire: 2,
+    water: 2,
+    void: { rank: 2, value: 2, max: 2 }
+  };
 }

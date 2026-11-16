@@ -385,3 +385,18 @@ export async function changeThroughSheet(sheet, selector, value) {
   await saved;
   await sheet.render();
 }
+
+/**
+ * The text of a rendered dialog's buttons by their action, so a test can check each names what it does
+ * (docs/design-system/patterns/dialogs.md, rule 2).
+ * @param {foundry.applications.api.DialogV2} app
+ * @returns {Record<string, string>}
+ */
+export function buttonLabelsOf(app) {
+  return Object.fromEntries(
+    [...app.element.querySelectorAll("button[data-action]")].map(button => [
+      button.dataset.action,
+      button.textContent.trim()
+    ])
+  );
+}

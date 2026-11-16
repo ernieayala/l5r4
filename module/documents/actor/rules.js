@@ -8,13 +8,9 @@
  * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
  *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
  * 3. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
- * 4. `prepareWoundRollOption`, once the Wound Rank is known.
+ * 4. `prepareWoundRollOption` (roll-options.js), once the Wound Rank is known.
  *
- * Roll options: `status:<id>` for every active status (stances included), `armor:worn`, `ring:<ring>:<value>`,
- * `trait:<trait>:<value>`, `wound:<rank>`, `skill:<skill>:<rank>`, `clan:<name>`, `family:<name>`, `school:<name>`,
- * `item:<type>:<name>` for owned Advantages, Disadvantages, Techniques, kata, kiho, tattoos, and spells,
- * `honor-rank:<n>`, `glory-rank:<n>`, `status-rank:<n>`, `taint-rank:<n>`, `insight:<n>`, `school-rank:<n>`, plus
- * RollOption rules.
+ * The roll options themselves are module/documents/actor/roll-options.js.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -27,24 +23,13 @@ import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
 import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
 import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
-import { getHighestSchoolRank } from "../../utils/mechanics.js";
 import { getStackedModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { createRule } from "../../data/rules/rule-models.js";
+import { prepareInitialRollOptions, prepareRankRollOptions } from "./roll-options.js";
 
 /** Rule problems already reported, so a bad rule warns once, not on every preparation. */
 const reported = new Set();
-
-/** Item types an `item:<type>:<name>` roll option names, for prerequisites such as owning an Advantage. */
-const optionItemTypes = new Set([
-  "advantage",
-  "disadvantage",
-  "technique",
-  "kata",
-  "kiho",
-  "tattoo",
-  "spell"
-]);
 
 /**
  * Every valid rule that applies to the actor, sorted by priority. Rules come from items whose rules are active
@@ -54,41 +39,11 @@ const optionItemTypes = new Set([
  * @returns {import("../../utils/rule-engine.js").RuleEntry[]}
  */
 export function rulesOf(actor) {
-  const sources = [];
-  for (const item of actor.items) {
-    if (item.system.rulesActive) {
-      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
-      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
-      sources.push(
-        ...applyChoices(item.system.ownedRules)
-          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
-          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
-          .map(rule => ({
-            rule,
-            source: item.name,
-            itemId: item.id,
-            ...extra
-          }))
-      );
-    }
-  }
-  for (const effect of actor.appliedEffects) {
-    const extra = { effectUuid: effect.uuid };
-    if (effect.system.level !== null) {
-      extra.level = effect.system.level;
-    }
-    sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name, ...extra })));
-  }
-  // Taint Level 3 and 4 penalize social Skill rolls (STAGE-11 decision 5)
-  // game-rules/89_shadowlands_taint.md, p.278
-  const { socialPenalty } = getTaintEffects(toInt(actor.system.shadowTaint.rank));
-  if (socialPenalty) {
-    const source = game.i18n.localize("l5r4.ui.taint.label");
-    sources.push({
-      rule: { key: "RollModifier", selector: "skill-tag:social", roll: -socialPenalty },
-      source
-    });
-  }
+  const sources = [
+    ...itemRuleSourcesOf(actor),
+    ...effectRuleSourcesOf(actor),
+    ...taintRuleSourcesOf(actor)
+  ];
 
   const entries = [];
   for (const { rule, ...from } of sources) {
@@ -110,17 +65,7 @@ export function rulesOf(actor) {
  */
 export function applyInitialRules(actor) {
   actor.rules = rulesOf(actor);
-  actor.rollOptions = new Set([...actor.statuses].map(status => `status:${status}`));
-  if (actor.items.some(item => item.type === "armor" && item.system.equipped)) {
-    actor.rollOptions.add("armor:worn");
-  }
-  prepareItemRollOptions(actor, actor.rollOptions);
-  for (const track of ["honor", "glory", "status"]) {
-    if (actor.system[track]) {
-      actor.rollOptions.add(`${track}-rank:${toInt(actor.system[track].rank)}`);
-    }
-  }
-  actor.rollOptions.add(`taint-rank:${toInt(actor.system.shadowTaint.rank)}`);
+  prepareInitialRollOptions(actor);
 
   const { adjustments, errors } = getTraitAdjustments(
     actor.rules,
@@ -148,19 +93,7 @@ export function applyInitialRules(actor) {
  */
 export function applyDerivedRules(actor, sys) {
   const options = actor.rollOptions;
-  for (const ring of ["air", "earth", "fire", "water"]) {
-    options.add(`ring:${ring}:${toInt(sys.rings[ring])}`);
-  }
-  options.add(`ring:void:${toInt(sys.rings.void.rank)}`);
-  for (const [trait, value] of Object.entries(sys._derived.traitsEff)) {
-    options.add(`trait:${trait}:${toInt(value)}`);
-  }
-  if (sys.insight) {
-    options.add(`insight:${toInt(sys.insight.rank)}`);
-    if (actor.items.some(item => item.type === "school")) {
-      options.add(`school-rank:${getHighestSchoolRank(actor)}`);
-    }
-  }
+  prepareRankRollOptions(actor, sys);
   applyRollOptionRules(actor.rules, options);
 
   const out = getDerivedRuleOutputs(actor.rules, actor.getRollData(), options);
@@ -168,39 +101,10 @@ export function applyDerivedRules(actor, sys) {
     onRuleProblem(actor, source, message);
   }
 
-  sys.initiative.rollMod += out.initiative.roll;
-  sys.initiative.keepMod += out.initiative.keep;
-  sys.initiative.totalMod += out.initiative.total;
-  sys.woundsMod += out.woundsPerRank;
-  sys.woundsPenaltyMod += out.woundPenalty;
-  sys.armorTn.ruleReduction = out.reduction;
-  sys.movementWater = out.movementWater;
-  actor.armorRules = out.armor;
-  actor.reductionParts = out.reductionParts;
-  actor.damageDefenses = out.defenses;
-  actor.conditionImmunities = out.immunities;
-  actor.periodicSaves = out.saves;
-  actor.resources = out.resources;
-  actor.ledgerRules = out.ledger;
-  actor.ruleBag = out.bag;
-  // Penalties on every roll reach the Initiative roll too: Fear is on all die rolls, Dazed on all actions.
-  // RollModifier rules on "any" or "initiative" join the pool; optional and range-limited ones do not.
-  // game-rules/42_fear.md, p.90
-  // game-rules/41_conditional_effects.md, p.89
-  const initiativeOptions = new Set([...options, "check:initiative"]);
-  const onInitiative = getSelectorBonus(out.bag, ["any", "initiative"], {
-    options: initiativeOptions
-  });
-  sys.initiative.rollMod += onInitiative.roll;
-  sys.initiative.keepMod += onInitiative.keep;
-  sys.initiative.totalMod += onInitiative.total;
-  // Taint Level 4 costs a Void Point from the maximum, not from the Void Ring; the Lost have none
-  // game-rules/89_shadowlands_taint.md, p.278-279
-  sys.rings.void.max = getMaxVoidPoints(
-    toInt(sys.rings.void.rank),
-    toInt(sys.shadowTaint.rank),
-    getHighestRing(sys.rings)
-  );
+  applyRuleModifiers(sys, out);
+  prepareActorRuleOutputs(actor, out);
+  applyInitiativeRollModifiers(sys, { bag: out.bag, options });
+  prepareMaxVoidPoints(sys);
 }
 
 /**
@@ -226,17 +130,6 @@ export function applyArmorRules(actor, sys, { base, armor, other }) {
 }
 
 /**
- * Add the `wound:<rank>` roll option for the current Wound Rank.
- * @param {Actor} actor
- * @param {object} sys
- * @param {object} current - The current entry of `sys.woundLevels`.
- */
-export function prepareWoundRollOption(actor, sys, current) {
-  const rank = Object.keys(sys.woundLevels).find(key => sys.woundLevels[key] === current);
-  actor.rollOptions.add(`wound:${rank}`);
-}
-
-/**
  * Warn once about a rule that failed validation or whose value did not resolve.
  * @param {Actor} actor
  * @param {string} source
@@ -252,20 +145,131 @@ function onRuleProblem(actor, source, message) {
 }
 
 /**
- * The roll options of what the actor owns: `skill:<skill>:<rank>`, `clan:<name>`, `family:<name>`, `school:<name>`,
- * and `item:<type>:<name>`. Names are in lower case, as roll selectors are.
+ * The rule sources of the items whose rules are active, a choice not yet made waiting for it.
  * @param {Actor} actor
- * @param {Set<string>} options - Extended in place.
+ * @returns {object[]} Each rule with its source name, item id, and for a weapon its weapon id
  */
-function prepareItemRollOptions(actor, options) {
+function itemRuleSourcesOf(actor) {
+  const sources = [];
   for (const item of actor.items) {
-    const name = item.name.toLowerCase().trim();
-    if (item.type === "skill") {
-      options.add(`skill:${name}:${toInt(item.system.rank)}`);
-    } else if (["clan", "family", "school"].includes(item.type)) {
-      options.add(`${item.type}:${name}`);
-    } else if (optionItemTypes.has(item.type)) {
-      options.add(`item:${item.type}:${name}`);
+    if (item.system.rulesActive) {
+      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
+      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
+      sources.push(
+        ...applyChoices(item.system.ownedRules)
+          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
+          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
+          .map(rule => ({
+            rule,
+            source: item.name,
+            itemId: item.id,
+            ...extra
+          }))
+      );
     }
   }
+  return sources;
+}
+
+/**
+ * The rule sources of the applied effects.
+ * @param {Actor} actor
+ * @returns {object[]} Each rule with its source name, effect UUID, and the effect's level when it has one
+ */
+function effectRuleSourcesOf(actor) {
+  const sources = [];
+  for (const effect of actor.appliedEffects) {
+    const extra = { effectUuid: effect.uuid };
+    if (effect.system.level !== null) {
+      extra.level = effect.system.level;
+    }
+    sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name, ...extra })));
+  }
+  return sources;
+}
+
+/**
+ * The Taint rule source: Taint Level 3 and 4 penalize social Skill rolls (STAGE-11 decision 5).
+ * game-rules/89_shadowlands_taint.md, p.278
+ * @param {Actor} actor
+ * @returns {object[]} The penalty's rule, or none below Level 3
+ */
+function taintRuleSourcesOf(actor) {
+  const { socialPenalty } = getTaintEffects(toInt(actor.system.shadowTaint.rank));
+  if (!socialPenalty) {
+    return [];
+  }
+  const source = game.i18n.localize("l5r4.ui.taint.label");
+  return [
+    {
+      rule: { key: "RollModifier", selector: "skill-tag:social", roll: -socialPenalty },
+      source
+    }
+  ];
+}
+
+/**
+ * Add the Initiative, Wounds, Reduction, and movement outputs onto the prepared data.
+ * @param {object} sys - The actor's prepared system data
+ * @param {object} out - From getDerivedRuleOutputs
+ */
+function applyRuleModifiers(sys, out) {
+  sys.initiative.rollMod += out.initiative.roll;
+  sys.initiative.keepMod += out.initiative.keep;
+  sys.initiative.totalMod += out.initiative.total;
+  sys.woundsMod += out.woundsPerRank;
+  sys.woundsPenaltyMod += out.woundPenalty;
+  sys.armorTn.ruleReduction = out.reduction;
+  sys.movementWater = out.movementWater;
+}
+
+/**
+ * Keep on the actor the outputs later steps and the roll pipeline read: ArmorTN rules, Reduction parts, damage
+ * defenses, condition immunities, periodic saves, resources, ledger rules, and the modifier bag.
+ * @param {Actor} actor
+ * @param {object} out - From getDerivedRuleOutputs
+ */
+function prepareActorRuleOutputs(actor, out) {
+  actor.armorRules = out.armor;
+  actor.reductionParts = out.reductionParts;
+  actor.damageDefenses = out.defenses;
+  actor.conditionImmunities = out.immunities;
+  actor.periodicSaves = out.saves;
+  actor.resources = out.resources;
+  actor.ledgerRules = out.ledger;
+  actor.ruleBag = out.bag;
+}
+
+/**
+ * Add the roll modifiers on every roll to the Initiative pool: Fear is on all die rolls, Dazed on all actions.
+ * RollModifier rules on "any" or "initiative" join the pool; optional and range-limited ones do not.
+ * game-rules/42_fear.md, p.90
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {object} sys - The actor's prepared system data
+ * @param {object} rolls
+ * @param {object} rolls.bag - The modifier bag
+ * @param {Set<string>} rolls.options - The actor's roll options
+ */
+function applyInitiativeRollModifiers(sys, { bag, options }) {
+  const initiativeOptions = new Set([...options, "check:initiative"]);
+  const onInitiative = getSelectorBonus(bag, ["any", "initiative"], {
+    options: initiativeOptions
+  });
+  sys.initiative.rollMod += onInitiative.roll;
+  sys.initiative.keepMod += onInitiative.keep;
+  sys.initiative.totalMod += onInitiative.total;
+}
+
+/**
+ * Prepare the maximum Void Points: Taint Level 4 costs a Void Point from the maximum, not from the Void Ring; the
+ * Lost have none.
+ * game-rules/89_shadowlands_taint.md, p.278-279
+ * @param {object} sys - The actor's prepared system data
+ */
+function prepareMaxVoidPoints(sys) {
+  sys.rings.void.max = getMaxVoidPoints(
+    toInt(sys.rings.void.rank),
+    toInt(sys.shadowTaint.rank),
+    getHighestRing(sys.rings)
+  );
 }

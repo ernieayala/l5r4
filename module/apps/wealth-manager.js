@@ -68,7 +68,7 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    */
   get title() {
     const baseTitle = T("l5r4.apps.wealthManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**

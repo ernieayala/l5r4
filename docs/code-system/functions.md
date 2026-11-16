@@ -105,7 +105,7 @@ notification.
 | Utils shape       | `module/utils/validators.js:44`: `validateEmphasisName` returns `{ valid, error }`              | `module/utils/validators.js:49`: `error` holds English text, not a key; `module/utils/link-syntax.js:127`: `{ ok: false, error: "l5r4.ui.links.error.pool" }` uses `ok` |
 | Warn, then `null` | `module/services/dice/check/spell-slots.js:40-49`: `planSlot` warns and returns `null`          | `module/services/dice/resources/void-points.js:144`: `spendVoidPoint` returns `{ success, rollBonus, keepBonus, message }` and leaves the warning to its caller         |
 | GM side throws    | `module/services/combat/damage.js:243-282`: `runDamageAction` throws on a request it refuses    | none found                                                                                                                                                              |
-| Dismissed prompt  | `module/services/dice/check/roll-check.js:299-306`: `DialogV2.prompt` with `rejectClose: false` | `module/services/chat.js:93`: `rejectClose: true`, caught and turned into `{ cancelled: true }`                                                                         |
+| Dismissed prompt  | `module/services/dice/check/roll-check.js:299-306`: `DialogV2.prompt` with `rejectClose: false` | none found                                                                                                                                                              |
 
 ## Async code
 

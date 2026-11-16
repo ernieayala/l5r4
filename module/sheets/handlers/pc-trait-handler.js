@@ -114,35 +114,13 @@ export class PcTraitHandler {
       return RollHandler.rollClickedTrait(context, event, element);
     }
 
-    // Read current base trait value (pending changes in _source take precedence)
-    const base =
-      Number(
-        context.actor._source?.system?.traits?.[key] ?? context.actor.system?.traits?.[key] ?? 0
-      ) || 0;
-
-    // Get family bonus for this trait (+1 for family's bonus trait, 0 otherwise)
-    const fam = FamilyBonusService.getBonus(context.actor, key);
-
-    // Calculate current effective trait (what user sees on sheet)
-    const effNow = base + fam;
-
-    // Define effective trait bounds
-    // Min: Cannot go below family bonus (base trait can't be negative)
-    // Max: 9 (⚠️ Note: game rules state traits go to 10, but this caps at 9)
-    const effMin = Math.max(0, fam);
-    const effMax = 9;
-
-    // Calculate desired and clamped effective trait values
-    const wantEff = effNow + (delta > 0 ? 1 : -1);
-    const nextEff = getClamped(wantEff, effMin, effMax);
+    const change = this.#getBaseTraitChange(context.actor, key, delta);
 
     // No-op if already at boundary
-    if (nextEff === effNow) {
+    if (!change) {
       return;
     }
-
-    // Convert effective trait back to base trait for storage
-    const nextBase = nextEff - fam;
+    const { base, nextBase } = change;
 
     try {
       // Update actor with new base trait value (diff:true = efficient update)
@@ -282,5 +260,43 @@ export class PcTraitHandler {
     }
 
     return submitData;
+  }
+
+  /**
+   * The base Trait a one-step adjustment stores: the effective Trait (base + family bonus) moved by one and kept
+   * between the family bonus and 9, less the family bonus.
+   * @param {Actor} actor - A PC
+   * @param {string} key - The Trait key
+   * @param {number} delta - Positive to raise, else lower
+   * @returns {{base: number, nextBase: number}|null} The current and new base, or null when the effective Trait is
+   * already at its bound
+   */
+  static #getBaseTraitChange(actor, key, delta) {
+    // Read current base trait value (pending changes in _source take precedence)
+    const base =
+      Number(actor._source?.system?.traits?.[key] ?? actor.system?.traits?.[key] ?? 0) || 0;
+
+    // Get family bonus for this trait (+1 for family's bonus trait, 0 otherwise)
+    const fam = FamilyBonusService.getBonus(actor, key);
+
+    // Calculate current effective trait (what user sees on sheet)
+    const effNow = base + fam;
+
+    // Define effective trait bounds
+    // Min: Cannot go below family bonus (base trait can't be negative)
+    // Max: 9 (⚠️ Note: game rules state traits go to 10, but this caps at 9)
+    const effMin = Math.max(0, fam);
+    const effMax = 9;
+
+    // Calculate desired and clamped effective trait values
+    const wantEff = effNow + (delta > 0 ? 1 : -1);
+    const nextEff = getClamped(wantEff, effMin, effMax);
+
+    if (nextEff === effNow) {
+      return null;
+    }
+
+    // Convert effective trait back to base trait for storage
+    return { base, nextBase: nextEff - fam };
   }
 }

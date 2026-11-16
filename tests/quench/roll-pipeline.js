@@ -17,7 +17,12 @@ import { applyEffect } from "../../module/services/effects/apply.js";
 import { ledgerEntriesOf, applyTrackChange } from "../../module/services/ledger.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
-import { answerCheckDialog, cleanTest, settleChatNotifications } from "./helpers.js";
+import {
+  answerCheckDialog,
+  buttonLabelsOf,
+  cleanTest,
+  settleChatNotifications
+} from "./helpers.js";
 
 /**
  * The rolled and kept dice of a message's pool.
@@ -233,14 +238,15 @@ export function registerRollPipelineTests(quench) {
             ]);
             const picked = new Promise(resolve =>
               Hooks.once("renderDialogV2", app => {
+                const labels = buttonLabelsOf(app);
                 app.element.querySelector("[name=element]").value = "water";
                 app.element.querySelector('[data-action="ok"]').click();
-                resolve();
+                resolve(labels);
               })
             );
             const slots = { ...actor._source.system.spellSlots };
             const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
-            await picked;
+            assert.equal((await picked).ok, game.i18n.localize("l5r4.magic.spells.castInElement"));
             const water = actor.system.rings.water;
             assert.equal(poolOf(message), `${water + actor.system.insight.rank}k${water}`);
             assert.equal(
@@ -263,13 +269,16 @@ export function registerRollPipelineTests(quench) {
             const answer = action =>
               new Promise(resolve =>
                 Hooks.once("renderDialogV2", app => {
+                  const labels = buttonLabelsOf(app);
                   app.element.querySelector(`[data-action="${action}"]`).click();
-                  resolve();
+                  resolve(labels);
                 })
               );
             let answered = answer("no");
             assert.isNull(await rollSpellCast({ actor, spell, showDialog: false }), "declined");
-            await answered;
+            const labels = await answered;
+            assert.equal(labels.yes, game.i18n.localize("l5r4.ui.common.allow"));
+            assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
             answered = answer("yes");
             const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             await answered;

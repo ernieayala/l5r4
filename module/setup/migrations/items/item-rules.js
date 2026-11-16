@@ -83,34 +83,7 @@ function changedTraitOf(change) {
  * @returns {Promise<boolean>} Whether the item changed.
  */
 async function migrateCreationBonusEffects(item) {
-  const rules = [];
-  const deletions = [];
-  const updates = [];
-  for (const effect of item.effects) {
-    if (!effect.transfer) {
-      continue;
-    }
-    const kept = [];
-    let moved = false;
-    for (const change of effect._source.system.changes) {
-      const trait = changedTraitOf(change);
-      const value = Number(change.value);
-      if (trait && Number.isFinite(value)) {
-        rules.push({ key: "TraitAdjust", trait, value });
-        moved = true;
-      } else {
-        kept.push(change);
-      }
-    }
-    if (!moved) {
-      continue;
-    }
-    if (kept.length === 0 && effect.statuses.size === 0) {
-      deletions.push(effect.id);
-    } else {
-      updates.push({ _id: effect.id, "system.changes": kept });
-    }
-  }
+  const { rules, updates, deletions } = buildCreationBonusMoves(item);
   if (rules.length === 0) {
     return false;
   }
@@ -126,6 +99,55 @@ async function migrateCreationBonusEffects(item) {
     await item.deleteEmbeddedDocuments("ActiveEffect", deletions, { render: false });
   }
   return true;
+}
+
+/**
+ * What moving a Family or School item's Trait bonuses into rules does: the TraitAdjust rules, the effects that keep
+ * other changes, and the effects left empty, which are deleted.
+ * @param {Item} item
+ * @returns {{rules: object[], updates: object[], deletions: string[]}} The rules to add, the effect updates, and the
+ * ids of the effects to delete
+ */
+function buildCreationBonusMoves(item) {
+  const rules = [];
+  const deletions = [];
+  const updates = [];
+  for (const effect of item.effects) {
+    if (!effect.transfer) {
+      continue;
+    }
+    const { moved, kept } = buildTraitAdjustMoves(effect);
+    if (moved.length === 0) {
+      continue;
+    }
+    rules.push(...moved);
+    if (kept.length === 0 && effect.statuses.size === 0) {
+      deletions.push(effect.id);
+    } else {
+      updates.push({ _id: effect.id, "system.changes": kept });
+    }
+  }
+  return { rules, updates, deletions };
+}
+
+/**
+ * Split one effect's changes: each numeric Trait or Void "add" change becomes a TraitAdjust rule, and the rest stay.
+ * @param {ActiveEffect} effect
+ * @returns {{moved: object[], kept: object[]}} The TraitAdjust rules and the changes the effect keeps
+ */
+function buildTraitAdjustMoves(effect) {
+  const moved = [];
+  const kept = [];
+  for (const change of effect._source.system.changes) {
+    const trait = changedTraitOf(change);
+    const value = Number(change.value);
+    if (trait && Number.isFinite(value)) {
+      moved.push({ key: "TraitAdjust", trait, value });
+    } else {
+      kept.push(change);
+    }
+  }
+  return { moved, kept };
 }
 
 /**

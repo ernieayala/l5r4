@@ -103,7 +103,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    */
   get title() {
     const baseTitle = T("l5r4.apps.woundConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**
@@ -219,46 +219,24 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
   _validateFieldValue(field, value) {
     switch (field) {
       case "woundMode":
-        if (!VALID_WOUND_MODES.includes(value)) {
-          console.warn(`${SYS_ID}`, `Invalid woundMode: ${value}. Must be "manual" or "formula".`);
-          return null;
-        }
-        return value;
+        return validateWoundMode(value);
 
-      case "woundsMultiplier": {
-        const mult = Number(value);
-        if (!Number.isInteger(mult) || mult < MIN_WOUND_MULTIPLIER || mult > MAX_WOUND_MULTIPLIER) {
-          console.warn(
-            `${SYS_ID}`,
-            `Invalid woundsMultiplier: ${value}. Must be integer ${MIN_WOUND_MULTIPLIER}-${MAX_WOUND_MULTIPLIER}.`
-          );
-          return null;
-        }
-        return mult;
-      }
+      case "woundsMultiplier":
+        return validateWholeNumber(field, value, {
+          min: MIN_WOUND_MULTIPLIER,
+          max: MAX_WOUND_MULTIPLIER
+        });
 
-      case "nrWoundLvls": {
-        const lvl = Number(value);
-        if (!Number.isInteger(lvl) || lvl < MIN_NPC_WOUND_LEVELS || lvl > MAX_NPC_WOUND_LEVELS) {
-          console.warn(
-            `${SYS_ID}`,
-            `Invalid nrWoundLvls: ${value}. Must be integer ${MIN_NPC_WOUND_LEVELS}-${MAX_NPC_WOUND_LEVELS}.`
-          );
-          return null;
-        }
-        return lvl;
-      }
+      case "nrWoundLvls":
+        return validateWholeNumber(field, value, {
+          min: MIN_NPC_WOUND_LEVELS,
+          max: MAX_NPC_WOUND_LEVELS
+        });
 
       case "woundsMod":
       case "woundsPenaltyMod":
-      case "wounds.mod": {
-        const mod = Number(value);
-        if (!Number.isFinite(mod)) {
-          console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
-          return null;
-        }
-        return Math.floor(mod);
-      }
+      case "wounds.mod":
+        return validateModifier(field, value);
 
       default:
         return value;
@@ -341,4 +319,50 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
     }
   }
+}
+
+/**
+ * A wound mode from the form: "manual" or "formula".
+ * @param {*} value
+ * @returns {string|null} The mode, or null when it is neither
+ */
+function validateWoundMode(value) {
+  if (!VALID_WOUND_MODES.includes(value)) {
+    console.warn(`${SYS_ID}`, `Invalid woundMode: ${value}. Must be "manual" or "formula".`);
+    return null;
+  }
+  return value;
+}
+
+/**
+ * A whole number from the form within its field's range.
+ * @param {string} field - The field name, for the warning
+ * @param {*} value
+ * @param {object} range
+ * @param {number} range.min - The least value allowed
+ * @param {number} range.max - The greatest value allowed
+ * @returns {number|null} The number, or null when it is not a whole number in range
+ */
+function validateWholeNumber(field, value, { min, max }) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be integer ${min}-${max}.`);
+    return null;
+  }
+  return number;
+}
+
+/**
+ * A Wound or penalty modifier from the form, rounded down.
+ * @param {string} field - The field name, for the warning
+ * @param {*} value
+ * @returns {number|null} The modifier, or null when it is not a finite number
+ */
+function validateModifier(field, value) {
+  const mod = Number(value);
+  if (!Number.isFinite(mod)) {
+    console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
+    return null;
+  }
+  return Math.floor(mod);
 }

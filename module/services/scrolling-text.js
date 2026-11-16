@@ -56,24 +56,34 @@ export function onUpdateActorScrollingText(actor, _changes, options) {
     if (!token.visible || token.document.isSecret) {
       continue;
     }
-    changes.forEach(({ id, delta }, i) => {
-      const nameKey = FLOATING_RESOURCES.find(resource => resource.id === id).nameKey;
-      canvas.interface.createScrollingText(
-        { x: token.center.x, y: token.center.y - i * 0.3 * token.h },
-        formatFloatingText(delta, T(nameKey)),
-        {
-          anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
-          direction: CONST.TEXT_ANCHOR_POINTS.TOP,
-          distance: reduced ? 0 : 2 * token.h,
-          fontSize: 28,
-          fill: COLORS[id][delta > 0 ? "up" : "down"],
-          stroke: 0x000000,
-          strokeThickness: 4,
-          jitter: reduced ? 0 : 0.25
-        }
-      );
-    });
+    startScrollingText(token, changes, { reduced });
   }
+}
+
+/**
+ * Float each change over one token, stacked upward in the order given.
+ * @param {Token} token - A token this user can see
+ * @param {Array<{id: string, delta: number}>} changes - The changed resources
+ * @param {{reduced: boolean}} motion - Whether the user prefers reduced motion
+ */
+function startScrollingText(token, changes, { reduced }) {
+  changes.forEach(({ id, delta }, i) => {
+    const nameKey = FLOATING_RESOURCES.find(resource => resource.id === id).nameKey;
+    canvas.interface.createScrollingText(
+      { x: token.center.x, y: token.center.y - i * 0.3 * token.h },
+      formatFloatingText(delta, T(nameKey)),
+      {
+        anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
+        direction: CONST.TEXT_ANCHOR_POINTS.TOP,
+        distance: reduced ? 0 : 2 * token.h,
+        fontSize: 28,
+        fill: COLORS[id][delta > 0 ? "up" : "down"],
+        stroke: 0x000000,
+        strokeThickness: 4,
+        jitter: reduced ? 0 : 0.25
+      }
+    );
+  });
 }
 
 /**

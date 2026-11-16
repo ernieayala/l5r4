@@ -10,10 +10,13 @@ import { getIconPath } from "../utils/icons.js";
 import { on } from "../utils/dom.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
+import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
 import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
+import { RestHandler } from "./handlers/rest-handler.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { SortHandler } from "./handlers/sort-handler.js";
+import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 import { openImageEditor } from "./ui/image-editor.js";
 import { TRAIT_DRAG_TYPE } from "./ui/macros.js";
@@ -42,6 +45,48 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     classes: ["l5r4", "l5r4-actor-sheet"],
     form: { submitOnChange: true }
   };
+
+  /**
+   * The click actions both actor sheets share: each `data-action` value with the step it runs, which gets the sheet,
+   * the click, and the element. Each sheet spreads these into its own table and adds its own actions
+   * (the actor-sheet exception, docs/code-system/foundry-patterns.md); _onAction looks the action up there.
+   *
+   * @type {Readonly<Record<string, function(BaseActorSheet, Event, HTMLElement): unknown>>}
+   */
+  static CLICK_ACTIONS = Object.freeze({
+    "apply-healing": (sheet, event, element) =>
+      RestHandler.applyHealing(sheet._getHandlerContext(), event, element),
+    "update-item-field": (sheet, event, element) => sheet._onInlineItemEdit(event, element),
+    "create-item": (sheet, event, element) => sheet._onItemCreate(event, element),
+    "delete-item": (sheet, event, element) => sheet._onItemDelete(event, element),
+    "edit-item": (sheet, event, element) => sheet._onItemEdit(event, element),
+    "expand-item": (sheet, event, element) => sheet._onItemExpand(event, element),
+    "expand-section": (sheet, event, element) =>
+      ItemCrudHandler.updateSectionCollapsed(sheet._getHandlerContext(), event, element),
+    "post-item": (sheet, event, element) => sheet._onItemHeaderToChat(event, element),
+    "sort-items": (sheet, event, element) => sheet._onUnifiedSortClick(event, element),
+    "adjust-void-ring": (sheet, event, element) =>
+      TraitHandler.updateVoidRing(sheet._getHandlerContext(), event, element, +1),
+    // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
+    "increase-void-ring": (sheet, event, element) =>
+      TraitHandler.updateVoidRing(sheet._getHandlerContext(), buildShiftClick(event), element, +1),
+    "decrease-void-ring": (sheet, event, element) =>
+      TraitHandler.updateVoidRing(sheet._getHandlerContext(), buildShiftClick(event), element, -1),
+    "roll-skill": (sheet, event, element) => sheet._onSkillRoll(event, element),
+    "roll-trait": (sheet, event, element) => sheet._onTraitRoll(event, element),
+    "roll-weapon-attack": (sheet, event, element) => sheet._onWeaponAttackRoll(event, element),
+    "cast-spell": (sheet, event, element) =>
+      RollHandler.rollClickedSpellCast(sheet._getHandlerContext(), event, element),
+    "adjust-void-points": (sheet, event, element) => sheet._onVoidPointsAdjust(event, element, +1),
+    "toggle-movement-type": (sheet, event) =>
+      StanceHandler.updateMovementType(sheet._getHandlerContext(), event),
+    "open-condition-manager": (sheet, event, element) =>
+      AppLauncherHandler.openConditionManager(sheet._getHandlerContext(), event, element),
+    "open-combat-config": (sheet, event, element) =>
+      AppLauncherHandler.openCombatConfig(sheet._getHandlerContext(), event, element),
+    "open-wound-config": (sheet, event, element) =>
+      AppLauncherHandler.openWoundConfig(sheet._getHandlerContext(), event, element)
+  });
 
   /**
    * Adds the sort header columns of every list (module/config/sort-keys.js), which the section partials pass to
@@ -93,31 +138,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
       return;
     }
 
-    on(root, "click", {
-      selector: "[data-action]",
-      handler: (ev, el) => {
-        const action = el.getAttribute("data-action");
-        this._onAction(action, ev, el);
-      }
-    });
-
-    on(root, "contextmenu", {
-      selector: "[data-action]",
-      handler: (ev, el) => {
-        ev.preventDefault();
-        const action = el.getAttribute("data-action");
-        this._onActionContext(action, ev, el);
-      },
-      capture: true
-    });
-
-    on(root, "change", {
-      selector: "[data-action]",
-      handler: (ev, el) => {
-        const action = el.getAttribute("data-action");
-        this._onActionChange(action, ev, el);
-      }
-    });
+    this.#bindActionEvents(root);
 
     this._setupImageErrorHandling(root);
 
@@ -152,19 +173,17 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   }
 
   /**
-   * Extension point for handling click events on [data-action] elements.
+   * Routes a click on a [data-action] element to its step in the sheet class's CLICK_ACTIONS table. Called by the
+   * delegated click handler in _onRender; an action the table lacks does nothing.
    *
-   * Subclasses override this method to implement action routing via switch
-   * statements. Called by the delegated click handler in _onRender.
-   *
-   * Actions are identified by data-action attribute values on interactive elements.
-   *
-   * @param {string} _action - The data-action attribute value
-   * @param {Event} _ev - The click event
-   * @param {HTMLElement} _el - The element that was clicked
+   * @param {string} action - The data-action attribute value
+   * @param {Event} event - The click event
+   * @param {HTMLElement} element - The element that was clicked
+   * @returns {unknown} What the action's step returns
    */
-  _onAction(_action, _ev, _el) {
-    // Extension point for subclasses
+  _onAction(action, event, element) {
+    const actions = this.constructor.CLICK_ACTIONS;
+    return Object.hasOwn(actions, action) ? actions[action](this, event, element) : undefined;
   }
 
   /**
@@ -619,4 +638,47 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     this._boundRoot = null;
     return super.close(options);
   }
+
+  /**
+   * Route click, right-click, and change on any [data-action] element to _onAction, _onActionContext, and
+   * _onActionChange. A right-click's own menu is suppressed.
+   * @param {HTMLElement} root - The sheet's root element
+   */
+  #bindActionEvents(root) {
+    on(root, "click", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
+        const action = el.getAttribute("data-action");
+        this._onAction(action, ev, el);
+      }
+    });
+
+    on(root, "contextmenu", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
+        ev.preventDefault();
+        const action = el.getAttribute("data-action");
+        this._onActionContext(action, ev, el);
+      },
+      capture: true
+    });
+
+    on(root, "change", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
+        const action = el.getAttribute("data-action");
+        this._onActionChange(action, ev, el);
+      }
+    });
+  }
+}
+
+/**
+ * A click stand-in that counts as a Shift-click, for the arrows that step a value without Shift; preventing its
+ * default prevents the real click's.
+ * @param {Event} event - The real click
+ * @returns {{preventDefault: function(): void, shiftKey: true}}
+ */
+function buildShiftClick(event) {
+  return { preventDefault: () => event.preventDefault(), shiftKey: true };
 }

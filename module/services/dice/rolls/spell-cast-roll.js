@@ -44,6 +44,38 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
   if (!ring) {
     return null;
   }
+  const ranks = await validateCastingRanks(actor, spell, ring);
+  if (!ranks) {
+    return null;
+  }
+  const { rank, shift, schoolRank, mastery } = ranks;
+  const slots = getSlotDialogData(actor, ring);
+
+  return rollCheck({
+    actor,
+    kind: "spell",
+    label: formatCastingLabel(spell, shift),
+    base: { roll: rank + schoolRank, keep: rank },
+    ring,
+    tn: 5 + 5 * mastery,
+    askForOptions: showDialog,
+    extras: { template: DIALOG_TEMPLATES.checkSpell, data: slots },
+    ...buildSlotHooks(actor, spell, { ring, slots })
+  });
+}
+
+/**
+ * The ranks a cast rolls with, after checking the caster may cast it: the Ring, the School Rank shifted by the
+ * school's Affinity or Deficiency, which must be above 0, and the Mastery Level, which above that School Rank needs
+ * a GM's leave.
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * @param {Actor} actor - The caster
+ * @param {Item} spell - The spell
+ * @param {string} ring - The element it is cast in
+ * @returns {Promise<{rank: number, shift: number, schoolRank: number, mastery: number}|null>} null when the cast is
+ *   blocked
+ */
+async function validateCastingRanks(actor, spell, ring) {
   const rank = ringRankOf(actor, ring);
   const shift = getAffinityDeficiencyModifier(actor, ring);
   const schoolRank = getCastingSchoolRank(actor) + shift;
@@ -64,22 +96,35 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
   ) {
     return null;
   }
-  const slots = getSlotDialogData(actor, ring);
-  let slotPath = null;
-  let label = `${T("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
-  if (shift) {
-    label += ` [${T(`l5r4.magic.spells.${shift > 0 ? "affinity" : "deficiency"}`)}]`;
-  }
+  return { rank, shift, schoolRank, mastery };
+}
 
-  return rollCheck({
-    actor,
-    kind: "spell",
-    label,
-    base: { roll: rank + schoolRank, keep: rank },
-    ring,
-    tn: 5 + 5 * mastery,
-    askForOptions: showDialog,
-    extras: { template: DIALOG_TEMPLATES.checkSpell, data: slots },
+/**
+ * The cast's label: the spell's name, and the school's Affinity or Deficiency when it shifts the School Rank.
+ * @param {Item} spell - The spell
+ * @param {number} shift - The Affinity or Deficiency shift to the School Rank
+ * @returns {string}
+ */
+function formatCastingLabel(spell, shift) {
+  const label = `${T("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
+  if (!shift) {
+    return label;
+  }
+  return `${label} [${T(`l5r4.magic.spells.${shift > 0 ? "affinity" : "deficiency"}`)}]`;
+}
+
+/**
+ * The cast's roll hooks: before the roll, the slot the dialog picks is checked and named on the card; once the roll
+ * is made, that slot is spent whatever the result, and a successful Concentration spell starts its Concentration.
+ * game-rules/66_magic_and_spell_casting.md, p.163
+ * @param {Actor} actor - The caster
+ * @param {Item} spell - The spell
+ * @param {{ring: string, slots: object}} slotData - The element and the slot dialog's data
+ * @returns {{prepare: Function, after: Function}} rollCheck's `prepare` and `after`
+ */
+function buildSlotHooks(actor, spell, { ring, slots }) {
+  let slotPath = null;
+  return {
     prepare: async choices => {
       const slot = getSlotToSpend(actor, ring, choices.slot ?? slots.slot);
       if (!slot) {
@@ -94,7 +139,7 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
         await startConcentration(actor, spell);
       }
     }
-  });
+  };
 }
 
 /**
@@ -113,7 +158,10 @@ async function askElement(spell) {
         label: T(`l5r4.ui.mechanics.rings.${value}`)
       }))
     }),
-    ok: { callback: (_event, button) => button.form.elements.element.value || null },
+    ok: {
+      label: T("l5r4.magic.spells.castInElement"),
+      callback: (_event, button) => button.form.elements.element.value || null
+    },
     rejectClose: false,
     modal: true
   });

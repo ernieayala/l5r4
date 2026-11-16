@@ -9,7 +9,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
-import { R, T } from "../utils/localization.js";
+import { F, R, T } from "../utils/localization.js";
 import { buildPool, parseRollAndKeep, getPoolFormula } from "../utils/check.js";
 import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
@@ -20,9 +20,8 @@ const DIALOG = foundry.applications.api.DialogV2;
 /**
  * Item creation result object
  * @typedef {object} ItemCreateResult
- * @property {string} [name] - Name of the item to create (only present if not cancelled)
- * @property {string} [type] - Item type identifier (only present if not cancelled)
- * @property {boolean} [cancelled] - True if dialog was cancelled or invalid input provided
+ * @property {string} name - Name of the item to create
+ * @property {string} type - Item type identifier
  */
 
 /**
@@ -33,18 +32,17 @@ const DIALOG = foundry.applications.api.DialogV2;
  * - PC actors: All item types (skills, advantages, disadvantages, equipment, spells, etc.)
  * - NPC actors: Skills only (simplified NPC sheet)
  *
- * Dialog uses Foundry v13+ DialogV2.prompt() with rejectClose behavior, meaning
- * clicking outside the dialog or pressing Escape is treated as cancellation rather
- * than rejection, returning {cancelled: true} instead of throwing.
+ * Closing the dialog resolves null (`rejectClose: false`, docs/code-system/functions.md, Result or problem).
  *
  * Validation:
- * - Item name is required (empty names return {cancelled: true})
+ * - Item name is required (an empty name gives null)
  * - Item type defaults to "commonItem" if not provided
  * - Form element access uses fallback pattern: button.form ?? dialog.form.
  *
  * @param {string} actorType - Actor type ("pc" or "npc") to determine available item types
  * @param {string|null} [preferredType=null] - Item type to pre-select in dialog (e.g., "skill", "advantage")
- * @returns {Promise<ItemCreateResult>} Object with {name, type} on success, {cancelled: true} on cancellation
+ * @returns {Promise<ItemCreateResult|null>} The name and type, or null when the dialog is closed or the name is
+ *   empty
  */
 export async function getUnifiedItemOptions(actorType, preferredType = null) {
   const showCharacterItems = actorType === "pc";
@@ -56,39 +54,16 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
     preferredType
   });
 
-  try {
-    const result = await DIALOG.prompt({
-      window: { title: T("l5r4.ui.sheets.addItem") },
-      content,
-      ok: {
-        label: T("l5r4.ui.common.ok"),
-        callback: (_ev, button, dialog) => {
-          // Fallback pattern: button.form exists in most cases, dialog.form as backup
-          // This handles edge cases where button might not have direct form reference
-          const form = button.form ?? dialog.form;
-          if (!form) {
-            return { cancelled: true };
-          }
-
-          const name = String(form.elements.itemName?.value ?? "").trim();
-          const type = String(form.elements.itemType?.value ?? "").trim() || "commonItem";
-
-          if (!name) {
-            return { cancelled: true };
-          }
-
-          return { name, type };
-        }
-      },
-      cancel: { label: T("l5r4.ui.common.cancel") },
-      rejectClose: true,
-      modal: true
-    });
-
-    return result ?? { cancelled: true };
-  } catch {
-    return { cancelled: true };
-  }
+  return DIALOG.prompt({
+    window: { title: T("l5r4.ui.sheets.addItem") },
+    content,
+    ok: {
+      label: T("l5r4.ui.sheets.addItem"),
+      callback: getItemCreateResult
+    },
+    rejectClose: false,
+    modal: true
+  });
 }
 
 /**
@@ -128,33 +103,10 @@ export function bindLegacyAttackCard(message, html) {
       }
       isProcessing = true;
       try {
-        const data = event.currentTarget.dataset;
-        const validation = validateAttackRaises(
-          parseInt(data.attackRaises) || 0,
-          message.flags?.[SYS_ID]?.attackRaises ?? 0
-        );
-        if (!validation.valid) {
-          ui.notifications?.error(validation.error);
-          return;
+        const request = validateLegacyDamageClick(message, event);
+        if (request) {
+          await rollWeaponDamage(request);
         }
-        const actor = game.actors.get(data.actorId);
-        if (!actor) {
-          ui.notifications?.warn(T("l5r4.ui.notifications.actorNotFound"));
-          return;
-        }
-        if (!actor.isOwner && !game.user.isGM) {
-          ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
-          return;
-        }
-        await rollWeaponDamage({
-          roll: getClamped(parseInt(data.damageRoll) || 0, 0, 99),
-          keep: getClamped(parseInt(data.damageKeep) || 0, 0, 99),
-          weaponName: data.weaponName,
-          weapon: actor.items.get(data.weaponId) ?? null,
-          askForOptions: !event.shiftKey,
-          attackRaises: validation.sanitized,
-          actor
-        });
       } finally {
         isProcessing = false;
       }
@@ -200,4 +152,67 @@ export function onChatMessage(chatlog, message) {
     return false;
   }
   return true;
+}
+
+/**
+ * The item creation dialog's answer, read from its form: the name and type, or null when the form is missing or
+ * the name is empty.
+ * @param {Event} _event - The submit event
+ * @param {HTMLButtonElement} button - The pressed button
+ * @param {foundry.applications.api.DialogV2} dialog - The dialog
+ * @returns {ItemCreateResult|null}
+ */
+function getItemCreateResult(_event, button, dialog) {
+  // Fallback pattern: button.form exists in most cases, dialog.form as backup
+  // This handles edge cases where button might not have direct form reference
+  const form = button.form ?? dialog.form;
+  if (!form) {
+    return null;
+  }
+
+  const name = String(form.elements.itemName?.value ?? "").trim();
+  const type = String(form.elements.itemType?.value ?? "").trim() || "commonItem";
+
+  if (!name) {
+    return null;
+  }
+
+  return { name, type };
+}
+
+/**
+ * Check a legacy attack card's damage click and read its roll: the card's Raises checked against the message flag,
+ * the actor found and its owner checked, the weapon's dice clamped. A refused click warns and gives null.
+ * @param {ChatMessage} message - The attack card
+ * @param {MouseEvent} event - The damage button's click
+ * @returns {object|null} The options rollWeaponDamage takes, or null when the click is refused
+ */
+function validateLegacyDamageClick(message, event) {
+  const data = event.currentTarget.dataset;
+  const validation = validateAttackRaises(
+    parseInt(data.attackRaises) || 0,
+    message.flags?.[SYS_ID]?.attackRaises ?? 0
+  );
+  if (!validation.valid) {
+    ui.notifications?.error(F(validation.error, validation.data));
+    return null;
+  }
+  const actor = game.actors.get(data.actorId);
+  if (!actor) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.actorNotFound"));
+    return null;
+  }
+  if (!actor.isOwner && !game.user.isGM) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
+    return null;
+  }
+  return {
+    roll: getClamped(parseInt(data.damageRoll) || 0, 0, 99),
+    keep: getClamped(parseInt(data.damageKeep) || 0, 0, 99),
+    weaponName: data.weaponName,
+    weapon: actor.items.get(data.weaponId) ?? null,
+    askForOptions: !event.shiftKey,
+    attackRaises: validation.sanitized,
+    actor
+  };
 }

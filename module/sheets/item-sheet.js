@@ -45,6 +45,12 @@ const WIDTH_BY_TYPE = Object.freeze({
   commonItem: 640
 });
 
+/**
+ * The system fields the sheet shows as enriched HTML.
+ * @type {ReadonlyArray<string>}
+ */
+const HTML_FIELDS = Object.freeze(["description", "specialRules", "demands", "effect"]);
+
 /* ------------------------------------------ */
 /* Sheet                                      */
 /* ------------------------------------------ */
@@ -218,31 +224,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context = await super._prepareContext(context, options);
 
     const item = this.item;
-    const system = foundry.utils.deepClone(item.system ?? {});
-
-    const toSystemString = k => {
-      if (system[k] == null) {
-        system[k] = "";
-      } else if (typeof system[k] !== "string") {
-        system[k] = String(system[k]);
-      }
-    };
-
-    for (const k of ["description", "specialRules", "demands", "effect"]) {
-      toSystemString(k);
-    }
-
-    const formatEnrichedHtml = html =>
-      TextEditor.enrichHTML(html ?? "", {
-        async: true,
-        secrets: this.isEditable,
-        documents: true,
-        links: true
-      });
-
-    const keys = ["description", "specialRules", "demands", "effect"];
-    const values = await Promise.all(keys.map(k => formatEnrichedHtml(system[k])));
-    const enriched = Object.fromEntries(keys.map((k, i) => [k, values[i]]));
+    const system = buildSheetSystem(item);
+    const enriched = await formatEnrichedFields(system, { secrets: this.isEditable });
 
     context.item = item;
     context.system = system;
@@ -259,42 +242,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       buildRulesEditorContext(item._source.system.rules, this.rulesMode, this.isEditable)
     );
 
-    // Weapon skill integration: When weapon is owned by a PC, populate skill dropdown
-    // from parent actor's skill items. This enables players to associate specific skills
-    // with weapons for roll automation (e.g., Kenjutsu with katana, Kyujutsu with yumi).
-    if (item.type === "weapon" && item.parent?.type === "pc") {
-      const actor = item.parent;
-      const skills = actor.items.filter(i => i.type === "skill");
-      context.skillOptions = {};
-      context.skillOptions[""] = game.i18n.localize("l5r4.ui.common.none");
-
-      for (const skill of skills) {
-        context.skillOptions[skill.name] = skill.name;
-      }
-
-      context.hasCharacterSkills = skills.length > 0;
-      context.isOwnedByCharacter = true;
-    } else {
-      context.hasCharacterSkills = false;
-      context.isOwnedByCharacter = false;
-      context.skillOptions = {};
-    }
-
-    // Tab management: Build tab state for template rendering
-    // Determines which tabs are available for this item type and which is currently active
-    const availableTabs = this._getAvailableTabs(item.type);
-
-    // Set default tab to first available if not set
-    if (!this.#currentTab || !availableTabs.includes(this.#currentTab)) {
-      this.#currentTab = availableTabs[0];
-    }
-
-    context.tabs = availableTabs.map(tabId => ({
-      id: tabId,
-      label: game.i18n.localize(`l5r4.ui.tabs.${tabId}`),
-      active: tabId === this.#currentTab
-    }));
-    context.currentTab = this.#currentTab;
+    Object.assign(context, buildSkillOptions(item));
+    Object.assign(context, this.#prepareTabs(item.type));
 
     return context;
   }
@@ -503,6 +452,90 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   static #onDeleteEffect(event, element) {
     return ItemEffectsHandler.deleteEffect({ item: this.item }, event, element);
   }
+
+  /**
+   * The tabs this item type shows, with the open one marked; the open tab falls back to the first when unset or not
+   * among them.
+   * @param {string} itemType
+   * @returns {{tabs: object[], currentTab: string}}
+   */
+  #prepareTabs(itemType) {
+    // Determines which tabs are available for this item type and which is currently active
+    const availableTabs = this._getAvailableTabs(itemType);
+
+    // Set default tab to first available if not set
+    if (!this.#currentTab || !availableTabs.includes(this.#currentTab)) {
+      this.#currentTab = availableTabs[0];
+    }
+
+    return {
+      tabs: availableTabs.map(tabId => ({
+        id: tabId,
+        label: game.i18n.localize(`l5r4.ui.tabs.${tabId}`),
+        active: tabId === this.#currentTab
+      })),
+      currentTab: this.#currentTab
+    };
+  }
+}
+
+/**
+ * The item's system data for the sheet: a copy with each HTML field as a string, empty when unset.
+ * @param {Item} item
+ * @returns {object}
+ */
+function buildSheetSystem(item) {
+  const system = foundry.utils.deepClone(item.system ?? {});
+  for (const k of HTML_FIELDS) {
+    if (system[k] == null) {
+      system[k] = "";
+    } else if (typeof system[k] !== "string") {
+      system[k] = String(system[k]);
+    }
+  }
+  return system;
+}
+
+/**
+ * Each HTML field enriched with core's links, `@UUID` references, and secrets, all at once.
+ * @param {object} system - The sheet's copy of the system data
+ * @param {object} options
+ * @param {boolean} options.secrets - Show secret blocks: the user can edit the item
+ * @returns {Promise<Record<string, string>>} Enriched HTML by field
+ */
+async function formatEnrichedFields(system, { secrets }) {
+  const values = await Promise.all(
+    HTML_FIELDS.map(k =>
+      TextEditor.enrichHTML(system[k] ?? "", {
+        async: true,
+        secrets,
+        documents: true,
+        links: true
+      })
+    )
+  );
+  return Object.fromEntries(HTML_FIELDS.map((k, i) => [k, values[i]]));
+}
+
+/**
+ * A weapon a PC owns lists the PC's skills, after "None", to associate one with the weapon for its attack rolls
+ * (Kenjutsu with a katana, Kyujutsu with a yumi); any other item lists none.
+ * @param {Item} item
+ * @returns {{skillOptions: Record<string, string>, hasCharacterSkills: boolean, isOwnedByCharacter: boolean}}
+ */
+function buildSkillOptions(item) {
+  if (item.type !== "weapon" || item.parent?.type !== "pc") {
+    return { hasCharacterSkills: false, isOwnedByCharacter: false, skillOptions: {} };
+  }
+  const skills = item.parent.items.filter(i => i.type === "skill");
+  const skillOptions = {};
+  skillOptions[""] = game.i18n.localize("l5r4.ui.common.none");
+
+  for (const skill of skills) {
+    skillOptions[skill.name] = skill.name;
+  }
+
+  return { skillOptions, hasCharacterSkills: skills.length > 0, isOwnedByCharacter: true };
 }
 
 /**

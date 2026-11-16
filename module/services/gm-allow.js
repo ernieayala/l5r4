@@ -5,6 +5,7 @@
  */
 
 import { DIALOG_TEMPLATES } from "../config/templates.js";
+import { T } from "../utils/localization.js";
 
 /**
  * Refuse a forbidden roll for a player, or ask the GM to allow it.
@@ -24,6 +25,8 @@ export async function askGmAllow({ title, reason, ask }) {
     content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
       question: reason,
       consequence: ask
-    })
+    }),
+    yes: { label: T("l5r4.ui.common.allow") },
+    no: { label: T("l5r4.ui.common.cancel") }
   });
 }

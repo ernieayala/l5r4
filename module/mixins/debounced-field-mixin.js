@@ -59,19 +59,7 @@ export function DebouncedFieldMixin(Base) {
      */
     _onRender(context, options) {
       super._onRender?.(context, options);
-
-      if (!this.element) {
-        console.warn(`${SYS_ID}`, `${this.constructor.name} _onRender: No element`);
-        return;
-      }
-
-      // Attach change listeners to all fields with data-action="update-field"
-      const fields = this.element.querySelectorAll('[data-action="update-field"]');
-      fields.forEach(field => {
-        field.addEventListener("change", event => {
-          this._onFieldChange(event, event.target);
-        });
-      });
+      bindFieldChanges(this);
     }
 
     /**
@@ -82,32 +70,7 @@ export function DebouncedFieldMixin(Base) {
      * @param {HTMLElement} element - The form field element that changed
      */
     async _onFieldChange(event, element) {
-      const field = element.name;
-
-      // Type coercion based on field type
-      const value =
-        element.type === "checkbox"
-          ? element.checked
-          : element.type === "number" || element.dataset.type === "Number"
-            ? toInt(element.value, 0)
-            : element.value;
-
-      if (!field) {
-        console.warn(`${SYS_ID}`, "Field change with no field name");
-        return;
-      }
-
-      // Optional validation hook - subclasses can implement this
-      if (typeof this._validateFieldValue === "function") {
-        const validatedValue = this._validateFieldValue(field, value);
-        if (validatedValue === null) {
-          // Validation failed - subclass should handle notification
-          return;
-        }
-        this.updateDebounced(field, validatedValue);
-      } else {
-        this.updateDebounced(field, value);
-      }
+      updateFieldValue(this, element);
     }
 
     /**
@@ -149,4 +112,65 @@ export function DebouncedFieldMixin(Base) {
       return super.close(options);
     }
   };
+}
+
+/**
+ * Listen for `change` on every `[data-action="update-field"]` field of the rendered window.
+ * @param {ApplicationV2} app - A window with the mixin
+ */
+function bindFieldChanges(app) {
+  if (!app.element) {
+    console.warn(`${SYS_ID}`, `${app.constructor.name} _onRender: No element`);
+    return;
+  }
+
+  // Attach change listeners to all fields with data-action="update-field"
+  const fields = app.element.querySelectorAll('[data-action="update-field"]');
+  fields.forEach(field => {
+    field.addEventListener("change", event => {
+      app._onFieldChange(event, event.target);
+    });
+  });
+}
+
+/**
+ * Queue the debounced update of a changed field with its coerced value, once the window's validation accepts it.
+ * @param {ApplicationV2} app - A window with the mixin
+ * @param {HTMLElement} element - The form field element that changed
+ */
+function updateFieldValue(app, element) {
+  const field = element.name;
+  const value = toFieldValue(element);
+
+  if (!field) {
+    console.warn(`${SYS_ID}`, "Field change with no field name");
+    return;
+  }
+
+  // Optional validation hook - subclasses can implement this
+  if (typeof app._validateFieldValue === "function") {
+    const validatedValue = app._validateFieldValue(field, value);
+    if (validatedValue === null) {
+      // Validation failed - subclass should handle notification
+      return;
+    }
+    app.updateDebounced(field, validatedValue);
+  } else {
+    app.updateDebounced(field, value);
+  }
+}
+
+/**
+ * A form field's value by its type: a checkbox's checked state, a number field's integer, or the text.
+ * @param {HTMLInputElement} element
+ * @returns {boolean|number|string}
+ */
+function toFieldValue(element) {
+  if (element.type === "checkbox") {
+    return element.checked;
+  }
+  if (element.type === "number" || element.dataset.type === "Number") {
+    return toInt(element.value, 0);
+  }
+  return element.value;
 }

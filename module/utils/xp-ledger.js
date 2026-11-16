@@ -114,70 +114,12 @@ export function getCostPricer({ costs, options, rollData, report = () => {} }) {
  * @returns {XpEntry[]}
  */
 export function getXpEntries(build, price = (_selectors, base) => base) {
-  const entries = [];
-
-  for (const trait of build.traits) {
-    const bonus = trait.freeBase > 0 ? 0 : trait.bonus;
-    for (let r = 2 + trait.freeBase + 1; r <= trait.stored; r++) {
-      const base = Math.max(0, TRAIT_XP_MULTIPLIER * (r + bonus) + trait.discount);
-      entries.push({
-        type: "trait",
-        name: trait.key,
-        from: r - 1,
-        to: r,
-        delta: price([`trait:${trait.key}`], base)
-      });
-    }
-  }
-
-  // The Void Ring's Family or School bonus raises each rank's price as a Trait's does (#44)
-  // game-rules/48_character_creation_expanded.md, p.103
-  const voidBonus = build.void.freeBase > 0 ? 0 : build.void.bonus;
-  for (let r = 2 + build.void.freeBase + 1; r <= build.void.stored; r++) {
-    const base = Math.max(0, VOID_XP_MULTIPLIER * (r + voidBonus) + build.void.discount);
-    entries.push({
-      type: "void",
-      name: "void",
-      from: r - 1,
-      to: r,
-      delta: price(["ring:void"], base)
-    });
-  }
-
-  for (const skill of build.skills) {
-    const selectors = [`skill:${skill.name.toLowerCase().trim()}`, `skill-type:${skill.type}`];
-    for (let r = Math.max(0, skill.freeRanks) + 1; r <= skill.rank; r++) {
-      entries.push({
-        type: "skill",
-        name: skill.name,
-        from: r - 1,
-        to: r,
-        delta: price(selectors, Math.max(0, SKILL_XP_MULTIPLIER * r))
-      });
-    }
-    for (const emphasis of skill.emphases.slice(Math.max(0, skill.freeEmphasis))) {
-      entries.push({
-        type: "emphasis",
-        name: skill.name,
-        emphasis,
-        delta: price(["emphasis"], EMPHASIS_XP_COST)
-      });
-    }
-  }
-
-  for (const item of build.items) {
-    if (item.type === "disadvantage") {
-      entries.push({ type: item.type, name: item.name, delta: -Math.max(0, item.cost) });
-    } else {
-      entries.push({
-        type: item.type,
-        name: item.name,
-        delta: price([`item:${item.type}`], Math.max(0, item.cost), item.id)
-      });
-    }
-  }
-
-  return entries;
+  return [
+    ...getTraitEntries(build.traits, price),
+    ...getVoidEntries(build.void, price),
+    ...getSkillEntries(build.skills, price),
+    ...getItemEntries(build.items, price)
+  ];
 }
 
 /**
@@ -214,4 +156,108 @@ export function getXpTotals(build, entries) {
     breakdown.kiho +
     breakdown.spells;
   return { total, spent, available: total - spent, breakdown };
+}
+
+/**
+ * Each Trait rank bought: four times the new rank, its Family and School bonus included.
+ * game-rules/48_character_creation_expanded.md, p.103
+ * @param {XpTrait[]} traits
+ * @param {function(string[], number): number} price
+ * @returns {XpEntry[]}
+ */
+function getTraitEntries(traits, price) {
+  const entries = [];
+  for (const trait of traits) {
+    const bonus = trait.freeBase > 0 ? 0 : trait.bonus;
+    for (let r = 2 + trait.freeBase + 1; r <= trait.stored; r++) {
+      const base = Math.max(0, TRAIT_XP_MULTIPLIER * (r + bonus) + trait.discount);
+      entries.push({
+        type: "trait",
+        name: trait.key,
+        from: r - 1,
+        to: r,
+        delta: price([`trait:${trait.key}`], base)
+      });
+    }
+  }
+  return entries;
+}
+
+/**
+ * Each Void Ring rank bought: six times the new rank. The Void Ring's Family or School bonus raises each rank's price
+ * as a Trait's does (#44).
+ * game-rules/48_character_creation_expanded.md, p.103
+ * @param {XpBuild["void"]} voidRing
+ * @param {function(string[], number): number} price
+ * @returns {XpEntry[]}
+ */
+function getVoidEntries(voidRing, price) {
+  const entries = [];
+  const voidBonus = voidRing.freeBase > 0 ? 0 : voidRing.bonus;
+  for (let r = 2 + voidRing.freeBase + 1; r <= voidRing.stored; r++) {
+    const base = Math.max(0, VOID_XP_MULTIPLIER * (r + voidBonus) + voidRing.discount);
+    entries.push({
+      type: "void",
+      name: "void",
+      from: r - 1,
+      to: r,
+      delta: price(["ring:void"], base)
+    });
+  }
+  return entries;
+}
+
+/**
+ * Each Skill rank bought above the ranks a School gave, at the new rank, and each Emphasis past the free one, at 2.
+ * game-rules/48_character_creation_expanded.md, p.103
+ * @param {XpSkill[]} skills
+ * @param {function(string[], number): number} price
+ * @returns {XpEntry[]}
+ */
+function getSkillEntries(skills, price) {
+  const entries = [];
+  for (const skill of skills) {
+    const selectors = [`skill:${skill.name.toLowerCase().trim()}`, `skill-type:${skill.type}`];
+    for (let r = Math.max(0, skill.freeRanks) + 1; r <= skill.rank; r++) {
+      entries.push({
+        type: "skill",
+        name: skill.name,
+        from: r - 1,
+        to: r,
+        delta: price(selectors, Math.max(0, SKILL_XP_MULTIPLIER * r))
+      });
+    }
+    for (const emphasis of skill.emphases.slice(Math.max(0, skill.freeEmphasis))) {
+      entries.push({
+        type: "emphasis",
+        name: skill.name,
+        emphasis,
+        delta: price(["emphasis"], EMPHASIS_XP_COST)
+      });
+    }
+  }
+  return entries;
+}
+
+/**
+ * Each priced item: an Advantage, kata, kiho, or memorized spell at its cost; a Disadvantage as the XP it gives,
+ * unpriced.
+ * @param {XpItem[]} items
+ * @param {function(string[], number, string|null=): number} price
+ * @returns {XpEntry[]}
+ */
+function getItemEntries(items, price) {
+  const entries = [];
+  for (const item of items) {
+    if (item.type === "disadvantage") {
+      entries.push({ type: item.type, name: item.name, delta: -Math.max(0, item.cost) });
+    } else {
+      entries.push({
+        type: item.type,
+        name: item.name,
+        delta: price([`item:${item.type}`], Math.max(0, item.cost), item.id)
+      });
+    }
+  }
+  return entries;
 }

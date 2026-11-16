@@ -615,9 +615,15 @@ export function registerInitiativeTests(quench) {
           const confirm = foundry.applications.api.DialogV2.confirm;
           let prompts = 0;
           let content = "";
+          let buttons = {};
           foundry.applications.api.DialogV2.confirm = async options => {
             prompts += 1;
             content = options.content;
+            buttons = {
+              title: options.window?.title,
+              yes: options.yes?.label,
+              no: options.no?.label
+            };
             return true;
           };
           const formulas = [];
@@ -639,6 +645,15 @@ export function registerInitiativeTests(quench) {
           assert.equal(
             question.textContent,
             game.i18n.localize("l5r4.ui.combat.initiativeVoidQuestion", { name: actor.name })
+          );
+          assert.deepEqual(
+            buttons,
+            {
+              title: game.i18n.localize("l5r4.ui.combat.initiativeVoidTitle", { name: actor.name }),
+              yes: game.i18n.localize("l5r4.ui.common.spendVoidPoint"),
+              no: game.i18n.localize("l5r4.ui.common.cancel")
+            },
+            "the title and buttons are localized and the buttons name the action"
           );
           assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
           assert.isFalse(actor.system.initiative.useVoid, "mark cleared");

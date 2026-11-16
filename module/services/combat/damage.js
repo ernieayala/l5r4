@@ -131,22 +131,7 @@ async function applyToActor(damageMessage, actor) {
  * @returns {Promise<ChatMessage>}
  */
 async function postResult(actor, result, existing) {
-  const notes = [];
-  if (result.reduction) {
-    notes.push(F("l5r4.ui.combat.reductionNote", { reduction: result.reduction }));
-  }
-  if (result.spirit) {
-    notes.push(T("l5r4.ui.combat.spiritNote"));
-  }
-  if (result.invulnerable) {
-    notes.push(T("l5r4.ui.combat.invulnerableNote"));
-  }
-  if (result.voidSpent) {
-    notes.push(F("l5r4.ui.combat.voidNote", { wounds: getVoidReduction(result.wounds) }));
-  }
-  if (result.killed) {
-    notes.push(T("l5r4.ui.combat.killedNote"));
-  }
+  const notes = buildResultNotes(result);
   const taken = result.wounds - (result.voidSpent ? getVoidReduction(result.wounds) : 0);
   const content = await foundry.applications.handlebars.renderTemplate(
     CHAT_TEMPLATES.damageResult,
@@ -167,6 +152,31 @@ async function postResult(actor, result, existing) {
     return existing;
   }
   return ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor }), content, flags });
+}
+
+/**
+ * The notes a damage result card lists: Reduction, Spirit, Invulnerability, a Void Point spent, and a kill.
+ * @param {object} result - The card's flags
+ * @returns {string[]} The localized notes, in that order
+ */
+function buildResultNotes(result) {
+  const notes = [];
+  if (result.reduction) {
+    notes.push(F("l5r4.ui.combat.reductionNote", { reduction: result.reduction }));
+  }
+  if (result.spirit) {
+    notes.push(T("l5r4.ui.combat.spiritNote"));
+  }
+  if (result.invulnerable) {
+    notes.push(T("l5r4.ui.combat.invulnerableNote"));
+  }
+  if (result.voidSpent) {
+    notes.push(F("l5r4.ui.combat.voidNote", { wounds: getVoidReduction(result.wounds) }));
+  }
+  if (result.killed) {
+    notes.push(T("l5r4.ui.combat.killedNote"));
+  }
+  return notes;
 }
 
 /**
@@ -227,19 +237,7 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     throw new Error(`No message ${messageId}`);
   }
   if (action === "apply") {
-    const actor = await fromUuid(String(actorUuid));
-    const roller = fromUuidSync(message.system.actorUuid);
-    if (
-      message.type !== "roll" ||
-      message.system.kind !== "damage" ||
-      actor?.documentName !== "Actor"
-    ) {
-      throw new Error("Not a damage roll and an actor");
-    }
-    if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
-      throw new Error("Only the roller or a GM applies this damage");
-    }
-    await applyToActor(message, actor);
+    await applyRequestedDamage(message, actorUuid, user);
     return;
   }
   const result = message.getFlag(SYS_ID, "damageResult");
@@ -260,6 +258,30 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     }
     await applyDamageUndo(message);
   }
+}
+
+/**
+ * Apply a damage roll to the actor a request names, as the GM: the message must be a damage roll, the uuid an actor,
+ * and the requesting user the roller or a GM.
+ * @param {ChatMessage} message - The damage roll
+ * @param {string} actorUuid - The actor to damage, from the request
+ * @param {User} user - The requesting user
+ * @returns {Promise<void>}
+ */
+async function applyRequestedDamage(message, actorUuid, user) {
+  const actor = await fromUuid(String(actorUuid));
+  const roller = fromUuidSync(message.system.actorUuid);
+  if (
+    message.type !== "roll" ||
+    message.system.kind !== "damage" ||
+    actor?.documentName !== "Actor"
+  ) {
+    throw new Error("Not a damage roll and an actor");
+  }
+  if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
+    throw new Error("Only the roller or a GM applies this damage");
+  }
+  await applyToActor(message, actor);
 }
 
 /**

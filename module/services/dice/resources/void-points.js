@@ -147,12 +147,7 @@ export async function spendVoidPoint(actor) {
 
   // Early validation: actor must exist before acquiring lock
   if (!resolvedActor) {
-    return {
-      success: false,
-      rollBonus: 0,
-      keepBonus: 0,
-      message: T("l5r4.ui.notifications.noActorForVoid")
-    };
+    return buildVoidRefusal(T("l5r4.ui.notifications.noActorForVoid"));
   }
 
   // Step 2: Execute spending with exclusive lock to prevent race conditions
@@ -162,12 +157,7 @@ export async function spendVoidPoint(actor) {
 
     // Step 4: Early return if validation failed (no Void available)
     if (!validation.valid) {
-      return {
-        success: false,
-        rollBonus: 0,
-        keepBonus: 0,
-        message: validation.message
-      };
+      return buildVoidRefusal(validation.message);
     }
 
     warnVoidLimit(resolvedActor);
@@ -190,6 +180,20 @@ export async function spendVoidPoint(actor) {
       message: null
     };
   });
+}
+
+/**
+ * A Void Point spend that failed: no bonuses, and the reason.
+ * @param {string} message - The localized reason
+ * @returns {VoidSpendResult}
+ */
+function buildVoidRefusal(message) {
+  return {
+    success: false,
+    rollBonus: 0,
+    keepBonus: 0,
+    message
+  };
 }
 
 /**

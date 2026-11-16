@@ -59,8 +59,24 @@ function optionActionsOf(tree) {
 }
 
 /**
- * The actions a tree's code handles: option keys, the actor sheets' `case` labels (the actor-sheet exception,
- * docs/code-system/foundry-patterns.md), and the `[data-action='x']` selectors services bind on chat cards.
+ * The keys of an actor sheet's `CLICK_ACTIONS` table: each quoted key opening a line between the table's start and
+ * its closing `});` at class-member indentation.
+ * @param {string} text - A module's text
+ * @returns {string[]} The table's actions
+ */
+function clickActionsOf(text) {
+  const start = text.search(/\bCLICK_ACTIONS\s*=\s*Object\.freeze\(\{/);
+  if (start < 0) {
+    return [];
+  }
+  const table = text.slice(start, text.indexOf("\n  });", start));
+  return [...table.matchAll(/^\s*["']([\w-]+)["']\s*:/gm)].map(([, action]) => action);
+}
+
+/**
+ * The actions a tree's code handles: option keys, the actor sheets' `CLICK_ACTIONS` keys and `case` labels (the
+ * actor-sheet exception, docs/code-system/foundry-patterns.md), and the `[data-action='x']` selectors services bind
+ * on chat cards.
  * @param {import("../../tools/conventions/shared.mjs").Tree} tree - The tree
  * @returns {Set<string>} The handled action names
  */
@@ -69,6 +85,9 @@ function handledActionsOf(tree) {
   for (const path of tree.files("module", /\.js$/)) {
     const text = tree.text(path);
     if (path.startsWith("module/sheets/")) {
+      for (const action of clickActionsOf(text)) {
+        handled.add(action);
+      }
       for (const [, action] of text.matchAll(/\bcase\s+["']([\w-]+)["']\s*:/g)) {
         handled.add(action);
       }

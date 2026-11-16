@@ -42,52 +42,97 @@ export function formatSkillLabel(skillName) {
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
 export async function rollSkill({
-  traitRank = null,
-  skillRank = null,
-  skillName = null,
-  skillTrait = null,
   askForOptions = true,
-  rollBonus = 0,
-  keepBonus = 0,
-  totalBonus = 0,
   actor = null,
   rollType = null,
-  weaponId = null
+  weaponId = null,
+  ...skill
 } = {}) {
   const roller = getRollActor(actor);
+  const weapon = weaponId ? roller.items.get(weaponId) : null;
+  return rollCheck({
+    actor: roller,
+    kind: rollType === "attack" ? "attack" : "skill",
+    ...buildSkillTerms(roller, skill),
+    weapon,
+    ranged: Boolean(weapon?.system.isBow),
+    askForOptions
+  });
+}
+
+/**
+ * What a Skill Roll rolls: (Skill + Trait)k(Trait), an Unskilled Roll at rank 0, the Skill's trained Emphases, and
+ * the caller's extra dice as a modifier.
+ * game-rules/29_types_of_rolls.md, p.79
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * @param {L5R4Actor} roller - The roller
+ * @param {object} skill - rollSkill's Skill options
+ * @param {number|null} [skill.traitRank=null] - The Trait's effective rank (kept dice)
+ * @param {number|null} [skill.skillRank=null] - Skill rank (rolled dice); 0 is an Unskilled Roll
+ * @param {string|null} [skill.skillName=null] - Skill name, for its item, Emphases, and rules
+ * @param {string|null} [skill.skillTrait=null] - Trait key ("void" for the Void Ring)
+ * @param {number} [skill.rollBonus=0] - Extra rolled dice from the caller, listed as a modifier
+ * @param {number} [skill.keepBonus=0] - Extra kept dice from the caller
+ * @param {number} [skill.totalBonus=0] - Extra flat bonus from the caller
+ * @returns {object} The check request's label, pool, Skill, Trait, Emphases, and modifiers
+ */
+function buildSkillTerms(
+  roller,
+  {
+    traitRank = null,
+    skillRank = null,
+    skillName = null,
+    skillTrait = null,
+    rollBonus = 0,
+    keepBonus = 0,
+    totalBonus = 0
+  }
+) {
   const trait = toInt(traitRank);
   const rank = toInt(skillRank);
   const skillKey = String(skillName ?? "").toLowerCase();
   const skillItem = roller.items.find(i => i.type === "skill" && i.name.toLowerCase() === skillKey);
-  const traitLabel = T(
-    skillTrait === "void"
-      ? "l5r4.ui.mechanics.rings.void"
-      : `l5r4.ui.mechanics.traits.${skillTrait}`
-  );
-  const weapon = weaponId ? roller.items.get(weaponId) : null;
-
-  const modifiers = [];
-  if (rollBonus || keepBonus || totalBonus) {
-    modifiers.push({
-      label: T("l5r4.ui.check.caller"),
-      roll: toInt(rollBonus),
-      keep: toInt(keepBonus),
-      total: toInt(totalBonus)
-    });
-  }
-
-  return rollCheck({
-    actor: roller,
-    kind: rollType === "attack" ? "attack" : "skill",
-    label: `${T("l5r4.ui.mechanics.rolls.skillRoll")}: ${formatSkillLabel(skillName)} / ${traitLabel}`,
+  return {
+    label: formatSkillRollLabel(skillName, skillTrait),
     base: { roll: trait + rank, keep: trait },
     skill: skillKey,
     trait: skillTrait,
     unskilled: rank === 0,
     emphases: skillItem?.system.trainedEmphases ?? [],
-    weapon,
-    ranged: Boolean(weapon?.system.isBow),
-    modifiers,
-    askForOptions
-  });
+    modifiers: buildCallerModifiers({ rollBonus, keepBonus, totalBonus })
+  };
+}
+
+/**
+ * A Skill Roll's label: the Skill's localized name and its Trait's, or the Void Ring's.
+ * @param {string|null} skillName - The Skill's name
+ * @param {string|null} skillTrait - The Trait key, or "void"
+ * @returns {string}
+ */
+function formatSkillRollLabel(skillName, skillTrait) {
+  const traitLabel = T(
+    skillTrait === "void"
+      ? "l5r4.ui.mechanics.rings.void"
+      : `l5r4.ui.mechanics.traits.${skillTrait}`
+  );
+  return `${T("l5r4.ui.mechanics.rolls.skillRoll")}: ${formatSkillLabel(skillName)} / ${traitLabel}`;
+}
+
+/**
+ * The caller's extra dice and bonus as one modifier, when there are any.
+ * @param {{rollBonus: number, keepBonus: number, totalBonus: number}} bonuses - Rolled, kept, and flat extras
+ * @returns {object[]}
+ */
+function buildCallerModifiers({ rollBonus, keepBonus, totalBonus }) {
+  if (!(rollBonus || keepBonus || totalBonus)) {
+    return [];
+  }
+  return [
+    {
+      label: T("l5r4.ui.check.caller"),
+      roll: toInt(rollBonus),
+      keep: toInt(keepBonus),
+      total: toInt(totalBonus)
+    }
+  ];
 }

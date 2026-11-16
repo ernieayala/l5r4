@@ -78,8 +78,8 @@ export function validateEmphasisName(emphasisName) {
  * range.
  * @param {number} claimedRaises - Raises claimed for damage/effect
  * @param {number} storedRaises - Raises from original attack roll
- * @returns {{valid: boolean, error?: string, sanitized?: number}} Validation result: whether it is valid, the
- *   error message if not, and the validated Raises value if it is
+ * @returns {{valid: boolean, error?: string, data?: object, sanitized?: number}} Validation result: whether it is
+ *   valid, the error's i18n key and its placeholder data if not, and the validated Raises value if it is
  */
 export function validateAttackRaises(claimedRaises, storedRaises) {
   const claimed = toNumber(claimedRaises);
@@ -88,21 +88,24 @@ export function validateAttackRaises(claimedRaises, storedRaises) {
   if (!Number.isFinite(claimed) || !Number.isFinite(stored)) {
     return {
       valid: false,
-      error: "Attack raises must be valid numbers"
+      error: "l5r4.ui.combat.errors.raisesInvalid",
+      data: {}
     };
   }
   // Range check (0-MAX_RAISES is reasonable maximum)
   if (claimed < 0 || claimed > MAX_RAISES || stored < 0 || stored > MAX_RAISES) {
     return {
       valid: false,
-      error: "Attack raises out of valid range (0-20)"
+      error: "l5r4.ui.combat.errors.raisesOutOfRange",
+      data: { max: MAX_RAISES }
     };
   }
   // Verify claimed Raises match stored value (anti-cheat)
   if (claimed !== stored) {
     return {
       valid: false,
-      error: `Attack raises mismatch: claimed ${claimed} but original roll had ${stored}`
+      error: "l5r4.ui.combat.errors.raisesMismatch",
+      data: { claimed, stored }
     };
   }
   return {

@@ -69,7 +69,7 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
    */
   get title() {
     const baseTitle = T("l5r4.apps.combatConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**

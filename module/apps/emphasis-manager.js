@@ -76,7 +76,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    */
   get title() {
     const baseTitle = T("l5r4.apps.emphasisManager.title");
-    return `${baseTitle}: ${this.item?.name ?? "Unknown Skill"}`;
+    return `${baseTitle}: ${this.item?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**
@@ -183,18 +183,9 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * @param {HTMLElement} _element - The clicked element (unused)
    */
   static async #onAddEmphasis(_event, _element) {
-    const content = await foundry.applications.handlebars.renderTemplate(
-      `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`
-    );
-
-    const name = await foundry.applications.api.DialogV2.prompt({
-      window: { title: T("l5r4.apps.emphasisManager.addCustom") },
-      content,
-      ok: {
-        label: T("l5r4.ui.common.add"),
-        callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
-      },
-      rejectClose: false
+    const name = await askEmphasisName({
+      title: "l5r4.apps.emphasisManager.addCustom",
+      label: "l5r4.ui.common.add"
     });
 
     if (!name || !name.trim()) {
@@ -237,6 +228,8 @@ export default class EmphasisManagerApplication extends foundry.applications.api
         DIALOG_TEMPLATES.removeEmphasis,
         { name: emphasisName }
       ),
+      yes: { label: T("l5r4.ui.common.delete") },
+      no: { label: T("l5r4.ui.common.cancel") },
       rejectClose: false
     });
 
@@ -267,19 +260,10 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       return;
     }
 
-    const content = await foundry.applications.handlebars.renderTemplate(
-      `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
-      { currentName: oldName }
-    );
-
-    const newName = await foundry.applications.api.DialogV2.prompt({
-      window: { title: T("l5r4.ui.common.edit") },
-      content,
-      ok: {
-        label: T("l5r4.ui.common.save"),
-        callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
-      },
-      rejectClose: false
+    const newName = await askEmphasisName({
+      title: "l5r4.ui.common.edit",
+      label: "l5r4.ui.common.save",
+      data: { currentName: oldName }
     });
 
     if (!newName || !newName.trim() || newName.trim() === oldName) {
@@ -299,6 +283,31 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       this.render();
     }
   }
+}
+
+/**
+ * Ask for a custom Emphasis name in the custom Emphasis dialog.
+ * @param {object} prompt
+ * @param {string} prompt.title - The window title's i18n key
+ * @param {string} prompt.label - The confirm button's i18n key
+ * @param {object} [prompt.data] - The dialog's template data: the current name when renaming
+ * @returns {Promise<string|null>} The name entered, or null when the dialog is dismissed
+ */
+async function askEmphasisName({ title, label, data }) {
+  const content = await foundry.applications.handlebars.renderTemplate(
+    `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
+    data
+  );
+
+  return foundry.applications.api.DialogV2.prompt({
+    window: { title: T(title) },
+    content,
+    ok: {
+      label: T(label),
+      callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
+    },
+    rejectClose: false
+  });
 }
 
 /**

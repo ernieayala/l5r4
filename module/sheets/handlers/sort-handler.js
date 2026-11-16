@@ -51,6 +51,20 @@ export class SortHandler {
   }
 
   /**
+   * Mark a header's columns from the user's stored sort preference for its scope.
+   *
+   * @param {HTMLElement} header - The `.l5r4-sort-header` container element
+   * @param {string} actorId - The actor's UUID or ID for preference lookup
+   * @param {object} options
+   * @param {string} options.scope - Sort scope identifier
+   * @param {string[]} options.allowedKeys - Valid sort keys for this scope; the first is the default
+   */
+  static #updateHeaderFromPref(header, actorId, { scope, allowedKeys }) {
+    const pref = getSortPref(actorId, scope, { allowedKeys, defaultKey: allowedKeys[0] });
+    this.#updateHeaderIndicators(header, pref.key, pref.dir);
+  }
+
+  /**
    * Initializes visual sort indicators on sheet render based on stored preferences.
    *
    * Called during sheet render to restore the user's last sort state for a given
@@ -75,8 +89,7 @@ export class SortHandler {
         return;
       }
 
-      const pref = getSortPref(actorId, scope, { allowedKeys, defaultKey: allowedKeys[0] });
-      this.#updateHeaderIndicators(header, pref.key, pref.dir);
+      this.#updateHeaderFromPref(header, actorId, { scope, allowedKeys });
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
     }
@@ -129,11 +142,7 @@ export class SortHandler {
       await updateSortPref(actorId, scope, { key, toggleFrom: cur });
 
       if (header) {
-        const newPref = getSortPref(actorId, scope, {
-          allowedKeys: allowed,
-          defaultKey: allowed[0]
-        });
-        this.#updateHeaderIndicators(header, newPref.key, newPref.dir);
+        this.#updateHeaderFromPref(header, actorId, { scope, allowedKeys: allowed });
       }
 
       renderSheet();

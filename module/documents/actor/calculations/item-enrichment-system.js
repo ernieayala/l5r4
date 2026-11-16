@@ -36,21 +36,7 @@ export function prepareItemFormulas(actor) {
       if (!item?.type) {
         continue;
       }
-
-      switch (item.type) {
-        case "skill":
-          prepareSkillFormula(actor, item);
-          break;
-        case "spell":
-          prepareSpellFormula(actor, item);
-          break;
-        case "weapon":
-        case "bow":
-          prepareWeaponFormula(actor, item);
-          break;
-        default:
-          break;
-      }
+      prepareOwnedItemFormula(actor, item);
     }
   } catch (err) {
     logError("Failed to enrich actor items", err, {
@@ -58,6 +44,28 @@ export function prepareItemFormulas(actor) {
       actorName: actor?.name
     });
     // Items remain unenriched - formulas won't display but won't break functionality
+  }
+}
+
+/**
+ * Add one owned item's roll formula by its type: a Skill's, a spell's, or a weapon's or bow's; other types have none.
+ * @param {Actor} actor - The actor who owns the item
+ * @param {Item} item - The item to enrich
+ */
+function prepareOwnedItemFormula(actor, item) {
+  switch (item.type) {
+    case "skill":
+      prepareSkillFormula(actor, item);
+      break;
+    case "spell":
+      prepareSpellFormula(actor, item);
+      break;
+    case "weapon":
+    case "bow":
+      prepareWeaponFormula(actor, item);
+      break;
+    default:
+      break;
   }
 }
 

@@ -44,19 +44,7 @@ export function buildRuleView(source, answered = source) {
   }
   const fields = Object.entries(Model.schema.fields)
     .filter(([name]) => name !== "key")
-    .map(([name, field]) => {
-      const kind = kindOf(field);
-      const value = name in source ? source[name] : field.getInitialValue({});
-      const placeholder =
-        typeof value === "string" && hasOpenChoice(value) ? { [value]: value } : {};
-      return {
-        name,
-        kind,
-        value: formatFieldValue(kind, value),
-        choices: kind === "select" ? { ...placeholder, ...choicesOf(field) } : null,
-        nullable: Boolean(field.nullable)
-      };
-    });
+    .map(([name, field]) => buildFieldView(source, { name, field }));
   return { key: source.key, error, fields };
 }
 
@@ -104,6 +92,28 @@ export function parseRuleForm(source, values) {
     }
   }
   return rule;
+}
+
+/**
+ * The editor's view of one field of a stored rule: its stored value, or the field's initial value when the rule
+ * leaves it out. A select whose value is a `{choice:...}` placeholder keeps it as an option.
+ * @param {object} source - An entry of `system.rules`, stored user JSON
+ * @param {object} model
+ * @param {string} model.name - The field's name
+ * @param {foundry.data.fields.DataField} model.field - The field of the rule key's model
+ * @returns {RuleFieldView}
+ */
+function buildFieldView(source, { name, field }) {
+  const kind = kindOf(field);
+  const value = name in source ? source[name] : field.getInitialValue({});
+  const placeholder = typeof value === "string" && hasOpenChoice(value) ? { [value]: value } : {};
+  return {
+    name,
+    kind,
+    value: formatFieldValue(kind, value),
+    choices: kind === "select" ? { ...placeholder, ...choicesOf(field) } : null,
+    nullable: Boolean(field.nullable)
+  };
 }
 
 /**

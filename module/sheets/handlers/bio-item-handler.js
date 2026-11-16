@@ -74,26 +74,7 @@ export class BioItemHandler {
         updates["system.clan"] = "";
         updates[`flags.${SYS_ID}.clanItemUuid`] = null;
       } else if (bioType === "family") {
-        // Extract personal name by removing family prefix (e.g., "Kakita Yoshi" → "Yoshi")
-        const fam = actor.getFlag(SYS_ID, "familyName");
-        let name = actor.name || "";
-        if (fam) {
-          name = this.getBaseName(name, fam);
-        }
-
-        // Delete embedded family item before clearing flags
-        const prior = (actor.items?.contents ?? actor.items).filter(i => i.type === "family");
-        if (prior.length) {
-          await actor.deleteEmbeddedDocuments(
-            "Item",
-            prior.map(i => i.id)
-          );
-        }
-
-        updates.name = name;
-        updates[`flags.${SYS_ID}.familyItemUuid`] = null;
-        updates[`flags.${SYS_ID}.familyName`] = null;
-        updates[`flags.${SYS_ID}.familyBaseName`] = null;
+        Object.assign(updates, await this.#deleteFamily(actor));
       } else if (bioType === "school") {
         updates["system.school"] = "";
         updates[`flags.${SYS_ID}.schoolItemUuid`] = null;
@@ -132,5 +113,36 @@ export class BioItemHandler {
     }
 
     return s;
+  }
+
+  /**
+   * Delete the actor's embedded family items, and build the update that takes the family name off the character's
+   * name and clears the family flags.
+   * @param {Actor} actor
+   * @returns {Promise<object>} The actor update
+   */
+  static async #deleteFamily(actor) {
+    // Extract personal name by removing family prefix (e.g., "Kakita Yoshi" → "Yoshi")
+    const fam = actor.getFlag(SYS_ID, "familyName");
+    let name = actor.name || "";
+    if (fam) {
+      name = this.getBaseName(name, fam);
+    }
+
+    // Delete embedded family item before clearing flags
+    const prior = (actor.items?.contents ?? actor.items).filter(i => i.type === "family");
+    if (prior.length) {
+      await actor.deleteEmbeddedDocuments(
+        "Item",
+        prior.map(i => i.id)
+      );
+    }
+
+    return {
+      name,
+      [`flags.${SYS_ID}.familyItemUuid`]: null,
+      [`flags.${SYS_ID}.familyName`]: null,
+      [`flags.${SYS_ID}.familyBaseName`]: null
+    };
   }
 }

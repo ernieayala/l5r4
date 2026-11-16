@@ -159,16 +159,7 @@ async function rollFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
     tn,
     modifiers: honorRank ? [{ label: T("l5r4.character.ranks.honorRank"), total: honorRank }] : [],
     askForOptions: false,
-    beforePost: async ({ success, total }) => {
-      if (success) {
-        return {};
-      }
-      let suffix = ` — ${F("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank })}`;
-      if (total - tn <= -CATASTROPHIC_MARGIN) {
-        suffix += ` ${T("l5r4.ui.mechanics.fear.catastrophicFailure")}`;
-      }
-      return { labelSuffix: suffix };
-    },
+    beforePost: async result => buildFearLabel(result, { tn, fearRank }),
     after: async message => {
       if (message.system.outcome.success === false) {
         await applyEffectAnywhere(character, "feared", {
@@ -178,4 +169,22 @@ async function rollFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
       }
     }
   });
+}
+
+/**
+ * The label a failed Fear test adds to its card: the penalty, and a Catastrophic Failure when it failed by 15 or more.
+ * game-rules/42_fear.md, p.90
+ * @param {{success: boolean, total: number}} result - The roll's outcome
+ * @param {{tn: number, fearRank: number}} fear - The test's TN and Fear Rank
+ * @returns {{labelSuffix?: string}} rollCheck's `beforePost` result; nothing on a success
+ */
+function buildFearLabel({ success, total }, { tn, fearRank }) {
+  if (success) {
+    return {};
+  }
+  let suffix = ` — ${F("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank })}`;
+  if (total - tn <= -CATASTROPHIC_MARGIN) {
+    suffix += ` ${T("l5r4.ui.mechanics.fear.catastrophicFailure")}`;
+  }
+  return { labelSuffix: suffix };
 }

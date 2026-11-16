@@ -104,18 +104,7 @@ export async function applyTrackChange(actor, track, { points, reason }) {
  * @returns {Promise<LedgerEntry|null>} The recorded change, or null when nothing was recorded
  */
 export async function openLedgerDialog(actor) {
-  const formatTrack = track => T(`l5r4.ui.ledger.tracks.${track}`);
-  const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.ledger, {
-    tracks: Object.fromEntries(ledgerTracksOf(actor).map(track => [track, formatTrack(track)])),
-    entries: ledgerEntriesOf(actor)
-      .slice(-SHOWN_ENTRIES)
-      .reverse()
-      .map(entry => ({
-        ...entry,
-        track: formatTrack(entry.track),
-        changed: entry.asked !== entry.points
-      }))
-  });
+  const content = await renderLedgerContent(actor);
   const choice = await foundry.applications.api.DialogV2.prompt({
     window: { title: `${T("l5r4.ui.ledger.title")}: ${actor.name}` },
     position: { width: 440 },
@@ -140,5 +129,25 @@ export async function openLedgerDialog(actor) {
   return applyTrackChange(actor, choice.track, {
     points: choice.points,
     reason: choice.reason.trim()
+  });
+}
+
+/**
+ * The ledger dialog's content: the actor's tracks to choose from and its latest entries, newest first.
+ * @param {Actor} actor
+ * @returns {Promise<string>} The rendered HTML
+ */
+function renderLedgerContent(actor) {
+  const formatTrack = track => T(`l5r4.ui.ledger.tracks.${track}`);
+  return foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.ledger, {
+    tracks: Object.fromEntries(ledgerTracksOf(actor).map(track => [track, formatTrack(track)])),
+    entries: ledgerEntriesOf(actor)
+      .slice(-SHOWN_ENTRIES)
+      .reverse()
+      .map(entry => ({
+        ...entry,
+        track: formatTrack(entry.track),
+        changed: entry.asked !== entry.points
+      }))
   });
 }

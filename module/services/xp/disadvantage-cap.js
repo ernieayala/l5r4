@@ -19,7 +19,7 @@ export async function askDisadvantageCap(currentCap) {
     window: { title: T("l5r4.apps.xpManager.disadvantageCapTitle") },
     content: await R(DIALOG_TEMPLATES.disadvantageCap, { currentCap }),
     ok: {
-      label: T("l5r4.ui.common.ok"),
+      label: T("l5r4.apps.xpManager.setDisadvantageCap"),
       callback: (_event, button) => toInt(button.form.elements.disadvantageCap.value, null)
     },
     rejectClose: false,

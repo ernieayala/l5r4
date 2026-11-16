@@ -104,35 +104,60 @@ export function registerCombatQueries() {
 async function applyCenterStance(combat) {
   const updates = [];
   for (const combatant of combat.combatants) {
-    const actor = combatant.actor;
-    if (!actor || combatant.initiative === null) {
-      continue;
-    }
-    const centered = actor.statuses.has("centerStance");
-    const had = Boolean(combatant.getFlag(SYS_ID, "centerInitiative"));
-    if (centered) {
-      const old = effectsOf(actor, "centered").map(e => e.id);
-      if (old.length) {
-        await actor.deleteEmbeddedDocuments("ActiveEffect", old);
-      }
-      await applyEffect(actor, "centered");
-    }
-    if (centered !== had) {
-      updates.push({
-        _id: combatant.id,
-        initiative: combatant.initiative + (centered ? CENTER_INITIATIVE : -CENTER_INITIATIVE),
-        [`flags.${SYS_ID}.centerInitiative`]: centered
-      });
+    const update = await applyCenterStanceTo(combatant);
+    if (update) {
+      updates.push(update);
     }
   }
   if (updates.length) {
-    // Core re-sorts the turns on an Initiative change [src: client/documents/combat.mjs:492-515] while the turn index
-    // stays, which would hand the ending Turn to another combatant; put the current one back, firing no events
-    const current = combat.combatant;
-    await combat.updateEmbeddedDocuments("Combatant", updates, { turnEvents: false });
-    const index = combat.turns.indexOf(current);
-    if (index >= 0 && index !== combat.turn) {
-      await combat.update({ turn: index }, { turnEvents: false });
+    await updateCenterInitiative(combat, updates);
+  }
+}
+
+/**
+ * Settle Center Stance for one combatant: in Center Stance, its "centered" effect is renewed; the +10 Initiative
+ * follows whether it is in Center Stance now.
+ * game-rules/36_stances.md, p.84
+ * @param {Combatant} combatant
+ * @returns {Promise<object|null>} The combatant's Initiative update, or null when it does not change
+ */
+async function applyCenterStanceTo(combatant) {
+  const actor = combatant.actor;
+  if (!actor || combatant.initiative === null) {
+    return null;
+  }
+  const centered = actor.statuses.has("centerStance");
+  const had = Boolean(combatant.getFlag(SYS_ID, "centerInitiative"));
+  if (centered) {
+    const old = effectsOf(actor, "centered").map(e => e.id);
+    if (old.length) {
+      await actor.deleteEmbeddedDocuments("ActiveEffect", old);
     }
+    await applyEffect(actor, "centered");
+  }
+  if (centered === had) {
+    return null;
+  }
+  return {
+    _id: combatant.id,
+    initiative: combatant.initiative + (centered ? CENTER_INITIATIVE : -CENTER_INITIATIVE),
+    [`flags.${SYS_ID}.centerInitiative`]: centered
+  };
+}
+
+/**
+ * Write the combatants' Initiative changes, keeping the Turn with the combatant whose Turn it is.
+ * @param {Combat} combat
+ * @param {object[]} updates - The combatants' Initiative updates
+ * @returns {Promise<void>}
+ */
+async function updateCenterInitiative(combat, updates) {
+  // Core re-sorts the turns on an Initiative change [src: client/documents/combat.mjs:492-515] while the turn index
+  // stays, which would hand the ending Turn to another combatant; put the current one back, firing no events
+  const current = combat.combatant;
+  await combat.updateEmbeddedDocuments("Combatant", updates, { turnEvents: false });
+  const index = combat.turns.indexOf(current);
+  if (index >= 0 && index !== combat.turn) {
+    await combat.update({ turn: index }, { turnEvents: false });
   }
 }

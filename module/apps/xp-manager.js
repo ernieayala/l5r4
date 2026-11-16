@@ -75,7 +75,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   get title() {
     const baseTitle = T("l5r4.apps.xpManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
   }
 
   /**
@@ -99,47 +99,13 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
       const sys = this.actor.system ?? {};
       const xp = sys?._xp ?? {};
-      const manual = this._getXpManual();
-      const spent = xpSpentOf(this.actor);
-
-      const manualEntries = formatXpEntries(manual, { sort: false });
-      const spentEntries = formatXpEntries(spent, {
-        sort: true,
-        actorId: this.actor.id,
-        scope: "xp-purchases"
-      });
-
-      const manualTotal = this._calculateTotal(manual);
-      const spentTotal = this._calculateTotal(spent);
-
-      const flags = this._getFlags();
-      const disadvantageCap = Number.isFinite(+flags.disadvantageCap)
-        ? Number(flags.disadvantageCap)
-        : 10;
+      const ledgers = this.#buildLedgers();
+      const disadvantageCap = disadvantageCapOf(this._getFlags());
 
       return {
-        xp: {
-          spent: xp.spent ?? 0,
-          total: xp.total ?? 40,
-          available: xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0),
-          breakdown: {
-            base: xp?.breakdown?.base ?? 40,
-            disadvantagesGranted: xp?.breakdown?.disadvantagesGranted ?? 0,
-            manual: xp?.breakdown?.manual ?? 0,
-            traits: xp?.breakdown?.traits ?? 0,
-            void: xp?.breakdown?.void ?? 0,
-            skills: xp?.breakdown?.skills ?? 0,
-            advantages: xp?.breakdown?.advantages ?? 0,
-            kata: xp?.breakdown?.kata ?? 0,
-            kiho: xp?.breakdown?.kiho ?? 0,
-            spells: xp?.breakdown?.spells ?? 0
-          }
-        },
+        xp: buildXpSummary(xp),
         disadvantageCap,
-        manualEntries,
-        spentEntries,
-        manualTotal,
-        spentTotal,
+        ...ledgers,
         sortColumns: SORT_COLUMNS
       };
     } catch (err) {
@@ -242,12 +208,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
 
     const manual = this._getXpManual(true);
-    manual.push({
-      id: foundry.utils.randomID(),
-      delta: amount,
-      note,
-      ts: Date.now()
-    });
+    manual.push(buildXpEntry(amount, note));
 
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", manual);
@@ -385,8 +346,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   static async #onChangeDisadvantageCap(event, _element) {
     event.preventDefault();
 
-    const flags = this._getFlags();
-    const currentCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+    const currentCap = disadvantageCapOf(this._getFlags());
 
     try {
       const newCap = await askDisadvantageCap(currentCap);
@@ -405,4 +365,72 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
     }
   }
+
+  /**
+   * The manual and purchase entries as display rows, with each list's total.
+   * @returns {{manualEntries: object[], spentEntries: object[], manualTotal: number, spentTotal: number}}
+   */
+  #buildLedgers() {
+    const manual = this._getXpManual();
+    const spent = xpSpentOf(this.actor);
+    return {
+      manualEntries: formatXpEntries(manual, { sort: false }),
+      spentEntries: formatXpEntries(spent, {
+        sort: true,
+        actorId: this.actor.id,
+        scope: "xp-purchases"
+      }),
+      manualTotal: this._calculateTotal(manual),
+      spentTotal: this._calculateTotal(spent)
+    };
+  }
+}
+
+/**
+ * The Disadvantage XP cap the actor's flags hold, 10 when unset or not a number.
+ * @param {object} flags - The actor's system flags
+ * @returns {number}
+ */
+function disadvantageCapOf(flags) {
+  return Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+}
+
+/**
+ * The XP totals and the spending breakdown the window shows, each defaulted when preparation left it unset.
+ * @param {object} xp - The actor's prepared `system._xp`
+ * @returns {object}
+ */
+function buildXpSummary(xp) {
+  return {
+    spent: xp.spent ?? 0,
+    total: xp.total ?? 40,
+    available: xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0),
+    breakdown: {
+      base: xp?.breakdown?.base ?? 40,
+      disadvantagesGranted: xp?.breakdown?.disadvantagesGranted ?? 0,
+      manual: xp?.breakdown?.manual ?? 0,
+      traits: xp?.breakdown?.traits ?? 0,
+      void: xp?.breakdown?.void ?? 0,
+      skills: xp?.breakdown?.skills ?? 0,
+      advantages: xp?.breakdown?.advantages ?? 0,
+      kata: xp?.breakdown?.kata ?? 0,
+      kiho: xp?.breakdown?.kiho ?? 0,
+      spells: xp?.breakdown?.spells ?? 0
+    }
+  };
+}
+
+/**
+ * A new manual XP entry.
+ * @param {number} amount - The XP added, or taken away when negative
+ * @param {string} note - The user's note
+ * @returns {{id: string, delta: number, note: string, ts: number}}
+ */
+function buildXpEntry(amount, note) {
+  return {
+    id: foundry.utils.randomID(),
+    delta: amount,
+    note,
+    ts: Date.now()
+  };
 }

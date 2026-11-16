@@ -25,11 +25,8 @@ import { migrateArmorTypes } from "./migrations/items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
 import { migrateWeaponSizes } from "./migrations/items/normalize.js";
 import { migrateItemRules } from "./migrations/items/item-rules.js";
-import {
-  migrateIconPaths,
-  migrateCompendiumIconPaths,
-  migrateEmbeddedItemIcons
-} from "./migrations/icons/icon-paths.js";
+import { migrateIconPaths, migrateEmbeddedItemIcons } from "./migrations/icons/icon-paths.js";
+import { migrateCompendiumIconPaths } from "./migrations/icons/pack-icon-paths.js";
 
 /**
  * The item steps world items and every pack run, in order: each step with its log label for world documents and the
@@ -107,9 +104,6 @@ export async function migrateWorld(fromVersion, toVersion) {
     console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
   }
 }
-
-// Re-export icon migration for external use
-export { migrateIconPaths } from "./migrations/icons/icon-paths.js";
 
 /**
  * Migrate the world's actors and items not yet marked with this version, then mark them: their schema, NPC wounds

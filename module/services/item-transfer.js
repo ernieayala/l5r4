@@ -62,32 +62,10 @@ export async function createImportedItems(text, parent) {
     folder: parent?.id ?? null
   });
 
-  // Each source keeps its old id in a flag: the created items are matched by it, not by order. fromCompendium
-  // prepares the data as core's own JSON import does: no id or sort, and the other world's ownership cleared
-  const sources = [];
-  for (const source of transfer.items) {
-    try {
-      const doc = await Item.implementation.fromImport(source);
-      const data = game.items.fromCompendium(doc);
-      data.folder = folder.id;
-      foundry.utils.setProperty(data, `flags.${SYS_ID}.importedFrom`, source._id ?? "");
-      sources.push(data);
-    } catch (err) {
-      console.warn(`${SYS_ID} | Item "${source.name}" not imported: ${err.message}`);
-    }
-  }
-  const created = await Item.implementation.createDocuments(sources);
-
-  const uuidsById = Object.fromEntries(
-    created.map(item => [item.getFlag(SYS_ID, "importedFrom"), item.uuid])
+  const created = await Item.implementation.createDocuments(
+    await buildImportSources(transfer.items, folder)
   );
-  await Item.implementation.updateDocuments(
-    created.map(item => ({
-      _id: item.id,
-      "system.rules": buildRemappedRules(item._source.system.rules, uuidsById),
-      [`flags.${SYS_ID}.importedFrom`]: new foundry.data.operators.ForcedDeletion()
-    }))
-  );
+  await updateImportedRules(created);
   ui.notifications?.info(
     F("l5r4.ui.transfer.importedCount", { count: created.length, folder: folder.name })
   );
@@ -117,6 +95,49 @@ export function onGetFolderContextOptions(app, entries) {
       visible: () => game.user.isGM,
       onClick: (_event, header) => askItemImport(folderOf(header))
     }
+  );
+}
+
+/**
+ * The item data to create from an export file's items, in the new folder. An item core cannot import is skipped with
+ * a console warning.
+ * @param {object[]} items - The export file's item sources
+ * @param {Folder} folder - The folder they go in
+ * @returns {Promise<object[]>} The data to create, each with its old id in a flag
+ */
+async function buildImportSources(items, folder) {
+  // Each source keeps its old id in a flag: the created items are matched by it, not by order. fromCompendium
+  // prepares the data as core's own JSON import does: no id or sort, and the other world's ownership cleared
+  const sources = [];
+  for (const source of items) {
+    try {
+      const doc = await Item.implementation.fromImport(source);
+      const data = game.items.fromCompendium(doc);
+      data.folder = folder.id;
+      foundry.utils.setProperty(data, `flags.${SYS_ID}.importedFrom`, source._id ?? "");
+      sources.push(data);
+    } catch (err) {
+      console.warn(`${SYS_ID} | Item "${source.name}" not imported: ${err.message}`);
+    }
+  }
+  return sources;
+}
+
+/**
+ * Point the imported items' rules at the imported copies of the items they name, and drop the old-id flag.
+ * @param {Item[]} created - The imported items
+ * @returns {Promise<void>}
+ */
+async function updateImportedRules(created) {
+  const uuidsById = Object.fromEntries(
+    created.map(item => [item.getFlag(SYS_ID, "importedFrom"), item.uuid])
+  );
+  await Item.implementation.updateDocuments(
+    created.map(item => ({
+      _id: item.id,
+      "system.rules": buildRemappedRules(item._source.system.rules, uuidsById),
+      [`flags.${SYS_ID}.importedFrom`]: new foundry.data.operators.ForcedDeletion()
+    }))
   );
 }
 

@@ -298,6 +298,16 @@ export function registerXpManagerTests(quench) {
           assert.exists(element, "Dialog has interactive elements");
         });
 
+        it("should name the add button for its action, not OK", () => {
+          const add = dialog.element.querySelector("[data-action='add-xp']");
+          assert.exists(add, "the add button renders");
+          assert.equal(
+            add.textContent.trim(),
+            game.i18n.localize("l5r4.apps.xpManager.addXp"),
+            "the button reads Add XP"
+          );
+        });
+
         it("should mark the purchases column a sort click chose, with its direction", async () => {
           const cost = dialog.element.querySelector("[data-sort-header] [data-sort-by='cost']");
           try {

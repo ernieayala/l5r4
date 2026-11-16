@@ -9,6 +9,58 @@
 import { SYS_ID } from "../../config/constants.js";
 
 /**
+ * One history record builder per ledger entry type that is not an item; historyRecordOf builds the rest.
+ * @type {Readonly<Record<string, (entry: import("../../utils/xp-ledger.js").XpEntry) => object>>}
+ */
+const HISTORY_RECORD_BUILDERS = Object.freeze({
+  trait: ({ type, name, delta, from, to }) => {
+    const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${name}`);
+    return {
+      delta,
+      type,
+      traitLabel,
+      fromValue: from,
+      toValue: to,
+      note: game.i18n.localize("l5r4.character.experience.traitChange", {
+        label: traitLabel,
+        from,
+        to
+      })
+    };
+  },
+  void: ({ type, delta, from, to }) => ({
+    delta,
+    type,
+    fromValue: from,
+    toValue: to,
+    note: game.i18n.localize("l5r4.character.experience.voidChange", { from, to })
+  }),
+  skill: ({ type, name, delta, from, to }) => ({
+    delta,
+    type,
+    skillName: name,
+    fromValue: from,
+    toValue: to,
+    note: `${name} ${to}`
+  }),
+  emphasis: ({ name, delta, emphasis }) => ({
+    delta,
+    type: "skill",
+    skillName: name,
+    emphasis,
+    fromValue: 0,
+    toValue: 1,
+    note: `${name} - Emphasis: ${emphasis}`
+  }),
+  spell: ({ type, name, delta }) => ({
+    delta,
+    type,
+    itemName: name,
+    note: game.i18n.localize("l5r4.character.experience.spellMemorized", { name })
+  })
+});
+
+/**
  * Merge retroactively calculated XP entries with existing manual entries.
  *
  * Preserves manual XP corrections and custom entries while updating auto-calculated entries.
@@ -82,51 +134,9 @@ export async function buildXpHistory(actor) {
  * @returns {object|null}
  */
 function historyRecordOf(entry) {
-  const { type, name, delta, from, to } = entry;
-  switch (type) {
-    case "trait": {
-      const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${name}`);
-      return {
-        delta,
-        type,
-        traitLabel,
-        fromValue: from,
-        toValue: to,
-        note: game.i18n.localize("l5r4.character.experience.traitChange", {
-          label: traitLabel,
-          from,
-          to
-        })
-      };
-    }
-    case "void":
-      return {
-        delta,
-        type,
-        fromValue: from,
-        toValue: to,
-        note: game.i18n.localize("l5r4.character.experience.voidChange", { from, to })
-      };
-    case "skill":
-      return { delta, type, skillName: name, fromValue: from, toValue: to, note: `${name} ${to}` };
-    case "emphasis":
-      return {
-        delta,
-        type: "skill",
-        skillName: name,
-        emphasis: entry.emphasis,
-        fromValue: 0,
-        toValue: 1,
-        note: `${name} - Emphasis: ${entry.emphasis}`
-      };
-    case "spell":
-      return {
-        delta,
-        type,
-        itemName: name,
-        note: game.i18n.localize("l5r4.character.experience.spellMemorized", { name })
-      };
-    default:
-      return delta === 0 ? null : { delta, type, itemName: name, note: name };
+  if (Object.hasOwn(HISTORY_RECORD_BUILDERS, entry.type)) {
+    return HISTORY_RECORD_BUILDERS[entry.type](entry);
   }
+  const { type, name, delta } = entry;
+  return delta === 0 ? null : { delta, type, itemName: name, note: name };
 }

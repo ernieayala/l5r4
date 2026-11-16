@@ -7,6 +7,7 @@ import NpcAttackConfigApplication from "../../module/apps/npc-attack-config.js";
 import WealthManagerApplication from "../../module/apps/wealth-manager.js";
 import WoundConfigApplication from "../../module/apps/wound-config.js";
 import XpManagerApplication from "../../module/apps/xp-manager.js";
+import { ItemCrudHandler } from "../../module/sheets/handlers/item-crud-handler.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import {
   createArmorData,
@@ -18,6 +19,7 @@ import {
   createSpellData
 } from "../fixtures/item-fixtures.js";
 import {
+  buttonLabelsOf,
   changeThroughSheet,
   cleanTest,
   nextUpdate,
@@ -283,15 +285,18 @@ export function registerSheetsAndAppsTests(quench) {
 
             const answered = new Promise(resolve =>
               Hooks.once("renderDialogV2", app => {
+                const labels = buttonLabelsOf(app);
                 app.element.querySelector('[data-action="yes"]').click();
-                resolve();
+                resolve(labels);
               })
             );
             const saved = nextUpdate(npc);
             sheet.element
               .querySelector('[data-action="delete-attack"][data-attack-key="attack2"]')
               .click();
-            await answered;
+            const labels = await answered;
+            assert.equal(labels.yes, game.i18n.localize("l5r4.ui.common.delete"));
+            assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
             await saved;
             assert.include(npc.system.attack2, { name: "", roll: 0, keep: 0 });
             assert.include(npc.system.damage2, { roll: 0, keep: 0 });
@@ -529,7 +534,9 @@ export function registerSheetsAndAppsTests(quench) {
             const app = new XpManagerApplication(actor);
             await app.render({ force: true });
             try {
+              let capLabels = {};
               const answered = answerDialog(dialog => {
+                capLabels = buttonLabelsOf(dialog);
                 dialog.element.querySelector("[data-field='disadvantage-cap']").value = "3";
                 dialog.element.querySelector('[data-action="ok"]').click();
               });
@@ -538,6 +545,10 @@ export function registerSheetsAndAppsTests(quench) {
               await answered;
               await capped;
               assert.equal(actor.getFlag(SYS_ID, "disadvantageCap"), 3);
+              assert.equal(
+                capLabels.ok,
+                game.i18n.localize("l5r4.apps.xpManager.setDisadvantageCap")
+              );
 
               await app.render();
               const deleted = nextUpdate(actor);
@@ -574,8 +585,10 @@ export function registerSheetsAndAppsTests(quench) {
 
               await app.render();
               let question = "";
+              let removeLabels = {};
               const deleted = answerDialog(dialog => {
                 question = dialog.element.querySelector("form").textContent;
+                removeLabels = buttonLabelsOf(dialog);
                 dialog.element.querySelector('[data-action="yes"]').click();
               });
               app.element
@@ -588,11 +601,69 @@ export function registerSheetsAndAppsTests(quench) {
                 question,
                 `${game.i18n.localize("l5r4.ui.common.delete")} "Sheets Renamed"?`
               );
+              assert.equal(removeLabels.yes, game.i18n.localize("l5r4.ui.common.delete"));
+              assert.equal(removeLabels.no, game.i18n.localize("l5r4.ui.common.cancel"));
               assert.isTrue(await waitFor(() => !customs().includes("Sheets Renamed")));
             } finally {
               await app.close({ animate: false });
               await game.settings.set(SYS_ID, "customEmphases", saved);
             }
+          })
+        );
+
+        it(
+          "should add the item the create prompt names, and add nothing when the prompt is closed",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets create" });
+            created.push(actor);
+            const create = () =>
+              ItemCrudHandler.create(
+                { actor },
+                new PointerEvent("click"),
+                document.createElement("button")
+              );
+            let labels = {};
+            const answered = answerDialog(dialog => {
+              labels = buttonLabelsOf(dialog);
+              dialog.element.querySelector('[name="itemName"]').value = "Sheets Lantern";
+              dialog.element.querySelector('[data-action="ok"]').click();
+            });
+            const [item] = await create();
+            await answered;
+            assert.equal(labels.ok, game.i18n.localize("l5r4.ui.sheets.addItem"));
+            assert.equal(item?.name, "Sheets Lantern", "the Add item button adds the named item");
+
+            const count = actor.items.size;
+            const closed = answerDialog(dialog => dialog.close());
+            assert.deepEqual(await create(), [], "closing the prompt adds nothing");
+            await closed;
+            assert.equal(actor.items.size, count);
+          })
+        );
+
+        it(
+          "should remove an item after its confirmation's Remove button",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets remove" });
+            created.push(actor);
+            const [item] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Sheets Doomed", type: "commonItem" }
+            ]);
+            const row = document.createElement("div");
+            row.dataset.itemId = item.id;
+            const button = row.appendChild(document.createElement("button"));
+            let labels = {};
+            const answered = answerDialog(dialog => {
+              labels = buttonLabelsOf(dialog);
+              dialog.element.querySelector('[data-action="yes"]').click();
+            });
+            await ItemCrudHandler.deleteItem({ actor }, new PointerEvent("click"), button);
+            await answered;
+            assert.equal(labels.yes, game.i18n.localize("l5r4.ui.common.delete"));
+            assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
+            assert.isUndefined(actor.items.get(item.id), "the item is removed");
           })
         );
 

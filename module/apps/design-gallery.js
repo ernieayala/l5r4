@@ -9,7 +9,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { STANCES } from "../config/localization.js";
-import { GALLERY_COLORS, GALLERY_SURFACE } from "../config/design-gallery/colors.js";
+import { GALLERY_COLORS } from "../config/design-gallery/colors.js";
 import { GALLERY_COMPONENTS } from "../config/design-gallery/components.js";
 import { GALLERY_CONTEXTS, GALLERY_ROLLS } from "../config/design-gallery/contexts.js";
 import {
@@ -21,17 +21,13 @@ import {
 import { GALLERY_PATTERNS } from "../config/design-gallery/patterns.js";
 import { F, T } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
+import { renderTokenRow } from "./token-contrast.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { renderTemplate } = foundry.applications.handlebars;
 
 /** Where the gallery's own templates live. */
 const TEMPLATES = `systems/${SYS_ID}/templates/apps/design-gallery`;
-
-/** Each color token's entry, by token, for the over and against lookups. */
-const colorEntries = new Map(
-  GALLERY_COLORS.flatMap(group => group.tokens).map(entry => [entry.token, entry])
-);
 
 /**
  * The design gallery window, one per client.
@@ -210,33 +206,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
       `l5r4.apps.designGallery.theme.${theme}`
     );
     for (const row of this.element.querySelectorAll("[data-token]")) {
-      const token = row.dataset.token;
-      const raw = rawOf(token, styles, theme);
-      row.querySelector("[data-token-value]").textContent =
-        raw || T("l5r4.apps.designGallery.foundations.notDefined");
-      const ratioCell = row.querySelector("[data-token-ratio]");
-      const chip = row.querySelector("[data-token-chip]");
-      if (!ratioCell) {
-        continue;
-      }
-      const entry = colorEntries.get(token);
-      const color = colorOf(token, { styles, theme, probe });
-      chip?.setAttribute("fill", color ? `rgb(${color.slice(0, 3).join(" ")})` : "none");
-      const against = entry.against ?? GALLERY_SURFACE.token;
-      const other = colorOf(against, { styles, theme, probe });
-      if (entry.image || !color || !other) {
-        ratioCell.textContent = T("l5r4.apps.designGallery.foundations.noRatio");
-        continue;
-      }
-      const value = getContrastRatio(color, other).toFixed(2);
-      ratioCell.textContent = entry.minimum
-        ? F(
-            Number(value) >= entry.minimum
-              ? "l5r4.apps.designGallery.foundations.meets"
-              : "l5r4.apps.designGallery.foundations.below",
-            { ratio: value, against, minimum: entry.minimum }
-          )
-        : F("l5r4.apps.designGallery.foundations.ratio", { ratio: value, against });
+      renderTokenRow(row, { styles, theme, probe });
     }
   }
 }
@@ -283,102 +253,4 @@ function themeOf(element) {
  */
 function camelOf(page) {
   return page.replace(/-([a-z])/g, (_match, letter) => letter.toUpperCase());
-}
-
-/**
- * A token's value as the stylesheet resolves it on the window, or the reference surface, which core paints.
- * @param {string} token
- * @param {CSSStyleDeclaration} styles
- * @param {"light"|"dark"} theme
- * @returns {string}  Empty when the token is not declared
- */
-function rawOf(token, styles, theme) {
-  return token === GALLERY_SURFACE.token
-    ? GALLERY_SURFACE[theme]
-    : styles.getPropertyValue(token).trim();
-}
-
-/**
- * A token's color as opaque RGB, translucent values composited over the token color.md puts under them
- * (foundations/color.md, Contrast), down to the surface.
- * @param {string} token
- * @param {object} read
- * @param {CSSStyleDeclaration} read.styles
- * @param {"light"|"dark"} read.theme
- * @param {CanvasRenderingContext2D} read.probe
- * @returns {number[]|null}  [r, g, b, a] with a = 1, or null when the token holds no color
- */
-function colorOf(token, { styles, theme, probe }) {
-  const color = parseColor(rawOf(token, styles, theme), probe);
-  if (!color || color[3] >= 1 || token === GALLERY_SURFACE.token) {
-    return color;
-  }
-  const under = colorOf(colorEntries.get(token)?.over ?? GALLERY_SURFACE.token, {
-    styles,
-    theme,
-    probe
-  });
-  if (!under) {
-    return null;
-  }
-  const alpha = color[3];
-  return [...color.slice(0, 3).map((channel, i) => channel * alpha + under[i] * (1 - alpha)), 1];
-}
-
-/**
- * A CSS color as [r, g, b, a] in 0-255 and 0-1, read back through a canvas, which serializes any color it accepts.
- * @param {string} value
- * @param {CanvasRenderingContext2D} probe
- * @returns {number[]|null}  Null when the value is not a color
- */
-function parseColor(value, probe) {
-  if (!value) {
-    return null;
-  }
-  const toCanvasColor = sentinel => {
-    probe.fillStyle = sentinel;
-    probe.fillStyle = value;
-    return probe.fillStyle;
-  };
-  const normal = toCanvasColor("#000000");
-  if (normal !== toCanvasColor("#ffffff")) {
-    return null;
-  }
-  const hex = normal.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-  if (hex) {
-    return [...hex.slice(1).map(part => parseInt(part, 16)), 1];
-  }
-  const rgba = normal.match(/^rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)$/);
-  if (rgba) {
-    return [Number(rgba[1]), Number(rgba[2]), Number(rgba[3]), Number(rgba[4] ?? 1)];
-  }
-  const srgb = normal.match(/^color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)(?: \/ ([\d.]+))?\)$/);
-  if (srgb) {
-    return [...srgb.slice(1, 4).map(part => Number(part) * 255), Number(srgb[4] ?? 1)];
-  }
-  return null;
-}
-
-/**
- * The WCAG 2 contrast ratio of two opaque colors.
- * @param {number[]} a
- * @param {number[]} b
- * @returns {number}
- */
-function getContrastRatio(a, b) {
-  const [light, dark] = [luminanceOf(a), luminanceOf(b)].sort((x, y) => y - x);
-  return (light + 0.05) / (dark + 0.05);
-}
-
-/**
- * WCAG 2 relative luminance of an opaque color.
- * @param {number[]} color
- * @returns {number}
- */
-function luminanceOf(color) {
-  const [r, g, b] = color.slice(0, 3).map(channel => {
-    const c = channel / 255;
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }

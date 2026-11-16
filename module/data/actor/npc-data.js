@@ -37,21 +37,6 @@ export default class NpcData extends ActorData {
   /** @override */
   static defineSchema() {
     const { SchemaField } = foundry.data.fields;
-    const attackField = (roll, keep) =>
-      new SchemaField({
-        name: stringField(),
-        roll: numberField(roll),
-        keep: numberField(keep),
-        modifier: numberField(0),
-        type: stringField()
-      });
-    const damageField = (roll, keep) =>
-      new SchemaField({
-        roll: numberField(roll),
-        keep: numberField(keep),
-        modifier: numberField(0),
-        type: stringField()
-      });
     return {
       ...super.defineSchema(),
       attack1: attackField(2, 2),
@@ -63,21 +48,7 @@ export default class NpcData extends ActorData {
       armor: new SchemaField({ armorTn: numberField(10), reduction: numberField(0) }),
       nrWoundLvls: numberField(3),
       woundMode: stringField("manual"),
-      manualWoundLevels: new SchemaField(
-        Object.fromEntries(
-          WOUND_LEVEL_ORDER.map(key => {
-            const [value, penalty, active] = MANUAL_WOUND_DEFAULTS[key];
-            return [
-              key,
-              new SchemaField({
-                value: numberField(value),
-                penalty: numberField(penalty),
-                active: booleanField(active)
-              })
-            ];
-          })
-        )
-      ),
+      manualWoundLevels: manualWoundLevelsField(),
       fear: new SchemaField({ rank: numberField(0) }),
       spellSlots: spellSlotsField(0),
       // The book and page a creature comes from (roadmap/STAGE-15); blank for one the GM made
@@ -103,4 +74,58 @@ export default class NpcData extends ActorData {
   static _initiativeFields() {
     return { roll: numberField(0), keep: numberField(0), ...super._initiativeFields() };
   }
+}
+
+/**
+ * One attack of the stat block: its name, pool, flat modifier, and type.
+ * @param {number} roll - Initial rolled dice
+ * @param {number} keep - Initial kept dice
+ * @returns {foundry.data.fields.SchemaField}
+ */
+function attackField(roll, keep) {
+  return new foundry.data.fields.SchemaField({
+    name: stringField(),
+    roll: numberField(roll),
+    keep: numberField(keep),
+    modifier: numberField(0),
+    type: stringField()
+  });
+}
+
+/**
+ * One damage pool of the stat block: its pool, flat modifier, and type.
+ * @param {number} roll - Initial rolled dice
+ * @param {number} keep - Initial kept dice
+ * @returns {foundry.data.fields.SchemaField}
+ */
+function damageField(roll, keep) {
+  return new foundry.data.fields.SchemaField({
+    roll: numberField(roll),
+    keep: numberField(keep),
+    modifier: numberField(0),
+    type: stringField()
+  });
+}
+
+/**
+ * The GM's manual Wound Ranks, one per rank of WOUND_LEVEL_ORDER, each starting at MANUAL_WOUND_DEFAULTS.
+ * @returns {foundry.data.fields.SchemaField}
+ */
+function manualWoundLevelsField() {
+  const { SchemaField } = foundry.data.fields;
+  return new SchemaField(
+    Object.fromEntries(
+      WOUND_LEVEL_ORDER.map(key => {
+        const [value, penalty, active] = MANUAL_WOUND_DEFAULTS[key];
+        return [
+          key,
+          new SchemaField({
+            value: numberField(value),
+            penalty: numberField(penalty),
+            active: booleanField(active)
+          })
+        ];
+      })
+    )
+  );
 }

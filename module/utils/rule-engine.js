@@ -29,6 +29,36 @@ import { getRuleValue } from "./rule-values.js";
  */
 
 /**
+ * The fields each rule key's bag entry adds to the shared ones (buildBagEntry): the rule, its entry, and its value
+ * resolver in, the key's resolved numbers and settings out.
+ * @type {Readonly<Record<string, function(object, RuleEntry, function(*): number): object>>}
+ */
+const BAG_ENTRY_BUILDERS = Object.freeze({
+  RollModifier: buildModifierBagFields,
+  OpponentModifier: buildModifierBagFields,
+  RaiseRule: (rule, _entry, value) => ({
+    maneuver: rule.maneuver,
+    cost: value(rule.cost),
+    cap: value(rule.cap),
+    minimum: value(rule.minimum)
+  }),
+  UnskilledAs: (rule, _entry, value) => ({ rank: value(rule.rank) }),
+  ActionCost: rule => ({ action: rule.action, range: rule.range }),
+  // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js)
+  Cost: (rule, entry) => ({ value: rule.value, itemId: entry.itemId ?? null }),
+  TNModifier: (rule, _entry, value) => ({ value: value(rule.value), type: rule.type }),
+  FreeRaise: (rule, _entry, value) => ({ value: value(rule.value) }),
+  DiceRule: rule => ({ explode: rule.explode, rerollOnes: rule.rerollOnes }),
+  Substitute: rule => ({ replace: rule.replace, with: rule.with }),
+  Note: rule => ({ text: rule.text }),
+  ApplyCondition: rule => ({ condition: rule.condition, level: rule.level }),
+  DamageSource: (rule, _entry, value) => ({
+    tags: [...rule.tags],
+    ignoreReduction: value(rule.ignoreReduction)
+  })
+});
+
+/**
  * Roll options added by RollOption rules: an option without a toggle is always on; a toggle is on when its
  * `value` is true. Rules are read in order, so a RollOption's predicate sees the options added before it.
  * @param {RuleEntry[]} entries
@@ -331,49 +361,29 @@ function buildBagEntry(rule, entry, value) {
     predicate: rule.predicate,
     weaponId: entry.weaponId ?? null
   };
-  switch (rule.key) {
-    case "RollModifier":
-    case "OpponentModifier":
-      return {
-        ...base,
-        roll: value(rule.roll),
-        keep: value(rule.keep),
-        total: value(rule.total),
-        type: rule.type,
-        range: rule.range,
-        optional: Boolean(rule.optional),
-        // The effect a ticked `consumes` modifier ends; an item's rule has none to end
-        consumes: rule.consumes && entry.effectUuid ? entry.effectUuid : null
-      };
-    case "RaiseRule":
-      return {
-        ...base,
-        maneuver: rule.maneuver,
-        cost: value(rule.cost),
-        cap: value(rule.cap),
-        minimum: value(rule.minimum)
-      };
-    case "UnskilledAs":
-      return { ...base, rank: value(rule.rank) };
-    case "ActionCost":
-      return { ...base, action: rule.action, range: rule.range };
-    case "Cost":
-      // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js)
-      return { ...base, value: rule.value, itemId: entry.itemId ?? null };
-    case "TNModifier":
-      return { ...base, value: value(rule.value), type: rule.type };
-    case "FreeRaise":
-      return { ...base, value: value(rule.value) };
-    case "DiceRule":
-      return { ...base, explode: rule.explode, rerollOnes: rule.rerollOnes };
-    case "Substitute":
-      return { ...base, replace: rule.replace, with: rule.with };
-    case "Note":
-      return { ...base, text: rule.text };
-    case "ApplyCondition":
-      return { ...base, condition: rule.condition, level: rule.level };
-    case "DamageSource":
-      return { ...base, tags: [...rule.tags], ignoreReduction: value(rule.ignoreReduction) };
+  if (!Object.hasOwn(BAG_ENTRY_BUILDERS, rule.key)) {
+    throw new Error(`No bag entry for ${rule.key}`);
   }
-  throw new Error(`No bag entry for ${rule.key}`);
+  return { ...base, ...BAG_ENTRY_BUILDERS[rule.key](rule, entry, value) };
+}
+
+/**
+ * A RollModifier's or OpponentModifier's bag fields: its resolved dice and total, type, range, whether the roller
+ * may tick it, and the effect a ticked `consumes` modifier ends.
+ * @param {object} rule
+ * @param {RuleEntry} entry
+ * @param {function(*): number} value
+ * @returns {object}
+ */
+function buildModifierBagFields(rule, entry, value) {
+  return {
+    roll: value(rule.roll),
+    keep: value(rule.keep),
+    total: value(rule.total),
+    type: rule.type,
+    range: rule.range,
+    optional: Boolean(rule.optional),
+    // The effect a ticked `consumes` modifier ends; an item's rule has none to end
+    consumes: rule.consumes && entry.effectUuid ? entry.effectUuid : null
+  };
 }

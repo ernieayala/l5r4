@@ -69,17 +69,14 @@ export function buildPool({
   keepOverride = null,
   littleTruths = false
 }) {
-  const added = getStackedModifiers(modifiers.filter(modifier => modifier.enabled !== false));
-  let rolled = roll + added.roll;
-  let kept = keep + added.keep;
-  const flat = bonus + added.total;
-  if (voidPoint) {
-    rolled += 1;
-    kept += 1;
-  }
-  if (keepOverride !== null && keepOverride !== undefined && keepOverride < kept) {
-    kept = Math.max(0, keepOverride);
-  }
+  const { rolled, kept, flat } = getModifiedPool({
+    roll,
+    keep,
+    bonus,
+    modifiers,
+    voidPoint,
+    keepOverride
+  });
   const ten = applyTenDiceRule(rolled, kept, { bonus: flat, littleTruths });
   return {
     roll: ten.roll,
@@ -210,4 +207,32 @@ export function parseRollAndKeep(text) {
     rerollOnes: prefix.toLowerCase() === "e",
     explode: threshold
   };
+}
+
+/**
+ * A check's pool before the Ten Dice Rule: the base pool plus the enabled modifiers, stacked as the sheet stacks
+ * them, and a Void Point (+1k1), then a lower keep override.
+ * game-rules/25_rings_and_traits.md, p.78
+ * @param {object} spec - buildPool's parts of the same names
+ * @param {number} spec.roll
+ * @param {number} spec.keep
+ * @param {number} spec.bonus
+ * @param {PoolModifier[]} spec.modifiers
+ * @param {boolean} spec.voidPoint
+ * @param {number|null} spec.keepOverride
+ * @returns {{rolled: number, kept: number, flat: number}} Rolled and kept dice, and the flat bonus
+ */
+function getModifiedPool({ roll, keep, bonus, modifiers, voidPoint, keepOverride }) {
+  const added = getStackedModifiers(modifiers.filter(modifier => modifier.enabled !== false));
+  let rolled = roll + added.roll;
+  let kept = keep + added.keep;
+  const flat = bonus + added.total;
+  if (voidPoint) {
+    rolled += 1;
+    kept += 1;
+  }
+  if (keepOverride !== null && keepOverride !== undefined && keepOverride < kept) {
+    kept = Math.max(0, keepOverride);
+  }
+  return { rolled, kept, flat };
 }

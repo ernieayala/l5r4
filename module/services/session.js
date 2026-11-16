@@ -16,7 +16,9 @@ import { R, T } from "../utils/localization.js";
 export async function startNewSession() {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: T("l5r4.ui.session.new") },
-    content: await R(DIALOG_TEMPLATES.confirm, { question: T("l5r4.ui.session.confirm") })
+    content: await R(DIALOG_TEMPLATES.confirm, { question: T("l5r4.ui.session.confirm") }),
+    yes: { label: T("l5r4.ui.session.start") },
+    no: { label: T("l5r4.ui.common.cancel") }
   });
   if (!confirmed) {
     return;

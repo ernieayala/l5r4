@@ -131,13 +131,15 @@ Not conforming, `module/apps/xp-manager.js:60-65`: handlers bound as `XpManagerA
 
 #### Actor-sheet exception
 
-The PC and NPC sheets keep their own `data-action` switch (Stage 17 decision 16): `BaseActorSheet._onRender` returns
+The PC and NPC sheets keep their own `data-action` routing (Stage 17 decision 16): `BaseActorSheet._onRender` returns
 before binding anything when the user does not own the actor, then routes `click`, `contextmenu`, and `change` on
-`[data-action]` to `_onAction`, `_onActionContext`, and `_onActionChange` (`module/sheets/base-actor-sheet.js:113-137`).
-A viewer who does not own the actor gets no handler at all, and the right-click steps (Trait ranks, Void Points,
-spell slots) go through the same switch as the left-click ones. No other class adds a switch of its own.
-`tests/conventions/actions.test.js` takes the cases of these two sheets' switch as their handlers. Their action names
-follow the same kebab-case, verb-first rule as every other.
+`[data-action]` to `_onAction`, `_onActionContext`, and `_onActionChange` (`module/sheets/base-actor-sheet.js:129-146`,
+`:647`). `_onAction` looks the action up in the sheet class's `CLICK_ACTIONS` table: the actions both sheets share in
+`BaseActorSheet.CLICK_ACTIONS` (`:56`), spread into each sheet's own table with its own actions. The right-click and
+change routes stay `switch` statements. A viewer who does not own the actor gets no handler at all, and the
+right-click steps (Trait ranks, Void Points, spell slots) go through the same routing as the left-click ones. No
+other class adds routing of its own. `tests/conventions/actions.test.js` takes these two sheets' `CLICK_ACTIONS` keys
+and `case` labels as their handlers. Their action names follow the same kebab-case, verb-first rule as every other.
 
 ### Forms
 

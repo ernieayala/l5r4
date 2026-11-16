@@ -318,8 +318,14 @@ export function registerActiveEffectsTests(quench) {
           await combat.startCombat();
           assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
           let content = "";
+          let buttons = {};
           foundry.applications.api.DialogV2.confirm = async options => {
             content = options.content;
+            buttons = {
+              title: options.window?.title,
+              yes: options.yes?.label,
+              no: options.no?.label
+            };
             return true;
           };
           await PcActionsHandler.updateArmorVoid({ actor }, null, { checked: true });
@@ -327,6 +333,15 @@ export function registerActiveEffectsTests(quench) {
             foundry.utils.parseHTML(content).textContent,
             game.i18n.localize("l5r4.ui.effects.voidArmorQuestion"),
             "the question renders from its template"
+          );
+          assert.deepEqual(
+            buttons,
+            {
+              title: game.i18n.localize("l5r4.ui.effects.voidArmorTitle"),
+              yes: game.i18n.localize("l5r4.ui.common.spendVoidPoint"),
+              no: game.i18n.localize("l5r4.ui.common.cancel")
+            },
+            "the title and buttons are localized and the buttons name the action"
           );
           assert.equal(
             actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")

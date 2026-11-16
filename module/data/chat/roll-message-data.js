@@ -11,6 +11,7 @@ import { booleanField, numberField, stringField } from "../fields.js";
  */
 export default class RollMessageData extends foundry.abstract.TypeDataModel {
   /** @override */
+  // eslint-disable-next-line max-lines-per-function -- one schema: every field a roll message stores, read as one list (functions.md, Function length)
   static defineSchema() {
     const { ArrayField, NumberField, SchemaField } = foundry.data.fields;
     const modifierField = () =>

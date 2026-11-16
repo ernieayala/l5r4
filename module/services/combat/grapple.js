@@ -126,6 +126,93 @@ function rollHit(state) {
   });
 }
 
+/**
+ * Record a side's control roll in the state, after checking the side and the roll are the user's; once both sides
+ * have rolled, settle the Contested Roll.
+ * game-rules/40_grappling.md, p.88
+ * @param {object} state - The grapple's state, changed in place
+ * @param {Actor[]} sides - The two sides
+ * @param {{data: object, user: User}} step - The step the clicking client sent and the requesting user
+ */
+function applyControlRoll(state, sides, { data, user }) {
+  const i = Number(data.side);
+  const roll = game.messages.get(String(data.rollId));
+  if (
+    ![0, 1].includes(i) ||
+    !canActFor(user, sides[i]) ||
+    roll?.system.actorUuid !== sides[i].uuid
+  ) {
+    throw new Error("Not this user's side or roll");
+  }
+  state.rolls[i] = roll.system.outcome.total;
+  if (state.rolls.every(total => total !== null)) {
+    applyControlContest(state, sides);
+  }
+}
+
+/**
+ * Settle the control rolls as a Contested Roll: a tie changes nothing, otherwise the winner takes control, and a
+ * weapon grappler who loses it is told the opponent gains Free Raises for a Disarm. The rolls are cleared.
+ * game-rules/40_grappling.md, p.88-89
+ * game-rules/29_types_of_rolls.md, p.80
+ * @param {object} state - The grapple's state, changed in place
+ * @param {Actor[]} sides - The two sides
+ */
+function applyControlContest(state, sides) {
+  const result = getContestResult(state.rolls.map((total, side) => ({ id: String(side), total })));
+  if (result.tie) {
+    state.log.push(T("l5r4.ui.check.contestTie"));
+  } else {
+    const winner = Number(result.winner);
+    if (state.weapon && state.control === 0 && winner === 1) {
+      state.log.push(F("l5r4.ui.combat.grapple.weaponLost", { name: sides[1].name }));
+    }
+    state.control = winner;
+    state.log.push(F("l5r4.ui.combat.grapple.inControl", { name: sides[winner].name }));
+  }
+  state.rolls = [null, null];
+}
+
+/**
+ * Apply the controller's action, after checking the user acts for the side in control: a Hit's damage roll is
+ * logged, a Throw knocks the other side Prone and ends the grapple, a Break ends it, a Pass keeps control.
+ * game-rules/40_grappling.md, p.88-89
+ * @param {object} state - The grapple's state, changed in place
+ * @param {Actor[]} sides - The two sides
+ * @param {{data: object, user: User}} step - The step the clicking client sent and the requesting user
+ * @returns {Promise<void>}
+ */
+async function applyControllerAction(state, sides, { data, user }) {
+  const controller = sides[state.control];
+  const other = sides[1 - state.control];
+  if (!canActFor(user, controller)) {
+    throw new Error("Only the side in control acts");
+  }
+  if (data.action === "hit") {
+    const roll = game.messages.get(String(data.rollId));
+    if (roll?.system.actorUuid !== controller.uuid || roll.system.kind !== "damage") {
+      throw new Error("Not the controller's damage roll");
+    }
+    const total = roll.system.outcome.total;
+    state.log.push(F("l5r4.ui.combat.grapple.hitLog", { name: controller.name, total }));
+  } else if (data.action === "throw") {
+    await endGrapple(sides);
+    if (!other.statuses.has("prone")) {
+      await applyEffectAnywhere(other, "prone");
+    }
+    state.log.push(F("l5r4.ui.combat.grapple.thrown", { name: other.name }));
+    state.over = true;
+  } else if (data.action === "break") {
+    await endGrapple(sides);
+    state.log.push(F("l5r4.ui.combat.grapple.broken", { name: controller.name }));
+    state.over = true;
+  } else if (data.action === "pass") {
+    state.log.push(F("l5r4.ui.combat.grapple.passed", { name: controller.name }));
+  } else {
+    throw new Error(`Unknown grapple action ${data.action}`);
+  }
+}
+
 registerFlow("grapple", {
   /**
    * A button on the grapple card, on the clicking client.
@@ -166,66 +253,10 @@ registerFlow("grapple", {
       throw new Error("The grapple is over");
     }
     if (data.action === "control") {
-      const i = Number(data.side);
-      const roll = game.messages.get(String(data.rollId));
-      if (
-        ![0, 1].includes(i) ||
-        !canActFor(user, sides[i]) ||
-        roll?.system.actorUuid !== sides[i].uuid
-      ) {
-        throw new Error("Not this user's side or roll");
-      }
-      state.rolls[i] = roll.system.outcome.total;
-      if (state.rolls.every(total => total !== null)) {
-        const result = getContestResult(
-          state.rolls.map((total, side) => ({ id: String(side), total }))
-        );
-        if (result.tie) {
-          state.log.push(T("l5r4.ui.check.contestTie"));
-        } else {
-          const winner = Number(result.winner);
-          if (state.weapon && state.control === 0 && winner === 1) {
-            state.log.push(F("l5r4.ui.combat.grapple.weaponLost", { name: sides[1].name }));
-          }
-          state.control = winner;
-          state.log.push(F("l5r4.ui.combat.grapple.inControl", { name: sides[winner].name }));
-        }
-        state.rolls = [null, null];
-      }
+      applyControlRoll(state, sides, { data, user });
       return state;
     }
-    const controller = sides[state.control];
-    const other = sides[1 - state.control];
-    if (!canActFor(user, controller)) {
-      throw new Error("Only the side in control acts");
-    }
-    if (data.action === "hit") {
-      const roll = game.messages.get(String(data.rollId));
-      if (roll?.system.actorUuid !== controller.uuid || roll.system.kind !== "damage") {
-        throw new Error("Not the controller's damage roll");
-      }
-      state.log.push(
-        F("l5r4.ui.combat.grapple.hitLog", {
-          name: controller.name,
-          total: roll.system.outcome.total
-        })
-      );
-    } else if (data.action === "throw") {
-      await endGrapple(sides);
-      if (!other.statuses.has("prone")) {
-        await applyEffectAnywhere(other, "prone");
-      }
-      state.log.push(F("l5r4.ui.combat.grapple.thrown", { name: other.name }));
-      state.over = true;
-    } else if (data.action === "break") {
-      await endGrapple(sides);
-      state.log.push(F("l5r4.ui.combat.grapple.broken", { name: controller.name }));
-      state.over = true;
-    } else if (data.action === "pass") {
-      state.log.push(F("l5r4.ui.combat.grapple.passed", { name: controller.name }));
-    } else {
-      throw new Error(`Unknown grapple action ${data.action}`);
-    }
+    await applyControllerAction(state, sides, { data, user });
     return state;
   },
 

@@ -32,46 +32,7 @@ import { buildXpHistory } from "./calculator.js";
  */
 export function getXpDataVersion(actor) {
   try {
-    const sys = actor?.system ?? {};
-    const items = actor?.items ?? [];
-
-    // Collect all XP-relevant data into a serializable structure
-    const xpData = {
-      traits: sys.traits || {},
-      voidRank: sys.rings?.void?.rank || 0,
-      skills: items
-        .filter(i => i.type === "skill")
-        .map(i => ({
-          id: i.id,
-          rank: i.system?.rank || 0,
-          freeRanks: i.system?.freeRanks || 0,
-          trainedEmphases: Array.isArray(i.system?.trainedEmphases)
-            ? i.system.trainedEmphases.join(",")
-            : "",
-          freeEmphasis: i.system?.freeEmphasis || 0
-        })),
-      items: items
-        .filter(i => ["advantage", "disadvantage", "kata", "kiho"].includes(i.type))
-        .map(i => ({
-          id: i.id,
-          type: i.type,
-          cost: i.system?.cost || 0
-        })),
-      // The prices the ledger charged, so a Cost rule that changes one changes the version (roadmap/STAGE-11)
-      prices: (sys._xp?.entries ?? []).map(e => e.delta)
-    };
-
-    // Generate hash using 32-bit algorithm (similar to Java String.hashCode)
-    // Left shift by 5 and subtract original creates ((hash << 5) - hash) = hash * 31
-    // The bitwise AND operation keeps the value within 32-bit integer range
-    const str = JSON.stringify(xpData);
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Bitwise AND for 32-bit integer conversion
-    }
-    return Math.abs(hash);
+    return getHashCode(JSON.stringify(buildXpVersionData(actor)));
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to calculate XP data version", err);
     return Date.now(); // Fallback ensures update triggers on error
@@ -155,4 +116,54 @@ export async function updateXpHistory(actor) {
       actorId: actor?.id
     });
   }
+}
+
+/**
+ * Collects the actor's XP-relevant data into a serializable structure.
+ * @param {Actor} actor - The actor document to version
+ * @returns {object} The Traits, Void rank, Skills, XP-costing items, and ledger prices
+ */
+function buildXpVersionData(actor) {
+  const sys = actor?.system ?? {};
+  const items = actor?.items ?? [];
+  return {
+    traits: sys.traits || {},
+    voidRank: sys.rings?.void?.rank || 0,
+    skills: items
+      .filter(i => i.type === "skill")
+      .map(i => ({
+        id: i.id,
+        rank: i.system?.rank || 0,
+        freeRanks: i.system?.freeRanks || 0,
+        trainedEmphases: Array.isArray(i.system?.trainedEmphases)
+          ? i.system.trainedEmphases.join(",")
+          : "",
+        freeEmphasis: i.system?.freeEmphasis || 0
+      })),
+    items: items
+      .filter(i => ["advantage", "disadvantage", "kata", "kiho"].includes(i.type))
+      .map(i => ({
+        id: i.id,
+        type: i.type,
+        cost: i.system?.cost || 0
+      })),
+    // The prices the ledger charged, so a Cost rule that changes one changes the version (roadmap/STAGE-11)
+    prices: (sys._xp?.entries ?? []).map(e => e.delta)
+  };
+}
+
+/**
+ * Hashes a string to a 32-bit integer, as Java's String.hashCode does, and returns its absolute value.
+ * @param {string} str - The text to hash
+ * @returns {number} A positive integer
+ */
+function getHashCode(str) {
+  // ((hash << 5) - hash) is hash * 31; the bitwise AND keeps the value within 32-bit integer range
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Bitwise AND for 32-bit integer conversion
+  }
+  return Math.abs(hash);
 }

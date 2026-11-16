@@ -45,53 +45,7 @@ export async function migrateLegacyNpcWounds(docs, label) {
 
   for (const actor of npcActors) {
     try {
-      const updates = {};
-      let needsUpdate = false;
-
-      if (!actor.system.woundMode) {
-        updates["system.woundMode"] = "manual";
-        needsUpdate = true;
-      }
-
-      if (actor.system.woundsMultiplier === undefined) {
-        updates["system.woundsMultiplier"] = 2;
-        needsUpdate = true;
-      }
-
-      if (actor.system.woundsPenaltyMod === undefined) {
-        updates["system.woundsPenaltyMod"] = 0;
-        needsUpdate = true;
-      }
-
-      const legacyArmorTn = actor.system.armor?.armor_tn;
-      const currentArmorTn = actor.system.armor?.armorTn;
-
-      const armorTnValue =
-        legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
-
-      if (armorTnValue !== undefined && armorTnValue !== null) {
-        updates["system.armor.armorTn"] = armorTnValue;
-        needsUpdate = true;
-      }
-
-      if (typeof actor.system.nrWoundLvls === "string") {
-        updates["system.nrWoundLvls"] = parseInt(actor.system.nrWoundLvls) || 1;
-        needsUpdate = true;
-      }
-
-      // Legacy wound_lvl / woundLevels become manualWoundLevels in NpcData.migrateData, on raw source before the
-      // schema drops those keys (module/data/migrate-source.js migrateNpcSource).
-      if (actor.system.manualWoundLevels) {
-        const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
-
-        if (migrateWoundLevelData(manualWoundLevels)) {
-          updates["system.manualWoundLevels"] = manualWoundLevels;
-          needsUpdate = true;
-        }
-      }
-
-      if (needsUpdate) {
-        await actor.update(updates, { diff: true, render: false });
+      if (await migrateNpcActorWounds(actor)) {
         migratedCount++;
       }
     } catch (err) {
@@ -108,4 +62,74 @@ export async function migrateLegacyNpcWounds(docs, label) {
       `${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`
     );
   }
+}
+
+/**
+ * Migrate one NPC's wound data: its missing wound settings and its legacy wound values.
+ * @param {Actor} actor - An NPC
+ * @returns {Promise<boolean>} Whether the actor was updated
+ */
+async function migrateNpcActorWounds(actor) {
+  const updates = {
+    ...buildWoundSettingDefaults(actor.system),
+    ...buildLegacyWoundValues(actor.system)
+  };
+  if (Object.keys(updates).length === 0) {
+    return false;
+  }
+  await actor.update(updates, { diff: true, render: false });
+  return true;
+}
+
+/**
+ * The wound settings an NPC lacks, at their defaults: manual mode, the ×2 Earth multiplier, no penalty modifier.
+ * @param {object} system - The NPC's system data
+ * @returns {object} Update entries; empty when every setting is present
+ */
+function buildWoundSettingDefaults(system) {
+  const updates = {};
+  if (!system.woundMode) {
+    updates["system.woundMode"] = "manual";
+  }
+  if (system.woundsMultiplier === undefined) {
+    updates["system.woundsMultiplier"] = 2;
+  }
+  if (system.woundsPenaltyMod === undefined) {
+    updates["system.woundsPenaltyMod"] = 0;
+  }
+  return updates;
+}
+
+/**
+ * Legacy wound values in their current shape: the Armor TN under `armorTn`, a numeric `nrWoundLvls`, and manual
+ * Wound Rank penalties as positive numbers.
+ * @param {object} system - The NPC's system data
+ * @returns {object} Update entries; empty when nothing needs normalizing
+ */
+function buildLegacyWoundValues(system) {
+  const updates = {};
+  const legacyArmorTn = system.armor?.armor_tn;
+  const currentArmorTn = system.armor?.armorTn;
+
+  const armorTnValue =
+    legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
+
+  if (armorTnValue !== undefined && armorTnValue !== null) {
+    updates["system.armor.armorTn"] = armorTnValue;
+  }
+
+  if (typeof system.nrWoundLvls === "string") {
+    updates["system.nrWoundLvls"] = parseInt(system.nrWoundLvls) || 1;
+  }
+
+  // Legacy wound_lvl / woundLevels become manualWoundLevels in NpcData.migrateData, on raw source before the
+  // schema drops those keys (module/data/migrate-source.js migrateNpcSource).
+  if (system.manualWoundLevels) {
+    const manualWoundLevels = foundry.utils.deepClone(system.manualWoundLevels);
+
+    if (migrateWoundLevelData(manualWoundLevels)) {
+      updates["system.manualWoundLevels"] = manualWoundLevels;
+    }
+  }
+  return updates;
 }

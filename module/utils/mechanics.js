@@ -165,50 +165,9 @@ export function getWeaponSkillTrait(actor, weapon) {
   const associatedSkill = toString(weaponSystem.associatedSkill);
   const fallbackTrait = toString(weaponSystem.fallbackTrait, "agi");
 
-  // Look up skill item on actor by name
-  let skill = null;
-  if (associatedSkill && associatedSkill.trim() && actor.items?.find) {
-    const skillNameLower = associatedSkill.toLowerCase();
-    skill = actor.items.find(i => {
-      if (i.type !== "skill") {
-        return false;
-      }
-      const itemName = toString(i.name);
-      return itemName.toLowerCase() === skillNameLower;
-    });
-  }
-
-  // Skill found on actor
+  const skill = getOwnedSkill(actor, associatedSkill);
   if (skill) {
-    const skillRank = toInt(skill.system?.rank ?? 0);
-    const skillTrait = toString(skill.system?.trait, fallbackTrait);
-    const traitValue = getEffectiveTrait(actor, skillTrait);
-    const skillName = toString(skill.name, "Unknown Skill");
-
-    // The same Skill and Trait bonuses the roll pipeline starts from, so the shown formula matches the roll
-    const bonus = getFormulaBonus(actor, { skill: skillName.toLowerCase(), trait: skillTrait });
-    const skillBonusRoll = bonus.roll;
-    const skillBonusKeep = bonus.keep;
-
-    // Rank 0 counts as unskilled (roll and keep both = trait)
-    if (skillRank === 0) {
-      return {
-        skillRank: 0,
-        traitValue,
-        rollBonus: traitValue + skillBonusRoll,
-        keepBonus: traitValue + skillBonusKeep,
-        description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue}) [Unskilled]`
-      };
-    }
-
-    // Skilled roll: roll = skill + trait, keep = trait
-    return {
-      skillRank,
-      traitValue,
-      rollBonus: skillRank + traitValue + skillBonusRoll,
-      keepBonus: traitValue + skillBonusKeep,
-      description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
-    };
+    return getWeaponSkillPool(actor, { skill, fallbackTrait });
   }
 
   // No skill found - use fallback trait (unskilled)
@@ -220,5 +179,66 @@ export function getWeaponSkillTrait(actor, weapon) {
     rollBonus: traitValue,
     keepBonus: traitValue,
     description: `${fallbackTrait.toUpperCase()} (${traitValue}) [Unskilled]`
+  };
+}
+
+/**
+ * The actor's Skill item of a name, matched without case; none for an empty name.
+ * @param {object} actor - Foundry actor document
+ * @param {string} skillName - The Skill's name
+ * @returns {object|null|undefined} The Skill item; null or undefined when there is none
+ */
+function getOwnedSkill(actor, skillName) {
+  if (!(skillName && skillName.trim() && actor.items?.find)) {
+    return null;
+  }
+  const skillNameLower = skillName.toLowerCase();
+  return actor.items.find(i => {
+    if (i.type !== "skill") {
+      return false;
+    }
+    const itemName = toString(i.name);
+    return itemName.toLowerCase() === skillNameLower;
+  });
+}
+
+/**
+ * A weapon attack's pool from an owned Skill: rank + Trait, keep Trait, with the Skill and Trait bonuses the roll
+ * pipeline starts from, so the shown formula matches the roll. Rank 0 counts as unskilled: roll and keep both the
+ * Trait.
+ * @param {object} actor - Foundry actor document
+ * @param {object} weaponSkill
+ * @param {object} weaponSkill.skill - The Skill item
+ * @param {string} weaponSkill.fallbackTrait - The weapon's Trait, for a Skill with none
+ * @returns {{skillRank: number, traitValue: number, rollBonus: number, keepBonus: number, description: string}}
+ */
+function getWeaponSkillPool(actor, { skill, fallbackTrait }) {
+  const skillRank = toInt(skill.system?.rank ?? 0);
+  const skillTrait = toString(skill.system?.trait, fallbackTrait);
+  const traitValue = getEffectiveTrait(actor, skillTrait);
+  const skillName = toString(skill.name, "Unknown Skill");
+
+  const bonus = getFormulaBonus(actor, { skill: skillName.toLowerCase(), trait: skillTrait });
+  const skillBonusRoll = bonus.roll;
+  const skillBonusKeep = bonus.keep;
+
+  // Rank 0 counts as unskilled (roll and keep both = trait)
+  if (skillRank === 0) {
+    return {
+      skillRank: 0,
+      traitValue,
+      rollBonus: traitValue + skillBonusRoll,
+      keepBonus: traitValue + skillBonusKeep,
+      description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue}) [Unskilled]`
+    };
+  }
+
+  // Skilled roll: roll = skill + trait, keep = trait
+  return {
+    skillRank,
+    traitValue,
+    rollBonus: skillRank + traitValue + skillBonusRoll,
+    keepBonus: traitValue + skillBonusKeep,
+    description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
   };
 }

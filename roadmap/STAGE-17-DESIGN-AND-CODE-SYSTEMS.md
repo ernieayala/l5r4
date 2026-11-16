@@ -517,6 +517,14 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Long functions that are tables | The sheets' `_onAction` switches become lookup tables; `RollMessageData.defineSchema` keeps its shape with a disable comment naming why |
 | Functions over 30 lines | Every one split along its own steps, with differential checks against HEAD; `max-lines-per-function` ends strict |
 | Dialog buttons that read "OK" | Each names its action (dialogs.md rule 2), with new i18n keys; every dialog checked against the rule |
+| Long option bags (`rollPool`, `rollSkill`) | Split by concern, each helper destructuring its own defaults |
+| Literal dialog window titles | i18n keys in the voice rules' form now, with a sweep for any other literal title |
+| XP manager's add-XP button | Reads "Add XP" |
+| `chat.js` prompt options | The ignored `cancel` option dropped; close handled with `rejectClose: false` and a null result |
+| `bio-item-handler.js`, no importer | Find what it was for: a lost control is wired as a fix with a failing test first; superseded code is deleted |
+| Mixins under the function-length rule | Method bodies in named module functions, as split |
+| Duplicated coercion and attack defaults | `WoundConfig` reuses the mixin's coercion and `NpcAttackConfig`'s fallback reuses the field builders, each checked against HEAD (any input where they differ is reported first) |
+| Titles joined from a key and a name | One key per title with `{name}` placeholders; a check flags a localized string joined into a title |
 | Citations of core's installed source | `[src: path:line]` keeps its line: the source is pinned to 14.370; rechecked when the target version moves |
 | `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |

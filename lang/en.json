@@ -393,11 +393,13 @@
         "title": "Wound configuration"
       },
       "xpManager": {
+        "addXp": "Add XP",
         "disadvantageCapTitle": "Set Disadvantage cap",
         "errors": {
           "openFailed": "Failed to open XP manager"
         },
         "open": "Open the XP manager",
+        "setDisadvantageCap": "Set cap",
         "title": "XP manager"
       }
     },
@@ -617,6 +619,7 @@
         "anyElement": "Any element",
         "areaOfEffect": "Area of effect",
         "cast": "Cast",
+        "castInElement": "Cast",
         "chooseElement": "Cast {spell} in which element?",
         "deficiency": "Deficiency",
         "duration": "Duration",
@@ -765,6 +768,11 @@
           "strike": "Strike",
           "title": "Iaijutsu duel"
         },
+        "errors": {
+          "raisesInvalid": "Attack Raises must be numbers",
+          "raisesMismatch": "This card claims {claimed} Raises; the attack declared {stored}",
+          "raisesOutOfRange": "Attack Raises must be from 0 to {max}"
+        },
         "extraAttack": "Extra Attack (5 Raises)",
         "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
         "feint": "Feint (2 Raises)",
@@ -796,6 +804,7 @@
         "initiativeVoidNone": "{name} has no Void Points available",
         "initiativeVoidQuestion": "Spend a Void Point to add +10 to {name}'s initiative roll?",
         "initiativeVoidSpent": "{name} spent Void Point for initiative (+10)",
+        "initiativeVoidTitle": "Spend a Void Point for {name}'s Initiative",
         "invulnerableNote": "Invulnerability: one Wound.",
         "killedNote": "Past the Out Wound Rank: marked Dead. The GM can remove the status.",
         "knockdown": "Knockdown (2 Raises, 4 against 4 or more legs)",
@@ -821,6 +830,7 @@
         "active": "Active",
         "add": "Add",
         "all": "All",
+        "allow": "Allow",
         "armor": "Armor",
         "auto": "Auto",
         "bonus": "Bonus",
@@ -847,7 +857,6 @@
         "name": "Name",
         "new": "New",
         "none": "None",
-        "ok": "OK",
         "rank": "Rank",
         "rate": "Rate",
         "ring": "Ring",
@@ -855,10 +864,12 @@
         "save": "Save",
         "school": "School",
         "simple": "Simple",
+        "spendVoidPoint": "Spend Void Point",
         "tn": "TN",
         "toggle": "Turn on or off",
         "total": "Total",
         "type": "Type",
+        "unknown": "Unknown",
         "xp": "XP"
       },
       "dialogs": {
@@ -894,6 +905,7 @@
         "voidArmorNotTurn": "Can only use Void for Armor TN on your turn",
         "voidArmorQuestion": "Spend a Void Point to increase Armor TN by +10 for 1 round?",
         "voidArmorSpent": "{name} spent a Void Point: Armor TN +10 for 1 Round",
+        "voidArmorTitle": "Spend a Void Point for Armor TN",
         "voidLimit": "{name} has already spent a Void Point this Round",
         "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
       },
@@ -1091,7 +1103,9 @@
       },
       "purchase": {
         "addAnyway": "Add it anyway?",
+        "bypass": "Add anyway",
         "choose": "Choose",
+        "makeChoice": "Choose",
         "noOptions": "{name} has a choice with nothing to choose from; it was not added",
         "schoolAdd": "Add as another School",
         "schoolQuestion": "{name} already studies at {schools}. Replace it, or add {school} as another School (an Advanced School, or the Multiple Schools Advantage)?",
@@ -1206,6 +1220,7 @@
       "session": {
         "confirm": "Start a new game session? Every character gets its Honor Roll back.",
         "new": "New session",
+        "start": "Start session",
         "started": "A new game session has begun."
       },
       "sheets": {

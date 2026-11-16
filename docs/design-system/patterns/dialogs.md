@@ -96,11 +96,11 @@ The submitting button's label is the action's verb, from `lang/en.json`: "Roll",
 School" (`content/voice.md`, Buttons). A confirmation overrides core's "Yes" and "No" with `yes: { label }` and
 `no: { label: "l5r4.ui.common.cancel" }`. Enforced by review; `tests/lang.test.js` checks button keys carry no period.
 
-Conforming, `module/services/purchase.js:167-170`: the School choice's buttons read "Add as another School" and
-"Replace".
+Conforming, `module/services/purchase.js`, `askSchool`: the School choice's buttons read "Add as another School" and
+"Replace"; `module/services/session.js`, `startNewSession`: the confirmation's buttons read "Start session" and
+"Cancel".
 
-Non-conforming, `module/services/purchase.js:75`: the choice prompt's button is `l5r4.ui.label.ok`, "OK"; every
-`DialogV2.confirm` call keeps core's "Yes" and "No".
+Non-conforming, modeled: a prompt that keeps core's "Confirm", or a confirmation that keeps core's "Yes" and "No".
 
 ### 3. A destructive confirmation defaults to the safe button
 

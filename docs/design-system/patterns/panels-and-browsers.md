@@ -145,9 +145,9 @@ Conforming, `templates/apps/armor-config.hbs:2-32`: every field carries `data-ac
 no Save button.
 
 Non-conforming, modeled: a Save button added to the Armor configuration, which already saved each field as it
-changed, so the button does nothing a user can see. In the same family, `templates/apps/xp-manager.hbs:71-78` labels
-an action "OK" (`l5r4.ui.common.ok`); under the actions model each button reads as its verb (`content/voice.md`,
-Buttons).
+changed, so the button does nothing a user can see. Under the actions model each button reads as its verb
+(`content/voice.md`, Buttons): `templates/apps/xp-manager.hbs:73-76` labels its add button "Add XP"
+(`l5r4.apps.xpManager.addXp`), never "OK".
 
 ### 3. Rows share one shape
 

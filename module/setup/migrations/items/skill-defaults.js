@@ -29,22 +29,9 @@ export async function migrateSkillDefaults(docs, label) {
 
   for (const item of skillItems) {
     try {
-      const updates = {};
-      let needsUpdate = false;
+      const updates = buildSkillDefaults(item);
 
-      const currentFreeRanks = item.system?.freeRanks;
-      if (currentFreeRanks === undefined || currentFreeRanks === null) {
-        updates["system.freeRanks"] = 0;
-        needsUpdate = true;
-      }
-
-      const currentFreeEmphasis = item.system?.freeEmphasis;
-      if (currentFreeEmphasis === undefined || currentFreeEmphasis === null) {
-        updates["system.freeEmphasis"] = 0;
-        needsUpdate = true;
-      }
-
-      if (needsUpdate) {
+      if (Object.keys(updates).length > 0) {
         await item.update(updates, { diff: true, render: false });
         migratedCount++;
       }
@@ -62,4 +49,25 @@ export async function migrateSkillDefaults(docs, label) {
       `${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`
     );
   }
+}
+
+/**
+ * The defaults a skill lacks: `freeRanks` and `freeEmphasis` at 0.
+ * @param {Item} item - A skill item
+ * @returns {object} Update entries; empty when both fields hold a value
+ */
+function buildSkillDefaults(item) {
+  const updates = {};
+
+  const currentFreeRanks = item.system?.freeRanks;
+  if (currentFreeRanks === undefined || currentFreeRanks === null) {
+    updates["system.freeRanks"] = 0;
+  }
+
+  const currentFreeEmphasis = item.system?.freeEmphasis;
+  if (currentFreeEmphasis === undefined || currentFreeEmphasis === null) {
+    updates["system.freeEmphasis"] = 0;
+  }
+
+  return updates;
 }

@@ -41,28 +41,8 @@ export function prepareNpcData(actor, sys) {
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
 
-  // Initiative pool: the GM's stored pool when both its numbers are above 0, otherwise Insight Rank + Reflexes,
-  // keep Reflexes, an NPC counting as Insight Rank 1 (Ernie's ruling); then the modifiers, rules included
-  // game-rules/31_combat_round.md, p.81
-  const sourceRoll = toInt(actor._source.system.initiative.roll);
-  const sourceKeep = toInt(actor._source.system.initiative.keep);
-  const custom = sourceRoll > 0 && sourceKeep > 0;
-  const formula = getInitiativePool({
-    insightRank: NPC_INSIGHT_RANK,
-    reflexes: toInt(sys._derived.traitsEff.ref)
-  });
-  sys.initiative.roll = (custom ? sourceRoll : formula.roll) + toInt(sys.initiative.rollMod);
-  sys.initiative.keep = (custom ? sourceKeep : formula.keep) + toInt(sys.initiative.keepMod);
-  sys.initiative.totalMod = toInt(sys.initiative.totalMod);
-
-  // Initialize armor TN structure
-  // NPCs use simplified armor (single TN value, no calculation)
-  sys.armorTn = sys.armorTn || {};
-  sys.armorTn.base = 0;
-  sys.armorTn.bonus = 0;
-  sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
-  // An NPC's Armor TN is one entered value with its armor in it, so it stands as the base and armor adds 0
-  applyArmorRules(actor, sys, { base: toInt(sys.armor?.armorTn ?? 0), armor: 0, other: 0 });
+  prepareNpcInitiative(actor, sys);
+  prepareNpcArmorTn(actor, sys);
 
   // Initialize wound level structures
   sys.woundLevels = sys.woundLevels || {};
@@ -94,4 +74,38 @@ export function prepareNpcData(actor, sys) {
   prepareItemFormulas(actor);
 
   prepareFear(sys);
+}
+
+/**
+ * Prepare the Initiative pool: the GM's stored pool when both its numbers are above 0, otherwise Insight Rank +
+ * Reflexes, keep Reflexes, an NPC counting as Insight Rank 1 (Ernie's ruling); then the modifiers, rules included.
+ * game-rules/31_combat_round.md, p.81
+ * @param {Actor} actor - The NPC actor; `actor._source` holds the stored pool
+ * @param {object} sys - The actor's system data object (mutated in place)
+ */
+function prepareNpcInitiative(actor, sys) {
+  const sourceRoll = toInt(actor._source.system.initiative.roll);
+  const sourceKeep = toInt(actor._source.system.initiative.keep);
+  const custom = sourceRoll > 0 && sourceKeep > 0;
+  const formula = getInitiativePool({
+    insightRank: NPC_INSIGHT_RANK,
+    reflexes: toInt(sys._derived.traitsEff.ref)
+  });
+  sys.initiative.roll = (custom ? sourceRoll : formula.roll) + toInt(sys.initiative.rollMod);
+  sys.initiative.keep = (custom ? sourceKeep : formula.keep) + toInt(sys.initiative.keepMod);
+  sys.initiative.totalMod = toInt(sys.initiative.totalMod);
+}
+
+/**
+ * Prepare the Armor TN: NPCs use simplified armor, one entered Armor TN with the armor in it, so it stands as the
+ * base and armor adds 0; then the ArmorTN and Reduction rules.
+ * @param {Actor} actor - The NPC actor
+ * @param {object} sys - The actor's system data object (mutated in place)
+ */
+function prepareNpcArmorTn(actor, sys) {
+  sys.armorTn = sys.armorTn || {};
+  sys.armorTn.base = 0;
+  sys.armorTn.bonus = 0;
+  sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
+  applyArmorRules(actor, sys, { base: toInt(sys.armor?.armorTn ?? 0), armor: 0, other: 0 });
 }

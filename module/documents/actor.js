@@ -17,9 +17,7 @@
  * - XP tracking uses flags for persistent character advancement data
  */
 
-import { SYS_ID } from "../config/constants.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
-import { getIconPath } from "../utils/icons.js";
 import { toInt } from "../utils/type-coercion.js";
 import { rollDataKey } from "../utils/rule-values.js";
 import { getHighestSchoolRank } from "../utils/mechanics.js";
@@ -28,12 +26,14 @@ import {
   prepareWoundState,
   prepareCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
+import { onActorPreCreate } from "./actor/creation.js";
 import { prepareCurrentWoundLevelByMode } from "./actor/calculations/npc-wound-system.js";
 import { updateXpFlags } from "./actor/calculations/xp-system.js";
 import { preparePcData } from "./actor/preparation/pc-preparation.js";
 import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
 import { applyGrants } from "./item/lifecycle/grants.js";
-import { prepareWoundRollOption, applyInitialRules } from "./actor/rules.js";
+import { applyInitialRules } from "./actor/rules.js";
+import { prepareWoundRollOption } from "./actor/roll-options.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -55,70 +55,7 @@ export default class L5R4Actor extends Actor {
    */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
-
-    if (this.type === "pc") {
-      this.prototypeToken.updateSource({
-        bar1: { attribute: "wounds" },
-        bar2: { attribute: "suffered" },
-        displayName: CONST.TOKEN_DISPLAY_MODES.ALWAYS,
-        displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        disposition: CONST.TOKEN_DISPOSITIONS.FRIENDLY,
-        name: this.name,
-        vision: true,
-        actorLink: true
-      });
-
-      if (!data.img) {
-        this.updateSource({ img: getIconPath("pc.webp") });
-      }
-
-      // Initialize XP tracking flags for character advancement
-      // These flags persist character creation choices and XP expenditure history
-      const providedFlags = data.flags?.[SYS_ID] ?? {};
-      const updates = {};
-
-      if (providedFlags.xpManual === undefined) {
-        updates[`flags.${SYS_ID}.xpManual`] = [];
-      }
-      if (providedFlags.xpSpent === undefined) {
-        updates[`flags.${SYS_ID}.xpSpent`] = [];
-      }
-      if (providedFlags.xpBase === undefined) {
-        updates[`flags.${SYS_ID}.xpBase`] = 40;
-      }
-      if (providedFlags.xpFreeTraitBase === undefined) {
-        updates[`flags.${SYS_ID}.xpFreeTraitBase`] = {};
-      }
-      if (providedFlags.traitDiscounts === undefined) {
-        updates[`flags.${SYS_ID}.traitDiscounts`] = {};
-      }
-
-      if (Object.keys(updates).length > 0) {
-        this.updateSource(updates);
-      }
-    } else {
-      this.prototypeToken.updateSource({
-        bar1: { attribute: "wounds" },
-        bar2: { attribute: "suffered" },
-        displayName: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        disposition: CONST.TOKEN_DISPOSITIONS.HOSTILE
-      });
-
-      const updates = {};
-
-      if (!data.img) {
-        updates.img = getIconPath("npc.webp");
-      }
-
-      if (!data.system?.woundMode) {
-        updates["system.woundMode"] = "manual";
-      }
-
-      if (Object.keys(updates).length > 0) {
-        this.updateSource(updates);
-      }
-    }
+    onActorPreCreate(this, data);
   }
 
   /**

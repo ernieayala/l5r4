@@ -53,7 +53,7 @@ Columns per subtype, from `_item-lists.scss:29-124`, read the size tokens:
 | Subtype    | `-<subtype>` on list and row | The column set above                                    |
 | Expandable | `-expandable` on the row     | Renders the expand control and the details cell         |
 | Bio        | `-bio` on the row            | Row on `--l5r4-color-panel`                             |
-| Attacks    | `l5r4-item-row -attacks`     | An NPC attack: two roll buttons, type, action, controls |
+| Attacks    | `l5r4-item-row -attacks`     | An NPC attack: two roll buttons, action, type, controls |
 | Ledger     | `-xp`, `-xp-spent`           | XP manager rows                                         |
 
 ## States

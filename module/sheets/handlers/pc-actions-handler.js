@@ -52,45 +52,26 @@ export class PcActionsHandler {
 
     // Deactivation path: end the effect; the Void Point stays spent
     if (!element.checked) {
-      const effects = effectsOf(actor, "voidArmor").map(e => e.id);
-      if (effects.length) {
-        await actor.deleteEmbeddedDocuments("ActiveEffect", effects);
-      }
+      await this.#deleteArmorVoid(actor);
       return;
     }
 
     // Activation path: validate prerequisites
-
-    // Check if in combat
-    const combat = game.combat;
-    if (!combat || !combat.started) {
-      ui.notifications?.warn(T("l5r4.ui.effects.voidArmorNoCombat"));
-      element.checked = false;
-      return;
-    }
-
-    // Check if it's this actor's turn
-    const currentCombatant = combat.combatant;
-    if (!currentCombatant || currentCombatant.actorId !== actor.id) {
-      ui.notifications?.warn(T("l5r4.ui.effects.voidArmorNotTurn"));
-      element.checked = false;
-      return;
-    }
-
-    // Check void points available
-    const voidCurrent = actor.system?.rings?.void?.value ?? 0;
-    if (voidCurrent <= 0) {
-      ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
+    const problem = this.#getArmorVoidProblem(actor);
+    if (problem) {
+      ui.notifications?.warn(T(problem));
       element.checked = false;
       return;
     }
 
     // Confirm with dialog
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: "Spend Void Point" },
+      window: { title: T("l5r4.ui.effects.voidArmorTitle") },
       content: await R(DIALOG_TEMPLATES.confirm, {
         question: T("l5r4.ui.effects.voidArmorQuestion")
-      })
+      }),
+      yes: { label: T("l5r4.ui.common.spendVoidPoint") },
+      no: { label: T("l5r4.ui.common.cancel") }
     });
 
     if (!confirmed) {
@@ -98,17 +79,7 @@ export class PcActionsHandler {
       return;
     }
 
-    // Spend the Void Point, then +10 Armor TN as an effect ending with the Round. The write starts from the
-    // stored value, so an Active Effect on Void Points is never written into storage (B6).
-    // game-rules/25_rings_and_traits.md, p.78
-    warnVoidLimit(actor);
-    await actor.update({
-      "system.rings.void.value": actor._source.system.rings.void.value - 1,
-      ...buildVoidUseUpdate(actor)
-    });
-    await applyEffect(actor, "voidArmor");
-
-    ui.notifications?.info(F("l5r4.ui.effects.voidArmorSpent", { name: actor.name }));
+    await this.#spendArmorVoid(actor);
   }
 
   /**
@@ -191,5 +162,63 @@ export class PcActionsHandler {
       ? "l5r4.character.ranks.insightAutomatic"
       : "l5r4.character.ranks.insightManual";
     ui.notifications?.info(F(key, { name: context.actor.name }));
+  }
+
+  /**
+   * End the actor's Void for Armor TN effect early; the Void Point stays spent.
+   * @param {Actor} actor
+   * @returns {Promise<void>}
+   */
+  static async #deleteArmorVoid(actor) {
+    const effects = effectsOf(actor, "voidArmor").map(e => e.id);
+    if (effects.length) {
+      await actor.deleteEmbeddedDocuments("ActiveEffect", effects);
+    }
+  }
+
+  /**
+   * Why the actor cannot spend a Void Point on Armor TN now: no combat has started, it is not the actor's turn, or
+   * the actor has no Void Points.
+   * game-rules/25_rings_and_traits.md, p.78
+   * @param {Actor} actor
+   * @returns {string|null} The warning's i18n key, or null when the actor can spend
+   */
+  static #getArmorVoidProblem(actor) {
+    // Check if in combat
+    const combat = game.combat;
+    if (!combat || !combat.started) {
+      return "l5r4.ui.effects.voidArmorNoCombat";
+    }
+
+    // Check if it's this actor's turn
+    const currentCombatant = combat.combatant;
+    if (!currentCombatant || currentCombatant.actorId !== actor.id) {
+      return "l5r4.ui.effects.voidArmorNotTurn";
+    }
+
+    // Check void points available
+    const voidCurrent = actor.system?.rings?.void?.value ?? 0;
+    if (voidCurrent <= 0) {
+      return "l5r4.ui.mechanics.wounds.noVoidPoints";
+    }
+    return null;
+  }
+
+  /**
+   * Spend the Void Point, then +10 Armor TN as an effect ending with the Round.
+   * game-rules/25_rings_and_traits.md, p.78
+   * @param {Actor} actor
+   * @returns {Promise<void>}
+   */
+  static async #spendArmorVoid(actor) {
+    // The write starts from the stored value, so an Active Effect on Void Points is never written into storage (B6).
+    warnVoidLimit(actor);
+    await actor.update({
+      "system.rings.void.value": actor._source.system.rings.void.value - 1,
+      ...buildVoidUseUpdate(actor)
+    });
+    await applyEffect(actor, "voidArmor");
+
+    ui.notifications?.info(F("l5r4.ui.effects.voidArmorSpent", { name: actor.name }));
   }
 }

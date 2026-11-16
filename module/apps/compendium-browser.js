@@ -87,38 +87,10 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     );
     const shown = getFilteredEntries(entries, tab, { search: this.search, choices: this.choices });
     return Object.assign(context, {
-      tabs: BROWSER_TABS.map(t => ({
-        id: t.id,
-        label: T(`l5r4.apps.compendiumBrowser.tabs.${t.id}`),
-        active: t.id === tab.id
-      })),
+      tabs: buildTabs(tab),
       search: this.search,
-      filters: tab.filters.map(id => {
-        const filter = BROWSER_FILTERS[id];
-        return {
-          id,
-          kind: filter.kind,
-          label: T(filter.label),
-          value: this.choices[id] ?? "",
-          options:
-            filter.kind === "select"
-              ? getFilterOptions(entries, id).map(value => ({
-                  value,
-                  label: getOptionLabel(filter, value)
-                }))
-              : null
-        };
-      }),
-      rows: shown.map(entry => {
-        const numbers = getEntryNumbers(entry);
-        const citation = buildSourceCitation(entry.system.source);
-        return {
-          ...entry,
-          typeLabel: T(`TYPES.${tab.documentName}.${entry.type}`),
-          numbers: numbers ? formatPhrase(numbers) : "",
-          citation: citation ? formatPhrase(citation) : ""
-        };
-      }),
+      filters: buildFilters(tab, { entries, choices: this.choices }),
+      rows: buildRows(shown, tab),
       count: shown.length,
       canAdd: tab.documentName === "Item",
       canImport: tab.documentName === "Actor" && game.user.isGM,
@@ -311,6 +283,65 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     }
     return this.#entries[documentName];
   }
+}
+
+/**
+ * The tab strip, with the open tab marked.
+ * @param {object} tab - The open tab's entry in BROWSER_TABS
+ * @returns {object[]}
+ */
+function buildTabs(tab) {
+  return BROWSER_TABS.map(t => ({
+    id: t.id,
+    label: T(`l5r4.apps.compendiumBrowser.tabs.${t.id}`),
+    active: t.id === tab.id
+  }));
+}
+
+/**
+ * The open tab's filters, each with its choice and, for a select, the options its entries offer.
+ * @param {object} tab - The open tab's entry in BROWSER_TABS
+ * @param {object} state
+ * @param {object[]} state.entries - The tab's entries before filtering
+ * @param {Record<string, string>} state.choices - Each filter's choice, by filter id
+ * @returns {object[]}
+ */
+function buildFilters(tab, { entries, choices }) {
+  return tab.filters.map(id => {
+    const filter = BROWSER_FILTERS[id];
+    return {
+      id,
+      kind: filter.kind,
+      label: T(filter.label),
+      value: choices[id] ?? "",
+      options:
+        filter.kind === "select"
+          ? getFilterOptions(entries, id).map(value => ({
+              value,
+              label: getOptionLabel(filter, value)
+            }))
+          : null
+    };
+  });
+}
+
+/**
+ * The result rows: each entry with its type label, key numbers, and citation as display text.
+ * @param {object[]} shown - The entries the filters keep
+ * @param {object} tab - The open tab's entry in BROWSER_TABS
+ * @returns {object[]}
+ */
+function buildRows(shown, tab) {
+  return shown.map(entry => {
+    const numbers = getEntryNumbers(entry);
+    const citation = buildSourceCitation(entry.system.source);
+    return {
+      ...entry,
+      typeLabel: T(`TYPES.${tab.documentName}.${entry.type}`),
+      numbers: numbers ? formatPhrase(numbers) : "",
+      citation: citation ? formatPhrase(citation) : ""
+    };
+  });
 }
 
 /**

@@ -49,27 +49,7 @@ export function applyGrants(actor) {
  */
 export function deleteGrantedItems(actor, giver) {
   return updateGrantQueue(actor, async () => {
-    const deletes = [];
-    const updates = [];
-    for (const record of recordsOf(giver)) {
-      const target = record.itemId ? actor.items.get(record.itemId) : null;
-      if (!target) {
-        continue;
-      }
-      const plan =
-        target.type === "skill"
-          ? buildUngrantedSkill(target._source.system, record)
-          : { delete: record.created };
-      if (plan.delete) {
-        deletes.push(target.id);
-      } else if (plan.update) {
-        updates.push({
-          _id: target.id,
-          system: plan.update,
-          [`flags.${SYS_ID}.grantedBy`]: new foundry.data.operators.ForcedDeletion()
-        });
-      }
-    }
+    const { deletes, updates } = buildUngrantChanges(actor, giver);
     if (updates.length) {
       await actor.updateEmbeddedDocuments("Item", updates);
     }
@@ -218,38 +198,96 @@ async function createDueGrants(actor) {
       if (isActorGone()) {
         return;
       }
-      const source = await fromUuid(rule.uuid);
-      if (source?.documentName !== "Item") {
-        console.warn(`${SYS_ID} | "${giver.name}" grants ${rule.uuid}, which is not an item`);
-        records.push({
-          uuid: rule.uuid,
-          itemId: null,
-          created: false,
-          freeRanks: 0,
-          emphasis: "",
-          freeEmphasis: 0
-        });
-        continue;
-      }
-      records.push(await createGrantedItem(actor, rule, { giver, source }));
-      if (rule.rank > 0) {
-        await ChatMessage.create({
-          speaker: ChatMessage.getSpeaker({ actor }),
-          content: await R(CHAT_TEMPLATES.note, {
-            lines: [
-              F("l5r4.ui.grants.granted", {
-                name: actor.name,
-                item: source.name,
-                giver: giver.name,
-                rank: rule.rank
-              })
-            ]
-          })
-        });
-      }
+      records.push(await createDueGrant(actor, rule, { giver }));
     }
     if (due.length && !isActorGone()) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
+}
+
+/**
+ * The changes that take back what a deleted giver granted: the granted items to delete, and the Skills with ranks or
+ * Emphases bought on top, each losing only what the grant gave.
+ * @param {Actor} actor
+ * @param {Item} giver - The deleted item, its flags still readable
+ * @returns {{deletes: string[], updates: object[]}} Item ids to delete, and item updates
+ */
+function buildUngrantChanges(actor, giver) {
+  const deletes = [];
+  const updates = [];
+  for (const record of recordsOf(giver)) {
+    const target = record.itemId ? actor.items.get(record.itemId) : null;
+    if (!target) {
+      continue;
+    }
+    const plan =
+      target.type === "skill"
+        ? buildUngrantedSkill(target._source.system, record)
+        : { delete: record.created };
+    if (plan.delete) {
+      deletes.push(target.id);
+    } else if (plan.update) {
+      updates.push({
+        _id: target.id,
+        system: plan.update,
+        [`flags.${SYS_ID}.grantedBy`]: new foundry.data.operators.ForcedDeletion()
+      });
+    }
+  }
+  return { deletes, updates };
+}
+
+/**
+ * Grant one due rule: give its item to the actor and, when the grant waited for a School Rank, post a chat note. A
+ * rule whose UUID is not an item is recorded as granted with no item, so it is not tried again.
+ * @param {Actor} actor
+ * @param {import("../../../utils/grants.js").GrantRule} rule
+ * @param {object} grant
+ * @param {Item} grant.giver - The item whose rule grants it
+ * @returns {Promise<import("../../../utils/grants.js").GrantRecord>}
+ */
+async function createDueGrant(actor, rule, { giver }) {
+  const source = await fromUuid(rule.uuid);
+  if (source?.documentName !== "Item") {
+    console.warn(`${SYS_ID} | "${giver.name}" grants ${rule.uuid}, which is not an item`);
+    return {
+      uuid: rule.uuid,
+      itemId: null,
+      created: false,
+      freeRanks: 0,
+      emphasis: "",
+      freeEmphasis: 0
+    };
+  }
+  const record = await createGrantedItem(actor, rule, { giver, source });
+  if (rule.rank > 0) {
+    await postGrantNote(actor, { giver, source, rank: rule.rank });
+  }
+  return record;
+}
+
+/**
+ * Post the chat note that a grant which waited for a School Rank has come.
+ * @param {Actor} actor
+ * @param {object} grant
+ * @param {Item} grant.giver - The item whose rule grants it
+ * @param {Item} grant.source - The item granted
+ * @param {number} grant.rank - The School Rank it waited for
+ * @returns {Promise<void>}
+ */
+async function postGrantNote(actor, { giver, source, rank }) {
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: await R(CHAT_TEMPLATES.note, {
+      lines: [
+        F("l5r4.ui.grants.granted", {
+          name: actor.name,
+          item: source.name,
+          giver: giver.name,
+          rank
+        })
+      ]
+    })
+  });
 }

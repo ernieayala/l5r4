@@ -30,6 +30,37 @@ const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });
  */
 export async function rollDamageFromAttack(message, { askForOptions = true } = {}) {
   const attack = message.system;
+  const actor = validateAttacker(attack);
+  if (!actor) {
+    return null;
+  }
+  const weapon = attack.weaponUuid ? fromUuidSync(attack.weaponUuid) : null;
+  const spec = damageSpecOf(attack, weapon);
+  const base = attack.maneuvers.disarm
+    ? { ...DISARM_DAMAGE, bonus: 0 }
+    : { roll: spec.roll, keep: spec.keep, bonus: spec.bonus };
+  const modifiers = buildDamageModifiers(attack, actor);
+  const target = attack.target.uuid ? (fromUuidSync(attack.target.uuid) ?? null) : null;
+  return rollCheck({
+    actor,
+    kind: "damage",
+    label: `${T("l5r4.ui.check.damageFor")} ${spec.label}`,
+    base,
+    weapon,
+    explode: spec.explode ?? null,
+    modifiers,
+    target,
+    attackOf: message.id,
+    askForOptions
+  });
+}
+
+/**
+ * The attacker an attack message names, when it exists and the user owns it; otherwise a warning and null.
+ * @param {object} attack - The attack message's system data
+ * @returns {Actor|null}
+ */
+function validateAttacker(attack) {
   const actor = fromUuidSync(attack.actorUuid);
   if (!actor) {
     ui.notifications?.warn(T("l5r4.ui.notifications.actorNotFound"));
@@ -39,21 +70,37 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
     return null;
   }
-  const weapon = attack.weaponUuid ? fromUuidSync(attack.weaponUuid) : null;
-  const spec = attack.damage.label
-    ? attack.damage
-    : // An attack posted before its damage pool was stored: the weapon's pool now
-      {
-        label: weapon?.name ?? "",
-        roll: toInt(weapon?.system.derivedDamageRoll ?? weapon?.system.damageRoll),
-        keep: toInt(weapon?.system.derivedDamageKeep ?? weapon?.system.damageKeep),
-        bonus: 0,
-        explode: weapon ? weapon.system.damageExplode : 10
-      };
+  return actor;
+}
+
+/**
+ * The damage pool an attack stored, or for an attack posted before its damage pool was stored, the weapon's pool now.
+ * @param {object} attack - The attack message's system data
+ * @param {Item|null} weapon - The attack's weapon
+ * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number|null}}
+ */
+function damageSpecOf(attack, weapon) {
+  if (attack.damage.label) {
+    return attack.damage;
+  }
+  return {
+    label: weapon?.name ?? "",
+    roll: toInt(weapon?.system.derivedDamageRoll ?? weapon?.system.damageRoll),
+    keep: toInt(weapon?.system.derivedDamageKeep ?? weapon?.system.damageKeep),
+    bonus: 0,
+    explode: weapon ? weapon.system.damageExplode : 10
+  };
+}
+
+/**
+ * The damage roll's modifiers from the attack's maneuvers: Increased Damage +1k0 per Raise, and the Feint bonus.
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {object} attack - The attack message's system data
+ * @param {Actor} actor - The attacker
+ * @returns {object[]} The modifiers, each with a label
+ */
+function buildDamageModifiers(attack, actor) {
   const maneuvers = attack.maneuvers;
-  const base = maneuvers.disarm
-    ? { ...DISARM_DAMAGE, bonus: 0 }
-    : { roll: spec.roll, keep: spec.keep, bonus: spec.bonus };
   const modifiers = [];
   if (maneuvers.increasedDamage) {
     modifiers.push({ label: T("l5r4.ui.check.increasedDamage"), roll: maneuvers.increasedDamage });
@@ -70,17 +117,5 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   if (feint) {
     modifiers.push({ label: T("l5r4.ui.combat.feint"), total: feint });
   }
-  const target = attack.target.uuid ? (fromUuidSync(attack.target.uuid) ?? null) : null;
-  return rollCheck({
-    actor,
-    kind: "damage",
-    label: `${T("l5r4.ui.check.damageFor")} ${spec.label}`,
-    base,
-    weapon,
-    explode: spec.explode ?? null,
-    modifiers,
-    target,
-    attackOf: message.id,
-    askForOptions
-  });
+  return modifiers;
 }

@@ -39,7 +39,6 @@ export async function rollRing({
   const ring = String(ringKey ?? "void").toLowerCase();
   const rank = toInt(ringRank);
   const affinity = getAffinityDeficiencyModifier(roller, ring);
-  let slotPath = null;
 
   return rollCheck({
     actor: roller,
@@ -52,18 +51,27 @@ export async function rollRing({
       template: DIALOG_TEMPLATES.checkRing,
       data: { ...getSlotDialogData(roller, ring), affinity: affinity > 0, deficiency: affinity < 0 }
     },
+    ...buildCastingHooks(roller, { ring, ringName })
+  });
+}
+
+/**
+ * The Ring Roll's hooks for a Spell Casting Roll the dialog asks for: before the roll, the School Rank and the slot
+ * are checked and the School Rank joins the rolled dice; once the roll is made, the slot is spent.
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * @param {L5R4Actor} roller - The roller
+ * @param {{ring: string, ringName: string}} ringData - The Ring's key and display name
+ * @returns {{prepare: Function, after: Function}} rollCheck's `prepare` and `after`
+ */
+function buildCastingHooks(roller, { ring, ringName }) {
+  let slotPath = null;
+  return {
     prepare: async choices => {
       if (!choices.spellCasting) {
         return {};
       }
-      const schoolRank = getCastingSchoolRank(roller);
-      const shift = (choices.affinity ? 1 : 0) - (choices.deficiency ? 1 : 0);
-      if (schoolRank + shift <= 0) {
-        ui.notifications?.warn(
-          shift < 0
-            ? F("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
-            : T("l5r4.ui.notifications.schoolRankZero")
-        );
+      const ranks = validateCastingRank(roller, choices, { ringName });
+      if (!ranks) {
         return null;
       }
       const slot = getSlotToSpend(roller, ring, choices.slot);
@@ -71,23 +79,57 @@ export async function rollRing({
         return null;
       }
       slotPath = slot.path;
-      const kindLabel = shift > 0 ? "affinity" : shift < 0 ? "deficiency" : null;
-      return {
-        modifiers: [
-          {
-            label: T("l5r4.ui.check.schoolRank"),
-            roll: schoolRank + shift,
-            keep: 0,
-            total: 0,
-            enabled: true
-          }
-        ],
-        labelSuffix:
-          ` (${T("l5r4.ui.mechanics.rolls.spellCasting")})` +
-          (kindLabel ? ` [${T(`l5r4.magic.spells.${kindLabel}`)}]` : "") +
-          slot.label
-      };
+      return buildCastingTerms(ranks, slot);
     },
     after: () => spendSlot(roller, slotPath)
-  });
+  };
+}
+
+/**
+ * The School Rank a Spell Casting Roll adds, shifted by the Affinity or Deficiency the dialog marks; a rank of 0 or
+ * less blocks the cast with a warning.
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * @param {L5R4Actor} roller - The roller
+ * @param {object} choices - The roll dialog's choices
+ * @param {{ringName: string}} ringData - The Ring's display name
+ * @returns {{schoolRank: number, shift: number}|null} null when the cast is blocked
+ */
+function validateCastingRank(roller, choices, { ringName }) {
+  const schoolRank = getCastingSchoolRank(roller);
+  const shift = (choices.affinity ? 1 : 0) - (choices.deficiency ? 1 : 0);
+  if (schoolRank + shift <= 0) {
+    ui.notifications?.warn(
+      shift < 0
+        ? F("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+        : T("l5r4.ui.notifications.schoolRankZero")
+    );
+    return null;
+  }
+  return { schoolRank, shift };
+}
+
+/**
+ * What a Spell Casting Roll adds to the Ring Roll: the shifted School Rank as rolled dice, and a label naming the
+ * cast, its Affinity or Deficiency, and its slot.
+ * @param {{schoolRank: number, shift: number}} ranks - The School Rank and its shift
+ * @param {{label: string}} slot - The slot to spend
+ * @returns {{modifiers: object[], labelSuffix: string}} rollCheck's `prepare` result
+ */
+function buildCastingTerms({ schoolRank, shift }, slot) {
+  const kindLabel = shift > 0 ? "affinity" : shift < 0 ? "deficiency" : null;
+  return {
+    modifiers: [
+      {
+        label: T("l5r4.ui.check.schoolRank"),
+        roll: schoolRank + shift,
+        keep: 0,
+        total: 0,
+        enabled: true
+      }
+    ],
+    labelSuffix:
+      ` (${T("l5r4.ui.mechanics.rolls.spellCasting")})` +
+      (kindLabel ? ` [${T(`l5r4.magic.spells.${kindLabel}`)}]` : "") +
+      slot.label
+  };
 }

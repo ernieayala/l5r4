@@ -86,13 +86,21 @@ export function toTraitKey(raw) {
     return ENGLISH_TRAIT_LABELS[k.toLowerCase()];
   }
 
-  // Try matching against localized labels
+  return getLocalizedTraitKey(k);
+}
+
+/**
+ * The key of the Trait whose label in the current language is the text, matched without case.
+ * @param {string} text - A trimmed Trait name
+ * @returns {string} The Trait key, or "" when no label matches
+ */
+function getLocalizedTraitKey(text) {
   try {
     for (const key of KNOWN_TRAITS) {
       const labelKey =
         key === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${key}`;
       const label = T(labelKey);
-      if (label && label.toLowerCase() === k.toLowerCase()) {
+      if (label && label.toLowerCase() === text.toLowerCase()) {
         return key;
       }
     }

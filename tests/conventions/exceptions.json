@@ -1,9 +1,10 @@
 {
   "module/apps/xp-manager.js": "One window class: its options, the context it renders with its fallback on an error, and its action handlers, which core calls as the class's own static #on<Action> members (foundry-patterns.md, Actions); rebuilding the XP history it shows is services/xp/versioning.js",
   "module/data/rules/rule-models.js": "One registry of every rule model, split by nothing but size",
+  "module/hooks/register-all.js": "The one place the system's Foundry hooks are wired (Stage 17 decision 16): one registration step per feature, run in the order handlers on a shared hook fire, split by nothing but size",
   "module/services/combat/duel.js": "One combat flow, the iaijutsu duel: starting it, each stage's roll, settling a stage, and the card each state renders, which flow.js reads as the flow's click, step, and render",
   "module/services/dice/check/collect.js": "Everything one check gathers (getCheckContext): the selectors and roll options its rules are read with, then its modifiers, TN changes, and dice, damage, and Raise rule terms, one step each; spending the context is roll-check.js",
-  "module/sheets/base-actor-sheet.js": "One base class of the PC and NPC sheets: the [data-action] delegation and the shared members each sheet's action switch calls, every one routed to a handler in module/sheets/handlers/",
+  "module/sheets/base-actor-sheet.js": "One base class of the PC and NPC sheets: the [data-action] delegation, the click actions both sheets share, and the shared members each sheet's actions call, every one routed to a handler in module/sheets/handlers/",
   "module/sheets/item-sheet.js": "One sheet class: its options, parts, tabs, and context, and its action table; a set of actions one class uses stays as that class's static #on<Action> members (foundry-patterns.md, Actions), and the effect actions already delegate to ItemEffectsHandler in module/sheets/handlers/",
   "module/utils/rule-engine.js": "What each rule key produces (CLAUDE.md Layers): one output per key from validated rule data, the derived outputs in one pass over the rules; reading the finished bag is rule-bag.js",
   "module/utils/rule-summary.js": "The summary of every rule key: one line builder per key in RULE_KEYS and the phrase builders those lines share, split by nothing but size; the book citation is source-citation.js"

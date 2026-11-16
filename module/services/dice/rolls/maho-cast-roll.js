@@ -47,38 +47,60 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
       template: DIALOG_TEMPLATES.checkMaho,
       data: { bloodCost }
     },
-    prepare: async choices => {
-      // Dialog input: a whole number of Wounds, never negative
-      const additional = Math.max(0, toInt(choices.additionalBlood));
-      const total = bloodCost + additional;
-      const freeRaises = Math.floor(additional / bloodCost);
-      if (choices.bloodSource !== "other") {
-        // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
-        const suffered = Math.min(
-          actor._source.system.suffered + total,
-          toInt(actor.system.wounds.max)
-        );
-        await actor.update({ "system.suffered": suffered });
-      }
-      return {
-        freeRaises,
-        labelSuffix: ` [${T("l5r4.magic.maho.bloodCost")}: ${total}]`
-      };
-    },
-    beforePost: async ({ success }) => {
-      if (!success) {
-        return {};
-      }
-      const base = Math.max(mastery - 1, 1);
-      const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
-      // Through the ledger, so ten points become a Taint Rank and the change is logged
-      // game-rules/89_shadowlands_taint.md, p.275
-      await applyTrackChange(actor, "taint", {
-        points: taint,
-        reason: T("l5r4.magic.maho.taintGained")
-      });
-      ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
-      return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
-    }
+    prepare: choices => spendBloodCost(actor, choices, { bloodCost }),
+    beforePost: ({ success }) => applyMahoTaint(actor, { success, mastery, masterOfBlood })
   });
+}
+
+/**
+ * Pay the blood cost before the roll: the cost and any additional blood the dialog adds, taken as Wounds unless the
+ * blood comes from someone else. Each additional full cost gives one Free Raise.
+ * game-rules/88_maho.md, p.267-268
+ * @param {L5R4Actor} actor - The caster
+ * @param {object} choices - The roll dialog's choices
+ * @param {{bloodCost: number}} cost - The spell's blood cost in Wounds
+ * @returns {Promise<{freeRaises: number, labelSuffix: string}>} rollCheck's `prepare` result
+ */
+async function spendBloodCost(actor, choices, { bloodCost }) {
+  // Dialog input: a whole number of Wounds, never negative
+  const additional = Math.max(0, toInt(choices.additionalBlood));
+  const total = bloodCost + additional;
+  const freeRaises = Math.floor(additional / bloodCost);
+  if (choices.bloodSource !== "other") {
+    // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
+    const suffered = Math.min(
+      actor._source.system.suffered + total,
+      toInt(actor.system.wounds.max)
+    );
+    await actor.update({ "system.suffered": suffered });
+  }
+  return {
+    freeRaises,
+    labelSuffix: ` [${T("l5r4.magic.maho.bloodCost")}: ${total}]`
+  };
+}
+
+/**
+ * Gain the Taint of a successful cast: Mastery Level - 1, at least 1; Master of Blood takes the Earth Ring from it,
+ * at least 1.
+ * game-rules/89_shadowlands_taint.md, p.280
+ * @param {L5R4Actor} actor - The caster
+ * @param {{success: boolean, mastery: number, masterOfBlood: boolean}} cast - Whether the cast succeeded, the
+ *   spell's Mastery Level, and whether the caster has Master of Blood
+ * @returns {Promise<object>} rollCheck's `beforePost` result: the Taint on the label, or nothing on a failure
+ */
+async function applyMahoTaint(actor, { success, mastery, masterOfBlood }) {
+  if (!success) {
+    return {};
+  }
+  const base = Math.max(mastery - 1, 1);
+  const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
+  // Through the ledger, so ten points become a Taint Rank and the change is logged
+  // game-rules/89_shadowlands_taint.md, p.275
+  await applyTrackChange(actor, "taint", {
+    points: taint,
+    reason: T("l5r4.magic.maho.taintGained")
+  });
+  ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
+  return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
 }

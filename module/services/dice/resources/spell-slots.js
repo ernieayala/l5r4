@@ -65,40 +65,22 @@ const VALID_RINGS = Object.freeze(["water", "air", "fire", "earth", "void"]);
  */
 export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
   if (!actor) {
-    return {
-      valid: false,
-      current: 0,
-      message: T("l5r4.ui.notifications.noActorForVoid"),
-      path: null
-    };
+    return buildSlotRefusal(T("l5r4.ui.notifications.noActorForVoid"), null);
   }
 
   const normalizedRing = String(ringKey).toLowerCase();
   if (!VALID_RINGS.includes(normalizedRing)) {
-    return {
-      valid: false,
-      current: 0,
-      message: game.i18n.localize("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
-      path: null
-    };
+    return buildSlotRefusal(
+      game.i18n.localize("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
+      null
+    );
   }
 
   const path = isVoidSlot ? "system.spellSlots.void" : `system.spellSlots.${normalizedRing}`;
   const current = Number(foundry.utils.getProperty(actor, path) ?? 0) || 0;
 
   if (current <= 0) {
-    const ringLabel = isVoidSlot
-      ? `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize(
-          "l5r4.magic.spells.voidSlot"
-        )}`
-      : game.i18n.localize(`l5r4.ui.mechanics.rings.${normalizedRing}`) || normalizedRing;
-
-    return {
-      valid: false,
-      current: 0,
-      message: `${ringLabel}: 0`,
-      path
-    };
+    return buildSlotRefusal(`${formatSlotRingLabel(normalizedRing, { isVoidSlot })}: 0`, path);
   }
 
   return {
@@ -221,16 +203,55 @@ async function spendSpellSlot(actor, ringKey, isVoidSlot) {
     const stored = foundry.utils.getProperty(resolvedActor._source, validation.path);
     await resolvedActor.update({ [validation.path]: stored - 1 }, { diff: true });
 
-    const ringDisplay =
-      game.i18n.localize(`l5r4.ui.mechanics.rings.${String(ringKey).toLowerCase()}`) || ringKey;
-    const label = isVoidSlot
-      ? ` [${ringDisplay} ${game.i18n.localize("l5r4.magic.spells.voidSlot") || "Slot"}]`
-      : ` [${ringDisplay} Slot]`;
-
     return {
       success: true,
-      label,
+      label: formatSlotLabel(ringKey, { isVoidSlot }),
       message: null
     };
   });
+}
+
+/**
+ * A spell slot validation that refuses the slot.
+ * @param {string} message - The localized reason
+ * @param {string|null} path - The slot's actor property path, when the ring is valid
+ * @returns {SpellSlotValidation}
+ */
+function buildSlotRefusal(message, path) {
+  return {
+    valid: false,
+    current: 0,
+    message,
+    path
+  };
+}
+
+/**
+ * The name of an empty slot's kind for the refusal message: the Void slot, or the Ring's name.
+ * @param {string} normalizedRing - The ring key in lower case
+ * @param {object} options
+ * @param {boolean} options.isVoidSlot - Whether the slot is a Void bonus slot
+ * @returns {string}
+ */
+function formatSlotRingLabel(normalizedRing, { isVoidSlot }) {
+  return isVoidSlot
+    ? `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize(
+        "l5r4.magic.spells.voidSlot"
+      )}`
+    : game.i18n.localize(`l5r4.ui.mechanics.rings.${normalizedRing}`) || normalizedRing;
+}
+
+/**
+ * The chat label of a spent slot, such as " [Fire Slot]".
+ * @param {string} ringKey - Ring identifier for the slot type
+ * @param {object} options
+ * @param {boolean} options.isVoidSlot - Whether the slot is a Void bonus slot
+ * @returns {string}
+ */
+function formatSlotLabel(ringKey, { isVoidSlot }) {
+  const ringDisplay =
+    game.i18n.localize(`l5r4.ui.mechanics.rings.${String(ringKey).toLowerCase()}`) || ringKey;
+  return isVoidSlot
+    ? ` [${ringDisplay} ${game.i18n.localize("l5r4.magic.spells.voidSlot") || "Slot"}]`
+    : ` [${ringDisplay} Slot]`;
 }

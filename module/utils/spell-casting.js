@@ -52,23 +52,7 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
     return 0;
   }
 
-  // Collect all modifiers (use Set to track unique values)
-  const modifiers = new Set();
-  for (const item of shugenjaItems) {
-    if (!item?.system) {
-      continue;
-    }
-
-    const affinity = toString(item.system.affinity).toLowerCase().trim();
-    if (affinity === normalizedRing) {
-      modifiers.add(1);
-    }
-
-    const deficiency = toString(item.system.deficiency).toLowerCase().trim();
-    if (deficiency === normalizedRing) {
-      modifiers.add(-1);
-    }
-  }
+  const modifiers = getRingModifiers(shugenjaItems, normalizedRing);
 
   // If both affinity and deficiency present, they cancel out
   if (modifiers.size > 1) {
@@ -77,4 +61,30 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
 
   // Return single modifier if present, otherwise 0
   return modifiers.size === 1 ? modifiers.values().next().value : 0;
+}
+
+/**
+ * The distinct modifiers shugenja Techniques give a Ring: 1 for an Affinity, -1 for a Deficiency.
+ * @param {object[]} techniques - The shugenja Technique items
+ * @param {string} ring - The Ring, in lower case
+ * @returns {Set<number>} The modifiers, each once
+ */
+function getRingModifiers(techniques, ring) {
+  const modifiers = new Set();
+  for (const item of techniques) {
+    if (!item?.system) {
+      continue;
+    }
+
+    const affinity = toString(item.system.affinity).toLowerCase().trim();
+    if (affinity === ring) {
+      modifiers.add(1);
+    }
+
+    const deficiency = toString(item.system.deficiency).toLowerCase().trim();
+    if (deficiency === ring) {
+      modifiers.add(-1);
+    }
+  }
+  return modifiers;
 }

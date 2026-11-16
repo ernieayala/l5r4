@@ -33,9 +33,7 @@ export async function migrateFreeRaisesDefaults(docs, label) {
 
   for (const item of itemDocs) {
     try {
-      const currentFreeRaises = item.system?.freeRaises;
-      if (currentFreeRaises === undefined || currentFreeRaises === null) {
-        await item.update({ "system.freeRaises": 0 }, { diff: true, render: false });
+      if (await migrateItemFreeRaises(item)) {
         migratedCount++;
       }
     } catch (err) {
@@ -53,4 +51,18 @@ export async function migrateFreeRaisesDefaults(docs, label) {
       `${SYS_ID} | Successfully migrated ${migratedCount} items with freeRaises field (${label})`
     );
   }
+}
+
+/**
+ * Set an item's missing `freeRaises` to 0.
+ * @param {Item} item
+ * @returns {Promise<boolean>} Whether the item was updated
+ */
+async function migrateItemFreeRaises(item) {
+  const currentFreeRaises = item.system?.freeRaises;
+  if (currentFreeRaises !== undefined && currentFreeRaises !== null) {
+    return false;
+  }
+  await item.update({ "system.freeRaises": 0 }, { diff: true, render: false });
+  return true;
 }

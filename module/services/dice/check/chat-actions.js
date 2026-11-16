@@ -80,57 +80,17 @@ export async function rollAgainKeepBetter(message) {
  */
 export async function rollHonor(message) {
   const actor = rollActor(message);
-  if (!actor?.isOwner) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
-    return null;
-  }
-  if (!isHonorRollOffered(message.system)) {
-    return null;
-  }
-  const session = game.settings.get(SYS_ID, "session");
-  if (actor.getFlag(SYS_ID, "honorRollSession") === session) {
-    ui.notifications?.warn(F("l5r4.ui.honorRoll.used", { name: actor.name }));
-    return null;
-  }
-  // A character without an Honor Rank has nothing to call on; an NPC has no Honor at all. A Taint penalty that
-  // shrinks the pool floors at 1k1 like any other (module/utils/ten-dice.js)
-  const honor = toInt(actor.system.honor?.rank);
-  if (honor < 1) {
-    ui.notifications?.warn(F("l5r4.ui.honorRoll.noDice", { name: actor.name }));
+  const allowed = validateHonorRoll(message, actor);
+  if (!allowed) {
     return null;
   }
   const source = message.system.toObject();
-  const penalty = getTaintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
-  const modifiers = penalty.roll
-    ? [{ label: T("l5r4.ui.taint.label"), roll: -penalty.roll, keep: -penalty.keep, total: 0 }]
-    : [];
-  const pool = buildPool({
-    roll: honor,
-    keep: honor,
-    modifiers,
-    littleTruths: game.settings.get(SYS_ID, "LtException")
-  });
-  await actor.setFlag(SYS_ID, "honorRollSession", session);
+  const { pool, modifiers } = buildHonorPool(actor, allowed.honor);
+  await actor.setFlag(SYS_ID, "honorRollSession", allowed.session);
   const roll = new foundry.dice.Roll(getPoolFormula(pool));
   await roll.evaluate();
   const outcome = getCheckResult(roll.total, source.tn.effective);
-  const system = {
-    ...source,
-    label: `${source.label} (${T("l5r4.ui.honorRoll.button")})`,
-    pool: { ...pool, unskilled: false },
-    modifiers: modifiers.map(m => ({ ...m, enabled: true })),
-    voidPoint: false,
-    emphasis: "",
-    outcome: { total: roll.total, success: outcome.success, margin: outcome.margin },
-    honorRollOf: message.id
-  };
-  const content = await renderCheckCard(system, roll, { actorId: actor.id });
-  const posted = await roll.toMessage({
-    type: "roll",
-    system,
-    speaker: message.speaker,
-    content
-  });
+  const posted = await postHonorRoll(message, roll, { source, pool, modifiers, outcome, actor });
   if (!outcome.success) {
     await applyTrackChange(actor, "honor", {
       points: -10,
@@ -266,6 +226,88 @@ export function onGetChatMessageContextOptions(_app, options) {
       }
     }
   );
+}
+
+/**
+ * Whether the roll's actor may make its Honor Roll: the user owns the actor, the card offers the roll, the actor has
+ * not used it this session, and it has an Honor Rank to roll. A refusal warns and gives null.
+ * game-rules/43_honor.md, p.92
+ * @param {ChatMessage} message - A failed `roll` message
+ * @param {Actor|null} actor - The roll's actor
+ * @returns {{honor: number, session: unknown}|null} The Honor Rank and the current session, or null when refused
+ */
+function validateHonorRoll(message, actor) {
+  if (!actor?.isOwner) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  if (!isHonorRollOffered(message.system)) {
+    return null;
+  }
+  const session = game.settings.get(SYS_ID, "session");
+  if (actor.getFlag(SYS_ID, "honorRollSession") === session) {
+    ui.notifications?.warn(F("l5r4.ui.honorRoll.used", { name: actor.name }));
+    return null;
+  }
+  // A character without an Honor Rank has nothing to call on; an NPC has no Honor at all. A Taint penalty that
+  // shrinks the pool floors at 1k1 like any other (module/utils/ten-dice.js)
+  const honor = toInt(actor.system.honor?.rank);
+  if (honor < 1) {
+    ui.notifications?.warn(F("l5r4.ui.honorRoll.noDice", { name: actor.name }));
+    return null;
+  }
+  return { honor, session };
+}
+
+/**
+ * The Honor Roll's pool: Honor Rank in rolled and kept dice, less what Taint Level 4 takes, the Ten Dice Rule last.
+ * game-rules/43_honor.md, p.92
+ * game-rules/89_shadowlands_taint.md, p.278
+ * @param {Actor} actor - The roller
+ * @param {number} honor - The Honor Rank
+ * @returns {{pool: object, modifiers: object[]}} The pool, and the Taint modifier when there is one
+ */
+function buildHonorPool(actor, honor) {
+  const penalty = getTaintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
+  const modifiers = penalty.roll
+    ? [{ label: T("l5r4.ui.taint.label"), roll: -penalty.roll, keep: -penalty.keep, total: 0 }]
+    : [];
+  const pool = buildPool({
+    roll: honor,
+    keep: honor,
+    modifiers,
+    littleTruths: game.settings.get(SYS_ID, "LtException")
+  });
+  return { pool, modifiers };
+}
+
+/**
+ * Post the Honor Roll's card: the failed roll's context with the Honor pool, no Void Point or Emphasis, and the new
+ * outcome, marked as the Honor Roll of the original.
+ * @param {ChatMessage} message - The failed `roll` message
+ * @param {Roll} roll - The evaluated Honor Roll
+ * @param {{source: object, pool: object, modifiers: object[], outcome: object, actor: Actor}} honorRoll - The failed
+ *   roll's stored context, the pool and its modifiers, the outcome, and the roller
+ * @returns {Promise<ChatMessage>}
+ */
+async function postHonorRoll(message, roll, { source, pool, modifiers, outcome, actor }) {
+  const system = {
+    ...source,
+    label: `${source.label} (${T("l5r4.ui.honorRoll.button")})`,
+    pool: { ...pool, unskilled: false },
+    modifiers: modifiers.map(m => ({ ...m, enabled: true })),
+    voidPoint: false,
+    emphasis: "",
+    outcome: { total: roll.total, success: outcome.success, margin: outcome.margin },
+    honorRollOf: message.id
+  };
+  const content = await renderCheckCard(system, roll, { actorId: actor.id });
+  return roll.toMessage({
+    type: "roll",
+    system,
+    speaker: message.speaker,
+    content
+  });
 }
 
 /**

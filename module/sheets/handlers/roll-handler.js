@@ -175,11 +175,7 @@ export class RollHandler {
     const id = weapon.id;
     const weaponSkill = getWeaponSkillTrait(actor, weapon);
     const associatedSkill = weapon.system.associatedSkill || null;
-    const skillItem = associatedSkill
-      ? actor.items.find(
-          i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
-        )
-      : null;
+    const skillItem = RollHandler.#skillItemOf(actor, associatedSkill);
     const skillTrait = skillItem?.system.trait || weapon.system.fallbackTrait || "agi";
 
     return RollHandler.#rollOnce(`${actor.id}-weapon-attack-${id}`, () =>
@@ -194,16 +190,9 @@ export class RollHandler {
             rollType: "attack",
             weaponId: id
           })
-        : rollPool({
-            roll: weaponSkill.traitValue,
-            keep: weaponSkill.traitValue,
-            rollName: `${weapon.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`,
+        : RollHandler.#rollUnskilledAttack(actor, weapon, {
+            traitValue: weaponSkill.traitValue,
             askForOptions,
-            rollType: "attack",
-            actor,
-            unskilled: true,
-            weaponId: id,
-            isBow: weapon.type === "bow" || Boolean(weapon.system.isBow),
             skillName: associatedSkill,
             skillTrait
           })
@@ -369,5 +358,47 @@ export class RollHandler {
     const row = element.closest("[data-item-id]");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     return id ? actor.items.get(id) : null;
+  }
+
+  /**
+   * The actor's skill item with this name, matched without regard to case.
+   * @param {Actor} actor
+   * @param {string|null} skillName - A weapon's associated Skill
+   * @returns {Item|null|undefined} The skill; null when the weapon names none
+   */
+  static #skillItemOf(actor, skillName) {
+    return skillName
+      ? actor.items.find(
+          i => i.type === "skill" && i.name.toLowerCase() === skillName.toLowerCase()
+        )
+      : null;
+  }
+
+  /**
+   * Attack with a weapon's fallback Trait alone, as an Unskilled Roll: roll and keep the Trait.
+   * game-rules/30_skill_rolls_expanded.md, p.80
+   * @param {Actor} actor
+   * @param {Item} weapon - A weapon or bow the actor owns
+   * @param {object} attack
+   * @param {number} attack.traitValue - The Trait's rank
+   * @param {boolean} attack.askForOptions - Show the roll dialog
+   * @param {string|null} attack.skillName - The weapon's associated Skill, which the actor lacks
+   * @param {string} attack.skillTrait - The Trait rolled
+   * @returns {Promise<ChatMessage|null>}
+   */
+  static #rollUnskilledAttack(actor, weapon, { traitValue, askForOptions, skillName, skillTrait }) {
+    return rollPool({
+      roll: traitValue,
+      keep: traitValue,
+      rollName: `${weapon.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`,
+      askForOptions,
+      rollType: "attack",
+      actor,
+      unskilled: true,
+      weaponId: weapon.id,
+      isBow: weapon.type === "bow" || Boolean(weapon.system.isBow),
+      skillName,
+      skillTrait
+    });
   }
 }

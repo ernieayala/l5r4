@@ -35,17 +35,7 @@ export async function buildEffectData(
   id,
   { level, name, rules, origin, start, flags } = {}
 ) {
-  let data;
-  if (CONFIG.statusEffects[id]) {
-    const effect = await foundry.documents.ActiveEffect.implementation.fromStatusEffect(id, {
-      parent: actor
-    });
-    data = effect.toObject();
-    delete data._id;
-  } else {
-    const { name: key, ...rest } = foundry.utils.deepClone(SYSTEM_EFFECTS[id]);
-    data = { ...rest, name: T(key) };
-  }
+  const data = await buildBaseEffectData(actor, id);
   data.system ??= {};
   data.flags = foundry.utils.mergeObject(data.flags ?? {}, {
     [SYS_ID]: { effectId: id, ...(flags ?? {}) }
@@ -157,4 +147,23 @@ export function registerEffectQueries() {
       ...(turnOf ? { turnOf: options.turnOf } : {})
     });
   };
+}
+
+/**
+ * Active Effect data for a status (CONFIG.statusEffects) or a system effect (SYSTEM_EFFECTS), before any option.
+ * @param {Actor} actor - The actor the effect is for
+ * @param {string} id - A status or system effect id
+ * @returns {Promise<object>} The effect's data, with no `_id`
+ */
+async function buildBaseEffectData(actor, id) {
+  if (CONFIG.statusEffects[id]) {
+    const effect = await foundry.documents.ActiveEffect.implementation.fromStatusEffect(id, {
+      parent: actor
+    });
+    const data = effect.toObject();
+    delete data._id;
+    return data;
+  }
+  const { name: key, ...rest } = foundry.utils.deepClone(SYSTEM_EFFECTS[id]);
+  return { ...rest, name: T(key) };
 }

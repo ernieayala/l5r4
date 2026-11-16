@@ -93,33 +93,52 @@ export function getTargets(actor, rollType) {
     const armorTn = armorTnOf(targetActor);
 
     if (armorTn > 0) {
-      return {
-        autoTn: armorTn,
-        targetInfo: ` ${T("l5r4.ui.combat.vs")} ${targetActor.name}`,
-        targetData: {
-          name: targetActor.name,
-          armorTn,
-          single: true,
-          vsText: T("l5r4.ui.combat.vs"),
-          actor: targetActor
-        }
-      };
+      return buildSingleTarget(targetActor, armorTn);
     }
   }
 
   if (targetedTokens.length > 1) {
-    return {
-      autoTn: 0,
-      targetInfo: ` (${T("l5r4.ui.combat.multipleTargets")})`,
-      targetData: {
-        multiple: true,
-        count: targetedTokens.length,
-        multipleText: T("l5r4.ui.combat.multipleTargets")
-      }
-    };
+    return buildMultipleTargets(targetedTokens.length);
   }
 
   return EMPTY_TARGET;
+}
+
+/**
+ * The result for one target whose Armor TN becomes the attack's TN.
+ * @param {L5R4Actor} targetActor - The target's actor
+ * @param {number} armorTn - The target's Armor TN, above 0
+ * @returns {SingleTargetResult}
+ */
+function buildSingleTarget(targetActor, armorTn) {
+  return {
+    autoTn: armorTn,
+    targetInfo: ` ${T("l5r4.ui.combat.vs")} ${targetActor.name}`,
+    targetData: {
+      name: targetActor.name,
+      armorTn,
+      single: true,
+      vsText: T("l5r4.ui.combat.vs"),
+      actor: targetActor
+    }
+  };
+}
+
+/**
+ * The result for several targets, which gives the attack no TN.
+ * @param {number} count - How many tokens are targeted
+ * @returns {MultipleTargetResult}
+ */
+function buildMultipleTargets(count) {
+  return {
+    autoTn: 0,
+    targetInfo: ` (${T("l5r4.ui.combat.multipleTargets")})`,
+    targetData: {
+      multiple: true,
+      count,
+      multipleText: T("l5r4.ui.combat.multipleTargets")
+    }
+  };
 }
 
 /**

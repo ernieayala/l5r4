@@ -103,6 +103,23 @@ export async function getUpdatedIconPath(doc, docType) {
 }
 
 /**
+ * The update entry for an actor's prototype token image when it maps to a new path.
+ * @param {Actor} actor
+ * @returns {Promise<object>} `{ "prototypeToken.texture.src": path }`, or empty when the image stays
+ */
+export async function buildTokenIconUpdate(actor) {
+  const tokenImg = actor.prototypeToken?.texture?.src;
+  if (!tokenImg) {
+    return {};
+  }
+  const nextToken = await getMappedIconPath(tokenImg);
+  if (nextToken && nextToken !== tokenImg) {
+    return { "prototypeToken.texture.src": nextToken };
+  }
+  return {};
+}
+
+/**
  * Lists files in a directory with caching for performance.
  *
  * Uses Foundry's FilePicker API to browse directory contents, extracting only the

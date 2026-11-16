@@ -1,10 +1,11 @@
 /**
  * @module setup/migrations/icons/icon-paths
- * @description Updates legacy PNG icon paths to new WebP assets.
+ * @description Updates legacy PNG icon paths to new WebP assets on world actors and items and on actors' embedded
+ * items; compendium packs are pack-icon-paths.js.
  */
 import { SYS_ID } from "../../../config/constants.js";
 import { pluralKeyOf } from "../../../utils/localization.js";
-import { getMappedIconPath, getUpdatedIconPath } from "./icon-lookup.js";
+import { buildTokenIconUpdate, getMappedIconPath, getUpdatedIconPath } from "./icon-lookup.js";
 
 /**
  * Migrates legacy PNG icon paths to new WebP assets for world documents.
@@ -30,46 +31,7 @@ export async function migrateIconPaths() {
     return;
   }
 
-  let changed = 0;
-
-  for (const a of game.actors.contents) {
-    const updates = {};
-
-    const nextImg = await getMappedIconPath(a.img);
-    if (nextImg && nextImg !== a.img) {
-      updates.img = nextImg;
-    }
-
-    const tokenImg = a.prototypeToken?.texture?.src;
-    if (tokenImg) {
-      const nextToken = await getMappedIconPath(tokenImg);
-      if (nextToken && nextToken !== tokenImg) {
-        updates["prototypeToken.texture.src"] = nextToken;
-      }
-    }
-
-    if (Object.keys(updates).length > 0) {
-      try {
-        await a.update(updates, { diff: true, render: false });
-        changed++;
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err });
-      }
-    }
-  }
-
-  for (const i of game.items.contents) {
-    const nextImg = await getUpdatedIconPath(i, "Item");
-
-    if (nextImg && nextImg !== i.img) {
-      try {
-        await i.update({ img: nextImg }, { diff: true, render: false });
-        changed++;
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err });
-      }
-    }
-  }
+  const changed = (await migrateWorldActorIcons()) + (await migrateWorldItemIcons());
 
   ui.notifications?.info(
     game.i18n.localize(
@@ -120,87 +82,50 @@ export async function migrateEmbeddedItemIcons(docs, label) {
 }
 
 /**
- * Migrates legacy PNG icon paths to new WebP assets in compendium packs.
- *
- * Updates actor and item icons within unlocked compendium packs. Skips locked packs to
- * avoid permission errors. Displays notification with count of updated documents when
- * complete. Runs apart from the world migration to handle compendium-specific loading.
- *
- * Foundry VTT Integration:
- * - Respects pack.metadata.locked status (skips locked compendia).
- * - Loads compendium documents via pack.getDocuments().
- * - Updates both document icons and actor prototype token images.
- *
- * @returns {Promise<void>}
+ * Migrate each world actor's icon and prototype token image.
+ * @returns {Promise<number>} How many actors were updated
  */
-export async function migrateCompendiumIconPaths() {
+async function migrateWorldActorIcons() {
   let changed = 0;
-  const packs = game.packs?.contents ?? [];
-  for (const pack of packs) {
-    const docName = pack.documentName ?? pack.metadata?.type ?? pack.metadata?.documentName;
-    if (docName !== "Actor" && docName !== "Item") {
-      continue;
+  for (const a of game.actors.contents) {
+    const updates = {};
+
+    const nextImg = await getMappedIconPath(a.img);
+    if (nextImg && nextImg !== a.img) {
+      updates.img = nextImg;
     }
 
-    const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
-    if (isLocked) {
-      continue;
-    }
+    Object.assign(updates, await buildTokenIconUpdate(a));
 
-    let docs;
-    try {
-      docs = await pack.getDocuments();
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to load compendium documents", {
-        collection: pack.collection,
-        err
-      });
-      continue;
-    }
-
-    for (const doc of docs) {
-      const nextImg = await getUpdatedIconPath(doc, docName);
-      const updates = {};
-
-      if (nextImg && nextImg !== doc.img) {
-        updates.img = nextImg;
-      }
-
-      if (docName === "Actor") {
-        const tokenImg = doc.prototypeToken?.texture?.src;
-        if (tokenImg) {
-          const nextToken = await getMappedIconPath(tokenImg);
-          if (nextToken && nextToken !== tokenImg) {
-            updates["prototypeToken.texture.src"] = nextToken;
-          }
-        }
-      }
-
-      if (Object.keys(updates).length > 0) {
-        try {
-          await doc.update(updates, { diff: true, render: false });
-          changed++;
-        } catch (err) {
-          console.warn(`${SYS_ID}`, "Failed to update compendium doc img", {
-            id: doc.id,
-            collection: pack.collection,
-            err
-          });
-        }
+    if (Object.keys(updates).length > 0) {
+      try {
+        await a.update(updates, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err });
       }
     }
   }
+  return changed;
+}
 
-  if (changed > 0) {
-    ui.notifications?.info(
-      game.i18n.localize(
-        pluralKeyOf(
-          game.i18n,
-          changed,
-          category => `l5r4.system.migration.compendiumIconsUpdated.${category}`
-        ),
-        { count: changed }
-      )
-    );
+/**
+ * Migrate each world item's icon.
+ * @returns {Promise<number>} How many items were updated
+ */
+async function migrateWorldItemIcons() {
+  let changed = 0;
+  for (const i of game.items.contents) {
+    const nextImg = await getUpdatedIconPath(i, "Item");
+
+    if (nextImg && nextImg !== i.img) {
+      try {
+        await i.update({ img: nextImg }, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err });
+      }
+    }
   }
+  return changed;
 }

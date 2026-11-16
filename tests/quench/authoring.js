@@ -11,6 +11,7 @@ import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSchoolData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
   answerCheckDialog,
+  buttonLabelsOf,
   changeThroughSheet,
   checkEffects,
   cleanTest,
@@ -25,13 +26,14 @@ const NINES = () => 0.15;
 /**
  * Answer the next confirm dialog with Yes or No.
  * @param {"yes"|"no"} action
- * @returns {Promise<void>}
+ * @returns {Promise<Record<string, string>>} The dialog's button labels by action
  */
 function answerConfirm(action) {
   return new Promise(resolve => {
     Hooks.once("renderDialogV2", app => {
+      const labels = buttonLabelsOf(app);
       app.element.querySelector(`[data-action="${action}"]`).click();
-      resolve();
+      resolve(labels);
     });
   });
 }
@@ -232,7 +234,9 @@ export function registerAuthoringTests(quench) {
             };
             let answered = answerConfirm("no");
             assert.isNull(await preparePurchase(actor, data), "the GM said no");
-            await answered;
+            const labels = await answered;
+            assert.equal(labels.yes, game.i18n.localize("l5r4.ui.purchase.bypass"));
+            assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
             answered = answerConfirm("yes");
             assert.equal((await preparePurchase(actor, data)).name, "Quench Kata", "added anyway");
             await answered;
@@ -250,6 +254,9 @@ export function registerAuthoringTests(quench) {
           clean(async () => {
             const actor = track(await createTestPC({ name: "Character options: chooser" }));
             await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2)]);
+            const labelled = new Promise(resolve =>
+              Hooks.once("renderDialogV2", app => resolve(buttonLabelsOf(app)))
+            );
             const answered = answerCheckDialog({ selection: "kenjutsu" });
             const data = await preparePurchase(actor, {
               name: "Quench Weapon Focus",
@@ -269,6 +276,11 @@ export function registerAuthoringTests(quench) {
               }
             });
             await answered;
+            assert.equal(
+              (await labelled).ok,
+              game.i18n.localize("l5r4.ui.purchase.makeChoice"),
+              "the button names the choice"
+            );
             assert.equal(data.system.rules[0].selection, "kenjutsu");
             await actor.createEmbeddedDocuments("Item", [data]);
             assert.equal(
@@ -559,15 +571,19 @@ export function registerAuthoringTests(quench) {
           clean(async () => {
             const session = game.settings.get(SYS_ID, "session");
             let question = "";
+            let labels = {};
             const answered = new Promise(resolve => {
               Hooks.once("renderDialogV2", app => {
                 question = app.element.querySelector("form").textContent;
+                labels = buttonLabelsOf(app);
                 app.element.querySelector('[data-action="yes"]').click();
                 resolve();
               });
             });
             await Promise.all([answered, startNewSession()]);
             assert.include(question, game.i18n.localize("l5r4.ui.session.confirm"));
+            assert.equal(labels.yes, game.i18n.localize("l5r4.ui.session.start"));
+            assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
             assert.equal(game.settings.get(SYS_ID, "session"), session + 1);
             assert.equal(
               foundry.utils.parseHTML(posted.at(-1).content).textContent,

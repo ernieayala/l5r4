@@ -101,42 +101,45 @@ function onRenderLink(element, { signal }) {
   if (!link) {
     return;
   }
-  onActivate(
-    link,
-    () => {
-      const spec = specOf(link);
-      if (spec.ok) {
-        onLinkClick(spec);
-      }
-    },
-    signal
-  );
+  onActivate(link, () => onLinkActivate(link, onLinkClick), signal);
   if (
     game.user.isGM &&
     link.dataset.linkType === "Check" &&
     !element.querySelector("[data-link-request]")
   ) {
-    const request = document.createElement("a");
-    request.className = "l5r4-inline-link-request";
-    request.setAttribute("role", "button");
-    request.tabIndex = 0;
-    request.dataset.linkRequest = "";
-    request.dataset.tooltip = T("l5r4.ui.links.request");
-    request.setAttribute("aria-label", T("l5r4.ui.links.request"));
-    const icon = document.createElement("i");
-    icon.className = "fa-solid fa-comment-dots";
-    icon.inert = true;
-    request.append(icon);
+    const request = renderRequestButton();
     link.after(request);
-    onActivate(
-      request,
-      () => {
-        const spec = specOf(link);
-        if (spec.ok) {
-          postCheckRequest(spec);
-        }
-      },
-      signal
-    );
+    onActivate(request, () => onLinkActivate(link, postCheckRequest), signal);
   }
+}
+
+/**
+ * Run an action on the link's spec, parsed again from its element, when it parses.
+ * @param {HTMLElement} link
+ * @param {function(import("../utils/link-syntax.js").LinkSpec): unknown} action
+ */
+function onLinkActivate(link, action) {
+  const spec = specOf(link);
+  if (spec.ok) {
+    action(spec);
+  }
+}
+
+/**
+ * The GM's button beside a Check link that posts a request card.
+ * @returns {HTMLAnchorElement}
+ */
+function renderRequestButton() {
+  const request = document.createElement("a");
+  request.className = "l5r4-inline-link-request";
+  request.setAttribute("role", "button");
+  request.tabIndex = 0;
+  request.dataset.linkRequest = "";
+  request.dataset.tooltip = T("l5r4.ui.links.request");
+  request.setAttribute("aria-label", T("l5r4.ui.links.request"));
+  const icon = document.createElement("i");
+  icon.className = "fa-solid fa-comment-dots";
+  icon.inert = true;
+  request.append(icon);
+  return request;
 }

@@ -39,24 +39,9 @@ export async function migrateBowsToWeapons(docs, label) {
 
   for (const item of bowItems) {
     try {
-      const currentSystem = foundry.utils.deepClone(item.system || {});
-      const weaponSystem = {
-        ...currentSystem,
-        isBow: true,
-        damageKeep: 0, // Bows don't use damageKeep, set to 0
-
-        str: currentSystem.str || 1,
-        range: currentSystem.range || 100,
-        arrow: currentSystem.arrow || "willow",
-
-        explodesOn: currentSystem.explodesOn || 10,
-        associatedSkill: currentSystem.associatedSkill || "",
-        fallbackTrait: currentSystem.fallbackTrait || "ref"
-      };
-
       const updateData = {
         type: "weapon",
-        system: weaponSystem
+        system: buildBowWeaponSystem(item)
       };
 
       await item.update(updateData, { diff: false, recursive: false, render: false });
@@ -68,4 +53,26 @@ export async function migrateBowsToWeapons(docs, label) {
       });
     }
   }
+}
+
+/**
+ * A bow's system data as a weapon's: marked `isBow`, `damageKeep` 0, and the bow fields kept or defaulted.
+ * @param {Item} item - A "bow" item
+ * @returns {object} The weapon system data
+ */
+function buildBowWeaponSystem(item) {
+  const currentSystem = foundry.utils.deepClone(item.system || {});
+  return {
+    ...currentSystem,
+    isBow: true,
+    damageKeep: 0, // Bows don't use damageKeep, set to 0
+
+    str: currentSystem.str || 1,
+    range: currentSystem.range || 100,
+    arrow: currentSystem.arrow || "willow",
+
+    explodesOn: currentSystem.explodesOn || 10,
+    associatedSkill: currentSystem.associatedSkill || "",
+    fallbackTrait: currentSystem.fallbackTrait || "ref"
+  };
 }

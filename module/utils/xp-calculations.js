@@ -54,59 +54,81 @@ function getCreationBonusInternal(actor, trait) {
   try {
     let rules = 0;
     let legacy = 0;
-    // Track processed documents to prevent duplicates
-    const seen = new Set();
-
-    const applyDocBonus = doc => {
-      if (!doc) {
-        return;
-      }
-      // Deduplicate by UUID or ID
-      const did = doc.uuid ?? doc.id ?? null;
-      if (did && seen.has(did)) {
-        return;
-      }
-      if (did) {
-        seen.add(did);
-      }
-
-      // A TraitAdjust rule replaces the legacy fields
-      const fromRules = getTraitAdjustTotal(doc.system?.rules, trait);
-      if (fromRules !== 0) {
-        rules += fromRules;
-        return;
-      }
-
-      // Fallback to legacy bonus system
-      const tKey = toString(doc?.system?.trait).toLowerCase();
-      const amt = toNumber(doc?.system?.bonus, NaN);
-      if (tKey === trait && Number.isFinite(amt)) {
-        legacy += amt;
-      }
-    };
-
-    // Check flagged Family/School items (may be in compendiums)
-    for (const flagKey of ["familyItemUuid", "schoolItemUuid"]) {
-      const uuid = actor.getFlag(SYS_ID, flagKey);
-      if (!uuid || !globalThis.fromUuidSync) {
-        continue;
-      }
-      applyDocBonus(globalThis.fromUuidSync(uuid));
+    for (const doc of creationDocsOf(actor)) {
+      const bonus = getDocBonus(doc, trait);
+      rules += bonus.rules;
+      legacy += bonus.legacy;
     }
-
-    // Check owned Family/School items
-    for (const it of actor.items ?? []) {
-      if (!it || typeof it.type !== "string") {
-        continue;
-      }
-      if (it.type === "family" || it.type === "school") {
-        applyDocBonus(it);
-      }
-    }
-
     return { rules, legacy };
   } catch {
     // Return 0 on any error
     return { rules: 0, legacy: 0 };
   }
+}
+
+/**
+ * The Family and School documents whose bonuses count: the flagged ones (which may be in compendiums), then the
+ * owned ones, each once by UUID or id.
+ * @param {object} actor - Foundry actor document
+ * @returns {object[]} The documents
+ */
+function creationDocsOf(actor) {
+  const docs = [];
+  // Check flagged Family/School items (may be in compendiums)
+  for (const flagKey of ["familyItemUuid", "schoolItemUuid"]) {
+    const uuid = actor.getFlag(SYS_ID, flagKey);
+    if (!uuid || !globalThis.fromUuidSync) {
+      continue;
+    }
+    docs.push(globalThis.fromUuidSync(uuid));
+  }
+  // Check owned Family/School items
+  for (const it of actor.items ?? []) {
+    if (!it || typeof it.type !== "string") {
+      continue;
+    }
+    if (it.type === "family" || it.type === "school") {
+      docs.push(it);
+    }
+  }
+  return getUniqueDocs(docs);
+}
+
+/**
+ * The documents that exist, each once: a document with a UUID or id counts the first time it appears.
+ * @param {Array<object|null|undefined>} docs
+ * @returns {object[]}
+ */
+function getUniqueDocs(docs) {
+  const seen = new Set();
+  return docs.filter(doc => {
+    if (!doc) {
+      return false;
+    }
+    const did = doc.uuid ?? doc.id ?? null;
+    if (did && seen.has(did)) {
+      return false;
+    }
+    if (did) {
+      seen.add(did);
+    }
+    return true;
+  });
+}
+
+/**
+ * One Family or School document's bonus to a Trait: from its TraitAdjust rules, which replace the legacy fields, or
+ * else from its legacy `trait`/`bonus` fields.
+ * @param {object} doc - The Family or School document
+ * @param {string} trait - Trait key, or "void" for the Void Ring
+ * @returns {{rules: number, legacy: number}}
+ */
+function getDocBonus(doc, trait) {
+  const fromRules = getTraitAdjustTotal(doc.system?.rules, trait);
+  if (fromRules !== 0) {
+    return { rules: fromRules, legacy: 0 };
+  }
+  const tKey = toString(doc?.system?.trait).toLowerCase();
+  const amt = toNumber(doc?.system?.bonus, NaN);
+  return { rules: 0, legacy: tKey === trait && Number.isFinite(amt) ? amt : 0 };
 }

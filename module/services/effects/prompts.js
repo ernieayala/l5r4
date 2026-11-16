@@ -195,18 +195,7 @@ export async function onPromptClick(message) {
     return;
   }
 
-  // A PeriodicSave
-  if (success) {
-    await effect.delete();
-  } else if (request.onFailure === "endNextRound") {
-    // Ends at the end of the Round now running: the Reactions stage that prompted the save has passed
-    await effect.update({
-      duration: { value: 0, units: "rounds", expiry: "roundEnd" },
-      start: foundry.documents.ActiveEffect.getEffectStart()
-    });
-  } else {
-    await effect.setFlag(SYS_ID, "saveTn", getNextSaveTn(request.tn, request.step, request.min));
-  }
+  await applySaveResult(effect, request, { success });
 }
 
 /**
@@ -241,6 +230,29 @@ async function postPrompt(actor, request, card) {
     content,
     flags: { [SYS_ID]: { prompt: { actorUuid: actor.uuid, ...request } } }
   });
+}
+
+/**
+ * Apply a PeriodicSave's roll to its effect: success ends it; a failure ends it after the next Round (Stunned) or
+ * lowers the next save's TN (Dazed, decision 5).
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {ActiveEffect} effect - The effect the save is for
+ * @param {object} request - The prompt's stored request
+ * @param {{success: boolean}} result - Whether the save succeeded
+ * @returns {Promise<void>}
+ */
+async function applySaveResult(effect, request, { success }) {
+  if (success) {
+    await effect.delete();
+  } else if (request.onFailure === "endNextRound") {
+    // Ends at the end of the Round now running: the Reactions stage that prompted the save has passed
+    await effect.update({
+      duration: { value: 0, units: "rounds", expiry: "roundEnd" },
+      start: foundry.documents.ActiveEffect.getEffectStart()
+    });
+  } else {
+    await effect.setFlag(SYS_ID, "saveTn", getNextSaveTn(request.tn, request.step, request.min));
+  }
 }
 
 /**

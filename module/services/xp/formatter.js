@@ -31,6 +31,46 @@ const SORT_COLUMNS = Object.freeze({
 });
 
 /**
+ * The category label key and the fallback name of each item-based entry type.
+ * @type {Readonly<Record<string, {type: string, fallback: string}>>}
+ */
+const ITEM_ENTRY_LABELS = Object.freeze({
+  advantage: { type: "l5r4.ui.sheets.advantage", fallback: "Advantage" },
+  disadvantage: { type: "l5r4.ui.sheets.disadvantage", fallback: "Disadvantage" },
+  kata: { type: "l5r4.ui.sheets.kata", fallback: "Kata" },
+  kiho: { type: "l5r4.ui.sheets.kiho", fallback: "Kiho" },
+  spell: { type: "l5r4.character.experience.breakdown.spells", fallback: "Spell" }
+});
+
+/**
+ * Legacy entries recognized by the raw i18n key in their note, in the order they are tried: the key the note holds,
+ * the category label key, and the label key that replaces the note.
+ * @type {ReadonlyArray<{marker: string, type: string, note: string}>}
+ */
+const LEGACY_ENTRY_LABELS = Object.freeze([
+  {
+    marker: "l5r4.character.experience.traitChange",
+    type: "l5r4.character.experience.breakdown.traits",
+    note: "l5r4.character.experience.fallbackLabels.traitIncrease"
+  },
+  {
+    marker: "l5r4.character.experience.voidChange",
+    type: "l5r4.character.experience.breakdown.void",
+    note: "l5r4.character.experience.fallbackLabels.voidIncrease"
+  },
+  {
+    marker: "l5r4.character.experience.skillCreate",
+    type: "l5r4.character.experience.breakdown.skills",
+    note: "l5r4.character.experience.fallbackLabels.skillCreated"
+  },
+  {
+    marker: "l5r4.character.experience.skillChange",
+    type: "l5r4.character.experience.breakdown.skills",
+    note: "l5r4.character.experience.fallbackLabels.skillIncreased"
+  }
+]);
+
+/**
  * Formats raw XP history entries for display in character sheets.
  *
  * Transforms calculator-generated entries into human-readable, localized strings with proper
@@ -45,7 +85,7 @@ const SORT_COLUMNS = Object.freeze({
  * 5. Sorts by timestamp or user preference
  *
  * Fallback Logic:
- * Lines 60-76 handle legacy entries that may contain raw i18n keys instead of
+ * formatLegacyEntryLabels handles legacy entries that may contain raw i18n keys instead of
  * proper type identifiers. This ensures backward compatibility with older character data.
  *
  * @param {Array<object>} entries - Raw XP entries from xp-calculator.buildXpHistory()
@@ -61,87 +101,88 @@ const SORT_COLUMNS = Object.freeze({
  */
 export function formatXpEntries(entries, options = {}) {
   const { sort = false, actorId = null, scope = "xp-purchases", sortPref = null } = options || {};
-
-  let formatted = entries.slice().map(e => {
-    let formattedNote = e.note || "";
-    let type;
-
-    if (e.type === "trait" && e.traitLabel && e.toValue !== undefined) {
-      type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-      formattedNote = formatProgression(e.traitLabel, e.fromValue, e.toValue);
-    } else if (e.type === "void" && e.toValue !== undefined) {
-      type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-      const voidLabel = game.i18n.localize("l5r4.ui.mechanics.rings.void");
-      formattedNote = formatProgression(voidLabel, e.fromValue, e.toValue);
-    } else if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
-      type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-
-      if (e.emphasis || e.note?.includes("Emphasis:")) {
-        formattedNote = e.note;
-      } else {
-        formattedNote = formatProgression(e.skillName, e.fromValue, e.toValue);
-      }
-    } else if (e.type === "advantage") {
-      type = game.i18n.localize("l5r4.ui.sheets.advantage");
-      formattedNote = formatItemEntry(e, "Advantage");
-    } else if (e.type === "disadvantage") {
-      type = game.i18n.localize("l5r4.ui.sheets.disadvantage");
-      formattedNote = formatItemEntry(e, "Disadvantage");
-    } else if (e.type === "kata") {
-      type = game.i18n.localize("l5r4.ui.sheets.kata");
-      formattedNote = formatItemEntry(e, "Kata");
-    } else if (e.type === "kiho") {
-      type = game.i18n.localize("l5r4.ui.sheets.kiho");
-      formattedNote = formatItemEntry(e, "Kiho");
-    } else if (e.type === "spell") {
-      type = game.i18n.localize("l5r4.character.experience.breakdown.spells");
-      formattedNote = formatItemEntry(e, "Spell");
-    } else {
-      // Fallback for legacy entries that may have raw i18n keys instead of proper type identifiers.
-      // This ensures backward compatibility with character data created before proper type tracking.
-      if (formattedNote.includes("l5r4.character.experience.traitChange")) {
-        type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-        formattedNote = game.i18n.localize(
-          "l5r4.character.experience.fallbackLabels.traitIncrease"
-        );
-      } else if (formattedNote.includes("l5r4.character.experience.voidChange")) {
-        type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-        formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.voidIncrease");
-      } else if (formattedNote.includes("l5r4.character.experience.skillCreate")) {
-        type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-        formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.skillCreated");
-      } else if (formattedNote.includes("l5r4.character.experience.skillChange")) {
-        type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-        formattedNote = game.i18n.localize(
-          "l5r4.character.experience.fallbackLabels.skillIncreased"
-        );
-      } else if (e.type) {
-        type = e.type;
-      } else {
-        type = game.i18n.localize("l5r4.character.experience.breakdown.manualAdjustments");
-      }
-    }
-
-    return {
-      id: e.id,
-      deltaFormatted: (Number.isFinite(+e.delta) ? (e.delta >= 0 ? "+" : "") : "") + (e.delta ?? 0),
-      note: formattedNote,
-      type: type,
-      delta: e.delta,
-      ts: e.ts
-    };
-  });
-
+  const formatted = entries.slice().map(formatXpEntry);
   if (sort && actorId) {
     const pref =
       sortPref ||
       getSortPref(actorId, scope, { allowedKeys: SORT_KEYS["xp-purchases"], defaultKey: "note" });
-    formatted = applySortPref(formatted, SORT_COLUMNS, { pref, locale: game.i18n?.lang });
-  } else {
-    formatted.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    return applySortPref(formatted, SORT_COLUMNS, { pref, locale: game.i18n?.lang });
   }
+  return formatted.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+}
 
-  return formatted;
+/**
+ * Formats one raw XP entry for display: its category label, its note, and its signed cost.
+ * @param {object} e - Raw XP entry from the calculator
+ * @returns {{id: string, deltaFormatted: string, note: string, type: string, delta: number, ts: number}}
+ */
+function formatXpEntry(e) {
+  const { type, note } = formatEntryLabels(e);
+  return {
+    id: e.id,
+    deltaFormatted: (Number.isFinite(+e.delta) ? (e.delta >= 0 ? "+" : "") : "") + (e.delta ?? 0),
+    note,
+    type,
+    delta: e.delta,
+    ts: e.ts
+  };
+}
+
+/**
+ * The localized category label and the note of an entry, by its type: a rank progression for a Trait, the Void Ring,
+ * or a Skill; the item's name for an item-based entry; the legacy labels otherwise.
+ * @param {object} e - Raw XP entry from the calculator
+ * @returns {{type: string, note: string}}
+ */
+function formatEntryLabels(e) {
+  if (e.type === "trait" && e.traitLabel && e.toValue !== undefined) {
+    return {
+      type: game.i18n.localize("l5r4.character.experience.breakdown.traits"),
+      note: formatProgression(e.traitLabel, e.fromValue, e.toValue)
+    };
+  }
+  if (e.type === "void" && e.toValue !== undefined) {
+    const voidLabel = game.i18n.localize("l5r4.ui.mechanics.rings.void");
+    return {
+      type: game.i18n.localize("l5r4.character.experience.breakdown.void"),
+      note: formatProgression(voidLabel, e.fromValue, e.toValue)
+    };
+  }
+  if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
+    return {
+      type: game.i18n.localize("l5r4.character.experience.breakdown.skills"),
+      note:
+        e.emphasis || e.note?.includes("Emphasis:")
+          ? e.note
+          : formatProgression(e.skillName, e.fromValue, e.toValue)
+    };
+  }
+  if (Object.hasOwn(ITEM_ENTRY_LABELS, e.type)) {
+    const { type, fallback } = ITEM_ENTRY_LABELS[e.type];
+    return { type: game.i18n.localize(type), note: formatItemEntry(e, fallback) };
+  }
+  return formatLegacyEntryLabels(e);
+}
+
+/**
+ * The category label and note of an entry with no recognized type: older entries hold a raw i18n key in their note
+ * instead of a type identifier, which keeps character data from before type tracking readable.
+ * @param {object} e - Raw XP entry from the calculator
+ * @returns {{type: string, note: string}}
+ */
+function formatLegacyEntryLabels(e) {
+  const note = e.note || "";
+  const legacy = LEGACY_ENTRY_LABELS.find(({ marker }) => note.includes(marker));
+  if (legacy) {
+    return { type: game.i18n.localize(legacy.type), note: game.i18n.localize(legacy.note) };
+  }
+  if (e.type) {
+    return { type: e.type, note };
+  }
+  return {
+    type: game.i18n.localize("l5r4.character.experience.breakdown.manualAdjustments"),
+    note
+  };
 }
 
 /**

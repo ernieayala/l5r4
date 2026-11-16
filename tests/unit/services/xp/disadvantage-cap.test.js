@@ -5,7 +5,7 @@ import { askDisadvantageCap } from "../../../../module/services/xp/disadvantage-
 /**
  * A prompt that answers with the ok button's callback over a form holding `value`, or with `closed` when it is set.
  * @param {object} answer - What the user does
- * @param {string} [answer.value] - The field's value when the user presses OK
+ * @param {string} [answer.value] - The field's value when the user presses the button
  * @param {boolean} [answer.closed] - Whether the user closes the dialog instead
  * @returns {import("vitest").Mock} The prompt
  */
@@ -54,12 +54,12 @@ describe("Disadvantage cap prompt", () => {
     expect(prompt.mock.calls[0][0].content).toBe("<div></div>");
   });
 
-  it("should ask with the cap title and the OK button, modal, resolving null on close", async () => {
+  it("should ask with the cap title and a button that names its action, modal, resolving null on close", async () => {
     answerWith({ value: "10" });
     await askDisadvantageCap(10);
     const config = prompt.mock.calls[0][0];
     expect(config.window.title).toBe("l5r4.apps.xpManager.disadvantageCapTitle");
-    expect(config.ok.label).toBe("l5r4.ui.common.ok");
+    expect(config.ok.label).toBe("l5r4.apps.xpManager.setDisadvantageCap");
     expect(config.modal).toBe(true);
     expect(config.rejectClose).toBe(false);
   });
