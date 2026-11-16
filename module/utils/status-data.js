@@ -49,15 +49,3 @@ export function buildStatusEffectUpdate(source) {
   }
   return source._id ? { _id: source._id, ...update } : update;
 }
-
-/**
- * A copy of the rules a status effect carries (module/config/status-effects.js), for every path that creates the
- * effect without ActiveEffect.fromStatusEffect.
- * @param {string} statusId
- * @returns {object[]} Empty for a status without rules.
- */
-export function getStatusRules(statusId) {
-  return structuredClone(
-    STATUS_EFFECTS.find(status => status.id === statusId)?.system?.rules ?? []
-  );
-}

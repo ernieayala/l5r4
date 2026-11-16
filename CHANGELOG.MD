@@ -189,6 +189,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - A spell's prepared `system.castTN` -> `system.castTn`
 - `L5R4Combat.resolveInitiativeBonuses` -> `L5R4Combat.askInitiativeBonuses`; `L5R4Combat.events` ->
   `L5R4Combat.EVENTS`
+- `CONFIG.l5r4.npcNumberWoundLvls` -> `CONFIG.l5r4.npcNumberWoundLevels`
 
 `game.system.api.rollItem` and `rollTrait`, which hotbar macros call, are unchanged.
 

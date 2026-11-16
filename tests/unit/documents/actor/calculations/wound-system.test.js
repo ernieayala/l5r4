@@ -14,11 +14,43 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { WOUND_LEVEL_ORDER } from "../../../../../module/config/game-mechanics.js";
 import {
+  getWoundThreshold,
   prepareWoundPenalties,
   prepareWoundState,
   prepareCurrentWoundLevel
 } from "../../../../../module/documents/actor/calculations/wound-system.js";
+
+/** Each rank's threshold in WOUND_LEVEL_ORDER, built on the one before it as preparation builds them. */
+function thresholdsOf({ earth, mult, add = 0 }) {
+  let prev = 0;
+  return WOUND_LEVEL_ORDER.map(key => (prev = getWoundThreshold(key, { earth, mult, add, prev })));
+}
+
+// game-rules/33_wounds.md, p.82
+// game-rules/34_ambush_falling_drowning.md, p.84
+describe("getWoundThreshold", () => {
+  it("should give Healthy Earth × 5 and each later rank Earth × 2 more, the default multiplier", () => {
+    // Earth 2: Healthy holds 10, then 4 per rank through Out
+    expect(thresholdsOf({ earth: 2, mult: 2 })).toEqual([10, 14, 18, 22, 26, 30, 34, 38]);
+    // Earth 3: Healthy holds 15, then 6 per rank
+    expect(thresholdsOf({ earth: 3, mult: 2 })).toEqual([15, 21, 27, 33, 39, 45, 51, 57]);
+  });
+
+  it("should keep Healthy at Earth × 5 whatever multiplier the campaign chooses", () => {
+    for (const mult of [2, 3, 4, 5]) {
+      expect(getWoundThreshold("healthy", { earth: 3, mult, add: 0, prev: 0 })).toBe(15);
+    }
+    // Earth 3 at × 4: 12 per rank after Healthy
+    expect(thresholdsOf({ earth: 3, mult: 4 })).toEqual([15, 27, 39, 51, 63, 75, 87, 99]);
+  });
+
+  it("should add the flat Wounds modifier to each rank", () => {
+    // Earth 2, × 2, +1: Healthy 11, then each rank 4 + 1 more than the one before
+    expect(thresholdsOf({ earth: 2, mult: 2, add: 1 })).toEqual([11, 16, 21, 26, 31, 36, 41, 46]);
+  });
+});
 
 describe("prepareWoundPenalties", () => {
   describe("Valid inputs", () => {

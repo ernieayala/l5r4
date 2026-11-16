@@ -19,7 +19,7 @@ import {
   KIHO_TYPES,
   ADVANTAGE_TYPES
 } from "../../../config/localization.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-mechanics.js";
+import { NPC_NUMBER_WOUND_LEVELS } from "../../../config/game-mechanics.js";
 
 /**
  * @typedef {object} SheetContext
@@ -59,7 +59,7 @@ export function prepareItemSheetOptions(data) {
     actionTypes: ACTION_TYPES,
     kihoTypes: KIHO_TYPES,
     advantageTypes: ADVANTAGE_TYPES,
-    npcNumberWoundLevels: NPC_NUMBER_WOUND_LVLS
+    npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
   };
   return data;
 }

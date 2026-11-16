@@ -2,9 +2,9 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { DragDropHandler } from "../../module/sheets/handlers/drag-drop-handler.js";
+import { RollHandler } from "../../module/sheets/handlers/roll-handler.js";
 import { getArmorTnPenalty } from "../../module/utils/armor-penalties.js";
 import CompendiumBrowser from "../../module/apps/compendium-browser.js";
-import { PcRollHandler } from "../../module/sheets/handlers/pc-roll-handler.js";
 import { getAnsweredRules } from "../../module/utils/choices.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { grantQueueOf } from "../../module/documents/item/lifecycle/grants.js";
@@ -1064,7 +1064,7 @@ export function registerPacksTests(quench) {
             const spell = await DragDropHandler.onItemDrop({ actor }, null, {
               uuid: fire.uuid
             });
-            const message = await PcRollHandler.rollSpellCast(actor, spell, false);
+            const message = await RollHandler.rollSpellCast(actor, spell, false);
             posted.push(message);
             assert.equal(message.system.tn.base, 10);
             assert.equal(message.system.kind, "spell");

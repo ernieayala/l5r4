@@ -25,6 +25,7 @@
   "eslint/l5r4/member-order": 0,
   "eslint/l5r4/module-shape": 0,
   "eslint/l5r4/naming": 0,
+  "eslint/max-lines-per-function": 100,
   "eslint/max-params": 0,
   "eslint/new-cap": 0,
   "eslint/no-console": 2,

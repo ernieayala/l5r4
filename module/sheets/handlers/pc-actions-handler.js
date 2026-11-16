@@ -1,13 +1,12 @@
 /**
  * @module sheets/handlers/pc-actions-handler
- * @description PC sheet actions for natural healing, Void Point spending, and the Insight Rank's mode, delegating to
- * services: a night's rest heals (Stamina × 2) + Insight Rank Wounds; Void for Armor TN gives +10 for one Round and
- * only on the actor's turn in combat, after a DialogV2 confirmation; Void for Initiative sets a flag the initiative
- * roll spends for +10; a GM's Shift-click switches the Insight Rank between computed and typed.
+ * @description PC sheet actions for Void Point spending and the Insight Rank's mode, delegating to services: Void
+ * for Armor TN gives +10 for one Round and only on the actor's turn in combat, after a DialogV2 confirmation; Void
+ * for Initiative sets a flag the initiative roll spends for +10; a GM's Shift-click switches the Insight Rank
+ * between computed and typed.
  */
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
-import { applyLongRest } from "../../services/rest.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
 
@@ -21,31 +20,6 @@ import { buildVoidUseUpdate, warnVoidLimit } from "../../services/effects/uses.j
  * - Provide user feedback via notifications
  */
 export class PcActionsHandler {
-  /**
-   * Applies natural healing to the character.
-   *
-   * **Game Rules Context:**
-   * Characters heal (Stamina × 2) + Insight Rank wounds per night of rest.
-   * Healing cannot reduce suffered wounds below 0 (no over-healing).
-   *
-   * **Implementation:**
-   * Delegates to healing service which:
-   * - Calculates healing amount from actor.system.wounds.healRate
-   * - Reduces suffered wounds by healing amount
-   * - Posts chat message with healing summary
-   * - Handles edge cases (already at full health, invalid heal rate)
-   *
-   * @param {object} context - Handler context from actor sheet
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - Click event on healing button
-   * @param {HTMLElement} _element - Button element (unused)
-   * @returns {Promise<void>}
-   */
-  static async applyHealing(context, event, _element) {
-    event?.preventDefault?.();
-    return applyLongRest(context.actor);
-  }
-
   /**
    * Toggles Void Point armor TN boost.
    *

@@ -46,6 +46,42 @@ export class PcContextBuilder {
   };
 
   /**
+   * Column extractors of the lists sorted through `#getSortedItems()`, by sort scope.
+   *
+   * @type {{[scope: string]: {[key: string]: Function}}}
+   */
+  static #sortColumns = {
+    advantages: this.#advDisCols,
+    disadvantages: this.#advDisCols,
+    items: {
+      name: it => String(it?.name ?? "")
+    },
+    katas: {
+      name: it => String(it?.name ?? ""),
+      ring: it => String(it?.system?.ring ?? ""),
+      mastery: it => Number(it?.system?.mastery ?? 0) || 0
+    },
+    kihos: {
+      name: it => String(it?.name ?? ""),
+      ring: it => String(it?.system?.ring ?? ""),
+      mastery: it => Number(it?.system?.mastery ?? 0) || 0,
+      type: it => String(it?.system?.type ?? "")
+    },
+    tattoos: {
+      name: it => String(it?.name ?? "")
+    },
+    techniques: {
+      name: it => String(it?.name ?? "")
+    },
+    armors: {
+      name: it => String(it?.name ?? ""),
+      bonus: it => Number(it?.system?.bonus ?? 0) || 0,
+      reduction: it => Number(it?.system?.reduction ?? 0) || 0,
+      equipped: it => (it?.system?.equipped ? 1 : 0)
+    }
+  };
+
+  /**
    * Build sorted item collections for character sheet display.
    *
    * Primary context builder method that processes all Actor items into sorted,
@@ -64,91 +100,25 @@ export class PcContextBuilder {
    */
   static buildSortedItems(actor, allItems) {
     const getItemsOfType = t => allItems.filter(i => i.type === t);
-
-    const skills = this.#getSortedSkills(actor, getItemsOfType("skill"));
-
-    const spells = this.#getSortedSpells(actor, getItemsOfType("spell"));
-
-    const advantages = this.#getSortedItems(actor, getItemsOfType("advantage"), {
-      scope: "advantages",
-      cols: this.#advDisCols
-    });
-
-    const disadvantages = this.#getSortedItems(actor, getItemsOfType("disadvantage"), {
-      scope: "disadvantages",
-      cols: this.#advDisCols
-    });
-
-    const items = this.#getSortedItems(
-      actor,
-      allItems.filter(i => i.type === "item" || i.type === "commonItem"),
-      {
-        scope: "items",
-        cols: {
-          name: it => String(it?.name ?? "")
-        }
-      }
-    );
-
-    const katas = this.#getSortedItems(actor, getItemsOfType("kata"), {
-      scope: "katas",
-      cols: {
-        name: it => String(it?.name ?? ""),
-        ring: it => String(it?.system?.ring ?? ""),
-        mastery: it => Number(it?.system?.mastery ?? 0) || 0
-      }
-    });
-
-    const kihos = this.#getSortedItems(actor, getItemsOfType("kiho"), {
-      scope: "kihos",
-      cols: {
-        name: it => String(it?.name ?? ""),
-        ring: it => String(it?.system?.ring ?? ""),
-        mastery: it => Number(it?.system?.mastery ?? 0) || 0,
-        type: it => String(it?.system?.type ?? "")
-      }
-    });
-
-    const tattoos = this.#getSortedItems(actor, getItemsOfType("tattoo"), {
-      scope: "tattoos",
-      cols: {
-        name: it => String(it?.name ?? "")
-      }
-    });
-
-    const techniques = this.#getSortedItems(actor, getItemsOfType("technique"), {
-      scope: "techniques",
-      cols: {
-        name: it => String(it?.name ?? "")
-      }
-    });
-
-    const armors = this.#getSortedItems(actor, getItemsOfType("armor"), {
-      scope: "armors",
-      cols: {
-        name: it => String(it?.name ?? ""),
-        bonus: it => Number(it?.system?.bonus ?? 0) || 0,
-        reduction: it => Number(it?.system?.reduction ?? 0) || 0,
-        equipped: it => (it?.system?.equipped ? 1 : 0)
-      }
-    });
-
-    const weapons = this.#getSortedWeapons(actor, getItemsOfType("weapon"));
-    const bows = this.#getSortedWeapons(actor, getItemsOfType("bow"));
+    const sortedOf = (scope, items) =>
+      this.#getSortedItems(actor, items, { scope, cols: this.#sortColumns[scope] });
 
     return {
-      skills,
-      spells,
-      advantages,
-      disadvantages,
-      items,
-      katas,
-      kihos,
-      tattoos,
-      techniques,
-      armors,
-      weapons,
-      bows
+      skills: this.#getSortedSkills(actor, getItemsOfType("skill")),
+      spells: this.#getSortedSpells(actor, getItemsOfType("spell")),
+      advantages: sortedOf("advantages", getItemsOfType("advantage")),
+      disadvantages: sortedOf("disadvantages", getItemsOfType("disadvantage")),
+      items: sortedOf(
+        "items",
+        allItems.filter(i => i.type === "item" || i.type === "commonItem")
+      ),
+      katas: sortedOf("katas", getItemsOfType("kata")),
+      kihos: sortedOf("kihos", getItemsOfType("kiho")),
+      tattoos: sortedOf("tattoos", getItemsOfType("tattoo")),
+      techniques: sortedOf("techniques", getItemsOfType("technique")),
+      armors: sortedOf("armors", getItemsOfType("armor")),
+      weapons: this.#getSortedWeapons(actor, getItemsOfType("weapon")),
+      bows: this.#getSortedWeapons(actor, getItemsOfType("bow"))
     };
   }
 

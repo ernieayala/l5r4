@@ -51,6 +51,32 @@ initial value of a boolean field, a value and not a switch, so it stays.
 | Two functions | `module/services/animations/asset-library.js:212` and `:222`: `getStanceAnimation(stanceId)` and `getConditionAnimation(conditionId)` | `module/services/animations/status-animations.js:49`: `startAnimation(actor, statusId, isStance = false)` picks the stance or the condition table at 56 |
 | Fact by name  | `module/utils/ten-dice.js:38`: `{ littleTruths = false }` in the options object                                                       | `module/utils/check.js:118`: `maxRaises(voidRing, unskilled = false)`                                                                                   |
 
+## Function length
+
+A function does one step. When a function runs a job of several steps, each step is a function named for what it
+does, and the function that runs the job calls them in order, so it reads as the job's outline.
+
+| Rule                                                                                                                     | Enforced by                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| At most 30 lines of code in a function, blank lines and comment lines not counted; a nested function counts in its outer | ESLint core `max-lines-per-function` (`max: 30, skipBlankLines: true, skipComments: true`)   |
+| A long function splits along its own steps, each a named function the job calls in order; never at an arbitrary line     | review                                                                                       |
+| A list of values (paths, option lists, one builder per key) is data the function reads, not more lines                   | review                                                                                       |
+| The count of functions over the limit only falls                                                                         | `tests/conventions/eslint.test.js` against `tests/conventions/baseline.json` (warning count) |
+
+Blank and comment lines are not counted because a comment says why a step does what it does
+([documentation.md](documentation.md)) and should never be the reason to split one.
+
+Measured with `max-lines-per-function` in report mode over `module/` and `dist/l5r4-enhanced.js`, counting code lines
+only, before any split: 1,487 functions, median 6 lines, 75th percentile 14, 90th percentile 27, 95th 38, 99th 76,
+the longest 337 (`rollCheck`), 115 over 30 lines. The limit sits near the 90th percentile, as the file limits in
+[modules.md](modules.md) do, so it names the outliers. The functions still over it are the rule's count in
+`tests/conventions/baseline.json`: 100.
+
+| Rule                  | Conforming                                                                                                                                                                                                  | Non-conforming                                                                 |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Steps called in order | `module/services/dice/check/roll-check.js`, `rollCheck`: `askCheck`, `spendCheckVoidPoints`, `rollCheckPool`, `postCheck`, `deleteConsumedEffects`; `askCheck` runs the steps that settle the check's terms | A 337-line pipeline that gathers, asks, rolls, and posts in one body (modeled) |
+| Data, not lines       | `module/utils/rule-summary.js`, `LINE_BUILDERS`: one line builder per rule key that `linesOf` looks up; `module/config/templates.js`, `PRELOAD_TEMPLATES`: the paths `registerTemplates` loads              | A function that lists 125 template paths in its body (modeled)                 |
+
 ## Result or problem
 
 What a function hands back when it cannot do its job depends on its layer, because only some layers may talk to the
@@ -79,7 +105,7 @@ notification.
 | Utils shape       | `module/utils/validators.js:44`: `validateEmphasisName` returns `{ valid, error }`              | `module/utils/validators.js:49`: `error` holds English text, not a key; `module/utils/link-syntax.js:127`: `{ ok: false, error: "l5r4.ui.links.error.pool" }` uses `ok` |
 | Warn, then `null` | `module/services/dice/check/spell-slots.js:40-49`: `planSlot` warns and returns `null`          | `module/services/dice/resources/void-points.js:144`: `spendVoidPoint` returns `{ success, rollBonus, keepBonus, message }` and leaves the warning to its caller         |
 | GM side throws    | `module/services/combat/damage.js:243-282`: `runDamageAction` throws on a request it refuses    | none found                                                                                                                                                              |
-| Dismissed prompt  | `module/services/dice/check/roll-check.js:176-181`: `DialogV2.prompt` with `rejectClose: false` | `module/services/chat.js:93`: `rejectClose: true`, caught and turned into `{ cancelled: true }`                                                                         |
+| Dismissed prompt  | `module/services/dice/check/roll-check.js:299-306`: `DialogV2.prompt` with `rejectClose: false` | `module/services/chat.js:93`: `rejectClose: true`, caught and turned into `{ cancelled: true }`                                                                         |
 
 ## Async code
 

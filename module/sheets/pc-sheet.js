@@ -1,8 +1,9 @@
 /**
  * @module sheets/pc-sheet
- * @description The player character sheet. On top of BaseActorSheet it routes the PC's actions to the PC handlers
- * (PcAdjustmentHandler for the Void Ring, spell slots, and rank tracks; PcTraitHandler for Traits; AppLauncherHandler
- * for the configuration windows; StanceHandler; PcRollHandler; PcActionsHandler), builds the sorted item lists and
+ * @description The player character sheet. On top of BaseActorSheet it routes the PC's actions to the handlers
+ * (PcAdjustmentHandler for spell slots and rank tracks; PcTraitHandler for Traits; TraitHandler for the Void Ring;
+ * AppLauncherHandler for the configuration windows; StanceHandler; PcRollHandler and RollHandler; PcActionsHandler;
+ * RestHandler), builds the sorted item lists and
  * Mastery Abilities through PcContextBuilder, enriches the notes with TextEditor.enrichHTML, and shows a limited view
  * (pc-limited.hbs) to a player who does not own the character.
  */
@@ -22,7 +23,10 @@ import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./pc-context-builder.js";
 import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
+import { RestHandler } from "./handlers/rest-handler.js";
+import { RollHandler } from "./handlers/roll-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
+import { TraitHandler } from "./handlers/trait-handler.js";
 
 const { TextEditor } = foundry.applications.ux;
 
@@ -213,7 +217,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onAction(action, event, element) {
     switch (action) {
       case "apply-healing":
-        return PcActionsHandler.applyHealing(this._getHandlerContext(), event, element);
+        return RestHandler.applyHealing(this._getHandlerContext(), event, element);
       case "update-item-field":
         return this._onInlineItemEdit(event, element);
       case "post-item":
@@ -229,17 +233,17 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "sort-items":
         return this._onUnifiedSortClick(event, element);
       case "adjust-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
+        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
       case "increase-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(
+        return TraitHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
       case "decrease-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(
+        return TraitHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
@@ -256,7 +260,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
-        return PcRollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
+        return RollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
       case "adjust-rank-points":
         return PcAdjustmentHandler.updateRankPoints(
           this._getHandlerContext(),
@@ -330,7 +334,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onActionContext(action, event, element) {
     switch (action) {
       case "adjust-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
+        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
       case "adjust-rank-points":
         return PcAdjustmentHandler.updateRankPoints(
           this._getHandlerContext(),

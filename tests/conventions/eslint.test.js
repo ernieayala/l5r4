@@ -28,6 +28,11 @@ const VIOLATING = Object.freeze([
   { rule: "camelcase", file: "camelcase.js", as: "module/services/example.js" },
   { rule: "new-cap", file: "new-cap.js", as: "module/services/example.js" },
   { rule: "max-params", file: "max-params.js", as: "module/services/example.js" },
+  {
+    rule: "max-lines-per-function",
+    file: "max-lines-per-function.js",
+    as: "module/services/example.js"
+  },
   { rule: "no-else-return", file: "no-else-return.js", as: "module/services/example.js" },
   { rule: "jsdoc/require-jsdoc", file: "jsdoc-require.js", as: "module/services/example.js" },
   {

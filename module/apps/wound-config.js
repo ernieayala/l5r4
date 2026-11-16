@@ -6,7 +6,7 @@
  * submit so the user can make several adjustments.
  */
 import { SYS_ID } from "../config/constants.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../config/game-mechanics.js";
+import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
@@ -134,7 +134,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
         wounds: sys.wounds ?? {},
         visibleManualWoundLevels: sys.visibleManualWoundLevels ?? {},
         config: {
-          npcNumberWoundLevels: NPC_NUMBER_WOUND_LVLS
+          npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
         }
       };
 

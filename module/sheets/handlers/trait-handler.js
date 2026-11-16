@@ -1,8 +1,9 @@
 /**
  * @module sheets/handlers/trait-handler
- * @description Trait rank adjustments and Trait rolls on actor sheets. A Shift+Click on a Trait's rank moves it by
- * one, clamped to 0-10; a plain click rolls the Trait through RollHandler. The increase and decrease buttons adjust
- * without Shift. Traits rank 1-10, a human starts at 2, and a rank costs 4 × the new rank in XP.
+ * @description Trait and Void Ring rank adjustments and Trait rolls on actor sheets. A Shift+Click on a Trait's rank
+ * moves it by one, clamped to 0-10; a plain click rolls the Trait through RollHandler. The increase and decrease
+ * buttons adjust without Shift. Traits rank 1-10, a human starts at 2, and a rank costs 4 × the new rank in XP. A
+ * Shift+Click on the Void Ring moves its rank by one, clamped to 0-9; both sheets adjust it here.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -131,5 +132,61 @@ export class TraitHandler {
     // Create modified event that appears to have shift key pressed
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
     return this.updateTraitRank(context, modifiedEvent, element, -1);
+  }
+
+  /**
+   * Adjusts the Void Ring rank.
+   *
+   * **Game Rules Context:**
+   * Per core rules, Void Ring is unique:
+   * - No associated Traits (unlike other Rings)
+   * - Produces Void Points equal to rank (used to enhance rolls +1k1)
+   * - Valid range: 0-9 (matches all Ring/Trait maximum)
+   * - Cannot exceed 10 per L5R4 rules
+   *
+   * **User Interaction:**
+   * Requires Shift+Click to prevent accidental adjustments (safety mechanism).
+   * Delta parameter determines direction: positive = increase, negative = decrease.
+   *
+   * **Implementation Notes:**
+   * Reads from _source first (pending changes) before falling back to system data.
+   * Uses diff:true option for efficient Foundry update.
+   *
+   * @param {object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event (must have shiftKey = true)
+   * @param {HTMLElement} element - Target element from event delegation
+   * @param {number} delta - Direction of adjustment (+1 or -1)
+   * @returns {Promise<void>}
+   */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
+  static async updateVoidRing(context, event, element, delta) {
+    event?.preventDefault?.();
+
+    // Safety: require Shift key to prevent accidental adjustment
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    // Read current value from _source (pending changes) or system data
+    const cur =
+      Number(
+        context.actor._source?.system?.rings?.void?.rank ??
+          context.actor.system?.rings?.void?.rank ??
+          0
+      ) || 0;
+    const min = 0;
+    const max = 9; // L5R4 maximum for all Rings/Traits
+
+    // Calculate next value: delta sign determines direction
+    const next = getClamped(cur + (delta > 0 ? 1 : -1), min, max);
+    if (next === cur) {
+      return;
+    } // No-op if already at boundary
+
+    try {
+      await context.actor.update({ "system.rings.void.rank": next }, { diff: true });
+    } catch (err) {
+      console.warn(`${SYS_ID} TraitHandler: failed to update void ring rank`, { err });
+    }
   }
 }

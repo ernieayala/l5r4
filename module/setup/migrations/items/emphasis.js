@@ -46,80 +46,11 @@ export async function migrateEmphasisStringToArray(docs, label) {
   }
 
   let migratedCount = 0;
-  let customEmphasisCount = 0;
   const customEmphasisNames = [];
 
   for (const item of skillItems) {
     try {
-      const system = item.system || {};
-
-      // Parse old emphasis string
-      const oldEmphasis = system.emphasis ?? "";
-      const trimmed = String(oldEmphasis).trim();
-
-      // Skip if no old emphasis data AND already has new format
-      if (
-        !trimmed &&
-        Array.isArray(system.availableEmphases) &&
-        system.availableEmphases.length > 0
-      ) {
-        continue;
-      }
-
-      // If already has availableEmphases but also has old emphasis string, merge them
-      const existingAvailable = Array.isArray(system.availableEmphases)
-        ? system.availableEmphases
-        : [];
-      const existingTrained = Array.isArray(system.trainedEmphases) ? system.trainedEmphases : [];
-
-      const parsedNames = trimmed
-        ? trimmed
-            .split(/[,;]+/)
-            .map(s => s.trim())
-            .filter(Boolean)
-        : [];
-
-      // Match each parsed name to official emphases or create custom
-      const finalAvailable = [...existingAvailable];
-      const finalTrained = [...existingTrained];
-
-      for (const parsedName of parsedNames) {
-        // Try to find official match
-        const officialMatch = getOfficialEmphasis(parsedName);
-
-        const emphasisName = officialMatch || parsedName.trim();
-
-        // Add to available emphases (avoid duplicates)
-        if (!finalAvailable.includes(emphasisName)) {
-          finalAvailable.push(emphasisName);
-        }
-
-        // Add to trained emphases (these were already trained in old system)
-        if (!finalTrained.includes(emphasisName)) {
-          finalTrained.push(emphasisName);
-        }
-
-        // If no official match, create as custom emphasis
-        if (!officialMatch) {
-          await updateWorldCustomEmphases(emphasisName);
-
-          // Track for logging
-          if (!customEmphasisNames.includes(emphasisName)) {
-            customEmphasisNames.push(emphasisName);
-            customEmphasisCount++;
-          }
-        }
-      }
-
-      // Update only when something was processed
-      if (parsedNames.length > 0 || existingAvailable.length === 0) {
-        await item.update(
-          {
-            "system.availableEmphases": finalAvailable,
-            "system.trainedEmphases": finalTrained
-          },
-          { diff: true, render: false }
-        );
+      if (await migrateSkillEmphasis(item, customEmphasisNames)) {
         migratedCount++;
       }
     } catch (err) {
@@ -131,17 +62,112 @@ export async function migrateEmphasisStringToArray(docs, label) {
     }
   }
 
-  if (migratedCount > 0) {
-    console.warn(
-      `${SYS_ID} | Migrated ${migratedCount} skill items from emphasis string to split fields (${label})`
-    );
+  logEmphasisMigration(migratedCount, { customEmphasisNames, label });
+}
 
-    if (customEmphasisCount > 0) {
-      console.warn(
-        `${SYS_ID} | Created ${customEmphasisCount} custom emphases during migration: ${customEmphasisNames.join(
-          ", "
-        )}`
-      );
+/**
+ * Log how many skills the migration updated and the custom Emphases it created; nothing when it updated none.
+ * @param {number} migratedCount
+ * @param {object} details
+ * @param {string[]} details.customEmphasisNames
+ * @param {string} details.label - Migration context label
+ */
+function logEmphasisMigration(migratedCount, { customEmphasisNames, label }) {
+  if (migratedCount === 0) {
+    return;
+  }
+  console.warn(
+    `${SYS_ID} | Migrated ${migratedCount} skill items from emphasis string to split fields (${label})`
+  );
+  if (customEmphasisNames.length > 0) {
+    console.warn(
+      `${SYS_ID} | Created ${customEmphasisNames.length} custom emphases during migration: ${customEmphasisNames.join(
+        ", "
+      )}`
+    );
+  }
+}
+
+/**
+ * Migrate one skill's Emphasis string into its available and trained Emphases, merged with any it already has. A
+ * skill with no string and available Emphases already is left alone.
+ * @param {Item} item - A skill item
+ * @param {string[]} customEmphasisNames - The custom Emphases created so far, for the log; extended in place
+ * @returns {Promise<boolean>} Whether the item was updated
+ */
+async function migrateSkillEmphasis(item, customEmphasisNames) {
+  const system = item.system || {};
+
+  // Parse old emphasis string
+  const oldEmphasis = system.emphasis ?? "";
+  const trimmed = String(oldEmphasis).trim();
+
+  // Skip if no old emphasis data AND already has new format
+  if (!trimmed && Array.isArray(system.availableEmphases) && system.availableEmphases.length > 0) {
+    return false;
+  }
+
+  // If already has availableEmphases but also has old emphasis string, merge them
+  const existingAvailable = Array.isArray(system.availableEmphases) ? system.availableEmphases : [];
+  const existingTrained = Array.isArray(system.trainedEmphases) ? system.trainedEmphases : [];
+
+  const parsedNames = trimmed
+    ? trimmed
+        .split(/[,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const lists = { available: [...existingAvailable], trained: [...existingTrained] };
+  await migrateEmphasisNames(parsedNames, lists, customEmphasisNames);
+
+  // Update only when something was processed
+  if (parsedNames.length === 0 && existingAvailable.length > 0) {
+    return false;
+  }
+  await item.update(
+    {
+      "system.availableEmphases": lists.available,
+      "system.trainedEmphases": lists.trained
+    },
+    { diff: true, render: false }
+  );
+  return true;
+}
+
+/**
+ * Add each parsed Emphasis to the available and trained lists once, as its official name when one matches; one with
+ * no official match becomes a custom Emphasis in the world settings.
+ * @param {string[]} parsedNames - The names the old string held
+ * @param {{available: string[], trained: string[]}} lists - Extended in place
+ * @param {string[]} customEmphasisNames - The custom Emphases created so far, for the log; extended in place
+ * @returns {Promise<void>}
+ */
+async function migrateEmphasisNames(parsedNames, lists, customEmphasisNames) {
+  for (const parsedName of parsedNames) {
+    // Try to find official match
+    const officialMatch = getOfficialEmphasis(parsedName);
+
+    const emphasisName = officialMatch || parsedName.trim();
+
+    // Add to available emphases (avoid duplicates)
+    if (!lists.available.includes(emphasisName)) {
+      lists.available.push(emphasisName);
+    }
+
+    // Add to trained emphases (these were already trained in old system)
+    if (!lists.trained.includes(emphasisName)) {
+      lists.trained.push(emphasisName);
+    }
+
+    // If no official match, create as custom emphasis
+    if (!officialMatch) {
+      await updateWorldCustomEmphases(emphasisName);
+
+      // Track for logging
+      if (!customEmphasisNames.includes(emphasisName)) {
+        customEmphasisNames.push(emphasisName);
+      }
     }
   }
 }

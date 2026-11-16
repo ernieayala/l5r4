@@ -45,7 +45,7 @@ nothing from that layer.
 | 8 Sheets    | `module/sheets/`                                                         | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js:57`)                             |
 | 9 Setup     | `module/setup/`                                                          | `import { runMigrations } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js:62`)                          |
 | 10 Hooks    | `module/hooks/`                                                          | `import { registerAllHooks } from "../module/hooks/register-all.js";` (`dist/l5r4-enhanced.js:70`)                     |
-| 11 Local    | A path that starts with `./`: the file's folder and the folders below it | `import { collectCheck } from "./collect.js";` (`module/services/dice/check/roll-check.js:32`)                         |
+| 11 Local    | A path that starts with `./`: the file's folder and the folders below it | `import { renderCheckCard } from "./card.js";` (`module/services/dice/check/roll-check.js:32`)                         |
 
 A path that starts with `../` goes in the group of the layer it reaches, even inside the file's own layer:
 `module/services/combat/damage-roll.js:23` lists `../dice/check/roll-check.js` under Services.
@@ -71,7 +71,7 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | Group order    | `module/utils/status-data.js:8-10`                                                        | `module/documents/actor/rules.js:20-33`: the data import first, then utils, then the config import last                                                   |
 | One block      | `module/services/combat/damage.js:11-24`: no labels, no blank lines                       | `module/sheets/pc-sheet.js:42-57`: `// Config`, `// Utils`, `// Documents`, and `// Local` labels with blank lines, and services imports under `// Utils` |
 | Static imports | `module/services/rest.js:9` imports `config/templates.js` statically                      | A module loaded with `await import()` inside a function (modeled)                                                                                         |
-| Layers         | `module/services/dice/check/roll-check.js:13-34` imports config, utils, and services only | A service that imports a sheet or an app (modeled)                                                                                                        |
+| Layers         | `module/services/dice/check/roll-check.js:22-40` imports config, utils, and services only | A service that imports a sheet or an app (modeled)                                                                                                        |
 
 ## Constants
 
@@ -135,19 +135,19 @@ Each layer has a soft limit in lines. A file over its limit passes only with a w
 `tests/conventions/exceptions.json` (decision 3). The limits sit near each layer's 90th percentile today, so they
 name the outliers and nothing else.
 
-| Layer                   | Limit | Largest today                      | Over the limit today                       |
-| ----------------------- | ----- | ---------------------------------- | ------------------------------------------ |
-| `module/config/`        | 300   | `design-gallery.js` 2383           | `design-gallery.js`                        |
-| `module/utils/`         | 300   | `rule-summary.js` 374              | `rule-summary.js`, `rule-engine.js` 335    |
-| `module/data/`          | 200   | `rules/rule-models.js` 609         | `rules/rule-models.js`                     |
-| `module/documents/`     | 300   | `actor.js` 291                     | none                                       |
-| `module/services/`      | 350   | `dice/check/roll-check.js` 580     | `dice/check/roll-check.js`                 |
-| `module/mixins/`        | 200   | `keyboard-behavior-mixin.js` 156   | none                                       |
-| `module/apps/`          | 400   | `xp-manager.js` 426                | `xp-manager.js`                            |
-| `module/sheets/`        | 500   | `base-actor-sheet.js` 622          | `base-actor-sheet.js`, `item-sheet.js` 542 |
-| `module/setup/`         | 250   | `migrations/items/emphasis.js` 217 | none                                       |
-| `module/hooks/`         | 150   | `register-all.js` 134              | none                                       |
-| `dist/l5r4-enhanced.js` | 300   | 227                                | none                                       |
+| Layer                   | Limit | Largest today                      | Over the limit today                          |
+| ----------------------- | ----- | ---------------------------------- | --------------------------------------------- |
+| `module/config/`        | 300   | `status-effects.js` 290            | none                                          |
+| `module/utils/`         | 300   | `rule-summary.js` 414              | `rule-summary.js`, `rule-engine.js` 379       |
+| `module/data/`          | 200   | `rules/rule-models.js` 609         | `rules/rule-models.js`                        |
+| `module/documents/`     | 300   | `actor.js` 291                     | none                                          |
+| `module/services/`      | 350   | `dice/check/collect.js` 389        | `dice/check/collect.js`, `combat/duel.js` 382 |
+| `module/mixins/`        | 200   | `keyboard-behavior-mixin.js` 156   | none                                          |
+| `module/apps/`          | 400   | `xp-manager.js` 408                | `xp-manager.js`                               |
+| `module/sheets/`        | 500   | `base-actor-sheet.js` 622          | `base-actor-sheet.js`, `item-sheet.js` 542    |
+| `module/setup/`         | 250   | `migrations/items/emphasis.js` 243 | none                                          |
+| `module/hooks/`         | 150   | `register-all.js` 134              | none                                          |
+| `dist/l5r4-enhanced.js` | 300   | 264                                | none                                          |
 
 | Rule                                                                                                                    | Enforced by                      |
 | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------- |

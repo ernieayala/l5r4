@@ -18,6 +18,8 @@ import { rollSkill } from "../../services/dice/rolls/skill-roll.js";
 import { rollPool } from "../../services/dice/rolls/simple-roll.js";
 import { rollTrait } from "../../services/dice/rolls/trait-roll.js";
 import { rollRing } from "../../services/dice/rolls/ring-roll.js";
+import { rollSpellCast } from "../../services/dice/rolls/spell-cast-roll.js";
+import { rollMahoCast } from "../../services/dice/rolls/maho-cast-roll.js";
 
 /**
  * Static roll actions for actor sheets.
@@ -151,9 +153,7 @@ export class RollHandler {
    */
   static async rollClickedWeaponAttack(context, event, element) {
     event.preventDefault();
-    const row = element.closest("[data-item-id]");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const weapon = id ? context.actor.items.get(id) : null;
+    const weapon = RollHandler.rowItemOf(context.actor, element);
     if (!weapon || (weapon.type !== "weapon" && weapon.type !== "bow")) {
       ui.notifications?.warn(T("l5r4.ui.notifications.noValidWeapon"));
       return undefined;
@@ -306,6 +306,36 @@ export class RollHandler {
   }
 
   /**
+   * Cast the spell of the clicked row: a maho spell through the maho roll, any other through the Spell Casting
+   * Roll.
+   * @param {object} context - Sheet context with `actor`
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - Element inside the spell row
+   * @returns {Promise<ChatMessage|null|undefined>}
+   */
+  static async rollClickedSpellCast(context, event, element) {
+    event?.preventDefault?.();
+    const spell = RollHandler.rowItemOf(context.actor, element);
+    if (!spell || spell.type !== "spell") {
+      return undefined;
+    }
+    return RollHandler.rollSpellCast(context.actor, spell, !event?.shiftKey);
+  }
+
+  /**
+   * Cast a spell item: a maho spell through the maho roll, any other through the Spell Casting Roll. Both sheets'
+   * rows and a hotbar macro cast through here.
+   * @param {Actor} actor
+   * @param {Item} spell - A spell the actor owns
+   * @param {boolean} showDialog
+   * @returns {Promise<ChatMessage|null>}
+   */
+  static rollSpellCast(actor, spell, showDialog) {
+    const cast = spell.system.maho ? rollMahoCast : rollSpellCast;
+    return cast({ actor, spell, showDialog });
+  }
+
+  /**
    * Roll an XkY pool from the clicked element's data-roll, data-keep, data-rolllabel, data-trait, and
    * data-rolltype ("attack", "damage", or a plain roll).
    * @param {object} context - Sheet context with `actor`
@@ -327,5 +357,17 @@ export class RollHandler {
         actor: context.actor
       })
     );
+  }
+
+  /**
+   * The item of the row the element sits in.
+   * @param {Actor} actor
+   * @param {HTMLElement} element
+   * @returns {Item|null}
+   */
+  static rowItemOf(actor, element) {
+    const row = element.closest("[data-item-id]");
+    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    return id ? actor.items.get(id) : null;
   }
 }

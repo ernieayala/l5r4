@@ -13,7 +13,11 @@ import {
 } from "../../../config/game-mechanics.js";
 import { toInt, getClamped } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
-import { getEffectiveWoundPenalty, prepareCurrentWoundLevel } from "./wound-system.js";
+import {
+  getEffectiveWoundPenalty,
+  getWoundThreshold,
+  prepareCurrentWoundLevel
+} from "./wound-system.js";
 
 /**
  * The Wound Rank keys in use for a count of ranks: Healthy and Out for 1, Healthy, Nicked, and Out for 2, otherwise
@@ -246,19 +250,4 @@ export function prepareVisibleWoundLevels(sys, order) {
 
     prepareCurrentWoundLevel({ woundLevels: sys.visibleWoundLevels }, baseVisibleOrder, sCapped);
   }
-}
-
-/**
- * One Wound Rank's threshold: Healthy holds 5 × Earth, each later rank Earth × the multiplier more than the one
- * before it, each plus the flat modifier.
- * @param {string} key - Wound level key
- * @param {object} terms
- * @param {number} terms.earth - Earth Ring value
- * @param {number} terms.mult - Multiplier for subsequent levels
- * @param {number} terms.add - Flat modifier to add
- * @param {number} terms.prev - Previous level's threshold
- * @returns {number} Calculated wound threshold
- */
-function getWoundThreshold(key, { earth, mult, add, prev }) {
-  return key === "healthy" ? 5 * earth + add : earth * mult + prev + add;
 }

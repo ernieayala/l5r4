@@ -2,18 +2,18 @@
 
 A shugenja's spell slots left for each Ring, shown in the Spells section title: the Ring's image with the count over
 it. A press adds a slot, a right-press uses one; the count stays between 0 and 9
-(`module/sheets/handlers/pc-adjustment-handler.js:141`).
+(`PcAdjustmentHandler.updateSpellSlot` in `module/sheets/handlers/pc-adjustment-handler.js`).
 
-| Item        | Detail                                                                                                                                               |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/actor/_partials/_spell-slot.hbs`, five uses in `_spell-section.hbs`                                                                       |
-| Parameters  | `ring` (`water`, `air`, `fire`, `earth`, `void`), `count` (`system.spellSlots.<ring>`)                                                               |
-| SCSS        | `scss/features/_spell-slots.scss` (target), holding `_sections.scss:39-70`                                                                           |
-| Block class | `l5r4-spell-slots` on the group; `l5r4-spell-slot -<ring>` on each slot                                                                              |
-| Handler     | `PcAdjustmentHandler.adjustSpellSlot` (`module/sheets/handlers/pc-adjustment-handler.js:126-154`), routed by `module/sheets/pc-sheet.js:211`, `:288` |
-| Shows in    | The Spells section title on the PC sheet                                                                                                             |
-| Game terms  | spell slot, lowercase in the book and the UI (`game-rules/66_magic_and_spell_casting.md, p.163`); Ring (`game-rules/25_rings_and_traits.md, p.76`)   |
-| Gallery     | Counts 0, 1, and 9 per Ring; a slot hovered and focused; light and dark                                                                              |
+| Item        | Detail                                                                                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/actor/_partials/_spell-slot.hbs`, five uses in `_spell-section.hbs`                                                                                         |
+| Parameters  | `ring` (`water`, `air`, `fire`, `earth`, `void`), `count` (`system.spellSlots.<ring>`)                                                                                 |
+| SCSS        | `scss/features/_spell-slots.scss` (target), holding `_sections.scss:39-70`                                                                                             |
+| Block class | `l5r4-spell-slots` on the group; `l5r4-spell-slot -<ring>` on each slot                                                                                                |
+| Handler     | `PcAdjustmentHandler.updateSpellSlot` (`module/sheets/handlers/pc-adjustment-handler.js`), routed by `_onAction` and `_onActionContext` in `module/sheets/pc-sheet.js` |
+| Shows in    | The Spells section title on the PC sheet                                                                                                                               |
+| Game terms  | spell slot, lowercase in the book and the UI (`game-rules/66_magic_and_spell_casting.md, p.163`); Ring (`game-rules/25_rings_and_traits.md, p.76`)                     |
+| Gallery     | Counts 0, 1, and 9 per Ring; a slot hovered and focused; light and dark                                                                                                |
 
 ## Anatomy
 

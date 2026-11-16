@@ -104,7 +104,8 @@ export function getTraitAdjustTotal(rules, trait) {
  */
 
 /**
- * Outputs of the rules that run once Traits and Rings are known.
+ * Outputs of the rules that run once Traits and Rings are known. Each group of rule keys runs in turn, so value errors
+ * are reported in that order.
  * @param {RuleEntry[]} entries
  * @param {object} rollData
  * @param {Set<string>} options
@@ -112,10 +113,35 @@ export function getTraitAdjustTotal(rules, trait) {
  */
 export function getDerivedRuleOutputs(entries, rollData, options) {
   const errors = [];
-  const value = getValueResolver(rollData);
+  const pass = { entries, options, errors, value: getValueResolver(rollData) };
+  return {
+    ...getArmorRuleOutputs(pass),
+    defenses: getDefenseRuleOutputs(pass),
+    ...getActorRuleOutputs(pass),
+    ...getEffectRuleOutputs(pass),
+    ...getTrackRuleOutputs(pass),
+    bag: buildRuleBag(pass),
+    errors
+  };
+}
 
+/**
+ * @typedef {object} RulePass
+ * @property {RuleEntry[]} entries
+ * @property {Set<string>} options
+ * @property {RuleError[]} errors - Extended in place
+ * @property {function(*, RuleEntry): number} value - Resolves one entry's value
+ */
+
+/**
+ * The ArmorTN and Reduction rules' outputs.
+ * @param {RulePass} pass
+ * @returns {{armor: object[], reduction: number, reductionParts: object[]}}
+ */
+function getArmorRuleOutputs(pass) {
+  const { value } = pass;
   const armor = [];
-  applyMatchingRules({ entries, keys: ["ArmorTN"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["ArmorTN"] }, (rule, entry) => {
     armor.push({
       mode: rule.mode,
       value: value(rule.value, entry),
@@ -123,41 +149,54 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
       range: rule.range
     });
   });
-
   let reduction = 0;
   const reductionParts = [];
-  applyMatchingRules({ entries, keys: ["Reduction"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Reduction"] }, (rule, entry) => {
     const part = value(rule.value, entry);
     reduction += part;
     reductionParts.push({ value: part, except: [...rule.except] });
   });
+  return { armor, reduction, reductionParts };
+}
 
-  // Creature defenses; several of one kind act as the first
-  // game-rules/99_creatures.md, p.319-320
+/**
+ * Creature defenses; several of one kind act as the first.
+ * game-rules/99_creatures.md, p.319-320
+ * @param {RulePass} pass
+ * @returns {{invulnerable: object|null, spirit: object|null}}
+ */
+function getDefenseRuleOutputs(pass) {
   const defenses = { invulnerable: null, spirit: null };
-  applyMatchingRules({ entries, keys: ["Invulnerability"], options, errors }, rule => {
+  applyMatchingRules({ ...pass, keys: ["Invulnerability"] }, rule => {
     defenses.invulnerable ??= { harmedBy: [...rule.harmedBy], only: [...rule.only] };
   });
-  applyMatchingRules({ entries, keys: ["Spirit"], options, errors }, rule => {
+  applyMatchingRules({ ...pass, keys: ["Spirit"] }, rule => {
     defenses.spirit ??= { harmedBy: [...rule.harmedBy] };
   });
+  return defenses;
+}
 
+/**
+ * The Movement, Wounds, and Initiative rules' outputs.
+ * @param {RulePass} pass
+ * @returns {{movementWater: number, woundsPerRank: number, woundPenalty: number, initiative: object}}
+ */
+function getActorRuleOutputs(pass) {
+  const { value } = pass;
   let movementWater = 0;
-  applyMatchingRules({ entries, keys: ["Movement"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Movement"] }, (rule, entry) => {
     movementWater += value(rule.water, entry);
   });
-
   let woundsPerRank = 0;
   let woundPenalty = 0;
-  applyMatchingRules({ entries, keys: ["Wounds"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Wounds"] }, (rule, entry) => {
     // Resolve both before adding either, so a bad formula changes neither total.
     const [perRank, penalty] = [value(rule.perRank, entry), value(rule.penalty, entry)];
     woundsPerRank += perRank;
     woundPenalty += penalty;
   });
-
   const initiative = { roll: 0, keep: 0, total: 0 };
-  applyMatchingRules({ entries, keys: ["Initiative"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Initiative"] }, (rule, entry) => {
     const [roll, keep, total] = [
       value(rule.roll, entry),
       value(rule.keep, entry),
@@ -167,15 +206,22 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
     initiative.keep += keep;
     initiative.total += total;
   });
+  return { movementWater, woundsPerRank, woundPenalty, initiative };
+}
 
+/**
+ * The ConditionImmunity and PeriodicSave rules' outputs. A save belongs to the effect it ends; an item's rule has no
+ * effect to end and is skipped.
+ * @param {RulePass} pass
+ * @returns {{immunities: Set<string>, saves: object[]}}
+ */
+function getEffectRuleOutputs(pass) {
   const immunities = new Set();
-  applyMatchingRules({ entries, keys: ["ConditionImmunity"], options, errors }, rule => {
+  applyMatchingRules({ ...pass, keys: ["ConditionImmunity"] }, rule => {
     immunities.add(rule.condition);
   });
-
-  // A save belongs to the effect it ends; an item's rule has no effect to end and is skipped
   const saves = [];
-  applyMatchingRules({ entries, keys: ["PeriodicSave"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["PeriodicSave"] }, (rule, entry) => {
     if (entry.effectUuid) {
       const { event, roll, tn, step, min, onFailure } = rule;
       saves.push({
@@ -190,16 +236,24 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
       });
     }
   });
+  return { immunities, saves };
+}
 
+/**
+ * The Resource and Ledger rules' outputs.
+ * @param {RulePass} pass
+ * @returns {{resources: Record<string, {max: number, per: string}>, ledger: object[]}}
+ */
+function getTrackRuleOutputs(pass) {
+  const { value } = pass;
   const resources = {};
-  applyMatchingRules({ entries, keys: ["Resource"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Resource"] }, (rule, entry) => {
     const max = value(rule.max, entry);
     resources[rule.slug] ??= { max: 0, per: rule.per };
     resources[rule.slug].max += max;
   });
-
   const ledger = [];
-  applyMatchingRules({ entries, keys: ["Ledger"], options, errors }, (rule, entry) => {
+  applyMatchingRules({ ...pass, keys: ["Ledger"] }, (rule, entry) => {
     ledger.push({
       track: rule.track,
       direction: rule.direction,
@@ -207,33 +261,23 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
       source: entry.source
     });
   });
+  return { resources, ledger };
+}
 
+/**
+ * The rule bag: every bag-kind rule's entry by kind, then selector, whatever its predicate, which a roll tests later.
+ * @param {RulePass} pass
+ * @returns {Record<string, Record<string, object[]>>}
+ */
+function buildRuleBag(pass) {
+  const { value } = pass;
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
-  applyMatchingRules(
-    { entries, keys: Object.keys(BAG_KINDS), options: null, errors },
-    (rule, entry) => {
-      // Resolve first, so a rule whose value fails leaves no trace in the bag
-      const output = buildBagEntry(rule, entry, v => value(v, entry));
-      (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
-    }
-  );
-
-  return {
-    armor,
-    reduction,
-    reductionParts,
-    defenses,
-    woundsPerRank,
-    woundPenalty,
-    movementWater,
-    initiative,
-    immunities,
-    saves,
-    resources,
-    ledger,
-    bag,
-    errors
-  };
+  applyMatchingRules({ ...pass, keys: Object.keys(BAG_KINDS), options: null }, (rule, entry) => {
+    // Resolve first, so a rule whose value fails leaves no trace in the bag
+    const output = buildBagEntry(rule, entry, v => value(v, entry));
+    (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
+  });
+  return bag;
 }
 
 /**

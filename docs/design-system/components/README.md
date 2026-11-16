@@ -37,7 +37,7 @@ The design system's other pages use the same form. `tests/conventions/design-sys
 path that starts `templates/` or `scss/` in `docs/design-system/`: one followed by ` (target)` must not exist yet, and
 every other must exist, its `:line` suffix aside; a path holding a `<placeholder>` or `*` is skipped. Core's files are
 written from `resources/app/` (`resources/app/templates/dice/roll.hbs`), so the check skips them too. The fix pass creates each target
-and registers a new partial in `module/setup/preload-templates.js`; once a target exists, its page drops the marker.
+and registers a new partial in `PRELOAD_TEMPLATES` (`module/config/templates.js`); once a target exists, its page drops the marker.
 
 ### One name for block, file, and page
 

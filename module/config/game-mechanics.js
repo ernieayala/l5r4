@@ -107,7 +107,7 @@ export const BOW_IN_MELEE_PENALTY = -10;
  * @type {Readonly<{1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
  * @constant
  */
-export const NPC_NUMBER_WOUND_LVLS = Object.freeze({
+export const NPC_NUMBER_WOUND_LEVELS = Object.freeze({
   1: 1,
   2: 2,
   3: 3,

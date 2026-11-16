@@ -27,7 +27,7 @@ Stage 18 playtest run first.
 | `package.json` `release:validate` | Passes `--validate-only`, which `scripts/prepare-release.js` does not accept (it treats it as the version and exits) |
 | `tests/quench/smoke.js` | Switch to `CONFIG.compatibility.mode` `FAILURE` scoped to `systems/l5r4-enhanced/` (X4) |
 | `lang/*.json` | List keys present in `en.json` and missing from each translation, for translators |
-| Code comments on `main` | Some repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12). Re-run on `release/4.0.0`; several of these files are gone since Stage 8 |
+| Code comments on `main` | Some repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `module/services/combat/legacy-damage.js` (`module/hooks/chat-damage-buttons.js` on `main`), `melee-damage.js`, `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12). Re-run on `release/4.0.0`; several of these files are gone since Stage 8 |
 
 ## Deliverables
 

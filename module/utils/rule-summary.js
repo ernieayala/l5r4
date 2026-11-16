@@ -16,11 +16,96 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
  * @property {Record<string, string|number|Phrase>} data
  */
 
+/**
+ * The phrases every rule's line builder shares (linesOf).
+ * @typedef {object} LineTerms
+ * @property {function(object): Phrase[]} main - The rule key's own line with its data
+ * @property {function(): Phrase} rolls - The rolls the rule's selector names
+ * @property {function(Phrase[]): Phrase[]} ranged - The lines with the rule's attack range added, when it has one
+ * @property {function(string): string} itemName - The name of the item a uuid names
+ */
+
 /** Trait keys, each named by `l5r4.ui.mechanics.traits.<key>`. */
 const TRAITS = Object.freeze(new Set(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]));
 
 /** Ring keys, each named by `l5r4.ui.mechanics.rings.<key>`. */
 const RINGS = Object.freeze(new Set(["air", "earth", "fire", "water", "void"]));
+
+/**
+ * The line builder of each rule key: the rule and its LineTerms in, its summary lines out (linesOf).
+ * @type {Readonly<Record<string, function(object, LineTerms): Phrase[]>>}
+ */
+const LINE_BUILDERS = Object.freeze({
+  RollModifier: buildModifierLines,
+  OpponentModifier: buildModifierLines,
+  TNModifier: (rule, { main, rolls }) =>
+    main({ value: formatSigned(rule.value ?? 0), rolls: rolls() }),
+  ArmorTN: buildArmorTnLines,
+  Reduction: buildReductionLines,
+  Wounds: (rule, { main }) =>
+    main({ perRank: formatSigned(rule.perRank ?? 0), penalty: formatSigned(rule.penalty ?? 0) }),
+  Initiative: (rule, { main }) => main({ bonus: formatPool(rule) }),
+  FreeRaise: (rule, { main, rolls }) => main({ value: String(rule.value ?? 1), rolls: rolls() }),
+  DiceRule: buildDiceRuleLines,
+  Substitute: (rule, { main, rolls }) =>
+    main({
+      replace: buildSelectorPhrase(rule.replace),
+      with: buildSelectorPhrase(rule.with),
+      rolls: rolls()
+    }),
+  TraitAdjust: (rule, { main }) =>
+    main({
+      trait:
+        rule.trait === "void"
+          ? buildPhrase("l5r4.ui.mechanics.rings.void")
+          : buildNamePhrase("trait", rule.trait),
+      value: formatSigned(rule.value ?? 0)
+    }),
+  Note: (rule, { main, rolls }) => main({ text: String(rule.text ?? ""), rolls: rolls() }),
+  RollOption: (rule, { main }) => main({ option: String(rule.option ?? "") }),
+  Movement: (rule, { main }) => main({ value: formatSigned(rule.water ?? 0) }),
+  ApplyCondition: (rule, { main, rolls }) =>
+    main({ condition: buildConditionPhrase(rule.condition), rolls: rolls() }),
+  ConditionImmunity: (rule, { main }) => main({ condition: buildConditionPhrase(rule.condition) }),
+  PeriodicSave: (rule, { main }) => {
+    const [kind, value] = String(rule.roll ?? "").split(":");
+    return main({ roll: buildNamePhrase(kind, value), tn: rule.tn ?? 20 });
+  },
+  Resource: (rule, { main }) =>
+    main({
+      max: String(rule.max ?? 1),
+      slug: String(rule.slug ?? ""),
+      per: buildPhrase(`l5r4.ui.ruleSummary.per.${rule.per ?? "round"}`)
+    }),
+  DamageSource: buildDamageSourceLines,
+  Invulnerability: (rule, { main }) => main({ harmedBy: formatTagList(rule.harmedBy) }),
+  Spirit: (rule, { main }) => main({ harmedBy: formatTagList(rule.harmedBy) }),
+  RaiseRule: buildRaiseRuleLines,
+  UnskilledAs: (rule, { main, rolls }) => main({ rank: String(rule.rank ?? 1), rolls: rolls() }),
+  ActionCost: (rule, { main, rolls, ranged }) =>
+    ranged(
+      main({
+        action: buildPhrase(`l5r4.ui.ruleSummary.action.${rule.action ?? "simple"}`),
+        rolls: rolls()
+      })
+    ),
+  Cost: (rule, { main }) =>
+    main({ what: buildPricedPhrase(rule.selector), value: String(rule.value ?? "@cost") }),
+  Ledger: (rule, { main }) =>
+    main({
+      track: buildPhrase(`l5r4.ui.ledger.tracks.${rule.track ?? "honor"}`),
+      direction: buildPhrase(`l5r4.ui.ruleSummary.direction.${rule.direction ?? "gain"}`),
+      value: String(rule.value ?? "@points")
+    }),
+  Prerequisite: (rule, { main }) =>
+    main({ requires: rule.label || formatPredicate(rule.requires ?? []) }),
+  ChoiceSet: (rule, { main }) =>
+    rule.selection
+      ? [buildPhrase("l5r4.ui.ruleSummary.chosen", { selection: String(rule.selection) })]
+      : main({ prompt: rule.prompt || String(rule.flag ?? "") }),
+  GrantItem: (rule, { main, itemName }) =>
+    main({ item: itemName(String(rule.uuid ?? "")), rank: rule.rank ?? 0 })
+});
 
 /**
  * The summary key of each rule key.
@@ -194,181 +279,136 @@ function buildPricedPhrase(selector) {
 }
 
 /**
- * The lines of one rule, before any predicate is added.
+ * The lines of one rule, before any predicate is added: the line builder of its key, given the phrases every rule
+ * shares.
  * @param {object} rule
  * @param {function(string): string} itemName - The name of the item a uuid names
  * @returns {Phrase[]}
  */
 function linesOf(rule, itemName) {
   const key = rule.key;
-  const buildMainLines = data => [buildPhrase(SUMMARY_KEYS[key], data)];
-  const buildRollsPhrase = () => buildSelectorPhrase(rule.selector);
-  // A rule limited to one attack range says which
-  const buildRangedLines = lines =>
-    rule.range ? [...lines, buildPhrase(`l5r4.ui.ruleSummary.range.${rule.range}`)] : lines;
-  switch (key) {
-    case "RollModifier":
-    case "OpponentModifier": {
-      const lines = buildRangedLines(
-        buildMainLines({ bonus: formatPool(rule), rolls: buildRollsPhrase() })
-      );
-      if (rule.optional) {
-        lines.push(buildPhrase("l5r4.ui.ruleSummary.optional"));
-      }
-      return lines;
-    }
-    case "TNModifier":
-      return buildMainLines({ value: formatSigned(rule.value ?? 0), rolls: buildRollsPhrase() });
-    case "ArmorTN": {
-      const mode = rule.mode ?? "add";
-      if (mode !== "add") {
-        return [
-          buildPhrase(`l5r4.ui.ruleSummary.armorTn.${mode}`, { value: String(rule.value ?? 0) })
-        ];
-      }
-      return buildRangedLines(buildMainLines({ value: formatSigned(rule.value ?? 0) }));
-    }
-    case "Reduction":
-      return rule.except?.length
-        ? [
-            buildPhrase("l5r4.ui.ruleSummary.reductionExcept", {
-              value: formatSigned(rule.value ?? 0),
-              except: formatTagList(rule.except)
-            })
-          ]
-        : buildMainLines({ value: formatSigned(rule.value ?? 0) });
-    case "Wounds":
-      return buildMainLines({
-        perRank: formatSigned(rule.perRank ?? 0),
-        penalty: formatSigned(rule.penalty ?? 0)
-      });
-    case "Initiative":
-      return buildMainLines({ bonus: formatPool(rule) });
-    case "FreeRaise":
-      return buildMainLines({ value: String(rule.value ?? 1), rolls: buildRollsPhrase() });
-    case "DiceRule": {
-      const lines = [];
-      if (rule.explode) {
-        lines.push(
-          buildPhrase(SUMMARY_KEYS.DiceRule, { explode: rule.explode, rolls: buildRollsPhrase() })
-        );
-      }
-      if (rule.rerollOnes) {
-        lines.push(buildPhrase("l5r4.ui.ruleSummary.rerollOnes", { rolls: buildRollsPhrase() }));
-      }
-      return lines;
-    }
-    case "Substitute":
-      return buildMainLines({
-        replace: buildSelectorPhrase(rule.replace),
-        with: buildSelectorPhrase(rule.with),
-        rolls: buildRollsPhrase()
-      });
-    case "TraitAdjust":
-      return buildMainLines({
-        trait:
-          rule.trait === "void"
-            ? buildPhrase("l5r4.ui.mechanics.rings.void")
-            : buildNamePhrase("trait", rule.trait),
-        value: formatSigned(rule.value ?? 0)
-      });
-    case "Note":
-      return buildMainLines({ text: String(rule.text ?? ""), rolls: buildRollsPhrase() });
-    case "RollOption":
-      return buildMainLines({ option: String(rule.option ?? "") });
-    case "Movement":
-      return buildMainLines({ value: formatSigned(rule.water ?? 0) });
-    case "ApplyCondition":
-      return buildMainLines({
-        condition: buildConditionPhrase(rule.condition),
-        rolls: buildRollsPhrase()
-      });
-    case "ConditionImmunity":
-      return buildMainLines({ condition: buildConditionPhrase(rule.condition) });
-    case "PeriodicSave": {
-      const [kind, value] = String(rule.roll ?? "").split(":");
-      return buildMainLines({ roll: buildNamePhrase(kind, value), tn: rule.tn ?? 20 });
-    }
-    case "Resource":
-      return buildMainLines({
-        max: String(rule.max ?? 1),
-        slug: String(rule.slug ?? ""),
-        per: buildPhrase(`l5r4.ui.ruleSummary.per.${rule.per ?? "round"}`)
-      });
-    case "DamageSource": {
-      const lines = rule.tags?.length
-        ? buildMainLines({ tags: formatTagList(rule.tags), rolls: buildRollsPhrase() })
-        : [];
-      if (rule.ignoreReduction) {
-        lines.push(
-          buildPhrase("l5r4.ui.ruleSummary.ignoreReduction", {
-            value: String(rule.ignoreReduction)
-          })
-        );
-      }
-      return lines;
-    }
-    case "Invulnerability":
-    case "Spirit":
-      return buildMainLines({ harmedBy: formatTagList(rule.harmedBy) });
-    case "RaiseRule": {
-      const lines = [];
-      if (rule.maneuver && rule.cost) {
-        lines.push(
-          buildPhrase(SUMMARY_KEYS.RaiseRule, {
-            maneuver: buildPhrase(`l5r4.ui.ruleSummary.maneuver.${rule.maneuver}`),
-            cost: formatSigned(rule.cost),
-            rolls: buildRollsPhrase()
-          })
-        );
-      }
-      if (rule.cap) {
-        lines.push(
-          buildPhrase("l5r4.ui.ruleSummary.raiseCap", {
-            value: formatSigned(rule.cap),
-            rolls: buildRollsPhrase()
-          })
-        );
-      }
-      if (rule.minimum) {
-        lines.push(
-          buildPhrase("l5r4.ui.ruleSummary.raiseMinimum", {
-            value: String(rule.minimum),
-            rolls: buildRollsPhrase()
-          })
-        );
-      }
-      return lines;
-    }
-    case "UnskilledAs":
-      return buildMainLines({ rank: String(rule.rank ?? 1), rolls: buildRollsPhrase() });
-    case "ActionCost":
-      return buildRangedLines(
-        buildMainLines({
-          action: buildPhrase(`l5r4.ui.ruleSummary.action.${rule.action ?? "simple"}`),
-          rolls: buildRollsPhrase()
-        })
-      );
-    case "Cost":
-      return buildMainLines({
-        what: buildPricedPhrase(rule.selector),
-        value: String(rule.value ?? "@cost")
-      });
-    case "Ledger":
-      return buildMainLines({
-        track: buildPhrase(`l5r4.ui.ledger.tracks.${rule.track ?? "honor"}`),
-        direction: buildPhrase(`l5r4.ui.ruleSummary.direction.${rule.direction ?? "gain"}`),
-        value: String(rule.value ?? "@points")
-      });
-    case "Prerequisite":
-      return buildMainLines({ requires: rule.label || formatPredicate(rule.requires ?? []) });
-    case "ChoiceSet":
-      return rule.selection
-        ? [buildPhrase("l5r4.ui.ruleSummary.chosen", { selection: String(rule.selection) })]
-        : buildMainLines({ prompt: rule.prompt || String(rule.flag ?? "") });
-    case "GrantItem":
-      return buildMainLines({ item: itemName(String(rule.uuid ?? "")), rank: rule.rank ?? 0 });
-    default:
-      return [buildPhrase("l5r4.ui.ruleSummary.unknown", { key: String(key ?? "") })];
+  const builder = Object.hasOwn(LINE_BUILDERS, key) ? LINE_BUILDERS[key] : null;
+  if (!builder) {
+    return [buildPhrase("l5r4.ui.ruleSummary.unknown", { key: String(key ?? "") })];
   }
+  return builder(rule, {
+    main: data => [buildPhrase(SUMMARY_KEYS[key], data)],
+    rolls: () => buildSelectorPhrase(rule.selector),
+    // A rule limited to one attack range says which
+    ranged: lines =>
+      rule.range ? [...lines, buildPhrase(`l5r4.ui.ruleSummary.range.${rule.range}`)] : lines,
+    itemName
+  });
+}
+
+/**
+ * A RollModifier's or OpponentModifier's lines: the bonus on its rolls, its range, and whether it is optional.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildModifierLines(rule, { main, rolls, ranged }) {
+  const lines = ranged(main({ bonus: formatPool(rule), rolls: rolls() }));
+  if (rule.optional) {
+    lines.push(buildPhrase("l5r4.ui.ruleSummary.optional"));
+  }
+  return lines;
+}
+
+/**
+ * An ArmorTN rule's lines: a base or total it sets, or the change it adds with its range.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildArmorTnLines(rule, { main, ranged }) {
+  const mode = rule.mode ?? "add";
+  if (mode !== "add") {
+    return [buildPhrase(`l5r4.ui.ruleSummary.armorTn.${mode}`, { value: String(rule.value ?? 0) })];
+  }
+  return ranged(main({ value: formatSigned(rule.value ?? 0) }));
+}
+
+/**
+ * A Reduction rule's lines: the Reduction, and the damage tags it does not stop.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildReductionLines(rule, { main }) {
+  if (!rule.except?.length) {
+    return main({ value: formatSigned(rule.value ?? 0) });
+  }
+  return [
+    buildPhrase("l5r4.ui.ruleSummary.reductionExcept", {
+      value: formatSigned(rule.value ?? 0),
+      except: formatTagList(rule.except)
+    })
+  ];
+}
+
+/**
+ * A DiceRule's lines: the explode threshold and the re-rolled 1s it sets on its rolls.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildDiceRuleLines(rule, { rolls }) {
+  const lines = [];
+  if (rule.explode) {
+    lines.push(buildPhrase(SUMMARY_KEYS.DiceRule, { explode: rule.explode, rolls: rolls() }));
+  }
+  if (rule.rerollOnes) {
+    lines.push(buildPhrase("l5r4.ui.ruleSummary.rerollOnes", { rolls: rolls() }));
+  }
+  return lines;
+}
+
+/**
+ * A DamageSource rule's lines: the damage tags it gives its rolls and the Reduction they ignore.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildDamageSourceLines(rule, { main, rolls }) {
+  const lines = rule.tags?.length ? main({ tags: formatTagList(rule.tags), rolls: rolls() }) : [];
+  if (rule.ignoreReduction) {
+    lines.push(
+      buildPhrase("l5r4.ui.ruleSummary.ignoreReduction", { value: String(rule.ignoreReduction) })
+    );
+  }
+  return lines;
+}
+
+/**
+ * A RaiseRule's lines: a maneuver's cost in Raises, the change to the Raise cap, and the Raises it requires.
+ * @param {object} rule
+ * @param {LineTerms} terms
+ * @returns {Phrase[]}
+ */
+function buildRaiseRuleLines(rule, { rolls }) {
+  const lines = [];
+  if (rule.maneuver && rule.cost) {
+    lines.push(
+      buildPhrase(SUMMARY_KEYS.RaiseRule, {
+        maneuver: buildPhrase(`l5r4.ui.ruleSummary.maneuver.${rule.maneuver}`),
+        cost: formatSigned(rule.cost),
+        rolls: rolls()
+      })
+    );
+  }
+  if (rule.cap) {
+    lines.push(
+      buildPhrase("l5r4.ui.ruleSummary.raiseCap", { value: formatSigned(rule.cap), rolls: rolls() })
+    );
+  }
+  if (rule.minimum) {
+    lines.push(
+      buildPhrase("l5r4.ui.ruleSummary.raiseMinimum", {
+        value: String(rule.minimum),
+        rolls: rolls()
+      })
+    );
+  }
+  return lines;
 }

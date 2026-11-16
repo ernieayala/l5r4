@@ -275,6 +275,8 @@ export default [
         { capIsNewExceptions: ["T", "F", "R", "TEMPLATE"], capIsNewExceptionPattern: "Mixin$" }
       ],
       "max-params": ["warn", 3],
+      // docs/code-system/functions.md, Function length: near the 90th percentile of the system's functions
+      "max-lines-per-function": ["warn", { max: 30, skipBlankLines: true, skipComments: true }],
       "no-else-return": "warn",
       "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS],
       "no-restricted-properties": [

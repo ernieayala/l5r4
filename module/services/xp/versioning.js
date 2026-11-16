@@ -147,7 +147,7 @@ export async function updateXpHistory(actor) {
     }
 
     // Update version flag to prevent redundant recalculations
-    // Version is based on item count and modification timestamps
+    // The version is a hash of the XP-relevant Traits, Void Ring, Skills, items, and ledger prices
     const currentVersion = getXpDataVersion(actor);
     await actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
   } catch (err) {

@@ -138,6 +138,44 @@ export function buildCheckOptions(actor, kind, { target = null, weapon = null } 
  * @returns {CheckContext}
  */
 export function getCheckContext(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
+  const spec = { kind, skill, trait, ring, target, weapon };
+  const { entriesOf, selectors } = buildRuleQuery(actor, spec);
+  return {
+    modifiers: getCheckModifiers(actor, spec, { entriesOf, selectors }),
+    tnModifiers: getCheckTnModifiers(actor, spec, entriesOf),
+    freeRaises:
+      kind === "damage" ? 0 : entriesOf("freeRaises").reduce((sum, entry) => sum + entry.value, 0),
+    ...getDiceRuleTerms(entriesOf),
+    substitutes: entriesOf("substitutes").map(({ label, replace, with: by }) => ({
+      label,
+      replace,
+      with: by
+    })),
+    notes: entriesOf("notes").map(entry => entry.text),
+    applyConditions: entriesOf("applyConditions").map(({ label, condition, level }) => ({
+      label,
+      condition,
+      level
+    })),
+    ...getDamageSourceTerms(entriesOf),
+    ...getRaiseRuleTerms(entriesOf),
+    actions: entriesOf("actionCosts").map(entry => ({
+      label: entry.label,
+      action: entry.action,
+      ...(entry.range ? { range: entry.range } : {})
+    }))
+  };
+}
+
+/**
+ * How the check reads the actor's rule bag: its selectors (with the Skill item's type and tags) and roll options, and
+ * a reader of the bag entries of one kind that match them and the check's weapon.
+ * @param {Actor} actor
+ * @param {object} spec - getCheckContext's spec
+ * @returns {{entriesOf: function(string): object[], selectors: string[]}}
+ */
+function buildRuleQuery(actor, spec) {
+  const { kind, skill, trait, ring, target, weapon } = spec;
   const skillItem = skill
     ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
     : null;
@@ -145,8 +183,56 @@ export function getCheckContext(actor, { kind, skill, trait, ring, target = null
   const options = buildCheckOptions(actor, kind, { target, weapon });
   const entriesOf = bagKind =>
     getBagEntries(actor.ruleBag, bagKind, { selectors, options, weaponId: weapon?.id ?? null });
+  return { entriesOf, selectors };
+}
 
-  const toModifier = (entry, label = entry.label) => ({
+/**
+ * The check's modifiers: its RollModifier rules; the target's OpponentModifier rules, tested from its side (its
+ * options, with the roller as its target); Active Effect values in `system.bonuses`; and a bow's shot in melee range.
+ * @param {Actor} actor
+ * @param {object} spec - getCheckContext's spec
+ * @param {object} query
+ * @param {function(string): object[]} query.entriesOf - The actor's bag entries of a kind for this check
+ * @param {string[]} query.selectors - The check's selectors
+ * @returns {CheckModifier[]}
+ */
+function getCheckModifiers(actor, spec, { entriesOf, selectors }) {
+  const { kind, target, weapon } = spec;
+  const modifiers = entriesOf("rollModifiers").map(entry => buildCheckModifier(entry));
+  if (target?.ruleBag) {
+    const theirs = buildCheckOptions(target, kind, { target: actor });
+    for (const entry of getBagEntries(target.ruleBag, "opponentModifiers", {
+      selectors,
+      options: theirs
+    })) {
+      modifiers.push(buildCheckModifier(entry, `${entry.label} (${target.name})`));
+    }
+  }
+  modifiers.push(...getEffectBonusModifiers(actor, spec));
+  // A bow shot at a target in melee range is -10; the roller judges the range, so it starts unticked
+  // game-rules/74_weapons.md, p.199
+  if (kind === "attack" && weapon?.system.isBow) {
+    modifiers.push({
+      label: T("l5r4.equipment.weapons.meleeRange"),
+      roll: 0,
+      keep: 0,
+      total: BOW_IN_MELEE_PENALTY,
+      enabled: false,
+      range: "ranged",
+      consumes: null
+    });
+  }
+  return modifiers;
+}
+
+/**
+ * A rule bag entry as a check modifier: an optional rule starts off.
+ * @param {object} entry - A rollModifiers or opponentModifiers bag entry
+ * @param {string} [label] - The label to show, the entry's own by default
+ * @returns {CheckModifier}
+ */
+function buildCheckModifier(entry, label = entry.label) {
+  return {
     label,
     roll: entry.roll,
     keep: entry.keep,
@@ -155,55 +241,56 @@ export function getCheckContext(actor, { kind, skill, trait, ring, target = null
     enabled: !entry.optional,
     ...(entry.range ? { range: entry.range } : {}),
     consumes: entry.consumes ?? null
-  });
-  const modifiers = entriesOf("rollModifiers").map(entry => toModifier(entry));
-  // The target's OpponentModifier rules, tested from its side: its options, with the roller as its target
-  if (target?.ruleBag) {
-    const theirs = buildCheckOptions(target, kind, { target: actor });
-    for (const entry of getBagEntries(target.ruleBag, "opponentModifiers", {
-      selectors,
-      options: theirs
-    })) {
-      modifiers.push(toModifier(entry, `${entry.label} (${target.name})`));
-    }
-  }
+  };
+}
 
-  // Active Effect changes on system.bonuses (ACTIVE_EFFECTS.md, Skill and Ring bonuses)
-  for (const [category, name] of [
-    ["skill", skill],
-    ["trait", trait],
-    ["ring", ring]
-  ]) {
+/**
+ * The Active Effect changes on `system.bonuses` for the check's Skill, Trait, and Ring (ACTIVE_EFFECTS.md, Skill and
+ * Ring bonuses), each that changes the pool.
+ * @param {Actor} actor
+ * @param {object} spec - getCheckContext's spec
+ * @returns {CheckModifier[]}
+ */
+function getEffectBonusModifiers(actor, spec) {
+  const named = [
+    ["skill", spec.skill],
+    ["trait", spec.trait],
+    ["ring", spec.ring]
+  ];
+  return named.flatMap(([category, name]) => {
     const bonus = name ? actor.system.bonuses[category][name] : null;
-    if (bonus && (toInt(bonus.roll) || toInt(bonus.keep) || toInt(bonus.total))) {
-      modifiers.push({
+    if (!bonus || !(toInt(bonus.roll) || toInt(bonus.keep) || toInt(bonus.total))) {
+      return [];
+    }
+    return [
+      {
         label: `${T("l5r4.ui.check.effects")} (${name})`,
         roll: toInt(bonus.roll),
         keep: toInt(bonus.keep),
         total: toInt(bonus.total),
         enabled: true
-      });
-    }
-  }
+      }
+    ];
+  });
+}
 
+/**
+ * The check's TN changes: its TNModifier rules, the target's range-limited Armor TN changes on an attack, the armor
+ * penalty, and an attack weapon's own TN change.
+ * @param {Actor} actor
+ * @param {object} spec - getCheckContext's spec
+ * @param {function(string): object[]} entriesOf - The actor's bag entries of a kind for this check
+ * @returns {Array<{label: string, value: number, type?: string, range?: string, fromTarget?: boolean}>}
+ */
+function getCheckTnModifiers(actor, spec, entriesOf) {
+  const { kind, skill, trait, target, weapon } = spec;
   const tnModifiers = entriesOf("tnModifiers").map(entry => ({
     label: entry.label,
     value: entry.value,
     ...(entry.type ? { type: entry.type } : {})
   }));
-  // The target's Armor TN changes that count only against one attack range (Prone against melee)
-  // game-rules/41_conditional_effects.md, p.89
   if (kind === "attack" && target) {
-    for (const [range, value] of Object.entries(target.system.armorTn?.vs ?? {})) {
-      if (value) {
-        tnModifiers.push({
-          label: `${target.name} (${T(`l5r4.ui.check.range.${range}`)})`,
-          value,
-          range,
-          fromTarget: true
-        });
-      }
-    }
+    tnModifiers.push(...getTargetRangeTnModifiers(target));
   }
   if (kind !== "damage") {
     const armor = getArmorTnPenalty(actor, skill ?? null, trait ?? null);
@@ -212,76 +299,91 @@ export function getCheckContext(actor, { kind, skill, trait, ring, target = null
     }
   }
   if (kind === "attack" && weapon) {
-    // A weapon's own TN change mounted or on foot, as the dai-kyu's and the han-kyu's
-    // game-rules/74_weapons.md, p.199
-    const mounted = actor.statuses.has("mounted");
-    const value = mounted ? weapon.system.tnMounted : weapon.system.tnOnFoot;
-    if (value) {
-      tnModifiers.push({
-        label: `${weapon.name} (${T(`l5r4.equipment.weapons.${mounted ? "tnMounted" : "tnOnFoot"}`)})`,
-        value
-      });
-    }
-    // A bow shot at a target in melee range is -10; the roller judges the range, so it starts unticked
-    // game-rules/74_weapons.md, p.199
-    if (weapon.system.isBow) {
-      modifiers.push({
-        label: T("l5r4.equipment.weapons.meleeRange"),
-        roll: 0,
-        keep: 0,
-        total: BOW_IN_MELEE_PENALTY,
-        enabled: false,
-        range: "ranged",
-        consumes: null
-      });
-    }
+    tnModifiers.push(...getWeaponTnModifiers(actor, weapon));
   }
+  return tnModifiers;
+}
 
-  const freeRaises =
-    kind === "damage" ? 0 : entriesOf("freeRaises").reduce((sum, entry) => sum + entry.value, 0);
+/**
+ * The target's Armor TN changes that count only against one attack range (Prone against melee).
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {Actor} target
+ * @returns {Array<{label: string, value: number, range: string, fromTarget: boolean}>}
+ */
+function getTargetRangeTnModifiers(target) {
+  return Object.entries(target.system.armorTn?.vs ?? {})
+    .filter(([, value]) => value)
+    .map(([range, value]) => ({
+      label: `${target.name} (${T(`l5r4.ui.check.range.${range}`)})`,
+      value,
+      range,
+      fromTarget: true
+    }));
+}
 
+/**
+ * A weapon's own TN change mounted or on foot, as the dai-kyu's and the han-kyu's.
+ * game-rules/74_weapons.md, p.199
+ * @param {Actor} actor
+ * @param {Item} weapon
+ * @returns {Array<{label: string, value: number}>}
+ */
+function getWeaponTnModifiers(actor, weapon) {
+  const mounted = actor.statuses.has("mounted");
+  const value = mounted ? weapon.system.tnMounted : weapon.system.tnOnFoot;
+  if (!value) {
+    return [];
+  }
+  const where = T(`l5r4.equipment.weapons.${mounted ? "tnMounted" : "tnOnFoot"}`);
+  return [{ label: `${weapon.name} (${where})`, value }];
+}
+
+/**
+ * The check's DiceRule terms: the lowest explode threshold, or null for none, and whether 1s are re-rolled.
+ * @param {function(string): object[]} entriesOf - The actor's bag entries of a kind for this check
+ * @returns {{explode: number|null, rerollOnes: boolean}}
+ */
+function getDiceRuleTerms(entriesOf) {
   const diceRules = entriesOf("diceRules");
   const thresholds = diceRules.map(rule => rule.explode).filter(value => value !== null);
+  return {
+    explode: thresholds.length ? Math.min(...thresholds) : null,
+    rerollOnes: diceRules.some(rule => rule.rerollOnes)
+  };
+}
 
+/**
+ * The check's DamageSource terms: its damage-source tags and the Reduction the damage ignores.
+ * @param {function(string): object[]} entriesOf - The actor's bag entries of a kind for this check
+ * @returns {{damageSources: string[], ignoreReduction: number}}
+ */
+function getDamageSourceTerms(entriesOf) {
+  const sources = entriesOf("damageSources");
+  return {
+    damageSources: [...new Set(sources.flatMap(entry => entry.tags))],
+    ignoreReduction: sources.reduce((sum, entry) => sum + entry.ignoreReduction, 0)
+  };
+}
+
+/**
+ * The check's RaiseRule and UnskilledAs terms: the change to the Raise cap, the Raises that must be declared, the
+ * change to each maneuver's cost, and the ranks an Unskilled roll counts as, 0 for none.
+ * @param {function(string): object[]} entriesOf - The actor's bag entries of a kind for this check
+ * @returns {{raises: {cap: number, minimum: number, maneuverCosts: Record<string, number>}, unskilledAs: number}}
+ */
+function getRaiseRuleTerms(entriesOf) {
   const raiseRules = entriesOf("raiseRules");
   const maneuverCosts = {};
   for (const rule of raiseRules.filter(r => r.maneuver)) {
     maneuverCosts[rule.maneuver] = (maneuverCosts[rule.maneuver] ?? 0) + rule.cost;
   }
   const unskilledAs = entriesOf("unskilledAs").map(entry => entry.rank);
-
   return {
-    modifiers,
-    tnModifiers,
-    freeRaises,
-    explode: thresholds.length ? Math.min(...thresholds) : null,
-    rerollOnes: diceRules.some(rule => rule.rerollOnes),
-    substitutes: entriesOf("substitutes").map(entry => ({
-      label: entry.label,
-      replace: entry.replace,
-      with: entry.with
-    })),
-    notes: entriesOf("notes").map(entry => entry.text),
-    applyConditions: entriesOf("applyConditions").map(entry => ({
-      label: entry.label,
-      condition: entry.condition,
-      level: entry.level
-    })),
-    damageSources: [...new Set(entriesOf("damageSources").flatMap(entry => entry.tags))],
-    ignoreReduction: entriesOf("damageSources").reduce(
-      (sum, entry) => sum + entry.ignoreReduction,
-      0
-    ),
     raises: {
       cap: raiseRules.reduce((sum, rule) => sum + rule.cap, 0),
       minimum: Math.max(0, ...raiseRules.map(rule => rule.minimum)),
       maneuverCosts
     },
-    unskilledAs: unskilledAs.length ? Math.max(...unskilledAs) : 0,
-    actions: entriesOf("actionCosts").map(entry => ({
-      label: entry.label,
-      action: entry.action,
-      ...(entry.range ? { range: entry.range } : {})
-    }))
+    unskilledAs: unskilledAs.length ? Math.max(...unskilledAs) : 0
   };
 }

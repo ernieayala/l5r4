@@ -15,7 +15,6 @@
  * @see module/services/stance/
  */
 
-import { getStatusRules } from "../../../module/utils/status-data.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
@@ -408,7 +407,6 @@ export function registerStanceTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
-              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -459,7 +457,6 @@ export function registerStanceTests(quench) {
               {
                 name: `${stance.name} Stance`,
                 img: "icons/svg/combat.svg",
-                system: { rules: getStatusRules(stance.id) },
                 statuses: [stance.id]
               }
             ]);

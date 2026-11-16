@@ -32,6 +32,22 @@ import {
 } from "./migrations/icons/icon-paths.js";
 
 /**
+ * The item steps world items and every pack run, in order: each step with its log label for world documents and the
+ * stem of its label for a pack, which adds `:<pack collection>`.
+ * @type {ReadonlyArray<[function(Document[], string): Promise<void>, string, string]>}
+ */
+const ITEM_STEPS = Object.freeze([
+  [migrateBowsToWeapons, "world-bow-migration", "pack-bow-migration"],
+  [migrateSkillDefaults, "world-skill-defaults", "pack-skill-defaults"],
+  [migrateEmphasisStringToArray, "world-emphasis-migration", "pack-emphasis-migration"],
+  [migrateArmorTypes, "world-armor-types", "pack-armor-types"],
+  [migrateFreeRaisesDefaults, "world-free-raises", "pack-free-raises"],
+  [migrateEmbeddedItemIcons, "world-icon-migration", "pack-icon-migration"],
+  [migrateWeaponSizes, "world-items-norm", "pack-norm"],
+  [migrateItemRules, "world-item-rules", "pack-item-rules"]
+]);
+
+/**
  * Main migration orchestration function for system version updates.
  *
  * Executes all migration steps in sequence when system version changes. Processes world
@@ -78,6 +94,31 @@ export async function migrateWorld(fromVersion, toVersion) {
     return;
   }
 
+  await migrateWorldDocuments(toVersion);
+
+  for (const pack of game.packs) {
+    await migratePack(pack, toVersion);
+  }
+
+  try {
+    await migrateIconPaths();
+    await migrateCompendiumIconPaths();
+  } catch (err) {
+    console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
+  }
+}
+
+// Re-export icon migration for external use
+export { migrateIconPaths } from "./migrations/icons/icon-paths.js";
+
+/**
+ * Migrate the world's actors and items not yet marked with this version, then mark them: their schema, NPC wounds
+ * and Initiative, the item steps, legacy fields, the actors' embedded items and status effects, unlinked tokens,
+ * and the free Trait rank flags.
+ * @param {string} toVersion - The system version to mark documents with
+ * @returns {Promise<void>}
+ */
+async function migrateWorldDocuments(toVersion) {
   // Filter out already-migrated documents to ensure true idempotency
   const unmigratedActors = game.actors.contents.filter(doc => !hasBeenMigrated(doc, toVersion));
   const unmigratedItems = game.items.contents.filter(doc => !hasBeenMigrated(doc, toVersion));
@@ -88,21 +129,7 @@ export async function migrateWorld(fromVersion, toVersion) {
   await migrateLegacyNpcWounds(unmigratedActors, "world-legacy-npc-wounds");
   await migrateNpcInitiative(unmigratedActors, "world-npc-initiative");
 
-  await migrateBowsToWeapons(unmigratedItems, "world-bow-migration");
-
-  await migrateSkillDefaults(unmigratedItems, "world-skill-defaults");
-
-  await migrateEmphasisStringToArray(unmigratedItems, "world-emphasis-migration");
-
-  await migrateArmorTypes(unmigratedItems, "world-armor-types");
-
-  await migrateFreeRaisesDefaults(unmigratedItems, "world-free-raises");
-
-  await migrateEmbeddedItemIcons(unmigratedItems, "world-icon-migration");
-
-  await migrateWeaponSizes(unmigratedItems, "world-items-norm");
-
-  await migrateItemRules(unmigratedItems, "world-item-rules");
+  await migrateItemSteps(unmigratedItems, null);
 
   await deleteLegacyFields(unmigratedActors, "world-actors-cleanup");
 
@@ -125,74 +152,83 @@ export async function migrateWorld(fromVersion, toVersion) {
   for (const doc of [...unmigratedActors, ...unmigratedItems]) {
     await updateMigratedVersion(doc, toVersion);
   }
+}
 
-  for (const pack of game.packs) {
-    const docType = pack.metadata?.type ?? pack.documentName;
-    if (docType !== "Actor" && docType !== "Item") {
-      continue;
-    }
+/**
+ * Migrate one compendium's documents not yet marked with this version, then mark them. Only Actor and Item packs are
+ * migrated, and a locked pack is skipped; a failure is logged, and the next pack still runs.
+ * @param {CompendiumCollection} pack
+ * @param {string} toVersion - The system version to mark documents with
+ * @returns {Promise<void>}
+ */
+async function migratePack(pack, toVersion) {
+  const docType = pack.metadata?.type ?? pack.documentName;
+  if (docType !== "Actor" && docType !== "Item") {
+    return;
+  }
 
-    const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
-    if (isLocked) {
-      console.warn(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
-      continue;
-    }
-
-    try {
-      const docs = await pack.getDocuments();
-
-      // Filter out already-migrated compendium documents
-      const unmigratedDocs = docs.filter(doc => !hasBeenMigrated(doc, toVersion));
-
-      if (unmigratedDocs.length === 0) {
-        continue; // All documents in this pack already migrated
-      }
-
-      await applySchemaMapToDocs(unmigratedDocs, `pack:${pack.collection}`);
-
-      if (docType === "Actor") {
-        await migrateLegacyNpcWounds(unmigratedDocs, `pack-legacy-npc-wounds:${pack.collection}`);
-        await migrateNpcInitiative(unmigratedDocs, `pack-npc-initiative:${pack.collection}`);
-      }
-      await migrateBowsToWeapons(unmigratedDocs, `pack-bow-migration:${pack.collection}`);
-      await migrateSkillDefaults(unmigratedDocs, `pack-skill-defaults:${pack.collection}`);
-      await migrateEmphasisStringToArray(
-        unmigratedDocs,
-        `pack-emphasis-migration:${pack.collection}`
-      );
-      await migrateArmorTypes(unmigratedDocs, `pack-armor-types:${pack.collection}`);
-      await migrateFreeRaisesDefaults(unmigratedDocs, `pack-free-raises:${pack.collection}`);
-      await migrateEmbeddedItemIcons(unmigratedDocs, `pack-icon-migration:${pack.collection}`);
-      await migrateWeaponSizes(unmigratedDocs, `pack-norm:${pack.collection}`);
-      await migrateItemRules(unmigratedDocs, `pack-item-rules:${pack.collection}`);
-
-      if (docType === "Actor") {
-        for (const actor of unmigratedDocs) {
-          await migrateActorEmbeddedItems(actor, `compendium-actor:${pack.collection}`);
-        }
-        await migrateStatusEffectRules(
-          unmigratedDocs,
-          `pack-status-effect-rules:${pack.collection}`
-        );
-        await migrateEffectFreeTraitBase(unmigratedDocs, `pack-free-trait-base:${pack.collection}`);
-      }
-
-      // Mark compendium documents as migrated
-      for (const doc of unmigratedDocs) {
-        await updateMigratedVersion(doc, toVersion);
-      }
-    } catch (e) {
-      console.warn(`${SYS_ID}`, "Schema remap pack failed", { pack: pack.collection, error: e });
-    }
+  const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
+  if (isLocked) {
+    console.warn(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
+    return;
   }
 
   try {
-    await migrateIconPaths();
-    await migrateCompendiumIconPaths();
-  } catch (err) {
-    console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
+    const docs = await pack.getDocuments();
+
+    // Filter out already-migrated compendium documents
+    const unmigratedDocs = docs.filter(doc => !hasBeenMigrated(doc, toVersion));
+
+    if (unmigratedDocs.length === 0) {
+      return; // All documents in this pack already migrated
+    }
+
+    await migratePackDocuments(unmigratedDocs, pack, docType);
+
+    // Mark compendium documents as migrated
+    for (const doc of unmigratedDocs) {
+      await updateMigratedVersion(doc, toVersion);
+    }
+  } catch (e) {
+    console.warn(`${SYS_ID}`, "Schema remap pack failed", { pack: pack.collection, error: e });
   }
 }
 
-// Re-export icon migration for external use
-export { migrateIconPaths } from "./migrations/icons/icon-paths.js";
+/**
+ * Run the migration steps over a pack's documents: the schema, an Actor pack's NPC wounds and Initiative, the item
+ * steps, and an Actor pack's embedded items, status effects, and free Trait rank flags.
+ * @param {Document[]} docs - The pack's documents not yet migrated
+ * @param {CompendiumCollection} pack
+ * @param {string} docType - "Actor" or "Item"
+ * @returns {Promise<void>}
+ */
+async function migratePackDocuments(docs, pack, docType) {
+  const { collection } = pack;
+  await applySchemaMapToDocs(docs, `pack:${collection}`);
+
+  if (docType === "Actor") {
+    await migrateLegacyNpcWounds(docs, `pack-legacy-npc-wounds:${collection}`);
+    await migrateNpcInitiative(docs, `pack-npc-initiative:${collection}`);
+  }
+  await migrateItemSteps(docs, pack);
+
+  if (docType === "Actor") {
+    for (const actor of docs) {
+      await migrateActorEmbeddedItems(actor, `compendium-actor:${collection}`);
+    }
+    await migrateStatusEffectRules(docs, `pack-status-effect-rules:${collection}`);
+    await migrateEffectFreeTraitBase(docs, `pack-free-trait-base:${collection}`);
+  }
+}
+
+/**
+ * Run each item step (ITEM_STEPS) over documents in order, labelled for the world or for a pack.
+ * @param {Document[]} docs
+ * @param {CompendiumCollection|null} pack - The pack the documents come from; null for world documents
+ * @returns {Promise<void>}
+ */
+async function migrateItemSteps(docs, pack) {
+  for (const [step, worldLabel, packLabel] of ITEM_STEPS) {
+    await step(docs, pack ? `${packLabel}:${pack.collection}` : worldLabel);
+  }
+}

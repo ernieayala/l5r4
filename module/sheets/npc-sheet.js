@@ -20,9 +20,7 @@ import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { NpcActionsHandler } from "./handlers/npc-actions-handler.js";
-import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
-import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
-import { PcRollHandler } from "./handlers/pc-roll-handler.js";
+import { RestHandler } from "./handlers/rest-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 
@@ -105,41 +103,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const base = await super._prepareContext(options);
     const actorObj = this.actor;
 
-    const all = this.actor.items.contents;
-    const getItemsOfType = t => all.filter(i => i.type === t);
-
     const currentStance = getActiveStance(actorObj.statuses);
-
-    // Prepare sortable skills list with user preference
-    const skills = (() => {
-      // Define column extractors for sorting
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        rank: it => Number(it?.system?.rank ?? 0) || 0,
-        trait: it => {
-          // Localize trait key if it matches known pattern
-          const raw = String(it?.system?.trait ?? "").toLowerCase();
-          const key =
-            raw && /^l5r4\.mechanics\.traits\./.test(raw)
-              ? raw
-              : raw
-                ? `l5r4.ui.mechanics.traits.${raw}`
-                : "";
-          const loc = key ? game.i18n?.localize?.(key) : "";
-          return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
-        },
-        roll: it => Number(it?.system?.roll ?? it?.system?.rank ?? 0) || 0,
-        emphasis: it => {
-          const trained = Array.isArray(it?.system?.trainedEmphases)
-            ? it.system.trainedEmphases
-            : [];
-          return trained.join(", ");
-        }
-      };
-      const allowedKeys = this._getAllowedSortKeys("skills");
-      const pref = getSortPref(actorObj.id, "skills", { allowedKeys, defaultKey: "name" });
-      return applySortPref(getItemsOfType("skill"), cols, { pref, locale: game.i18n?.lang });
-    })();
 
     const collapsedSections = getSectionCollapsedMap(actorObj.id, [
       "skills",
@@ -149,27 +113,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       "items"
     ]);
 
-    // The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30).
-    // `attack.type` stores the action key the attack config's select writes; a value from older data that is no
-    // key shows as stored.
-    const attacks = ["1", "2", "3"].map(num => {
-      const attack = actorObj.system[`attack${num}`];
-      const damage = actorObj.system[`damage${num}`];
-      const empty = !attack.name && !attack.roll && !attack.keep && !damage.roll && !damage.keep;
-      const actionLabel = attack.type in ACTION_TYPES ? T(ACTION_TYPES[attack.type]) : attack.type;
-      return {
-        num,
-        key: `attack${num}`,
-        attack,
-        damage,
-        empty,
-        actionLabel,
-        attackPool: formatAttackPool(attack),
-        damagePool: formatAttackPool(damage),
-        attackLabel: attack.name || `${T("l5r4.ui.mechanics.combat.attack")} ${num}`,
-        damageLabel: `${T("l5r4.ui.common.damage")} ${num}`
-      };
-    });
+    const attacks = buildAttackSlots(actorObj.system);
 
     const context = {
       ...base,
@@ -187,12 +131,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 
-      skills,
-      weapons: getItemsOfType("weapon"),
-      bows: getItemsOfType("bow"),
-      armors: getItemsOfType("armor"),
-      spells: getItemsOfType("spell"),
-      items: all.filter(i => i.type === "item" || i.type === "commonItem")
+      ...this.#getItemLists()
     };
 
     prepareItemSheetOptions(context);
@@ -231,7 +170,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   _onAction(action, event, element) {
     switch (action) {
       case "apply-healing":
-        return PcActionsHandler.applyHealing(this._getHandlerContext(), event, element);
+        return RestHandler.applyHealing(this._getHandlerContext(), event, element);
       case "update-item-field":
         return this._onInlineItemEdit(event, element);
       case "create-item":
@@ -249,17 +188,17 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "sort-items":
         return this._onUnifiedSortClick(event, element);
       case "adjust-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
+        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
       case "increase-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(
+        return TraitHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
       case "decrease-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(
+        return TraitHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
@@ -278,7 +217,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
-        return PcRollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
+        return RollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
       case "test-fear":
         return NpcActionsHandler.testFear(this._getHandlerContext(), event, element);
       case "adjust-trait":
@@ -326,7 +265,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "adjust-trait":
         return this._onTraitAdjust(event, element, -1);
       case "adjust-void-ring":
-        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
+        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
       default:
@@ -458,6 +397,88 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
     return submit;
   }
+
+  /**
+   * The NPC's item lists by section: its Skills in the user's sort order, weapons, bows, armor, spells, and other
+   * items ("item" and "commonItem").
+   * @returns {{skills: Item[], weapons: Item[], bows: Item[], armors: Item[], spells: Item[], items: Item[]}}
+   */
+  #getItemLists() {
+    const all = this.actor.items.contents;
+    const getItemsOfType = t => all.filter(i => i.type === t);
+    const allowedKeys = this._getAllowedSortKeys("skills");
+    return {
+      skills: getSortedSkills(this.actor.id, getItemsOfType("skill"), allowedKeys),
+      weapons: getItemsOfType("weapon"),
+      bows: getItemsOfType("bow"),
+      armors: getItemsOfType("armor"),
+      spells: getItemsOfType("spell"),
+      items: all.filter(i => i.type === "item" || i.type === "commonItem")
+    };
+  }
+}
+
+/**
+ * The NPC's Skills in the user's sort order for the actor (name, rank, Trait, roll, or Emphasis), by name when none
+ * is stored.
+ * @param {string} actorId
+ * @param {Item[]} skills - The NPC's skill items
+ * @param {string[]} allowedKeys - The sort keys the Skills header offers
+ * @returns {Item[]}
+ */
+function getSortedSkills(actorId, skills, allowedKeys) {
+  // Define column extractors for sorting
+  const cols = {
+    name: it => String(it?.name ?? ""),
+    rank: it => Number(it?.system?.rank ?? 0) || 0,
+    trait: it => {
+      // Localize trait key if it matches known pattern
+      const raw = String(it?.system?.trait ?? "").toLowerCase();
+      const key =
+        raw && /^l5r4\.mechanics\.traits\./.test(raw)
+          ? raw
+          : raw
+            ? `l5r4.ui.mechanics.traits.${raw}`
+            : "";
+      const loc = key ? game.i18n?.localize?.(key) : "";
+      return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
+    },
+    roll: it => Number(it?.system?.roll ?? it?.system?.rank ?? 0) || 0,
+    emphasis: it => {
+      const trained = Array.isArray(it?.system?.trainedEmphases) ? it.system.trainedEmphases : [];
+      return trained.join(", ");
+    }
+  };
+  const pref = getSortPref(actorId, "skills", { allowedKeys, defaultKey: "name" });
+  return applySortPref(skills, cols, { pref, locale: game.i18n?.lang });
+}
+
+/**
+ * The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30).
+ * `attack.type` stores the action key the attack config's select writes; a value from older data that is no key
+ * shows as stored.
+ * @param {object} system - The NPC's system data
+ * @returns {object[]}
+ */
+function buildAttackSlots(system) {
+  return ["1", "2", "3"].map(num => {
+    const attack = system[`attack${num}`];
+    const damage = system[`damage${num}`];
+    const empty = !attack.name && !attack.roll && !attack.keep && !damage.roll && !damage.keep;
+    const actionLabel = attack.type in ACTION_TYPES ? T(ACTION_TYPES[attack.type]) : attack.type;
+    return {
+      num,
+      key: `attack${num}`,
+      attack,
+      damage,
+      empty,
+      actionLabel,
+      attackPool: formatAttackPool(attack),
+      damagePool: formatAttackPool(damage),
+      attackLabel: attack.name || `${T("l5r4.ui.mechanics.combat.attack")} ${num}`,
+      damageLabel: `${T("l5r4.ui.common.damage")} ${num}`
+    };
+  });
 }
 
 /**

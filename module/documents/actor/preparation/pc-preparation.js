@@ -23,7 +23,7 @@ import {
   prepareMovement,
   ringsOf
 } from "../calculations/shared-traits-rings-system.js";
-import { prepareHealRate } from "../calculations/wound-system.js";
+import { getWoundThreshold, prepareHealRate } from "../calculations/wound-system.js";
 import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
 import { getInsightRank, preparePcExperience } from "../calculations/xp-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
@@ -41,18 +41,7 @@ import { applyArmorRules, applyDerivedRules } from "../rules.js";
  * @returns {void} Mutates sys object in place
  */
 export function preparePcData(actor, sys) {
-  // Extract school name from equipped school item
-  // Defensive: Handle both v10 (items.contents) and v11 (items) API
-  try {
-    const schoolItem = (actor.items?.contents ?? actor.items).find(i => i.type === "school");
-    sys.school = schoolItem?.name ?? "";
-  } catch (err) {
-    logError("Failed to derive school name in preparePcData", err, {
-      actorId: actor?.id,
-      actorName: actor?.name
-    });
-    sys.school = sys.school ?? "";
-  }
+  prepareSchoolName(actor, sys);
 
   // Calculate base traits and rings first (required for all subsequent calculations)
   prepareTraitsAndRings(sys);
@@ -65,26 +54,80 @@ export function preparePcData(actor, sys) {
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
 
-  // Helper to access effective trait values (after all modifiers)
-  const tEff = sys._derived?.traitsEff || {};
-  const effectiveTraitOf = k => toInt(tEff[k]);
+  preparePcArmorTn(actor, sys);
 
-  // Calculate PC armor TN from base formula + equipped armor
-  // Base TN = Reflexes × 5 + 5 (L5R4 core rules)
+  // Calculate movement rates (depends on traits)
+  prepareMovement(sys);
+
+  preparePcWoundLevels(actor, sys);
+
+  // Apply wound penalties to traits/rings
+  actor._finalizeWoundPenalties(sys, WOUND_LEVEL_ORDER);
+
+  preparePcInitiative(sys);
+
+  prepareHealRate(sys, toInt(sys.insight.rank));
+
+  // Enrich embedded items with calculated data
+  prepareItemFormulas(actor);
+
+  preparePcExperience(actor, sys);
+}
+
+/**
+ * Set `sys.school` to the name of the actor's School item, or empty without one.
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data
+ */
+function prepareSchoolName(actor, sys) {
+  // Defensive: Handle both v10 (items.contents) and v11 (items) API
+  try {
+    const schoolItem = (actor.items?.contents ?? actor.items).find(i => i.type === "school");
+    sys.school = schoolItem?.name ?? "";
+  } catch (err) {
+    logError("Failed to derive school name in preparePcData", err, {
+      actorId: actor?.id,
+      actorName: actor?.name
+    });
+    sys.school = sys.school ?? "";
+  }
+}
+
+/**
+ * Prepare the PC's Armor TN from its base, Reflexes × 5 + 5, the equipped armor's bonus and Reduction, and the
+ * ArmorTN rules on its effects (stances, conditions, Void Points). The highest armor counts unless the actor allows
+ * armor stacking (a house rule).
+ * game-rules/32_attack_and_defense.md, p.82
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data, after the effective Traits are known
+ */
+function preparePcArmorTn(actor, sys) {
   sys.armorTn = sys.armorTn || {};
-  const ref = effectiveTraitOf("ref");
-  const baseTn = 5 * ref + 5;
+  const baseTn = 5 * effectiveTraitOf(sys, "ref") + 5;
   const modTn = toInt(sys.armorTn.mod);
+  const { bonusTn, reduction } = getEquippedArmor(actor);
 
+  sys.armorTn.base = baseTn;
+  sys.armorTn.bonus = bonusTn;
+
+  const reductionMod = toInt(sys.armorTn.reductionMod);
+  sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
+
+  // Stances, conditions, and Void Points change the Armor TN through ArmorTN rules on their effects
+  applyArmorRules(actor, sys, { base: baseTn, armor: bonusTn, other: modTn });
+}
+
+/**
+ * The equipped armor's Armor TN bonus and Reduction: the highest of each by default (RAW), or every piece added
+ * together when the actor allows armor stacking (a house rule).
+ * @param {Actor} actor
+ * @returns {{bonusTn: number, reduction: number}}
+ */
+function getEquippedArmor(actor) {
   // Check if armor stacking is allowed (optional house rule)
   const allowStack = actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
-
   let bonusTn = 0;
   let reduction = 0;
-
-  // Aggregate bonuses from all equipped armor items
-  // Default behavior: Use highest bonus (RAW)
-  // Optional behavior: Stack all bonuses (house rule)
   const mounted = actor.statuses.has("mounted");
   for (const it of actor.items) {
     if (!it || typeof it.type !== "string" || it.type !== "armor") {
@@ -107,24 +150,17 @@ export function preparePcData(actor, sys) {
       reduction = Math.max(reduction, r);
     }
   }
+  return { bonusTn, reduction };
+}
 
-  sys.armorTn.base = baseTn;
-  sys.armorTn.bonus = bonusTn;
-
-  const reductionMod = toInt(sys.armorTn.reductionMod);
-  sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
-
-  // Stances, conditions, and Void Points change the Armor TN through ArmorTN rules on their effects
-  applyArmorRules(actor, sys, { base: baseTn, armor: bonusTn, other: modTn });
-
-  // Calculate movement rates (depends on traits)
-  prepareMovement(sys);
-
-  // Calculate PC wound thresholds using Earth Ring formulas (L5R4 core rules)
-  // Healthy: Earth × 5 + modifier
-  // Other levels: Earth × multiplier + previous threshold + modifier
-  // Cumulative thresholds (each level adds to previous)
-  const order = WOUND_LEVEL_ORDER;
+/**
+ * Prepare the PC's Wound Ranks: each threshold from the Earth Ring, each rank's on top of the one before it, and
+ * each rank's base penalty; the default thresholds when that fails.
+ * game-rules/33_wounds.md, p.82
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data, after the Rings are known
+ */
+function preparePcWoundLevels(actor, sys) {
   try {
     const earth = toInt(sys.rings.earth) || 1;
     const mult = toInt(sys.woundsMultiplier) || 2;
@@ -132,14 +168,10 @@ export function preparePcData(actor, sys) {
 
     sys.woundLevels = sys.woundLevels || {};
     let prev = 0;
-    for (const key of order) {
+    for (const key of WOUND_LEVEL_ORDER) {
       const lvl =
         sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
-      if (key === "healthy") {
-        lvl.value = 5 * earth + add;
-      } else {
-        lvl.value = earth * mult + prev + add;
-      }
+      lvl.value = getWoundThreshold(key, { earth, mult, add, prev });
       // Each wound level starts from its base penalty (issue #32), so prepareWoundPenalties gives every row its
       // own penalty plus the modifier, and Healthy stays 0 whatever the modifier.
       lvl.penalty = DEFAULT_WOUND_PENALTIES[key] ?? 0;
@@ -160,29 +192,34 @@ export function preparePcData(actor, sys) {
       };
     }
   }
+}
 
-  // Apply wound penalties to traits/rings
-  actor._finalizeWoundPenalties(sys, order);
-
-  // Initiative pool: Insight Rank + Reflexes, keep Reflexes. Calculated once the Insight Rank above is final.
-  // game-rules/31_combat_round.md, p.81
+/**
+ * Initiative pool: Insight Rank + Reflexes, keep Reflexes. Calculated once the Insight Rank is final.
+ * game-rules/31_combat_round.md, p.81
+ * @param {object} sys - Prepared system data
+ */
+function preparePcInitiative(sys) {
   sys.initiative = sys.initiative || {};
   Object.assign(
     sys.initiative,
     getInitiativePool({
       insightRank: toInt(sys.insight.rank),
-      reflexes: effectiveTraitOf("ref"),
+      reflexes: effectiveTraitOf(sys, "ref"),
       rollMod: toInt(sys.initiative.rollMod),
       keepMod: toInt(sys.initiative.keepMod)
     })
   );
+}
 
-  prepareHealRate(sys, toInt(sys.insight.rank));
-
-  // Enrich embedded items with calculated data
-  prepareItemFormulas(actor);
-
-  preparePcExperience(actor, sys);
+/**
+ * An effective Trait, after all modifiers.
+ * @param {object} sys - Prepared system data, after the effective Traits are known
+ * @param {string} key - Trait key
+ * @returns {number}
+ */
+function effectiveTraitOf(sys, key) {
+  return toInt((sys._derived?.traitsEff || {})[key]);
 }
 
 /**

@@ -1,7 +1,7 @@
 /**
  * @module documents/actor/calculations/wound-system
- * @description Prepares the Wound state every actor shares during actor data preparation, once its Wound Ranks'
- * thresholds are set: each rank's effective penalty, the current rank from the Wounds suffered, the Wounds left, and
+ * @description Prepares the Wound state every actor shares during actor data preparation: each Wound Rank's
+ * threshold from the Earth Ring, and once the thresholds are set, each rank's effective penalty, the current rank from the Wounds suffered, the Wounds left, and
  * the healing rate. An NPC's thresholds come from npc-wound-system.js. Modifies `sys.woundLevels` and `sys.wounds` in
  * place.
  */
@@ -100,4 +100,22 @@ export function prepareHealRate(sys, insightRank) {
  */
 export function getEffectiveWoundPenalty(key, penalty, mod) {
   return key === "healthy" ? 0 : Math.max(0, toInt(penalty) + mod);
+}
+
+/**
+ * One Wound Rank's threshold, the Wounds suffered that fill it: Healthy holds Earth × 5 whatever the campaign's
+ * multiplier, each later rank Earth × the multiplier more than the one before it, each plus the flat Wounds
+ * modifier. PC and NPC preparation both read their thresholds here.
+ * game-rules/33_wounds.md, p.82
+ * game-rules/34_ambush_falling_drowning.md, p.84
+ * @param {string} key - Wound level key
+ * @param {object} terms
+ * @param {number} terms.earth - Earth Ring value
+ * @param {number} terms.mult - The campaign's Earth multiplier for the ranks after Healthy
+ * @param {number} terms.add - Flat Wounds modifier added to each rank
+ * @param {number} terms.prev - The previous rank's threshold (0 for Healthy)
+ * @returns {number}
+ */
+export function getWoundThreshold(key, { earth, mult, add, prev }) {
+  return key === "healthy" ? 5 * earth + add : earth * mult + prev + add;
 }

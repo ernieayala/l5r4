@@ -1,10 +1,10 @@
 /**
  * @module setup/preload-templates
- * @description Loads every Handlebars template and partial the system renders into core's template cache with
- * `foundry.applications.handlebars.loadTemplates`, during `init` after the document classes and sheets register, so
- * no template loads mid-game.
+ * @description Loads every Handlebars template and partial the system renders (PRELOAD_TEMPLATES,
+ * module/config/templates.js) into core's template cache with `foundry.applications.handlebars.loadTemplates`,
+ * during `init` after the document classes and sheets register, so no template loads mid-game.
  */
-import { SYS_ID } from "../config/constants.js";
+import { PRELOAD_TEMPLATES } from "../config/templates.js";
 
 /**
  * Preloads all Handlebars templates for the L5R4 Enhanced system.
@@ -25,162 +25,7 @@ import { SYS_ID } from "../config/constants.js";
  * @throws {Error} If template loading fails (invalid paths, missing files)
  */
 export async function registerTemplates() {
-  const templatePaths = [
-    // Item Sheet - Main Tab Partials
-    `systems/${SYS_ID}/templates/item/_partials/_header.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tabs.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tab-details.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tab-modifiers.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tab-description.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_advantage-details.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_mastery-details.hbs`,
-
-    // Rules editor, on item and Active Effect sheets
-    `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`,
-    `systems/${SYS_ID}/templates/rules/effect-tab.hbs`,
-
-    // Item Sheet - Type-Specific Details Templates
-    `systems/${SYS_ID}/templates/item/_type-details/advantage.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/armor.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/bow.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/clan.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/commonItem.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/disadvantage.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/family.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/kata.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/kiho.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/school.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/skill.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/spell.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/tattoo.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/technique.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-details/weapon.hbs`,
-
-    // Item Sheet - Type-Specific Modifiers Templates
-    `systems/${SYS_ID}/templates/item/_type-modifiers/advantage.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/armor.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/bow.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/clan.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/commonItem.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/disadvantage.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/family.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/kata.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/kiho.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/school.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/skill.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/spell.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/tattoo.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/technique.hbs`,
-    `systems/${SYS_ID}/templates/item/_type-modifiers/weapon.hbs`,
-
-    // Actor Sheet Templates
-    `systems/${SYS_ID}/templates/actor/pc.hbs`,
-    `systems/${SYS_ID}/templates/actor/npc.hbs`,
-
-    // Actor Sheet Templates - Limited Views
-    `systems/${SYS_ID}/templates/actor/pc-limited.hbs`,
-    `systems/${SYS_ID}/templates/actor/npc-limited.hbs`,
-
-    // Actor Partials - Core Components
-    `systems/${SYS_ID}/templates/actor/_partials/_expand.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_stats.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_stats-npc.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_ranks.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_combat.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_armor.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_wounds.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_fear.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_bio.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_unified-item-create.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_traits-rings.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_ring.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_trait.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_rank-control.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_void-points.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_rank-track.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_spell-slot.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_wound-track.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_note-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_limited.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_sort-header.hbs`,
-
-    // Actor Partials - Item Sections
-    `systems/${SYS_ID}/templates/actor/_partials/_skill-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_weapon-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_armor-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_item-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_spell-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_technique-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_kiho-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_kata-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_tattoo-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_advantage-section.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_disadvantage-section.hbs`,
-
-    // Chat Cards
-    `systems/${SYS_ID}/templates/cards/advantage-disadvantage.hbs`,
-    `systems/${SYS_ID}/templates/cards/armor.hbs`,
-    `systems/${SYS_ID}/templates/cards/clan.hbs`,
-    `systems/${SYS_ID}/templates/cards/family.hbs`,
-    `systems/${SYS_ID}/templates/cards/commonItem.hbs`,
-    `systems/${SYS_ID}/templates/cards/kata.hbs`,
-    `systems/${SYS_ID}/templates/cards/kiho.hbs`,
-    `systems/${SYS_ID}/templates/cards/school.hbs`,
-    `systems/${SYS_ID}/templates/cards/skill.hbs`,
-    `systems/${SYS_ID}/templates/cards/spell.hbs`,
-    `systems/${SYS_ID}/templates/cards/tattoo.hbs`,
-    `systems/${SYS_ID}/templates/cards/technique.hbs`,
-    `systems/${SYS_ID}/templates/cards/weapon.hbs`,
-
-    // Card Partials
-    `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_activate.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_details.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_detail-text.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_text-section.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_bio-row.hbs`,
-    `systems/${SYS_ID}/templates/cards/_partials/_roll-button.hbs`,
-
-    // Chat Message Templates
-    `systems/${SYS_ID}/templates/chat/check.hbs`,
-    `systems/${SYS_ID}/templates/chat/effect-prompt.hbs`,
-    `systems/${SYS_ID}/templates/chat/healing.hbs`,
-    `systems/${SYS_ID}/templates/chat/weapon.hbs`,
-    `systems/${SYS_ID}/templates/chat/check-request.hbs`,
-    `systems/${SYS_ID}/templates/chat/item-summary.hbs`,
-
-    // Text links (module/setup/enrichers.js)
-    `systems/${SYS_ID}/templates/links/inline-link.hbs`,
-
-    // Dialog Templates
-    `systems/${SYS_ID}/templates/dialogs/check-dialog.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/check-extras/maho.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/check-extras/ring.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/check-extras/slot.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/check-extras/spell.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/ledger-dialog.hbs`,
-
-    // Application Templates
-    `systems/${SYS_ID}/templates/apps/armor-config.hbs`,
-    `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
-    `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
-    `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`,
-    `systems/${SYS_ID}/templates/apps/combat-config.hbs`,
-    `systems/${SYS_ID}/templates/apps/effect-panel.hbs`,
-    `systems/${SYS_ID}/templates/apps/compendium-browser.hbs`,
-    `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`,
-    `systems/${SYS_ID}/templates/apps/_partials/_wealth-change.hbs`,
-
-    // Design gallery (module/apps/design-gallery.js): its parts include these partials
-    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_sample.hbs`,
-    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_token-head.hbs`,
-    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_token-row.hbs`
-  ];
+  const templatePaths = [...PRELOAD_TEMPLATES];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {
     const error = new Error(

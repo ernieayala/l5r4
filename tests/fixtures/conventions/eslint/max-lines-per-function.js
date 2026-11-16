@@ -1,0 +1,31 @@
+export function buildLongSummary(actor) {
+  const name = actor.name;
+  const air = actor.system.rings.air;
+  const earth = actor.system.rings.earth;
+  const fire = actor.system.rings.fire;
+  const water = actor.system.rings.water;
+  const voidRank = actor.system.rings.void.rank;
+  const sta = actor.system.traits.sta;
+  const wil = actor.system.traits.wil;
+  const str = actor.system.traits.str;
+  const per = actor.system.traits.per;
+  const ref = actor.system.traits.ref;
+  const awa = actor.system.traits.awa;
+  const agi = actor.system.traits.agi;
+  const int = actor.system.traits.int;
+  const honor = actor.system.honor.rank;
+  const glory = actor.system.glory.rank;
+  const status = actor.system.status.rank;
+  const taint = actor.system.shadowTaint.rank;
+  const insight = actor.system.insight.rank;
+  const wounds = actor.system.wounds.value;
+  const armorTn = actor.system.armorTn.current;
+  const initiative = actor.system.initiative.roll;
+  const rings = [air, earth, fire, water, voidRank];
+  const traits = [sta, wil, str, per, ref, awa, agi, int];
+  const ranks = [honor, glory, status, taint, insight];
+  const combat = [wounds, armorTn, initiative];
+  const lines = [name, ...rings, ...traits, ...ranks, ...combat];
+  const text = lines.join(", ");
+  return text;
+}

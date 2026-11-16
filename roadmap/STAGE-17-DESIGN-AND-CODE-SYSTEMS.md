@@ -91,7 +91,7 @@ browser, inline link, floating number.
 | File | Does |
 |------|------|
 | `module/apps/design-gallery.js` | A GM-only ApplicationV2 window, opened from a settings menu button, rendering every component in every variant and state from fixture data, plus every foundation (swatches with contrast ratios in both themes, type scale, space scale, icons, frames) and one sample of each pattern (a sheet section, a chat card, a dialog, a panel row) |
-| `module/config/design-gallery.js` | The fixture data: plain objects, no functions |
+| `module/config/design-gallery/` | The fixture data, one file per gallery section plus `fixtures.js` and `contexts.js`: plain objects, no functions |
 | `templates/apps/design-gallery/*.hbs` | One part per section. Composes the real partials, never copies their markup, so the gallery shows what the system ships |
 | `module/setup/settings/` | The `registerMenu` entry that opens the gallery |
 | `lang/en.json` | The gallery's strings |
@@ -512,6 +512,11 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Wound threshold formula | One shared function in `wound-system.js`, which PC and NPC preparation both call |
 | `module/config/design-gallery.js` | One config file per gallery section plus a shared fixtures file |
 | `getStatusRules`, no caller in `module/` | Find what replaced it; delete it and point the tests at the live path, or give it a real caller |
+| `CONFIG.l5r4.npcNumberWoundLvls` | Renamed `npcNumberWoundLevels` with a CHANGELOG line; the glossary checker's comment stripping fixed with a failing fixture, then rerun for anything else it hid |
+| `roll-check.js` after `rollCheck`'s steps | Split into `roll-check.js`, `terms.js`, `message-data.js`, one job each |
+| Long functions that are tables | The sheets' `_onAction` switches become lookup tables; `RollMessageData.defineSchema` keeps its shape with a disable comment naming why |
+| Functions over 30 lines | Every one split along its own steps, with differential checks against HEAD; `max-lines-per-function` ends strict |
+| Dialog buttons that read "OK" | Each names its action (dialogs.md rule 2), with new i18n keys; every dialog checked against the rule |
 | Citations of core's installed source | `[src: path:line]` keeps its line: the source is pinned to 14.370; rechecked when the target version moves |
 | `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |

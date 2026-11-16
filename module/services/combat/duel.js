@@ -274,76 +274,109 @@ registerFlow("duel", {
    * @returns {Promise<string>}
    */
   async render(state) {
-    const duelists = state.duelists.map((uuid, i) => {
-      const actor = fromUuidSync(uuid);
-      const rolled = state.rolls[state.stage]?.[i];
-      const strikesNow =
-        state.stage === "strike" &&
-        (state.firstStrike === null ||
-          state.firstStrike === i ||
-          state.rolls.strike[state.firstStrike] !== null);
-      return {
-        index: i,
-        name: actor?.name ?? "?",
-        canRoll: state.stage !== "done" && !rolled && (state.stage !== "strike" || strikesNow),
-        canConcede: state.stage === "assessment" || state.stage === "focus"
-      };
-    });
-    const lines = [];
-    if (state.facts) {
-      state.facts.forEach((n, i) =>
-        lines.push(F("l5r4.ui.combat.duel.facts", { name: duelists[i].name, count: n }))
-      );
-      state.focusBonus.forEach((won, i) => {
-        if (won) {
-          const actor = fromUuidSync(state.duelists[i]);
-          const edge = actor ? iaijutsuMasteryOf(actor).edge : 1;
-          lines.push(
-            F("l5r4.ui.combat.duel.edgeWon", { name: duelists[i].name, bonus: `+${edge}k${edge}` })
-          );
-        }
-      });
-    }
-    if (state.stage === "strike" || (state.stage === "done" && state.conceded === null)) {
-      lines.push(
-        state.firstStrike === null
-          ? T("l5r4.ui.combat.duel.kharmic")
-          : F("l5r4.ui.combat.duel.firstStrike", {
-              name: duelists[state.firstStrike].name,
-              raises: state.freeRaises
-            })
-      );
-    }
-    if (state.conceded !== null) {
-      lines.push(F("l5r4.ui.combat.duel.conceded", { name: duelists[state.conceded].name }));
-    }
+    const duelists = buildDuelists(state);
     return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.flowCard, {
       title: T("l5r4.ui.combat.duel.title"),
       stage:
         state.stage === "done"
           ? T("l5r4.ui.combat.duel.done")
           : T(`l5r4.ui.combat.duel.${state.stage}`),
-      lines,
-      buttons: duelists.flatMap(d => [
-        ...(d.canRoll
-          ? [
-              {
-                action: "roll",
-                label: F("l5r4.ui.combat.duel.roll", { name: d.name }),
-                data: d.index
-              }
-            ]
-          : []),
-        ...(d.canConcede && state.stage !== "done"
-          ? [
-              {
-                action: "concede",
-                label: F("l5r4.ui.combat.duel.concede", { name: d.name }),
-                data: d.index
-              }
-            ]
-          : [])
-      ])
+      lines: buildDuelLines(state, duelists),
+      buttons: buildDuelButtons(state, duelists)
     });
   }
 });
+
+/**
+ * Each duelist as the card shows it: name, and whether they may roll this stage or concede. In the strike, the
+ * duelist with the first strike rolls first; after a kharmic strike both roll at once.
+ * @param {object} state
+ * @returns {Array<{index: number, name: string, canRoll: boolean, canConcede: boolean}>}
+ */
+function buildDuelists(state) {
+  return state.duelists.map((uuid, i) => {
+    const actor = fromUuidSync(uuid);
+    const rolled = state.rolls[state.stage]?.[i];
+    const strikesNow =
+      state.stage === "strike" &&
+      (state.firstStrike === null ||
+        state.firstStrike === i ||
+        state.rolls.strike[state.firstStrike] !== null);
+    return {
+      index: i,
+      name: actor?.name ?? "?",
+      canRoll: state.stage !== "done" && !rolled && (state.stage !== "strike" || strikesNow),
+      canConcede: state.stage === "assessment" || state.stage === "focus"
+    };
+  });
+}
+
+/**
+ * The card's lines: each duelist's facts learned and Focus edge won, then the first strike or a kharmic strike, then
+ * a concession.
+ * @param {object} state
+ * @param {object[]} duelists - From buildDuelists
+ * @returns {string[]}
+ */
+function buildDuelLines(state, duelists) {
+  const lines = state.facts ? buildAssessmentLines(state, duelists) : [];
+  if (state.stage === "strike" || (state.stage === "done" && state.conceded === null)) {
+    lines.push(
+      state.firstStrike === null
+        ? T("l5r4.ui.combat.duel.kharmic")
+        : F("l5r4.ui.combat.duel.firstStrike", {
+            name: duelists[state.firstStrike].name,
+            raises: state.freeRaises
+          })
+    );
+  }
+  if (state.conceded !== null) {
+    lines.push(F("l5r4.ui.combat.duel.conceded", { name: duelists[state.conceded].name }));
+  }
+  return lines;
+}
+
+/**
+ * The Assessment's lines: the facts each duelist learned, then the Focus edge each won.
+ * @param {object} state - A state past the Assessment
+ * @param {object[]} duelists - From buildDuelists
+ * @returns {string[]}
+ */
+function buildAssessmentLines(state, duelists) {
+  const lines = state.facts.map((n, i) =>
+    F("l5r4.ui.combat.duel.facts", { name: duelists[i].name, count: n })
+  );
+  state.focusBonus.forEach((won, i) => {
+    if (won) {
+      const actor = fromUuidSync(state.duelists[i]);
+      const edge = actor ? iaijutsuMasteryOf(actor).edge : 1;
+      lines.push(
+        F("l5r4.ui.combat.duel.edgeWon", { name: duelists[i].name, bonus: `+${edge}k${edge}` })
+      );
+    }
+  });
+  return lines;
+}
+
+/**
+ * The card's buttons: each duelist's roll for this stage and concession, where allowed.
+ * @param {object} state
+ * @param {object[]} duelists - From buildDuelists
+ * @returns {Array<{action: string, label: string, data: number}>}
+ */
+function buildDuelButtons(state, duelists) {
+  return duelists.flatMap(d => [
+    ...(d.canRoll
+      ? [{ action: "roll", label: F("l5r4.ui.combat.duel.roll", { name: d.name }), data: d.index }]
+      : []),
+    ...(d.canConcede && state.stage !== "done"
+      ? [
+          {
+            action: "concede",
+            label: F("l5r4.ui.combat.duel.concede", { name: d.name }),
+            data: d.index
+          }
+        ]
+      : [])
+  ]);
+}

@@ -1,19 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { getStatusRules } from "../../../module/utils/status-data.js";
+import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
+import { buildStatusEffectUpdate } from "../../../module/utils/status-data.js";
 
-describe("getStatusRules", () => {
-  it("should copy a status's rules, and none for a status without them", () => {
-    expect(getStatusRules("defenseStance")).toEqual([
+/** The rules an effect created with only a status id takes (L5R4ActiveEffect#_preCreate). */
+const rulesOf = statusId =>
+  buildStatusEffectUpdate({ statuses: [statusId], system: {} })?.["system.rules"];
+
+describe("buildStatusEffectUpdate", () => {
+  it("should give an effect made with only a status id its status's rules", () => {
+    expect(rulesOf("defenseStance")).toEqual([
       { key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }
     ]);
-    expect(getStatusRules("mounted")[0]).toMatchObject({
+    expect(rulesOf("mounted")[0]).toMatchObject({
       key: "RollModifier",
       selector: "attack",
       roll: 1
     });
     // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large
     // game-rules/41_conditional_effects.md, p.89
-    expect(getStatusRules("prone")).toEqual([
+    expect(rulesOf("prone")).toEqual([
       { key: "ArmorTN", value: -10, range: "melee" },
       {
         key: "RollModifier",
@@ -28,11 +33,13 @@ describe("getStatusRules", () => {
         predicate: ["weapon:size:large"]
       }
     ]);
-    expect(getStatusRules("attackStance")).toEqual([]);
+    expect(rulesOf("attackStance")).toBeUndefined();
   });
 
-  it("should return a copy, so editing it leaves the config alone", () => {
-    getStatusRules("defenseStance")[0].value = 99;
-    expect(getStatusRules("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
+  it("should copy the rules, so editing them leaves the config alone", () => {
+    rulesOf("defenseStance")[0].value = 99;
+    const config = STATUS_EFFECTS.find(status => status.id === "defenseStance");
+    expect(config.system.rules[0].value).toBe("@rings.air + @skills.defense.rank");
+    expect(rulesOf("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
   });
 });

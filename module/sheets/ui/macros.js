@@ -13,7 +13,6 @@ import { RING_LABELS } from "../../config/localization.js";
 import { T } from "../../utils/localization.js";
 import { updateActivation } from "../../services/effects/activation.js";
 import { RollHandler } from "../handlers/roll-handler.js";
-import { PcRollHandler } from "../handlers/pc-roll-handler.js";
 
 /** Item types a macro rolls. */
 const macroItemTypes = new Set(["skill", "weapon", "bow", "spell", "kata", "kiho"]);
@@ -45,7 +44,7 @@ export async function rollItem(uuid) {
     case "skill":
       return RollHandler.rollSkill(actor, item, true);
     case "spell":
-      return PcRollHandler.rollSpellCast(actor, item, true);
+      return RollHandler.rollSpellCast(actor, item, true);
     case "kata":
     case "kiho":
       return updateActivation(actor, item);
