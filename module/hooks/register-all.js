@@ -40,10 +40,10 @@ import { onGetSceneControlButtonsDuel } from "../services/combat/duel.js";
 import { onGetSceneControlButtonsGuard } from "../services/combat/guard.js";
 import { onGetSceneControlButtonsSession } from "../services/session.js";
 import { onGetFolderContextOptions } from "../services/item-transfer.js";
+import { onUpdateItemMemorization } from "../services/xp/versioning.js";
 import EffectPanel from "../apps/effect-panel.js";
 import CompendiumBrowser from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
-import { registerSpellMemorizationHooks } from "./spell-memorization.js";
 
 /** The hooks after which the open effect panel redraws: control changes, and effects or the actor change. */
 const EFFECT_PANEL_REDRAWS = Object.freeze([
@@ -75,8 +75,8 @@ export function registerAllHooks() {
   // Damage buttons on cards posted by 3.x
   Hooks.on("renderChatMessageHTML", bindLegacyDamageCard);
 
-  // Spell system: Memorization XP tracking
-  registerSpellMemorizationHooks();
+  // Spell system: a spell memorized or forgotten rebuilds the XP history
+  Hooks.on("updateItem", onUpdateItemMemorization);
 }
 
 /** Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active. */

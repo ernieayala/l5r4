@@ -364,9 +364,9 @@ export function registerActiveEffectsTests(quench) {
 
         /**
          * Puts a controlled token of a PC with Wound and Void Point effects on the viewed scene, then renders a
-         * chat card with both damage buttons.
+         * chat card with both damage buttons, each carrying the given `data-damage`.
          */
-        async function setUp(name) {
+        async function setUp(name, { apply = "7", reduce = "15" } = {}) {
           actor = await createTestPC({ name, prototypeToken: { actorLink: true } });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.suffered": 5, "system.rings.void.value": 1 })
@@ -383,8 +383,8 @@ export function registerActiveEffectsTests(quench) {
           // The two damage buttons of a posted card, built as elements and stored as the message's HTML
           const card = document.createElement("div");
           for (const [action, damage] of [
-            ["apply-wounds", "7"],
-            ["reduce-wounds-void", "15"]
+            ["apply-wounds", apply],
+            ["reduce-wounds-void", reduce]
           ]) {
             const button = document.createElement("button");
             button.dataset.action = action;
@@ -411,6 +411,22 @@ export function registerActiveEffectsTests(quench) {
           await updated;
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
           assert.equal(actor._source.system.suffered, 5, "stored 0 + (15 - 10)");
+        });
+
+        // docs/design-system/patterns/chat-cards.md, CC5: a pre-4.0.0 card's attributes are untrusted
+        it("should apply at most 99 damage from a forged card's data-damage", async () => {
+          const html = await setUp("Active effects: forged damage", {
+            apply: "500",
+            reduce: "500"
+          });
+          let updated = nextUpdate(actor);
+          html.querySelector("[data-action='apply-wounds']").click();
+          await updated;
+          assert.equal(actor._source.system.suffered, 99, "stored 0 + 99, the card's 500 clamped");
+          updated = nextUpdate(actor);
+          html.querySelector("[data-action='reduce-wounds-void']").click();
+          await updated;
+          assert.equal(actor._source.system.suffered, 99 + 89, "stored 99 + (99 - 10)");
         });
       });
 

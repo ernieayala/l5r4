@@ -185,6 +185,7 @@ async function askChoice(itemName, choice) {
   return foundry.applications.api.DialogV2.prompt({
     window: { title: F("l5r4.ui.purchase.choiceTitle", { item: itemName, prompt }) },
     content: await R(DIALOG_TEMPLATES.choice, {
+      formId: foundry.utils.randomID(),
       label: prompt,
       name: "selection",
       options: options.map(({ value, label }) => ({ value, label }))

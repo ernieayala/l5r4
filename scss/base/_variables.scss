@@ -178,6 +178,9 @@ $earth-ring-img: url("../assets/icons/earth.webp");
 $fire-ring-img: url("../assets/icons/fire.webp");
 $void-ring-img: url("../assets/icons/void.webp");
 
+// The brush-stroke frame around the sheet header (foundations/frames.md rule 7)
+$brush-border-img: url("../assets/borders/brush-08-gray.svg");
+
 // Sprite frame counts less one, the N of each sprite's steps(N) (foundations/motion.md)
 $urban-sprite-steps: 29;
 $nature-sprite-steps: 22;

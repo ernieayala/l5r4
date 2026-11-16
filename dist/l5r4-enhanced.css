@@ -242,6 +242,9 @@ body > * {
  * Check Dialog
  * The roll pipeline dialog: one row per modifier, with its toggle, label, and value
  */
+.l5r4-check-dialog .l5r4-check-dialog-pool {
+  font-variant-numeric: tabular-nums;
+}
 .l5r4-check-dialog .l5r4-check-dialog-group {
   display: flex;
   flex-direction: column;
@@ -416,6 +419,7 @@ body > * {
 .l5r4-button.-roll {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
   border-radius: 0;
+  font-variant-numeric: tabular-nums;
   overflow: hidden;
   position: relative;
 }
@@ -460,6 +464,7 @@ body > * {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
   border-block-end: none;
   display: grid;
+  font-variant-numeric: tabular-nums;
   grid-template-columns: 1fr 1fr;
 }
 .l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > span,
@@ -509,6 +514,9 @@ body > * {
 }
 .l5r4-section-title.is-collapsed ~ .l5r4-item-row-list {
   display: none;
+}
+.l5r4-section-title.-compact .l5r4-section-heading {
+  min-height: auto;
 }
 .l5r4-section-title .l5r4-section-heading,
 .l5r4-section-title .button,
@@ -572,9 +580,6 @@ body > * {
   margin: 0;
   min-height: var(--input-height);
 }
-.l5r4-section-heading.-compact {
-  min-height: auto;
-}
 
 /**
  * Item Row
@@ -584,6 +589,7 @@ body > * {
 .l5r4-item-row-list {
   display: flex;
   flex-direction: column;
+  font-variant-numeric: tabular-nums;
   gap: var(--l5r4-space-gap-tight);
 }
 .l5r4-item-row-list.l5r4-sort-header {
@@ -731,6 +737,10 @@ body > * {
     mask-position: 100% 0;
   }
 }
+.l5r4-rank-control {
+  font-variant-numeric: tabular-nums;
+}
+
 .l5r4-rank-control.-track {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
   height: var(--l5r4-size-rank-block);
@@ -867,6 +877,7 @@ body > * {
   gap: var(--l5r4-space-8);
 }
 .l5r4-ledger-dialog .l5r4-ledger-dialog-entries .l5r4-ledger-dialog-points {
+  font-variant-numeric: tabular-nums;
   font-weight: bold;
 }
 
@@ -889,7 +900,7 @@ body > * {
  * The effect panel window (module/apps/effect-panel.js)
  */
 .l5r4-effect-panel .l5r4-effect-panel-actor {
-  margin: 0 0 var(--l5r4-space-8);
+  margin: 0 0 var(--l5r4-space-gap);
 }
 .l5r4-effect-panel .l5r4-effect-panel-list {
   display: flex;
@@ -1828,16 +1839,17 @@ body > * {
   overflow-y: auto;
 }
 .l5r4-xp-manager .window-content h3 {
-  border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-divider);
+  border-block-end: var(--sidebar-separator);
   margin: 0;
 }
 .l5r4-xp-manager .l5r4-xp-manager-breakdown {
+  font-variant-numeric: tabular-nums;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 .l5r4-xp-manager .l5r4-xp-manager-breakdown li {
-  border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-divider);
+  border-block-end: var(--sidebar-separator);
   display: flex;
   gap: var(--l5r4-space-gap);
   justify-content: space-between;

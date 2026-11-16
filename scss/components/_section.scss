@@ -25,6 +25,11 @@
     }
   }
 
+  // A sidebar section's title sits tight: its heading drops core's field height
+  &.-compact .l5r4-section-heading {
+    min-height: auto;
+  }
+
   .l5r4-section-heading,
   .button,
   button,
@@ -93,8 +98,4 @@
   text-wrap: nowrap;
 
   @include title-row;
-
-  &.-compact {
-    min-height: auto;
-  }
 }

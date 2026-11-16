@@ -62,7 +62,8 @@ export class ItemCrudHandler {
     return foundry.applications.api.DialogV2.confirm({
       window: { title: "l5r4.ui.dialogs.deleteItem.title" },
       content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
-        question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name })
+        question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name }),
+        consequence: game.i18n.localize("l5r4.ui.dialogs.deleteItem.consequence")
       }),
       yes: { label: "l5r4.ui.common.delete" },
       no: { label: "l5r4.ui.common.cancel" }

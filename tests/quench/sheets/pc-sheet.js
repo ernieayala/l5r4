@@ -199,6 +199,25 @@ export function registerPcSheetTests(quench) {
           assert.isAtLeast(ringRolls.length + traitRolls.length, 1, "Roll buttons exist on sheet");
         });
 
+        // docs/design-system/components/ring-trait-block.md, K4
+        it("should name each Ring's roll button after its Ring", () => {
+          const names = Object.fromEntries(
+            [...sheet.element.querySelectorAll('[data-action="roll-ring"]')].map(button => [
+              button.dataset.ringKey,
+              [button.getAttribute("aria-label"), button.dataset.tooltip]
+            ])
+          );
+          const expected = Object.fromEntries(
+            ["earth", "air", "water", "fire", "void"].map(ring => {
+              const name = game.i18n.localize("l5r4.ui.mechanics.rolls.rollRing", {
+                element: game.i18n.localize(`l5r4.ui.mechanics.rings.${ring}`)
+              });
+              return [ring, [name, name]];
+            })
+          );
+          assert.deepEqual(names, expected);
+        });
+
         it("should have item management actions", () => {
           const element = sheet.element;
           // Look for edit or delete actions

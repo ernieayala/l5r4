@@ -552,6 +552,37 @@ export function registerNpcSheetTests(quench) {
           assert.equal(toggle().getAttribute("aria-expanded"), "false", "closed after a render");
         });
 
+        // docs/design-system/components/expand-control.md, X2
+        it("should render the expand icon of the section's stored state", async () => {
+          const icon = () =>
+            sheet.element.querySelector(
+              '[data-section-title][data-scope="skills"] [data-action="expand-section"] i'
+            ).classList;
+          const shows = () => (icon().contains("fa-angle-up") ? "up" : "down");
+          await sheet.render(true);
+          assert.equal(shows(), "up", "an open section renders the open icon");
+          sheet.element
+            .querySelector(
+              '[data-section-title][data-scope="skills"] [data-action="expand-section"]'
+            )
+            .click();
+          await new Promise(resolve => setTimeout(resolve, 300));
+          await sheet.render(true);
+          assert.equal(shows(), "down", "a closed section renders the closed icon");
+          sheet.element
+            .querySelector(
+              '[data-section-title][data-scope="skills"] [data-action="expand-section"]'
+            )
+            .click();
+          await new Promise(resolve => setTimeout(resolve, 300));
+          await sheet.render(true);
+          assert.equal(shows(), "up", "a reopened section renders the open icon");
+          assert.isFalse(
+            icon().contains("fa-angle-up") && icon().contains("fa-angle-down"),
+            "one icon at a time"
+          );
+        });
+
         it("should mark a Skill row's expand control as expanded when clicked", async () => {
           await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
           await sheet.render(true);

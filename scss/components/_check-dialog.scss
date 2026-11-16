@@ -4,6 +4,10 @@
  */
 
 .l5r4-check-dialog {
+  .l5r4-check-dialog-pool {
+    font-variant-numeric: tabular-nums;
+  }
+
   .l5r4-check-dialog-group {
     display: flex;
     flex-direction: column;

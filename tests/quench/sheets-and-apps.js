@@ -295,17 +295,20 @@ export function registerSheetsAndAppsTests(quench) {
             const answered = new Promise(resolve =>
               Hooks.once("renderDialogV2", app => {
                 const labels = buttonLabelsOf(app);
+                const text = app.element.querySelector("form").textContent;
                 app.element.querySelector('[data-action="yes"]').click();
-                resolve(labels);
+                resolve({ labels, text });
               })
             );
             const saved = nextUpdate(npc);
             sheet.element
               .querySelector('[data-action="delete-attack"][data-attack-key="attack2"]')
               .click();
-            const labels = await answered;
+            const { labels, text } = await answered;
             assert.equal(labels.yes, game.i18n.localize("l5r4.ui.common.delete"));
             assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
+            // docs/design-system/patterns/dialogs.md, rule 3: the confirmation states what is lost
+            assert.include(text, game.i18n.localize("l5r4.ui.dialogs.deleteAttack.consequence"));
             await saved;
             assert.include(npc.system.attack2, { name: "", roll: 0, keep: 0 });
             assert.include(npc.system.damage2, { roll: 0, keep: 0 });
@@ -637,7 +640,14 @@ export function registerSheetsAndAppsTests(quench) {
               await deleted;
               assert.include(
                 question,
-                `${game.i18n.localize("l5r4.ui.common.delete")} "Sheets Renamed"?`
+                game.i18n.localize("l5r4.ui.dialogs.deleteEmphasis.content", {
+                  emphasis: "Sheets Renamed"
+                })
+              );
+              // docs/design-system/patterns/dialogs.md, rule 3: the confirmation states what is lost
+              assert.include(
+                question,
+                game.i18n.localize("l5r4.ui.dialogs.deleteEmphasis.consequence")
               );
               assert.equal(removeLabels.yes, game.i18n.localize("l5r4.ui.common.delete"));
               assert.equal(removeLabels.no, game.i18n.localize("l5r4.ui.common.cancel"));
@@ -693,14 +703,18 @@ export function registerSheetsAndAppsTests(quench) {
             row.dataset.itemId = item.id;
             const button = row.appendChild(document.createElement("button"));
             let labels = {};
+            let text = "";
             const answered = answerDialog(dialog => {
               labels = buttonLabelsOf(dialog);
+              text = dialog.element.querySelector("form").textContent;
               dialog.element.querySelector('[data-action="yes"]').click();
             });
             await ItemCrudHandler.deleteItem({ actor }, new PointerEvent("click"), button);
             await answered;
             assert.equal(labels.yes, game.i18n.localize("l5r4.ui.common.delete"));
             assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
+            // docs/design-system/patterns/dialogs.md, rule 3: the confirmation states what is lost
+            assert.include(text, game.i18n.localize("l5r4.ui.dialogs.deleteItem.consequence"));
             assert.isUndefined(actor.items.get(item.id), "the item is removed");
           })
         );

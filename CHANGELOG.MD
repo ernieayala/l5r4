@@ -11,14 +11,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
-Wording. Dialog buttons name their action ("Set cap", "Allow", "Start session", "Spend Void Point", "Remove") in
-place of OK and Yes/No, and the XP manager's add button reads "Add XP". Window and card titles that pair a name with a
-label are one translatable phrase each; a translation that had translated the wound configuration title keeps it. A
-check made with a Void Point is labelled "[Void]" in place of "Void!". A spent spell slot reads "[Use spell slot
-Fire]" or "[Use Void spell slot]", and an empty Void slot reads "Void spell slots: 0".
+Wording. Dialog buttons name their action ("Set cap", "Allow", "Start session", "Spend Void Point", "Remove") in place of OK and Yes/No, and the XP manager's add button reads "Add XP". Window and card titles that pair a name with a label are one translatable phrase each; a translation that had translated the wound configuration title keeps it. A check made with a Void Point is labelled "[Void]" in place of "Void!". A spent spell slot reads "[Use spell slot Fire]" or "[Use Void spell slot]", and an empty Void slot reads "Void spell slots: 0".
 
-CSS custom properties renamed. The Ring colors now hold whole colors instead of RGB triplets: read them as
-`var(--l5r4-color-ring-water)`, not `rgb(var(--water-ring-color))`.
+CSS custom properties renamed. The Ring colors now hold whole colors instead of RGB triplets: read them as `var(--l5r4-color-ring-water)`, not `rgb(var(--water-ring-color))`.
 
 - `--water-ring-color` -> `--l5r4-color-ring-water`
 - `--earth-ring-color` -> `--l5r4-color-ring-earth`
@@ -27,11 +22,9 @@ CSS custom properties renamed. The Ring colors now hold whole colors instead of 
 - `--l5r4-ring-rank-backdrop-color` -> `--l5r4-color-ring-rank-backdrop`
 - `--l5r4-ring-rank-backdrop-image` -> `--l5r4-image-ring-rank-backdrop`
 - `--controls` -> `--l5r4-size-column-controls`
-- `--air-ring-color` -> `--l5r4-color-ring-air`, also darker: `#64798d` in place of `#889eb3`, so ring text on
-  it meets its contrast minimum
+- `--air-ring-color` -> `--l5r4-color-ring-air`, also darker: `#64798d` in place of `#889eb3`, so ring text on it meets its contrast minimum
 
-CSS classes renamed. Posted chat cards keep their stored classes (`chat-card`, `item`, `title`, and the rest), so
-their styles are unchanged.
+CSS classes renamed. Posted chat cards keep their stored classes (`chat-card`, `item`, `title`, and the rest), so their styles are unchanged.
 
 - `main-sheet` -> `l5r4-sheet-body`
 - `stats` -> `l5r4-sheet-main`
@@ -181,37 +174,37 @@ their styles are unchanged.
 - `title` (XP manager and NPC attack row names) -> `l5r4-item-row-name`
 - `clickable` (XP manager cap) -> `l5r4-xp-manager-cap`
 - `check-maneuvers` -> `l5r4-check-dialog-maneuvers`
-- Section roots, template roots, and item tab panels gained `l5r4-` block classes (`l5r4-section`,
-  `l5r4-item-details`, `l5r4-item-modifiers`, `l5r4-<window>-body`); their old classes stay
+- Section roots, template roots, and item tab panels gained `l5r4-` block classes (`l5r4-section`, `l5r4-item-details`, `l5r4-item-modifiers`, `l5r4-<window>-body`); their old classes stay
 
-Clickable controls are `<button type="button">` in place of `<a>`, `<span>`, and `<div>`; core's focus ring shows on
-them, and on a sheet the viewer cannot edit core disables them. Icon-only controls carry `data-tooltip` and
-`aria-label` in place of `title`.
+Clickable controls are `<button type="button">` in place of `<a>`, `<span>`, and `<div>`; core's focus ring shows on them, and on a sheet the viewer cannot edit core disables them. Icon-only controls carry `data-tooltip` and `aria-label` in place of `title`.
 
 Data attributes and prepared values renamed (none is stored in world data):
 
 - `data-system-ring` (Ring roll) -> `data-ring-key`
 - A Skill's prepared `system.rollDice`, `system.rollKeep`, and `system.keepDice` -> `system.roll`, `system.keep`
 - A spell's prepared `system.castTN` -> `system.castTn`
-- `L5R4Combat.resolveInitiativeBonuses` -> `L5R4Combat.askInitiativeBonuses`; `L5R4Combat.events` ->
-  `L5R4Combat.EVENTS`
+- `L5R4Combat.resolveInitiativeBonuses` -> `L5R4Combat.askInitiativeBonuses`; `L5R4Combat.events` -> `L5R4Combat.EVENTS`
 - `CONFIG.l5r4.npcNumberWoundLvls` -> `CONFIG.l5r4.npcNumberWoundLevels`
 
 `game.system.api.rollItem` and `rollTrait`, which hotbar macros call, are unchanged.
 
 ### Removed
 
-- CSS rules no template used: `-gap-xl`, `clear-btn`, `void-points-amount`, `item-list -advantages`,
-  `expanded-text -npc`, `editor-container`, `price-section`, `price-field`, `sheet-content > h4`
-- Classes no style or script read: `info-group`, `sized`, `effects` (item effects tab wrapper), `message` (design
-  gallery), `rules` (Active Effect Rules tab)
+- CSS rules no template used: `-gap-xl`, `clear-btn`, `void-points-amount`, `item-list -advantages`, `expanded-text -npc`, `editor-container`, `price-section`, `price-field`, `sheet-content > h4`
+- Classes no style or script read: `info-group`, `sized`, `effects` (item effects tab wrapper), `message` (design gallery), `rules` (Active Effect Rules tab)
 
 ### Fixed
 
 - NPC sheet Skills sort by their Roll and Emphasis heads, which did nothing before
 - NPC sheet attack rows show the attack's damage type in the Type column, which was always empty
-- Two overlapping casts could spend one spell slot twice or leave a negative count; an unknown Ring or a missing
-  caster now gets its own message
+- Two overlapping casts could spend one spell slot twice or leave a negative count; an unknown Ring or a missing caster now gets its own message
+- A cast refused for want of a spell slot no longer rolls or posts a card: the slot is spent before the roll, and a cast that stops before it rolls (a Void Point it cannot spend) gets its slot back
+- Removing an item, an NPC attack, or a custom Emphasis says what goes with it
+- The spell element choice names its list for screen readers
+- A section's expand arrow points the way the section is, after the sheet redraws
+- Each Ring's roll button names its Ring ("Roll Air") in place of "Ring Roll"
+- A damage card posted before 4.0.0 applies at most 99 Wounds from its stored damage
+- Pools, ranks, and other numbers line up in their columns (tabular figures); the XP manager's separators match core's windows
 
 ---
 
@@ -252,6 +245,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Added
 
 **Visual Animation System**
+
 - New animation system for stances, conditions, and attacks using Sequencer + JB2A
 - Stance animations: Full Attack, Full Defense, Center with visual effects
 - Condition animations: Blinded, Dazed, Fatigued, Prone, Stunned, Grappled
@@ -264,6 +258,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Target-based attack animations triggered from chat messages
 
 **Armor Configuration Dialog**
+
 - ApplicationV2-based armor configuration interface
 - Edit armor TN bonus and reduction values
 - Armor stacking rules configuration (highest only or all stack)
@@ -271,6 +266,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Form validation and proper data persistence
 
 **Condition Manager Dialog**
+
 - Centralized status effect management interface
 - Toggle all conditions and stances from single dialog
 - Visual status indicators for active effects
@@ -278,12 +274,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Integrated with character sheet for easy condition tracking
 
 **Combat Configuration Dialog**
+
 - Initiative modifier configuration
 - Movement rate adjustments
 - Combat-related settings in dedicated interface
 - Streamlined combat setup workflow
 
 **Wealth Manager**
+
 - New modal wealth management application with calculator-style UI
 - Add/remove money by denomination (koku, bu, zeni) with validation
 - Currency conversion: 10 zeni ↔ 1 bu, 5 bu ↔ 1 koku
@@ -294,6 +292,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - 24 integration tests covering edge cases and error conditions
 
 **Race Condition Protection**
+
 - Roll handlers now prevent double-click exploits using in-progress tracking
 - Each roll type tracked independently (skill, attack, trait, ring, spell, weapon, NPC)
 - Simultaneous different rolls allowed while preventing duplicate submissions
@@ -301,12 +300,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Async/await pattern ensures proper cleanup after roll completion
 
 **Hook Registration System**
+
 - Centralized hook registration in `register-all.js`
 - Single point of reference for all active hooks
 - Improved debugging and maintenance of hook interactions
 - Clear documentation of hook categories and execution order
 
 **Comprehensive Test Suite**
+
 - 18 new integration test files for edge cases and race conditions
 - 6 new unit test files for services and utilities
 - Tests cover: actor creation, attacks, conditions, damage, emphasis reroll, initiative
@@ -315,6 +316,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Edge case coverage for all major systems
 
 **Validators Module**
+
 - New `utils/validators.js` for input validation
 - Centralized validation logic for data integrity
 - Type checking and range validation utilities
@@ -322,6 +324,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Enhanced
 
 **Roll System**
+
 - All roll handlers now async with proper error handling
 - Race condition protection across all roll types
 - Improved roll key generation for tracking
@@ -329,12 +332,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Consistent async patterns throughout roll services
 
 **Resource Management**
+
 - Spell slot manager enhanced with better validation
 - Void Point manager improved with edge case handling
 - Resource depletion checks more robust
 - Better error messages for resource failures
 
 **XP System**
+
 - XP calculations refactored for clarity
 - XP formatter improved with better output
 - XP versioning enhanced for migration tracking
@@ -342,6 +347,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Better handling of custom emphases
 
 **Migration System**
+
 - Migration helpers improved with better error handling
 - Icon path migration more robust
 - Emphasis migration enhanced with deduplication
@@ -350,23 +356,27 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Bow-to-weapon migration enhanced
 
 **Dialog System**
+
 - Roll modifier dialog improved with better layout
 - Spell cast dialog enhanced with clearer options
 - Maho cast dialog improved for usability
 - Better keyboard navigation in all dialogs
 
 **Chat System**
+
 - Chat damage buttons more reliable
 - Combat Void spending hooks improved
 - Better error handling in chat message creation
 - Improved chat card formatting
 
 **Combat System**
+
 - Initiative modifiers now properly configurable
 - Movement tracking enhanced with configuration options
 - Combat modifiers integrated into derived data calculations
 
 **Code Quality**
+
 - Consistent async/await patterns throughout
 - Better error handling with try/catch/finally
 - Improved JSDoc documentation
@@ -380,35 +390,42 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Fixed
 
 **Roll System**
+
 - TN calculation reflects declared raises only
 - Free raises reduce required roll result, not TN
 - Void point tracking now properly handles edge cases
 - Unskilled roll mechanics fixed to prevent incorrect calculations
 
 **Character Sheet**
+
 - Fixed trait values stacking on sheet recalculation
 - Trait bonuses now apply correctly without duplication
 
 **Deprecation Warnings**
+
 - Updated chat message type constants to use CONST.CHAT_MESSAGE_STYLES
 - Resolved Foundry v13 API deprecation warnings
 
 **Code Cleanup**
+
 - Fixed race condition protection in roll handlers
 - Improved async/await patterns in animation hooks
 - Better error handling throughout animation system
 
 **Emphasis Migration**
+
 - Old emphases now properly marked as trained (selected) in new system
 - Trained emphases are now correctly added to `trainedEmphases` array during migration
 - Previously purchased emphases no longer appear as unpurchased after migration
 
 **Icon Migration**
+
 - Fixed embedded item icons not updating on actor sheets
 - Icon migration now processes items owned by actors (embedded items)
 - Items on character sheets will now properly update from old PNG to new WebP icons
 
 **Race Conditions**
+
 - Fixed double-click exploits in all roll handlers
 - Fixed race conditions in actor creation workflows
 - Fixed race conditions in item creation workflows
@@ -418,18 +435,21 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Fixed race conditions in XP tracking
 
 **Resource Management**
+
 - Fixed spell slot depletion edge cases
 - Fixed Void Point spending edge cases
 - Fixed resource restoration during rest
 - Better validation prevents negative resources
 
 **Roll System**
+
 - NPC rolls use unified simple-roll system
 - Formula builder edge cases handled
 - Unskilled rolls properly handled
 - Wound penalty application improved
 
 **UI/UX**
+
 - Removed transition animation on inline controls to prevent visual glitches
 - Fixed item list styling issues
 - Better visual feedback for roll progress
@@ -437,12 +457,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Removed
 
 **Code Cleanup**
+
 - Cleaned up unused imports and dependencies
 - Streamlined NPC roll system
 
 ### Technical
 
 **Architecture**
+
 - Centralized hook registration pattern
 - Improved separation of concerns in roll handlers
 - Better async/await patterns throughout
@@ -455,11 +477,13 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Animation manager service for centralized control
 
 **Dependencies**
+
 - Sequencer module integration (optional, graceful degradation)
 - JB2A module integration (optional, graceful degradation)
 - System functions without animation modules installed
 
 **Testing**
+
 - 18 new integration test files
 - 6 new unit test files
 - Comprehensive edge case coverage
@@ -467,6 +491,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Better test organization and fixtures
 
 **Performance**
+
 - Reduced code duplication in roll handlers
 - More efficient roll tracking
 - Better resource cleanup
@@ -479,6 +504,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Fixed
 
 **Emphasis Migration**
+
 - Improved emphasis string-to-array migration with intelligent matching
 - Case-insensitive matching for official emphases (e.g., "katana" → "Katana")
 - Singular/plural matching (e.g., "Dog" → "Dogs", "horse" → "Horses")
@@ -490,6 +516,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Enhanced
 
 **Migration Safety**
+
 - Migration can run multiple times safely without duplicating data
 - Existing emphasis data is never lost during system updates
 - Proper logging of created custom emphases during migration
@@ -501,6 +528,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Added
 
 **NPC Attack Editor**
+
 - ApplicationV2-based dialog for editing NPC attack and damage values
 - Form fields for attack roll (XkY format) with `roll`, `keep`, `modifier` inputs
 - Form fields for damage roll (XkY format) with `roll`, `keep`, `modifier` inputs
@@ -516,6 +544,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Enhanced
 
 **NPC Sheet Integration**
+
 - Attack editing workflow streamlined with dedicated dialog
 - Consistent form patterns across NPC attack configuration
 - Improved UX for managing multiple NPC attacks
@@ -527,12 +556,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Breaking Changes
 
 **Test Infrastructure**
+
 - Added comprehensive test suite requiring Quench module for integration tests
 - Development workflow now includes mandatory testing before releases
 
 ### Added
 
 **Raise & Free Raise System**
+
 - Complete raise mechanics for all roll types (skill, trait, ring, spell, weapon, NPC)
 - Declared raises increase TN by 5 each (maximum = Void Ring rank)
 - Free Raises reduce TN by 5 each without Void Ring limit
@@ -545,6 +576,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Game rules citations from Skills_and_Rolls.md
 
 **Damage Application System**
+
 - Apply Wounds button in damage roll chat cards
 - Reduce with Void button for Void Point damage reduction (-10)
 - Automatic armor reduction applied to incoming damage
@@ -554,6 +586,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - One-click damage application to selected tokens
 
 **Armor Reduction**
+
 - Automatic damage reduction from equipped armor
 - Reduction value calculated in prepareDerivedData
 - Stacking rules support (highest only or all stack)
@@ -562,6 +595,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Works with Void Point reduction (Void first, then armor)
 
 **Guard Maneuver Status Effects**
+
 - Guarding status: -5 Armor TN penalty while protecting ally
 - Guarded status: +10 Armor TN bonus while being protected
 - Manual application by players when Guard action declared
@@ -570,6 +604,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Integration with condition effects system
 
 **Movement Tracking**
+
 - Water Ring-based movement calculation
 - Movement rates displayed in Combat section
 - Condition penalties affect movement (Blinded -2 Water Ring)
@@ -577,6 +612,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Visual display on character sheets
 
 **Item Sheet Redesign**
+
 - 4-tab modular system: Description, Details, Modifiers, Active Effects
 - Eliminated 150+ lines of duplicate template code
 - Conditional tab visibility based on item type
@@ -586,6 +622,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Tab state management with ApplicationV2 PARTS pattern
 
 **Emphasis System Overhaul**
+
 - Multiple emphases per skill support
 - `availableEmphases` array for skill options
 - `trainedEmphases` array for purchased emphases
@@ -594,11 +631,13 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Migration from legacy single `emphasis` string field
 
 **Spell Memorization**
+
 - `memorized` boolean field on spell items
 - Tracking for prepared/memorized spells
 - Integration with spell management workflow
 
 **Comprehensive Test Infrastructure**
+
 - 440+ passing unit tests (Vitest)
 - Integration test suite (Quench)
 - Test fixtures for actors and items
@@ -610,17 +649,20 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Automated test execution in development workflow
 
 **Void Point Combat Spending**
+
 - Initiative Void Point spending hook
 - Void Point expenditure tracking in combat
 - Integration with combat tracker
 
 **Healing Stamina Modifier**
+
 - `healingStaminaMod` field for custom healing rate adjustments
 - Allows modifying Stamina multiplier in heal rate calculation
 
 ### Enhanced
 
 **Roll System**
+
 - All roll types support raises and free raises
 - TN calculator handles raise mechanics (+5 per raise)
 - TN calculator handles free raise mechanics (-5 per free raise)
@@ -630,6 +672,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Chat messages show declared raises and free raises
 
 **Damage System**
+
 - Damage rolls create interactive chat cards
 - Apply damage with single click
 - Void Point reduction option in chat
@@ -638,12 +681,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Integration with token selection
 
 **Condition Effects**
+
 - Guard maneuver conditions (Guarding/Guarded)
 - Armor TN modifiers from conditions
 - Movement penalties from conditions (Blinded)
 - Comprehensive condition tracking in prepareDerivedData
 
 **Item Management**
+
 - Modular item sheet templates
 - Type-specific detail sections
 - Organized modifier displays
@@ -651,12 +696,14 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Reduced code duplication across item types
 
 **XP System**
+
 - Multiple emphasis tracking per skill
 - Proper XP calculation for each trained emphasis
 - Emphasis Manager displays all trained emphases
 - XP recalculation includes emphasis costs
 
 **Migration System**
+
 - Free Raises field migration for all items
 - Emphasis array migration from legacy string field
 - Embedded items migration support
@@ -664,6 +711,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - World-level migration execution
 
 **Documentation**
+
 - Comprehensive testing guide in CONTRIBUTING.md
 - Testing philosophy and tier system
 - AAA pattern examples
@@ -674,30 +722,35 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Fixed
 
 **Critical Bugs**
+
 - Stance TN stacking bug (Issue #2): Removed queueMicrotask wrapper causing race condition
 - Automatic trait changes during form submissions (Issue #1): Removed convertSubmitData corruption
 - Emphasis XP tracking: Now uses trainedEmphases array instead of single string
 - Ten Dice Rule test: Corrected test expectations
 
 **Roll System**
+
 - Raise validation against Void Ring maximum
 - Free raise calculation from multiple sources
 - TN floor enforcement (minimum 0)
 - Unskilled roll raise prevention
 
 **Item System**
+
 - Equipped checkbox now functional on armor items
 - Bow weapon icons display correctly
 - Item sheet tab state persistence
 - Template path references updated
 
 **Effect System**
+
 - Stance conflict removal synchronized
 - Effect cleanup in test hooks
 - Duplicate status ID declarations removed
 - Guard status effect integration
 
 **Migration System**
+
 - Free Raises defaults backfilled for existing items
 - Emphasis migration handles legacy data
 - Embedded items properly migrated
@@ -706,6 +759,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Technical
 
 **Architecture**
+
 - Modular item sheet template system
 - Service-oriented raise management
 - Centralized TN calculation
@@ -714,6 +768,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Mock data generators
 
 **Code Quality**
+
 - 73 unit tests for TN calculator
 - 21 integration tests for roll types
 - 561 total tests passing
@@ -722,6 +777,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Linting and formatting enforced
 
 **Performance**
+
 - Reduced template duplication
 - Optimized item sheet rendering
 - Efficient raise calculation

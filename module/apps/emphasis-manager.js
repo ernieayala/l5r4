@@ -225,10 +225,10 @@ export default class EmphasisManagerApplication extends foundry.applications.api
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: T("l5r4.ui.common.delete") },
-      content: await foundry.applications.handlebars.renderTemplate(
-        DIALOG_TEMPLATES.removeEmphasis,
-        { name: emphasisName }
-      ),
+      content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
+        question: F("l5r4.ui.dialogs.deleteEmphasis.content", { emphasis: emphasisName }),
+        consequence: T("l5r4.ui.dialogs.deleteEmphasis.consequence")
+      }),
       yes: { label: T("l5r4.ui.common.delete") },
       no: { label: T("l5r4.ui.common.cancel") },
       rejectClose: false

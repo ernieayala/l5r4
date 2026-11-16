@@ -8,7 +8,7 @@ Traits, so its disc is text; the Void Ring's disc is its rank control. --}}
   <h4 class="l5r4-ring-rank -{{ring}}" data-ring-disc="{{ring}}"><span class="l5r4-ring-rank-face">{{rank}}</span></h4>
 {{/if}}
 <div class="l5r4-ring -{{ring}}">
-  <button type="button" class="l5r4-ring-roll draggable" data-action="roll-ring" data-ring-rank="{{rank}}" data-ring-name="{{localize (concat "l5r4.ui.mechanics.rings." ring)}}" data-ring-key="{{ring}}" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" aria-label="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}">
+  <button type="button" class="l5r4-ring-roll draggable" data-action="roll-ring" data-ring-rank="{{rank}}" data-ring-name="{{localize (concat "l5r4.ui.mechanics.rings." ring)}}" data-ring-key="{{ring}}" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.rollRing" element=(localize (concat "l5r4.ui.mechanics.rings." ring))}}" aria-label="{{localize "l5r4.ui.mechanics.rolls.rollRing" element=(localize (concat "l5r4.ui.mechanics.rings." ring))}}">
     <img src="{{iconPath (concat ring ".webp")}}" alt="" class="l5r4-ring-image" />
   </button>
 </div>

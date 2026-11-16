@@ -3,7 +3,8 @@
  * @description Change detection for a character's XP data: a content hash of the Traits, Skills, Void rank, and
  * purchased advantages, disadvantages, kata, and kiho, compared with the version stored in
  * `flags[SYS_ID].xpRetroactiveVersion`, tells the XP manager when to rebuild the XP history so it shows the current
- * costs. The rebuild stores the history in `flags[SYS_ID].xpSpentCache` with the version it was built at.
+ * costs. The rebuild stores the history in `flags[SYS_ID].xpSpentCache` with the version it was built at. A spell
+ * memorized or forgotten resets the version, so the next look rebuilds.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -116,6 +117,21 @@ export async function updateXpHistory(actor) {
       actorId: actor?.id
     });
   }
+}
+
+/**
+ * `updateItem` hook: a spell memorized or forgotten marks its owner's XP history for rebuilding, because a memorized
+ * spell costs XP equal to its Mastery Level.
+ * game-rules/66_magic_and_spell_casting.md, p.164
+ * @param {Item} item - The updated item
+ * @param {object} change - The update's changed data
+ * @returns {Promise<void>}
+ */
+export async function onUpdateItemMemorization(item, change) {
+  if (item.type !== "spell" || change.system?.memorized === undefined || !item.actor) {
+    return;
+  }
+  await item.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
 }
 
 /**

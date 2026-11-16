@@ -71,7 +71,6 @@ export const APP_TEMPLATES = Object.freeze({
  * @property {string} ledger - A change to Honor, Glory, Status, or Taint, with the actor's ledger
  * @property {string} confirm - A confirmation: its question and an optional consequence
  * @property {string} choice - A choice prompt: a label and a select
- * @property {string} removeEmphasis - The question before a custom Emphasis is removed
  * @property {string} disadvantageCap - The XP manager's Disadvantage XP cap prompt
  */
 export const DIALOG_TEMPLATES = Object.freeze({
@@ -84,7 +83,6 @@ export const DIALOG_TEMPLATES = Object.freeze({
   ledger: `${PATHS.templates}/dialogs/ledger-dialog.hbs`,
   confirm: `${PATHS.templates}/dialogs/confirm-dialog.hbs`,
   choice: `${PATHS.templates}/dialogs/choice-dialog.hbs`,
-  removeEmphasis: `${PATHS.templates}/dialogs/remove-emphasis-dialog.hbs`,
   disadvantageCap: `${PATHS.templates}/dialogs/disadvantage-cap-dialog.hbs`
 });
 

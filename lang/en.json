@@ -896,10 +896,16 @@
       "dialogs": {
         "addAttack": "Add attack",
         "deleteAttack": {
+          "consequence": "Its attack and damage pools are cleared.",
           "content": "Remove {name}?",
           "title": "Remove attack?"
         },
+        "deleteEmphasis": {
+          "consequence": "It leaves this world's custom Emphases.",
+          "content": "Remove {emphasis}?"
+        },
         "deleteItem": {
+          "consequence": "Its effects and rules, and any item it granted, go with it.",
           "content": "Remove {name}?",
           "title": "Remove item?"
         }
@@ -1045,6 +1051,7 @@
           "raises": "Raises",
           "ringRoll": "Ring Roll",
           "ringRollLabel": "Ring Roll: {element}",
+          "rollRing": "Roll {element}",
           "skillRoll": "Skill Roll",
           "skillRollLabel": "Skill Roll: {skillName} / {traitName}",
           "socialResistance": "Social resistance",

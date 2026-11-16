@@ -18,6 +18,11 @@
   }
 }
 
+// Every rank changes in place, so its digits keep one width (foundations/typography.md T5)
+.l5r4-rank-control {
+  font-variant-numeric: tabular-nums;
+}
+
 .l5r4-rank-control.-track {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
   height: var(--l5r4-size-rank-block);

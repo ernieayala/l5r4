@@ -9,19 +9,22 @@
   .window-content {
     overflow-y: auto;
 
+    // The heading and the breakdown rows are dividers, so they take core's separator
+    // (docs/design-system/foundations/frames.md, rule 2)
     h3 {
-      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-divider);
+      border-block-end: var(--sidebar-separator);
       margin: 0;
     }
   }
 
   .l5r4-xp-manager-breakdown {
+    font-variant-numeric: tabular-nums;
     list-style: none;
     margin: 0;
     padding: 0;
 
     li {
-      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-divider);
+      border-block-end: var(--sidebar-separator);
       display: flex;
       gap: var(--l5r4-space-gap);
       justify-content: space-between;

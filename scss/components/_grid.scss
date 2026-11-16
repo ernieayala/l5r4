@@ -10,6 +10,7 @@
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
   border-block-end: none;
   display: grid;
+  font-variant-numeric: tabular-nums;
   grid-template-columns: 1fr 1fr;
 
   > span,

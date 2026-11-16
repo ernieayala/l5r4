@@ -3,6 +3,8 @@
  * Header section with character name, clan, school, rank, XP, and insight
  */
 
+@use "../base/variables" as *;
+
 .l5r4-pc-info {
   flex-wrap: nowrap;
   padding: var(--l5r4-space-section);
@@ -11,7 +13,7 @@
   &::before {
     border-image-repeat: stretch;
     border-image-slice: 15 fill;
-    border-image-source: url("../assets/borders/brush-08-gray.svg");
+    border-image-source: $brush-border-img;
     border-image-width: 15px;
     content: "";
     inset: -5px;

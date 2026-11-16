@@ -3,12 +3,14 @@
  * @description The Apply Wounds and Reduce with Void buttons on damage cards posted before 4.0.0, which carry their
  * damage in the HTML. Either button applies the damage to the first selected token. Reduce with Void first spends one
  * of the target's Void Points for 10 fewer Wounds, declared before the damage is applied. The equipped armor's
- * Reduction then lowers what is left. Neither step takes the damage below 0. A `roll` message's damage goes through
+ * Reduction then lowers what is left. Neither step takes the damage below 0. The card's damage is untrusted HTML, so
+ * it is clamped to 0-99 as the legacy attack card's dice are. A `roll` message's damage goes through
  * module/services/combat/damage.js. module/hooks/register-all.js wires the binder.
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/73_armor.md, p.198
  */
 import { T, F } from "../../utils/localization.js";
+import { getClamped } from "../../utils/type-coercion.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /**
@@ -22,12 +24,22 @@ export function bindLegacyDamageCard(message, html) {
   }
   // renderChatMessageHTML passes an HTMLElement, not jQuery
   bindDebouncedClick(html.querySelector("[data-action='apply-wounds']"), event =>
-    applyWoundsToToken(parseInt(event.currentTarget.dataset.damage) || 0)
+    applyWoundsToToken(parseCardDamage(event.currentTarget))
   );
   bindDebouncedClick(html.querySelector("[data-action='reduce-wounds-void']"), event => {
     const button = event.currentTarget;
-    return applyWoundsWithVoid(parseInt(button.dataset.damage) || 0, button.dataset.actorId);
+    return applyWoundsWithVoid(parseCardDamage(button), button.dataset.actorId);
   });
+}
+
+/**
+ * A posted card's damage, read from its `data-damage` as untrusted input: a whole number clamped to 0-99, as the
+ * legacy attack card clamps its dice (`validateLegacyDamageClick` in module/services/chat.js).
+ * @param {HTMLElement} button - The damage button
+ * @returns {number}
+ */
+function parseCardDamage(button) {
+  return getClamped(parseInt(button.dataset.damage) || 0, 0, 99);
 }
 
 /**

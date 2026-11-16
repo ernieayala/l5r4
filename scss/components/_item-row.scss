@@ -9,6 +9,7 @@
 .l5r4-item-row-list {
   display: flex;
   flex-direction: column;
+  font-variant-numeric: tabular-nums;
   gap: var(--l5r4-space-gap-tight);
 
   &.l5r4-sort-header {
