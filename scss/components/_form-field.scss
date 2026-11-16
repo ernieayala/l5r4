@@ -1,32 +1,29 @@
 /**
- * Form Controls
- * Styling for input, select, and textarea elements
+ * Form Field
+ * A header label and the value beside it on the PC and NPC sheets (components/form-field.md). The sheets' bare-input
+ * reset is in sheets/_actor-sheet.scss
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  input,
-  select,
-  textarea {
-    border: none;
-    box-shadow: none;
-    margin: 0;
-    resize: none;
-  }
+@use "../base/variables" as *;
 
-  .l5r4-form-field-value {
-    align-items: center;
-    color: var(--l5r4-color-text);
-    display: inline-flex;
-    font-family: inherit;
-    font-size: inherit;
-    height: var(--input-height);
-    line-height: var(--input-height);
-    margin: 0;
-    min-width: 20px;
-    padding: 0 var(--l5r4-space-8);
-    text-align: inherit;
-    user-select: text;
-    width: calc(100% - 2px);
-  }
+.l5r4-form-field-label {
+  text-wrap: nowrap;
+
+  @include title-row;
+}
+
+.l5r4-form-field-value {
+  align-items: center;
+  color: var(--l5r4-color-text);
+  display: inline-flex;
+  font-family: inherit;
+  font-size: inherit;
+  height: var(--input-height);
+  line-height: var(--input-height);
+  margin: 0;
+  min-width: 20px;
+  padding: 0 var(--l5r4-space-8);
+  text-align: inherit;
+  user-select: text;
+  width: calc(100% - 2px);
 }

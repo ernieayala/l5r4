@@ -1,54 +1,52 @@
 /**
- * Wounds
- * Wound tracking grid for character sheets and wound config modal
+ * Wound Track
+ * The Wound Ranks table inside a grid, on the PC and NPC sheets and in the wound configuration window
+ * (components/wound-track.md). Scoped by the grid it sits in, so it overrides the grid's cell rules
  */
 
-.l5r4.pc,
-.l5r4.npc,
-.l5r4-wound-config {
-  .l5r4-grid .l5r4-wound-track {
-    border-block-end: none;
-    display: grid;
-    grid-column: 1 / 3;
-    grid-template-columns: 1fr min-content min-content min-content;
-    padding: 0;
+.l5r4-grid .l5r4-wound-track {
+  border-block-end: none;
+  display: grid;
+  grid-column: 1 / 3;
+  grid-template-columns: 1fr min-content min-content min-content;
+  padding: 0;
 
-    > span {
-      align-items: center;
-      background: var(--l5r4-color-panel);
-      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-      border-inline-end: none;
-      display: inline-flex;
-      font-family: var(--l5r4-font-label);
-      font-size: var(--l5r4-font-size-label);
-      height: 100%;
-      justify-content: center;
-      padding: var(--l5r4-space-4);
+  > span {
+    align-items: center;
+    background: var(--l5r4-color-panel);
+    border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    border-inline-end: none;
+    display: inline-flex;
+    font-family: var(--l5r4-font-label);
+    font-size: var(--l5r4-font-size-label);
+    height: 100%;
+    justify-content: center;
+    padding: var(--l5r4-space-4);
 
-      &:first-child {
-        justify-content: start;
-      }
+    &:first-child {
+      justify-content: start;
+    }
+  }
+
+  > div {
+    align-items: center;
+    border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    display: inline-flex;
+    justify-content: center;
+
+    // No block padding: the row's min-height sets its height. 25px, not --l5r4-size-target: 1px less per row takes
+    // 8px off the track, a size change Stage 17 decision 9 does not take
+    min-height: 25px;
+    padding: 0 var(--l5r4-space-4);
+
+    &:nth-child(4n + 1) {
+      justify-content: start;
     }
 
-    > div {
-      align-items: center;
-      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-      display: inline-flex;
-      justify-content: center;
-      min-height: 25px;
-
-      // No block padding: the row's min-height sets its height
-      padding: 0 var(--l5r4-space-4);
-
-      &:nth-child(4n + 1) {
-        justify-content: start;
-      }
-
-      input {
-        height: auto;
-        line-height: 1;
-        text-align: center;
-      }
+    input {
+      height: auto;
+      line-height: 1;
+      text-align: center;
     }
   }
 }

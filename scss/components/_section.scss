@@ -1,96 +1,100 @@
 /**
- * Sections
- * Section titles and containers used throughout sheets
+ * Section
+ * Section title rows, headings, and bodies of the PC and NPC sheets (components/section.md)
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  .l5r4-section-title {
-    align-items: center;
-    background: var(--l5r4-color-header);
-    color: var(--l5r4-color-text-on-header);
-    flex-wrap: nowrap;
-    margin: 0;
-    padding: var(--l5r4-space-card);
+@use "../base/variables" as *;
 
-    &.is-collapsed {
-      ~ .l5r4-item-row-list {
-        display: none;
-      }
-    }
+// Core's icon buttons in a section's title row, and the Fear test under its grid
+.l5r4-section .button {
+  cursor: pointer;
+  display: inline-flex;
+}
 
-    .l5r4-section-heading,
-    .button,
-    button,
-    input,
-    input::placeholder {
-      color: inherit;
-    }
+.l5r4-section-title {
+  align-items: center;
+  background: var(--l5r4-color-header);
+  color: var(--l5r4-color-text-on-header);
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: var(--l5r4-space-card);
 
-    input[type="text"],
-    input[type="number"] {
-      max-width: 46px;
-      width: auto;
-    }
-
-    span {
-      text-wrap: nowrap;
-    }
-
-    .flexrow.l5r4-wealth,
-    .flexrow.l5r4-spell-slots {
-      flex-wrap: nowrap;
-    }
-
-    .l5r4-spell-slot {
-      position: relative;
-
-      img {
-        border-radius: var(--l5r4-radius-round);
-        height: 32px;
-        width: 32px;
-      }
-
-      // A <button>: border, font, min-height, and transition undo core's button look so the count keeps its circle
-      .l5r4-spell-slot-count {
-        align-items: center;
-        background: var(--l5r4-color-scrim);
-        border: none;
-        border-radius: var(--l5r4-radius-round);
-        cursor: var(--conditional-cursor, default);
-        display: inline-flex;
-        font: inherit;
-        height: 32px;
-        justify-content: center;
-        left: 0;
-        min-height: 0;
-        padding: 0;
-        position: absolute;
-        text-shadow: var(--l5r4-shadow-text-halo);
-        top: 0;
-        transition: none;
-        width: 32px;
-      }
+  &.is-collapsed {
+    ~ .l5r4-item-row-list {
+      display: none;
     }
   }
 
-  .l5r4-section-body {
-    padding: 0 var(--l5r4-space-8);
-  }
-
-  // Item and attack row names keep the posted card's `title`; section headings and header labels share its look
-  .title,
   .l5r4-section-heading,
-  .l5r4-form-field-label {
-    align-items: center;
-    display: inline-flex;
-    font-size: var(--l5r4-font-size-title);
-    margin: 0;
-    min-height: var(--input-height);
-    text-wrap: nowrap;
+  .button,
+  button,
+  input,
+  input::placeholder {
+    color: inherit;
+  }
 
-    &.-compact {
-      min-height: auto;
+  input[type="text"],
+  input[type="number"] {
+    max-width: 46px;
+    width: auto;
+  }
+
+  span {
+    text-wrap: nowrap;
+  }
+
+  .flexrow.l5r4-wealth,
+  .flexrow.l5r4-spell-slots {
+    flex-wrap: nowrap;
+  }
+
+  .l5r4-spell-slot {
+    position: relative;
+
+    img {
+      border-radius: var(--l5r4-radius-round);
+      height: var(--l5r4-size-item-icon);
+      width: var(--l5r4-size-item-icon);
     }
+
+    // A <button>: border, font, min-height, and transition undo core's button look so the count keeps its circle.
+    // While Shift is held, the sheet's Shift+click controls show the pointer (module/mixins/keyboard-behavior-mixin.js)
+    .l5r4-spell-slot-count {
+      align-items: center;
+      background: var(--l5r4-color-scrim);
+      border: none;
+      border-radius: var(--l5r4-radius-round);
+      cursor: default;
+      display: inline-flex;
+      font: inherit;
+      height: var(--l5r4-size-item-icon);
+      justify-content: center;
+      left: 0;
+      min-height: 0;
+      padding: 0;
+      position: absolute;
+      text-shadow: var(--l5r4-shadow-text-halo);
+      top: 0;
+      transition: none;
+      width: var(--l5r4-size-item-icon);
+
+      .is-shift-held & {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.l5r4-section-body {
+  padding: 0 var(--l5r4-space-8);
+}
+
+.l5r4-section-heading {
+  text-wrap: nowrap;
+
+  @include title-row;
+
+  &.-compact {
+    min-height: auto;
   }
 }

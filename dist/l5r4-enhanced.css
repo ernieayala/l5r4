@@ -7,7 +7,7 @@
  * - components/  → Reusable UI components
  * - features/    → Domain-specific feature modules
  * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
+ * - sheets/      → Rules for one sheet as a whole
  * A few partials sit outside their folder's group: the cascade keeps the order the stylesheet had.
  */
 /**
@@ -59,6 +59,20 @@
   --l5r4-space-control-inline: var(--l5r4-space-8);
   --l5r4-space-card: var(--l5r4-space-8);
   --l5r4-space-section: var(--l5r4-space-16);
+  --l5r4-size-portrait: 240px;
+  --l5r4-size-medallion: 96px;
+  --l5r4-size-ring-rank: 32px;
+  --l5r4-size-trait-rank: 28px;
+  --l5r4-size-item-icon: 32px;
+  --l5r4-size-rank-block: 64px;
+  --l5r4-size-void-point: 12px;
+  --l5r4-size-stepper: 16px;
+  --l5r4-size-target: 24px;
+  --l5r4-size-column-60: 60px;
+  --l5r4-size-column-80: 80px;
+  --l5r4-size-column-100: 100px;
+  --l5r4-size-column-120: 120px;
+  --l5r4-size-column-150: 150px;
   --l5r4-size-column-controls: 102px;
   --l5r4-size-icon-sm: 0.625rem;
   --l5r4-border-width-thin: 1px;
@@ -80,6 +94,7 @@
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
   --l5r4-state-pressed-transform: scale(0.98);
+  --l5r4-state-disabled-opacity: 0.75;
 }
 
 .theme-light,
@@ -237,46 +252,21 @@ body > * {
 
 /**
  * Actor Layout
- * Grid and flexbox layouts for actor sheets (PC and NPC)
+ * The two-column grid of the PC and NPC sheets and their Limited view. The window's own rules are in
+ * sheets/_actor-sheet.scss
  */
-.l5r4.pc,
-.l5r4.npc {
-  display: flex;
-  flex-direction: column;
-}
-.l5r4.pc.is-shift-held,
-.l5r4.npc.is-shift-held {
-  --conditional-cursor: pointer;
-}
-.l5r4.pc .window-content,
-.l5r4.npc .window-content {
-  flex-flow: row;
-  gap: var(--l5r4-space-section);
-  overflow-y: auto;
-  padding: 0;
-}
-.l5r4.pc .window-content > .flexcol,
-.l5r4.npc .window-content > .flexcol {
-  flex: 1 1 100%;
-}
-.l5r4.pc .window-content > .flexcol.l5r4-sheet-sidebar,
-.l5r4.npc .window-content > .flexcol.l5r4-sheet-sidebar {
-  flex: 0;
-}
-.l5r4.pc .l5r4-sheet-body,
-.l5r4.npc .l5r4-sheet-body {
+.l5r4-sheet-body {
   column-gap: var(--l5r4-space-section);
   display: inline-grid;
   grid-template-columns: 1fr min-content;
   height: 100%;
   width: calc(100% - 2px);
 }
-.l5r4.pc .l5r4-limited,
-.l5r4.npc .l5r4-limited {
+
+.l5r4-limited {
   padding: var(--l5r4-space-section);
 }
-.l5r4.pc .l5r4-limited > *,
-.l5r4.npc .l5r4-limited > * {
+.l5r4-limited > * {
   align-items: center;
   margin: 0;
   text-align: center;
@@ -286,62 +276,57 @@ body > * {
  * Sidebar Layout
  * Actor sheet sidebar component (actor image and compact sections)
  */
-.l5r4.pc .l5r4-portrait,
-.l5r4.npc .l5r4-portrait {
+.l5r4-portrait {
   align-items: center;
   display: flex;
-  height: 240px;
+  height: var(--l5r4-size-portrait);
   justify-content: center;
-  max-width: 240px;
-  min-width: 240px;
-  width: 240px;
+  max-width: var(--l5r4-size-portrait);
+  min-width: var(--l5r4-size-portrait);
+  width: var(--l5r4-size-portrait);
 }
-.l5r4.pc .l5r4-portrait img,
-.l5r4.npc .l5r4-portrait img {
+.l5r4-portrait img {
   max-height: 100%;
   max-width: 100%;
 }
 
 /**
  * Item Layout
- * Layouts for item sheets
+ * The item sheet's header, tab panels, and Active Effects list. The window's own rules are in sheets/_item-sheet.scss
  */
-.l5r4.item .window-content {
-  gap: var(--l5r4-space-8);
-  overflow: auto;
-}
-.l5r4.item .tab {
-  gap: var(--l5r4-space-4);
-}
-.l5r4.item .tab .l5r4-item-description-heading {
-  margin: var(--l5r4-space-8) 0 0;
-}
-.l5r4.item .l5r4-item-header-fields > h1 {
-  margin: 0;
-}
-.l5r4.item .l5r4-item-header-fields > h1 input {
-  height: auto;
-}
-.l5r4.item .editor {
-  min-height: 200px;
-}
-.l5r4.item prose-mirror {
-  border-block-end: var(--sidebar-separator);
-}
-.l5r4.item .l5r4-effect-list {
-  margin: 0;
-  padding: 0;
-}
-.l5r4.item .l5r4-effect-list .l5r4-effect-list-row {
-  margin-block-start: var(--l5r4-space-8);
-}
-.l5r4.item .l5r4-inline-control {
-  flex-wrap: nowrap;
-}
-
 .l5r4-item-header .l5r4-item-header-image {
   block-size: 64px;
   inline-size: 64px;
+}
+.l5r4-item-header .l5r4-item-header-fields > h1 {
+  margin: 0;
+}
+.l5r4-item-header .l5r4-item-header-fields > h1 input {
+  height: auto;
+}
+
+.l5r4-section.tab {
+  gap: var(--l5r4-space-4);
+}
+.l5r4-section.tab .l5r4-item-description-heading {
+  margin: var(--l5r4-space-8) 0 0;
+}
+.l5r4-section.tab .editor {
+  min-height: 200px;
+}
+.l5r4-section.tab prose-mirror {
+  border-block-end: var(--sidebar-separator);
+}
+
+.l5r4-effect-list {
+  margin: 0;
+  padding: 0;
+}
+.l5r4-effect-list .l5r4-effect-list-row {
+  margin-block-start: var(--l5r4-space-8);
+}
+.l5r4-effect-list .l5r4-inline-control {
+  flex-wrap: nowrap;
 }
 
 .l5r4-item-details,
@@ -350,22 +335,20 @@ body > * {
 }
 
 /**
- * Form Controls
- * Styling for input, select, and textarea elements
+ * Form Field
+ * A header label and the value beside it on the PC and NPC sheets (components/form-field.md). The sheets' bare-input
+ * reset is in sheets/_actor-sheet.scss
  */
-.l5r4.pc input,
-.l5r4.pc select,
-.l5r4.pc textarea,
-.l5r4.npc input,
-.l5r4.npc select,
-.l5r4.npc textarea {
-  border: none;
-  box-shadow: none;
+.l5r4-form-field-label {
+  text-wrap: nowrap;
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--l5r4-font-size-title);
   margin: 0;
-  resize: none;
+  min-height: var(--input-height);
 }
-.l5r4.pc .l5r4-form-field-value,
-.l5r4.npc .l5r4-form-field-value {
+
+.l5r4-form-field-value {
   align-items: center;
   color: var(--l5r4-color-text);
   display: inline-flex;
@@ -382,391 +365,17 @@ body > * {
 }
 
 /**
- * Buttons
- * Reusable button component styles
- */
-.l5r4.pc .button,
-.l5r4.npc .button,
-.l5r4.item .button {
-  cursor: pointer;
-  display: inline-flex;
-}
-
-/**
- * Grids
- * Reusable grid component patterns
- */
-.l5r4.pc .l5r4-grid,
-.l5r4.npc .l5r4-grid {
-  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-  border-block-end: none;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-.l5r4.pc .l5r4-grid > span,
-.l5r4.pc .l5r4-grid > div,
-.l5r4.npc .l5r4-grid > span,
-.l5r4.npc .l5r4-grid > div {
-  border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-}
-.l5r4.pc .l5r4-grid > span,
-.l5r4.npc .l5r4-grid > span {
-  align-items: center;
-  background: var(--l5r4-color-panel);
-  border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-  display: inline-flex;
-  font-family: var(--l5r4-font-label);
-  font-size: var(--l5r4-font-size-label);
-  height: 100%;
-  padding: var(--l5r4-space-4);
-}
-.l5r4.pc .l5r4-grid > div,
-.l5r4.npc .l5r4-grid > div {
-  align-items: center;
-  font-size: var(--l5r4-font-size-label);
-  padding: var(--l5r4-space-4);
-}
-.l5r4.pc .l5r4-grid > div > input,
-.l5r4.pc .l5r4-grid > div > select,
-.l5r4.npc .l5r4-grid > div > input,
-.l5r4.npc .l5r4-grid > div > select {
-  height: auto;
-  line-height: 1;
-}
-.l5r4.pc .l5r4-grid > div > span,
-.l5r4.npc .l5r4-grid > div > span {
-  padding: 0 var(--l5r4-space-8);
-}
-
-/**
- * Sections
- * Section titles and containers used throughout sheets
- */
-.l5r4.pc .l5r4-section-title,
-.l5r4.npc .l5r4-section-title {
-  align-items: center;
-  background: var(--l5r4-color-header);
-  color: var(--l5r4-color-text-on-header);
-  flex-wrap: nowrap;
-  margin: 0;
-  padding: var(--l5r4-space-card);
-}
-.l5r4.pc .l5r4-section-title.is-collapsed ~ .l5r4-item-row-list,
-.l5r4.npc .l5r4-section-title.is-collapsed ~ .l5r4-item-row-list {
-  display: none;
-}
-.l5r4.pc .l5r4-section-title .l5r4-section-heading,
-.l5r4.pc .l5r4-section-title .button,
-.l5r4.pc .l5r4-section-title button,
-.l5r4.pc .l5r4-section-title input,
-.l5r4.pc .l5r4-section-title input::placeholder,
-.l5r4.npc .l5r4-section-title .l5r4-section-heading,
-.l5r4.npc .l5r4-section-title .button,
-.l5r4.npc .l5r4-section-title button,
-.l5r4.npc .l5r4-section-title input,
-.l5r4.npc .l5r4-section-title input::placeholder {
-  color: inherit;
-}
-.l5r4.pc .l5r4-section-title input[type=text],
-.l5r4.pc .l5r4-section-title input[type=number],
-.l5r4.npc .l5r4-section-title input[type=text],
-.l5r4.npc .l5r4-section-title input[type=number] {
-  max-width: 46px;
-  width: auto;
-}
-.l5r4.pc .l5r4-section-title span,
-.l5r4.npc .l5r4-section-title span {
-  text-wrap: nowrap;
-}
-.l5r4.pc .l5r4-section-title .flexrow.l5r4-wealth,
-.l5r4.pc .l5r4-section-title .flexrow.l5r4-spell-slots,
-.l5r4.npc .l5r4-section-title .flexrow.l5r4-wealth,
-.l5r4.npc .l5r4-section-title .flexrow.l5r4-spell-slots {
-  flex-wrap: nowrap;
-}
-.l5r4.pc .l5r4-section-title .l5r4-spell-slot,
-.l5r4.npc .l5r4-section-title .l5r4-spell-slot {
-  position: relative;
-}
-.l5r4.pc .l5r4-section-title .l5r4-spell-slot img,
-.l5r4.npc .l5r4-section-title .l5r4-spell-slot img {
-  border-radius: var(--l5r4-radius-round);
-  height: 32px;
-  width: 32px;
-}
-.l5r4.pc .l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count,
-.l5r4.npc .l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count {
-  align-items: center;
-  background: var(--l5r4-color-scrim);
-  border: none;
-  border-radius: var(--l5r4-radius-round);
-  cursor: var(--conditional-cursor, default);
-  display: inline-flex;
-  font: inherit;
-  height: 32px;
-  justify-content: center;
-  left: 0;
-  min-height: 0;
-  padding: 0;
-  position: absolute;
-  text-shadow: var(--l5r4-shadow-text-halo);
-  top: 0;
-  transition: none;
-  width: 32px;
-}
-.l5r4.pc .l5r4-section-body,
-.l5r4.npc .l5r4-section-body {
-  padding: 0 var(--l5r4-space-8);
-}
-.l5r4.pc .title,
-.l5r4.pc .l5r4-section-heading,
-.l5r4.pc .l5r4-form-field-label,
-.l5r4.npc .title,
-.l5r4.npc .l5r4-section-heading,
-.l5r4.npc .l5r4-form-field-label {
-  align-items: center;
-  display: inline-flex;
-  font-size: var(--l5r4-font-size-title);
-  margin: 0;
-  min-height: var(--input-height);
-  text-wrap: nowrap;
-}
-.l5r4.pc .title.-compact,
-.l5r4.pc .l5r4-section-heading.-compact,
-.l5r4.pc .l5r4-form-field-label.-compact,
-.l5r4.npc .title.-compact,
-.l5r4.npc .l5r4-section-heading.-compact,
-.l5r4.npc .l5r4-form-field-label.-compact {
-  min-height: auto;
-}
-
-/**
- * Item Lists
- * Grid layouts and styling for item lists in actor sheets
- */
-.l5r4.pc .l5r4-item-row-list,
-.l5r4.npc .l5r4-item-row-list,
-.l5r4-xp-manager .l5r4-item-row-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--l5r4-space-gap-tight);
-}
-.l5r4.pc .l5r4-item-row-list.l5r4-sort-header,
-.l5r4.npc .l5r4-item-row-list.l5r4-sort-header,
-.l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header {
-  background: var(--l5r4-color-panel);
-  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-  border-inline-start: none;
-  color: var(--table-header-text-color);
-  font-weight: bold;
-  padding: var(--l5r4-space-card);
-}
-.l5r4.pc .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row {
-  padding: 0;
-}
-.l5r4.pc .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button,
-.l5r4.npc .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button,
-.l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button {
-  background: none;
-  border: none;
-  border-radius: 0;
-  color: inherit;
-  display: block;
-  font: inherit;
-  height: auto;
-  min-height: 0;
-  padding: 0;
-  text-align: inherit;
-  transition: none;
-}
-.l5r4.pc .l5r4-item-row-list.-attacks .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-attacks .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-attacks .l5r4-item-row {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-advantage .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-advantage .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-advantage .l5r4-item-row {
-  grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-armor .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-armor .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-armor .l5r4-item-row {
-  grid-template-columns: 1fr 80px 100px 100px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-bio .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-bio .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-bio .l5r4-item-row {
-  grid-template-columns: 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list,
-.l5r4.npc .l5r4-item-row-list,
-.l5r4-xp-manager .l5r4-item-row-list {
-  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
-}
-.l5r4.pc .l5r4-item-row-list.-commonItem .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-commonItem .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-commonItem .l5r4-item-row {
-  grid-template-columns: 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-disadvantage .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-disadvantage .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-disadvantage .l5r4-item-row {
-  grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-kata .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-kata .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-kata .l5r4-item-row {
-  grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-kiho .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-kiho .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-kiho .l5r4-item-row {
-  grid-template-columns: 1fr 80px 80px 80px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-skill .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-skill .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-skill .l5r4-item-row {
-  grid-template-columns: 1fr 60px 120px 60px 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-spell .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-spell .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-spell .l5r4-item-row {
-  grid-template-columns: 1fr 80px 60px 60px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-tattoo .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-tattoo .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-tattoo .l5r4-item-row {
-  grid-template-columns: 1fr 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-technique .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-technique .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-technique .l5r4-item-row {
-  grid-template-columns: 1fr 1fr 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-weapon .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-weapon .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-weapon .l5r4-item-row {
-  grid-template-columns: 1fr 80px 80px 150px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-xp .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-xp .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-xp .l5r4-item-row {
-  grid-template-columns: 150px 1fr var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list.-xp-spent .l5r4-item-row,
-.l5r4.npc .l5r4-item-row-list.-xp-spent .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row-list.-xp-spent .l5r4-item-row {
-  grid-template-columns: 1fr 80px 120px var(--l5r4-size-column-controls);
-}
-.l5r4.pc .l5r4-item-row-list > .l5r4-item-row:nth-of-type(even),
-.l5r4.npc .l5r4-item-row-list > .l5r4-item-row:nth-of-type(even),
-.l5r4-xp-manager .l5r4-item-row-list > .l5r4-item-row:nth-of-type(even) {
-  background-color: var(--l5r4-color-row-alt);
-}
-.l5r4.pc .l5r4-item-row,
-.l5r4.npc .l5r4-item-row,
-.l5r4-xp-manager .l5r4-item-row {
-  align-items: center;
-  column-gap: var(--l5r4-space-4);
-  display: grid;
-  grid-template-rows: min-content min-content;
-  padding: 0 var(--l5r4-space-8);
-}
-.l5r4.pc .l5r4-item-row:hover .inline-control, .l5r4.pc .l5r4-item-row:has(:focus-visible) .inline-control,
-.l5r4.npc .l5r4-item-row:hover .inline-control,
-.l5r4.npc .l5r4-item-row:has(:focus-visible) .inline-control,
-.l5r4-xp-manager .l5r4-item-row:hover .inline-control,
-.l5r4-xp-manager .l5r4-item-row:has(:focus-visible) .inline-control {
-  opacity: 1;
-  pointer-events: all;
-}
-.l5r4.pc .l5r4-item-row.-bio,
-.l5r4.npc .l5r4-item-row.-bio,
-.l5r4-xp-manager .l5r4-item-row.-bio {
-  background: var(--l5r4-color-panel);
-}
-.l5r4.pc .l5r4-item-row.-expandable .inline-control.l5r4-expand-control,
-.l5r4.npc .l5r4-item-row.-expandable .inline-control.l5r4-expand-control,
-.l5r4-xp-manager .l5r4-item-row.-expandable .inline-control.l5r4-expand-control {
-  display: flex;
-}
-.l5r4.pc .l5r4-item-row.is-expanded .l5r4-item-row-details,
-.l5r4.npc .l5r4-item-row.is-expanded .l5r4-item-row-details,
-.l5r4-xp-manager .l5r4-item-row.is-expanded .l5r4-item-row-details {
-  display: block;
-}
-.l5r4.pc .l5r4-item-row select,
-.l5r4.pc .l5r4-item-row input[type=number],
-.l5r4.npc .l5r4-item-row select,
-.l5r4.npc .l5r4-item-row input[type=number],
-.l5r4-xp-manager .l5r4-item-row select,
-.l5r4-xp-manager .l5r4-item-row input[type=number] {
-  border: var(--l5r4-border-width-thin) solid var(--input-border-color);
-  height: 2em;
-  min-height: 2em;
-}
-.l5r4.pc .l5r4-item-row .l5r4-item-row-badge,
-.l5r4.npc .l5r4-item-row .l5r4-item-row-badge,
-.l5r4-xp-manager .l5r4-item-row .l5r4-item-row-badge {
-  block-size: 16px;
-  inline-size: 16px;
-}
-.l5r4.pc .l5r4-item-row .title,
-.l5r4.npc .l5r4-item-row .title,
-.l5r4-xp-manager .l5r4-item-row .title {
-  text-wrap: revert;
-}
-.l5r4.pc .l5r4-item-row .title a[data-action=post-item],
-.l5r4.npc .l5r4-item-row .title a[data-action=post-item],
-.l5r4-xp-manager .l5r4-item-row .title a[data-action=post-item] {
-  color: inherit;
-  cursor: var(--conditional-cursor, default);
-  text-decoration: none;
-  text-shadow: none;
-}
-.l5r4.pc .l5r4-item-row .l5r4-inline-control,
-.l5r4.npc .l5r4-item-row .l5r4-inline-control,
-.l5r4-xp-manager .l5r4-item-row .l5r4-inline-control {
-  justify-content: flex-end;
-}
-.l5r4.pc .l5r4-item-row .inline-control,
-.l5r4.npc .l5r4-item-row .inline-control,
-.l5r4-xp-manager .l5r4-item-row .inline-control {
-  opacity: 0;
-  pointer-events: none;
-  transition: none;
-}
-.l5r4.pc .l5r4-item-row .inline-control.l5r4-expand-control,
-.l5r4.npc .l5r4-item-row .inline-control.l5r4-expand-control,
-.l5r4-xp-manager .l5r4-item-row .inline-control.l5r4-expand-control {
-  display: none;
-}
-.l5r4.pc .l5r4-item-row .l5r4-item-row-details,
-.l5r4.npc .l5r4-item-row .l5r4-item-row-details,
-.l5r4-xp-manager .l5r4-item-row .l5r4-item-row-details {
-  display: none;
-  font-size: var(--l5r4-font-size-body);
-  grid-column: 1/-1;
-  grid-row: 2;
-}
-
-/**
- * Animations
- * Keyframe animations and animated components
+ * Button
+ * The roll button: a label under a brush-stroke face whose sprite plays on hover (components/button.md)
  * Animation technique credit: Yugam (https://codepen.io/pizza3)
  */
-.l5r4.pc .l5r4-button.-roll,
-.l5r4.npc .l5r4-button.-roll {
+.l5r4-button.-roll {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
   border-radius: 0;
   overflow: hidden;
   position: relative;
 }
-.l5r4.pc .l5r4-button.-roll .l5r4-button-under,
-.l5r4.npc .l5r4-button.-roll .l5r4-button-under {
+.l5r4-button.-roll .l5r4-button-under {
   align-items: center;
   color: var(--l5r4-color-text);
   display: flex;
@@ -778,8 +387,7 @@ body > * {
   text-align: center;
   width: 100%;
 }
-.l5r4.pc .l5r4-button.-roll .l5r4-button-face,
-.l5r4.npc .l5r4-button.-roll .l5r4-button-face {
+.l5r4-button.-roll .l5r4-button-face {
   background: var(--l5r4-color-action);
   border: none;
   border-radius: 0;
@@ -793,19 +401,336 @@ body > * {
   mask-size: 3000% 100%;
   width: 100%;
 }
-.l5r4.pc .l5r4-button.-roll .l5r4-button-face:hover,
-.l5r4.npc .l5r4-button.-roll .l5r4-button-face:hover {
+.l5r4-button.-roll .l5r4-button-face:hover:not(:disabled) {
   animation: mask-reverse-urban var(--l5r4-duration-sprite) steps(29) forwards;
 }
-.l5r4.pc .l5r4-rank-control.-track,
-.l5r4.npc .l5r4-rank-control.-track {
+.l5r4-button.-roll .l5r4-button-face:disabled {
+  opacity: var(--l5r4-state-disabled-opacity);
+}
+
+/**
+ * Grid
+ * Two-column label and value grid of the sheet sidebar blocks (components/grid.md)
+ */
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) {
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  border-block-end: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > span,
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > div {
+  border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+}
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > span {
+  align-items: center;
+  background: var(--l5r4-color-panel);
+  border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  display: inline-flex;
+  font-family: var(--l5r4-font-label);
+  font-size: var(--l5r4-font-size-label);
+  height: 100%;
+  padding: var(--l5r4-space-4);
+}
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > div {
+  align-items: center;
+  font-size: var(--l5r4-font-size-label);
+  padding: var(--l5r4-space-4);
+}
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > div > input,
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > div > select {
+  height: auto;
+  line-height: 1;
+}
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) > div > span {
+  padding: 0 var(--l5r4-space-8);
+}
+
+/**
+ * Section
+ * Section title rows, headings, and bodies of the PC and NPC sheets (components/section.md)
+ */
+.l5r4-section .button {
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.l5r4-section-title {
+  align-items: center;
+  background: var(--l5r4-color-header);
+  color: var(--l5r4-color-text-on-header);
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: var(--l5r4-space-card);
+}
+.l5r4-section-title.is-collapsed ~ .l5r4-item-row-list {
+  display: none;
+}
+.l5r4-section-title .l5r4-section-heading,
+.l5r4-section-title .button,
+.l5r4-section-title button,
+.l5r4-section-title input,
+.l5r4-section-title input::placeholder {
+  color: inherit;
+}
+.l5r4-section-title input[type=text],
+.l5r4-section-title input[type=number] {
+  max-width: 46px;
+  width: auto;
+}
+.l5r4-section-title span {
+  text-wrap: nowrap;
+}
+.l5r4-section-title .flexrow.l5r4-wealth,
+.l5r4-section-title .flexrow.l5r4-spell-slots {
+  flex-wrap: nowrap;
+}
+.l5r4-section-title .l5r4-spell-slot {
+  position: relative;
+}
+.l5r4-section-title .l5r4-spell-slot img {
+  border-radius: var(--l5r4-radius-round);
+  height: var(--l5r4-size-item-icon);
+  width: var(--l5r4-size-item-icon);
+}
+.l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count {
+  align-items: center;
+  background: var(--l5r4-color-scrim);
+  border: none;
+  border-radius: var(--l5r4-radius-round);
+  cursor: default;
+  display: inline-flex;
+  font: inherit;
+  height: var(--l5r4-size-item-icon);
+  justify-content: center;
+  left: 0;
+  min-height: 0;
+  padding: 0;
+  position: absolute;
+  text-shadow: var(--l5r4-shadow-text-halo);
+  top: 0;
+  transition: none;
+  width: var(--l5r4-size-item-icon);
+}
+.is-shift-held .l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count {
+  cursor: pointer;
+}
+
+.l5r4-section-body {
+  padding: 0 var(--l5r4-space-8);
+}
+
+.l5r4-section-heading {
+  text-wrap: nowrap;
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--l5r4-font-size-title);
+  margin: 0;
+  min-height: var(--input-height);
+}
+.l5r4-section-heading.-compact {
+  min-height: auto;
+}
+
+/**
+ * Item Row
+ * Item lists and their rows on the PC and NPC sheets and in the XP manager (components/item-row.md). A row's card
+ * root also posts to chat, so row rules sit under the list, which a posted card never has
+ */
+.l5r4-item-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+}
+.l5r4-item-row-list.l5r4-sort-header {
+  background: var(--l5r4-color-panel);
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  border-inline-start: none;
+  color: var(--table-header-text-color);
+  font-weight: bold;
+  padding: var(--l5r4-space-card);
+}
+.l5r4-item-row-list.l5r4-sort-header .l5r4-item-row {
+  padding: 0;
+}
+.l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: block;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  text-align: inherit;
+  transition: none;
+}
+.l5r4-item-row-list.-attacks .l5r4-item-row {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-advantage .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-armor .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-100) var(--l5r4-size-column-100) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-bio .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list {
+  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
+}
+.l5r4-item-row-list.-commonItem .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-disadvantage .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-kata .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-kiho .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-skill .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-60) var(--l5r4-size-column-120) var(--l5r4-size-column-60) 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-spell .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-60) var(--l5r4-size-column-60) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-tattoo .l5r4-item-row {
+  grid-template-columns: 1fr 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-technique .l5r4-item-row {
+  grid-template-columns: 1fr 1fr 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-weapon .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-150) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-xp .l5r4-item-row {
+  grid-template-columns: var(--l5r4-size-column-150) 1fr var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list.-xp-spent .l5r4-item-row {
+  grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-120) var(--l5r4-size-column-controls);
+}
+.l5r4-item-row-list .l5r4-item-row {
+  align-items: center;
+  column-gap: var(--l5r4-space-4);
+  display: grid;
+  grid-template-rows: min-content min-content;
+  padding: 0 var(--l5r4-space-8);
+}
+.l5r4-item-row-list .l5r4-item-row:hover .inline-control, .l5r4-item-row-list .l5r4-item-row:focus-within .inline-control {
+  opacity: 1;
+  pointer-events: all;
+}
+.l5r4-item-row-list .l5r4-item-row.-bio {
+  background: var(--l5r4-color-panel);
+}
+.l5r4-item-row-list .l5r4-item-row.-expandable .inline-control.l5r4-expand-control {
+  display: flex;
+}
+.l5r4-item-row-list .l5r4-item-row.is-expanded .l5r4-item-row-details {
+  display: block;
+}
+.l5r4-item-row-list .l5r4-item-row select,
+.l5r4-item-row-list .l5r4-item-row input[type=number] {
+  border: var(--l5r4-border-width-thin) solid var(--input-border-color);
+  height: 2em;
+  min-height: 2em;
+}
+.l5r4-item-row-list .l5r4-item-row .l5r4-item-row-badge {
+  block-size: 16px;
+  inline-size: 16px;
+}
+.l5r4-item-row-list .l5r4-item-row .title {
+  text-wrap: revert;
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--l5r4-font-size-title);
+  margin: 0;
+  min-height: var(--input-height);
+}
+.l5r4-item-row-list .l5r4-item-row .l5r4-inline-control {
+  justify-content: flex-end;
+}
+.l5r4-item-row-list .l5r4-item-row .inline-control {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+.l5r4-item-row-list .l5r4-item-row .inline-control.l5r4-expand-control {
+  display: none;
+}
+.l5r4-item-row-list .l5r4-item-row .l5r4-item-row-details {
+  display: none;
+  font-size: var(--l5r4-font-size-body);
+  grid-column: 1/-1;
+  grid-row: 2;
+}
+.l5r4-item-row-list > .l5r4-item-row:nth-of-type(even) {
+  background-color: var(--l5r4-color-row-alt);
+}
+
+/**
+ * Animations
+ * The brush-stroke sprite keyframes the roll button (components/_button.scss) and the rank block
+ * (components/_rank-control.scss) play on hover
+ * Animation technique credit: Yugam (https://codepen.io/pizza3)
+ */
+@keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+  }
+}
+@keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+  }
+}
+/**
+ * Rank Control
+ * The Honor, Glory, Status, and Taint rank blocks: a label under a value button whose brush-stroke sprite plays on
+ * hover (components/rank-control.md). The 2 by 2 track layout is in features/_ranks.scss
+ */
+.l5r4-rank-control-value {
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: var(--l5r4-font-size-label);
+  line-height: 1;
+  min-height: 0;
+  padding: var(--l5r4-space-4) 0;
+  text-align: center;
+  transition: box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard), filter var(--l5r4-duration-fast) var(--l5r4-easing-standard), outline var(--l5r4-duration-fast) var(--l5r4-easing-standard), transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
+}
+.l5r4-rank-control-value:hover {
+  filter: var(--l5r4-state-hover-filter);
+}
+.l5r4-rank-control-value:active {
+  filter: var(--l5r4-state-pressed-filter);
+  transform: var(--l5r4-state-pressed-transform);
+}
+.l5r4-rank-control-value span:first-child {
+  font-family: var(--l5r4-font-label);
+  font-size: var(--l5r4-font-size-title);
+  font-weight: bold;
+}
+
+.l5r4-rank-control.-track {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
-  height: 64px;
+  height: var(--l5r4-size-rank-block);
   overflow: hidden;
   position: relative;
 }
-.l5r4.pc .l5r4-rank-control.-track .l5r4-rank-control-under,
-.l5r4.npc .l5r4-rank-control.-track .l5r4-rank-control-under {
+.l5r4-rank-control.-track .l5r4-rank-control-under {
   align-items: center;
   color: var(--l5r4-color-text);
   display: flex;
@@ -820,8 +745,7 @@ body > * {
   text-align: center;
   width: 100%;
 }
-.l5r4.pc .l5r4-rank-control.-track .l5r4-rank-control-value,
-.l5r4.npc .l5r4-rank-control.-track .l5r4-rank-control-value {
+.l5r4-rank-control.-track .l5r4-rank-control-value {
   align-items: center;
   background: var(--l5r4-color-header);
   border: none;
@@ -839,43 +763,10 @@ body > * {
   mask-size: 2300% 100%;
   width: 100%;
 }
-.l5r4.pc .l5r4-rank-control.-track .l5r4-rank-control-value:hover,
-.l5r4.npc .l5r4-rank-control.-track .l5r4-rank-control-value:hover {
+.l5r4-rank-control.-track .l5r4-rank-control-value:hover {
   animation: mask-forward-nature var(--l5r4-duration-sprite) steps(22) forwards;
 }
 
-@keyframes mask-forward-urban {
-  from {
-    mask-position: 0 0;
-  }
-  to {
-    mask-position: 100% 0;
-  }
-}
-@keyframes mask-reverse-urban {
-  from {
-    mask-position: 100% 0;
-  }
-  to {
-    mask-position: 0 0;
-  }
-}
-@keyframes mask-forward-nature {
-  from {
-    mask-position: 0 0;
-  }
-  to {
-    mask-position: 100% 0;
-  }
-}
-@keyframes mask-reverse-nature {
-  from {
-    mask-position: 100% 0;
-  }
-  to {
-    mask-position: 0 0;
-  }
-}
 /**
  * Rules Editor
  * The rules editor on item and Active Effect sheets (module/sheets/rules-editor.js)
@@ -991,9 +882,9 @@ body > * {
 }
 .l5r4-effect-panel .l5r4-effect-panel-icon {
   border: none;
-  flex: 0 0 32px;
-  height: 32px;
-  width: 32px;
+  flex: 0 0 var(--l5r4-size-item-icon);
+  height: var(--l5r4-size-item-icon);
+  width: var(--l5r4-size-item-icon);
 }
 .l5r4-effect-panel .l5r4-effect-panel-text {
   display: flex;
@@ -1135,9 +1026,9 @@ body > * {
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-icon {
   border: none;
-  flex: 0 0 32px;
-  height: 32px;
-  width: 32px;
+  flex: 0 0 var(--l5r4-size-item-icon);
+  height: var(--l5r4-size-item-icon);
+  width: var(--l5r4-size-item-icon);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-text {
   display: flex;
@@ -1198,14 +1089,12 @@ body > * {
  * PC Info Section
  * Header section with character name, clan, school, rank, XP, and insight
  */
-.l5r4.pc .l5r4-pc-info,
-.l5r4.npc .l5r4-pc-info {
+.l5r4-pc-info {
   flex-wrap: nowrap;
   padding: var(--l5r4-space-section);
   position: relative;
 }
-.l5r4.pc .l5r4-pc-info::before,
-.l5r4.npc .l5r4-pc-info::before {
+.l5r4-pc-info::before {
   border-image-repeat: stretch;
   border-image-slice: 15 fill;
   border-image-source: url("../assets/borders/brush-08-gray.svg");
@@ -1217,21 +1106,17 @@ body > * {
   position: absolute;
   z-index: var(--l5r4-layer-behind);
 }
-.l5r4.pc .l5r4-pc-info input,
-.l5r4.pc .l5r4-pc-info .l5r4-form-field-value,
-.l5r4.npc .l5r4-pc-info input,
-.l5r4.npc .l5r4-pc-info .l5r4-form-field-value {
+.l5r4-pc-info input,
+.l5r4-pc-info .l5r4-form-field-value {
   background: none;
   font-size: var(--l5r4-font-size-label);
   height: calc(var(--input-height) - 0.5rem);
   line-height: 1;
 }
-.l5r4.pc .l5r4-pc-info .l5r4-form-field-label,
-.l5r4.npc .l5r4-pc-info .l5r4-form-field-label {
+.l5r4-pc-info .l5r4-form-field-label {
   min-height: calc(var(--input-height) - 0.5rem);
 }
-.l5r4.pc .l5r4-pc-info .l5r4-form-field-label-button,
-.l5r4.npc .l5r4-pc-info .l5r4-form-field-label-button {
+.l5r4-pc-info .l5r4-form-field-label-button {
   align-self: stretch;
   background: none;
   border: none;
@@ -1252,7 +1137,7 @@ body > * {
 .l5r4.pc .traits-rings,
 .l5r4.npc .traits-rings {
   display: grid;
-  grid-template-columns: 1fr 32px 32px 32px 32px 32px 32px 8px 8px 32px 32px 32px 32px 32px 32px 1fr;
+  grid-template-columns: 1fr repeat(6, var(--l5r4-size-ring-rank)) 8px 8px repeat(6, var(--l5r4-size-ring-rank)) 1fr;
   grid-template-rows: min-content 1fr 1fr 2px 1fr 1fr 1fr min-content min-content;
   overflow: hidden;
   place-items: center center;
@@ -1264,7 +1149,7 @@ body > * {
   display: inline-flex;
   justify-content: center;
   margin: 0;
-  min-height: 24px;
+  min-height: var(--l5r4-size-target);
   text-align: center;
   width: 100%;
 }
@@ -1278,11 +1163,11 @@ body > * {
   font-family: var(--l5r4-font-display);
   font-size: var(--l5r4-font-size-medallion);
   font-weight: bold;
-  height: 32px;
+  height: var(--l5r4-size-ring-rank);
   margin: 0;
   place-content: center center;
   position: relative;
-  width: 32px;
+  width: var(--l5r4-size-ring-rank);
   z-index: var(--l5r4-layer-medallion);
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank::before,
@@ -1327,23 +1212,23 @@ body > * {
   border-color: var(--l5r4-color-ring-void);
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down {
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-down {
   opacity: 1;
 }
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up {
-  top: -16px;
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-up {
+  top: calc(-1 * var(--l5r4-size-stepper));
 }
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down {
-  bottom: -16px;
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:focus-within .l5r4-rank-control-arrow.-down {
+  bottom: calc(-1 * var(--l5r4-size-stepper));
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-void .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-ring-rank.-void .l5r4-rank-control-arrow.-down,
@@ -1358,7 +1243,7 @@ body > * {
   display: flex;
   font-family: inherit;
   font-size: var(--l5r4-size-icon-sm);
-  height: 16px;
+  height: var(--l5r4-size-stepper);
   justify-content: center;
   left: -2px;
   line-height: inherit;
@@ -1412,14 +1297,14 @@ body > * {
 .l5r4.npc .traits-rings .ring-roll img {
   border-radius: var(--l5r4-radius-round);
   filter: var(--l5r4-shadow-drop);
-  height: 96px;
+  height: var(--l5r4-size-medallion);
   position: relative;
   transition: transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-  width: 96px;
+  width: var(--l5r4-size-medallion);
 }
 .l5r4.pc .traits-rings .l5r4-trait,
 .l5r4.npc .traits-rings .l5r4-trait {
-  height: 28px;
+  height: var(--l5r4-size-trait-rank);
 }
 .l5r4.pc .traits-rings .l5r4-void-points,
 .l5r4.npc .traits-rings .l5r4-void-points {
@@ -1432,7 +1317,7 @@ body > * {
   align-self: center;
   display: grid;
   grid-template-areas: "fill roll rank";
-  grid-template-columns: 1fr min-content 28px;
+  grid-template-columns: 1fr min-content var(--l5r4-size-trait-rank);
   margin: 0;
   place-items: center right;
   width: 100%;
@@ -1485,10 +1370,10 @@ body > * {
   padding: 0 var(--l5r4-space-8);
   width: 100%;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover {
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover:not(:disabled),
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover:not(:disabled),
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover:not(:disabled),
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover:not(:disabled) {
   animation: mask-reverse-urban var(--l5r4-duration-sprite) steps(29) forwards;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait,
@@ -1502,45 +1387,45 @@ body > * {
   font-size: var(--l5r4-font-size-rank);
   font-weight: bold;
   grid-area: rank;
-  height: 28px;
+  height: var(--l5r4-size-trait-rank);
   justify-content: center;
   position: relative;
-  width: 28px;
+  width: var(--l5r4-size-trait-rank);
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down {
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down {
   opacity: 1;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up {
-  top: -16px;
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-up {
+  top: calc(-1 * var(--l5r4-size-stepper));
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down {
-  bottom: -16px;
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:focus-within .l5r4-rank-control-arrow.-down {
+  bottom: calc(-1 * var(--l5r4-size-stepper));
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait .l5r4-rank-control-arrow.-down,
@@ -1559,7 +1444,7 @@ body > * {
   display: flex;
   font-family: inherit;
   font-size: var(--l5r4-size-icon-sm);
-  height: 16px;
+  height: var(--l5r4-size-stepper);
   justify-content: center;
   left: -2px;
   line-height: inherit;
@@ -1592,7 +1477,7 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-agility,
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence {
   grid-template-areas: "rank roll fill";
-  grid-template-columns: 28px min-content 1fr;
+  grid-template-columns: var(--l5r4-size-trait-rank) min-content 1fr;
   justify-items: start;
 }
 .l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-rank-control.-trait .l5r4-rank-control-arrow.-up,
@@ -1919,9 +1804,9 @@ body > * {
 .l5r4.npc .traits-rings .void-dot {
   border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);
   border-radius: var(--l5r4-radius-round);
-  height: 12px;
+  height: var(--l5r4-size-void-point);
   pointer-events: auto;
-  width: 12px;
+  width: var(--l5r4-size-void-point);
 }
 .l5r4.pc .traits-rings .void-dot:hover,
 .l5r4.npc .traits-rings .void-dot:hover {
@@ -1939,65 +1824,33 @@ body > * {
 
 /**
  * Ranks
- * Honor, Glory, Status, and Shadow/Taint rank displays, and the ledger link under them on a PC sheet
- * Note: Animation styles are in components/_animations.scss
+ * The 2 by 2 track of Honor, Glory, Status, and Shadow/Taint rank blocks, and the ledger link under them on a PC sheet.
+ * Each block is a rank control (components/_rank-control.scss)
  */
-.l5r4.pc .l5r4-ranks,
-.l5r4.npc .l5r4-ranks {
+.l5r4-ranks {
   display: grid;
   gap: var(--l5r4-space-4);
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
 }
-.l5r4.pc .l5r4-rank-control-value,
-.l5r4.npc .l5r4-rank-control-value {
-  cursor: pointer;
-  display: flex;
-  font: inherit;
-  font-size: var(--l5r4-font-size-label);
-  line-height: 1;
-  min-height: 0;
-  padding: var(--l5r4-space-4) 0;
-  text-align: center;
-  transition: box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard), filter var(--l5r4-duration-fast) var(--l5r4-easing-standard), outline var(--l5r4-duration-fast) var(--l5r4-easing-standard), transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-}
-.l5r4.pc .l5r4-rank-control-value:hover,
-.l5r4.npc .l5r4-rank-control-value:hover {
-  filter: var(--l5r4-state-hover-filter);
-}
-.l5r4.pc .l5r4-rank-control-value:active,
-.l5r4.npc .l5r4-rank-control-value:active {
-  filter: var(--l5r4-state-pressed-filter);
-  transform: var(--l5r4-state-pressed-transform);
-}
-.l5r4.pc .l5r4-rank-control-value span:first-child,
-.l5r4.npc .l5r4-rank-control-value span:first-child {
-  font-family: var(--l5r4-font-label);
-  font-size: var(--l5r4-font-size-title);
-  font-weight: bold;
-}
-
-.l5r4.pc .l5r4-ranks .l5r4-ranks-ledger {
+.l5r4-ranks .l5r4-ranks-ledger {
   grid-column: 1/-1;
   text-align: center;
 }
 
 /**
- * Wounds
- * Wound tracking grid for character sheets and wound config modal
+ * Wound Track
+ * The Wound Ranks table inside a grid, on the PC and NPC sheets and in the wound configuration window
+ * (components/wound-track.md). Scoped by the grid it sits in, so it overrides the grid's cell rules
  */
-.l5r4.pc .l5r4-grid .l5r4-wound-track,
-.l5r4.npc .l5r4-grid .l5r4-wound-track,
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track {
+.l5r4-grid .l5r4-wound-track {
   border-block-end: none;
   display: grid;
   grid-column: 1/3;
   grid-template-columns: 1fr min-content min-content min-content;
   padding: 0;
 }
-.l5r4.pc .l5r4-grid .l5r4-wound-track > span,
-.l5r4.npc .l5r4-grid .l5r4-wound-track > span,
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track > span {
+.l5r4-grid .l5r4-wound-track > span {
   align-items: center;
   background: var(--l5r4-color-panel);
   border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
@@ -2009,14 +1862,10 @@ body > * {
   justify-content: center;
   padding: var(--l5r4-space-4);
 }
-.l5r4.pc .l5r4-grid .l5r4-wound-track > span:first-child,
-.l5r4.npc .l5r4-grid .l5r4-wound-track > span:first-child,
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track > span:first-child {
+.l5r4-grid .l5r4-wound-track > span:first-child {
   justify-content: start;
 }
-.l5r4.pc .l5r4-grid .l5r4-wound-track > div,
-.l5r4.npc .l5r4-grid .l5r4-wound-track > div,
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track > div {
+.l5r4-grid .l5r4-wound-track > div {
   align-items: center;
   border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
   display: inline-flex;
@@ -2024,14 +1873,10 @@ body > * {
   min-height: 25px;
   padding: 0 var(--l5r4-space-4);
 }
-.l5r4.pc .l5r4-grid .l5r4-wound-track > div:nth-child(4n+1),
-.l5r4.npc .l5r4-grid .l5r4-wound-track > div:nth-child(4n+1),
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track > div:nth-child(4n+1) {
+.l5r4-grid .l5r4-wound-track > div:nth-child(4n+1) {
   justify-content: start;
 }
-.l5r4.pc .l5r4-grid .l5r4-wound-track > div input,
-.l5r4.npc .l5r4-grid .l5r4-wound-track > div input,
-.l5r4-wound-config .l5r4-grid .l5r4-wound-track > div input {
+.l5r4-grid .l5r4-wound-track > div input {
   height: auto;
   line-height: 1;
   text-align: center;
@@ -2089,12 +1934,12 @@ body > * {
   border-inline-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
 }
 .l5r4-xp-manager .l5r4-item-row-list .l5r4-item-row-name {
+  text-wrap: nowrap;
   align-items: center;
   display: inline-flex;
   font-size: var(--l5r4-font-size-title);
   margin: 0;
   min-height: var(--input-height);
-  text-wrap: nowrap;
 }
 
 /**
@@ -2351,12 +2196,47 @@ body > * {
 }
 
 /**
- * Actor Sheet Specific Styles
- * Sheet-specific overrides and additions not covered by other modules
- * Most actor sheet styling is now in layout/, components/, and features/
+ * Actor Sheet
+ * Rules for the PC and NPC sheet as a whole that no component or feature owns (docs/design-system/patterns/sheets.md
+ * rule 7): the window's column layout and the reset of the sheet's bare fields
  */
+.l5r4.pc,
+.l5r4.npc {
+  display: flex;
+  flex-direction: column;
+}
+.l5r4.pc .window-content,
+.l5r4.npc .window-content {
+  flex-flow: row;
+  gap: var(--l5r4-space-section);
+  overflow-y: auto;
+  padding: 0;
+}
+.l5r4.pc .window-content > .flexcol,
+.l5r4.npc .window-content > .flexcol {
+  flex: 1 1 100%;
+}
+.l5r4.pc .window-content > .flexcol.l5r4-sheet-sidebar,
+.l5r4.npc .window-content > .flexcol.l5r4-sheet-sidebar {
+  flex: 0;
+}
+:where(.l5r4.pc,
+.l5r4.npc) input,
+:where(.l5r4.pc,
+.l5r4.npc) select,
+:where(.l5r4.pc,
+.l5r4.npc) textarea {
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  resize: none;
+}
+
 /**
- * Item Sheet Specific Styles
- * Sheet-specific overrides and additions not covered by other modules
- * Most item sheet styling is now in layout/_item-layout.scss and components/
+ * Item Sheet
+ * Rules for the item sheet as a whole that no component or feature owns (docs/design-system/patterns/sheets.md rule 7)
  */
+.l5r4.item .window-content {
+  gap: var(--l5r4-space-8);
+  overflow: auto;
+}

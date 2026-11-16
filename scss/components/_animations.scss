@@ -1,113 +1,9 @@
 /**
  * Animations
- * Keyframe animations and animated components
+ * The brush-stroke sprite keyframes the roll button (components/_button.scss) and the rank block
+ * (components/_rank-control.scss) play on hover
  * Animation technique credit: Yugam (https://codepen.io/pizza3)
  */
-
-@use "../base/variables" as *;
-
-// Button Mask Container
-.l5r4.pc,
-.l5r4.npc {
-  .l5r4-button.-roll {
-    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
-    border-radius: 0;
-    overflow: hidden;
-    position: relative;
-
-    .l5r4-button-under {
-      align-items: center;
-      color: var(--l5r4-color-text);
-      display: flex;
-      font-weight: bold;
-      height: 100%;
-      justify-content: center;
-      pointer-events: none;
-      position: absolute;
-      text-align: center;
-      width: 100%;
-    }
-
-    // The face is a <button>; this rule overrides core's button look with the sprite
-    .l5r4-button-face {
-      background: var(--l5r4-color-action);
-      border: none;
-      border-radius: 0;
-      color: var(--l5r4-color-action-text);
-      cursor: pointer;
-      display: inline-flex;
-      font-weight: bold;
-      height: 100%;
-      mask: url("../assets/animation/urban-sprite.webp");
-      mask-position: 100% 0;
-      mask-size: 3000% 100%;
-      width: 100%;
-
-      &:hover {
-        animation: mask-reverse-urban var(--l5r4-duration-sprite) steps($urban-sprite-steps)
-          forwards;
-      }
-    }
-  }
-
-  .l5r4-rank-control.-track {
-    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
-    height: 64px;
-    overflow: hidden;
-    position: relative;
-
-    .l5r4-rank-control-under {
-      align-items: center;
-      color: var(--l5r4-color-text);
-      display: flex;
-      flex-direction: column;
-      font-weight: bold;
-      gap: var(--l5r4-space-4);
-      height: 100%;
-      justify-content: center;
-      line-height: 1;
-      pointer-events: none;
-      position: absolute;
-      text-align: center;
-      width: 100%;
-    }
-
-    .l5r4-rank-control-value {
-      align-items: center;
-      background: var(--l5r4-color-header);
-      border: none;
-      border-radius: 0;
-      color: var(--l5r4-color-text-on-header);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      font-weight: bold;
-      gap: var(--l5r4-space-4);
-      height: 100%;
-      justify-content: center;
-      mask: url("../assets/animation/nature-sprite.webp");
-      mask-position: 0 0;
-      mask-size: 2300% 100%;
-      width: 100%;
-
-      &:hover {
-        animation: mask-forward-nature var(--l5r4-duration-sprite) steps($nature-sprite-steps)
-          forwards;
-      }
-    }
-  }
-}
-
-// Keyframe Definitions (Deduplicated)
-@keyframes mask-forward-urban {
-  from {
-    mask-position: 0 0;
-  }
-
-  to {
-    mask-position: 100% 0;
-  }
-}
 
 @keyframes mask-reverse-urban {
   from {
@@ -126,15 +22,5 @@
 
   to {
     mask-position: 100% 0;
-  }
-}
-
-@keyframes mask-reverse-nature {
-  from {
-    mask-position: 100% 0;
-  }
-
-  to {
-    mask-position: 0 0;
   }
 }

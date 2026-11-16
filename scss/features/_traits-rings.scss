@@ -9,20 +9,20 @@
 // Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring). Each arrow is a <button>:
 // `border-radius`, `font-family`, `line-height`, `min-height`, and `padding` undo core's button face
 @mixin rank-arrows {
-  // Keyboard focus on an arrow shows both, as the pointer does
+  // Focus on an arrow shows both, as the pointer does (foundations/states.md rule 3)
   &:hover,
-  &:has(:focus-visible) {
+  &:focus-within {
     .l5r4-rank-control-arrow.-up,
     .l5r4-rank-control-arrow.-down {
       opacity: 1;
     }
 
     .l5r4-rank-control-arrow.-up {
-      top: -16px;
+      top: calc(-1 * var(--l5r4-size-stepper));
     }
 
     .l5r4-rank-control-arrow.-down {
-      bottom: -16px;
+      bottom: calc(-1 * var(--l5r4-size-stepper));
     }
   }
 
@@ -37,7 +37,7 @@
     display: flex;
     font-family: inherit;
     font-size: var(--l5r4-size-icon-sm);
-    height: 16px;
+    height: var(--l5r4-size-stepper);
     justify-content: center;
     left: -2px;
     line-height: inherit;
@@ -66,7 +66,9 @@
 .l5r4.npc {
   .traits-rings {
     display: grid;
-    grid-template-columns: 1fr 32px 32px 32px 32px 32px 32px 8px 8px 32px 32px 32px 32px 32px 32px 1fr;
+    grid-template-columns:
+      1fr repeat(6, var(--l5r4-size-ring-rank)) 8px 8px repeat(6, var(--l5r4-size-ring-rank))
+      1fr;
     grid-template-rows: min-content 1fr 1fr 2px 1fr 1fr 1fr min-content min-content;
     overflow: hidden;
     place-items: center center;
@@ -77,7 +79,7 @@
       display: inline-flex;
       justify-content: center;
       margin: 0;
-      min-height: 24px;
+      min-height: var(--l5r4-size-target);
       text-align: center;
       width: 100%;
     }
@@ -91,11 +93,11 @@
       font-family: var(--l5r4-font-display);
       font-size: var(--l5r4-font-size-medallion);
       font-weight: bold;
-      height: 32px;
+      height: var(--l5r4-size-ring-rank);
       margin: 0;
       place-content: center center;
       position: relative;
-      width: 32px;
+      width: var(--l5r4-size-ring-rank);
       z-index: var(--l5r4-layer-medallion);
 
       // The backdrop comes from custom properties set per theme (below), so the nearest themed ancestor decides it:
@@ -186,15 +188,15 @@
       img {
         border-radius: var(--l5r4-radius-round);
         filter: var(--l5r4-shadow-drop);
-        height: 96px;
+        height: var(--l5r4-size-medallion);
         position: relative;
         transition: transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-        width: 96px;
+        width: var(--l5r4-size-medallion);
       }
     }
 
     .l5r4-trait {
-      height: 28px;
+      height: var(--l5r4-size-trait-rank);
     }
 
     .l5r4-void-points {
@@ -206,7 +208,7 @@
       align-self: center;
       display: grid;
       grid-template-areas: "fill roll rank";
-      grid-template-columns: 1fr min-content 28px;
+      grid-template-columns: 1fr min-content var(--l5r4-size-trait-rank);
       margin: 0;
       place-items: center right;
       width: 100%;
@@ -252,7 +254,9 @@
           padding: 0 var(--l5r4-space-8);
           width: 100%;
 
-          &:hover {
+          // Disabled on a sheet the viewer cannot edit: no sprite, and the button rule's disabled opacity
+          // (components/_button.scss)
+          &:hover:not(:disabled) {
             animation: mask-reverse-urban var(--l5r4-duration-sprite) steps($urban-sprite-steps)
               forwards;
           }
@@ -267,10 +271,10 @@
         font-size: var(--l5r4-font-size-rank);
         font-weight: bold;
         grid-area: rank;
-        height: 28px;
+        height: var(--l5r4-size-trait-rank);
         justify-content: center;
         position: relative;
-        width: 28px;
+        width: var(--l5r4-size-trait-rank);
 
         @include rank-arrows;
       }
@@ -281,7 +285,7 @@
     .l5r4-trait.-fire.-agility,
     .l5r4-trait.-fire.-intelligence {
       grid-template-areas: "rank roll fill";
-      grid-template-columns: 28px min-content 1fr;
+      grid-template-columns: var(--l5r4-size-trait-rank) min-content 1fr;
       justify-items: start;
 
       .l5r4-rank-control.-trait {
@@ -572,9 +576,9 @@
     .void-dot {
       border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);
       border-radius: var(--l5r4-radius-round);
-      height: 12px;
+      height: var(--l5r4-size-void-point);
       pointer-events: auto;
-      width: 12px;
+      width: var(--l5r4-size-void-point);
 
       &:hover {
         border-color: var(--l5r4-color-void-point-hover);

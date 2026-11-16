@@ -1,48 +1,23 @@
 /**
  * Actor Layout
- * Grid and flexbox layouts for actor sheets (PC and NPC)
+ * The two-column grid of the PC and NPC sheets and their Limited view. The window's own rules are in
+ * sheets/_actor-sheet.scss
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  display: flex;
-  flex-direction: column;
+.l5r4-sheet-body {
+  column-gap: var(--l5r4-space-section);
+  display: inline-grid;
+  grid-template-columns: 1fr min-content;
+  height: 100%;
+  width: calc(100% - 2px);
+}
 
-  // Shift held: the Shift+Click controls show the pointer (module/mixins/keyboard-behavior-mixin.js)
-  &.is-shift-held {
-    --conditional-cursor: pointer;
-  }
+.l5r4-limited {
+  padding: var(--l5r4-space-section);
 
-  .window-content {
-    flex-flow: row;
-    gap: var(--l5r4-space-section);
-    overflow-y: auto;
-    padding: 0;
-
-    > .flexcol {
-      flex: 1 1 100%;
-
-      &.l5r4-sheet-sidebar {
-        flex: 0;
-      }
-    }
-  }
-
-  .l5r4-sheet-body {
-    column-gap: var(--l5r4-space-section);
-    display: inline-grid;
-    grid-template-columns: 1fr min-content;
-    height: 100%;
-    width: calc(100% - 2px);
-  }
-
-  .l5r4-limited {
-    padding: var(--l5r4-space-section);
-
-    > * {
-      align-items: center;
-      margin: 0;
-      text-align: center;
-    }
+  > * {
+    align-items: center;
+    margin: 0;
+    text-align: center;
   }
 }

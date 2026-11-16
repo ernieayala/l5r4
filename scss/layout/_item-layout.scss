@@ -1,20 +1,12 @@
 /**
  * Item Layout
- * Layouts for item sheets
+ * The item sheet's header, tab panels, and Active Effects list. The window's own rules are in sheets/_item-sheet.scss
  */
 
-.l5r4.item {
-  .window-content {
-    gap: var(--l5r4-space-8);
-    overflow: auto;
-  }
-
-  .tab {
-    gap: var(--l5r4-space-4);
-
-    .l5r4-item-description-heading {
-      margin: var(--l5r4-space-8) 0 0;
-    }
+.l5r4-item-header {
+  .l5r4-item-header-image {
+    block-size: 64px;
+    inline-size: 64px;
   }
 
   .l5r4-item-header-fields > h1 {
@@ -23,6 +15,15 @@
     input {
       height: auto;
     }
+  }
+}
+
+// One tab panel per part (templates/item/_partials/_tab-*.hbs)
+.l5r4-section.tab {
+  gap: var(--l5r4-space-4);
+
+  .l5r4-item-description-heading {
+    margin: var(--l5r4-space-8) 0 0;
   }
 
   // Prose Editor
@@ -33,25 +34,20 @@
   prose-mirror {
     border-block-end: var(--sidebar-separator);
   }
+}
 
-  // Active Effects
-  .l5r4-effect-list {
-    margin: 0;
-    padding: 0;
+// Active Effects
+.l5r4-effect-list {
+  margin: 0;
+  padding: 0;
 
-    .l5r4-effect-list-row {
-      margin-block-start: var(--l5r4-space-8);
-    }
+  .l5r4-effect-list-row {
+    margin-block-start: var(--l5r4-space-8);
   }
 
   .l5r4-inline-control {
     flex-wrap: nowrap;
   }
-}
-
-.l5r4-item-header .l5r4-item-header-image {
-  block-size: 64px;
-  inline-size: 64px;
 }
 
 // A subtype partial's root draws no box, so each of its fields stays a flex item of the tab, spaced by the tab's gap

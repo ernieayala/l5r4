@@ -1,137 +1,150 @@
 /**
- * Item Lists
- * Grid layouts and styling for item lists in actor sheets
+ * Item Row
+ * Item lists and their rows on the PC and NPC sheets and in the XP manager (components/item-row.md). A row's card
+ * root also posts to chat, so row rules sit under the list, which a posted card never has
  */
 
-.l5r4.pc,
-.l5r4.npc,
-.l5r4-xp-manager {
-  .l5r4-item-row-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--l5r4-space-gap-tight);
+@use "../base/variables" as *;
 
-    &.l5r4-sort-header {
-      background: var(--l5r4-color-panel);
-      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-      border-inline-start: none;
-      color: var(--table-header-text-color);
-      font-weight: bold;
-      padding: var(--l5r4-space-card);
+.l5r4-item-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
 
-      .l5r4-item-row {
-        padding: 0;
-      }
+  &.l5r4-sort-header {
+    background: var(--l5r4-color-panel);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    border-inline-start: none;
+    color: var(--table-header-text-color);
+    font-weight: bold;
+    padding: var(--l5r4-space-card);
 
-      // A <button>: undo core's button look so the head reads as the header's text
-      .l5r4-sort-header-button {
-        background: none;
-        border: none;
-        border-radius: 0;
-        color: inherit;
-        display: block;
-        font: inherit;
-        height: auto;
-        min-height: 0;
-        padding: 0;
-        text-align: inherit;
-        transition: none;
-      }
+    .l5r4-item-row {
+      padding: 0;
     }
 
-    &.-attacks {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--l5r4-size-column-controls);
-      }
+    // A <button>: undo core's button look so the head reads as the header's text
+    .l5r4-sort-header-button {
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: inherit;
+      display: block;
+      font: inherit;
+      height: auto;
+      min-height: 0;
+      padding: 0;
+      text-align: inherit;
+      transition: none;
     }
+  }
 
-    &.-advantage {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-      }
+  &.-attacks {
+    .l5r4-item-row {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-armor {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 100px 100px var(--l5r4-size-column-controls);
-      }
+  &.-advantage {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-bio {
-      .l5r4-item-row {
-        grid-template-columns: 1fr var(--l5r4-size-column-controls);
-      }
+  &.-armor {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-100) var(--l5r4-size-column-100)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
-    &.-commonItem {
-      .l5r4-item-row {
-        grid-template-columns: 1fr var(--l5r4-size-column-controls);
-      }
+  &.-bio {
+    .l5r4-item-row {
+      grid-template-columns: 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-disadvantage {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-      }
+  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
+  &.-commonItem {
+    .l5r4-item-row {
+      grid-template-columns: 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-kata {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
-      }
+  &.-disadvantage {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-kiho {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 80px 80px var(--l5r4-size-column-controls);
-      }
+  &.-kata {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-skill {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 60px 120px 60px 1fr var(--l5r4-size-column-controls);
-      }
+  &.-kiho {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-80)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-spell {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 60px 60px var(--l5r4-size-column-controls);
-      }
+  &.-skill {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-60) var(--l5r4-size-column-120) var(--l5r4-size-column-60)
+        1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-tattoo {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 1fr var(--l5r4-size-column-controls);
-      }
+  &.-spell {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-60) var(--l5r4-size-column-60)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-technique {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 1fr 1fr var(--l5r4-size-column-controls);
-      }
+  &.-tattoo {
+    .l5r4-item-row {
+      grid-template-columns: 1fr 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-weapon {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 80px 150px var(--l5r4-size-column-controls);
-      }
+  &.-technique {
+    .l5r4-item-row {
+      grid-template-columns: 1fr 1fr 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-xp {
-      .l5r4-item-row {
-        grid-template-columns: 150px 1fr var(--l5r4-size-column-controls);
-      }
+  &.-weapon {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-150)
+        var(--l5r4-size-column-controls);
     }
+  }
 
-    &.-xp-spent {
-      .l5r4-item-row {
-        grid-template-columns: 1fr 80px 120px var(--l5r4-size-column-controls);
-      }
+  &.-xp {
+    .l5r4-item-row {
+      grid-template-columns: var(--l5r4-size-column-150) 1fr var(--l5r4-size-column-controls);
     }
+  }
 
-    > .l5r4-item-row:nth-of-type(even) {
-      background-color: var(--l5r4-color-row-alt);
+  &.-xp-spent {
+    .l5r4-item-row {
+      grid-template-columns:
+        1fr var(--l5r4-size-column-80) var(--l5r4-size-column-120)
+        var(--l5r4-size-column-controls);
     }
   }
 
@@ -142,9 +155,9 @@
     grid-template-rows: min-content min-content;
     padding: 0 var(--l5r4-space-8);
 
-    // Keyboard focus shows the row's controls; :focus-visible keeps a mouse press from leaving them shown
+    // Keyboard focus inside the row shows its controls, as the pointer does (foundations/states.md rule 3)
     &:hover,
-    &:has(:focus-visible) {
+    &:focus-within {
       .inline-control {
         opacity: 1;
         pointer-events: all;
@@ -179,15 +192,11 @@
       inline-size: 16px;
     }
 
+    // The name keeps the posted card's `title` class; it takes the section heading's look and wraps
     .title {
       text-wrap: revert;
 
-      a[data-action="post-item"] {
-        color: inherit;
-        cursor: var(--conditional-cursor, default);
-        text-decoration: none;
-        text-shadow: none;
-      }
+      @include title-row;
     }
 
     .l5r4-inline-control {
@@ -210,5 +219,10 @@
       grid-column: 1 / -1;
       grid-row: 2;
     }
+  }
+
+  // After the row rule, so an even Bio row takes the alternate color over its panel background
+  > .l5r4-item-row:nth-of-type(even) {
+    background-color: var(--l5r4-color-row-alt);
   }
 }

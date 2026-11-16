@@ -3,50 +3,47 @@
  * Header section with character name, clan, school, rank, XP, and insight
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  .l5r4-pc-info {
-    flex-wrap: nowrap;
-    padding: var(--l5r4-space-section);
-    position: relative;
+.l5r4-pc-info {
+  flex-wrap: nowrap;
+  padding: var(--l5r4-space-section);
+  position: relative;
 
-    &::before {
-      border-image-repeat: stretch;
-      border-image-slice: 15 fill;
-      border-image-source: url("../assets/borders/brush-08-gray.svg");
-      border-image-width: 15px;
-      content: "";
-      inset: -5px;
-      opacity: 0.25;
-      pointer-events: none;
-      position: absolute;
-      z-index: var(--l5r4-layer-behind);
-    }
+  &::before {
+    border-image-repeat: stretch;
+    border-image-slice: 15 fill;
+    border-image-source: url("../assets/borders/brush-08-gray.svg");
+    border-image-width: 15px;
+    content: "";
+    inset: -5px;
+    opacity: 0.25;
+    pointer-events: none;
+    position: absolute;
+    z-index: var(--l5r4-layer-behind);
+  }
 
-    input,
-    .l5r4-form-field-value {
-      background: none;
-      font-size: var(--l5r4-font-size-label);
-      height: calc(var(--input-height) - 0.5rem);
-      line-height: 1;
-    }
+  input,
+  .l5r4-form-field-value {
+    background: none;
+    font-size: var(--l5r4-font-size-label);
+    height: calc(var(--input-height) - 0.5rem);
+    line-height: 1;
+  }
 
-    .l5r4-form-field-label {
-      min-height: calc(var(--input-height) - 0.5rem);
-    }
+  .l5r4-form-field-label {
+    min-height: calc(var(--input-height) - 0.5rem);
+  }
 
-    // The label's text as a <button> (Shift+click actions): it fills the label and undoes core's button face
-    .l5r4-form-field-label-button {
-      align-self: stretch;
-      background: none;
-      border: none;
-      border-radius: 0;
-      color: inherit;
-      cursor: inherit;
-      font: inherit;
-      height: auto;
-      min-height: 0;
-      padding: 0;
-    }
+  // The label's text as a <button> (Shift+click actions): it fills the label and undoes core's button face
+  .l5r4-form-field-label-button {
+    align-self: stretch;
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    cursor: inherit;
+    font: inherit;
+    height: auto;
+    min-height: 0;
+    padding: 0;
   }
 }

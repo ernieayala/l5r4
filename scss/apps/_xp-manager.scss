@@ -3,6 +3,8 @@
  * Modal dialog for managing character experience points
  */
 
+@use "../base/variables" as *;
+
 .l5r4-xp-manager {
   .window-content {
     overflow-y: auto;
@@ -54,12 +56,9 @@
     }
 
     .l5r4-item-row-name {
-      align-items: center;
-      display: inline-flex;
-      font-size: var(--l5r4-font-size-title);
-      margin: 0;
-      min-height: var(--input-height);
       text-wrap: nowrap;
+
+      @include title-row;
     }
   }
 }

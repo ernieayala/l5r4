@@ -60,6 +60,20 @@
   --l5r4-space-section: var(--l5r4-space-16);
 
   // Size scale (foundations/space-and-size.md) and icon glyph sizes (foundations/iconography.md)
+  --l5r4-size-portrait: 240px;
+  --l5r4-size-medallion: 96px;
+  --l5r4-size-ring-rank: 32px;
+  --l5r4-size-trait-rank: 28px;
+  --l5r4-size-item-icon: 32px;
+  --l5r4-size-rank-block: 64px;
+  --l5r4-size-void-point: 12px;
+  --l5r4-size-stepper: 16px;
+  --l5r4-size-target: 24px;
+  --l5r4-size-column-60: 60px;
+  --l5r4-size-column-80: 80px;
+  --l5r4-size-column-100: 100px;
+  --l5r4-size-column-120: 120px;
+  --l5r4-size-column-150: 150px;
   --l5r4-size-column-controls: 102px;
   --l5r4-size-icon-sm: 0.625rem;
 
@@ -89,6 +103,7 @@
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
   --l5r4-state-pressed-transform: scale(0.98);
+  --l5r4-state-disabled-opacity: 0.75;
 }
 
 // Per-theme roles. Set on each themed element, so a sheet's own theme overrides the interface's. Tokens built from
@@ -166,3 +181,13 @@ $void-ring-img: url("../assets/icons/void.webp");
 // Sprite frame counts less one, the N of each sprite's steps(N) (foundations/motion.md)
 $urban-sprite-steps: 29;
 $nature-sprite-steps: 22;
+
+// The one-line title look that section headings, header labels, and item row names share
+// (components/section.md rule S5). Each reader sets its own `text-wrap`
+@mixin title-row {
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--l5r4-font-size-title);
+  margin: 0;
+  min-height: var(--input-height);
+}

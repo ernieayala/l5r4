@@ -1,12 +1,40 @@
 /**
- * Actor Sheet Specific Styles
- * Sheet-specific overrides and additions not covered by other modules
- * Most actor sheet styling is now in layout/, components/, and features/
+ * Actor Sheet
+ * Rules for the PC and NPC sheet as a whole that no component or feature owns (docs/design-system/patterns/sheets.md
+ * rule 7): the window's column layout and the reset of the sheet's bare fields
  */
 
-// Currently no actor-sheet-specific styles needed
-// All styles have been modularized into:
-// - layout/_actor-layout.scss (layout patterns)
-// - layout/_sidebar.scss (sidebar)
-// - components/ (buttons, forms, grids, sections, item-lists, animations)
-// - features/ (pc-info, traits-rings, ranks, wounds, etc.)
+// The window carries no l5r4- class of its own, only core's and the sheet's `l5r4 pc` / `l5r4 npc`
+.l5r4.pc,
+.l5r4.npc {
+  display: flex;
+  flex-direction: column;
+
+  .window-content {
+    flex-flow: row;
+    gap: var(--l5r4-space-section);
+    overflow-y: auto;
+    padding: 0;
+
+    > .flexcol {
+      flex: 1 1 100%;
+
+      &.l5r4-sheet-sidebar {
+        flex: 0;
+      }
+    }
+  }
+
+  // Fields draw no frame of their own on a sheet; components that want one set it (components/form-field.md).
+  // `:where()` gives the reset no class weight, so every component's own field rule wins over it
+  :where(&) {
+    input,
+    select,
+    textarea {
+      border: none;
+      box-shadow: none;
+      margin: 0;
+      resize: none;
+    }
+  }
+}

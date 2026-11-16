@@ -1,46 +1,46 @@
 /**
- * Grids
- * Reusable grid component patterns
+ * Grid
+ * Two-column label and value grid of the sheet sidebar blocks (components/grid.md)
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  .l5r4-grid {
-    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-    border-block-end: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+// The wound configuration window's Wound Ranks table keeps the look it had: framing it as a grid makes each row 3px
+// shorter and its text 2px larger, a size change Stage 17 decision 9 does not take. For review: grid.md and
+// wound-track.md style it as on the sheet. `:where()` keeps the exception from raising the rule's specificity
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) {
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  border-block-end: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 
-    > span,
-    > div {
-      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  > span,
+  > div {
+    border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  }
+
+  > span {
+    align-items: center;
+    background: var(--l5r4-color-panel);
+    border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    display: inline-flex;
+    font-family: var(--l5r4-font-label);
+    font-size: var(--l5r4-font-size-label);
+    height: 100%;
+    padding: var(--l5r4-space-4);
+  }
+
+  > div {
+    align-items: center;
+    font-size: var(--l5r4-font-size-label);
+    padding: var(--l5r4-space-4);
+
+    > input,
+    > select {
+      height: auto;
+      line-height: 1;
     }
 
     > span {
-      align-items: center;
-      background: var(--l5r4-color-panel);
-      border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
-      display: inline-flex;
-      font-family: var(--l5r4-font-label);
-      font-size: var(--l5r4-font-size-label);
-      height: 100%;
-      padding: var(--l5r4-space-4);
-    }
-
-    > div {
-      align-items: center;
-      font-size: var(--l5r4-font-size-label);
-      padding: var(--l5r4-space-4);
-
-      > input,
-      > select {
-        height: auto;
-        line-height: 1;
-      }
-
-      > span {
-        padding: 0 var(--l5r4-space-8);
-      }
+      padding: 0 var(--l5r4-space-8);
     }
   }
 }

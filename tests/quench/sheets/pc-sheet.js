@@ -214,7 +214,9 @@ export function registerPcSheetTests(quench) {
           assert.equal(JSON.parse(dataTransfer.getData("text/plain")).key, "sta", "Stamina first");
         });
 
-        it("should roll the Skill and the weapon of the row a Shift-click lands in", async () => {
+        it("should roll the Skill and the weapon of the row a Shift-click lands in", async function () {
+          // Three rolls posted in turn take about 2 seconds, Mocha's default
+          this.timeout(10_000);
           await actor.createEmbeddedDocuments("Item", [createKatana()]);
           await sheet.render(true);
           const posted = [];
@@ -286,13 +288,23 @@ export function registerPcSheetTests(quench) {
           );
         });
 
-        it("should set the Shift+Click cursor while Shift is held", () => {
-          const cursor = () =>
-            getComputedStyle(sheet.element).getPropertyValue("--conditional-cursor").trim();
-          document.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift" }));
-          assert.equal(cursor(), "pointer", "Shift held");
-          document.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
-          assert.notEqual(cursor(), "pointer", "Shift released");
+        it("should set the Shift+Click cursor while Shift is held", async () => {
+          // The spell slots, which carry the Shift-held cursor, render only beside a spell
+          const [spell] = await actor.createEmbeddedDocuments("Item", [
+            createSpellData("Quench Cursor")
+          ]);
+          try {
+            await sheet.render(true);
+            const count = sheet.element.querySelector("[data-action='adjust-spell-slot']");
+            assert.exists(count, "a spell slot count");
+            const cursor = () => getComputedStyle(count).cursor;
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift" }));
+            assert.equal(cursor(), "pointer", "Shift held");
+            document.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+            assert.notEqual(cursor(), "pointer", "Shift released");
+          } finally {
+            await spell.delete();
+          }
         });
 
         it("should display embedded items", async () => {

@@ -69,10 +69,28 @@
 
   // The type steps, as docs/design-system/foundations/typography.md names them
   .l5r4-design-gallery-type {
-    @each $step in meta, body, label, title, rank, medallion {
-      &.-#{$step} {
-        font-size: var(--l5r4-font-size-#{$step});
-      }
+    &.-meta {
+      font-size: var(--l5r4-font-size-meta);
+    }
+
+    &.-body {
+      font-size: var(--l5r4-font-size-body);
+    }
+
+    &.-label {
+      font-size: var(--l5r4-font-size-label);
+    }
+
+    &.-title {
+      font-size: var(--l5r4-font-size-title);
+    }
+
+    &.-rank {
+      font-size: var(--l5r4-font-size-rank);
+    }
+
+    &.-medallion {
+      font-size: var(--l5r4-font-size-medallion);
     }
   }
 

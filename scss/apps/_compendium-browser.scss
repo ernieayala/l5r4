@@ -98,9 +98,9 @@
 
   .l5r4-compendium-browser-icon {
     border: none;
-    flex: 0 0 32px;
-    height: 32px;
-    width: 32px;
+    flex: 0 0 var(--l5r4-size-item-icon);
+    height: var(--l5r4-size-item-icon);
+    width: var(--l5r4-size-item-icon);
   }
 
   .l5r4-compendium-browser-text {

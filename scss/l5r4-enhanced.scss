@@ -6,7 +6,7 @@
  * - components/  → Reusable UI components
  * - features/    → Domain-specific feature modules
  * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
+ * - sheets/      → Rules for one sheet as a whole
  * A few partials sit outside their folder's group: the cascade keeps the order the stylesheet had.
  */
 
@@ -31,6 +31,7 @@
 @use "./components/section";
 @use "./components/item-row";
 @use "./components/animations";
+@use "./components/rank-control";
 @use "./components/rules-editor";
 @use "./components/ledger-dialog";
 @use "./components/inline-control";
@@ -52,6 +53,6 @@
 @use "./apps/emphasis-manager";
 @use "./apps/design-gallery";
 
-// Sheets (minimal overrides)
+// Sheets
 @use "./sheets/actor-sheet";
 @use "./sheets/item-sheet";
