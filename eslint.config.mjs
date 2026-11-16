@@ -371,7 +371,8 @@ export default [
   },
   {
     files: ["module/sheets/**/*.js"],
-    rules: { "no-restricted-imports": layerImports("(^|/)(apps|setup|hooks|data)/", "Sheets") }
+    // Sheets open the system's windows, so they may import apps (CLAUDE.md Layers)
+    rules: { "no-restricted-imports": layerImports("(^|/)(setup|hooks|data)/", "Sheets") }
   },
   {
     files: ["module/apps/**/*.js"],

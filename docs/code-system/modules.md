@@ -71,7 +71,7 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | Group order    | `module/utils/status-data.js:8-10`                                                        | `module/documents/actor/rules.js:20-33`: the data import first, then utils, then the config import last                                                   |
 | One block      | `module/services/combat/damage.js:11-24`: no labels, no blank lines                       | `module/sheets/pc-sheet.js:42-57`: `// Config`, `// Utils`, `// Documents`, and `// Local` labels with blank lines, and services imports under `// Utils` |
 | Static imports | `module/services/rest.js:9` imports `config/templates.js` statically                      | A module loaded with `await import()` inside a function (modeled)                                                                                         |
-| Layers         | `module/services/dice/check/roll-check.js:13-34` imports config, utils, and services only | `module/sheets/handlers/app-launcher-handler.js:27-32`: a sheet handler imports apps                                                                      |
+| Layers         | `module/services/dice/check/roll-check.js:13-34` imports config, utils, and services only | A service that imports a sheet or an app (modeled)                                                                                                        |
 
 ## Constants
 
