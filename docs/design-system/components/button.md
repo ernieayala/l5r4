@@ -26,11 +26,11 @@ Core button:
 
 Roll button:
 
-| Part        | Element                  | Class               | Class now                            |
-| ----------- | ------------------------ | ------------------- | ------------------------------------ |
-| Root        | `<div>`                  | `l5r4-button -roll` | `button-mask-container`              |
-| Under-label | `<span inert>`           | `l5r4-button-under` | `mas`; renders without `inert` today |
-| Face        | `<button type="button">` | `l5r4-button-face`  | `a.button`                           |
+| Part        | Element                  | Class               | Class now               |
+| ----------- | ------------------------ | ------------------- | ----------------------- |
+| Root        | `<div>`                  | `l5r4-button -roll` | `button-mask-container` |
+| Under-label | `<span inert>`           | `l5r4-button-under` | `mas`                   |
+| Face        | `<button type="button">` | `l5r4-button-face`  | `a.button`              |
 
 The root is a wrapper because the sprite mask cuts the face, and the under-label shows through the cut. The
 under-label repeats the face's text for sight only, so it is `inert` and read once.
