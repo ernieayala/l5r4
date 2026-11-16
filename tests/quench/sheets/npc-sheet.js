@@ -463,6 +463,33 @@ export function registerNpcSheetTests(quench) {
           );
         });
 
+        /**
+         * The text of an attack row's cell under the attack header's head with the given label.
+         * @param {string} slot  The attack slot, as its row's data-attack-section
+         * @param {string} label  The head's i18n key
+         */
+        const cellUnder = (slot, label) => {
+          const row = sheet.element.querySelector(`[data-attack-section="${slot}"]`);
+          // The attack header is the sibling before the attack list
+          const header = row.closest("section").previousElementSibling;
+          assert.isTrue(header.matches("[data-sort-header]"), "the attack header");
+          const heads = [...header.firstElementChild.children];
+          const column = heads.findIndex(head => head.textContent === game.i18n.localize(label));
+          assert.isAtLeast(column, 0, `a ${label} head`);
+          return row.children[column].textContent.trim();
+        };
+
+        it("should show the attack's damage type in the row's Type cell", () => {
+          assert.equal(cellUnder("attack1", "l5r4.ui.common.type"), "Slashing");
+        });
+
+        it("should leave the Type cell empty for an attack with no damage type", async () => {
+          await actor.update({ "system.damage1.type": "" });
+          await sheet.render(true);
+
+          assert.equal(cellUnder("attack1", "l5r4.ui.common.type"), "");
+        });
+
         it("should display attack name", () => {
           const element = sheet.element;
           const attackSection = element.querySelector('[data-attack-section="attack1"]');

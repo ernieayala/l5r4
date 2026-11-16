@@ -202,6 +202,7 @@ Data attributes and prepared values renamed (none is stored in world data):
 ### Fixed
 
 - NPC sheet Skills sort by their Roll and Emphasis heads, which did nothing before
+- NPC sheet attack rows show the attack's damage type in the Type column, which was always empty
 
 ---
 
