@@ -207,3 +207,15 @@ export const STANCE_LIMITS = Object.freeze({
   fatigued: Object.freeze(["fullAttackStance"]),
   mounted: Object.freeze(["fullAttackStance"])
 });
+
+/**
+ * When a condition's stance limit does not hold, by condition and stance: a predicate over the actor's roll options
+ * (module/utils/predicate.js). Horsemanship Rank 3 lets a mounted character take Full Attack.
+ * game-rules/60_bugei_skills.md, p.140
+ * @type {Readonly<Record<string, Readonly<Record<string, ReadonlyArray<string|object>>>>>}
+ */
+export const STANCE_LIMIT_EXCEPTIONS = Object.freeze({
+  mounted: Object.freeze({
+    fullAttackStance: Object.freeze([Object.freeze({ gte: ["skill:horsemanship", 3] })])
+  })
+});

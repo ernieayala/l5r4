@@ -6,8 +6,9 @@
  * game-rules/41_conditional_effects.md, p.89
  */
 
-import { STANCE_LIMITS } from "../config/game-mechanics.js";
+import { STANCE_LIMIT_EXCEPTIONS, STANCE_LIMITS } from "../config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
+import { testPredicate } from "./predicate.js";
 
 /**
  * Ids of the five stances: the status effects in the "stance" group.
@@ -28,13 +29,22 @@ export function getActiveStance(statuses) {
 
 /**
  * The statuses that rule a stance out: Dazed allows only Defense and Full Defense, Prone only Attack and Defense;
- * Fatigued and Mounted forbid Full Attack. So Full Attack while mounted conflicts with "mounted".
+ * Fatigued and Mounted forbid Full Attack, Mounted not at Horsemanship Rank 3. So Full Attack while mounted conflicts
+ * with "mounted".
  * game-rules/36_stances.md, p.84
  * game-rules/41_conditional_effects.md, p.89
+ * game-rules/60_bugei_skills.md, p.140
  * @param {string} stanceId
  * @param {Iterable<string>} statuses
+ * @param {Set<string>} options - The actor's roll options, which an exception tests
  * @returns {string[]}
  */
-export function getStanceConflicts(stanceId, statuses) {
-  return [...statuses].filter(status => STANCE_LIMITS[status]?.includes(stanceId));
+export function getStanceConflicts(stanceId, statuses, options) {
+  return [...statuses].filter(status => {
+    if (!STANCE_LIMITS[status]?.includes(stanceId)) {
+      return false;
+    }
+    const exception = STANCE_LIMIT_EXCEPTIONS[status]?.[stanceId];
+    return !exception || !testPredicate(exception, options);
+  });
 }

@@ -66,7 +66,8 @@ export class StanceHandler {
     // A condition may rule the stance out: warn, and leave the choice to the player
     // game-rules/36_stances.md, p.84
     // game-rules/41_conditional_effects.md, p.89
-    for (const status of getStanceConflicts(stanceId, actor.statuses)) {
+    // game-rules/60_bugei_skills.md, p.140
+    for (const status of getStanceConflicts(stanceId, actor.statuses, actor.rollOptions)) {
       ui.notifications?.warn(
         game.i18n.localize("l5r4.ui.effects.stanceNotAllowed", {
           condition: game.i18n.localize(CONFIG.statusEffects[status].name),

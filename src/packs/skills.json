@@ -98,7 +98,7 @@
         ]
       }
     },
-    { "name": "Horsemanship", "type": "skill", "folder": "Bugei Skills", "page": 139, "coverage": "partial", "system": { "type": "bugei", "trait": "agi", "availableEmphases": ["Gaijin Riding Horse", "Rokugani Pony", "Utaku Steed"], "mastery3": "May take the Full Attack Stance while mounted.", "mastery5": "Mounting is a Simple Action, dismounting a Free Action.", "mastery7": "Mounting is a Free Action." } },
+    { "name": "Horsemanship", "type": "skill", "folder": "Bugei Skills", "page": 139, "coverage": "partial", "system": { "type": "bugei", "trait": "agi", "availableEmphases": ["Gaijin Riding Horse", "Rokugani Pony", "Utaku Steed"], "mastery5": "Mounting is a Simple Action, dismounting a Free Action.", "mastery7": "Mounting is a Free Action." } },
     {
       "name": "Hunting",
       "type": "skill",
