@@ -17,6 +17,7 @@ import { TRAIT_KEYS } from "../../../config/reference-data.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import { getInitiativePool } from "../../../utils/initiative.js";
+import { getMasteryInsight } from "../../../utils/insight.js";
 import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
 import {
   prepareTraitsAndRings,
@@ -224,9 +225,11 @@ function effectiveTraitOf(sys, key) {
 
 /**
  * Calculate Insight points and, unless the GM sets it by hand, Insight Rank: the Rings times ten plus every Skill
- * rank. The Rings come from the stored ranks plus the Family and School TraitAdjust bonuses, so an effect that
- * raises a Trait for a while (a kata, a spell) never changes the Insight Rank.
+ * rank, plus what Courtier and Etiquette Mastery Abilities add. The Rings come from the stored ranks plus the Family
+ * and School TraitAdjust bonuses, so an effect that raises a Trait for a while (a kata, a spell) never changes the
+ * Insight Rank.
  * game-rules/49_improving_your_character.md, p.104
+ * game-rules/59_high_skills.md, p.135-136
  * @param {Actor} actor
  * @param {object} sys - Prepared system data
  * @param {Function} calculateInsightRankFn - Insight Rank from points
@@ -239,15 +242,13 @@ function prepareInsight(actor, sys, calculateInsightRankFn) {
   const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
   const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
 
-  let skillTotal = 0;
-  for (const it of actor.items) {
-    if (it.type === "skill") {
-      skillTotal += toInt(it._source.system.rank);
-    }
-  }
+  const skills = actor.items
+    .filter(it => it.type === "skill")
+    .map(it => ({ name: it.name, rank: toInt(it._source.system.rank) }));
+  const skillTotal = skills.reduce((sum, skill) => sum + skill.rank, 0);
 
   sys.insight = sys.insight || {};
-  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
+  sys.insight.points = ringsTotal * 10 + skillTotal + getMasteryInsight(skills);
 
   // Default to auto-calculate insight rank from points
   if (sys.insight.autoCalculate === undefined) {

@@ -142,6 +142,23 @@ export const RANK_TRACK_RANGE = Object.freeze({
 export const NPC_INSIGHT_RANK = 1;
 
 /**
+ * Insight a Skill's Mastery Abilities add above the Rings and Skill ranks, by Skill name in lower case: each step
+ * adds `insight` from Skill Rank `rank` on. Courtier and Etiquette add 3 at Rank 3 and 7 more at Rank 7.
+ * game-rules/59_high_skills.md, p.135-136
+ * @type {Readonly<Record<string, ReadonlyArray<{rank: number, insight: number}>>>}
+ */
+export const MASTERY_INSIGHT = Object.freeze({
+  courtier: Object.freeze([
+    Object.freeze({ rank: 3, insight: 3 }),
+    Object.freeze({ rank: 7, insight: 7 })
+  ]),
+  etiquette: Object.freeze([
+    Object.freeze({ rank: 3, insight: 3 }),
+    Object.freeze({ rank: 7, insight: 7 })
+  ])
+});
+
+/**
  * Canonical wound level progression order for L5R4 characters.
  * Defines the 8 wound levels from Healthy to Out in ascending severity.
  * Used to iterate wound levels in correct sequence during damage calculations.

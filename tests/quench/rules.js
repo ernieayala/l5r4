@@ -450,6 +450,24 @@ export function registerRulesTests(quench) {
           })
         );
 
+        // #72
+        // game-rules/59_high_skills.md, p.135-136
+        it(
+          "should add Courtier's Mastery Insight at Rank 3 and Rank 7",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rule engine: courtier" }));
+            const before = actor.system.insight.points;
+            const [courtier] = await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Courtier", 2, "awa")
+            ]);
+            assert.equal(actor.system.insight.points, before + 2, "Rank 2: the ranks only");
+            await courtier.update({ "system.rank": 3 });
+            assert.equal(actor.system.insight.points, before + 3 + 3, "Rank 3: +3");
+            await courtier.update({ "system.rank": 7 });
+            assert.equal(actor.system.insight.points, before + 7 + 10, "Rank 7: +7 more");
+          })
+        );
+
         // game-rules/89_shadowlands_taint.md, p.279
         it(
           "should add the Taint Rank to a Lost character's physical Trait rolls and give no Void Points",
