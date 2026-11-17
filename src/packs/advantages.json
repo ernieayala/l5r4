@@ -59,7 +59,15 @@
             "roll": 1,
             "keep": 1,
             "optional": true,
-            "label": "Kitsuki: Void Point spent to spot a lie (+1k1 more)"
+            "label": "Kitsuki: Void Point spent to spot a lie (+1k1 more)",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           },
           {
             "key": "Prerequisite",
@@ -418,7 +426,15 @@
             "selector": "any",
             "roll": 1,
             "optional": true,
-            "label": "Resisting Intimidation or Temptation with Honor Rank added"
+            "label": "Resisting Intimidation or Temptation with Honor Rank added",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           }
         ],
         "specialRules": ""
@@ -651,7 +667,12 @@
             "selector": "any",
             "roll": 1,
             "optional": true,
-            "label": "Contested Roll against someone trying to confuse or manipulate you"
+            "label": "Contested Roll against someone trying to confuse or manipulate you",
+            "predicate": [
+              {
+                "not": "check:damage"
+              }
+            ]
           },
           {
             "key": "Cost",
@@ -1620,7 +1641,12 @@
             "roll": 1,
             "keep": 1,
             "optional": true,
-            "label": "Contested Roll against a member of your hated Clan or faction"
+            "label": "Contested Roll against a member of your hated Clan or faction",
+            "predicate": [
+              {
+                "not": "check:damage"
+              }
+            ]
           },
           {
             "key": "Cost",
@@ -2031,7 +2057,15 @@
             "selector": "any",
             "roll": 1,
             "optional": true,
-            "label": "Contested Roll against Temptation"
+            "label": "Contested Roll against Temptation",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           }
         ],
         "specialRules": "Imperial characters pay 1."
@@ -2661,7 +2695,15 @@
             "roll": 2,
             "keep": 2,
             "optional": true,
-            "label": "Moto: resisting restraint or mental sway"
+            "label": "Moto: resisting restraint or mental sway",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           },
           {
             "key": "Prerequisite",
@@ -2806,7 +2848,10 @@
             "optional": true,
             "label": "Compassion: Void Point spent aiding someone below you in the Celestial Order",
             "predicate": [
-              "paragon:compassion"
+              "paragon:compassion",
+              {
+                "not": "check:damage"
+              }
             ]
           },
           {
@@ -2817,7 +2862,13 @@
             "optional": true,
             "label": "Courage: resisting Intimidation or a Fear effect",
             "predicate": [
-              "paragon:courage"
+              "paragon:courage",
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
             ]
           },
           {
@@ -2848,7 +2899,13 @@
             "optional": true,
             "label": "Honor: resisting Temptation or Intimidation, on top of the usual Honor bonus",
             "predicate": [
-              "paragon:honor"
+              "paragon:honor",
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
             ]
           },
           {
@@ -3683,7 +3740,15 @@
             "selector": "any",
             "roll": 2,
             "optional": true,
-            "label": "Resisting a disease or poison"
+            "label": "Resisting a disease or poison",
+            "predicate": [
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
+            ]
           },
           {
             "key": "Cost",
@@ -4687,7 +4752,15 @@
             "selector": "any",
             "roll": 2,
             "optional": true,
-            "label": "Contested Roll against social manipulation, such as Courtier"
+            "label": "Contested Roll against social manipulation, such as Courtier",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           }
         ],
         "specialRules": "Shugenja pay 4."

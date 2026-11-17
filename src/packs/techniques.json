@@ -2918,7 +2918,15 @@
             "selector": "any",
             "roll": 5,
             "optional": true,
-            "label": "Strength in All Things: resisting Intimidation, Temptation, or Fear"
+            "label": "Strength in All Things: resisting Intimidation, Temptation, or Fear",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
           }
         ],
         "specialRules": ""

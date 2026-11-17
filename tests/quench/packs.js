@@ -504,6 +504,42 @@ export function registerPacksTests(quench) {
           })
         );
 
+        // #81
+        // game-rules/64_advantages.md, p.146
+        // game-rules/62_low_skills.md, p.144-145
+        it(
+          "should offer Balance on the Skill and Trait rolls that resist, never on attack or damage",
+          clean(async () => {
+            const { actor } = await holding("advantages", "Balance");
+            const offered = spec =>
+              getCheckContext(actor, spec).modifiers.some(m =>
+                m.label.startsWith("Resisting Intimidation or Temptation")
+              );
+            assert.isTrue(offered({ kind: "skill", skill: "etiquette", trait: "wil" }), "skill");
+            assert.isTrue(offered({ kind: "trait", trait: "wil" }), "Willpower");
+            assert.isFalse(offered({ kind: "attack", skill: "kenjutsu", trait: "agi" }), "attack");
+            assert.isFalse(offered({ kind: "damage" }), "damage");
+          })
+        );
+
+        // #81
+        // game-rules/64_advantages.md, p.154
+        // game-rules/100_poison.md, p.332
+        it(
+          "should offer Jurojin's Blessing on the Trait and Ring rolls that resist poison, not damage",
+          clean(async () => {
+            const { actor } = await holding("advantages", "Seven Fortunes' Blessing (Jurojin)");
+            const offered = spec =>
+              getCheckContext(actor, spec).modifiers.some(
+                m => m.label === "Resisting a disease or poison"
+              );
+            assert.isTrue(offered({ kind: "trait", trait: "sta" }), "Stamina");
+            assert.isTrue(offered({ kind: "ring", ring: "earth" }), "Earth");
+            assert.isFalse(offered({ kind: "skill", skill: "kenjutsu", trait: "agi" }), "skill");
+            assert.isFalse(offered({ kind: "damage" }), "damage");
+          })
+        );
+
         // game-rules/83_ancestors.md, p.243
         it(
           "should add Intelligence to a Phoenix's Armor TN with Shiba",

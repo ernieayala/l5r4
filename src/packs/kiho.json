@@ -136,7 +136,15 @@
             "selector": "any",
             "roll": "floor(@rings.earth / 2)",
             "optional": true,
-            "label": "Resisting poison or disease"
+            "label": "Resisting poison or disease",
+            "predicate": [
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
+            ]
           }
         ],
         "specialRules": ""

@@ -1253,7 +1253,13 @@
             "optional": true,
             "label": "Resisting poison or disease",
             "predicate": [
-              "curse-jurojin"
+              "curse-jurojin",
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
             ]
           }
         ],
