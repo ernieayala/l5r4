@@ -6,6 +6,11 @@
  */
 import { IMMUNE_STATUS_HOOK } from "../config/constants.js";
 import {
+  onPreCreateChangeOrigin,
+  onPreDeleteChangeOrigin,
+  onPreUpdateChangeOrigin
+} from "../services/change-origin.js";
+import {
   onCreateActiveEffectAnimation,
   onCreateChatMessageAnimation,
   onDeleteActiveEffectAnimation,
@@ -55,6 +60,9 @@ const EFFECT_PANEL_REDRAWS = Object.freeze([
   "updateCombat"
 ]);
 
+/** The documents whose changes carry the client that sent them (module/services/change-origin.js). */
+const CHANGE_ORIGIN_DOCUMENTS = Object.freeze(["Actor", "Item", "ActiveEffect", "ChatMessage"]);
+
 /**
  * Register all system hooks, once during `init` in the system entry point.
  *
@@ -63,6 +71,7 @@ const EFFECT_PANEL_REDRAWS = Object.freeze([
  * @returns {void}
  */
 export function registerAllHooks() {
+  registerChangeOriginHooks();
   registerAnimationHooks();
   registerEffectHooks();
   registerChatCardHooks();
@@ -77,6 +86,18 @@ export function registerAllHooks() {
 
   // Spell system: a spell memorized or forgotten rebuilds the XP history
   Hooks.on("updateItem", onUpdateItemMemorization);
+}
+
+/**
+ * Change origin: each change a client sends carries its socket id, so the work after it runs on that client alone,
+ * not on every client its user is signed in on.
+ */
+function registerChangeOriginHooks() {
+  for (const documentName of CHANGE_ORIGIN_DOCUMENTS) {
+    Hooks.on(`preCreate${documentName}`, onPreCreateChangeOrigin);
+    Hooks.on(`preUpdate${documentName}`, onPreUpdateChangeOrigin);
+    Hooks.on(`preDelete${documentName}`, onPreDeleteChangeOrigin);
+  }
 }
 
 /** Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active. */

@@ -6,6 +6,7 @@
  * queueMicrotask), changes no game mechanic, and does nothing without Sequencer and JB2A.
  */
 
+import { isOwnChange } from "../../utils/change-origin.js";
 import { STANCE_IDS } from "../../utils/stances.js";
 import { startAnimation, deleteAnimation, deleteAllAnimations } from "./status-animations.js";
 import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
@@ -18,15 +19,14 @@ import { startAttackAnimation } from "./attack-animations.js";
  * Deferred via queueMicrotask to ensure effect is fully applied before animation.
  *
  * @param {ActiveEffect} effect - The newly created effect
- * @param {object} _options - Creation options
- * @param {string} userId - User who created the effect
+ * @param {object} options - Creation options
  * @returns {void}
  */
-export function onCreateActiveEffectAnimation(effect, _options, userId) {
+export function onCreateActiveEffectAnimation(effect, options) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
     return;
   }
 
@@ -47,12 +47,10 @@ export function onCreateActiveEffectAnimation(effect, _options, userId) {
  *
  * @param {ActiveEffect} effect - The updated effect
  * @param {object} changes - Changed fields
- * @param {object} _options - Update options
- * @param {string} userId - User who updated the effect
+ * @param {object} options - Update options
  * @returns {void}
  */
-// eslint-disable-next-line max-params -- core's updateActiveEffect hook passes (effect, changes, options, userId)
-export function onUpdateActiveEffectAnimation(effect, changes, _options, userId) {
+export function onUpdateActiveEffectAnimation(effect, changes, options) {
   // Early return: Only handle disabled state changes
   if (changes?.disabled === undefined) {
     return;
@@ -61,7 +59,7 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, userId)
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
     return;
   }
 
@@ -85,15 +83,14 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, userId)
  * Cleans up animations when stances or conditions are removed from an actor.
  *
  * @param {ActiveEffect} effect - The deleted effect
- * @param {object} _options - Deletion options
- * @param {string} userId - User who deleted the effect
+ * @param {object} options - Deletion options
  * @returns {void}
  */
-export function onDeleteActiveEffectAnimation(effect, _options, userId) {
+export function onDeleteActiveEffectAnimation(effect, options) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
     return;
   }
 
@@ -112,12 +109,11 @@ export function onDeleteActiveEffectAnimation(effect, _options, userId) {
  * Prevents orphaned Sequencer effects.
  *
  * @param {Actor} actor - The deleted actor
- * @param {object} _options - Deletion options
- * @param {string} userId - User who deleted the actor
+ * @param {object} options - Deletion options
  * @returns {void}
  */
-export function onDeleteActorAnimation(actor, _options, userId) {
-  if (!isOwnChange(userId)) {
+export function onDeleteActorAnimation(actor, options) {
+  if (!isPlayedHere(options)) {
     return;
   }
   // Defer animation cleanup
@@ -133,12 +129,11 @@ export function onDeleteActorAnimation(actor, _options, userId) {
  * client that posted it plays the animation, and Sequencer shows it to everyone.
  *
  * @param {ChatMessage} message - The newly created chat message
- * @param {object} _options - Creation options
- * @param {string} userId - User who created the message
+ * @param {object} options - Creation options
  * @returns {void}
  */
-export function onCreateChatMessageAnimation(message, _options, userId) {
-  if (message.type !== "roll" || !isOwnChange(userId)) {
+export function onCreateChatMessageAnimation(message, options) {
+  if (message.type !== "roll" || !isPlayedHere(options)) {
     return;
   }
   const { kind, outcome, actorUuid, weaponUuid, target } = message.system;
@@ -171,13 +166,13 @@ function animatedStatusesOf(effect) {
 }
 
 /**
- * Whether this client plays the animation for a change: only the user who made it. Every client runs these hooks,
- * and Sequencer sends each effect to every connected client, so playing it everywhere would show it once per
- * client.
+ * Whether this client plays the animation for a change: only the client that sent it (module/utils/change-origin.js).
+ * Every client runs these hooks, and Sequencer sends each effect to every connected client, so playing it everywhere
+ * would show it once per client.
  *
- * @param {string} userId - The user who made the change
+ * @param {object} options - The change's options
  * @returns {boolean}
  */
-function isOwnChange(userId) {
-  return userId === game.user.id;
+function isPlayedHere(options) {
+  return isOwnChange(options, game.socket.id);
 }

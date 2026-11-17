@@ -166,6 +166,20 @@ Documents import no service (CLAUDE.md **Layers**). Two shapes carry what a docu
 
 A hook handler's return value is ignored, so anything the document waits for or reads back is a slot.
 
+### Work after a change
+
+Every connected client runs `_onCreate`, `_onUpdate`, `_onDelete`, and the `create*`, `update*`, and `delete*` hooks for each change, and one user can be signed in on several clients, so the user id does not pick one client. Core runs `_preCreate`, `_preUpdate`, `_preDelete`, and the `preCreate*`, `preUpdate*`, and `preDelete*` hooks only on the client that sends the change (`ClientDatabaseBackend`, `client/data/client-backend.mjs`), and every client receives the options they leave. `module/services/change-origin.js` stamps each Actor, Item, Active Effect, and chat message change with the sender's `game.socket.id`; `isOwnChange` (`module/utils/change-origin.js`) reads it back, given the change's options and `game.socket.id`.
+
+| Rule | Check |
+| --- | --- |
+| Work a change starts that writes to the world, opens a dialog, or plays an animation runs where `isOwnChange(options, game.socket.id)` holds; never on `userId === game.user.id` | Quench `l5r4-enhanced.workflows.change-origin` |
+| Work only a GM may do runs on `game.users.activeGM?.isSelf`, or through a GM query (**GM queries**) | review |
+| A change made with `noHook` carries no stamp, so no client runs work after it | review |
+
+Conforming, `L5R4Item#_onCreate` (`module/documents/item.js`): grants and the XP history's stale mark run only where `isOwnChange` holds.
+
+Not conforming (modeled): an `_onCreate` that writes a flag on every client that receives the creation; a second client's write then runs its own grants beside the sender's.
+
 ## Data models
 
 One `foundry.abstract.TypeDataModel` per subtype in `module/data/<document>/`, registered in `DATA_MODELS` (`module/data/models.js`) and assigned to `CONFIG.<Document>.dataModels` during `init` by `registerDataModels` (`dist/l5r4-enhanced.js`). A core type such as the ActiveEffect `base` goes in `CORE_TYPE_DATA_MODELS` and never in `system.json` `documentTypes` [src: common/packages/sub-types.mjs:45-47].

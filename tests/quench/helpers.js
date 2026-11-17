@@ -1,3 +1,4 @@
+import { CHANGE_ORIGIN_OPTION } from "../../module/config/constants.js";
 import { buildPool, parseRollAndKeep, getPoolFormula } from "../../module/utils/check.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { getSlotStatus, spendSlot } from "../../module/services/dice/check/spell-slots.js";
@@ -85,6 +86,38 @@ export function guardRolls({ before, after }) {
       }
     }
   });
+}
+
+/** The socket id `withAnotherClient` stamps changes with: no client has it. */
+export const ANOTHER_CLIENT_ID = "another-client";
+
+/**
+ * Run a function with every Actor, Item, Active Effect, and chat message change this client sends stamped as another
+ * client's (module/services/change-origin.js), so this client sees the change as one of its user's other clients
+ * receives it. The stamp hooks run after the system's, which register during init.
+ * @template T
+ * @param {function(): Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+export async function withAnotherClient(fn) {
+  const restamp = options => {
+    options[CHANGE_ORIGIN_OPTION] = ANOTHER_CLIENT_ID;
+  };
+  const hooks = ["Actor", "Item", "ActiveEffect", "ChatMessage"].flatMap(documentName => [
+    [
+      `preCreate${documentName}`,
+      Hooks.on(`preCreate${documentName}`, (_doc, _data, o) => restamp(o))
+    ],
+    [`preUpdate${documentName}`, Hooks.on(`preUpdate${documentName}`, (_doc, _c, o) => restamp(o))],
+    [`preDelete${documentName}`, Hooks.on(`preDelete${documentName}`, (_doc, o) => restamp(o))]
+  ]);
+  try {
+    return await fn();
+  } finally {
+    for (const [hook, id] of hooks) {
+      Hooks.off(hook, id);
+    }
+  }
 }
 
 /**

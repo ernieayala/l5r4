@@ -15,6 +15,7 @@
  */
 
 import { IMMUNE_STATUS_HOOK } from "../config/constants.js";
+import { isOwnChange } from "../utils/change-origin.js";
 import { buildStatusEffectUpdate } from "../utils/status-data.js";
 
 /**
@@ -91,7 +92,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
     super._onCreate(data, options, userId);
     const actor = this.parent;
     const group = this.system.group;
-    if (userId !== game.user.id || !group || actor?.documentName !== "Actor") {
+    if (!isOwnChange(options, game.socket.id) || !group || actor?.documentName !== "Actor") {
       return;
     }
     const queues = L5R4ActiveEffect.#groupQueues;

@@ -18,6 +18,7 @@
  */
 
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
+import { isOwnChange } from "../utils/change-origin.js";
 import { toInt } from "../utils/type-coercion.js";
 import { rollDataKey } from "../utils/rule-values.js";
 import { getHighestSchoolRank } from "../utils/mechanics.js";
@@ -169,12 +170,12 @@ export default class L5R4Actor extends Actor {
 
   /**
    * A change that raises Insight Rank (a Trait, the Void Ring) can bring a School's next Technique due
-   * (roadmap/STAGE-11 decision 2). Only the user who made the change grants it.
+   * (roadmap/STAGE-11 decision 2). Only the client that sent the change grants it.
    * @override
    */
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
-    if (userId === game.user.id) {
+    if (isOwnChange(options, game.socket.id)) {
       applyGrants(this);
     }
   }

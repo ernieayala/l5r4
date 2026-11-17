@@ -18,6 +18,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "../config/item-types.js";
+import { isOwnChange } from "../utils/change-origin.js";
 import { onItemPreCreate, onItemCreate } from "./item/lifecycle/item-creation.js";
 import { updateGrantRecords, applyGrants, deleteGrantedItems } from "./item/lifecycle/grants.js";
 import { onItemPreUpdate } from "./item/lifecycle/item-updates.js";
@@ -52,8 +53,9 @@ export default class L5R4Item extends Item {
   }
 
   /**
-   * Handle post-creation tasks.
-   * Performs additional setup after item is created in database.
+   * After an owned item is created, grant what has come due (module/documents/item/lifecycle/grants.js) and mark the
+   * owner's XP history for rebuilding (item-creation.js). Only the client that created it does either: every client
+   * receives the creation, and a second client's XP write would run its own grants alongside this one's.
    *
    * @param {object} data - Created item data
    * @param {object} options - Creation options
@@ -63,20 +65,21 @@ export default class L5R4Item extends Item {
    */
   async _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
-    if (userId === game.user.id && this.actor) {
-      applyGrants(this.actor);
+    if (!isOwnChange(options, game.socket.id) || !this.actor) {
+      return;
     }
+    applyGrants(this.actor);
     await onItemCreate(this, data);
   }
 
   /**
    * After an owned item changes (its rules, a choice, a Skill rank that moves Insight Rank, a School Rank), grant
-   * whatever has come due (module/documents/item/lifecycle/grants.js). Only the user who made the change does it.
+   * whatever has come due (module/documents/item/lifecycle/grants.js). Only the client that sent the change does it.
    * @override
    */
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
-    if (userId === game.user.id && this.actor) {
+    if (isOwnChange(options, game.socket.id) && this.actor) {
       applyGrants(this.actor);
     }
   }
@@ -88,7 +91,7 @@ export default class L5R4Item extends Item {
    */
   _onDelete(options, userId) {
     super._onDelete(options, userId);
-    if (userId !== game.user.id || !this.actor) {
+    if (!isOwnChange(options, game.socket.id) || !this.actor) {
       return;
     }
     if (this.getFlag(SYS_ID, "grants")?.length) {

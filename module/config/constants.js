@@ -51,3 +51,11 @@ export const MIGRATION_FLAG = "migratedVersion";
  * @constant
  */
 export const IMMUNE_STATUS_HOOK = `${SYS_ID}.immuneStatus`;
+
+/**
+ * The option a document change carries the socket id of the client that sent it under
+ * (module/services/change-origin.js), read back by `isOwnChange` (module/utils/change-origin.js).
+ * @type {string}
+ * @constant
+ */
+export const CHANGE_ORIGIN_OPTION = `${SYS_ID}Origin`;

@@ -1,9 +1,9 @@
 /**
  * @module documents/item/lifecycle/grants
  * @description GrantItem rules on an actor's items (roadmap/STAGE-11 decisions 2 and 7): a School's Skills come with
- * it, its Techniques as the School Rank reaches them, and removing the School takes back what it gave. The user who
- * changed the actor or item does the work, so one client makes each change; changes to one actor run one after
- * another.
+ * it, its Techniques as the School Rank reaches them, and removing the School takes back what it gave. The client that
+ * sent the change to the actor or item does the work (module/utils/change-origin.js), so one client makes each grant,
+ * even when its user is signed in on others; changes to one actor run one after another.
  * game-rules/48_character_creation_expanded.md, p.102
  * game-rules/49_improving_your_character.md, p.104
  */

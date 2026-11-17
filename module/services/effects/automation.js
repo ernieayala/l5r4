@@ -16,6 +16,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
+import { isOwnChange } from "../../utils/change-origin.js";
 import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { applyEffect, effectsOf } from "./apply.js";
@@ -121,14 +122,13 @@ export async function onUpdateActorWounds(actor, changes, options) {
 }
 
 /**
- * Ask for the Full Defense roll when the user who took the stance is this one.
+ * Ask for the Full Defense roll on the client that took the stance (module/utils/change-origin.js).
  * @param {ActiveEffect} effect
- * @param {object} _options
- * @param {string} userId
+ * @param {object} options - The creation's options
  */
-export function onCreateActiveEffectFullDefense(effect, _options, userId) {
+export function onCreateActiveEffectFullDefense(effect, options) {
   if (
-    userId === game.user.id &&
+    isOwnChange(options, game.socket.id) &&
     effect.parent?.documentName === "Actor" &&
     effect.statuses.has("fullDefenseStance")
   ) {

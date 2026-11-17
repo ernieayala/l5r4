@@ -10,6 +10,11 @@ import { IMMUNE_STATUS_HOOK, SYS_ID } from "../../../module/config/constants.js"
 import { getBrowserIndexFields } from "../../../module/utils/browser-filter.js";
 import L5R4ActiveEffect from "../../../module/documents/active-effect.js";
 import {
+  onPreCreateChangeOrigin,
+  onPreDeleteChangeOrigin,
+  onPreUpdateChangeOrigin
+} from "../../../module/services/change-origin.js";
+import {
   onCreateActiveEffectAnimation,
   onCreateChatMessageAnimation,
   onDeleteActiveEffectAnimation,
@@ -75,6 +80,16 @@ export function registerHookWiringTests(quench) {
           `${hook} runs its handlers in the order they were wired`
         );
       };
+
+      describe("Change origin", () => {
+        it("should stamp each Actor, Item, Active Effect, and chat message change with its client", () => {
+          for (const documentName of ["Actor", "Item", "ActiveEffect", "ChatMessage"]) {
+            assertWiredInOrder(`preCreate${documentName}`, [onPreCreateChangeOrigin]);
+            assertWiredInOrder(`preUpdate${documentName}`, [onPreUpdateChangeOrigin]);
+            assertWiredInOrder(`preDelete${documentName}`, [onPreDeleteChangeOrigin]);
+          }
+        });
+      });
 
       describe("Effects and actor updates", () => {
         it("should wire the Wound tracking, Full Defense, and floating number handlers", () => {

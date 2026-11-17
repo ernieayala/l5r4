@@ -1,15 +1,15 @@
-import { SYS_ID } from "../../module/config/constants.js";
+import { CHANGE_ORIGIN_OPTION, SYS_ID } from "../../module/config/constants.js";
 import {
   isJb2aAvailable,
   isSequencerAvailable
 } from "../../module/services/animations/asset-library.js";
 import { onCreateActiveEffectAnimation } from "../../module/services/animations/hooks.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
-import { cleanTest, waitFor } from "./helpers.js";
+import { ANOTHER_CLIENT_ID, cleanTest, waitFor } from "./helpers.js";
 
 /**
  * Registers the `animations` batch (roadmap/STAGE-12): with Sequencer and a JB2A collection active, a status with an
- * animation plays it once on the actor's token, for the user who set the status, and ending the status ends it. The
+ * animation plays it once on the actor's token, from the client that set the status, and ending the status ends it. The
  * batch skips itself when either module is inactive.
  * @param {object} quench  The Quench API object.
  */
@@ -85,18 +85,25 @@ export function registerAnimationsTests(quench) {
           })
         );
 
-        it("should play nothing on this client for another user's change", async () => {
+        it("should play nothing on this client for another client's change", async () => {
           await placeActor("Sequencer: elsewhere");
           const [effect] = await actor.createEmbeddedDocuments(
             "ActiveEffect",
             [{ name: "Quench Daze", statuses: ["dazed"] }],
             { animate: false }
           );
-          assert.isTrue(await waitFor(() => playing("dazed").length === 1), "played for this user");
-          const other = game.users.find(user => user.id !== game.user.id);
-          onCreateActiveEffectAnimation(effect, {}, other.id);
+          assert.isTrue(
+            await waitFor(() => playing("dazed").length === 1),
+            "played for this client"
+          );
+          // The same user's other client receives the change
+          onCreateActiveEffectAnimation(
+            effect,
+            { [CHANGE_ORIGIN_OPTION]: ANOTHER_CLIENT_ID },
+            game.user.id
+          );
           await new Promise(resolve => setTimeout(resolve, 500));
-          assert.lengthOf(playing("dazed"), 1, "the other user's client plays it, not this one");
+          assert.lengthOf(playing("dazed"), 1, "the client that made the change plays it");
         });
       });
     },
