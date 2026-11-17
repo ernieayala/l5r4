@@ -127,15 +127,31 @@ writeFileSync(
   )
 );
 
-// Users: copied, then the GM gets the flags 3.2.1 wrote
+// Users: copied, then the first GM takes the id the documents name as author and owner, with the flags 3.2.1 wrote.
+// The copied world's GM can have any id, so the fixture gives it GM_ID.
 cpSync(path.join(usersWorld, "data", "users"), path.join(worldDir, "data", "users"), {
   recursive: true
 });
 rmSync(path.join(worldDir, "data", "users", "LOCK"), { force: true });
 {
   const db = await open("users");
-  const gm = await db.get(`!users!${GM_ID}`);
-  await db.put(`!users!${GM_ID}`, { ...gm, flags: merge(gm.flags ?? {}, GM_FLAGS) });
+  let gm = null;
+  for await (const [key, user] of db.iterator()) {
+    if (user.role === 4) {
+      gm = { key, user };
+      break;
+    }
+  }
+  if (!gm) {
+    console.error(`No GM user in ${usersWorld}`);
+    process.exit(1);
+  }
+  await db.del(gm.key);
+  await db.put(`!users!${GM_ID}`, {
+    ...gm.user,
+    _id: GM_ID,
+    flags: merge(gm.user.flags ?? {}, GM_FLAGS)
+  });
   await db.close();
 }
 
