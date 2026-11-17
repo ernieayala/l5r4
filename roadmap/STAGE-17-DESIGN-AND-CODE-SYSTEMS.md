@@ -203,7 +203,7 @@ Run with the Workflow tool, at the default workflow size (under 10 agents per wo
 - [x] `CONTRIBUTING.md`, `DEVELOPER.md`, and `CLAUDE.md` point to `docs/` and name no script `package.json` lacks.
 - [x] Gate passes locally and in CI; `npm run coverage:check` shows zero gaps.
 - [x] Full Quench run: pre-stage pass count plus the gallery batch, zero console errors from `l5r4-enhanced`; `world-upgrade` passes in the fixture world.
-- [ ] Captures reviewed against the pre-stage captures; Ernie signs off the look.
+- [x] Captures reviewed against the pre-stage captures; Ernie signs off the look.
 - [x] No fixed name changed, or each change ships a migration Ernie approved.
 - [x] `CHANGELOG.MD` lists every renamed CSS class, token, and `game.system.api` name a module or world CSS could use.
 
@@ -517,7 +517,7 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Post-stage captures | `docs/design-system/captures/post-stage/` at `0b04cde`, compared in its `REVIEW.md`; the `e84eedb` changes (roll-face focus ring on the frame, the gallery NPC attack's Type, the expand note removed) checked live on 2026-11-17. Left in it: #80 (out of scope) |
 | Behavior proof | 2026-11-17 on `e84eedb`, Sequencer and JB2A active: full Quench 1776 tests, 1754 passed, 21 skipped (the fixture-only `world-upgrade` tests and the player-only packs test), 1 failed: the animations test of another user's change, since the world had no second user. With a Player user added, `animations` and `packs` passed 61 of 61, no console errors. Console in the full run: no deprecation warnings; the errors are core's validation errors and the rules editor's refusals that negative-path tests provoke. `world-upgrade` 20 of 20 in the rebuilt fixture world (version set to 4.0.0 locally and put back, as Stage 12 did); the builder now gives the copied world's GM the fixture's GM id, since the world it was first copied from is gone. Gate green; CI green on `e84eedb` |
 | PR #39 | Ernie, 2026-11-17: pushed through `2362a05`; the body carries Stage 17's summary, first-run counts, and the behavior proof |
-| Next | Ernie, 2026-11-17: he reviews `REVIEW.md` and the post-stage captures, then signs off or names changes |
+| Sign-off | Ernie, 2026-11-17: signed off the look after comparing the pre-stage and post-stage captures. Stage 17 is done; Stage 18 is next |
 | Found on the way | #76: the item sheet image opened no file picker; fixed in the working tree (`data-action="editImage"`, a `sheets-and-apps` test that failed first), its own commit. `templates/chat/weapon.hbs` (was `weapon-chat.hbs`) is rendered only by the design gallery, as the weapon card posted before 4.0.0. `damage-result.hbs` and `flow-card.hbs` are not preloaded, which costs only a first-render fetch |
 | Gate after the npm update | Green: Vitest 932, ESLint 0 errors, Stylelint, Prettier, build:css, deps:circular, `coverage:check` 0 gaps |
 
