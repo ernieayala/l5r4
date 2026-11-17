@@ -193,19 +193,19 @@ Run with the Workflow tool, at the default workflow size (under 10 agents per wo
 
 ### Run
 
-- [ ] Baseline recorded: gate, coverage report, Quench pass count, pre-stage captures.
-- [ ] Survey done; every split convention decided by Ernie.
-- [ ] `docs/design-system/` and `docs/code-system/` written; every component in the inventory has a page.
-- [ ] Gallery opens from settings and shows every component, state, and foundation in both themes; `l5r4-enhanced.design-gallery` passes.
+- [x] Baseline recorded: gate, coverage report, Quench pass count, pre-stage captures.
+- [x] Survey done; every split convention decided by Ernie.
+- [x] `docs/design-system/` and `docs/code-system/` written; every component in the inventory has a page.
+- [x] Gallery opens from settings and shows every component, state, and foundation in both themes; `l5r4-enhanced.design-gallery` passes.
 - [ ] Every check built with a failing fixture; first-run violation counts in the PR #39 checklist.
-- [ ] Every check at zero or a recorded exception, and enforcing in the gate; ESLint and Stylelint at zero warnings.
-- [ ] Every Quench batch has an id and display name per `testing.md`; no test name over the limit or carrying a citation.
-- [ ] `CONTRIBUTING.md`, `DEVELOPER.md`, and `CLAUDE.md` point to `docs/` and name no script `package.json` lacks.
-- [ ] Gate passes locally and in CI; `npm run coverage:check` shows zero gaps.
-- [ ] Full Quench run: pre-stage pass count plus the gallery batch, zero console errors from `l5r4-enhanced`; `world-upgrade` passes in the fixture world.
+- [x] Every check at zero or a recorded exception, and enforcing in the gate; ESLint and Stylelint at zero warnings.
+- [x] Every Quench batch has an id and display name per `testing.md`; no test name over the limit or carrying a citation.
+- [x] `CONTRIBUTING.md`, `DEVELOPER.md`, and `CLAUDE.md` point to `docs/` and name no script `package.json` lacks.
+- [x] Gate passes locally and in CI; `npm run coverage:check` shows zero gaps.
+- [x] Full Quench run: pre-stage pass count plus the gallery batch, zero console errors from `l5r4-enhanced`; `world-upgrade` passes in the fixture world.
 - [ ] Captures reviewed against the pre-stage captures; Ernie signs off the look.
-- [ ] No fixed name changed, or each change ships a migration Ernie approved.
-- [ ] `CHANGELOG.MD` lists every renamed CSS class, token, and `game.system.api` name a module or world CSS could use.
+- [x] No fixed name changed, or each change ships a migration Ernie approved.
+- [x] `CHANGELOG.MD` lists every renamed CSS class, token, and `game.system.api` name a module or world CSS could use.
 
 ## Decisions
 
@@ -512,8 +512,11 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Full Quench after the fixes | 1706 passed; the 2 expected gallery failures. A first run failed the Mounted test once: a token targeted before core drew it (the draw awaits its texture before it adds the target arrows). `f370d62` adds `createDrawnToken` to the Quench helpers; the three tests that target a token use it |
 | Fixes on the way (decision 17) | `f86a5ca` a creature's attack action survived no attack-config save (pack stored `Simple`/`Complex`, the select offers `simple`/`complex`/`free`); the sheet now shows the localized label. `55b9277` the NPC sheet's section collapse button did nothing. `4dfd426` the condition manager stayed stale after its actor's effects changed. Each with a test that failed first |
 | Wave C (templates, part 1) | C1 (attributes: inert icons, alt text, `data-tooltip` + `aria-label` in place of `title`, comments, localized text, `aria-expanded`) and C2 (native `<button>` controls, `l5r4-` block classes, their SCSS) by file partition; `lang/` keys sorted in all six files. Decisions under **Template wave** above. Baseline total 5457 → 4447, 44 → 54 rules strict; `templates/` title-attribute, icon-inert, img-alt, icon-button-name, html-comment, literal-text, expand-aria, inline-style, modifier-without-block at 0, `lang/key-order` at 0. Full Quench 1709 passed, 0 failed: the gallery's accessible-name and focus tests pass in both themes for the first time. Still in templates: repeated-markup 84, action-element 21, class-prefix 38, root-class 2 |
-| Next | Waves for templates/SCSS/copy and for `module/` code, each with the baseline lowered and the gate and Quench after; then switch checks to strict; Ernie's visual sign-off. Baselines are lowered with scratchpad `lower-baseline.mjs` (runs the checks with `--silent=false`, never raises a count) |
-| Exceptions for Ernie | 14 files over their size limit are in the baseline without a reason; `tests/conventions/exceptions.json` holds one (`module/data/rules/rule-models.js`). Each needs a reason or a split (decision 3) |
+| Fix waves and strict checks | Done through part 23 and `e84eedb`: all 149 rules in `baseline.json` at 0 and failing the gate (part 22); ESLint and Stylelint at zero warnings |
+| Exceptions | Files that did two jobs were split (part 15); the 9 files left over their size limit each carry a written reason in `tests/conventions/exceptions.json` |
+| Post-stage captures | `docs/design-system/captures/post-stage/` at `0b04cde`, compared in its `REVIEW.md`; the `e84eedb` changes (roll-face focus ring on the frame, the gallery NPC attack's Type, the expand note removed) checked live on 2026-11-17. Left in it: #80 (out of scope) |
+| Behavior proof | 2026-11-17 on `e84eedb`, Sequencer and JB2A active: full Quench 1776 tests, 1754 passed, 21 skipped (the fixture-only `world-upgrade` tests and the player-only packs test), 1 failed: the animations test of another user's change, since the world had no second user. With a Player user added, `animations` and `packs` passed 61 of 61, no console errors. Console in the full run: no deprecation warnings; the errors are core's validation errors and the rules editor's refusals that negative-path tests provoke. `world-upgrade` 20 of 20 in the rebuilt fixture world (version set to 4.0.0 locally and put back, as Stage 12 did); the builder now gives the copied world's GM the fixture's GM id, since the world it was first copied from is gone. Gate green; CI green on `e84eedb` |
+| Next | Ernie's sign-off on the look (post-stage captures and `REVIEW.md`) |
 | Found on the way | #76: the item sheet image opened no file picker; fixed in the working tree (`data-action="editImage"`, a `sheets-and-apps` test that failed first), its own commit. `templates/chat/weapon.hbs` (was `weapon-chat.hbs`) is rendered only by the design gallery, as the weapon card posted before 4.0.0. `damage-result.hbs` and `flow-card.hbs` are not preloaded, which costs only a first-render fetch |
 | Gate after the npm update | Green: Vitest 932, ESLint 0 errors, Stylelint, Prettier, build:css, deps:circular, `coverage:check` 0 gaps |
 
