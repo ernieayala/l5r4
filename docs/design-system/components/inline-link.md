@@ -42,13 +42,13 @@ The link's HTML is built each time core enriches the text, never stored, so its 
 
 ## States
 
-| State               | Look                                                                    |
-| ------------------- | ----------------------------------------------------------------------- |
-| Default             | A chip: thin muted frame, small corner, one line                        |
-| Hover, focus        | Core's button looks on the target `<button>`; focus ring per states.md  |
-| Broken              | Dashed frame and the help cursor; the reason in words beside the source |
-| No acting character | Warning `l5r4.ui.links.noActor`                                         |
-| No targets          | Warning `l5r4.ui.links.noTargets`                                       |
+| State | Look |
+| --- | --- |
+| Default | A chip: thin muted frame, small corner, one line |
+| Hover, focus | Core's button looks on the target `<button>`; focus ring per states.md |
+| Broken | Thick dashed frame in the text color and the help cursor; the reason in words beside the source |
+| No acting character | Warning `l5r4.ui.links.noActor` |
+| No targets | Warning `l5r4.ui.links.noTargets` |
 
 ## Parameters
 
@@ -73,6 +73,7 @@ The click reads the link again from its data attributes, which are page content 
 | Token | Property | Part |
 | --- | --- | --- |
 | `--l5r4-border-width-thin`, `--l5r4-color-line-muted` | `border` | Link and request (`.l5r4-inline-link` (`scss/components/_inline-link.scss`)) |
+| `--l5r4-border-width-thick`, `--l5r4-color-text` | `border` (dashed) | Broken (`.l5r4-inline-link.-broken` (`scss/components/_inline-link.scss`)): heavier than a working chip's muted line, so the broken state reads at a glance |
 | `--l5r4-radius-sm` | `border-radius` | Link and request (frames.md rule 4) |
 | `--l5r4-space-4` | `padding-inline` | Link and request |
 | `--l5r4-space-4` | `margin-inline-start` | Request (`.l5r4-inline-link-request` (`scss/components/_inline-link.scss`)) |

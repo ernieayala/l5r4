@@ -100,7 +100,7 @@ Conforming, `l5r4-check-dialog-modifier` (`templates/dialogs/check-dialog.hbs`):
 </label>
 ```
 
-Non-conforming, the label of `name="rollMod"` (`templates/dialogs/check-dialog.hbs`): `<label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.modifier"}}</label>` is two keys joined and not linked to its input; `l5r4-custom-emphasis-dialog` (`templates/dialogs/custom-emphasis-dialog.hbs`) puts a bare `<label>` beside its input and adds a ":" outside the key.
+Non-conforming, the label of `name="rollMod"` (`templates/dialogs/check-dialog.hbs`): `<label>{{localize "l5r4.ui.check.rollModifier"}}</label>` is not linked to its input; `l5r4-custom-emphasis-dialog` (`templates/dialogs/custom-emphasis-dialog.hbs`) puts a bare `<label>` beside its input and adds a ":" outside the key.
 
 ### 5. A toggle that changes the pool shows the change
 

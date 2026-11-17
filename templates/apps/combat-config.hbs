@@ -3,7 +3,7 @@
     <h3>{{localize "l5r4.ui.common.initiative"}}</h3>
     {{#if (eq actor.type "npc")}}
       <div class="form-group">
-        <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}}</label>
+        <label>{{localize "l5r4.apps.combatConfig.pool"}}</label>
         <div class="l5r4-combat-config-pool form-fields flexrow -gap-xs">
           <input type="number" name="initiative.roll" value="{{source.initiative.roll}}" data-action="update-field" data-type="Number" />
           <input type="number" name="initiative.keep" value="{{source.initiative.keep}}" data-action="update-field" data-type="Number" />
@@ -12,7 +12,7 @@
       </div>
     {{/if}}
     <div class="form-group">
-      <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</label>
+      <label>{{localize "l5r4.apps.combatConfig.poolBonus"}}</label>
       <div class="l5r4-combat-config-pool form-fields flexrow -gap-xs">
         <input type="number" name="initiative.rollMod" value="{{source.initiative.rollMod}}" data-action="update-field" data-type="Number" />
         <input type="number" name="initiative.keepMod" value="{{source.initiative.keepMod}}" data-action="update-field" data-type="Number" />

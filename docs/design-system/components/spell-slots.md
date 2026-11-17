@@ -82,7 +82,7 @@ The count is one digit in a 32 px circle. The label "Spell slots" stays on one l
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| P1 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize "l5r4.ui.mechanics.rings.water") count=count}}` (modeled) | `data-tooltip="{{localize (concat "l5r4.ui.mechanics.rings." ring)}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})"` (`templates/actor/_partials/_spell-slot.hbs`): two keys joined, and no `aria-label` |
+| P1 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize "l5r4.ui.mechanics.rings.water") count=count}}` (modeled) | `data-tooltip="{{localize "l5r4.ui.hints.adjustSpellSlots" ring=(localize (concat "l5r4.ui.mechanics.rings." ring))}}"` (`templates/actor/_partials/_spell-slot.hbs`): one key, but no `aria-label` |
 | P2 | `<img class="l5r4-spell-slot-image" src="{{iconPath 'water.webp'}}" alt="" />` (modeled) | `<img src="{{iconPath 'water.webp'}}" title="..." />` with no `alt` (modeled) |
 | P3 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="water" count=system.spellSlots.water}}` (`templates/actor/_partials/_spell-section.hbs`) | Five copies of the slot (modeled) |
 | P4 | `background: var(--l5r4-color-scrim); text-shadow: var(--l5r4-shadow-text-halo);`, as in `.l5r4-spell-slot-count` (`scss/components/_section.scss`) | `background: rgb(0 0 0 / 40%); text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;` (modeled) |

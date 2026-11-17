@@ -7,7 +7,7 @@ Parameters: ring (water, air, fire, earth, void), count (system.spellSlots.<ring
     class="l5r4-spell-slot-count"
     data-action="adjust-spell-slot"
     data-path="system.spellSlots.{{ring}}"
-    data-tooltip="{{localize (concat "l5r4.ui.mechanics.rings." ring)}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+    data-tooltip="{{localize "l5r4.ui.hints.adjustSpellSlots" ring=(localize (concat "l5r4.ui.mechanics.rings." ring))}}">
     {{count}}
   </button>
 </div>

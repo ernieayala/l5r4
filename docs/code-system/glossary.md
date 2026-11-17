@@ -61,7 +61,7 @@ The check parses the **Terms** table by these rules.
 | Mastery Ability | `game-rules/58_skills_overview.md, p.133` | `mastery` | `l5r4.character.skills.properties.mastery3` | Rank 3 Mastery | none |
 | Skill Roll | `game-rules/29_types_of_rolls.md, p.79` | `skillRoll` | `l5r4.ui.mechanics.rolls.skillRoll` | Skill Roll | "Skill roll" |
 | Trait Roll | `game-rules/29_types_of_rolls.md, p.79` | `traitRoll` | `l5r4.ui.mechanics.rolls.traitRoll` | Trait Roll | "Trait roll" |
-| Ring Roll | `game-rules/29_types_of_rolls.md, p.80` | `ringRoll` | `l5r4.ui.mechanics.rolls.ringRoll` | Ring Roll | "Ring roll" |
+| Ring Roll | `game-rules/29_types_of_rolls.md, p.80` | `ringRoll` | `l5r4.ui.mechanics.rolls.ringRollLabel` | Ring Roll | "Ring roll" |
 | Spell Casting Roll | `game-rules/29_types_of_rolls.md, p.80; game-rules/66_magic_and_spell_casting.md, p.163` | `spellCast` | `l5r4.ui.mechanics.rolls.spellCasting` | Spell Casting Roll | "Spell Casting roll" |
 | damage roll | `game-rules/29_types_of_rolls.md, p.80` | `damage` | `l5r4.ui.mechanics.rolls.damageRoll` | Damage roll | none |
 | Contested Roll | `game-rules/29_types_of_rolls.md, p.80` | `contest` | `l5r4.ui.check.contest` | Contested Roll | "Contested roll" |
@@ -119,7 +119,7 @@ The check parses the **Terms** table by these rules.
 | School | `game-rules/47_character_creation_summary.md, p.99` | `school` | `TYPES.Item.school` | School | none |
 | Technique | `game-rules/49_improving_your_character.md, p.104` | `technique` | `TYPES.Item.technique` | Technique | none |
 | Insight | `game-rules/49_improving_your_character.md, p.104` | `insight` | `l5r4.ui.common.insight` | Insight | none |
-| Insight Rank | `game-rules/49_improving_your_character.md, p.104` | `insightRank` | none | Insight Rank | "insight rank" |
+| Insight Rank | `game-rules/49_improving_your_character.md, p.104` | `insightRank` | `l5r4.ui.common.insightRank` | Insight Rank | "insight rank" |
 | School Rank | `game-rules/49_improving_your_character.md, p.104; game-rules/66_magic_and_spell_casting.md, p.163` | `schoolRank` | `l5r4.ui.check.schoolRank` | School Rank | "school rank" |
 | Experience Points | `game-rules/48_character_creation_expanded.md, p.103; game-rules/94_experience_points.md, p.300` | `xp` | `l5r4.ui.common.xp` | XP | none |
 | Advantage | `game-rules/63_advantages_and_disadvantages.md, p.145` | `advantage` | `TYPES.Item.advantage` | Advantage | none |

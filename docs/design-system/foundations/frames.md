@@ -9,7 +9,7 @@ Declared in `scss/base/_variables.scss`, on `:root` unless the table says otherw
 | Token | Value | Use | Read at |
 | --- | --- | --- | --- |
 | `--l5r4-border-width-thin` | `1px` | Every frame and grid line | `scss/components/_grid.scss`, `scss/features/_wound-track.scss`, `scss/components/_item-row.scss`, `scss/features/_traits-rings.scss`, and the rest |
-| `--l5r4-border-width-thick` | `2px` | A Ring rank face and a Void Point dot | The `&::before` backdrop of `.l5r4-ring-rank`, `.l5r4-ring-rank-face`, and `.l5r4-void-point` (`scss/features/_traits-rings.scss`) |
+| `--l5r4-border-width-thick` | `2px` | A Ring rank face, a Void Point dot, and a broken text link's dashed frame | The `&::before` backdrop of `.l5r4-ring-rank`, `.l5r4-ring-rank-face`, and `.l5r4-void-point` (`scss/features/_traits-rings.scss`); `.l5r4-inline-link.-broken` (`scss/components/_inline-link.scss`) |
 | `--l5r4-border-width-band` | `32px` | The Ring color band on the outer side of each Trait row; one grid column wide | The four Ring rules from `.l5r4-trait.-earth.-stamina` to `.l5r4-trait.-air.-reflexes` (`scss/features/_traits-rings.scss`) |
 | `--l5r4-radius-sm` | `4px` | A chip or a card inside content: text links, rule cards | `.l5r4-inline-link` (`scss/components/_inline-link.scss`), `.l5r4-rules-editor-card` (`scss/components/_rules-editor.scss`) |
 | `--l5r4-radius-round` | `50%` | Ring medallions, spell slot images, Void Point dots | `.l5r4-ring-rank`, its backdrop and face, `.l5r4-ring-image`, and `.l5r4-void-point` (`scss/features/_traits-rings.scss`); `.l5r4-spell-slot` (`scss/components/_section.scss`) |

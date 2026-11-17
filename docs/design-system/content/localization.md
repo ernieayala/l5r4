@@ -45,7 +45,7 @@ How `lang/en.json` is organized: key paths, one key per meaning, placeholders, p
 | --- | --- | --- |
 | Conforming | `l5r4.ui.mechanics.wounds.armorTnBase` | `l5r4.ui.mechanics.wounds.armorTnBase` (`lang/en.json`) |
 | Conforming | `l5r4.ui.ruleSummary.TNModifier` (mirrors the rule key) | `l5r4.ui.ruleSummary.TNModifier` (`lang/en.json`) |
-| Non-conforming | `freeRaisesToTN`, `checkTN` (write `freeRaisesToTn`, `checkTn`) | modeled on `l5r4.ui.check.freeRaisesToTn` (`lang/en.json`), `l5r4.ui.links.checkTn` (`lang/en.json`) |
+| Non-conforming | `freeRaisesToTN`, `checkTN` (write `freeRaisesToTn`, `checkTn`) | modeled on `l5r4.ui.check.freeRaisesToTnNote` (`lang/en.json`), `l5r4.ui.links.checkTn` (`lang/en.json`) |
 | Non-conforming | `wounds.wounds`, `fear.fearRank` (write `wounds.label`, `fear.rank`) | modeled on `l5r4.ui.mechanics.wounds.label` (`lang/en.json`), `l5r4.ui.mechanics.fear.rank` (`lang/en.json`) |
 | Non-conforming | `common.init`, `common.mod`, `sheets.bio`, `spells.aoe` (write `initiative`, `modifier`, `background`, `areaOfEffect`) | modeled on `l5r4.ui.common.initiative` (`lang/en.json`), `l5r4.ui.common.modifier` (`lang/en.json`), `l5r4.ui.sheets.background` (`lang/en.json`), `l5r4.magic.spells.areaOfEffect` (`lang/en.json`) |
 
@@ -98,7 +98,7 @@ Each meaning below has one tree: the one the templates read and the translations
 | Wealth Manager strings | `l5r4.apps.wealthManager` (`lang/en.json`) | `l5r4.ui.wealthManager` |
 | Window titles | `l5r4.apps.<app>.title` | `ui.combat.configuration`, `ui.mechanics.wounds.woundConfiguration` |
 
-**Check.** `tests/lang.test.js`: the removed trees above do not exist. ESLint `l5r4/joined-copy` (`tools/eslint/`) fails a localized string in `module/` or `dist/` joined to other text with `+` or in a template literal, and `l5r4/joined-title` names the same fault in a window, dialog, or card title. A suffix added to a label goes through `l5r4.ui.check.labelWithSuffix` ("{label} {suffix}"). Review for other repeated values (two meanings may share a word) and for fragments joined in templates.
+**Check.** `tests/lang.test.js`: the removed trees above do not exist. ESLint `l5r4/joined-copy` (`tools/eslint/`) fails a localized string in `module/` or `dist/` joined to other text with `+` or in a template literal, and `l5r4/joined-title` names the same fault in a window, dialog, or card title. A suffix added to a label goes through `l5r4.ui.check.labelWithSuffix` ("{label} {suffix}"). `tests/conventions/templates.test.js` (`joined-localize`) fails two or more localize calls joined in one text node or attribute value of a template. Review for other repeated values (two meanings may share a word) and for a key joined to a value in a template.
 
 ## Interpolation
 

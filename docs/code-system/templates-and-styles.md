@@ -48,7 +48,7 @@ A partial whose output posts to chat (`templates/cards/_partials/_text-section.h
 | Font Awesome as `fa-solid fa-<name>`, with the names core's Font Awesome 7.2.0 ships, never 5.x aliases (`fa-edit`) | `tests/conventions/templates.test.js` |
 | No `style=`, no `width=` or `height=` for looks, no `on*=`, no `<script>` | `tests/conventions/templates.test.js` |
 | No user-facing text outside `{{localize}}` | `tests/conventions/templates.test.js` |
-| One key per label; no label joined from two keys or with a literal `&` | review |
+| One key per label; no label joined from two keys or with a literal `&`. Two or more `{{localize}}` calls (or `(localize)` subexpressions) in one text node or attribute value fail; a localize passed as another's placeholder value, `{{else}}` branches, and partial arguments do not count | `tests/conventions/templates.test.js` (`joined-localize`); review for `&` |
 | Comments are `{{!-- --}}`; `<!-- -->` ships into the DOM | `tests/conventions/templates.test.js` |
 | Partials are included by literal path: `{{> "systems/l5r4-enhanced/templates/..."}}`; a subtype file by `(concat ...)` | review |
 | A partial's parameters are named on the include (`{{> "..." item=this}}`) and listed in a `{{!-- --}}` comment at its top | review |

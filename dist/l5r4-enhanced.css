@@ -240,6 +240,17 @@ body > * {
 }
 
 /**
+ * Check Card
+ * The check card (components/check-card.md) and the dice row inside it (components/dice-row.md, DR5): core fades a
+ * dropped or re-rolled die, and the system strikes its number through, so it differs from a kept die by more than
+ * color. Rules sit under the card's fixed root, which cards posted before them carry too
+ */
+.l5r4-check .roll.discarded,
+.l5r4-check .roll.rerolled {
+  text-decoration: line-through;
+}
+
+/**
  * Check Dialog
  * The roll pipeline dialog: one row per modifier, with its toggle, label, and value
  */
@@ -962,7 +973,7 @@ body > * {
 }
 
 .l5r4-inline-link.-broken {
-  border-style: dashed;
+  border: var(--l5r4-border-width-thick) dashed var(--l5r4-color-text);
   cursor: help;
 }
 .l5r4-inline-link.-broken .l5r4-inline-link-reason {
@@ -2132,6 +2143,15 @@ body > * {
   border: var(--l5r4-border-width-thin) dashed var(--l5r4-color-divider);
   margin: 0;
   padding: var(--l5r4-space-8);
+}
+.l5r4-design-gallery .l5r4-design-gallery-sample.-fit {
+  inline-size: fit-content;
+}
+.l5r4-design-gallery .l5r4-design-gallery-sample.-fit .l5r4-traits-rings {
+  grid-template-columns: none;
+  grid-template-rows: none;
+  overflow: visible;
+  padding-block: var(--l5r4-space-12);
 }
 .l5r4-design-gallery .l5r4-design-gallery-sample figcaption {
   font-size: var(--l5r4-font-size-meta);

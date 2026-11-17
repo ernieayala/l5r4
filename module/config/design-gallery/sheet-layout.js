@@ -35,6 +35,7 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
     scss: ["scss/components/_section.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.notesSection",
         partial: `${T}/actor/_partials/_note-section.hbs`,
         scope: "pc",
         context: "pc"
@@ -110,20 +111,24 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
     scss: ["scss/components/_item-row.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.rowDetails",
         partial: `${T}/cards/_partials/_details.hbs`,
         scope: "pc",
         context: "plain",
         with: { rules: DESCRIPTION, description: DESCRIPTION }
       },
       {
+        label: "l5r4.apps.designGallery.samples.rowDetailText",
         partial: `${T}/cards/_partials/_detail-text.hbs`,
         scope: "pc",
         context: "plain",
         with: { description: DESCRIPTION }
       },
       {
+        label: "l5r4.apps.designGallery.samples.bioRow",
         partial: `${T}/cards/_partials/_bio-row.hbs`,
         scope: "pc",
+        within: ["l5r4-item-row-list -bio"],
         context: "plain",
         with: {
           name: "Crane",

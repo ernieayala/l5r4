@@ -1,5 +1,7 @@
+import { describe, expect, it } from "vitest";
 import {
   codeSpansOf,
+  getFixtureTrees,
   getRepoTree,
   lineOf,
   registerConventionSuite,
@@ -216,6 +218,51 @@ function literalTextOf(text) {
 }
 
 /**
+ * The localize calls a run of text joins: each `{{localize ...}}` counts once, its own subexpressions being its
+ * placeholders' values, and each `(localize ...)` inside any other mustache counts once.
+ * @param {string} run - A text node or an attribute value
+ * @returns {number} The joined calls
+ */
+function localizeCallsIn(run) {
+  return [...run.matchAll(new RegExp(MUSTACHE, "g"))].reduce(
+    (count, [mustache]) =>
+      count +
+      (/^\{\{~?localize\b/.test(mustache) ? 1 : [...mustache.matchAll(/\(localize\b/g)].length),
+    0
+  );
+}
+
+/**
+ * The runs of a template one label can occupy: each attribute value and each text node between tags. A run splits
+ * at `{{else}}`, whose branches never render together; a partial include is markup, not text, so it drops out.
+ * @param {string} text - The template, comments blanked
+ * @returns {{run: string, index: number}[]} The runs with their offsets
+ */
+function labelRunsOf(text) {
+  const attribute = new RegExp(String.raw`[\w:-]+="((?:[^"{]|${MUSTACHE})*)"`, "g");
+  const values = tagsOf(text).flatMap(({ name, attrs, index }) =>
+    [...attrs.matchAll(attribute)].map(match => ({
+      run: match[1],
+      index: index + 1 + name.length + match.index + match[0].indexOf('"') + 1
+    }))
+  );
+  const nodes = [];
+  const blanked = text
+    .replace(TAG, tag => tag.replace(/[^\n]/g, "<"))
+    .replace(/<\/[a-zA-Z][\w-]*\s*>/g, tag => tag.replace(/[^\n]/g, "<"))
+    .replace(/\{\{>[\s\S]*?\}\}/g, include => include.replace(/[^\n]/g, " "));
+  for (const match of blanked.matchAll(/[^<]+/g)) {
+    nodes.push({ run: match[0], index: match.index });
+  }
+  return [...values, ...nodes].flatMap(({ run, index }) =>
+    [...run.matchAll(/(?:(?!\{\{else\b)[\s\S])+/g)].map(part => ({
+      run: part[0],
+      index: index + part.index
+    }))
+  );
+}
+
+/**
  * Markup repeated in a second place: runs of identical lines across the templates.
  * @param {import("../../tools/conventions/shared.mjs").Tree} tree - The tree
  * @returns {string[]} One violation per repeated run
@@ -396,6 +443,16 @@ const RULES = {
       )
     ]),
 
+  "templates/joined-localize": tree =>
+    templatesOf(tree).flatMap(({ path, text }) =>
+      labelRunsOf(text)
+        .filter(({ run }) => localizeCallsIn(run) >= 2)
+        .map(
+          ({ run, index }) =>
+            `${path}:${lineOf(text, index + Math.max(run.indexOf("{{"), 0))}: "${run.trim().replace(/\s+/g, " ")}" joins ${localizeCallsIn(run)} localize calls; one label is one key with placeholders`
+        )
+    ),
+
   "templates/partial-path": tree =>
     templatesOf(tree).flatMap(({ path, text }) =>
       [...text.matchAll(/\{\{>\s*([^\s}]+)/g)]
@@ -414,3 +471,14 @@ const RULES = {
 };
 
 registerConventionSuite("Templates", RULES, "templates");
+
+describe("Joined localize calls", () => {
+  it("should fail a text node, an attribute value, and a conditional join, each on its own line", () => {
+    const found = RULES["templates/joined-localize"](getFixtureTrees("templates").bad);
+    expect(found.map(line => line.split(":").slice(0, 2).join(":"))).toEqual([
+      "templates/apps/sample.hbs:11",
+      "templates/apps/sample.hbs:10",
+      "templates/apps/sample.hbs:12"
+    ]);
+  });
+});

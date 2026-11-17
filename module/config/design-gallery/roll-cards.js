@@ -52,7 +52,7 @@ export const GALLERY_ROLL_CARDS = Object.freeze([
   {
     page: "dice-row",
     partials: [`${T}/chat/check.hbs`],
-    scss: ["scss/components/_chat-card.scss"],
+    scss: ["scss/components/_check-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.skilledRoll",
@@ -85,7 +85,7 @@ export const GALLERY_ROLL_CARDS = Object.freeze([
   {
     page: "check-card",
     partials: [`${T}/chat/check.hbs`],
-    scss: ["scss/components/_chat-card.scss"],
+    scss: ["scss/components/_check-card.scss", "scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.success",

@@ -16,6 +16,7 @@ export const GALLERY_SHEET_HEADERS = Object.freeze([
     scss: ["scss/components/_item-row.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.skillHeader",
         partial: `${T}/actor/_partials/_sort-header.hbs`,
         scope: "pc",
         context: "pc",

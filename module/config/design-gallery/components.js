@@ -8,6 +8,7 @@ import { GALLERY_SHEET_CONTROLS } from "./sheet-controls.js";
 import { GALLERY_SHEET_LAYOUT } from "./sheet-layout.js";
 import { GALLERY_SHEET_HEADERS } from "./sheet-headers.js";
 import { GALLERY_SHEET_BLOCKS } from "./sheet-blocks.js";
+import { GALLERY_SHEET_COMBAT_BLOCKS } from "./sheet-combat-blocks.js";
 import { GALLERY_ROLL_CARDS } from "./roll-cards.js";
 import { GALLERY_PROMPT_AND_ITEM_CARDS } from "./prompt-and-item-cards.js";
 import { GALLERY_FORMS } from "./forms.js";
@@ -26,6 +27,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
   ...GALLERY_SHEET_LAYOUT,
   ...GALLERY_SHEET_HEADERS,
   ...GALLERY_SHEET_BLOCKS,
+  ...GALLERY_SHEET_COMBAT_BLOCKS,
   ...GALLERY_ROLL_CARDS,
   ...GALLERY_PROMPT_AND_ITEM_CARDS,
   ...GALLERY_FORMS,

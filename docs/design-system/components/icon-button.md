@@ -75,7 +75,7 @@ The button has no visible text. Its tooltip is a short verb phrase (`content/voi
 | I1 | `<button type="button" class="inline-control icon" data-action="apply-healing" data-tooltip="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}" aria-label="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}">`, the `apply-healing` (`templates/actor/_partials/_wounds.hbs`) button | `<a class="button inline-control icon" data-action="xp-modal"><i class="fas fa-chart-line"></i></a>` (modeled): no name, no focus |
 | I2 | `<i class="fa-solid fa-gear" inert></i>` | `<i class="fas fa-cog"></i>` (modeled) |
 | I3 | `fa-gear` for every configuration window: armor, wounds, combat | `fa-scroll` for the ledger, which iconography gives `fa-book-bookmark` (modeled) |
-| I4 | "Post to chat": `l5r4.ui.hints.postToChat` (`lang/en.json`) | "Click or right-click to adjust": `l5r4.ui.hints.leftRightToAdjust` (`lang/en.json`) |
+| I4 | "Post to chat": `l5r4.ui.hints.postToChat` (`lang/en.json`) | "{ring} (click or right-click to adjust)": `l5r4.ui.hints.adjustSpellSlots` (`lang/en.json`) |
 | I5 | Core's `--button-size: 24px` on `.inline-control` | A rule that sets `width: 16px` on an icon button (modeled) |
 
 ## Do and don't

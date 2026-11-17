@@ -10,13 +10,10 @@
   {{{roll}}}
   {{#if tn}}
     <div class="l5r4-tn-result">
-      {{outcomeText}}
-      {{localize "l5r4.ui.combat.vs"}}
-      {{localize "l5r4.ui.common.tn"}}
-      {{tn.effective}}
-      {{#if tn.raises}}({{localize "l5r4.magic.spells.raises"}}: {{tn.raises}}){{/if}}
-      {{#if tn.freeRaisesToTN}}({{localize "l5r4.ui.check.freeRaisesToTn"}}: {{tn.freeRaisesToTN}}){{/if}}
-      {{#if tn.woundPenalty}}({{localize "l5r4.ui.mechanics.combat.woundPenalty"}} +{{tn.woundPenalty}}){{/if}}
+      <span>{{localize "l5r4.ui.check.outcomeAgainstTn" outcome=outcomeText tn=tn.effective}}</span>
+      {{#if tn.raises}}<span>{{localize "l5r4.ui.check.raisesNote" count=tn.raises}}</span>{{/if}}
+      {{#if tn.freeRaisesToTN}}<span>{{localize "l5r4.ui.check.freeRaisesToTnNote" count=tn.freeRaisesToTN}}</span>{{/if}}
+      {{#if tn.woundPenalty}}<span>{{localize "l5r4.ui.check.woundPenaltyNote" penalty=tn.woundPenalty}}</span>{{/if}}
     </div>
   {{/if}}
   {{#if freeRaisesLeft}}

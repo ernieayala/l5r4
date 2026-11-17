@@ -26,6 +26,13 @@
   <img class="l5r4-sample-icon" src="{{img}}" alt="" />
   <img class="l5r4-sample-portrait" src="{{img}}" data-action="editImage" data-edit="img" alt="{{name}}" />
   <input class="l5r4-sample-search" name="search" placeholder="{{localize "l5r4.ui.common.search"}}" />
-  {{> "systems/l5r4-enhanced/templates/apps/_partials/_row.hbs" item=this}}
+  <label class="l5r4-sample-label">{{localize "l5r4.ui.check.rollModifier"}}</label>
+  <span class="l5r4-sample-slot" data-tooltip="{{localize "l5r4.ui.hints.adjustSpellSlots" ring=(localize "l5r4.ui.mechanics.rings.water")}}">{{count}}</span>
+  <p class="l5r4-sample-note">{{#if free}}{{localize "l5r4.ui.common.free"}}{{else}}{{localize "l5r4.ui.common.rank"}}{{/if}}</p>
+  <p class="l5r4-sample-note">
+    <span>{{localize "l5r4.ui.check.outcomeAgainstTn" outcome=outcome tn=tn}}</span>
+    {{#if raises}}<span>{{localize "l5r4.ui.check.raisesNote" count=raises}}</span>{{/if}}
+  </p>
+  {{> "systems/l5r4-enhanced/templates/apps/_partials/_row.hbs" item=this label=(localize "l5r4.ui.common.roll") tooltip=(localize "l5r4.ui.common.modifier")}}
   {{> (concat "systems/l5r4-enhanced/templates/item/_type-details/" type ".hbs")}}
 </section>

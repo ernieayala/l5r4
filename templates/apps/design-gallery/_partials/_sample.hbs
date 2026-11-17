@@ -3,8 +3,9 @@ scope, html. The scope wraps the sample in the block class the sheet window carr
 item: the item sheet's), core's chat message for cards, or the window's root class for the effect panel and the
 compendium browser, so sheet-wide rules reach it as they do in the sheet. within (optional, actor scopes): one or
 two classes of the blocks a part of a sheet block sits in, outermost first, so the rules its parent scopes reach it
-as they do in the sheet (a Trait row in the Ring and Trait block, a Wound track in its grid). --}}
-<figure class="l5r4-design-gallery-sample" data-gallery-partial="{{partial}}">
+as they do in the sheet (a Trait row in the Ring and Trait block, a Wound track in its grid). fit (optional): the
+frame takes its content's width, for a small part shown alone. --}}
+<figure class="l5r4-design-gallery-sample{{#if fit}} -fit{{/if}}" data-gallery-partial="{{partial}}">
   {{#if label}}<figcaption>{{localize label}}</figcaption>{{/if}}
   {{#if (or (eq scope "pc") (eq scope "npc"))}}
     <div class="l5r4-actor-sheet">

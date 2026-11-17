@@ -20,6 +20,7 @@ export const GALLERY_SHEET_CONTROLS = Object.freeze([
     scss: ["scss/components/_button.scss", "scss/features/_traits-rings.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.rollFace",
         partial: `${T}/cards/_partials/_roll-button.hbs`,
         scope: "pc",
         context: "plain",
@@ -132,18 +133,21 @@ export const GALLERY_SHEET_CONTROLS = Object.freeze([
     scss: ["scss/components/_form-field.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.advantageFields",
         partial: `${T}/item/_partials/_advantage-details.hbs`,
         scope: "item",
         context: "item",
         with: { system: { type: "physical", cost: 2 } }
       },
       {
+        label: "l5r4.apps.designGallery.samples.masteryFields",
         partial: `${T}/item/_partials/_mastery-details.hbs`,
         scope: "item",
         context: "item",
         with: { system: { ring: "fire", mastery: 2 } }
       },
       {
+        label: "l5r4.apps.designGallery.samples.wealthChange",
         partial: `${T}/apps/_partials/_wealth-change.hbs`,
         context: "plain",
         with: { field: "add" }

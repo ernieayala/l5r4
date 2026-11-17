@@ -33,6 +33,33 @@ async function readSources(dir) {
   );
 }
 
+/**
+ * The leaf keys of a lang tree that no source names: not written out, not under a prefix the code builds keys from
+ * ("prefix." + x, `prefix.${x}`, or Handlebars (concat "prefix." x)), and not a subtype label core reads.
+ * @param {object} tree - A parsed lang file
+ * @param {string} text - Every source, comments dropped
+ * @param {string[]} types - The `TYPES.<Document>.<subtype>` keys core reads
+ * @returns {string[]} The unused keys
+ */
+function unusedKeysOf(tree, text, types) {
+  const prefixes = [
+    ...text.matchAll(/[`"']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)(?:\$\{|["']\s*\+)/g),
+    ...text.matchAll(/\(concat ["']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)["']/g)
+  ].map(([, prefix]) => prefix);
+  // Whole dotted paths only, so a key does not count as used inside a longer key that starts with it
+  const written = new Set(text.match(/[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+/g));
+  const leaves = (node, path) =>
+    typeof node === "string"
+      ? [path]
+      : Object.entries(node).flatMap(([key, child]) =>
+          leaves(child, path ? `${path}.${key}` : key)
+        );
+  return leaves(tree, "").filter(
+    key =>
+      !written.has(key) && !prefixes.some(prefix => key.startsWith(prefix)) && !types.includes(key)
+  );
+}
+
 beforeAll(async () => {
   lang = JSON.parse(await readFile(new URL("lang/en.json", root), "utf8"));
   const entry = "dist/l5r4-enhanced.js";
@@ -55,30 +82,13 @@ describe("Key coverage of lang/en.json", () => {
 
   // roadmap/STAGE-16
   it("should hold no key the system never uses", async () => {
-    const text = sources.map(({ text }) => text).join("\n");
-    // A key built at runtime: "prefix." + x, `prefix.${x}`, or Handlebars (concat "prefix." x)
-    const prefixes = [
-      ...text.matchAll(/[`"']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)(?:\$\{|["']\s*\+)/g),
-      ...text.matchAll(/\(concat ["']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)["']/g)
-    ].map(([, prefix]) => prefix);
     // Core labels each declared subtype with TYPES.<Document>.<subtype>
     const { documentTypes } = JSON.parse(await readFile(new URL("system.json", root), "utf8"));
     const types = Object.entries(documentTypes).flatMap(([doc, subtypes]) =>
       Object.keys(subtypes).map(type => `TYPES.${doc}.${type}`)
     );
-    const leaves = (node, path) =>
-      typeof node === "string"
-        ? [path]
-        : Object.entries(node).flatMap(([key, child]) =>
-            leaves(child, path ? `${path}.${key}` : key)
-          );
-    const unused = leaves(lang, "").filter(
-      key =>
-        !text.includes(key) &&
-        !prefixes.some(prefix => key.startsWith(prefix)) &&
-        !types.includes(key)
-    );
-    expect(unused).toEqual([]);
+    const text = sources.map(({ text }) => text).join("\n");
+    expect(unusedKeysOf(lang, text, types)).toEqual([]);
   });
 
   it("should define the group under every key built from a template literal", () => {
@@ -88,6 +98,27 @@ describe("Key coverage of lang/en.json", () => {
         .map(([, prefix]) => `${prefix} (${path})`)
     );
     expect([...new Set(missing)]).toEqual([]);
+  });
+});
+
+describe("Unused key detection", () => {
+  const fixture = {
+    l5r4: {
+      weapons: { fallback: "Fallback", fallbackTrait: "Fallback Trait" },
+      rings: { air: "Air", water: "Water" },
+      common: { roll: "Roll" }
+    },
+    TYPES: { Item: { skill: "Skill" } }
+  };
+
+  it("should report a key whose path only appears inside a longer key", () => {
+    const text = `T("l5r4.weapons.fallbackTrait"); (concat "l5r4.rings." ring); "l5r4.common.roll"`;
+    expect(unusedKeysOf(fixture, text, ["TYPES.Item.skill"])).toEqual(["l5r4.weapons.fallback"]);
+  });
+
+  it("should count a key written whole, a built-key prefix, and a declared subtype as used", () => {
+    const text = `"l5r4.weapons.fallback" "l5r4.weapons.fallbackTrait" \`l5r4.rings.\${ring}\` 'l5r4.common.roll'`;
+    expect(unusedKeysOf(fixture, text, ["TYPES.Item.skill"])).toEqual([]);
   });
 });
 

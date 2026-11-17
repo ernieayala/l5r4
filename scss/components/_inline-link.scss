@@ -16,8 +16,9 @@
   margin-inline-start: var(--l5r4-space-4);
 }
 
+// A heavier dash in the text color, so a broken link stands apart from the muted chip of a working one
 .l5r4-inline-link.-broken {
-  border-style: dashed;
+  border: var(--l5r4-border-width-thick) dashed var(--l5r4-color-text);
   cursor: help;
 
   .l5r4-inline-link-reason {

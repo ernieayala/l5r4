@@ -7,6 +7,9 @@
   <a data-action="expand-section"><i class="fa-solid fa-angle-down" inert></i></a>
   <img src="{{img}}" />
   <input placeholder="Search" />
+  <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.modifier"}}</label>
+  <span data-tooltip="{{localize (concat "l5r4.ui.mechanics.rings." ring)}} ({{localize "l5r4.ui.hints.postToChat"}})">{{count}}</span>
+  <p>{{#if free}}{{localize "l5r4.ui.common.free"}} {{/if}}{{concat (localize "l5r4.ui.common.rank") ":"}}</p>
   {{> controls}}
   <script></script>
 </div>

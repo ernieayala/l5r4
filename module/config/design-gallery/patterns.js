@@ -13,15 +13,42 @@ export const GALLERY_PATTERNS = Object.freeze([
     label: "l5r4.apps.designGallery.patterns.sheetSection",
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.rankTracks",
         partial: `${T}/actor/_partials/_ranks.hbs`,
         scope: "pc",
         context: "pc",
         with: { editable: true }
       },
-      { partial: `${T}/actor/_partials/_combat.hbs`, scope: "pc", context: "pc" },
-      { partial: `${T}/actor/_partials/_limited.hbs`, scope: "pc", context: "pc" },
-      { partial: `${T}/actor/_partials/_armor.hbs`, scope: "pc", context: "pc" },
-      { partial: `${T}/actor/_partials/_wounds.hbs`, scope: "pc", context: "pc" }
+      {
+        label: "l5r4.apps.designGallery.samples.combatBlock",
+        partial: `${T}/actor/_partials/_combat.hbs`,
+        scope: "pc",
+        context: "pc"
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.armorBlock",
+        partial: `${T}/actor/_partials/_armor.hbs`,
+        scope: "pc",
+        context: "pc"
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.woundsBlock",
+        partial: `${T}/actor/_partials/_wounds.hbs`,
+        scope: "pc",
+        context: "pc"
+      }
+    ]
+  },
+  {
+    page: "sheets",
+    label: "l5r4.apps.designGallery.patterns.limitedView",
+    samples: [
+      {
+        label: "l5r4.apps.designGallery.samples.limitedName",
+        partial: `${T}/actor/_partials/_limited.hbs`,
+        scope: "pc",
+        context: "pc"
+      }
     ]
   },
   {
@@ -29,6 +56,7 @@ export const GALLERY_PATTERNS = Object.freeze([
     label: "l5r4.apps.designGallery.patterns.chatCard",
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.attackHit",
         partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
@@ -41,6 +69,7 @@ export const GALLERY_PATTERNS = Object.freeze([
         }
       },
       {
+        label: "l5r4.apps.designGallery.samples.woundsTaken",
         partial: `${T}/chat/damage-result.hbs`,
         scope: "chat",
         context: "plain",
@@ -71,6 +100,7 @@ export const GALLERY_PATTERNS = Object.freeze([
     label: "l5r4.apps.designGallery.patterns.panelRow",
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.effects",
         partial: `${T}/apps/effect-panel.hbs`,
         scope: "effect-panel",
         context: "plain",

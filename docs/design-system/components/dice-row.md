@@ -8,7 +8,7 @@ The roll inside a check card: the dice formula, the total, and, when expanded, e
 | Inserted at | `{{{roll}}}` (`templates/chat/check.hbs`), from `roll: await roll.render()` in `renderCheckCard` (`module/services/dice/check/card.js`); `{{{roll}}}` (`templates/chat/weapon.hbs`) on cards posted before 4.0.0 |
 | Die | `L5R4Die` (`module/services/dice/roll-keep-die.js`), registered as `CONFIG.Dice.terms.d` |
 | Formula | `getPoolFormula` (`module/utils/check.js`): `<roll>d10[r1][xa<n>]k<keep><±bonus>` |
-| SCSS | Core's `.dice-roll` and `.dice-tooltip` rules (`foundry2.css:5597-5738`). The dropped-dice mark (DR5) sits in `scss/components/_check-card.scss` (target), under the card's fixed root `.l5r4-check` |
+| SCSS | Core's `.dice-roll` and `.dice-tooltip` rules (`foundry2.css:5597-5738`). The dropped-dice mark (DR5) sits in `scss/components/_check-card.scss`, under the card's fixed root `.l5r4-check` |
 | Quench | `l5r4-enhanced.roll-pipeline` |
 
 ## Anatomy
@@ -74,7 +74,7 @@ The formula is one token with no spaces; core breaks it anywhere (`word-break: b
 | DR2 | The system adds no style under `.dice-roll` or `.dice-tooltip` other than DR5's mark; core's look holds in both themes | `tests/conventions/styles.test.js` (selectors on `l5r4-` classes) | No rule in `scss/` names `.dice-roll` | `.l5r4-check .dice-total { color: … }` (modeled) |
 | DR3 | The formula comes from `getPoolFormula` and nowhere else, so every roll reads the same | Review | `new foundry.dice.Roll(getPoolFormula(pool))` in `rollCheckPool` (`module/services/dice/check/roll-check.js`) | A formula assembled at a call site (modeled) |
 | DR4 | Outcome, TN, and Raises live on the card, in words, never only in the dice marks | Review, in the gallery's chat section | `l5r4-tn-result` states the outcome and the TN in words ([check card](check-card.md)) | A card that shows the dice row and relies on the dimmed dice to say what failed (modeled) |
-| DR5 | A dropped or re-rolled die carries a mark that is not color: a line through its number (Stage 17 decision 16). The rule sits under the card's fixed root, so cards posted before it show the mark too | Review, in the gallery's chat section | `.l5r4-check .roll.discarded, .l5r4-check .roll.rerolled { text-decoration: line-through; }` in `scss/components/_check-card.scss` (target) | Dropped dice told apart by core's dimming alone, as in the code: no rule in `scss/` draws the line |
+| DR5 | A dropped or re-rolled die carries a mark that is not color: a line through its number (Stage 17 decision 16). The rule sits under the card's fixed root, so cards posted before it show the mark too | Review, in the gallery's chat section | `.roll.discarded, .roll.rerolled { text-decoration: line-through; }` nested in `.l5r4-check` (`scss/components/_check-card.scss`) | Dropped dice told apart by core's dimming alone (modeled) |
 
 ## Do and don't
 

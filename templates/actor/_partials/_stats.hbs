@@ -19,7 +19,7 @@
       </div>
       <div class="flexcol flex1">
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="toggle-rank-mode" {{#if @root.isGM}}data-tooltip="{{localize "l5r4.ui.hints.shiftClickToggleRankMode"}}"{{/if}}>{{localize "l5r4.ui.common.insight"}} {{localize "l5r4.ui.common.rank"}}</button></h4>
+          <h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="toggle-rank-mode" {{#if @root.isGM}}data-tooltip="{{localize "l5r4.ui.hints.shiftClickToggleRankMode"}}"{{/if}}>{{localize "l5r4.ui.common.insightRank"}}</button></h4>
           {{#if system.insight.autoCalculate}}
             <div class="flex1 l5r4-form-field-value">{{system.insight.rank}}</div>
           {{else}}

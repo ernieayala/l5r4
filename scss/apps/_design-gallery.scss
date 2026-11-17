@@ -221,6 +221,21 @@
     margin: 0;
     padding: var(--l5r4-space-8);
 
+    // A small part shown alone: the frame takes its content's width, not the entry's
+    &.-fit {
+      inline-size: fit-content;
+
+      // A lone Ring, Trait, or rank control keeps the Ring and Trait block's rules and its grid lines, so it sits as
+      // in the sheet; the tracks the other parts would fill collapse, and the block keeps room for a part the sheet
+      // pulls past its cell (the Void disc's negative margin) and for the hover arrows
+      .l5r4-traits-rings {
+        grid-template-columns: none;
+        grid-template-rows: none;
+        overflow: visible;
+        padding-block: var(--l5r4-space-12);
+      }
+    }
+
     figcaption {
       font-size: var(--l5r4-font-size-meta);
       font-weight: bold;

@@ -76,7 +76,7 @@ The title bar is one line (`text-wrap: nowrap`, `foundations/typography.md` T7).
 | S1 | The heading is an `<h4>` holding only its localized text; it carries no action | `tests/conventions/templates.test.js` (interactive elements are native controls) |
 | S2 | A collapsible section's state rides on `aria-expanded` of its expand control; `is-collapsed` only mirrors it | `tests/conventions/templates.test.js` (an expand toggle carries `aria-expanded`) |
 | S3 | The collapsed rule hides the body by its class (`.l5r4-section-title.is-collapsed ~ .l5r4-item-row-list`), never by tag | Stylelint `selector-class-pattern` |
-| S4 | One key per heading: a heading never joins two keys or uses a literal `&` | Review (`docs/code-system/templates-and-styles.md`) |
+| S4 | One key per heading: a heading never joins two keys or uses a literal `&` | `tests/conventions/templates.test.js` (`joined-localize`); review for `&` (`docs/code-system/templates-and-styles.md`) |
 | S5 | Styles sit under `.l5r4-section`, so the section looks the same in a sheet, the XP manager, and the gallery | `tests/conventions/styles.test.js` |
 | S6 | The expand control is the title bar's last button | Review |
 
@@ -85,7 +85,7 @@ The title bar is one line (`text-wrap: nowrap`, `foundations/typography.md` T7).
 | S1 | `<h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.skills"}}</h4>` (`templates/actor/_partials/_skill-section.hbs`) | `<h4 class="flex0 title" data-action="recalc-sheet">` (modeled) |
 | S2 | The `foundations/states.md` rule 4 example: `aria-expanded` on the toggle, `is-collapsed` on `l5r4-section-title` | An expand toggle with no `aria-expanded`: the toggle states nothing (modeled) |
 | S3 | `&.is-collapsed { ~ .l5r4-item-row-list { display: none; } }` under `.l5r4-section-title` (`scss/components/_section.scss`) | `&.is-collapsed { ~ .item-list { display: none; } }` keyed to a bare class (modeled) |
-| S4 | `{{localize "l5r4.ui.sheets.attacksAndDamage"}}` (modeled) | `{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}` (`templates/actor/_partials/_stats-npc.hbs`) |
+| S4 | `{{localize "l5r4.ui.sheets.attackAndDamage"}}` (`templates/actor/_partials/_stats-npc.hbs`) | `{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}` (modeled) |
 | S5 | `.l5r4-section-title { background: var(--l5r4-color-header); }` (modeled) | `.title` styled twice, once for sheets and once for the XP manager (modeled) |
 | S6 | Add, then expand, in the `data-section-title` bar (`templates/actor/_partials/_skill-section.hbs`) | Expand before a section's other tools (modeled) |
 

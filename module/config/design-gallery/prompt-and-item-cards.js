@@ -130,6 +130,7 @@ export const GALLERY_PROMPT_AND_ITEM_CARDS = Object.freeze([
     scss: ["scss/components/_item-summary-card.scss", "scss/components/_chat-card.scss"],
     samples: [
       {
+        label: "l5r4.apps.designGallery.samples.textSection",
         partial: `${T}/cards/_partials/_text-section.hbs`,
         scope: "chat",
         context: "plain",

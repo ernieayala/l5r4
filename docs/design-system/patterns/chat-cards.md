@@ -8,7 +8,7 @@ How a card the system posts to chat is put together: speaker, title, dice row wi
 | Paths | `CHAT_TEMPLATES` (`module/config/templates.js`) |
 | Posted by | `rollCheck`, through `postCheck` (`module/services/dice/check/roll-check.js`); `postCheckRequest` (`module/services/check-request.js`); damage results, `postResult` (`module/services/combat/damage.js`); effect prompts, `postPrompt` (`module/services/effects/prompts.js`); flow cards, `startFlow` (`module/services/combat/flow.js`); rest (`module/services/rest.js`) |
 | Wired by | `bind<Card>Card(message, html)` on `renderChatMessageHTML` (`docs/code-system/foundry-patterns.md`, Chat cards) |
-| SCSS | One file per card component in `scss/components/` (rule 6): `scss/components/_chat-card.scss`, `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss` |
+| SCSS | One file per card component in `scss/components/` (rule 6): `scss/components/_chat-card.scss`, `scss/components/_check-card.scss`, `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss` |
 | Tokens | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-size-meta`, `--l5r4-color-text`, `--l5r4-color-line-muted`, `--l5r4-state-disabled-opacity` |
 | Components | Chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, button |
 | Checks | `tests/conventions/actions.test.js` (fixed names exempt by name), `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, ESLint `no-restricted-syntax`; "review" where no tool can judge |
@@ -120,7 +120,7 @@ Non-conforming, modeled: a card that hides its total with a CSS class for player
 
 ### 6. Card styles live in one file per card
 
-Each card component has one file in `scss/components/`, named for its page: `scss/components/_chat-card.scss` (the shared shell: column layout, buttons one per row), `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss`, `scss/components/_check-card.scss` (target), `scss/components/_damage-result.scss` (target), and `scss/components/_flow-card.scss` (target). The selectors start at the card's fixed root class (`l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the dropped-dice mark in the check card's file (`components/dice-row.md` DR5). The check dialog's rules live in `scss/components/_check-dialog.scss`. The code differs: the check card's `.l5r4-roll`, the damage result, and the flow card are styled in `scss/components/_chat-card.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level file) and `tests/conventions/styles.test.js` (one component per file).
+Each card component has one file in `scss/components/`, named for its page: `scss/components/_chat-card.scss` (the shared shell: column layout, buttons one per row), `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss`, `scss/components/_check-card.scss`, `scss/components/_damage-result.scss` (target), and `scss/components/_flow-card.scss` (target). The selectors start at the card's fixed root class (`l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the dropped-dice mark in the check card's file (`components/dice-row.md` DR5). The check dialog's rules live in `scss/components/_check-dialog.scss`. The code differs: the check card's `.l5r4-roll`, the damage result, and the flow card are styled in `scss/components/_chat-card.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level file) and `tests/conventions/styles.test.js` (one component per file).
 
 Conforming, modeled on `.l5r4-damage-result` (`scss/components/_chat-card.scss`):
 
@@ -140,7 +140,7 @@ Non-conforming, `.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`
 
 ### 7. One key per line of card text
 
-Every line on a card is one i18n key with placeholders, never fragments joined in the template. A button label starts with a verb and names its object (`content/voice.md`, Buttons). Copy is not a fixed name: a reworded key changes new cards only (`content/voice.md`, Fixed names). Enforced by review (`docs/code-system/templates-and-styles.md`, one key per label) and `tests/lang.test.js` for the letter case.
+Every line on a card is one i18n key with placeholders, never fragments joined in the template. A button label starts with a verb and names its object (`content/voice.md`, Buttons). Copy is not a fixed name: a reworded key changes new cards only (`content/voice.md`, Fixed names). Enforced by `tests/conventions/templates.test.js` (`joined-localize`: two keys joined in one line), review for a key joined to a value (`docs/code-system/templates-and-styles.md`, one key per label), and `tests/lang.test.js` for the letter case.
 
 Conforming, `data-action="apply-condition"` (`templates/chat/check.hbs`):
 
@@ -148,7 +148,7 @@ Conforming, `data-action="apply-condition"` (`templates/chat/check.hbs`):
 {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
 ```
 
-Non-conforming, `data-action="damage-apply-target"` (`templates/chat/check.hbs`): `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins "Apply to" and a name; `l5r4-tn-result` (`templates/chat/check.hbs`) builds the TN line from five keys and literal parentheses.
+Non-conforming, `data-action="damage-apply-target"` (`templates/chat/check.hbs`): `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins "Apply to" and a name.
 
 ## States
 
