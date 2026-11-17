@@ -196,7 +196,6 @@
           "dialogPattern": "The check dialog in core's dialog frame. Its button only closes it.",
           "editor": "Notes show their read-only form: the editor needs a document to save to.",
           "expandRoll": "Press a dice row to show its dice, as in the chat log.",
-          "expandState": "The expand controls render closed whatever the stored state: the sheet sets the icon after it renders.",
           "invalidWarningLocked": "No template has an invalid, warning, or locked field yet: those states are targets of the design system.",
           "linkRequest": "The GM's request control beside a Check link is built by the enricher in JavaScript, not by this template.",
           "loading": "No control shows a loading state yet.",

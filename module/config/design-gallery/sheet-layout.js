@@ -87,8 +87,7 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
         context: "pc"
       }
     ],
-    seeAlso: ["section", "item-row"],
-    notes: ["l5r4.apps.designGallery.notes.expandState"]
+    seeAlso: ["section", "item-row"]
   },
   {
     page: "item-row",
@@ -222,6 +221,6 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
       }
     ],
     seeAlso: ["ring-trait-block"],
-    notes: ["l5r4.apps.designGallery.notes.reveal", "l5r4.apps.designGallery.notes.expandState"]
+    notes: ["l5r4.apps.designGallery.notes.reveal"]
   }
 ]);

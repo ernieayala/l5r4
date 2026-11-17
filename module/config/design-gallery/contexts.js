@@ -98,7 +98,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
         key: "attack1",
         num: 1,
         attack: { name: "Claws", roll: 6, keep: 3, modifier: 0, type: "simple" },
-        damage: { roll: 4, keep: 2, modifier: 2 },
+        damage: { roll: 4, keep: 2, modifier: 2, type: "Slashing" },
         actionLabel: "Simple",
         attackPool: "6k3",
         damagePool: "4k2+2",

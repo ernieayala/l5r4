@@ -435,6 +435,10 @@ body > * {
   overflow: hidden;
   position: relative;
 }
+.l5r4-button.-roll:has(.l5r4-button-face:focus-visible) {
+  box-shadow: var(--l5r4-state-focus-shadow);
+  outline: var(--l5r4-state-focus-outline);
+}
 .l5r4-button.-roll .l5r4-button-under {
   align-items: center;
   color: var(--l5r4-color-text);

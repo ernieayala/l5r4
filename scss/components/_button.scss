@@ -24,6 +24,12 @@
   overflow: hidden;
   position: relative;
 
+  // The face's mask (and this wrapper's overflow) clip the face's own focus ring, so the wrapper draws it
+  &:has(.l5r4-button-face:focus-visible) {
+    box-shadow: var(--l5r4-state-focus-shadow);
+    outline: var(--l5r4-state-focus-outline);
+  }
+
   .l5r4-button-under {
     align-items: center;
     color: var(--l5r4-color-text);
