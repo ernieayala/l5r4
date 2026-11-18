@@ -61,6 +61,8 @@ Foundry keeps one login per browser cookie store, and cookies are per host. Two 
 1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
 2. The script and logs are committed; recordings stay in the scratchpad.
 3. The scenario is rerun on each 4.0.0 release candidate before Stage 19 publishes.
+4. Ernie, 2026-11-17: the open issues #72, #73, #79, #80, and #81 are fixed before the playtest starts, each in its own commit with a test that fails first, so play runs on the fixed system.
+5. Ernie, 2026-11-17: #79's 66 open items are all fixed, in commits grouped by area; the ones players see (sort direction, Wound penalty sign and current-rank mark, healing card title, empty lists, the maho warning, Void dot tooltips, disabled Void reasons) go to him as before/after captures for sign-off before the playtest.
 
 ### Still open
 
