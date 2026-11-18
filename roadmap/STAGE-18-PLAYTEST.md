@@ -70,6 +70,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 9. Ernie, 2026-11-18, from Session 0: a new PC starts with Void Points equal to its Void Ring (#91); the Disadvantage XP cap and manual XP adjustments are GM-only (#92); a second School asks whether it replaces the first before its choices (#93); an NPC attack with no damage has no damage button (#94); the browser's Page filter leaves out entries with no page (#95).
 10. Ernie, 2026-11-18: a School added beside another follows the Multiple Schools Advantage (p.151): it gives no free Skills, and its Techniques wait until the character has rank 1 in each of its School Skills; a chat note names the missing Skills (#96, from #85).
 11. Ernie, 2026-11-18: the Bio section lists every School the character holds, first School first, and a second School's row lists the School Skills its Techniques wait for (#97). #97 is fixed before Session 1.
+12. Ernie, 2026-11-18, from Session 1: a roll with no TN shows no TN line, only its Raises, which count in a Contested Roll (p.80); no TN is made from Raises (#98).
 
 ### Still open
 
