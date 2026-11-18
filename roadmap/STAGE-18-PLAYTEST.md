@@ -63,6 +63,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host. Two 
 3. The scenario is rerun on each 4.0.0 release candidate before Stage 19 publishes.
 4. Ernie, 2026-11-17: the open issues #72, #73, #79, #80, and #81 are fixed before the playtest starts, each in its own commit with a test that fails first, so play runs on the fixed system.
 5. Ernie, 2026-11-17: #79's 66 open items are all fixed, in commits grouped by area; the ones players see (sort direction, Wound penalty sign and current-rank mark, healing card title, empty lists, the maho warning, Void dot tooltips, disabled Void reasons) go to him as before/after captures for sign-off before the playtest.
+6. Ernie, 2026-11-17: the PC header's labels are plain text; the actions they held become icon buttons beside their values: recalculate the sheet after the Name field, and a GM-only switch between a computed and a typed Insight Rank after the rank. Both run on a plain click.
 
 ### Still open
 
