@@ -16,6 +16,9 @@
       {{#if tn.woundPenalty}}<span>{{localize "l5r4.ui.check.woundPenaltyNote" penalty=tn.woundPenalty}}</span>{{/if}}
     </div>
   {{/if}}
+  {{#if raisesWithoutTn}}
+    <div class="check-note">{{localize "l5r4.ui.check.raisesNote" count=raisesWithoutTn}}</div>
+  {{/if}}
   {{#if freeRaisesLeft}}
     <div class="check-free-raises">{{localize "l5r4.ui.check.freeRaisesLeft" count=freeRaisesLeft}}</div>
   {{/if}}

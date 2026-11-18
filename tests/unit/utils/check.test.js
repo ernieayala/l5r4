@@ -162,9 +162,11 @@ describe("getTn", () => {
     expect(getTn({ base: 5, freeRaisesToTn: 3 })).toBe(0);
   });
 
-  it("should give no TN to a roll with no TN and no Raises", () => {
+  // A Raise on a roll with no TN counts only in a Contested Roll
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should give no TN to a roll with no TN, whatever its Raises", () => {
     expect(getTn({ base: 0, woundPenalty: 10 })).toBeNull();
-    expect(getTn({ base: 0, raises: 1 })).toBe(5);
+    expect(getTn({ base: 0, raises: 1 })).toBeNull();
   });
 });
 

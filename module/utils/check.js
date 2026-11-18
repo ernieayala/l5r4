@@ -130,9 +130,10 @@ export function getMaxRaises(voidRing, unskilled = false) {
 
 /**
  * The TN a roll must meet. Each declared Raise adds 5; each Free Raise the roller spends on the TN takes 5 off;
- * the Wound Rank's penalty is added; TN modifiers add. A roll with no TN given (0) and no Raises has none. A base
- * of 20 with two Raises and a wound penalty of 3 is 33.
+ * the Wound Rank's penalty is added; TN modifiers add. A roll with no TN given (0) has none, whatever its Raises: a
+ * Raise there counts only in a Contested Roll. A base of 20 with two Raises and a wound penalty of 3 is 33.
  * game-rules/28_raises.md, p.79
+ * game-rules/29_types_of_rolls.md, p.80
  * game-rules/33_wounds.md, p.82
  * @param {object} spec - The TN's parts
  * @param {number} spec.base - TN set by the GM, a spell, or a target's Armor TN
@@ -140,10 +141,11 @@ export function getMaxRaises(voidRing, unskilled = false) {
  * @param {number} [spec.freeRaisesToTn=0] - Free Raises spent to lower the TN
  * @param {number} [spec.woundPenalty=0] - The current Wound Rank's TN penalty
  * @param {number[]} [spec.modifiers=[]] - Other TN changes (conditions, armor, rules)
- * @returns {number|null} The TN, never below 0; null when the roll has no TN
+ * @returns {number|null} The TN, never below 0; null when the roll has no TN, its Raises included: a Raise on a roll
+ *   with no TN counts only in a Contested Roll (roadmap/STAGE-18 decision 12)
  */
 export function getTn({ base, raises = 0, freeRaisesToTn = 0, woundPenalty = 0, modifiers = [] }) {
-  if (base <= 0 && raises <= 0) {
+  if (base <= 0) {
     return null;
   }
   const extra = modifiers.reduce((sum, value) => sum + value, 0);

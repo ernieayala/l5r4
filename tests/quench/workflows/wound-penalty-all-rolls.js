@@ -203,6 +203,27 @@ export function registerWoundPenaltyAllRollsTests(quench) {
           assert.equal(message.system.pool.bonus, 0);
         });
 
+        // A Raise on a roll with no TN counts only in a Contested Roll (roadmap/STAGE-18 decision 12)
+        // game-rules/29_types_of_rolls.md, p.80
+        it("should show a roll with no TN its Raises and no TN line", async () => {
+          const answered = answerDialog({ raises: 1 });
+          const message = await rollTrait({ actor, traitName: "ref", traitRank: 3 });
+          await answered;
+          messages.push(message);
+          assert.isNull(message.system.tn.effective, "no TN made from the Raise");
+          assert.equal(message.system.tn.raises, 1, "the Raise is kept for a Contested Roll");
+          const card = await message.renderHTML();
+          const againstTn = game.i18n
+            .localize("l5r4.ui.check.outcomeAgainstTn", { outcome: "", tn: "" })
+            .trim();
+          assert.notInclude(card.textContent, againstTn, "no TN line");
+          assert.include(
+            card.textContent,
+            game.i18n.localize("l5r4.ui.check.raisesNote", { count: 1 }),
+            "the Raises noted"
+          );
+        });
+
         it("should give a damage roll no TN and no penalty", async () => {
           const message = await rollWeaponDamage({
             actor,

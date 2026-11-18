@@ -50,6 +50,8 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
   return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
     ...system,
     tn: system.tn.effective === null ? null : system.tn,
+    // A roll with no TN still shows the Raises a Contested Roll will count
+    raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
     freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
     outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
     appliedModifiers: system.modifiers
