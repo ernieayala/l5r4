@@ -95,20 +95,20 @@ describe("Book example: character creation (p.103-104)", () => {
 
 describe("getXpEntries", () => {
   // game-rules/48_character_creation_expanded.md, p.103
-  it("should price a Trait rank on top of its Family or School bonus", () => {
+  it("should price and name a Trait rank on top of its Family or School bonus", () => {
     // Stored 3 with a +1 bonus: the Trait goes from 3 to 4, which costs 4 × 4
     const entries = getXpEntries(build({ traits: traits({ str: { stored: 3, bonus: 1 } }) }));
-    expect(entries).toEqual([{ type: "trait", name: "str", from: 2, to: 3, delta: 16 }]);
+    expect(entries).toEqual([{ type: "trait", name: "str", from: 3, to: 4, delta: 16 }]);
   });
 
   // game-rules/48_character_creation_expanded.md, p.103
   // #44
-  it("should price a Void rank on top of its Family or School bonus, as a Trait", () => {
+  it("should price and name a Void rank on top of its Family or School bonus, as a Trait", () => {
     // Stored 3 with a +1 Void bonus: the Void Ring goes from 3 to 4, which costs 6 × 4
     const entries = getXpEntries(
       build({ void: { stored: 3, freeBase: 0, bonus: 1, discount: 0 } })
     );
-    expect(entries).toEqual([{ type: "void", name: "void", from: 2, to: 3, delta: 24 }]);
+    expect(entries).toEqual([{ type: "void", name: "void", from: 3, to: 4, delta: 24 }]);
   });
 
   it("should start above a legacy free rank and then ignore the bonus", () => {

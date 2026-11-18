@@ -66,8 +66,8 @@ import { getRuleValue } from "./rule-values.js";
  * @property {string} type   trait, void, skill, emphasis, advantage, disadvantage, kata, kiho, or spell
  * @property {string} name   The Trait key, Skill name, or item name
  * @property {number} delta  XP spent; negative for XP a Disadvantage gives
- * @property {number} [from] The rank before, for a rank
- * @property {number} [to]   The rank bought
+ * @property {number} [from] The rank before, for a rank, as the sheet shows it (a Trait's bonus included)
+ * @property {number} [to]   The rank bought, as the sheet shows it
  * @property {string} [emphasis]
  */
 
@@ -174,8 +174,8 @@ function getTraitEntries(traits, price) {
       entries.push({
         type: "trait",
         name: trait.key,
-        from: r - 1,
-        to: r,
+        from: r + bonus - 1,
+        to: r + bonus,
         delta: price([`trait:${trait.key}`], base)
       });
     }
@@ -199,8 +199,8 @@ function getVoidEntries(voidRing, price) {
     entries.push({
       type: "void",
       name: "void",
-      from: r - 1,
-      to: r,
+      from: r + voidBonus - 1,
+      to: r + voidBonus,
       delta: price(["ring:void"], base)
     });
   }
