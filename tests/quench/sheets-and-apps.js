@@ -468,6 +468,74 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #79: sort-header.md H1, H2, H4; spell-slots.md P1; form-field.md F1
+        it(
+          "should show the stored sort on render and name the spell slot and row controls",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const localize = (key, data) => game.i18n.localize(key, data);
+            await game.user.unsetFlag(SYS_ID, `sortByActor.${pc.id}`);
+            const sheet = pc.sheet;
+            await sheet.render({ force: true });
+            const head = (scope, key) =>
+              sheet.element.querySelector(
+                `[data-sort-header][data-scope="${scope}"] [data-sort-by="${key}"]`
+              );
+            try {
+              const name = head("skills", "name");
+              assert.equal(name.getAttribute("aria-pressed"), "true", "sorted by name on render");
+              assert.equal(name.dataset.dir, "asc");
+              assert.equal(name.dataset.tooltip, localize("l5r4.ui.common.sortedAscending"));
+              assert.exists(name.querySelector("i[inert]"), "the direction icon");
+              assert.equal(head("skills", "rank").getAttribute("aria-pressed"), "false");
+
+              const keys = [
+                ...sheet.element.querySelectorAll(
+                  '[data-sort-header][data-scope="weapons"] [data-sort-by]'
+                )
+              ].map(button => button.dataset.sortBy);
+              assert.deepEqual(keys, [...new Set(keys)], "no two weapon heads share a key");
+              for (const dir of ["asc", "desc"]) {
+                head("weapons", "attack").click();
+                assert.isTrue(
+                  await waitFor(() => head("weapons", "attack")?.dataset.dir === dir),
+                  `attack ${dir}`
+                );
+              }
+              assert.equal(
+                head("weapons", "attack").dataset.tooltip,
+                localize("l5r4.ui.common.sortedDescending")
+              );
+              assert.equal(head("weapons", "damage").getAttribute("aria-pressed"), "false");
+
+              const water = sheet.element.querySelector(
+                '[data-action="adjust-spell-slot"][data-path="system.spellSlots.water"]'
+              );
+              const slots = localize("l5r4.ui.sheets.spellSlotsOf", {
+                ring: localize("l5r4.ui.mechanics.rings.water"),
+                count: pc.system.spellSlots.water
+              });
+              assert.equal(water.getAttribute("aria-label"), slots);
+              assert.equal(water.dataset.tooltip, slots);
+
+              for (const [field, key] of [
+                ["system.trait", "l5r4.character.skills.properties.trait"],
+                ["system.equipped", "l5r4.equipment.armor.equipped"],
+                ["system.arrow", "l5r4.equipment.weapons.arrow"]
+              ]) {
+                assert.equal(
+                  sheet.element.querySelector(`[data-field="${field}"]`).getAttribute("aria-label"),
+                  localize(key),
+                  field
+                );
+              }
+            } finally {
+              await game.user.unsetFlag(SYS_ID, `sortByActor.${pc.id}`);
+              await sheet.close({ animate: false });
+            }
+          })
+        );
+
         it(
           "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {

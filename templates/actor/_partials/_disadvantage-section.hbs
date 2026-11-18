@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.disadvantages}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="disadvantages" type="disadvantage" columns=@root.sortColumns.disadvantages}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="disadvantages" type="disadvantage" columns=@root.sortColumns.disadvantages sort=@root.sortState.disadvantages}}
   <section class="l5r4-item-row-list -disadvantage">
     {{#each disadvantages as |item id|}}
       {{> "systems/l5r4-enhanced/templates/cards/advantage-disadvantage.hbs"

@@ -201,7 +201,6 @@
           "pseudoStates": "Hover, focus, and press: use the pointer or the keyboard on the sample.",
           "readOnly": "A sheet the viewer cannot edit disables its controls when the sheet renders, so the samples show the editable form.",
           "reveal": "Row controls are hidden until the pointer is over the row.",
-          "sorted": "The sorted column is marked by the sheet after it renders, so every head shows unsorted.",
           "surface": "Ratios are measured in the window's theme. The surface is core's window background, so its reference value from color.md stands in for it.",
           "voidDots": "The dots render empty: the sheet fills them after it renders. The Ring and Trait block shows them under the Void Ring.",
           "woundConfig": "The editable track lives in the Wound configuration window, which needs an actor to open."
@@ -933,6 +932,8 @@
         "save": "Save",
         "school": "School",
         "simple": "Simple",
+        "sortedAscending": "Sorted ascending",
+        "sortedDescending": "Sorted descending",
         "spendVoidPoint": "Spend Void Point",
         "tn": "TN",
         "toggle": "Turn on or off",
@@ -992,7 +993,6 @@
         "granted": "{name} gains {item} from {giver} (School Rank {rank})."
       },
       "hints": {
-        "adjustSpellSlots": "{ring} (click or right-click to adjust)",
         "leftClickPlusRightClickMinus": "Shift+click: +1, Shift+right-click: -1",
         "postToChat": "Post to chat",
         "shiftClickRankPoints": "Shift+click: ±0.1, Shift+Ctrl+click: ±1.0",
@@ -1346,6 +1346,7 @@
         "spell": "Spell",
         "spells": "Spells",
         "spellSlots": "Spell slots",
+        "spellSlotsOf": "{ring} spell slots: {count} (click: +1, right-click: -1)",
         "tattoo": "Tattoo",
         "tattooPassive": "Always active",
         "tattooPassiveHint": "On: its rules apply while the character has it. Off: the play button on the character sheet activates it, one tattoo at a time, for twice the School Rank in Rounds.",

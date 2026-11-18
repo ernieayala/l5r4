@@ -144,17 +144,18 @@ Non-conforming (modeled):
 
 Each sortable column head is a `<button type="button" data-action="sort-items" data-sort-by="<key>">` labelled with the column's name. The head of the sorted column carries `aria-pressed="true"`, its label in bold, and the direction icon after it, `fa-sort-up` or `fa-sort-down` (`foundations/iconography.md` rule 3); the others carry `aria-pressed="false"`. A column that does not sort is a `<span>`. The sort persists per actor and scope (`SortHandler.updateSortPref` (`module/sheets/handlers/sort-handler.js`)). `components/sort-header.md` holds the anatomy. Enforced by `tests/conventions/templates.test.js` (interactive elements are native controls; a toggle carries `aria-pressed`), `tests/conventions/actions.test.js`, and review for the visible state.
 
-Conforming, modeled on `templates/actor/_partials/_sort-header.hbs`:
+Conforming, the sorted head of `templates/actor/_partials/_sort-header.hbs`, rendered from the stored sort:
 
+<!-- prettier-ignore -->
 ```hbs
-<button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="name"
-  aria-pressed="{{#if sort.name}}true{{else}}false{{/if}}">
-  {{localize "l5r4.ui.common.name"}}
-  {{#if sort.name}}<i class="fa-solid {{#if sort.asc}}fa-sort-up{{else}}fa-sort-down{{/if}}" inert></i>{{/if}}
+<button type="button" class="l5r4-sort-header-button is-active" data-action="sort-items" data-sort-by="{{key}}"
+  data-dir="{{../sort.dir}}" aria-pressed="true" ...>
+  {{localize label}}
+  <i class="fa-solid fa-sort-up" inert></i>
 </button>
 ```
 
-Non-conforming, `SortHandler.#updateHeaderIndicators` (`module/sheets/handlers/sort-handler.js`): the `is-active` class and `data-dir` attribute it sets have no style, so the sorted column looks like the rest. `SORT_COLUMNS` (`module/config/sort-keys.js`) gives the weapon list's Attack and Damage heads the same key, `damage`.
+Non-conforming (modeled): an `is-active` class and `data-dir` attribute set after render with no style, so the sorted column looks like the rest; two heads that share one sort key.
 
 ### 4. An empty list section is left out
 

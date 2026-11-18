@@ -114,7 +114,7 @@
         aria-label="{{localize "l5r4.character.experience.recalculate"}}"
       ><i class="fa-solid fa-arrows-rotate" inert></i></button>
     </div>
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="xp-purchases" type="xp-spent" columns=sortColumns.xp-purchases}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="xp-purchases" type="xp-spent" columns=sortColumns.xp-purchases sort=sortState.xp-purchases}}
     <section class="l5r4-item-row-list -xp-spent">
       {{#each spentEntries}}
           <div class="l5r4-item-row -xp-spent -expandable">

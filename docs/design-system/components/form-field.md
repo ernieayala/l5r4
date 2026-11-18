@@ -84,17 +84,17 @@ A label wraps; it never truncates. In the header the label column is as wide as 
 | F1 | Every input, select, and textarea has an accessible name: a wrapping `<label>`, a `<label for>`, or `aria-label` with the visible label's key | Review, in the gallery |
 | F2 | A label is text, never a heading and never a control | `tests/conventions/templates.test.js` (interactive elements are native controls); review |
 | F3 | A value the system computes is text in `l5r4-form-field-value`, never a disabled input (`foundations/states.md` rule 6) | Review |
-| F4 | A field's value type is `data-type`, never `data-dtype` | Review |
+| F4 | A field's value type is `data-type`, never `data-dtype` | `tests/conventions/templates.test.js` (`data-dtype`) |
 | F5 | A field outside `system.*` has a camelCase `name` | Review |
 | F6 | The actor-sheet input reset leaves core's focus outline in place | `tests/quench/design-gallery.js` (focus style) |
 | F7 | A label has no trailing colon in the string; where the layout shows one, the template adds it | Review |
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| F1 | The search field's `<span>` and `<input>` inside `<label class="l5r4-compendium-browser-filter l5r4-compendium-browser-search">` (`templates/apps/compendium-browser.hbs`) | `<select data-action="update-item-field" data-field="system.trait" data-dtype="String">` (`templates/cards/skill.hbs`), with no name |
+| F1 | The search field's `<span>` and `<input>` inside `<label class="l5r4-compendium-browser-filter l5r4-compendium-browser-search">` (`templates/apps/compendium-browser.hbs`); a row select's `aria-label="{{localize "l5r4.character.skills.properties.trait"}}"` (`templates/cards/skill.hbs`) | A row select with no name (modeled) |
 | F2 | `<span class="l5r4-form-field-label">{{localize "l5r4.ui.common.clan"}}</span>` (modeled) | `<h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="recalculate-sheet">` (`templates/actor/_partials/_stats.hbs`): a heading that holds a control |
 | F3 | `<span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>` (`templates/actor/_partials/_stats.hbs`) | The `disabled` number input with `value="{{system.wounds.max}}"` (`templates/actor/_partials/_wounds.hbs`) |
-| F4 | `data-type="Number"` (`templates/actor/_partials/_wounds.hbs`) | `data-dtype="String"` (`templates/cards/skill.hbs`) |
+| F4 | `data-type="Number"` (`templates/actor/_partials/_wounds.hbs`) | `data-dtype="String"` (modeled) |
 | F5 | `name="woundMode"` (`templates/apps/wound-config.hbs`) | `name="{{field}}-amount"` (`templates/apps/_partials/_wealth-change.hbs`) |
 | F6 | `input, select { border: none; }` with no `outline` rule, in the `:where(&)` reset (`scss/sheets/_actor-sheet.scss`) | `input { outline: none; }` in a sheet reset (modeled) |
 | F7 | `<span>{{localize "l5r4.world.wealth.koku"}}:</span>` (`templates/actor/_partials/_item-section.hbs`) | A value "Koku:" in `lang/en.json` (modeled) |
@@ -109,9 +109,8 @@ A label wraps; it never truncates. In the header the label column is as wide as 
 
 ## Names
 
-| Current | Target | Why |
-| --- | --- | --- |
-| `h4.flex0.l5r4-form-field-label` (header label) | `span.l5r4-form-field-label` | F2 |
-| `data-dtype` (`templates/cards/skill.hbs`, `templates/cards/armor.hbs`, `templates/apps/npc-attack-config.hbs`) | `data-type` | F4 |
+| Current                                         | Target                       | Why |
+| ----------------------------------------------- | ---------------------------- | --- |
+| `h4.flex0.l5r4-form-field-label` (header label) | `span.l5r4-form-field-label` | F2  |
 
 The header labels hold two actions (`recalculate-sheet` on the Name label, `toggle-rank-mode` on the Insight Rank label), which belong on controls the PC header pattern places (`patterns/sheets.md`); a new visible control is a look change, so its place goes to the visual sign-off (Stage 17 decision 9).

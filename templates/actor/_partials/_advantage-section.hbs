@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.advantages}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="advantages" type="advantage" columns=@root.sortColumns.advantages}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="advantages" type="advantage" columns=@root.sortColumns.advantages sort=@root.sortState.advantages}}
   <section class="l5r4-item-row-list -advantage">
     {{#each advantages as |item id|}}
       {{> "systems/l5r4-enhanced/templates/cards/advantage-disadvantage.hbs"

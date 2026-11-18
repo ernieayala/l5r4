@@ -3,7 +3,7 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    <div>{{system.effect}}</div>
+    <div class="l5r4-item-row-cell">{{system.effect}}</div>
     {{#unless system.passive}}
       {{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}
     {{/unless}}

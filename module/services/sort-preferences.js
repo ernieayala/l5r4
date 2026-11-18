@@ -6,6 +6,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { SORT_KEYS } from "../config/sort-keys.js";
 
 /**
  * Gets sort preference for an actor sheet scope.
@@ -29,6 +30,24 @@ export function getSortPref(actorId, scope, { allowedKeys, defaultKey = "name" }
   // Normalize direction to "asc" or "desc"
   const dir = rec?.dir === "desc" ? "desc" : "asc";
   return { key, dir };
+}
+
+/**
+ * The stored sort of every list that sorts, by scope, for its sort header to show on render
+ * (components/sort-header.md): each list's first key, ascending, until the user picks another. A list whose heads
+ * do not sort (NPC attacks, the XP ledger) has none.
+ * @param {string} actorId - Actor document ID
+ * @returns {Record<string, {key: string, dir: string}>}
+ */
+export function getSortPrefs(actorId) {
+  return Object.fromEntries(
+    Object.entries(SORT_KEYS)
+      .filter(([, keys]) => keys.length)
+      .map(([scope, keys]) => [
+        scope,
+        getSortPref(actorId, scope, { allowedKeys: keys, defaultKey: keys[0] })
+      ])
+  );
 }
 
 /**

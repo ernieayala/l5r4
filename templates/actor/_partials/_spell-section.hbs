@@ -2,7 +2,7 @@
   <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.spells}} is-collapsed{{/if}}" data-section-title data-scope="spells">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.spells"}}</h4>
     <div class="flexrow -gap-sm l5r4-spell-slots">
-        <span>{{localize "l5r4.ui.sheets.spellSlots"}}:</span>
+        <span class="l5r4-spell-slots-label">{{localize "l5r4.ui.sheets.spellSlots"}}:</span>
         {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="water" count=system.spellSlots.water}}
         {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="air" count=system.spellSlots.air}}
         {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="fire" count=system.spellSlots.fire}}
@@ -12,7 +12,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.spells}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="spells" type="spell" columns=@root.sortColumns.spells}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="spells" type="spell" columns=@root.sortColumns.spells sort=@root.sortState.spells}}
   <section class="l5r4-item-row-list -spell">
     {{#each spells as |spell id|}}
       {{> "systems/l5r4-enhanced/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}

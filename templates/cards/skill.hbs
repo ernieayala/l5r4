@@ -12,9 +12,14 @@
     {{/if}}
   </h4>
   {{#if inSheet}}
-    <div>{{system.rank}}</div>
-    <div>
-      <select data-action="update-item-field" data-field="system.trait" data-dtype="String">
+    <div class="l5r4-item-row-cell">{{system.rank}}</div>
+    <div class="l5r4-item-row-cell">
+      <select
+        data-action="update-item-field"
+        data-field="system.trait"
+        data-type="String"
+        aria-label="{{localize "l5r4.character.skills.properties.trait"}}"
+      >
         {{selectOptions @root.config.traits selected=system.trait localize=true}}
       </select>
     </div>

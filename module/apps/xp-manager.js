@@ -10,7 +10,7 @@ import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
-import { getSortPref, updateSortPref } from "../services/sort-preferences.js";
+import { getSortPref, getSortPrefs, updateSortPref } from "../services/sort-preferences.js";
 import { askDisadvantageCap } from "../services/xp/disadvantage-cap.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
 import { isRetroactiveUpdateDue, updateXpHistory, xpSpentOf } from "../services/xp/versioning.js";
@@ -107,7 +107,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         xp: buildXpSummary(xp),
         disadvantageCap,
         ...ledgers,
-        sortColumns: SORT_COLUMNS
+        sortColumns: SORT_COLUMNS,
+        sortState: getSortPrefs(this.actor.id)
       };
     } catch (err) {
       logError("Failed to prepare XP manager context", err, {
@@ -289,22 +290,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const cur = getSortPref(this.actor.id, scope, { allowedKeys: allowed, defaultKey: "note" });
     await updateSortPref(this.actor.id, scope, { key, toggleFrom: cur });
 
-    if (header) {
-      header.querySelectorAll("[data-action='sort-items']").forEach(a => {
-        a.classList.toggle("is-active", a === element);
-        a.setAttribute("aria-pressed", String(a === element));
-        if (a !== element) {
-          a.removeAttribute("data-dir");
-        }
-      });
-
-      const newPref = getSortPref(this.actor.id, scope, {
-        allowedKeys: allowed,
-        defaultKey: "note"
-      });
-      element.setAttribute("data-dir", newPref.dir);
-    }
-
+    // The render marks the sorted head from the stored sort (templates/actor/_partials/_sort-header.hbs)
     if (this.rendered) {
       this.render();
     }

@@ -55,7 +55,7 @@ A partial whose output posts to chat (`templates/cards/_partials/_text-section.h
 | A partial's parameters are named on the include (`{{> "..." item=this}}`) and listed in a `{{!-- --}}` comment at its top | review |
 | No rule logic or formula in a template: the context arrives computed (`castFormula`), never built with helpers | review |
 | Mustache without inner spaces (`{{name}}`); a key inside an attribute in double quotes: `aria-label="{{localize "key"}}"` | review |
-| A field's value type is `data-type`, never `data-dtype` | review |
+| A field's value type is `data-type`, never `data-dtype` | `tests/conventions/templates.test.js` (`data-dtype`) |
 | Files end with a newline and carry no trailing whitespace (`.editorconfig`) | review |
 
 Stage 17 decision 15 sets `l5r4-` on every system class, kebab-case actions, and `fa-solid`. Decision 16 sets `<button type="button">` for every clickable element in place of an `<a>` with no `href`, which takes no keyboard focus, and `data-tooltip` with `aria-label` on icon-only controls in place of `title`. Picked by majority: `{{!-- --}}` comments, literal partial paths, `{{name}}` spacing, double quotes inside attributes, `data-type`.

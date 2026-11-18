@@ -286,10 +286,10 @@ export class ItemCrudHandler {
    * coerces the input value to the appropriate type, and updates the item.
    *
    * HTML elements should include data-action="update-item-field", data-field="path.to.field",
-   * and data-dtype="TypeName" attributes. For example, to edit a skill rank:
-   * <input data-action="update-item-field" data-field="system.rank" data-dtype="Integer" value="3">
+   * and data-type="TypeName" attributes. For example, to edit a skill rank:
+   * <input data-action="update-item-field" data-field="system.rank" data-type="Integer" value="3">
    *
-   * Supported data types (via data-dtype attribute):
+   * Supported data types (via data-type attribute):
    * - "Integer" → Converts to integer (default 0)
    * - "Number" → Converts to float (default 0)
    * - "Boolean" → Converts to boolean (accepts "true", "1", "on", "yes")
@@ -298,7 +298,7 @@ export class ItemCrudHandler {
    * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Change event (prevented)
-   * @param {HTMLElement} element - Input element with data-field and data-dtype attributes
+   * @param {HTMLElement} element - Input element with data-field and data-type attributes
    * @returns {Promise<Item|undefined>} Updated item document or undefined if validation fails
    */
   static async updateItemField(context, event, element) {
@@ -323,7 +323,7 @@ export class ItemCrudHandler {
     await item.update({ [field]: value }, { render: false });
 
     // For checkboxes, manually update the visual state
-    if (el.type === "checkbox" && el.dataset.dtype === "Boolean") {
+    if (el.type === "checkbox" && el.dataset.type === "Boolean") {
       el.checked = value;
     }
 
@@ -331,14 +331,14 @@ export class ItemCrudHandler {
   }
 
   /**
-   * An inline field's value coerced by its `data-dtype`: Integer, Number, Boolean (a checkbox's checked state, or a
+   * An inline field's value coerced by its `data-type`: Integer, Number, Boolean (a checkbox's checked state, or a
    * truthy word), else text.
    * @param {HTMLInputElement} el - The edited input
    * @returns {number|boolean|string}
    */
   static #toFieldValue(el) {
     const value = el.value;
-    switch (el.dataset.dtype) {
+    switch (el.dataset.type) {
       case "Integer":
         return toInt(value, 0);
       case "Number":

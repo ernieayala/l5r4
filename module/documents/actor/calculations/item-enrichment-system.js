@@ -129,9 +129,10 @@ function prepareSpellFormula(actor, spell) {
 }
 
 /**
- * Set a weapon's `attackFormula` and `damageFormula`. The attack is the weapon Skill and Trait
- * (getWeaponSkillTrait) plus the RollModifier rules on every attack, such as the Full Attack Stance's +2k1;
- * optional and range-limited rules wait for the roll dialog. The damage is the weapon's prepared damage.
+ * Set a weapon's attack pool (`attackRoll`, `attackKeep`, `attackFormula`) and `damageFormula`. The attack is the
+ * weapon Skill and Trait (getWeaponSkillTrait) plus the RollModifier rules on every attack, such as the Full Attack
+ * Stance's +2k1; optional and range-limited rules wait for the roll dialog. The damage is the weapon's prepared
+ * damage.
  * game-rules/36_stances.md, p.84
  * @param {Actor} actor - The actor who owns the weapon
  * @param {Item} weapon - The weapon or bow item to enrich
@@ -142,7 +143,9 @@ function prepareWeaponFormula(actor, weapon) {
     options: actor.rollOptions,
     weaponId: weapon.id
   });
-  weapon.attackFormula = `${weaponSkill.rollBonus + attack.roll}k${weaponSkill.keepBonus + attack.keep}`;
+  weapon.attackRoll = weaponSkill.rollBonus + attack.roll;
+  weapon.attackKeep = weaponSkill.keepBonus + attack.keep;
+  weapon.attackFormula = `${weapon.attackRoll}k${weapon.attackKeep}`;
 
   // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)
   prepareWeaponDamage(weapon);

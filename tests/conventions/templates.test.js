@@ -469,6 +469,12 @@ const RULES = {
 
   "templates/repeated-markup": repeatedMarkupOf,
 
+  // design-system/components/form-field.md F4
+  "templates/data-dtype": tree =>
+    perTag(tree, ({ attrs }) =>
+      hasAttribute(attrs, "data-dtype") ? "a field's value type is data-type, not data-dtype" : null
+    ),
+
   // design-system/patterns/dialogs.md rule 1: core's DialogV2 wraps the content in its own form
   "templates/dialog-form": tree =>
     tree

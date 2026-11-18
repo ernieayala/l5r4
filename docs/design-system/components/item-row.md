@@ -27,7 +27,7 @@ One document on a sheet as one grid row: its name, the numbers players read most
 | Controls | The inline control cluster (`inline-control.md`), `templates/cards/_partials/_controls.hbs` | `l5r4-inline-control -reveal` |
 | Details | `<div>` spanning every column, second grid row | `l5r4-item-row-details` |
 
-The code differs from the table in two places: only the spell row (`templates/cards/spell.hbs`) puts `l5r4-item-row-cell` on its cells, and every other row's number and field cells are bare `<div>`s, as `<div>{{system.rank}}</div>` (`templates/cards/skill.hbs`); the badge also carries core's `flex0`.
+Every number and field cell is `<div class="l5r4-item-row-cell">`, an empty one included, as `<div class="l5r4-item-row-cell">{{system.rank}}</div>` (`templates/cards/skill.hbs`); a row select names itself with its column's key (`form-field.md` F1). The badge also carries core's `flex0`.
 
 Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss`), read the size tokens:
 

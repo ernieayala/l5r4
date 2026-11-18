@@ -250,13 +250,12 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    *
    * Initializes UI components that require DOM access:
    * - Paints Void Points dots to match actor's current Void Points
-   * - Sets up sort indicators for skills list headers
    * - Binds simple roll handlers (non-delegated clicks)
    * - Binds image editor click handler
    *
    * **Ownership Check:**
-   * Only sets up interactive elements (sort indicators) if current
-   * user owns the actor. Void Points painting happens regardless for visual consistency.
+   * Only binds the click handlers if the current user owns the actor. Void Points painting happens regardless for
+   * visual consistency.
    *
    * **Foundry Lifecycle:**
    * Called automatically after template rendering. Always call super._onRender first
@@ -276,8 +275,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     if (!this.actor.isOwner) {
       return;
     }
-
-    this._initializeSortIndicators(root, "skills", this._getAllowedSortKeys("skills"));
 
     on(root, "click", {
       selector: ".simple-roll",

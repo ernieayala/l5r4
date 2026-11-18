@@ -6,15 +6,15 @@
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
     {{#unless system.shugenja}}
-      <div><strong>{{localize "l5r4.ui.common.rank"}}:</strong> {{system.rank}}</div>
-      <span></span>
+      <div class="l5r4-item-row-cell"><strong>{{localize "l5r4.ui.common.rank"}}:</strong> {{system.rank}}</div>
+      <div class="l5r4-item-row-cell"></div>
     {{/unless}}
     {{#if system.shugenja}}
       {{#if system.affinity}}
-      <div><strong>{{localize "l5r4.magic.spells.affinity"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.affinity)}}</div>
+      <div class="l5r4-item-row-cell"><strong>{{localize "l5r4.magic.spells.affinity"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.affinity)}}</div>
       {{/if}}
       {{#if system.deficiency}}
-      <div><strong>{{localize "l5r4.magic.spells.deficiency"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.deficiency)}}</div>
+      <div class="l5r4-item-row-cell"><strong>{{localize "l5r4.magic.spells.deficiency"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.deficiency)}}</div>
       {{/if}}
     {{/if}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}

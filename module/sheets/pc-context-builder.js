@@ -210,6 +210,7 @@ export class PcContextBuilder {
    *
    * Sorting columns:
    * - **name**: Weapon name
+   * - **attack**: The attack pool (attackRoll × 10 + attackKeep), as the Attack column shows it
    * - **damage**: Composite value (damageRoll × 10 + damageKeep) for numeric sorting.
    *
    * @param {Actor} actor - L5R4 Actor document
@@ -219,6 +220,7 @@ export class PcContextBuilder {
   static #getSortedWeapons(actor, weaponItems) {
     const cols = {
       name: it => String(it?.name ?? ""),
+      attack: it => it.attackRoll * 10 + it.attackKeep,
       damage: it => toInt(it?.system?.damageRoll) * 10 + toInt(it?.system?.damageKeep)
     };
 

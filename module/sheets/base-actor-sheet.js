@@ -9,6 +9,7 @@ import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { getIconPath } from "../utils/icons.js";
 import { formatInitiativePool } from "../utils/initiative.js";
 import { on } from "../utils/dom.js";
+import { getSortPrefs } from "../services/sort-preferences.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
@@ -90,17 +91,18 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   });
 
   /**
-   * Adds the sort header columns of every list (module/config/sort-keys.js), which the section partials pass to
-   * templates/actor/_partials/_sort-header.hbs, and the Initiative pool as one string, so the template does no
-   * arithmetic (components/initiative-block.md C1).
+   * Adds the sort header columns of every list (module/config/sort-keys.js) and each list's stored sort, which the
+   * section partials pass to templates/actor/_partials/_sort-header.hbs, and the Initiative pool as one string, so
+   * the template does no arithmetic (components/initiative-block.md C1).
    *
    * @param {object} options - Rendering options
-   * @returns {Promise<object>} The context, with `sortColumns` and `initiativeFormula`
+   * @returns {Promise<object>} The context, with `sortColumns`, `sortState`, and `initiativeFormula`
    * @override
    */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.sortColumns = SORT_COLUMNS;
+    context.sortState = getSortPrefs(this.actor.id);
     context.initiativeFormula = formatInitiativePool(this.actor.system.initiative);
     return context;
   }
@@ -552,20 +554,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   }
 
   /* Sorting System -------------------------------------------------------- */
-
-  /**
-   * Initializes sort direction indicators in the UI.
-   *
-   * Delegates to SortHandler to set up visual indicators (arrows) showing
-   * current sort field and direction for item lists.
-   *
-   * @param {HTMLElement} root - Sheet root element
-   * @param {string} scope - Sort scope identifier (e.g., "skills", "items")
-   * @param {string[]} allowedKeys - Array of sortable field names
-   */
-  _initializeSortIndicators(root, scope, allowedKeys) {
-    SortHandler.updateSortIndicators(root, this.actor.id, { scope, allowedKeys });
-  }
 
   /**
    * Handles click on a sort header to change sort field/direction.

@@ -17,14 +17,14 @@
     border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
     border-inline-start: none;
     color: var(--table-header-text-color);
-    font-weight: bold;
     padding: var(--l5r4-space-card);
 
     .l5r4-item-row {
       padding: 0;
     }
 
-    // A <button>: undo core's button look so the head reads as the header's text
+    // A <button>: undo core's button look so the head reads as the header's text. The sorted head alone is bold,
+    // with its direction icon after the label: weight and icon, not color alone (sort-header.md H2)
     .l5r4-sort-header-button {
       background: none;
       border: none;
@@ -37,6 +37,14 @@
       padding: 0;
       text-align: inherit;
       transition: none;
+
+      &:hover {
+        filter: var(--l5r4-state-hover-filter);
+      }
+
+      &.is-active {
+        font-weight: bold;
+      }
     }
   }
 

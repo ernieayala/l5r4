@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.weapons}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="weapons" type="weapon" columns=@root.sortColumns.weapons}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="weapons" type="weapon" columns=@root.sortColumns.weapons sort=@root.sortState.weapons}}
   <section class="l5r4-item-row-list -weapon" data-scope="weapons">
     {{#each weapons as |weapon id|}}
       {{> "systems/l5r4-enhanced/templates/cards/weapon.hbs"

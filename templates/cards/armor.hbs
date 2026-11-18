@@ -3,9 +3,18 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    <div>{{system.bonus}}</div>
-    <div>{{system.reduction}}</div>
-    <div><input data-action="update-item-field" data-field="system.equipped" type="checkbox" {{checked system.equipped}} data-dtype="Boolean" /></div>
+    <div class="l5r4-item-row-cell">{{system.bonus}}</div>
+    <div class="l5r4-item-row-cell">{{system.reduction}}</div>
+    <div class="l5r4-item-row-cell">
+      <input
+        data-action="update-item-field"
+        data-field="system.equipped"
+        type="checkbox"
+        {{checked system.equipped}}
+        data-type="Boolean"
+        aria-label="{{localize "l5r4.equipment.armor.equipped"}}"
+      />
+    </div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" description=system.description}}
   {{/if}}

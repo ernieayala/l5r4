@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.kihos}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="kihos" type="kiho" columns=@root.sortColumns.kihos}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="kihos" type="kiho" columns=@root.sortColumns.kihos sort=@root.sortState.kihos}}
   <section class="l5r4-item-row-list -kiho">
     {{#each kihos as |kiho id|}}
       {{> "systems/l5r4-enhanced/templates/cards/kiho.hbs" system=kiho.system inSheet=true docId=kiho.id active=(includes @root.activeItemIds kiho.id)}}

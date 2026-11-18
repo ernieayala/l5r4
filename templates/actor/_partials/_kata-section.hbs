@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.katas}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="katas" type="kata" columns=@root.sortColumns.katas}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="katas" type="kata" columns=@root.sortColumns.katas sort=@root.sortState.katas}}
   <section class="l5r4-item-row-list -kata">
     {{#each katas as |kata id|}}
       {{> "systems/l5r4-enhanced/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id active=(includes @root.activeItemIds kata.id)}}

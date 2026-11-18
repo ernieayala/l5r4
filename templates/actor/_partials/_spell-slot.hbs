@@ -1,13 +1,15 @@
 {{!-- One Ring's spell slots in the Spells section title (spell-slots.md): the Ring's image with the count over it.
 Parameters: ring (water, air, fire, earth, void), count (system.spellSlots.<ring>). --}}
-<div class="l5r4-spell-slot">
-  <img src="{{iconPath (concat ring ".webp")}}" alt="" data-tooltip="{{localize (concat "l5r4.ui.mechanics.rings." ring)}}" />
+<div class="l5r4-spell-slot -{{ring}}">
+  <img class="l5r4-spell-slot-image" src="{{iconPath (concat ring ".webp")}}" alt="" />
   <button
     type="button"
     class="l5r4-spell-slot-count"
     data-action="adjust-spell-slot"
     data-path="system.spellSlots.{{ring}}"
-    data-tooltip="{{localize "l5r4.ui.hints.adjustSpellSlots" ring=(localize (concat "l5r4.ui.mechanics.rings." ring))}}">
+    data-tooltip="{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize (concat "l5r4.ui.mechanics.rings." ring)) count=count}}"
+    aria-label="{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize (concat "l5r4.ui.mechanics.rings." ring)) count=count}}"
+  >
     {{count}}
   </button>
 </div>

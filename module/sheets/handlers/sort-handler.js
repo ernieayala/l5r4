@@ -1,8 +1,8 @@
 /**
  * @module sheets/handlers/sort-handler
  * @description Column sorting for actor item lists (skills, weapons, techniques, and the rest): a click on a sortable
- * column header stores the user's preference in user flags (getSortPref, updateSortPref), marks the active column with
- * `.is-active` and its direction with `data-dir="asc"|"desc"` for the CSS arrows, and re-renders the sheet.
+ * column header stores the user's preference in user flags (getSortPref, updateSortPref) and re-renders the sheet,
+ * whose sort header shows the stored sort (templates/actor/_partials/_sort-header.hbs).
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -11,97 +11,25 @@ import { getSortPref, updateSortPref } from "../../services/sort-preferences.js"
 /**
  * Static utility class for handling sortable column header interactions.
  *
- * Designed for use with Foundry v13's Application v2 event delegation system.
+ * Designed for use with Foundry's Application v2 event delegation system.
  * All methods are static - no instance creation required. Handlers are meant
  * to be called from sheet event delegation callbacks with appropriate parameters.
  *
  * Typical workflow:
- * 1. User clicks a `.l5r4-sort-header-button` element in an `.l5r4-sort-header`
+ * 1. User clicks a `[data-action="sort-items"]` head in a `[data-sort-header]` list
  * 2. Sheet's delegated event handler calls `SortHandler.updateSortPref(...)`
- * 3. Handler updates user preferences, visual indicators, and triggers re-render
- * 4. Sheet re-renders with newly sorted item list
+ * 3. Handler stores the user's preference and triggers a re-render
+ * 4. Sheet re-renders with the newly sorted list and its header marked
  *
  * @class SortHandler
  */
 export class SortHandler {
   /**
-   * Updates visual indicators for sortable column headers.
-   *
-   * Applies `.is-active` class and `aria-pressed="true"` to the currently active sort column and sets
-   * its `data-dir` attribute to show sort direction. Removes indicators from
-   * all other columns. CSS uses these attributes to render direction arrows.
-   *
-   * @param {HTMLElement} header - The `.l5r4-sort-header` container element
-   * @param {string} activeKey - The data-sort-by value of the active column
-   * @param {"asc"|"desc"} direction - Current sort direction for the active column
-   */
-  static #updateHeaderIndicators(header, activeKey, direction) {
-    header.querySelectorAll("[data-action='sort-items']").forEach(a => {
-      const sortKey = a.dataset.sortBy;
-      const isActive = sortKey === activeKey;
-      a.classList.toggle("is-active", isActive);
-      a.setAttribute("aria-pressed", String(isActive));
-
-      if (isActive) {
-        a.setAttribute("data-dir", direction);
-      } else {
-        a.removeAttribute("data-dir");
-      }
-    });
-  }
-
-  /**
-   * Mark a header's columns from the user's stored sort preference for its scope.
-   *
-   * @param {HTMLElement} header - The `.l5r4-sort-header` container element
-   * @param {string} actorId - The actor's UUID or ID for preference lookup
-   * @param {object} options
-   * @param {string} options.scope - Sort scope identifier
-   * @param {string[]} options.allowedKeys - Valid sort keys for this scope; the first is the default
-   */
-  static #updateHeaderFromPref(header, actorId, { scope, allowedKeys }) {
-    const pref = getSortPref(actorId, scope, { allowedKeys, defaultKey: allowedKeys[0] });
-    this.#updateHeaderIndicators(header, pref.key, pref.dir);
-  }
-
-  /**
-   * Initializes visual sort indicators on sheet render based on stored preferences.
-   *
-   * Called during sheet render to restore the user's last sort state for a given
-   * scope (skills, weapons, etc.). Reads preferences from user flags via getSortPref
-   * and updates the DOM accordingly.
-   *
-   * Safe to call even if the header element doesn't exist - fails gracefully with
-   * a console warning.
-   *
-   * @param {HTMLElement} root - The sheet's root element (Application v2 pattern)
-   * @param {string} actorId - The actor's UUID or ID for preference lookup
-   * @param {object} options
-   * @param {string} options.scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
-   * @param {string[]} options.allowedKeys - Valid sort keys for this scope (security whitelist)
-   */
-  static updateSortIndicators(root, actorId, { scope, allowedKeys }) {
-    try {
-      // querySelector used here to find header element by data-scope attribute
-      // This is proper use of data attributes for behavior targeting
-      const header = root.querySelector(`[data-sort-header][data-scope="${scope}"]`);
-      if (!header) {
-        return;
-      }
-
-      this.#updateHeaderFromPref(header, actorId, { scope, allowedKeys });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
-    }
-  }
-
-  /**
    * Handles click events on sortable column headers with toggle logic.
    *
    * Implements Application v2 event delegation pattern - receives both the event
    * and the target element. Validates the sort key against allowed keys, persists
-   * the new preference to user flags, updates visual indicators, and triggers a
-   * sheet re-render with the new sort order.
+   * the new preference to user flags, and triggers a sheet re-render with the new sort order.
    *
    * Toggle behavior:
    * - First click on a column: Sort by that column ascending
@@ -110,11 +38,10 @@ export class SortHandler {
    *
    * Error handling:
    * - Invalid sort keys are rejected with a warning (doesn't crash the sheet)
-   * - Missing DOM elements handled gracefully with fallbacks
    * - Errors are logged but don't prevent re-render.
    *
    * @param {Event} event - The DOM click event (preventDefault called automatically)
-   * @param {HTMLElement} element - The clicked `.l5r4-sort-header-button` element (Application v2 pattern)
+   * @param {HTMLElement} element - The clicked `[data-action="sort-items"]` head (Application v2 pattern)
    * @param {object} options
    * @param {string} options.actorId - The actor's UUID or ID for preference storage
    * @param {Function} options.getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
@@ -140,10 +67,6 @@ export class SortHandler {
 
       const cur = getSortPref(actorId, scope, { allowedKeys: allowed, defaultKey: allowed[0] });
       await updateSortPref(actorId, scope, { key, toggleFrom: cur });
-
-      if (header) {
-        this.#updateHeaderFromPref(header, actorId, { scope, allowedKeys: allowed });
-      }
 
       renderSheet();
     } catch (err) {

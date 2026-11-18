@@ -325,16 +325,18 @@ export function registerXpManagerTests(quench) {
         });
 
         it("should mark the purchases column a sort click chose, with its direction", async () => {
-          const cost = dialog.element.querySelector("[data-sort-header] [data-sort-by='cost']");
+          // The click re-renders the window, so each look finds the head again
+          const cost = () =>
+            dialog.element.querySelector("[data-sort-header] [data-sort-by='cost']");
           try {
             assert.equal(
-              cost.getAttribute("aria-pressed"),
+              cost().getAttribute("aria-pressed"),
               "false",
               "not pressed before the click"
             );
-            cost.click();
-            assert.isTrue(await waitFor(() => cost.dataset.dir === "asc"), "cost ascending");
-            assert.equal(cost.getAttribute("aria-pressed"), "true", "pressed after the click");
+            cost().click();
+            assert.isTrue(await waitFor(() => cost()?.dataset.dir === "asc"), "cost ascending");
+            assert.equal(cost().getAttribute("aria-pressed"), "true", "pressed after the click");
           } finally {
             await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
           }

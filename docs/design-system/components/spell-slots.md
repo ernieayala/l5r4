@@ -15,13 +15,13 @@ A shugenja's spell slots left for each Ring, shown in the Spells section title: 
 
 ## Anatomy
 
-| Part | Element | Class | Where the code differs |
-| --- | --- | --- | --- |
-| Group | `<div>` in the section title's tools | `l5r4-spell-slots flexrow -gap-sm` |  |
-| Label | `<span>`, "Spell slots" and a colon | `l5r4-spell-slots-label` | A bare `span` in `templates/actor/_partials/_spell-section.hbs` |
-| Slot | `<div>` | `l5r4-spell-slot -<ring>` | `l5r4-spell-slot` (`templates/actor/_partials/_spell-slot.hbs`), with no Ring modifier |
-| Image | `<img alt="">` | `l5r4-spell-slot-image` | An `img` with no class, `alt=""`, and a `data-tooltip` naming the Ring |
-| Count | `<button type="button" data-action="adjust-spell-slot" data-path data-tooltip aria-label>` over the image | `l5r4-spell-slot-count` | No `aria-label`: `data-action="adjust-spell-slot"` (`templates/actor/_partials/_spell-slot.hbs`) |
+| Part | Element | Class |
+| --- | --- | --- |
+| Group | `<div>` in the section title's tools | `l5r4-spell-slots flexrow -gap-sm` |
+| Label | `<span>`, "Spell slots" and a colon | `l5r4-spell-slots-label` |
+| Slot | `<div>` | `l5r4-spell-slot -<ring>` |
+| Image | `<img alt="">`, under the count, which names the Ring | `l5r4-spell-slot-image` |
+| Count | `<button type="button" data-action="adjust-spell-slot" data-path data-tooltip aria-label>` over the image | `l5r4-spell-slot-count` |
 
 ## Variants
 
@@ -82,8 +82,8 @@ The count is one digit in a 32 px circle. The label "Spell slots" stays on one l
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| P1 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize "l5r4.ui.mechanics.rings.water") count=count}}` (modeled) | `data-tooltip="{{localize "l5r4.ui.hints.adjustSpellSlots" ring=(localize (concat "l5r4.ui.mechanics.rings." ring))}}"` (`templates/actor/_partials/_spell-slot.hbs`): one key, but no `aria-label` |
-| P2 | `<img class="l5r4-spell-slot-image" src="{{iconPath 'water.webp'}}" alt="" />` (modeled) | `<img src="{{iconPath 'water.webp'}}" title="..." />` with no `alt` (modeled) |
+| P1 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.sheets.spellSlotsOf" ring=(localize (concat "l5r4.ui.mechanics.rings." ring)) count=count}}` (`templates/actor/_partials/_spell-slot.hbs`) | A `data-tooltip` with no `aria-label` (modeled) |
+| P2 | `<img class="l5r4-spell-slot-image" src="{{iconPath (concat ring ".webp")}}" alt="" />` (`templates/actor/_partials/_spell-slot.hbs`) | `<img src="{{iconPath 'water.webp'}}" title="..." />` with no `alt` (modeled) |
 | P3 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-slot.hbs" ring="water" count=system.spellSlots.water}}` (`templates/actor/_partials/_spell-section.hbs`) | Five copies of the slot (modeled) |
 | P4 | `background: var(--l5r4-color-scrim); text-shadow: var(--l5r4-shadow-text-halo);`, as in `.l5r4-spell-slot-count` (`scss/components/_section.scss`) | `background: rgb(0 0 0 / 40%); text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;` (modeled) |
 | P5 | "All spell slots restored to maximum": `l5r4.magic.spells.slotsRestored` (`lang/en.json`) | "Spell Slots" (modeled) |
@@ -101,10 +101,4 @@ The action is `adjust-spell-slot`, verb first (`docs/code-system/naming.md`); th
 
 Fixed (Stage 17 decision 2): `system.spellSlots.<ring>`, which `data-path` names.
 
-## Keys this page needs
-
-| Key | Value | For |
-| --- | --- | --- |
-| `l5r4.ui.sheets.spellSlotsOf` | {ring} spell slots: {count} (click: +1, right-click: -1) | P1's `data-tooltip` and `aria-label` |
-
-`l5r4.ui.sheets.spellSlots` reads "Spell slots" (P5).
+`l5r4.ui.sheets.spellSlots` reads "Spell slots" (P5); `l5r4.ui.sheets.spellSlotsOf` reads "{ring} spell slots: {count} (click: +1, right-click: -1)" (P1).

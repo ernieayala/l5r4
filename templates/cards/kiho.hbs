@@ -3,9 +3,9 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    <div>{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
-    <div>{{system.mastery}}</div>
-    <div>{{localize (concat "l5r4.magic.kiho." system.type)}}</div>
+    <div class="l5r4-item-row-cell">{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
+    <div class="l5r4-item-row-cell">{{system.mastery}}</div>
+    <div class="l5r4-item-row-cell">{{localize (concat "l5r4.magic.kiho." system.type)}}</div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" rules=system.specialRules description=system.description}}

@@ -5,12 +5,15 @@
   {{#if inSheet}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-weapon-attack" pool=attackFormula tooltip=(localize "l5r4.ui.mechanics.rolls.attackRoll")}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-weapon-damage" pool=system.derivedDamageFormula tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll")}}
-    {{#if ranged}}
-        <select data-action="update-item-field" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
-    {{/if}}
-    {{#unless ranged}}
-      <span></span>
-    {{/unless}}
+    <div class="l5r4-item-row-cell">
+      {{#if ranged}}
+        <select
+          data-action="update-item-field"
+          data-field="system.arrow"
+          aria-label="{{localize "l5r4.equipment.weapons.arrow"}}"
+        >{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
+      {{/if}}
+    </div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" description=system.description}}
   {{/if}}

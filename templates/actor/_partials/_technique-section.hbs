@@ -4,7 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.techniques}}
   </div>
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="techniques" type="technique" columns=@root.sortColumns.techniques}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="techniques" type="technique" columns=@root.sortColumns.techniques sort=@root.sortState.techniques}}
   <section class="l5r4-item-row-list -technique">
     {{#each techniques as |technique id|}}
       {{> "systems/l5r4-enhanced/templates/cards/technique.hbs" system=technique.system inSheet=true docId=technique.id}}

@@ -115,6 +115,7 @@
   "styles/z-index": 0,
   "templates/action-element": 0,
   "templates/class-prefix": 0,
+  "templates/data-dtype": 0,
   "templates/dialog-form": 0,
   "templates/event-attribute": 0,
   "templates/expand-aria": 0,

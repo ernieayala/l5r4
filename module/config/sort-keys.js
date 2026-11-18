@@ -8,8 +8,8 @@
 /**
  * The column heads of each list, in column order, keyed by the list's sort scope (its `data-scope`). A head with a
  * `key` sorts the list by it and renders as a button; a head with only a `label` does not sort; a head with
- * neither is the spacer over the row controls column. `label` is an i18n key. Two heads may share a key: a
- * weapon's Attack and Damage both sort by damage (sort-header.md H4).
+ * neither is the spacer over the row controls column. `label` is an i18n key. No two heads share a key
+ * (sort-header.md H4).
  *
  * @type {Readonly<Record<string, ReadonlyArray<{key?: string, label?: string}>>>}
  */
@@ -24,7 +24,7 @@ export const SORT_COLUMNS = Object.freeze({
   ]),
   weapons: Object.freeze([
     { key: "name", label: "l5r4.ui.common.name" },
-    { key: "damage", label: "l5r4.ui.mechanics.combat.attack" },
+    { key: "attack", label: "l5r4.ui.mechanics.combat.attack" },
     { key: "damage", label: "l5r4.ui.common.damage" },
     {}
   ]),

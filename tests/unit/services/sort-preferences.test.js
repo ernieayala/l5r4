@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSortPref, updateSortPref } from "../../../module/services/sort-preferences.js";
+import {
+  getSortPref,
+  getSortPrefs,
+  updateSortPref
+} from "../../../module/services/sort-preferences.js";
 
 describe("getSortPref", () => {
   beforeEach(() => {
@@ -117,6 +121,34 @@ describe("getSortPref", () => {
       expect(pref.key).toBe("name");
       expect(pref.dir).toBe("asc");
     });
+  });
+});
+
+// #79: the sort header shows the stored sort on render (docs/design-system/components/sort-header.md)
+describe("getSortPrefs", () => {
+  beforeEach(() => {
+    global.game = {
+      user: {
+        flags: {
+          "l5r4-enhanced": {
+            sortByActor: { actor123: { weapons: { key: "attack", dir: "desc" } } }
+          }
+        }
+      }
+    };
+  });
+
+  it("should give each sorting list its stored sort, or its first key ascending", () => {
+    const prefs = getSortPrefs("actor123");
+    expect(prefs.weapons).toEqual({ key: "attack", dir: "desc" });
+    expect(prefs.skills).toEqual({ key: "name", dir: "asc" });
+    expect(prefs["xp-purchases"]).toEqual({ key: "note", dir: "asc" });
+  });
+
+  it("should leave out the lists whose heads do not sort", () => {
+    const prefs = getSortPrefs("actor123");
+    expect(prefs).not.toHaveProperty("npcAttacks");
+    expect(prefs).not.toHaveProperty("xpLedger");
   });
 });
 

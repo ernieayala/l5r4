@@ -20,7 +20,12 @@ export const GALLERY_SHEET_HEADERS = Object.freeze([
         partial: `${T}/actor/_partials/_sort-header.hbs`,
         scope: "pc",
         context: "pc",
-        with: { scope: "skills", type: "skill", columns: SORT_COLUMNS.skills }
+        with: {
+          scope: "skills",
+          type: "skill",
+          columns: SORT_COLUMNS.skills,
+          sort: { key: "rank", dir: "desc" }
+        }
       },
       {
         label: "l5r4.apps.designGallery.samples.plainHeader",
@@ -38,7 +43,7 @@ export const GALLERY_SHEET_HEADERS = Object.freeze([
       }
     ],
     seeAlso: ["item-row"],
-    notes: ["l5r4.apps.designGallery.notes.sorted"]
+    notes: []
   },
   {
     page: "tabs",

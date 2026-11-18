@@ -45,6 +45,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
     voidArmor: false,
     collapsedSections: {},
     sortColumns: SORT_COLUMNS,
+    sortState: { spells: { key: "name", dir: "asc" } },
     activeItemIds: [],
     enriched: { notes: "" },
     skills: [],
