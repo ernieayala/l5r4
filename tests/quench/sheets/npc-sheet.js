@@ -490,6 +490,17 @@ export function registerNpcSheetTests(quench) {
           assert.equal(cellUnder("attack1", "l5r4.ui.common.type"), "");
         });
 
+        it("should show no damage button for an attack with no damage, cells under their heads", async () => {
+          await actor.update({ "system.damage1": { roll: 0, keep: 0, modifier: 0 } });
+          await sheet.render(true);
+          const row = sheet.element.querySelector('[data-attack-section="attack1"]');
+
+          assert.notExists(row.querySelector('[data-action="roll-damage"]'), "no damage button");
+          assert.equal(cellUnder("attack1", "l5r4.ui.common.damage"), "—");
+          assert.equal(cellUnder("attack1", "l5r4.ui.common.type"), "Slashing");
+          assert.notInclude(row.textContent, "0k0");
+        });
+
         it("should display attack name", () => {
           const element = sheet.element;
           const attackSection = element.querySelector('[data-attack-section="attack1"]');

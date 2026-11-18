@@ -105,6 +105,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
         actionLabel: "Simple",
         attackPool: "6k3",
         damagePool: "4k2+2",
+        hasDamage: true,
         attackLabel: "Claws",
         damageLabel: { i18n: "l5r4.ui.common.damage" }
       },
@@ -116,6 +117,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
         actionLabel: "Complex",
         attackPool: "5k2",
         damagePool: "3k2",
+        hasDamage: true,
         attackLabel: { i18n: "l5r4.ui.mechanics.combat.attack" },
         damageLabel: { i18n: "l5r4.ui.common.damage" }
       }

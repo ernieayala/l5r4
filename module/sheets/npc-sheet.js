@@ -376,7 +376,8 @@ function getSortedSkills(actorId, skills, allowedKeys) {
 }
 
 /**
- * The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30).
+ * The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30). An
+ * attack whose damage slot holds no dice and no modifier has no damage to roll (`hasDamage` false).
  * `attack.type` stores the action key the attack config's select writes; a value from older data that is no key
  * shows as stored.
  * @param {object} system - The NPC's system data
@@ -397,6 +398,7 @@ function buildAttackSlots(system) {
       actionLabel,
       attackPool: formatAttackPool(attack),
       damagePool: formatAttackPool(damage),
+      hasDamage: Boolean(damage.roll || damage.keep || damage.modifier),
       attackLabel: attack.name || F("l5r4.ui.mechanics.combat.attackSlot", { slot: num }),
       damageLabel: F("l5r4.ui.mechanics.combat.damageSlot", { slot: num })
     };

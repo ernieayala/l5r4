@@ -27,7 +27,11 @@
           <div class="l5r4-item-row -attacks" data-attack-section="{{key}}">
             <h4 class="l5r4-item-row-name flexrow -gap-sm" data-attack-title>{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}</h4>
             {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-attack" pool=attackPool tooltip=(localize "l5r4.ui.mechanics.combat.attack") data=(object attack-num=num roll=attack.roll keep=attack.keep modifier=attack.modifier description=actionLabel label=attackLabel)}}
-            {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-damage" pool=damagePool tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll") data=(object roll=damage.roll keep=damage.keep modifier=damage.modifier description=damage.type label=damageLabel)}}
+            {{#if hasDamage}}
+              {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-damage" pool=damagePool tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll") data=(object roll=damage.roll keep=damage.keep modifier=damage.modifier description=damage.type label=damageLabel)}}
+            {{else}}
+              <div class="l5r4-item-row-cell">—</div>
+            {{/if}}
             <div class="l5r4-item-row-cell">{{actionLabel}}</div>
             <div class="l5r4-item-row-cell">{{damage.type}}</div>
             {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" attackKey=key}}
