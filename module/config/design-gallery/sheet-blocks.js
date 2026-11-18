@@ -77,7 +77,12 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
         within: ["l5r4-traits-rings", "l5r4-trait -earth -stamina"],
         fit: true,
         context: "pc",
-        with: { variant: "trait", trait: "sta", value: 1 }
+        with: {
+          variant: "trait",
+          trait: "sta",
+          label: { i18n: "l5r4.ui.mechanics.traits.sta" },
+          value: 1
+        }
       },
       {
         label: "l5r4.apps.designGallery.samples.voidRank",
@@ -117,10 +122,10 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
         scope: "pc",
         within: ["l5r4-traits-rings"],
         context: "pc",
-        with: { value: 1 }
+        with: { value: 1, max: 2 }
       }
     ],
     seeAlso: ["ring-trait-block"],
-    notes: ["l5r4.apps.designGallery.notes.voidDots"]
+    notes: []
   }
 ]);

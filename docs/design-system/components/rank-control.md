@@ -5,7 +5,7 @@ A rank shown as a number and changed in place. Three variants: a Trait rank, the
 | Item | Detail |
 | --- | --- |
 | Partial | `templates/actor/_partials/_rank-control.hbs`, for the Trait and Void Ring, nine uses per sheet; `templates/actor/_partials/_rank-track.hbs`, four uses in `_ranks.hbs` |
-| Parameters | `_rank-control.hbs`: `variant` (`trait` or `void`), `trait` (key, Trait only), `label` (the Trait or Ring name), `value`. `_rank-track.hbs`: `track` (`honor`, `glory`, `status`, `shadowTaint`), `label` (i18n key), `rank`, `points` |
+| Parameters | `_rank-control.hbs`: `variant` (`trait` or `void`), `trait` (key, Trait only), `label` (the Trait's localized name, Trait only), `value`. `_rank-track.hbs`: `track` (`honor`, `glory`, `status`, `shadowTaint`), `label` (i18n key), `rank`, `points` |
 | SCSS | `scss/components/_rank-control.scss`: the track and its value button. The `rank-arrows` mixin and the Trait and Void Ring variants sit in `scss/features/_traits-rings.scss`, under `.l5r4-traits-rings`. The 2 by 2 track layout is in `scss/features/_ranks.scss` |
 | Block class | `l5r4-rank-control` |
 | Handlers | Trait: `PcTraitHandler.updateTraitRank`, `.updateTraitRankUp`, `.updateTraitRankDown` (`module/sheets/handlers/pc-trait-handler.js`). Void Ring, on both sheets: `TraitHandler.updateVoidRing` (`module/sheets/handlers/trait-handler.js`). Track: `PcAdjustmentHandler.updateRankPoints` (`module/sheets/handlers/pc-adjustment-handler.js`) |
@@ -28,13 +28,13 @@ The three buttons are siblings because a button cannot hold another. The Void Ri
 
 Rank track:
 
-| Part | Element | Class | Where the code differs |
-| --- | --- | --- | --- |
-| Track | `<div>` | `l5r4-rank-control -track` |  |
-| Under-label | `<div inert>` with the label and `rank.points` | `l5r4-rank-control-under` | No `inert` in `templates/actor/_partials/_rank-track.hbs` |
-| Face | `<button type="button" data-action="adjust-rank-points" data-key data-tooltip>` | `l5r4-rank-control-value` |  |
-| Label | `<span>` inside the face | `l5r4-rank-control-label` | A bare `span:first-child` |
-| Number | `<span>` inside the face: `{{rank}}.{{points}}` | `l5r4-rank-control-number` | A bare second `span` |
+| Part | Element | Class |
+| --- | --- | --- |
+| Track | `<div>` | `l5r4-rank-control -track` |
+| Under-label | `<div inert>` with the label and `rank.points` | `l5r4-rank-control-under` |
+| Face | `<button type="button" data-action="adjust-rank-points" data-key data-tooltip>` | `l5r4-rank-control-value` |
+| Label | `<span>`, in the face and the under-label | `l5r4-rank-control-label` |
+| Number | `<span>`, in the face and the under-label: `{{rank}}.{{points}}` | `l5r4-rank-control-number` |
 
 ## Variants
 
@@ -111,7 +111,7 @@ The number is one or two digits in a fixed box, in tabular figures. A track labe
 | --- | --- | --- |
 | Q1 | `<div class="l5r4-rank-control -trait"><button ... -up>...</button><button class="l5r4-rank-control-value" ...>3</button><button ... -down>...</button></div>` (modeled) | `<span class="trait-rank" data-action="trait-rank" role="button">` holding two `<a data-action>` (modeled) |
 | Q2 | `&:hover, &:focus-within { .l5r4-rank-control-arrow { opacity: 1; } }` (modeled) | `@mixin rank-arrows { &:hover { ... } }` alone (modeled) |
-| Q3 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.hints.increaseTrait" trait=label}}` on the up arrow (modeled) | `<a class="trait-increase" data-action="trait-increase" data-trait="sta">` with no name (modeled) |
+| Q3 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.hints.increaseTrait" trait=label}}` on the up arrow (`templates/actor/_partials/_rank-control.hbs`) | `<a class="trait-increase" data-action="trait-increase" data-trait="sta">` with no name (modeled) |
 | Q4 | `fa-chevron-up` on the Trait arrows (`templates/actor/_partials/_rank-control.hbs`) | `fa-chevron-down` on the expand control (modeled) |
 | Q5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="honor" label="l5r4.character.ranks.honorRank" rank=system.honor.rank points=system.honor.points}}` (modeled) | The track's label and number written twice in each of four blocks (modeled) |
 | Q6 | `z-index: var(--l5r4-layer-control);` (`foundations/layers.md`) | `z-index: 11;` (modeled) |
@@ -129,11 +129,11 @@ The number is one or two digits in a fixed box, in tabular figures. A track labe
 
 The actions are verb first (`docs/code-system/naming.md`): `adjust-trait`, `increase-trait`, `decrease-trait`, `adjust-void-ring`, `increase-void-ring`, `decrease-void-ring`, and `adjust-rank-points`. `data-key="shadowTaint"` names the stored field `system.shadowTaint` (decision 2). The Taint track's label is `l5r4.character.ranks.taintRank`: `docs/code-system/glossary.md` bans `shadowRank`.
 
-## Keys this page needs
+## Keys
 
 | Key | Value | For |
 | --- | --- | --- |
-| `l5r4.ui.hints.traitRank` | {trait}: Trait Roll; Shift+click: +1, Shift+right-click: -1 | The Trait value's `data-tooltip`; replaces `leftClickPlusRightClickMinus` there |
+| `l5r4.ui.hints.traitRank` | {trait}: Trait Roll; Shift+click: +1, Shift+right-click: -1 | The Trait value's `data-tooltip` |
 | `l5r4.ui.hints.voidRingRank` | Void Ring: Shift+click: +1, Shift+right-click: -1 | The Void Ring value's `data-tooltip` |
 | `l5r4.ui.hints.increaseTrait` | Increase {trait} | Trait up arrows |
 | `l5r4.ui.hints.decreaseTrait` | Decrease {trait} | Trait down arrows |

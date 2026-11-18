@@ -536,6 +536,67 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #79: void-point-dots.md V1, rank-control.md Q3 and the track's inert under-label
+        it(
+          "should render the Void Points filled and named, and name each rank arrow",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const localize = (key, data) => game.i18n.localize(key, data);
+            await pc.update({ "system.rings.void.rank": 2, "system.rings.void.value": 1 });
+            const sheet = pc.sheet;
+            await sheet.render({ force: true });
+            try {
+              const dots = () => sheet.element.querySelector('[data-action="adjust-void-points"]');
+              const filled = () =>
+                [...dots().querySelectorAll("[data-idx]")]
+                  .filter(dot => dot.classList.contains("is-filled"))
+                  .map(dot => dot.dataset.idx);
+              const named = current =>
+                localize("l5r4.ui.mechanics.rings.voidPointsValue", { current, max: 2 });
+              assert.deepEqual(filled(), ["1"], "filled by the template");
+              assert.isTrue(
+                [...dots().querySelectorAll("[data-idx]")].every(dot => dot.hasAttribute("inert"))
+              );
+              assert.equal(dots().getAttribute("aria-label"), named(1));
+              assert.equal(dots().dataset.tooltip, named(1));
+
+              const saved = nextUpdate(pc);
+              dots().click();
+              await saved;
+              assert.isTrue(await waitFor(() => filled().length === 2), "repainted to 2");
+              assert.equal(dots().getAttribute("aria-label"), named(2));
+
+              const stamina = localize("l5r4.ui.mechanics.traits.sta");
+              const arrow = action =>
+                sheet.element
+                  .querySelector(
+                    `[data-action="${action}"]:not([data-trait]), [data-action="${action}"][data-trait="sta"]`
+                  )
+                  .getAttribute("aria-label");
+              assert.equal(
+                arrow("increase-trait"),
+                localize("l5r4.ui.hints.increaseTrait", { trait: stamina })
+              );
+              assert.equal(
+                arrow("decrease-trait"),
+                localize("l5r4.ui.hints.decreaseTrait", { trait: stamina })
+              );
+              assert.equal(arrow("increase-void-ring"), localize("l5r4.ui.hints.increaseVoidRing"));
+              assert.equal(arrow("decrease-void-ring"), localize("l5r4.ui.hints.decreaseVoidRing"));
+
+              const honor = sheet.element.querySelector(
+                '[data-action="adjust-rank-points"][data-key="honor"]'
+              );
+              assert.isTrue(
+                honor.previousElementSibling.hasAttribute("inert"),
+                "the copy under the face is inert"
+              );
+            } finally {
+              await sheet.close({ animate: false });
+            }
+          })
+        );
+
         it(
           "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {

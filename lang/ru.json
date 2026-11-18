@@ -332,10 +332,8 @@
         "autoProne": "Авто: Повержен"
       },
       "hints": {
-        "leftClickPlusRightClickMinus": "Shift+Левый клик: +1, Shift+Правый клик: -1",
         "postToChat": "Опубликовать в чате",
-        "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0",
-        "voidPointsClickAdjust": "Левый клик: +1, Правый клик: -1"
+        "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0"
       },
       "mechanics": {
         "combat": {

@@ -197,7 +197,7 @@ Syntax a user types, such as the text link keys in the link error messages (`sta
 | Conforming | "Wounds: {current}/{max} (suffered: {suffered})" | `l5r4.ui.mechanics.wounds.status` (`lang/en.json`) |
 | Conforming | "(pp.231, 259)" | `l5r4.ui.sheets.masteryHint` (`lang/en.json`) |
 | Non-conforming | "targets - TN not auto-set" (write "Several targets: set the TN by hand") | modeled on `l5r4.ui.combat.multipleTargets` (`lang/en.json`) |
-| Non-conforming | "Shift+Left click: +1, Shift+Right click: -1" (write "Shift+click: +1, Shift+right-click: -1") | modeled on `l5r4.ui.hints.leftClickPlusRightClickMinus` (`lang/en.json`) |
+| Non-conforming | "Shift+Left click: +1, Shift+Right click: -1" (write "Shift+click: +1, Shift+right-click: -1") | modeled on `l5r4.ui.hints.traitRank` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js` fails " - " between words; review for key hints.
 

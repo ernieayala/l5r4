@@ -249,13 +249,11 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Post-render lifecycle hook for setting up interactive UI elements.
    *
    * Initializes UI components that require DOM access:
-   * - Paints Void Points dots to match actor's current Void Points
    * - Binds simple roll handlers (non-delegated clicks)
    * - Binds image editor click handler
    *
    * **Ownership Check:**
-   * Only binds the click handlers if the current user owns the actor. Void Points painting happens regardless for
-   * visual consistency.
+   * Only binds the click handlers if the current user owns the actor.
    *
    * **Foundry Lifecycle:**
    * Called automatically after template rendering. Always call super._onRender first
@@ -269,8 +267,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
-
-    this._paintVoidPointsDots(root);
 
     if (!this.actor.isOwner) {
       return;

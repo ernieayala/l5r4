@@ -202,7 +202,6 @@
           "readOnly": "A sheet the viewer cannot edit disables its controls when the sheet renders, so the samples show the editable form.",
           "reveal": "Row controls are hidden until the pointer is over the row.",
           "surface": "Ratios are measured in the window's theme. The surface is core's window background, so its reference value from color.md stands in for it.",
-          "voidDots": "The dots render empty: the sheet fills them after it renders. The Ring and Trait block shows them under the Void Ring.",
           "woundConfig": "The editable track lives in the Wound configuration window, which needs an actor to open."
         },
         "patterns": {
@@ -910,14 +909,12 @@
         "cost": "Cost",
         "current": "Current",
         "damage": "Damage",
-        "decrease": "Decrease",
         "delete": "Remove",
         "disabled": "disabled",
         "edit": "Edit",
         "effect": "Effect",
         "expand": "Expand",
         "free": "Free",
-        "increase": "Increase",
         "initiative": "Initiative",
         "insight": "Insight",
         "insightRank": "Insight Rank",
@@ -993,11 +990,15 @@
         "granted": "{name} gains {item} from {giver} (School Rank {rank})."
       },
       "hints": {
-        "leftClickPlusRightClickMinus": "Shift+click: +1, Shift+right-click: -1",
+        "decreaseTrait": "Decrease {trait}",
+        "decreaseVoidRing": "Decrease Void Ring",
+        "increaseTrait": "Increase {trait}",
+        "increaseVoidRing": "Increase Void Ring",
         "postToChat": "Post to chat",
         "shiftClickRankPoints": "Shift+click: ±0.1, Shift+Ctrl+click: ±1.0",
         "shiftClickToggleRankMode": "GM: Shift+click to toggle between automatic and manual rank calculation",
-        "voidPointsClickAdjust": "Click: +1, right-click: -1"
+        "traitRank": "{trait}: Trait Roll; Shift+click: +1, Shift+right-click: -1",
+        "voidRingRank": "Void Ring: Shift+click: +1, Shift+right-click: -1"
       },
       "honorRoll": {
         "button": "Honor Roll",
@@ -1078,6 +1079,7 @@
           "voidInitBoost": "Use Void",
           "voidPoints": "Void Points",
           "voidPointsEmpty": "Void Points: 0",
+          "voidPointsValue": "Void Points: {current}/{max} (click: +1, right-click: -1)",
           "voidTnBoost": "Use Void",
           "water": "Water"
         },

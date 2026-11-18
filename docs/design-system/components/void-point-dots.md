@@ -5,7 +5,7 @@ The actor's current Void Points as a row of nine dots under the Void Ring, fille
 | Item | Detail |
 | --- | --- |
 | Partial | `templates/actor/_partials/_void-points.hbs`, included by `_traits-rings.hbs` |
-| Parameters | `value` (`system.rings.void.value`), `dots` (the nine indexes, from the context) |
+| Parameters | `value` (`system.rings.void.value`), `max` (`system.rings.void.rank`) |
 | SCSS | `scss/features/_void-points.scss` (target), holding `.l5r4-void-points` (`scss/features/_traits-rings.scss`) and the dot rules after it |
 | Block class | `l5r4-void-points` |
 | Handler | `BaseActorSheet#_onVoidPointsAdjust` (`module/sheets/base-actor-sheet.js`), then `VoidPointsHandler.updateVoidPoints` and `VoidPointsHandler.updateVoidDots` (`module/sheets/handlers/void-points-handler.js`) |
@@ -19,7 +19,7 @@ The actor's current Void Points as a row of nine dots under the Void Ring, fille
 | --- | --- | --- |
 | Block | `<div>` | `l5r4-void-points` |
 | Dots | `<button type="button" data-action="adjust-void-points" data-value data-tooltip aria-label>` | `l5r4-void-points-dots` |
-| Dot | `<span data-idx inert>`, nine; the code's dots carry no `inert` | `l5r4-void-point`; `is-filled` when `data-idx` ≤ `data-value` |
+| Dot | `<span data-idx inert>`, nine | `l5r4-void-point`; `is-filled` when `data-idx` ≤ `data-value` |
 | Label | `<p>` | `l5r4-void-points-label` |
 
 The dots are one button, so the nine dots are one target and one tab stop. The dots are `inert`: the button has no visible text, so its `data-tooltip` and `aria-label` carry the count, from one key.
@@ -43,7 +43,7 @@ The dots are one button, so the nine dots are one target and one tab stop. The d
 | At 0 or 9 | Nothing changes and the press does nothing | `data-value="0"` or `"9"` |
 | Read-only | Core disables the button on a sheet the viewer cannot edit (`button.md` B8) | Core's `disabled` |
 
-The template fills the dots from `value`; `updateVoidDots` repeats it after a change, which `VoidPointsHandler.updateVoidPoints` (`module/sheets/handlers/void-points-handler.js`) saves with `render: false`. The code differs: the template renders every dot empty and `BaseActorSheet#_paintVoidPointsDots` (`module/sheets/base-actor-sheet.js`) fills them after render.
+The template fills the dots from `value`; `updateVoidDots` repeats it, the tooltip and name included, after a change, which `VoidPointsHandler.updateVoidPoints` (`module/sheets/handlers/void-points-handler.js`) saves with `render: false`.
 
 ## Tokens
 
@@ -86,11 +86,11 @@ No text in the dots. The label is "Void Points" on one line under them; a longer
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| V1 | `<button type="button" class="l5r4-void-points-dots" data-action="adjust-void-points" data-value="{{value}}" data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidPointsValue" current=value max=max}}" aria-label="{{localize "l5r4.ui.mechanics.rings.voidPointsValue" current=value max=max}}">` (modeled) | `data-tooltip="{{localize "l5r4.ui.hints.voidPointsClickAdjust"}}"` (`templates/actor/_partials/_void-points.hbs`), "Click: +1, right-click: -1", which names neither Void Points nor the count |
+| V1 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.mechanics.rings.voidPointsValue" current=value max=max}}` (`templates/actor/_partials/_void-points.hbs`) | "Click: +1, right-click: -1", which names neither Void Points nor the count (modeled) |
 | V2 | `&:hover { filter: var(--l5r4-state-hover-filter); }` (`foundations/states.md` rule 1) | `&:hover { border-color: #888; transform: scale(1.2); }` (modeled) |
 | V3 | `border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);` (modeled) | `border: 2px solid #666;` (modeled) |
 | V4 | `root?.querySelector?.("[data-action='adjust-void-points']")` in `VoidPointsHandler.updateVoidDots` (`module/sheets/handlers/void-points-handler.js`) | `root?.querySelector?.(".void-points-dots")` (modeled) |
-| V5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_void-points.hbs" value=system.rings.void.value}}` (modeled) | The nine dots written out in each sheet's header (modeled) |
+| V5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_void-points.hbs" value=system.rings.void.value max=system.rings.void.rank}}` (`templates/actor/_partials/_traits-rings.hbs`) | The nine dots written out in each sheet's header (modeled) |
 | V6 | `block-size: var(--l5r4-size-void-point);` on each dot, the size `.l5r4-void-point` (`scss/features/_traits-rings.scss`) sets | `min-block-size: var(--l5r4-size-target);` on the button, which adds height under the Void Ring (modeled) |
 
 ## Do and don't
@@ -105,10 +105,4 @@ No text in the dots. The label is "Void Points" on one line under them; a longer
 
 The action is `adjust-void-points`, verb first (`docs/code-system/naming.md`); a filled dot's state class is `is-filled` (state classes are `is-`, naming.md).
 
-## Keys this page needs
-
-| Key | Value | For |
-| --- | --- | --- |
-| `l5r4.ui.mechanics.rings.voidPointsValue` | Void Points: {current}/{max} (click: +1, right-click: -1) | V1's `data-tooltip` and `aria-label` |
-
-`{max}` is the Void Ring rank the context passes; the dots show nine.
+`l5r4.ui.mechanics.rings.voidPointsValue` reads "Void Points: {current}/{max} (click: +1, right-click: -1)"; `{max}` is the Void Ring rank, and the dots show nine.

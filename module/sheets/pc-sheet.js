@@ -329,9 +329,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /**
    * Post-render lifecycle hook for DOM manipulation and event binding.
    *
-   * Performs PC-specific rendering tasks:
-   * 1. Paints Void Points dots based on current/max values
-   * 2. Binds image edit click handler (non-delegated)
+   * Binds the image edit click handler (non-delegated).
    *
    * **Guard Logic:**
    * Tracks #boundExtraRoot to prevent duplicate event binding on re-renders.
@@ -345,8 +343,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
-
-    this._paintVoidPointsDots(root);
 
     // Guard: Only bind non-delegated events once per root element
     if (this.#boundExtraRoot === root) {

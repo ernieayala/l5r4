@@ -244,18 +244,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     return VoidPointsHandler.updateVoidPoints(this._getHandlerContext(), event, delta);
   }
 
-  /**
-   * Updates the visual representation of Void Points dots in the UI.
-   *
-   * Delegates to VoidPointsHandler to synchronize the dot display with
-   * the actor's current Void Point value.
-   *
-   * @param {HTMLElement} root - Sheet root element containing void-points-dots
-   */
-  _paintVoidPointsDots(root) {
-    VoidPointsHandler.updateVoidDots(root, this.actor);
-  }
-
   /* ---------------------------------- */
   /* Shared Drag & Drop Handling        */
   /* ---------------------------------- */

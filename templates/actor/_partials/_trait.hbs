@@ -3,5 +3,5 @@ Parameters: trait (key, sta), name (the Trait's variant, stamina), ring (earth, 
 effective rank shown); the roll reads the base rank from system.traits. --}}
 <div class="l5r4-trait -{{ring}} -{{name}}" data-trait-block>
   {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-trait" pool=(localize (concat "l5r4.ui.mechanics.traits." trait)) tooltip=(localize "l5r4.ui.mechanics.rolls.traitRoll") ring=ring draggable=true data=(object trait-rank=(lookup system.traits trait) trait-name=(localize (concat "l5r4.ui.mechanics.traits." trait)))}}
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-control.hbs" variant="trait" trait=trait value=rank}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-control.hbs" variant="trait" trait=trait label=(localize (concat "l5r4.ui.mechanics.traits." trait)) value=rank}}
 </div>

@@ -814,8 +814,8 @@ body > * {
   text-align: center;
   width: 100%;
 }
-.l5r4-rank-control.-track .l5r4-rank-control-under span:first-child,
-.l5r4-rank-control.-track .l5r4-rank-control-value span:first-child {
+.l5r4-rank-control.-track .l5r4-rank-control-under .l5r4-rank-control-label,
+.l5r4-rank-control.-track .l5r4-rank-control-value .l5r4-rank-control-label {
   font-family: var(--l5r4-font-label);
   font-size: var(--l5r4-font-size-title);
 }

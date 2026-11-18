@@ -328,10 +328,8 @@
         "autoProne": "Auto: Postrado"
       },
       "hints": {
-        "leftClickPlusRightClickMinus": "Shift+Clic izquierdo: +1, Shift+Clic derecho: -1",
         "postToChat": "Publicar en el chat",
-        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0",
-        "voidPointsClickAdjust": "Clic izquierdo: +1, Clic derecho: -1"
+        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0"
       },
       "mechanics": {
         "combat": {

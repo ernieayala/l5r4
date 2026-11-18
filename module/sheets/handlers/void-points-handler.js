@@ -66,13 +66,9 @@ export class VoidPointsHandler {
   }
 
   /**
-   * Updates the visual representation of Void Points in the character sheet.
-   *
-   * Finds all void dot elements and toggles their filled state based on the actor's
-   * current Void Point value. Dots with index <= current value are marked as filled.
-   *
-   * Foundry Pattern: Uses standard DOM querySelector and classList manipulation.
-   * Compatible with Foundry v13 Application v2 architecture.
+   * Repaints the Void Point dots after a change saved without a render, as the template paints them
+   * (templates/actor/_partials/_void-points.hbs): dots up to the count filled, and the count in the button's
+   * tooltip and name.
    *
    * @param {HTMLElement} root - Root element to query for void point dots
    * @param {L5R4Actor} actor - Actor document containing current Void Point data
@@ -90,6 +86,12 @@ export class VoidPointsHandler {
       d.classList.toggle("is-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
+    const label = game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsValue", {
+      current: cur,
+      max: actor.system.rings.void.rank
+    });
+    node.dataset.tooltip = label;
+    node.setAttribute("aria-label", label);
   }
 
   /**
