@@ -15,10 +15,11 @@ Quench runs as the GM in one client. The paths that only a player meets (a playe
 
 | Seat | User | Client |
 | --- | --- | --- |
-| GM | The existing Gamemaster user | `http://127.0.0.1:30000` |
-| Players | Two player users in the test world (decisions 7 and 8) | One client each, with its own cookie store |
+| GM | The existing Gamemaster user | `http://localhost:30000` |
+| Player 1 | User "Player 1" | `http://127.0.0.1:30000` |
+| Player 2 | User "Player 2" | `http://127.0.0.2:30000` |
 
-Foundry keeps one login per browser cookie store, and cookies are per host. Two seats can use two hosts (`127.0.0.1` and `localhost`); more need other loopback hosts, the machine name, or separate Chrome profiles through Claude in Chrome's browser switching. Procedure step 1 finds which works and records it here. Ernie can take any seat at any time.
+Foundry keeps one login per browser cookie store, and cookies are per host, so each seat uses its own loopback host in one Chrome profile; Foundry listens on every loopback address. Checked 2026-11-17: all three logged in at once, each client's `game.user` its own user, and the GM's client lists all three active. The "Player" user stays for the `animations` batch. Ernie can take any seat at any time.
 
 ## Deliverables
 
@@ -69,7 +70,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host. Two 
 
 ### Still open
 
-1. Which cookie-store method gives the seats on this machine (Procedure step 1).
+None.
 
 ## Out of scope
 
