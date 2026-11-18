@@ -4,7 +4,7 @@ One document on a sheet as one grid row: its name, the numbers players read most
 
 | Item | Detail |
 | --- | --- |
-| Partial | `templates/cards/<subtype>.hbs` with `inSheet=true` (one per Item subtype, `advantage-disadvantage.hbs` for both); NPC attack rows inline in `_stats-npc.hbs`. Shared parts: the details cell `templates/cards/_partials/_details.hbs` (`rules`, `description`), its paragraphs `templates/cards/_partials/_detail-text.hbs` for a row with lines of its own (Skill, spell), and the Clan, Family, and School row `templates/cards/_partials/_bio-row.hbs` |
+| Partial | `templates/cards/<subtype>.hbs` with `inSheet=true` (one per Item subtype, `advantage-disadvantage.hbs` for both); NPC attack rows in `_stats-npc.hbs`, with the shared controls (`attackKey=key`). Shared parts: the details cell `templates/cards/_partials/_details.hbs` (`rules`, `description`), its paragraphs `templates/cards/_partials/_detail-text.hbs` for a row with lines of its own (Skill, spell), and the Clan, Family, and School row `templates/cards/_partials/_bio-row.hbs` |
 | Parameters | `name`, `type`, `system`, `docId`, `inSheet` (all rows); `ranged` (weapons: `weapon.system.isBow`). Example: `systems/l5r4-enhanced/templates/cards/skill.hbs` (`templates/actor/_partials/_skill-section.hbs`) |
 | SCSS | `scss/components/_item-row.scss` |
 | Block class | `l5r4-item-row` on the row, beside its fixed classes; `l5r4-item-row-list` on the list |

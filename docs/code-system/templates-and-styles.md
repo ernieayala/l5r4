@@ -51,7 +51,7 @@ A partial whose output posts to chat (`templates/cards/_partials/_text-section.h
 | One key per label; no label joined from two keys or with a literal `&`. Two or more `{{localize}}` calls (or `(localize)` subexpressions) in one text node or attribute value fail; a localize passed as another's placeholder value, `{{else}}` branches, and partial arguments do not count | `tests/conventions/templates.test.js` (`joined-localize`); review for `&` |
 | Comments are `{{!-- --}}`; `<!-- -->` ships into the DOM | `tests/conventions/templates.test.js` |
 | A dialog template opens no `<form>`: core's `DialogV2` wraps its content in one | `tests/conventions/templates.test.js` (`dialog-form`) |
-| Partials are included by literal path: `{{> "systems/l5r4-enhanced/templates/..."}}`; a subtype file by `(concat ...)` | review |
+| Partials are included by literal path: `{{> "systems/l5r4-enhanced/templates/..."}}`; a subtype file by `(concat ...)`. A partial that takes a block renders it with the failover form `{{#> @partial-block}}{{/@partial-block}}`, which renders nothing for an include with no block; wrapping `{{> @partial-block}}` in `{{#if @partial-block}}` empties every block helper inside the caller's block | `tests/conventions/templates.test.js` (`partial-path`); review for the block form |
 | A partial's parameters are named on the include (`{{> "..." item=this}}`) and listed in a `{{!-- --}}` comment at its top | review |
 | No rule logic or formula in a template: the context arrives computed (`castFormula`), never built with helpers | review |
 | Mustache without inner spaces (`{{name}}`); a key inside an attribute in double quotes: `aria-label="{{localize "key"}}"` | review |

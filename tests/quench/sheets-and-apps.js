@@ -148,7 +148,8 @@ export function registerSheetsAndAppsTests(quench) {
         npc = await createTestNPC({ name: "Sheets NPC" });
         created.push(pc, npc);
         await pc.createEmbeddedDocuments("Item", [
-          createSkillData("Kenjutsu", 2, "agi"),
+          // A row expands only when it has details, so the click-through needs one with a description
+          createSkillData("Kenjutsu", 2, "agi", { system: { description: "Sheets details" } }),
           createKatana(),
           createBow(),
           createArmorData("Light Armor"),
@@ -594,6 +595,47 @@ export function registerSheetsAndAppsTests(quench) {
             } finally {
               await sheet.close({ animate: false });
             }
+          })
+        );
+
+        // #79: tabs.md T2, patterns/sheets.md rules 1 and 4, expand-control.md X5
+        it(
+          "should name the item tabs, say an empty Bio, and expand only rows with details",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets empty Bio" });
+            created.push(actor);
+            await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Plain Skill", 1, "agi"),
+              createSkillData("Told Skill", 1, "agi", { system: { description: "Told details" } })
+            ]);
+            const sheet = actor.sheet;
+            await sheet.render({ force: true });
+            const bio = sheet.element.querySelector('[data-section-title][data-scope="bio"]');
+            assert.equal(
+              bio.nextElementSibling.textContent.trim(),
+              game.i18n.localize("l5r4.ui.sheets.noBio"),
+              "one line in the empty list's place"
+            );
+            const row = name =>
+              sheet.element.querySelector(`[data-item-id="${actor.items.getName(name).id}"]`);
+            assert.isNull(row("Plain Skill").querySelector('[data-action="expand-item"]'));
+            assert.exists(row("Told Skill").querySelector('[data-action="expand-item"]'));
+            await sheet.close({ animate: false });
+
+            const item = actor.items.getName("Told Skill");
+            await item.sheet.render({ force: true });
+            const tablist = item.sheet.element.querySelector('[role="tablist"]');
+            assert.equal(
+              tablist.getAttribute("aria-label"),
+              game.i18n.localize("l5r4.ui.sheets.tabs")
+            );
+            assert.equal(
+              item.sheet.element.querySelectorAll('[role="tabpanel"]').length,
+              tablist.querySelectorAll('[role="tab"]').length,
+              "a panel for each tab"
+            );
+            await item.sheet.close({ animate: false });
           })
         );
 

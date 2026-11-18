@@ -584,7 +584,10 @@ export function registerNpcSheetTests(quench) {
         });
 
         it("should mark a Skill row's expand control as expanded when clicked", async () => {
-          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
+          // A row has an expand control only when it has details to show
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Kenjutsu", 2, "agi", { system: { description: "Kenjutsu details" } })
+          ]);
           await sheet.render(true);
           const toggle = sheet.element.querySelector('[data-action="expand-item"]');
           assert.equal(toggle.getAttribute("aria-expanded"), "false", "closed before the click");

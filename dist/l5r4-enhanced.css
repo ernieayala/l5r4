@@ -609,6 +609,12 @@ body > * {
   cursor: pointer;
 }
 
+.l5r4-section-empty {
+  font-style: italic;
+  margin: 0;
+  padding: 0 var(--l5r4-space-8);
+}
+
 .l5r4-section-body {
   padding: 0 var(--l5r4-space-8);
   /* stylelint-disable-next-line selector-class-pattern -- Core's prose-mirror class */
@@ -728,9 +734,6 @@ body > * {
 .l5r4-item-row-list .l5r4-item-row.-bio {
   background: var(--l5r4-color-panel);
 }
-.l5r4-item-row-list .l5r4-item-row.-expandable .inline-control.l5r4-expand-control {
-  display: flex;
-}
 .l5r4-item-row-list .l5r4-item-row.is-expanded .l5r4-item-row-details {
   display: block;
 }
@@ -760,9 +763,6 @@ body > * {
   opacity: 0;
   pointer-events: none;
   transition: none;
-}
-.l5r4-item-row-list .l5r4-item-row .inline-control.l5r4-expand-control {
-  display: none;
 }
 .l5r4-item-row-list .l5r4-item-row .l5r4-item-row-details {
   display: none;

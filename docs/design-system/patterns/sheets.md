@@ -101,7 +101,7 @@ A section is the unit of the main column: a title row, an optional sort header, 
 
 ### 1. One section title partial
 
-Every section title row is one registered partial, `templates/actor/_partials/_section-title.hbs` (target), so the title, the add control, and the expand control render the same in every section. It takes named parameters and a block for extras.
+Every section title row is one registered partial, `templates/actor/_partials/_section-title.hbs`, so the title, the add control, and the expand control render the same in every section. It takes named parameters and a block for extras.
 
 | Parameter   | Type    | Meaning                                                                |
 | ----------- | ------- | ---------------------------------------------------------------------- |
@@ -110,6 +110,7 @@ Every section title row is one registered partial, `templates/actor/_partials/_s
 | `collapsed` | boolean | Whether the section starts collapsed (`collapsedSections.<scope>`)     |
 | `create`    | boolean | Whether the title row carries the add control                          |
 | `expand`    | boolean | Whether the title row carries the expand control                       |
+| `compact`   | boolean | A sidebar section's tight title                                        |
 
 Enforced by `tests/conventions/templates.test.js` (markup used twice is a registered partial).
 
@@ -125,7 +126,7 @@ Conforming, modeled on the title row of `templates/actor/_partials/_item-section
 {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
 ```
 
-Non-conforming, the `l5r4-section-title` row of `templates/actor/_partials/_skill-section.hbs` and of `templates/actor/_partials/_weapon-section.hbs`: the same five lines copied into twelve section partials.
+Non-conforming (modeled): the same five title-row lines copied into each section partial.
 
 ### 2. The expand control states its state
 
@@ -163,7 +164,9 @@ A list section renders only when its list has an entry (the `{{#if skills.length
 
 Conforming, `templates/actor/_partials/_item-section.hbs`: the header and list render inside `{{#if items.length}}`.
 
-Non-conforming, the `l5r4-item-row-list -bio` list (`templates/actor/_partials/_bio.hbs`): a character with no Clan, Family, or School shows the Bio title over an empty list.
+Conforming, `templates/actor/_partials/_bio.hbs`: with no Clan, Family, or School, the Bio list holds the one line `l5r4.ui.sheets.noBio`.
+
+Non-conforming (modeled): the Bio title over an empty list.
 
 ### 5. A Limited view shows the name and the portrait only
 

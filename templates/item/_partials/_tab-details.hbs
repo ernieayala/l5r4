@@ -1,4 +1,4 @@
-<section class="l5r4-section tab {{#if (eq currentTab "details")}}active{{/if}}" data-tab="details" data-application-part="details">
+<section class="l5r4-section tab {{#if (eq currentTab "details")}}active{{/if}}" role="tabpanel" data-tab="details" data-application-part="details">
   {{!-- Type-specific property fields --}}
   {{> (concat "systems/" SYS_ID "/templates/item/_type-details/" item.type ".hbs") }}
   

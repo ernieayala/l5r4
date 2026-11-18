@@ -5,7 +5,7 @@ A titled block of a sheet: a title bar on core's header background, then the bod
 | Item | Detail |
 | --- | --- |
 | Partial | Each section is its own partial in `templates/actor/_partials/`: lists `templates/actor/_partials/_skill-section.hbs`, `templates/actor/_partials/_weapon-section.hbs`, `templates/actor/_partials/_armor-section.hbs`, `templates/actor/_partials/_item-section.hbs`, `templates/actor/_partials/_spell-section.hbs`, `templates/actor/_partials/_technique-section.hbs`, `templates/actor/_partials/_kiho-section.hbs`, `templates/actor/_partials/_kata-section.hbs`, `templates/actor/_partials/_tattoo-section.hbs`, `templates/actor/_partials/_advantage-section.hbs`, `templates/actor/_partials/_disadvantage-section.hbs`; the bio `templates/actor/_partials/_bio.hbs`; Notes `templates/actor/_partials/_note-section.hbs`; sidebar blocks `_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs` |
-| Parameters | The sheet context: the section's list (`skills`, `weapons`, ...), `collapsedSections.<scope>` for its collapsed state |
+| Parameters | The sheet context: the section's list (`skills`, `weapons`, ...), `collapsedSections.<scope>` for its collapsed state. The title row is `templates/actor/_partials/_section-title.hbs` in every section, with `label`, `scope`, `collapsed`, `create`, `expand`, and `compact`; used as a block, its block holds the title's tools (`patterns/sheets.md` rule 1) |
 | SCSS | `scss/components/_section.scss` |
 | Block class | `l5r4-section` |
 | Shows in | PC sheet (`templates/actor/_partials/_stats.hbs`), NPC sheet (`templates/actor/_partials/_stats-npc.hbs`), both sidebars (`l5r4-sheet-sidebar` (`templates/actor/pc.hbs`), `l5r4-sheet-sidebar` (`templates/actor/npc.hbs`)), the XP manager |
@@ -40,7 +40,7 @@ The title bar carries `data-scope="<scope>"`, the key a collapsed state is store
 | Expanded | Body shows; the expand icon is `fa-angle-up` | `aria-expanded="true"` on the expand control; no `is-collapsed` |
 | Collapsed | Body hidden at once (no transition, `foundations/motion.md`); the title bar stays; icon `fa-angle-down` | `aria-expanded="false"`; `is-collapsed` on `l5r4-section-title` mirrors it for CSS |
 | Focus-visible | The focused title button shows core's focus ring | `:focus-visible` |
-| Empty | A list section with no entries is not rendered (`{{#if skills.length}}`); the items section, which holds wealth, renders its title alone | `{{#if}}` in the sheet body |
+| Empty | A list section with no entries is not rendered (`{{#if skills.length}}`); the items section, which holds wealth, renders its title alone; the Bio section says so in one italic line, `l5r4-section-empty` | `{{#if}}` in the sheet body; `{{#unless}}` in `templates/actor/_partials/_bio.hbs` |
 | Read-only | Core disables title tools and buttons on a sheet the viewer cannot edit (`button.md` B8); the stored collapsed state still renders | Core's `disabled` |
 
 ## Tokens
@@ -82,10 +82,10 @@ The title bar is one line (`text-wrap: nowrap`, `foundations/typography.md` T7).
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| S1 | `<h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.skills"}}</h4>` (`templates/actor/_partials/_skill-section.hbs`) | `<h4 class="flex0 title" data-action="recalc-sheet">` (modeled) |
+| S1 | `<h4 class="l5r4-section-heading">{{localize label}}</h4>` (`templates/actor/_partials/_section-title.hbs`) | `<h4 class="flex0 title" data-action="recalc-sheet">` (modeled) |
 | S2 | The `foundations/states.md` rule 4 example: `aria-expanded` on the toggle, `is-collapsed` on `l5r4-section-title` | An expand toggle with no `aria-expanded`: the toggle states nothing (modeled) |
 | S3 | `&.is-collapsed { ~ .l5r4-item-row-list { display: none; } }` under `.l5r4-section-title` (`scss/components/_section.scss`) | `&.is-collapsed { ~ .item-list { display: none; } }` keyed to a bare class (modeled) |
-| S4 | `{{localize "l5r4.ui.sheets.attackAndDamage"}}` (`templates/actor/_partials/_stats-npc.hbs`) | `{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}` (modeled) |
+| S4 | `label="l5r4.ui.sheets.attackAndDamage"` (`templates/actor/_partials/_stats-npc.hbs`) | `{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}` (modeled) |
 | S5 | `.l5r4-section-title { background: var(--l5r4-color-header); }` (modeled) | `.title` styled twice, once for sheets and once for the XP manager (modeled) |
 | S6 | Add, then expand, in the `data-section-title` bar (`templates/actor/_partials/_skill-section.hbs`) | Expand before a section's other tools (modeled) |
 

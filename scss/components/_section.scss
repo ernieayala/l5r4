@@ -90,6 +90,13 @@
   }
 }
 
+// A section whose list is empty says so in one italic line in the list's place (foundations/states.md rule 9)
+.l5r4-section-empty {
+  font-style: italic;
+  margin: 0;
+  padding: 0 var(--l5r4-space-8);
+}
+
 .l5r4-section-body {
   padding: 0 var(--l5r4-space-8);
 

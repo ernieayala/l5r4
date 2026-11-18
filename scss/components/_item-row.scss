@@ -177,12 +177,6 @@
       background: var(--l5r4-color-panel);
     }
 
-    &.-expandable {
-      .inline-control.l5r4-expand-control {
-        display: flex;
-      }
-    }
-
     &.is-expanded {
       .l5r4-item-row-details {
         display: block;
@@ -221,10 +215,6 @@
       opacity: 0;
       pointer-events: none;
       transition: none;
-
-      &.l5r4-expand-control {
-        display: none;
-      }
     }
 
     .l5r4-item-row-details {

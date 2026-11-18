@@ -22,7 +22,7 @@ Sheet tabs:
 | Tab | `<button type="button" role="tab" data-action="change-tab" data-tab aria-selected>` | `l5r4-tabs-tab`; core's `active` on the selected one |
 | Panel | `<section role="tabpanel" data-tab>`, core's `tab` and `active` | `tab` |
 
-The sheet tab bar (`templates/item/_partials/_tabs.hbs`) has no `aria-label` (**Keys this page needs**), and the panels (`templates/item/_partials/_tab-details.hbs` and its siblings) carry no `role="tabpanel"`.
+The sheet tab bar's `aria-label` reads `l5r4.ui.sheets.tabs`, "Sheet parts" (`templates/item/_partials/_tabs.hbs`).
 
 Filter tabs:
 
@@ -84,7 +84,7 @@ A tab label is one line (`foundations/typography.md` T7) and short: the tab's na
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
 | T1 | The filter tab, `<button type="button" class="l5r4-tabs-tab` (`templates/apps/compendium-browser.hbs`) | `<a class="item {{tab.cssClass}}" data-action="changeTab" data-tab="{{tab.id}}">` (modeled) |
-| T2 | `aria-pressed="{{#if active}}true{{else}}false{{/if}}"` (`templates/apps/compendium-browser.hbs`) | The sheet tab bar with no roles (modeled) |
+| T2 | `role="tablist"` on the sheet tab bar and `role="tabpanel"` on each panel (`templates/item/_partials/_tabs.hbs`, `templates/item/_partials/_tab-details.hbs`); `aria-pressed="{{#if active}}true{{else}}false{{/if}}"` on a filter tab (`templates/apps/compendium-browser.hbs`) | The sheet tab bar with no roles (modeled) |
 | T3 | `{{#if (eq currentTab "details")}}active{{/if}}` on the panel (`templates/item/_partials/_tab-details.hbs`) | `class="item {{tab.cssClass}}"` on the tab, a class string built in JavaScript (modeled) |
 | T4 | `"select-tab": CompendiumBrowserApplication.#onSelectTab` (`module/apps/compendium-browser.js`) | `changeTab: L5R4ItemSheet.prototype._onChangeTab` (modeled) |
 | T5 | `font-weight: bold; outline: var(--l5r4-state-selected-outline);` on the selected `.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`) | A selected tab shown by a background color only (modeled) |
@@ -102,9 +102,3 @@ A panel marks itself active with `{{#if (eq currentTab "<id>")}}active`. The tab
 ## Names
 
 One component, `l5r4-tabs`, serves both tab bars. A sheet tab is a `button.l5r4-tabs-tab`, never an `a.item`, whose `item` would collide with the item row's fixed class. Core's `active`, `tab`, `sheet-tabs`, and `tabs` are core's names and stay.
-
-## Keys this page needs
-
-| Key                   | Value       | For                               |
-| --------------------- | ----------- | --------------------------------- |
-| `l5r4.ui.sheets.tabs` | Sheet parts | `aria-label` of the sheet tab bar |

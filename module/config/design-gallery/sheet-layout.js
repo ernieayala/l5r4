@@ -27,6 +27,7 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
   {
     page: "section",
     partials: [
+      `${T}/actor/_partials/_section-title.hbs`,
       `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/actor/_partials/_item-section.hbs`,
       `${T}/actor/_partials/_bio.hbs`,
@@ -34,6 +35,13 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
     ],
     scss: ["scss/components/_section.scss"],
     samples: [
+      {
+        label: "l5r4.apps.designGallery.samples.sectionTitle",
+        partial: `${T}/actor/_partials/_section-title.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { scope: "skills", label: "l5r4.ui.sheets.skills", create: true, expand: true }
+      },
       {
         label: "l5r4.apps.designGallery.samples.notesSection",
         partial: `${T}/actor/_partials/_note-section.hbs`,
@@ -70,6 +78,12 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
           bioFamily: { id: "galleryFamily", name: "Kakita", system: {} },
           bioSchool: { id: "gallerySchool", name: "Kakita Bushi", system: {} }
         }
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.bioEmpty",
+        partial: `${T}/actor/_partials/_bio.hbs`,
+        scope: "pc",
+        context: "pc"
       }
     ],
     seeAlso: ["initiative-block", "spell-slots", "ring-trait-block"],

@@ -1,4 +1,4 @@
-<nav class="l5r4-tabs -sheet sheet-tabs tabs" role="tablist" data-group="primary">
+<nav class="l5r4-tabs -sheet sheet-tabs tabs" role="tablist" aria-label="{{localize "l5r4.ui.sheets.tabs"}}" data-group="primary">
   {{#each tabs as |tab|}}
     <button type="button" role="tab" class="l5r4-tabs-tab{{#if tab.active}} active{{/if}}" data-action="change-tab" data-tab="{{tab.id}}" aria-selected="{{#if tab.active}}true{{else}}false{{/if}}">
       {{tab.label}}

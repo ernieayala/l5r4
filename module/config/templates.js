@@ -173,6 +173,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/actor/_partials/_note-section.hbs`,
   `${PATHS.templates}/actor/_partials/_limited.hbs`,
   `${PATHS.templates}/actor/_partials/_sort-header.hbs`,
+  `${PATHS.templates}/actor/_partials/_section-title.hbs`,
 
   // Actor Partials - Item Sections
   `${PATHS.templates}/actor/_partials/_skill-section.hbs`,

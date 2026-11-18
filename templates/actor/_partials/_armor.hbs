@@ -1,7 +1,6 @@
 {{!-- Armor TN and Reduction (armor-tn-block.md): computed text on a PC, typed in on an NPC --}}
 <section class="l5r4-section l5r4-armor">
-  <div class="flexrow -gap-sm l5r4-section-title -compact" data-section-title>
-    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.common.armor"}}</h4>
+  {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" label="l5r4.ui.common.armor" compact=true}}
     {{#if (eq actor.type "pc")}}
       <button
         type="button"
@@ -13,7 +12,7 @@
         <i class="fa-solid fa-gear" inert></i>
       </button>
     {{/if}}
-  </div>
+  {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
   <div class="l5r4-grid">
     <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
     {{#if (eq actor.type "pc")}}

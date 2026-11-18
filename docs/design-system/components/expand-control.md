@@ -4,9 +4,9 @@ An icon button that shows or hides content in place: a section's body, or an ite
 
 | Item | Detail |
 | --- | --- |
-| Partial | `templates/actor/_partials/_expand.hbs` (sections, 12 uses); the row's expand control is the last button of `templates/cards/_partials/_controls.hbs` |
-| Parameters | `_expand.hbs`: `collapsed` (boolean, from `collapsedSections.<scope>`). `_controls.hbs`: X5's `expandable` (boolean, the row has details), which it does not take; it takes no parameters |
-| SCSS | None of its own. `_item-row.scss` shows the row control only on an expandable row; `_section.scss` hides a collapsed body |
+| Partial | `templates/actor/_partials/_expand.hbs`, which `templates/actor/_partials/_section-title.hbs` includes for a section with `expand=true`; the row's expand control is the last button of `templates/cards/_partials/_controls.hbs` |
+| Parameters | `_expand.hbs`: `collapsed` (boolean, from `collapsedSections.<scope>`). `_controls.hbs`: `expandable` (boolean, the row has details), which each card passes with its root's `-expandable` test |
+| SCSS | None of its own. `_section.scss` hides a collapsed body |
 | Block class | `l5r4-expand-control`, beside core's `inline-control icon` |
 | Shows in | Every collapsible section title; every item row with details |
 | Handlers | Section: `ItemCrudHandler.updateSectionCollapsed` (`module/sheets/handlers/item-crud-handler.js`). Row: `ItemCrudHandler.updateItemExpanded` (`module/sheets/handlers/item-crud-handler.js`) |
@@ -26,7 +26,7 @@ An icon button that shows or hides content in place: a section's body, or an ite
 | Section | `data-action="expand-section"` in a title bar | The section's body | User flag per actor and the title bar's `data-scope`, through `updateSectionCollapsed` (`module/services/section-state.js`) |
 | Row | `data-action="expand-item"` in a row | The row's `l5r4-item-row-details` cell | None: the next render shows the row closed |
 
-A row with no details renders no expand control (the row lacks `-expandable`, X5). The code renders the control on every row: `&.l5r4-expand-control` (`scss/components/_item-row.scss`) hides it, and `&.-expandable` (`scss/components/_item-row.scss`) shows it again.
+A row with no details renders no expand control (the row lacks `-expandable`, X5).
 
 ## States
 
@@ -72,7 +72,7 @@ No visible text. What it reveals follows its own component: a section body, or t
 | X2 | `<i class="fa-solid {{#if collapsed}}fa-angle-down{{else}}fa-angle-up{{/if}}" inert></i>` (`templates/actor/_partials/_expand.hbs`) | `<i class="fa-solid fa-angle-down" inert></i>` whatever the stored state (modeled) |
 | X3 | `data-tooltip="{{localize "l5r4.ui.common.expand"}}" aria-label="{{localize "l5r4.ui.common.expand"}}"` | An expand control with no name (modeled) |
 | X4 | `element.closest("[data-scope]")`, as in `ItemCrudHandler.getSectionItemType` (`module/sheets/handlers/item-crud-handler.js`) | `element.closest(".section-title")` (modeled) |
-| X5 | `{{#if (or system.description system.specialRules)}}` around the control (modeled on the row's `-expandable` (`templates/cards/kata.hbs`) test) | The control rendered on every row and hidden by `&.l5r4-expand-control` (`scss/components/_item-row.scss`) inside `.inline-control` |
+| X5 | `{{#if expandable}}` around the control (`templates/cards/_partials/_controls.hbs`), passed `expandable=(or system.description system.specialRules)` (`templates/cards/kata.hbs`) | The control rendered on every row and hidden by a style (modeled) |
 
 ## Do and don't
 

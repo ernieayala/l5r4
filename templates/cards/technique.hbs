@@ -17,7 +17,7 @@
       <div class="l5r4-item-row-cell"><strong>{{localize "l5r4.magic.spells.deficiency"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.deficiency)}}</div>
       {{/if}}
     {{/if}}
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" rules=system.specialRules description=system.description}}
   {{/if}}
   {{#unless inSheet}}

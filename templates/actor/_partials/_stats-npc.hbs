@@ -15,30 +15,22 @@
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_traits-rings.hbs" system=system traitsEff=@root.traitsEff showVoidPoints=@root.showNpcVoidPoints}}
 
   <section class="l5r4-section flexcol -gap-sm">
-    <div class="flexrow -gap-sm l5r4-section-title" data-section-title>
-      <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.attackAndDamage"}}</h4>
+    {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" label="l5r4.ui.sheets.attackAndDamage"}}
       {{#if firstEmptyAttack}}
         <button type="button" class="inline-control icon flex0" data-action="add-attack" data-attack-key="{{firstEmptyAttack}}" data-tooltip="{{localize "l5r4.ui.dialogs.addAttack"}}" aria-label="{{localize "l5r4.ui.dialogs.addAttack"}}"><i class="fa-solid fa-plus" inert></i></button>
       {{/if}}
-    </div>
+    {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" type="attacks" columns=@root.sortColumns.npcAttacks}}
     <section class="l5r4-item-row-list -attacks">
       {{#each attacks}}
         {{#unless empty}}
-          <div class="l5r4-item-row -attacks -expandable" data-attack-section="{{key}}">
+          <div class="l5r4-item-row -attacks" data-attack-section="{{key}}">
             <h4 class="l5r4-item-row-name flexrow -gap-sm" data-attack-title>{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}</h4>
             {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-attack" pool=attackPool tooltip=(localize "l5r4.ui.mechanics.combat.attack") data=(object attack-num=num roll=attack.roll keep=attack.keep modifier=attack.modifier description=actionLabel label=attackLabel)}}
             {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-damage" pool=damagePool tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll") data=(object roll=damage.roll keep=damage.keep modifier=damage.modifier description=damage.type label=damageLabel)}}
-            <div>
-              {{actionLabel}}
-            </div>
-            <div>
-              {{damage.type}}
-            </div>
-            <div class="l5r4-inline-control -reveal flexrow -gap-xs">
-              <button type="button" class="inline-control icon" data-action="edit-attack" data-attack-key="{{key}}" data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></button>
-              <button type="button" class="inline-control icon" data-action="delete-attack" data-attack-key="{{key}}" data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></button>
-            </div>
+            <div class="l5r4-item-row-cell">{{actionLabel}}</div>
+            <div class="l5r4-item-row-cell">{{damage.type}}</div>
+            {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" attackKey=key}}
           </div>
         {{/unless}}
       {{/each}}

@@ -5,7 +5,7 @@ it posts as its name. Parameters: the item card context (name, system, docId, in
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=system.description}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" description=system.description}}
   {{/if}}
 </div>

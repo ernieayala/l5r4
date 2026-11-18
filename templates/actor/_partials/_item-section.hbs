@@ -1,6 +1,5 @@
 <section class="l5r4-section flexcol -gap-sm">
-  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.items}} is-collapsed{{/if}}" data-section-title data-scope="items">
-    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.items"}}</h4>
+  {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="items" label="l5r4.ui.sheets.items" collapsed=collapsedSections.items create=true expand=true}}
     <div class="flexrow flex0 l5r4-wealth">
       <span>{{localize "l5r4.world.wealth.koku"}}:</span>
       <input type="number" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" min="0" step="1" />
@@ -22,9 +21,7 @@
     >
       <i class="fa-solid fa-calculator" inert></i>
     </button>
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.items}}
-  </div>
+  {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
   {{#if items.length}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="items" type="commonItem" columns=@root.sortColumns.items sort=@root.sortState.items}}
     <section class="l5r4-item-row-list -commonItem">

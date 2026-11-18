@@ -7,7 +7,7 @@
     {{#unless system.passive}}
       {{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}
     {{/unless}}
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" rules=system.specialRules description=system.description}}
   {{/if}}
   {{#unless inSheet}}

@@ -5,10 +5,10 @@ A row's cluster of icon buttons: edit, remove, post to chat, expand, and the act
 | Item | Detail |
 | --- | --- |
 | Partial | `templates/cards/_partials/_controls.hbs` (edit, remove, post, expand); `templates/cards/_partials/_activate.hbs` (activation toggle) |
-| Parameters | `_controls.hbs`: `expandable` (boolean, target; `expand-control.md` X5); the handlers read the row's `data-item-id`. `_activate.hbs`: `active` (boolean, the activation is running) |
+| Parameters | `_controls.hbs`: `expandable` (boolean, the item row has details; `expand-control.md` X5), `attackKey` (an NPC attack row's key: edit and remove only, by `data-attack-key`); an item row's handlers read its `data-item-id`. `_activate.hbs`: `active` (boolean, the activation is running) |
 | SCSS | `scss/components/_inline-control.scss` (the activation toggle); the reveal rules sit in `.l5r4-item-row` (`scss/components/_item-row.scss`), the effects tab cluster in `.l5r4-effect-list` (`scss/layout/_item-layout.scss`) |
 | Block class | `l5r4-inline-control` on the cluster. Each button keeps core's `inline-control icon`: the system block holds core controls |
-| Shows in | Item rows in sheet sections (`cards/*.hbs`, in-sheet branch), NPC attack rows (`data-action="edit-attack"` (`templates/actor/_partials/_stats-npc.hbs`)), the item sheet's effects tab (`l5r4-effect-list` (`templates/item/_partials/_tab-effects.hbs`)), the emphasis manager's rows (`templates/apps/emphasis-manager.hbs`) |
+| Shows in | Item rows in sheet sections (`cards/*.hbs`, in-sheet branch), NPC attack rows (`attackKey=key` (`templates/actor/_partials/_stats-npc.hbs`)), the item sheet's effects tab (`l5r4-effect-list` (`templates/item/_partials/_tab-effects.hbs`)), the emphasis manager's rows (`templates/apps/emphasis-manager.hbs`) |
 | Gallery | A row with the cluster at rest, hovered, and focused; each button in every state below |
 
 `l5r4-inline-control` is the cluster; core's `inline-control` is each button in it. The two names stay apart: the system class names the block, the core class draws the button.
@@ -90,7 +90,7 @@ No visible text. The cluster has a fixed column (`--l5r4-size-column-controls`, 
 | N3 | `<button type="button" class="inline-control icon" data-action="post-item" data-tooltip="{{localize "l5r4.ui.hints.postToChat"}}" aria-label="{{localize "l5r4.ui.hints.postToChat"}}">` (`templates/cards/_partials/_controls.hbs`) | `<a class="button inline-control icon expandable" data-action="item-expand"><i class="fas fa-chevron-down"></i></a>` (modeled) |
 | N4 | `data-action="delete-item"` routed by `BaseActorSheet.CLICK_ACTIONS` (`module/sheets/base-actor-sheet.js`) | An effect control bound by a hand-added listener in place of the sheet's `DEFAULT_OPTIONS.actions` (modeled) |
 | N5 | `aria-pressed="{{#if active}}true{{else}}false{{/if}}"` (`templates/cards/_partials/_activate.hbs`) beside the `fa-circle-stop` / `fa-circle-play` swap | A toggle with only the icon swap (modeled); the effect toggle carries `aria-pressed` (`templates/item/_partials/_tab-effects.hbs`) |
-| N6 | `{{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}` (`templates/cards/skill.hbs`) | The edit and remove buttons written out in the NPC attack row (`data-action="edit-attack"` (`templates/actor/_partials/_stats-npc.hbs`)) |
+| N6 | `{{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" attackKey=key}}` (`templates/actor/_partials/_stats-npc.hbs`) | The edit and remove buttons written out in the NPC attack row (modeled) |
 
 ## Do and don't
 

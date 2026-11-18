@@ -107,7 +107,7 @@ Non-conforming (modeled): `&:hover` alone, so the controls stay hidden from a ke
 
 The attribute in the "Markup" column is the state: assistive technology reads it, and the Quench batches test it. Where CSS needs a class besides, it is `is-<state>` (`is-collapsed`, `is-expanded`), the form 12 of the 21 state-class uses in templates take (core's bare `active` 8, a dash modifier 1). An `is-` class always sits on an element that also carries its `l5r4-` block class, never alone, and core's `active` stays where core's CSS reads it. The undone damage card keeps `-undone`: it is stored in posted messages (fixed name, Stage 17 decision 2) and takes the disabled look. Enforced by `tests/conventions/templates.test.js` (an `is-` class needs an `l5r4-` class on the same element; an expand toggle carries `aria-expanded`; a toggle button carries `aria-pressed`) and review.
 
-Conforming, modeled on `l5r4-section-title` (`templates/actor/_partials/_skill-section.hbs`) and `data-action="expand-section"` (`templates/actor/_partials/_expand.hbs`):
+Conforming, modeled on `l5r4-section-title` (`templates/actor/_partials/_section-title.hbs`) and `data-action="expand-section"` (`templates/actor/_partials/_expand.hbs`):
 
 ```hbs
 <div class="l5r4-section-title{{#if collapsed}} is-collapsed{{/if}}" data-scope="skills">

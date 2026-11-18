@@ -5,7 +5,7 @@
   {{#if inSheet}}
     <div class="l5r4-item-row-cell">{{localize (concat "l5r4.character.advantages." system.type)}}</div>
     <div class="l5r4-item-row-cell">{{system.cost}}</div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" rules=system.specialRules description=system.description}}
   {{/if}}
   {{#unless inSheet}}

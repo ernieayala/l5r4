@@ -31,7 +31,7 @@
         —
       {{/if}}
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
     {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
       <div class="l5r4-item-row-details">
         {{#if (and (gte system.rank 3) system.mastery3)}}

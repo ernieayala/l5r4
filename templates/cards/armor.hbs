@@ -15,7 +15,7 @@
         aria-label="{{localize "l5r4.equipment.armor.equipped"}}"
       />
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=system.description}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" description=system.description}}
   {{/if}}
   {{#unless inSheet}}

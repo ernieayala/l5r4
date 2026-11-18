@@ -25,7 +25,7 @@ The system's own ApplicationV2 windows that are not sheets or dialogs: the effec
 | Armor configuration | `module/apps/armor-config.js` | The gear in the Armor TN block, `data-action="open-armor-config"` (`templates/actor/_partials/_armor.hbs`) | Armor TN and Reduction modifiers, armor stacking | Live |
 | Combat configuration | `module/apps/combat-config.js` | The gear in the Initiative block, `data-action="open-combat-config"` (`templates/actor/_partials/_combat.hbs`) | Initiative and movement modifiers | Live |
 | Condition manager | `module/apps/condition-manager.js` | The Initiative block, `data-action="open-condition-manager"` (`templates/actor/_partials/_combat.hbs`) | Every condition as one checkbox group, `multi-checkbox` (`templates/apps/condition-manager.hbs`) | Live |
-| NPC attack configuration | `module/apps/npc-attack-config.js` | An NPC attack row's edit control, `data-action="edit-attack"` (`templates/actor/_partials/_stats-npc.hbs`) | One attack's name, pool, modifier, and type | Submit (`closeOnSubmit`) |
+| NPC attack configuration | `module/apps/npc-attack-config.js` | An NPC attack row's edit control, `data-action="edit-attack"` (`templates/cards/_partials/_controls.hbs`) | One attack's name, pool, modifier, and type | Submit (`closeOnSubmit`) |
 
 ## Anatomy
 

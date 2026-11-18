@@ -1,9 +1,5 @@
 <section class="l5r4-section flexcol -gap-sm">
-  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.kihos}} is-collapsed{{/if}}" data-section-title data-scope="kihos">
-    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.kiho"}}</h4>
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.kihos}}
-  </div>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="kihos" label="l5r4.ui.sheets.kiho" collapsed=collapsedSections.kihos create=true expand=true}}
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="kihos" type="kiho" columns=@root.sortColumns.kihos sort=@root.sortState.kihos}}
   <section class="l5r4-item-row-list -kiho">
     {{#each kihos as |kiho id|}}

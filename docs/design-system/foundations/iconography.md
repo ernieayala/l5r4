@@ -53,7 +53,7 @@ Write the name Font Awesome 7 lists first for a glyph, not an older alias that d
 
 The glyph codes come from the grouped selectors in core's `all.min.css` (`.fa-edit,.fa-pen-to-square{--fa:"\f044"}`). Core itself writes `fa-edit` 21 times; the glyph is the same, so the system follows core's icon and writes its canonical name.
 
-Conforming, the icon of `data-action="edit-attack"` (`templates/actor/_partials/_stats-npc.hbs`):
+Conforming, the icon of `data-action="edit-attack"` (`templates/cards/_partials/_controls.hbs`):
 
 ```hbs
 <i class="fa-solid fa-pen-to-square" inert></i>
