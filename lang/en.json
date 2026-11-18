@@ -998,7 +998,6 @@
         "increaseVoidRing": "Increase Void Ring",
         "postToChat": "Post to chat",
         "shiftClickRankPoints": "Shift+click: ±0.1, Shift+Ctrl+click: ±1.0",
-        "shiftClickToggleRankMode": "GM: Shift+click to toggle between automatic and manual rank calculation",
         "traitRank": "{trait}: Trait Roll; Shift+click: +1, Shift+right-click: -1",
         "voidRingRank": "Void Ring: Shift+click: +1, Shift+right-click: -1"
       },
@@ -1345,6 +1344,7 @@
         "noBio": "No Clan, Family, or School yet.",
         "notes": "Notes",
         "recalculated": "Sheet recalculated for {name}",
+        "recalculateSheet": "Recalculate the sheet",
         "rulesSummary": "Rules summary",
         "skill": "Skill",
         "skills": "Skills",
@@ -1359,6 +1359,7 @@
         "tattoos": "Tattoos",
         "technique": "Technique",
         "techniques": "Techniques",
+        "typeInsightRank": "Type the Insight Rank in",
         "weapon": "Weapon",
         "weapons": "Weapons",
         "woundLevels": "Wound Ranks"

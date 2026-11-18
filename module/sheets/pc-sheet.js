@@ -171,6 +171,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       system,
       ...buildBioFields(all),
       editable: this.isEditable,
+      // The Insight Rank's computed or typed switch shows to a GM only
+      isGM: game.user.isGM,
       enriched: { notes: enrichedNotes },
       ...buildStatusFields(actorObj),
       // Lazy getter: Defers expensive sorting until template accesses property
@@ -259,17 +261,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /**
    * Handles manual sheet recalculation for testing purposes.
    *
-   * **Testing Tool:**
-   * Shift+Click on the character name label triggers a full actor data preparation
+   * The recalculate button after the Name field triggers a full actor data preparation
    * cycle and sheet re-render. Useful for debugging data preparation issues or
    * verifying that derived values update correctly.
    *
    * **What It Does:**
-   * 1. Checks for Shift key (safety mechanism)
-   * 2. Calls actor.reset() to rebuild data from storage and recalculate derived values once
+   * 1. Calls actor.reset() to rebuild data from storage and recalculate derived values once
    *    (a bare prepareData() on a prepared actor would apply its Active Effects a second time)
-   * 3. Re-renders the sheet to display updated values
-   * 4. Shows notification confirming recalculation
+   * 2. Re-renders the sheet to display updated values
+   * 3. Shows notification confirming recalculation
    *
    * **Use Cases:**
    * - Testing trait/ring calculations after rest
@@ -277,17 +277,12 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * - Debugging derived data issues
    * - Forcing refresh after manual data edits.
    *
-   * @param {Event} event - Click event on name label
-   * @param {HTMLElement} _element - Name label element (unused)
+   * @param {Event} event - Click event on the recalculate button
+   * @param {HTMLElement} _element - The recalculate button (unused)
    * @returns {Promise<void>}
    */
   async _onRecalcSheet(event, _element) {
     event?.preventDefault?.();
-
-    // Require Shift key to prevent accidental triggers
-    if (!event?.shiftKey) {
-      return;
-    }
 
     // Rebuild from source and prepare once [src: client/documents/abstract/client-document.mjs:60-67]
     this.actor.reset();

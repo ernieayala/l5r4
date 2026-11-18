@@ -83,7 +83,8 @@ Each meaning the system shows has one icon, and an icon stands for one meaning. 
 | Current Wound Rank | `fa-check` | `templates/actor/_partials/_wound-track.hbs`, `components/wound-track.md` |  | A finished or chosen item [src: templates/dice/roll-resolver.hbs:20] |
 | Open the design gallery | `fa-palette` | `module/setup/settings/menus.js` (the settings menu button) |
 | Convert to a larger or smaller coin | `fa-arrow-up`, `fa-arrow-down` | `data-action="convert-up"` and `data-action="convert-down"` (`templates/apps/wealth-manager.hbs`) |  |  |
-| Recalculate | `fa-arrows-rotate` | `data-action="recalculate-xp"` (`templates/apps/xp-manager.hbs`) |  | Reset and refresh, 3 uses |
+| Recalculate | `fa-arrows-rotate` | `data-action="recalculate-xp"` (`templates/apps/xp-manager.hbs`), `data-action="recalculate-sheet"` (`templates/actor/_partials/_stats.hbs`) |  | Reset and refresh, 3 uses |
+| Insight Rank computed or typed in (GM) | `fa-lock` computed, `fa-lock-open` typed in | `data-action="toggle-rank-mode"` (`templates/actor/_partials/_stats.hbs`) |  | HUD lock [src: templates/hud/token-hud.hbs:26] |
 | Open the wealth manager | `fa-calculator` | `templates/actor/_partials/_item-section.hbs`, window icon `WealthManagerApplication.DEFAULT_OPTIONS` (`module/apps/wealth-manager.js`) |  |  |
 | Open the XP manager | `fa-chart-line` | `data-action="open-xp-manager"` (`templates/actor/_partials/_stats.hbs`), window icon `XpManagerApplication.DEFAULT_OPTIONS` (`module/apps/xp-manager.js`) |  | `fa-star` means a favorite package |
 | Open the condition manager | `fa-heart-pulse` | `templates/actor/_partials/_combat.hbs`, window icon `ConditionManagerApplication.DEFAULT_OPTIONS` (`module/apps/condition-manager.js`) |  |  |

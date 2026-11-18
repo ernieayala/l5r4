@@ -1,12 +1,12 @@
 <section class="flexcol -gap-sm l5r4-sheet-main">
   <div class="flexrow -gap-lg l5r4-pc-info">
     <div class="flexcol flex1">
-      <div class="l5r4-form-field flexrow -gap-sm">
-        <h4 class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.name"}}</h4>
+      <label class="l5r4-form-field flexrow -gap-sm">
+        <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.name"}}</span>
         <div class="flexrow">
-          <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}" />
+          <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize "l5r4.ui.common.name"}}" />
         </div>
-      </div>
+      </label>
       {{#if summary.citation}}
         <p class="l5r4-citation">{{summary.citation}}</p>
       {{/if}}

@@ -20,11 +20,11 @@ A button that shows only an icon and names its action in a tooltip. It sits wher
 
 ## Variants
 
-| Variant      | Where                                 | Visible                      |
-| ------------ | ------------------------------------- | ---------------------------- |
-| Section tool | Inside `l5r4-section-title`           | Always                       |
-| Field tool   | After a value in the PC header (XP)   | Always                       |
-| Row tool     | Inside a row: see `inline-control.md` | On hover and `:focus-within` |
+| Variant | Where | Visible |
+| --- | --- | --- |
+| Section tool | Inside `l5r4-section-title` | Always |
+| Field tool | After a value in the PC header: Name (recalculate), Insight Rank (the GM's computed or typed switch), XP | Always; the Insight Rank switch to a GM only |
+| Row tool | Inside a row: see `inline-control.md` | On hover and `:focus-within` |
 
 A row tool follows this page for its element, name, and icon, and `inline-control.md` for when it shows.
 

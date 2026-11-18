@@ -643,6 +643,65 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #79: form-field.md F2; Stage 18 decision 6
+        it(
+          "should keep the header labels text and run their actions from buttons on a plain click",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            // The click-through may have switched the rank to typed in
+            await pc.update({ "system.insight.autoCalculate": true });
+            const sheet = pc.sheet;
+            await sheet.render({ force: true });
+            const header = () =>
+              sheet.element.querySelector('[data-action="recalculate-sheet"]').closest("section");
+            try {
+              assert.lengthOf(
+                header().querySelectorAll("h4 button, label button"),
+                0,
+                "no control inside a label"
+              );
+              const rankMode = () =>
+                sheet.element.querySelector('[data-action="toggle-rank-mode"]');
+              assert.equal(rankMode().getAttribute("aria-pressed"), "false", "computed");
+              const saved = nextUpdate(pc);
+              rankMode().click();
+              await saved;
+              assert.isFalse(pc.system.insight.autoCalculate, "typed in after a plain click");
+              assert.isTrue(
+                await waitFor(() => rankMode()?.getAttribute("aria-pressed") === "true"),
+                "pressed"
+              );
+              assert.exists(
+                sheet.element.querySelector('input[name="system.insight.rank"][aria-label]'),
+                "the typed rank names itself"
+              );
+
+              const said = [];
+              const info = ui.notifications.info;
+              ui.notifications.info = (message, ...rest) => {
+                said.push(message);
+                return info.call(ui.notifications, message, ...rest);
+              };
+              try {
+                sheet.element.querySelector('[data-action="recalculate-sheet"]').click();
+                assert.isTrue(
+                  await waitFor(() =>
+                    said.includes(
+                      game.i18n.localize("l5r4.ui.sheets.recalculated", { name: pc.name })
+                    )
+                  ),
+                  "recalculated on a plain click"
+                );
+              } finally {
+                delete ui.notifications.info;
+              }
+            } finally {
+              await pc.update({ "system.insight.autoCalculate": true });
+              await sheet.close({ animate: false });
+            }
+          })
+        );
+
         it(
           "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {

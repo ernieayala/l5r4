@@ -14,13 +14,15 @@ A label and the value it names: an input the viewer types into, a select, a chec
 
 Inline field (sheet header):
 
-| Part | Element | Class | Class now |
-| --- | --- | --- | --- |
-| Field | `<label>` when it holds an input; `<div>` when it holds a value | `l5r4-form-field flexrow -gap-sm` | same, on a `<div>`: `l5r4-form-field flexrow -gap-sm` (`templates/actor/_partials/_stats.hbs`) |
-| Label | `<span>` | `l5r4-form-field-label` | `<h4 class="flex0 l5r4-form-field-label">` (`templates/actor/_partials/_stats.hbs`) |
-| Input | `<input>`, `<select>` | none | `flex1` |
-| Value | `<span>` | `l5r4-form-field-value` | `<div class="flex1 l5r4-form-field-value">` (`templates/actor/_partials/_stats.hbs`) |
-| Controls | The inline control cluster (`inline-control.md`) | `l5r4-inline-control -reveal` | A button in `l5r4-form-field-group` (`templates/actor/_partials/_stats.hbs`), the XP field's only control |
+| Part | Element | Class |
+| --- | --- | --- |
+| Field | `<label>` when it holds an input alone; `<div>` when it holds a value, or an input beside a control, whose input then names itself with `aria-label` (a label around a control would add the control's name to the input's) | `l5r4-form-field flexrow -gap-sm` |
+| Label | `<span>` in the face core gives an `<h4>` | `flex0 l5r4-form-field-label` |
+| Input | `<input>`, `<select>` | `flex1` |
+| Value | `<div>` | `flex1 l5r4-form-field-value` |
+| Control | An icon button after the value, always shown (`icon-button.md`, field tool): recalculate after the PC's Name, the GM's Insight Rank switch after the rank, the XP manager after XP | `flex0 inline-control icon` |
+
+The PC header's controls: `data-action="recalculate-sheet"` rebuilds and redraws the sheet; `data-action="toggle-rank-mode"`, shown to a GM only, switches the Insight Rank between computed (`fa-lock`) and typed in (`fa-lock-open`), its state in `aria-pressed` (Stage 18 decision 6).
 
 Core field (apps, dialogs, item sheet):
 
@@ -92,7 +94,7 @@ A label wraps; it never truncates. In the header the label column is as wide as 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
 | F1 | The search field's `<span>` and `<input>` inside `<label class="l5r4-compendium-browser-filter l5r4-compendium-browser-search">` (`templates/apps/compendium-browser.hbs`); a row select's `aria-label="{{localize "l5r4.character.skills.properties.trait"}}"` (`templates/cards/skill.hbs`) | A row select with no name (modeled) |
-| F2 | `<span class="l5r4-form-field-label">{{localize "l5r4.ui.common.clan"}}</span>` (modeled) | `<h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="recalculate-sheet">` (`templates/actor/_partials/_stats.hbs`): a heading that holds a control |
+| F2 | `<span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.clan"}}</span>` (`templates/actor/_partials/_stats.hbs`) | A heading that holds a control: `<h4 class="l5r4-form-field-label"><button data-action="recalculate-sheet">` (modeled) |
 | F3 | `<span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>` (`templates/actor/_partials/_stats.hbs`) | The `disabled` number input with `value="{{system.wounds.max}}"` (`templates/actor/_partials/_wounds.hbs`) |
 | F4 | `data-type="Number"` (`templates/actor/_partials/_wounds.hbs`) | `data-dtype="String"` (modeled) |
 | F5 | `name="woundMode"` (`templates/apps/wound-config.hbs`) | `name="{{field}}-amount"` (`templates/apps/_partials/_wealth-change.hbs`) |
@@ -109,8 +111,4 @@ A label wraps; it never truncates. In the header the label column is as wide as 
 
 ## Names
 
-| Current                                         | Target                       | Why |
-| ----------------------------------------------- | ---------------------------- | --- |
-| `h4.flex0.l5r4-form-field-label` (header label) | `span.l5r4-form-field-label` | F2  |
-
-The header labels hold two actions (`recalculate-sheet` on the Name label, `toggle-rank-mode` on the Insight Rank label), which belong on controls the PC header pattern places (`patterns/sheets.md`); a new visible control is a look change, so its place goes to the visual sign-off (Stage 17 decision 9).
+The header's actions are `recalculate-sheet` and `toggle-rank-mode`, verb first (`docs/code-system/naming.md`).

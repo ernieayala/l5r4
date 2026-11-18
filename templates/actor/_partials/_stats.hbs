@@ -2,32 +2,67 @@
   <div class="flexcol l5r4-actor-header -gap-lg">
     <div class="flexrow -gap-lg l5r4-pc-info">
       <div class="flexcol flex1">
+        {{!-- A <div>, not a <label>: a label around the recalculate button would add its name to the input's --}}
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="recalculate-sheet">{{localize "l5r4.ui.common.name"}}</button></h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.name"}}</span>
           <div class="flexrow">
-            <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}" />
+            <input
+              class="flex1"
+              type="text"
+              name="name"
+              value="{{actor.name}}"
+              placeholder="{{localize "l5r4.ui.common.name"}}"
+              aria-label="{{localize "l5r4.ui.common.name"}}"
+            />
           </div>
+          <button
+            type="button"
+            class="flex0 inline-control icon"
+            data-action="recalculate-sheet"
+            data-tooltip="{{localize "l5r4.ui.sheets.recalculateSheet"}}"
+            aria-label="{{localize "l5r4.ui.sheets.recalculateSheet"}}"
+          >
+            <i class="fa-solid fa-arrows-rotate" inert></i>
+          </button>
         </div>
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.clan"}}</h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.clan"}}</span>
           <div class="flex1 l5r4-form-field-value">{{system.clan}}</div>
         </div>
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.school"}}</h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.school"}}</span>
           <div class="flex1 l5r4-form-field-value">{{system.school}}</div>
         </div>
       </div>
       <div class="flexcol flex1">
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label"><button type="button" class="l5r4-form-field-label-button" data-action="toggle-rank-mode" {{#if @root.isGM}}data-tooltip="{{localize "l5r4.ui.hints.shiftClickToggleRankMode"}}"{{/if}}>{{localize "l5r4.ui.common.insightRank"}}</button></h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.insightRank"}}</span>
           {{#if system.insight.autoCalculate}}
             <div class="flex1 l5r4-form-field-value">{{system.insight.rank}}</div>
           {{else}}
-            <input class="flex1" type="number" name="system.insight.rank" value="{{system.insight.rank}}" />
+            <input
+              class="flex1"
+              type="number"
+              name="system.insight.rank"
+              value="{{system.insight.rank}}"
+              aria-label="{{localize "l5r4.ui.common.insightRank"}}"
+            />
+          {{/if}}
+          {{#if @root.isGM}}
+            <button
+              type="button"
+              class="flex0 inline-control icon"
+              data-action="toggle-rank-mode"
+              aria-pressed="{{#if system.insight.autoCalculate}}false{{else}}true{{/if}}"
+              data-tooltip="{{localize "l5r4.ui.sheets.typeInsightRank"}}"
+              aria-label="{{localize "l5r4.ui.sheets.typeInsightRank"}}"
+            >
+              <i class="fa-solid {{#if system.insight.autoCalculate}}fa-lock{{else}}fa-lock-open{{/if}}" inert></i>
+            </button>
           {{/if}}
         </div>
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.xp"}}</h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.xp"}}</span>
           <div class="flexrow flex1 -gap-xs l5r4-form-field-value">
             {{#if system._xp}}
               <div class="l5r4-form-field-group flexrow -gap-md">
@@ -38,7 +73,7 @@
           </div>
         </div>
         <div class="l5r4-form-field flexrow -gap-sm">
-          <h4 class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.insight"}}</h4>
+          <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.insight"}}</span>
           <div class="flex1 l5r4-form-field-value">{{system.insight.points}}</div>
         </div>
       </div>

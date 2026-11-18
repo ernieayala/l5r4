@@ -413,6 +413,9 @@ body > * {
  * reset is in sheets/_actor-sheet.scss
  */
 .l5r4-form-field-label {
+  font-family: var(--l5r4-font-label);
+  font-weight: bold;
+  line-height: 1;
   text-wrap: nowrap;
   align-items: center;
   display: inline-flex;
@@ -1231,18 +1234,6 @@ body > * {
 }
 .l5r4-pc-info .l5r4-form-field-label {
   min-height: calc(var(--input-height) - 0.5rem);
-}
-.l5r4-pc-info .l5r4-form-field-label-button {
-  align-self: stretch;
-  background: none;
-  border: none;
-  border-radius: 0;
-  color: inherit;
-  cursor: inherit;
-  font: inherit;
-  height: auto;
-  min-height: 0;
-  padding: 0;
 }
 
 /**

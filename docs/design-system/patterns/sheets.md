@@ -20,7 +20,7 @@ How the PC, NPC, and item sheets compose components into one window: header, por
 
 | Region | Holds | Partial |
 | --- | --- | --- |
-| Header | Name (an input), Clan, School, Insight Rank, XP spent of total with the XP manager control, Insight; framed by the brush border (`foundations/frames.md` rule 7) | `l5r4-pc-info` (`templates/actor/_partials/_stats.hbs`) |
+| Header | Name (an input) with the recalculate control, Clan, School, Insight Rank with the GM's computed or typed switch, XP spent of total with the XP manager control, Insight; framed by the brush border (`foundations/frames.md` rule 7) | `l5r4-pc-info` (`templates/actor/_partials/_stats.hbs`) |
 | Rings | The five Ring medallions, the eight Traits with their rank controls, the Void Ring rank, and the Void Point dots | `templates/actor/_partials/_traits-rings.hbs`, included by `_stats.hbs` |
 | Sections | Skills, Weapons, Armor, Items, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages, Bio, Notes, in that order | `templates/actor/_partials/_stats.hbs`, one `_<noun>-section.hbs` each |
 | Sidebar | Portrait, then Honor, Glory, Status, and Taint, then Initiative and stances, Armor TN, and the Wound track | `l5r4-sheet-sidebar` (`templates/actor/pc.hbs`): `_ranks.hbs`, `_combat.hbs`, `_armor.hbs`, `_wounds.hbs` |

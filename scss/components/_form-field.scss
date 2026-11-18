@@ -6,7 +6,11 @@
 
 @use "../base/variables" as *;
 
+// The label is text in the face core gives a fourth-level heading: its font, bold, one line high
 .l5r4-form-field-label {
+  font-family: var(--l5r4-font-label);
+  font-weight: bold;
+  line-height: 1;
   text-wrap: nowrap;
 
   @include title-row;
