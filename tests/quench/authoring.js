@@ -313,7 +313,7 @@ export function registerAuthoringTests(quench) {
           "should mark an invalid rule with an icon its fields point at, and say when there are none",
           clean(async function () {
             this.timeout(15_000);
-            const [broken, empty] = await Item.createDocuments([
+            const created = await Item.createDocuments([
               {
                 name: "Character options: broken rule",
                 type: "technique",
@@ -321,25 +321,23 @@ export function registerAuthoringTests(quench) {
               },
               { name: "Character options: no rules", type: "technique" }
             ]);
-            worldItems.push(broken, empty);
+            worldItems.push(...created);
+            const {
+              "Character options: broken rule": broken,
+              "Character options: no rules": empty
+            } = byName(created);
             const rulesTabOf = async item => {
               await item.sheet.render({ force: true });
-              assert.exists(item.sheet.element, `${item.name}: the sheet renders`);
               item.sheet.element
                 .querySelector('[data-action="change-tab"][data-tab="rules"]')
                 .click();
               await item.sheet.render();
-              const editor = item.sheet.element?.querySelector("[data-rules-editor]");
-              assert.exists(editor, `${item.name}: the rules tab shows its editor`);
-              return editor;
+              return item.sheet.element.querySelector("[data-rules-editor]");
             };
             try {
               const editor = await rulesTabOf(broken);
               const error = editor.querySelector("[data-rule-error]");
-              assert.exists(
-                error,
-                `the error line: item ${broken.id}, sheet ${broken.sheet.document.id}, stored ${JSON.stringify(broken._source.system.rules)}, world ${JSON.stringify(game.items.get(broken.id)?._source.system.rules)}`
-              );
+              assert.exists(error, "the error line");
               assert.ok(error.querySelector("i[inert]"), "the invalid icon");
               const fields = [...editor.querySelectorAll('[name^="rules.0."]')];
               assert.isAbove(fields.length, 0);
