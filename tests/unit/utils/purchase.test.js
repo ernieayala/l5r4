@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   openChoices,
   getUnmetPrerequisites,
-  buildRulesWithSelections
+  buildRulesWithSelections,
+  getFixedGrantUuids,
+  getUngrantedOptions,
+  isKihoMasteryMet
 } from "../../../module/utils/purchase.js";
 
 describe("getUnmetPrerequisites", () => {
@@ -66,6 +69,61 @@ describe("openChoices", () => {
       { index: 3, flag: "skill", prompt: "", options: [], list: "skills", filter: ["bugei"] },
       { index: 4, flag: "bad", prompt: "", options: [], list: null, filter: [] }
     ]);
+  });
+});
+
+// game-rules/48_character_creation_expanded.md, p.102
+describe("The getFixedGrantUuids and getUngrantedOptions helpers", () => {
+  const battle = "Compendium.l5r4-enhanced.skills.Item.battle";
+  const kenjutsu = "Compendium.l5r4-enhanced.skills.Item.kenjutsu";
+  const akodo = [
+    { key: "GrantItem", uuid: battle, emphasis: "Mass Combat" },
+    { key: "GrantItem", uuid: kenjutsu },
+    { key: "ChoiceSet", flag: "extra", list: "skills" },
+    { key: "GrantItem", uuid: "{choice:extra}" },
+    { key: "TraitAdjust", trait: "per", value: 1 }
+  ];
+
+  it("should list the uuids an item grants whatever is chosen", () => {
+    expect(getFixedGrantUuids(akodo)).toEqual([battle, kenjutsu]);
+    expect(getFixedGrantUuids([{ key: "GrantItem" }, null])).toEqual([]);
+  });
+
+  it("should leave out of the skills list each Skill the item grants, by name in any pack or the world", () => {
+    const options = [
+      { value: battle, label: "Battle (Skills)", name: "Battle" },
+      { value: "Item.worldbattle", label: "Battle", name: "Battle" },
+      {
+        value: "Compendium.l5r4-enhanced.skills.Item.iaijutsu",
+        label: "Iaijutsu",
+        name: "Iaijutsu"
+      }
+    ];
+    expect(getUngrantedOptions(options, { uuids: [battle], names: ["Battle"] })).toEqual([
+      options[2]
+    ]);
+  });
+
+  it("should leave out of an item's own options each uuid it grants", () => {
+    // Forest Killers grants Kenjutsu and lists it among its Weapon Skill options
+    // game-rules/81_ronin.md, p.234
+    const options = [
+      { value: kenjutsu, label: "Kenjutsu" },
+      { value: "Compendium.l5r4-enhanced.skills.Item.spears", label: "Spears" }
+    ];
+    expect(getUngrantedOptions(options, { uuids: [kenjutsu], names: ["Kenjutsu"] })).toEqual([
+      options[1]
+    ]);
+  });
+});
+
+// game-rules/87_kiho.md, p.261
+describe("isKihoMasteryMet", () => {
+  it("should meet a Mastery Level with the kiho's Ring plus the School Rank", () => {
+    // Touch the Void Dragon, Mastery Level 4: Void 3 and School Rank 1 reach it, Void 2 does not
+    expect(isKihoMasteryMet(4, 3, 1)).toBe(true);
+    expect(isKihoMasteryMet(4, 2, 1)).toBe(false);
+    expect(isKihoMasteryMet(3, 2, 1)).toBe(true);
   });
 });
 

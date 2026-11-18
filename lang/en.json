@@ -1201,6 +1201,7 @@
         "bypass": "Add anyway",
         "choiceTitle": "{item}: {prompt}",
         "choose": "Choose",
+        "kihoMastery": "{ring} + School Rank {mastery}",
         "makeChoice": "Choose",
         "noOptions": "{name} has a choice with nothing to choose from; it was not added",
         "schoolAdd": "Add as another School",

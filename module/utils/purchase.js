@@ -6,6 +6,7 @@
  */
 
 import { CHOICE_LISTS } from "../config/rule-keys.js";
+import { hasOpenChoice } from "./choices.js";
 import { testPredicate } from "./predicate.js";
 
 /**
@@ -21,6 +22,20 @@ export function getUnmetPrerequisites(rules, options) {
     .filter(rule => testPredicate(Array.isArray(rule.predicate) ? rule.predicate : [], options))
     .filter(rule => !testPredicate(rule.requires, options))
     .map(rule => ({ label: String(rule.label ?? ""), requires: rule.requires }));
+}
+
+/**
+ * Whether a character may learn a kiho: its Ring plus its School Rank meets the kiho's Mastery Level. This is the
+ * Brotherhood monk's test; the optional rules for other characters (Ring alone, or School Rank alone) are never
+ * looser, so a kiho this refuses no character may learn, and the GM decides the rest by adding it anyway.
+ * game-rules/87_kiho.md, p.261, 266
+ * @param {number} mastery - The kiho's Mastery Level
+ * @param {number} ring - The character's rank in the kiho's Ring
+ * @param {number} schoolRank - The character's School Rank
+ * @returns {boolean}
+ */
+export function isKihoMasteryMet(mastery, ring, schoolRank) {
+  return ring + schoolRank >= mastery;
 }
 
 /**
@@ -57,6 +72,34 @@ export function openChoices(rules) {
     });
   });
   return open;
+}
+
+/**
+ * The uuids an item's GrantItem rules give whatever its buyer chooses: each one whose uuid names no choice.
+ * @param {object[]} rules - An item's raw `system.rules`
+ * @returns {string[]}
+ */
+export function getFixedGrantUuids(rules) {
+  return (rules ?? [])
+    .filter(rule => rule?.key === "GrantItem" && typeof rule.uuid === "string" && rule.uuid)
+    .filter(rule => !hasOpenChoice(rule.uuid))
+    .map(rule => rule.uuid);
+}
+
+/**
+ * A choice's options without what the item grants anyway: an option naming a granted uuid, or a Skill of a granted
+ * Skill's name (the world's Battle and a pack's are one Skill). A School's chosen Skill is never one it teaches.
+ * game-rules/48_character_creation_expanded.md, p.102
+ * @param {Array<{value: string, label: string, name?: string}>} options - `name` is a skills-list option's Skill
+ * @param {{uuids: string[], names: string[]}} granted - From getFixedGrantUuids, with the granted items' names
+ * @returns {Array<{value: string, label: string, name?: string}>}
+ */
+export function getUngrantedOptions(options, granted) {
+  const uuids = new Set(granted.uuids);
+  const names = new Set(granted.names.map(name => name.toLowerCase()));
+  return options.filter(
+    option => !uuids.has(option.value) && !names.has(option.name?.toLowerCase())
+  );
 }
 
 /**

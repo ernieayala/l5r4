@@ -967,7 +967,11 @@ export function registerPacksTests(quench) {
         it(
           "should add Insight Rank + Air Ring to Armor TN while Soul of the Four Winds is active",
           clean(async () => {
-            const { actor, item } = await holding("kiho", "Soul of the Four Winds");
+            // Air 4 reaches its Mastery Level 4
+            // game-rules/87_kiho.md, p.261
+            const { actor, item } = await holding("kiho", "Soul of the Four Winds", {
+              traits: { str: 2, ref: 4, awa: 4, agi: 2 }
+            });
             const before = actor.system.armorTn.current;
             await updateActivation(actor, item);
             assert.equal(

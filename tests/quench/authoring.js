@@ -254,6 +254,31 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // game-rules/87_kiho.md, p.261
+        it(
+          "should ask a GM to add a kiho whose Mastery Level the Ring plus School Rank does not reach",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: monk" }));
+            await actor.createEmbeddedDocuments("Item", [createSchoolData("Quench Monk School")]);
+            const kiho = {
+              name: "Quench Void Kiho",
+              type: "kiho",
+              system: { ring: "void", mastery: 4, type: "mystical" }
+            };
+            // Void 2 and School Rank 1 reach 3
+            const answered = answerConfirm("no");
+            assert.isNull(await preparePurchase(actor, kiho), "the GM said no");
+            await answered;
+
+            await actor.update({ "system.rings.void.rank": 3 });
+            assert.equal(
+              (await preparePurchase(actor, kiho)).name,
+              "Quench Void Kiho",
+              "Void 3 and School Rank 1 reach 4: no question asked"
+            );
+          })
+        );
+
         it(
           "should carry a choice made at purchase to the item's other rules",
           clean(async () => {
@@ -303,6 +328,106 @@ export function registerAuthoringTests(quench) {
               getCheckContext(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises,
               1
             );
+          })
+        );
+
+        /**
+         * Answer each dialog a purchase opens, in order, recording its title: the "A second School" question with
+         * `schoolAnswer` (an action, or "close"), a choice with its first option. Resolves the recorded titles and
+         * each choice's option labels once `done` settles.
+         * @param {Promise} done - The purchase
+         * @param {string} schoolAnswer - "add", "replace", or "close"
+         */
+        const answerPurchaseDialogs = async (done, schoolAnswer) => {
+          const titles = [];
+          const choiceLabels = [];
+          const schoolTitle = game.i18n.localize("l5r4.ui.purchase.schoolTitle");
+          const hook = Hooks.on("renderDialogV2", app => {
+            titles.push(app.title);
+            if (app.title === schoolTitle) {
+              if (schoolAnswer === "close") {
+                app.close();
+              } else {
+                app.element.querySelector(`[data-action="${schoolAnswer}"]`).click();
+              }
+              return;
+            }
+            const select = app.element.querySelector('[name="selection"]');
+            choiceLabels.push([...select.options].map(option => option.textContent.trim()));
+            app.element.querySelector('[data-action="ok"]').click();
+          });
+          try {
+            const result = await done;
+            return { result, titles, choiceLabels };
+          } finally {
+            Hooks.off("renderDialogV2", hook);
+          }
+        };
+
+        // game-rules/48_character_creation_expanded.md, p.102
+        it(
+          "should leave the Skills a School grants out of its Skill choice",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: choosing" }));
+            const skills = await Item.createDocuments([
+              createSkillData("Quench Granted", 0, "agi", { system: { type: "bugei" } }),
+              createSkillData("Quench Open", 0, "agi", { system: { type: "bugei" } })
+            ]);
+            worldItems.push(...skills);
+            const { "Quench Granted": granted } = byName(skills);
+            const school = {
+              name: "Quench Choosing School",
+              type: "school",
+              system: {
+                rules: [
+                  { key: "GrantItem", uuid: granted.uuid },
+                  { key: "ChoiceSet", flag: "extra", list: "skills", filter: ["bugei"] },
+                  { key: "GrantItem", uuid: "{choice:extra}" }
+                ]
+              }
+            };
+            const { choiceLabels } = await answerPurchaseDialogs(
+              preparePurchase(actor, school),
+              "add"
+            );
+            assert.lengthOf(choiceLabels, 1);
+            assert.include(choiceLabels[0], "Quench Open");
+            assert.notInclude(choiceLabels[0], "Quench Granted", "the School grants it already");
+          })
+        );
+
+        it(
+          "should ask whether a second School replaces the first before its choices",
+          clean(async function () {
+            this.timeout(15_000);
+            const { actor } = await schooled();
+            const second = {
+              name: "Quench Second School",
+              type: "school",
+              system: {
+                rules: [
+                  {
+                    key: "ChoiceSet",
+                    flag: "pick",
+                    options: [
+                      { value: "a", label: "A" },
+                      { value: "b", label: "B" }
+                    ]
+                  }
+                ]
+              }
+            };
+            const schoolTitle = game.i18n.localize("l5r4.ui.purchase.schoolTitle");
+
+            const added = await answerPurchaseDialogs(createPurchasedItem(actor, second), "add");
+            assert.equal(added.titles[0], schoolTitle, "the School question comes first");
+            assert.lengthOf(added.titles, 2, "then the choice");
+            assert.equal(added.result.name, "Quench Second School");
+            await added.result.delete();
+
+            const closed = await answerPurchaseDialogs(createPurchasedItem(actor, second), "close");
+            assert.isNull(closed.result, "closing the School question adds nothing");
+            assert.deepEqual(closed.titles, [schoolTitle], "and asks no choice");
           })
         );
       });
