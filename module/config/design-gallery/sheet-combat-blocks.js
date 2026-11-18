@@ -87,6 +87,7 @@ export const GALLERY_SHEET_COMBAT_BLOCKS = Object.freeze([
         context: "pc",
         with: {
           currentStance: "fullDefenseStance",
+          initiativeFormula: "5k3+10",
           system: { initiative: { useVoid: true }, movement: { showSimple: false } }
         }
       },

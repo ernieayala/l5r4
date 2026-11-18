@@ -7,6 +7,7 @@
  */
 import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { getIconPath } from "../utils/icons.js";
+import { formatInitiativePool } from "../utils/initiative.js";
 import { on } from "../utils/dom.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
@@ -90,15 +91,17 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
 
   /**
    * Adds the sort header columns of every list (module/config/sort-keys.js), which the section partials pass to
-   * templates/actor/_partials/_sort-header.hbs.
+   * templates/actor/_partials/_sort-header.hbs, and the Initiative pool as one string, so the template does no
+   * arithmetic (components/initiative-block.md C1).
    *
    * @param {object} options - Rendering options
-   * @returns {Promise<object>} The context, with `sortColumns`
+   * @returns {Promise<object>} The context, with `sortColumns` and `initiativeFormula`
    * @override
    */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.sortColumns = SORT_COLUMNS;
+    context.initiativeFormula = formatInitiativePool(this.actor.system.initiative);
     return context;
   }
 

@@ -9,15 +9,10 @@
  * game-rules/25_rings_and_traits.md, p.78
  */
 
+import { VOID_INITIATIVE_BONUS } from "../config/game-mechanics.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "./effects/uses.js";
-
-/**
- * Initiative bonus for a Void Point.
- * game-rules/25_rings_and_traits.md, p.78
- */
-const VOID_INITIATIVE_BONUS = 10;
 
 /**
  * Prompts each PC combatant that marked a Void Point for Initiative, spends the Void Point on a yes, and clears the

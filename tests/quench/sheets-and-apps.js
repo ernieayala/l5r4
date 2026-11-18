@@ -328,6 +328,74 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #79: docs/design-system/components/initiative-block.md C1-C4, armor-tn-block.md A4
+        it(
+          "should name the sidebar's stance, Void, and armor controls and sign a negative Initiative bonus",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            // The click-through may leave the Void mark on; the PC's pool shows its +10 then
+            await pc.update({ "system.initiative.useVoid": true, "system.rings.void.rank": 2 });
+            await npc.update({
+              "system.initiative.totalMod": -2,
+              "system.initiative.useVoid": false,
+              "system.rings.void.rank": 2
+            });
+            for (const actor of [pc, npc]) {
+              const sheet = actor.sheet;
+              await sheet.render({ force: true });
+              const named = selector =>
+                sheet.element.querySelector(selector)?.getAttribute("aria-label");
+              assert.equal(
+                named('[data-action="apply-stance"]'),
+                game.i18n.localize("l5r4.character.stance.current"),
+                `${actor.type} stance`
+              );
+              assert.equal(
+                named('[data-action="toggle-initiative-void"]'),
+                game.i18n.localize("l5r4.ui.mechanics.rings.voidInitBoost"),
+                `${actor.type} Initiative Void`
+              );
+              const section = sheet.element
+                .querySelector('[data-action="apply-stance"]')
+                .closest("section");
+              const label = [...section.querySelectorAll("span")].find(
+                span => span.textContent.trim() === game.i18n.localize("l5r4.ui.common.initiative")
+              );
+              const { roll, keep, totalMod } = actor.system.initiative;
+              const bonus = actor.type === "npc" ? "-2" : `+${totalMod + 10}`;
+              assert.equal(
+                label.nextElementSibling.firstElementChild.textContent.trim(),
+                `${roll}k${keep}${bonus}`,
+                `${actor.type} pool`
+              );
+              await sheet.close({ animate: false });
+            }
+            const sheet = npc.sheet;
+            await sheet.render({ force: true });
+            for (const [field, key] of [
+              ["system.armor.armorTn", "l5r4.ui.mechanics.wounds.armorTn"],
+              ["system.armor.reduction", "l5r4.ui.mechanics.wounds.armorReduction"]
+            ]) {
+              assert.equal(
+                sheet.element.querySelector(`input[name="${field}"]`).getAttribute("aria-label"),
+                game.i18n.localize(key),
+                field
+              );
+            }
+            await sheet.close({ animate: false });
+            await pc.sheet.render({ force: true });
+            assert.equal(
+              pc.sheet.element
+                .querySelector('[data-action="toggle-armor-void"]')
+                .getAttribute("aria-label"),
+              game.i18n.localize("l5r4.ui.mechanics.rings.voidTnBoost")
+            );
+            await pc.sheet.close({ animate: false });
+            await pc.update({ "system.initiative.useVoid": false });
+            await npc.update({ "system.initiative.totalMod": 0 });
+          })
+        );
+
         it(
           "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {

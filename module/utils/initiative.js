@@ -6,6 +6,7 @@
  * game-rules/31_combat_round.md, p.81
  */
 
+import { VOID_INITIATIVE_BONUS } from "../config/game-mechanics.js";
 import { buildPool, getPoolFormula } from "./check.js";
 
 /**
@@ -36,4 +37,18 @@ export function getInitiativePool({ insightRank, reflexes, rollMod = 0, keepMod 
 export function getInitiativeFormula({ roll, keep, bonus = 0 }, { littleTruths = false } = {}) {
   // The roll pipeline's pool and formula (module/utils/check.js), with a zero bonus left out
   return getPoolFormula(buildPool({ roll, keep, bonus, littleTruths })).replace(/\+0$/, "");
+}
+
+/**
+ * The Initiative pool as the sheet shows it: `XkY`, then the flat bonus with its sign and no space, a Void Point's
+ * +10 included when one is marked; a zero bonus is left out. 5k3 with a -2 total gives "5k3-2", with +3 and Void
+ * "5k3+13", with 0 "5k3".
+ * game-rules/25_rings_and_traits.md, p.78
+ * @param {{roll: number, keep: number, totalMod: number, useVoid: boolean}} initiative - The prepared Initiative
+ * @returns {string}
+ */
+export function formatInitiativePool({ roll, keep, totalMod, useVoid }) {
+  const bonus = totalMod + (useVoid ? VOID_INITIATIVE_BONUS : 0);
+  const flat = bonus > 0 ? `+${bonus}` : bonus < 0 ? String(bonus) : "";
+  return `${roll}k${keep}${flat}`;
 }

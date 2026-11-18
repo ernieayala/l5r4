@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getInitiativePool, getInitiativeFormula } from "../../../module/utils/initiative.js";
+import {
+  formatInitiativePool,
+  getInitiativePool,
+  getInitiativeFormula
+} from "../../../module/utils/initiative.js";
 
 // game-rules/31_combat_round.md, p.81
 describe("getInitiativePool", () => {
@@ -54,5 +58,25 @@ describe("getInitiativeFormula", () => {
 
   it("should give a custom NPC pool of 3k2 its own formula", () => {
     expect(getInitiativeFormula({ roll: 3, keep: 2 })).toBe("3d10xa10k2");
+  });
+});
+
+// #79: the sheet's pool reads XkY with a signed bonus (docs/design-system/content/voice.md, Numbers and dice)
+describe("formatInitiativePool", () => {
+  const pool = { roll: 5, keep: 3, totalMod: 0, useVoid: false };
+
+  it("should leave a zero bonus out", () => {
+    expect(formatInitiativePool(pool)).toBe("5k3");
+  });
+
+  it("should sign a positive bonus and keep a negative one's minus, never +-", () => {
+    expect(formatInitiativePool({ ...pool, totalMod: 3 })).toBe("5k3+3");
+    expect(formatInitiativePool({ ...pool, totalMod: -2 })).toBe("5k3-2");
+  });
+
+  // game-rules/25_rings_and_traits.md, p.78
+  it("should add a marked Void Point's +10", () => {
+    expect(formatInitiativePool({ ...pool, useVoid: true })).toBe("5k3+10");
+    expect(formatInitiativePool({ ...pool, totalMod: -12, useVoid: true })).toBe("5k3-2");
   });
 });

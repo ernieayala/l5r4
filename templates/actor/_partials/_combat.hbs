@@ -23,7 +23,7 @@
   <div class="l5r4-grid">
     <span>{{localize "l5r4.character.stance.current"}}</span>
     <div class="flexrow">
-      <select data-action="apply-stance">
+      <select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">
         {{#each config.stances as |label id|}}
           <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
             {{localize label}}
@@ -33,7 +33,7 @@
     </div>
     <span>{{localize "l5r4.ui.common.initiative"}}</span>
     <div class="flexrow -gap-sm l5r4-grid-value">
-      <div>{{system.initiative.roll}}k{{system.initiative.keep}}+{{#if system.initiative.useVoid}}{{math system.initiative.totalMod "+" 10}}{{else}}{{system.initiative.totalMod}}{{/if}}</div>
+      <span class="l5r4-combat-initiative">{{initiativeFormula}}</span>
       {{#if (gt system.rings.void.rank 0)}}
         <input
             class="flex0"
@@ -42,6 +42,7 @@
             {{checked system.initiative.useVoid}}
             data-action="toggle-initiative-void"
             data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"
+            aria-label="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"
           />
       {{/if}}
     </div>

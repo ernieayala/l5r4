@@ -142,6 +142,13 @@ export const RANK_TRACK_RANGE = Object.freeze({
 export const NPC_INSIGHT_RANK = 1;
 
 /**
+ * What a Void Point spent on Initiative adds to the roll.
+ * game-rules/25_rings_and_traits.md, p.78
+ * @type {number}
+ */
+export const VOID_INITIATIVE_BONUS = 10;
+
+/**
  * Insight a Skill's Mastery Abilities add above the Rings and Skill ranks, by Skill name in lower case: each step
  * adds `insight` from Skill Rank `rank` on. Courtier and Etiquette add 3 at Rank 3 and 7 more at Rank 7.
  * game-rules/59_high_skills.md, p.135-136

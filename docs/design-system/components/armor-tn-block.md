@@ -23,8 +23,6 @@ The sidebar block that shows how hard the actor is to hit and how much damage ar
 | Void toggle | `<input type="checkbox" data-action="toggle-armor-void" data-tooltip aria-label>`, only with a Void Ring above 0 | none |
 | Reduction | PC: a `<span>`. NPC: `<input type="number" name="system.armor.reduction" aria-label>` | none |
 
-The NPC inputs and the Void toggle in `templates/actor/_partials/_armor.hbs` carry no `aria-label` (A4).
-
 ## Variants
 
 | Variant | Selects it | Values |
@@ -72,8 +70,8 @@ Labels wrap in their cell; values are two digits.
 | A1 | `l5r4.ui.mechanics.wounds.armorTn` (`lang/en.json`), "Armor TN"; `getArmorTnPenalty` (`module/utils/armor-penalties.js`) | `getArmorTNPenalty` (modeled) |
 | A2 | `<span>{{system.armorTn.current}}</span>` (`templates/actor/_partials/_armor.hbs`) | A disabled input for the PC's Armor TN (modeled) |
 | A3 | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.sheets.configureArmor"}}` (modeled; `icon-button.md`) | `data-tooltip="{{localize "l5r4.ui.common.armor"}}"` (`templates/actor/_partials/_armor.hbs`), which names a thing, not the action |
-| A4 | `<input type="number" name="system.armor.armorTn" aria-label="{{localize "l5r4.ui.mechanics.wounds.armorTn"}}" ...>` (modeled) | The same input with no name: `name="system.armor.armorTn"` (`templates/actor/_partials/_armor.hbs`) and no `aria-label` |
-| A5 | `{{#if (eq actor.type "pc")}}` around the value cells only (modeled) | The whole section written twice, title bar included, one per branch of `templates/actor/_partials/_armor.hbs` |
+| A4 | `name="system.armor.armorTn"` with `aria-label="{{localize "l5r4.ui.mechanics.wounds.armorTn"}}"` (`templates/actor/_partials/_armor.hbs`) | The same input with no `aria-label` (modeled) |
+| A5 | `{{#if (eq actor.type "pc")}}` around the configuration button and the value cells only (`templates/actor/_partials/_armor.hbs`) | The whole section written twice, title bar included, one per branch (modeled) |
 
 ## Do and don't
 

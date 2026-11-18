@@ -5,7 +5,7 @@ The sidebar block for a skirmish: the current stance, the Initiative pool with i
 | Item | Detail |
 | --- | --- |
 | Partial | `templates/actor/_partials/_combat.hbs` |
-| Parameters | The sheet context: `config.stances`, `currentStance`, `system.initiative`, `system.rings.void.rank`, `system.movement`; C1 adds `initiativeFormula`, which the context does not pass |
+| Parameters | The sheet context: `config.stances`, `currentStance`, `initiativeFormula` (`formatInitiativePool` in `module/utils/initiative.js`), `system.initiative.useVoid`, `system.rings.void.rank`, `system.movement` |
 | SCSS | None of its own: `section.md` and `grid.md` draw it |
 | Block class | `l5r4-combat` on the section |
 | Shows in | PC sidebar (`templates/actor/pc.hbs`), NPC sidebar (`templates/actor/npc.hbs`) |
@@ -19,9 +19,9 @@ The sidebar block for a skirmish: the current stance, the Initiative pool with i
 | Section | `<section>` | `l5r4-section l5r4-combat` |  |
 | Title bar | Compact section title with the condition manager and combat configuration icon buttons | `l5r4-section-title -compact` |  |
 | Grid | `grid.md` | `l5r4-grid` |  |
-| Stance | `<select data-action="apply-stance" aria-label>` in a value cell | none | No `aria-label`: `<select data-action="apply-stance">` (`templates/actor/_partials/_combat.hbs`) |
-| Initiative pool | `<span>` with the pool string | `l5r4-combat-initiative` | A bare `div` in the Initiative value cell |
-| Void toggle | `<input type="checkbox" name="system.initiative.useVoid" data-action="toggle-initiative-void" data-tooltip aria-label>` after the pool, only with a Void Ring above 0 | none | No `aria-label`: `data-action="toggle-initiative-void"` (`templates/actor/_partials/_combat.hbs`) |
+| Stance | `<select data-action="apply-stance" aria-label>` in a value cell | none |  |
+| Initiative pool | `<span>` with the pool string | `l5r4-combat-initiative` |  |
+| Void toggle | `<input type="checkbox" name="system.initiative.useVoid" data-action="toggle-initiative-void" data-tooltip aria-label>` after the pool, only with a Void Ring above 0 | none |  |
 | Movement | Text with the unit, then a core button that switches Simple and Free | none | The text sits in a bare `div`; the button is `data-action="toggle-movement-type"` (`templates/actor/_partials/_combat.hbs`) |
 | Maximum | Text with the unit | none | A bare `l5r4-grid-value` div after the `l5r4.character.movement.maximum` (`templates/actor/_partials/_combat.hbs`) label |
 
@@ -73,10 +73,10 @@ Stance names in the select are the book's names and can run long; the select tak
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| C1 | `<span class="l5r4-combat-initiative">{{initiativeFormula}}</span>` (modeled) | `{{system.initiative.roll}}k{{system.initiative.keep}}+{{#if system.initiative.useVoid}}{{math system.initiative.totalMod "+" 10}}{{else}}...`, the Initiative value cell of `templates/actor/_partials/_combat.hbs` |
-| C2 | `5k3+2` (`content/voice.md`) | `5k3+-2`, which the template's literal `+` gives for a negative total (the same cell) |
-| C3 | `<select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">` (modeled) | `<select data-action="apply-stance">` (`templates/actor/_partials/_combat.hbs`) with no name |
-| C4 | `<input type="checkbox" ... data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}" aria-label="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}" />` (modeled on the Void toggle of `templates/actor/_partials/_combat.hbs`) | The Void toggle, `data-action="toggle-initiative-void"` (`templates/actor/_partials/_combat.hbs`), with `data-tooltip` and no `aria-label` |
+| C1 | `<span class="l5r4-combat-initiative">{{initiativeFormula}}</span>` (`templates/actor/_partials/_combat.hbs`) | `{{system.initiative.roll}}k{{system.initiative.keep}}+{{system.initiative.totalMod}}`, the pool built in the template (modeled) |
+| C2 | `5k3-2` from `formatInitiativePool` (`module/utils/initiative.js`) | `5k3+-2`, which a literal `+` before a negative total gives (modeled) |
+| C3 | `<select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">` (`templates/actor/_partials/_combat.hbs`) | `<select data-action="apply-stance">` with no name (modeled) |
+| C4 | `aria-label="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"` beside the same `data-tooltip` key on the Void toggle (`templates/actor/_partials/_combat.hbs`) | The Void toggle with `data-tooltip` and no `aria-label` (modeled) |
 | C5 | The block styled by `_section.scss` and `_grid.scss` alone | A stylesheet of the block's own that holds only comments (modeled) |
 
 ## Do and don't

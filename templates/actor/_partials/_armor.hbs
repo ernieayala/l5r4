@@ -1,7 +1,8 @@
-{{#if (eq actor.type "pc")}}
-  <section class="l5r4-section l5r4-armor">
-    <div class="flexrow -gap-sm l5r4-section-title -compact" data-section-title>
-      <h4 class="l5r4-section-heading">{{localize "l5r4.ui.common.armor"}}</h4>
+{{!-- Armor TN and Reduction (armor-tn-block.md): computed text on a PC, typed in on an NPC --}}
+<section class="l5r4-section l5r4-armor">
+  <div class="flexrow -gap-sm l5r4-section-title -compact" data-section-title>
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.common.armor"}}</h4>
+    {{#if (eq actor.type "pc")}}
       <button
         type="button"
         class="button inline-control icon"
@@ -11,9 +12,11 @@
       >
         <i class="fa-solid fa-gear" inert></i>
       </button>
-    </div>
-    <div class="l5r4-grid">
-      <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
+    {{/if}}
+  </div>
+  <div class="l5r4-grid">
+    <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
+    {{#if (eq actor.type "pc")}}
       <div class="flexrow">
         <span>{{system.armorTn.current}}</span>
         {{#if (gt system.rings.void.rank 0)}}
@@ -23,33 +26,30 @@
             {{checked voidArmor}}
             data-action="toggle-armor-void"
             data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}"
+            aria-label="{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}"
           />
         {{/if}}
       </div>
-      <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
-      <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
-    </div>
-  </section>
-{{else}}
-  <section class="l5r4-section l5r4-armor">
-    <div class="flexrow -gap-sm l5r4-section-title -compact" data-section-title>
-      <h4 class="l5r4-section-heading">{{localize "l5r4.ui.common.armor"}}</h4>
-    </div>
-    <div class="l5r4-grid">
-      <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
+    {{else}}
       <div class="flexrow"><input
           type="number"
           name="system.armor.armorTn"
           value="{{system.armor.armorTn}}"
           data-type="Number"
+          aria-label="{{localize "l5r4.ui.mechanics.wounds.armorTn"}}"
         /></div>
-      <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
+    {{/if}}
+    <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
+    {{#if (eq actor.type "pc")}}
+      <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
+    {{else}}
       <div class="flexrow"><input
           type="number"
           name="system.armor.reduction"
           value="{{system.armor.reduction}}"
           data-type="Number"
+          aria-label="{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}"
         /></div>
-    </div>
-  </section>
-{{/if}}
+    {{/if}}
+  </div>
+</section>
