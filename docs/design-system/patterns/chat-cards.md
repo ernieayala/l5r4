@@ -148,7 +148,9 @@ Conforming, `data-action="apply-condition"` (`templates/chat/check.hbs`):
 {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
 ```
 
-Non-conforming, `data-action="damage-apply-target"` (`templates/chat/check.hbs`): `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins "Apply to" and a name.
+Conforming, `data-action="damage-apply-target"` (`templates/chat/check.hbs`): `{{localize "l5r4.ui.combat.applyTo" target=applyTarget}}`, "Apply to {target}".
+
+Non-conforming (modeled): `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}`, joining "Apply to" and a name.
 
 ## States
 

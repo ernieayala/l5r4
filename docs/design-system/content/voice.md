@@ -163,7 +163,7 @@ The stored field for a Wound Rank is `woundLevel` (a fixed name, decision 2); on
 | Conforming | "{label} {from}→{to}" | `l5r4.character.experience.traitChange` (`lang/en.json`) |
 | Conforming | `formatSigned(roll)` + `k` + `keep`, then the bonus: "+0k1+5" | `formatPool` (`module/utils/rule-summary.js`) |
 | Non-conforming | "-{penalty}kO" (the letter O; write "-{penalty}k0") | modeled on `l5r4.ui.mechanics.fear.penaltySuffix` (`lang/en.json`) |
-| Non-conforming | "x 2 +" (write "× 2 +") | modeled on `l5r4.ui.mechanics.wounds.healRateFormula` (`lang/en.json`) |
+| Non-conforming | "x 2 +" (write "× 2 +") | modeled on `l5r4.ui.mechanics.wounds.healRateBreakdown` (`lang/en.json`) |
 | Non-conforming | "gains two Free Raises" (write "gains 2 Free Raises") | modeled on `l5r4.ui.combat.grapple.weaponLost` (`lang/en.json`) |
 | Non-conforming | Parts joined with a space: "+1k1 +5" | `formatModifier` (`module/services/dice/check/card.js`) |
 

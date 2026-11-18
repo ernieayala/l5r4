@@ -6,7 +6,7 @@
 
 /** The resources shown, their paths in prepared system data, and their name keys. */
 export const FLOATING_RESOURCES = Object.freeze([
-  Object.freeze({ id: "wounds", path: "suffered", nameKey: "l5r4.ui.floating.wounds" }),
+  Object.freeze({ id: "wounds", path: "suffered", nameKey: "l5r4.ui.mechanics.wounds.label" }),
   Object.freeze({ id: "void", path: "rings.void.value", nameKey: "l5r4.ui.floating.void" })
 ]);
 

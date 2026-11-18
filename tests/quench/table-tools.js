@@ -346,7 +346,7 @@ export function registerTableToolsTests(quench) {
               await game.settings.set(SYS_ID, "floatingNumbers", true);
               await actor.update({ "system.suffered": 5, "system.rings.void.value": 1 });
               assert.includeMembers(shown, [
-                `+5 ${game.i18n.localize("l5r4.ui.floating.wounds")}`,
+                `+5 ${game.i18n.localize("l5r4.ui.mechanics.wounds.label")}`,
                 `−1 ${game.i18n.localize("l5r4.ui.floating.void")}`
               ]);
               shown.length = 0;

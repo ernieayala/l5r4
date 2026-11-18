@@ -342,7 +342,6 @@
         },
         "fear": {
           "catastrophicSuffix": "— Penalidade: -{penalty}k0 em todas as rolagens FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
-          "effectName": "Medo {rank}",
           "label": "Medo {rank}",
           "noFear": "Este NPC não tem efeito de Medo configurado",
           "noTargets": "Nenhum token selecionado para teste de Medo",
@@ -428,7 +427,6 @@
           "grazed": "Raspado",
           "healingApplied": "Curou {amount} ferimentos (taxa de cura: {rate})",
           "healingFailed": "Falha ao aplicar cura em {name}",
-          "healRateFormula": "x 2 +",
           "healthy": "Saudável",
           "hurt": "Ferido",
           "injured": "Machucado",

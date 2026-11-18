@@ -342,7 +342,6 @@
         },
         "fear": {
           "catastrophicSuffix": "— Penalización: -{penalty}k0 a todas las tiradas ¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
-          "effectName": "Miedo {rank}",
           "label": "Miedo {rank}",
           "noFear": "Este PNJ no tiene efecto de Miedo configurado",
           "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
@@ -428,7 +427,6 @@
           "grazed": "Rozado",
           "healingApplied": "Sanó {amount} heridas (tasa de curación: {rate})",
           "healingFailed": "Error al aplicar curación a {name}",
-          "healRateFormula": "x 2 +",
           "healthy": "Saludable",
           "hurt": "Lastimado",
           "injured": "Herido",

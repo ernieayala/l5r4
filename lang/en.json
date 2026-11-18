@@ -757,7 +757,9 @@
         "contestTie": "Tie: roll again.",
         "contestWinner": "{name} wins.",
         "damageLabel": "Damage for {weapon}",
+        "damageRollPool": "Damage roll ({pool})",
         "effectsFor": "Active effects ({key})",
+        "freeRaisesLeft": "Free Raises: {count}",
         "freeRaisesToTnNote": "(Free Raises spent on the TN: {count})",
         "increasedDamage": "Increased Damage (Raises)",
         "keepFewer": "Keep only",
@@ -781,6 +783,7 @@
         "spellSlot": "Spell slot",
         "statBlock": "Stat block",
         "substitutes": "Substitutions",
+        "titleAgainst": "{label} against {target}",
         "totalModifier": "Total modifier",
         "unskilled": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
         "void": "Spend a Void Point (+1k1)",
@@ -791,7 +794,7 @@
       },
       "combat": {
         "applySelected": "Apply to selected",
-        "applyTo": "Apply to",
+        "applyTo": "Apply to {target}",
         "arrowArmor": {
           "armor": "Armor Piercing arrow ignores armor",
           "flesh": "Flesh Cutter arrow doubles armor"
@@ -838,6 +841,7 @@
         "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
         "feint": "Feint (2 Raises)",
         "feintNote": "Feint: half the margin over the TN adds to damage (up to 5 × Insight Rank).",
+        "flowTitle": "{flow}: {stage}",
         "fourLegged": "Target has 4 or more legs",
         "grapple": {
           "break": "Break",
@@ -860,7 +864,7 @@
         },
         "grappleIgnoresArmor": "Grapple ignores armor",
         "grappleManeuver": "Start a grapple (ignores armor)",
-        "grappleStart": "Start grapple with",
+        "grappleStart": "Start grapple with {target}",
         "guard": "Guard the targeted token",
         "guardFullAttack": "You cannot Guard in the Full Attack Stance",
         "guardPick": "Select your token and target the one to guard",
@@ -881,7 +885,7 @@
         "npcInitiative": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",
         "reductionNote": "Reduction {reduction}.",
         "resultTitle": "{name} takes {wounds} Wounds from {damage} damage",
-        "sources": "Damage sources",
+        "sources": "Damage sources: {sources}",
         "spiritNote": "Spirit: the damage is halved.",
         "unarmed": "Unarmed",
         "undo": "Undo",
@@ -979,8 +983,7 @@
         "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
       },
       "floating": {
-        "void": "Void Points",
-        "wounds": "Wounds"
+        "void": "Void Points"
       },
       "grants": {
         "granted": "{name} gains {item} from {giver} (School Rank {rank})."
@@ -1031,7 +1034,6 @@
           "traitAndRing": "a Trait and a Ring cannot both be rolled",
           "unknownKey": "unknown key; use skill, trait, ring, or tn"
         },
-        "fear": "Fear {rank}",
         "needTrait": "{name} has no {skill} Skill, and the link names no Trait to roll it Unskilled with",
         "noActor": "Select a token or assign a character to roll this link",
         "noTargets": "Target or select the tokens this link acts on",
@@ -1052,7 +1054,6 @@
         },
         "fear": {
           "catastrophicSuffix": "— Penalty: -{penalty}k0 to all rolls Catastrophic failure: the character flees or cowers helplessly.",
-          "effectName": "Fear {rank}",
           "label": "Fear {rank}",
           "noFear": "This NPC has no Fear effect configured",
           "noTargets": "No tokens selected for Fear test",
@@ -1145,7 +1146,6 @@
           "healingApplied": "Healed {amount} Wounds (heal rate: {rate})",
           "healingFailed": "Failed to apply healing to {name}",
           "healRateBreakdown": "(Stamina × 2) + Insight Rank + modifier = ({sta} × 2) + {rank} + {mod}",
-          "healRateFormula": "× 2 +",
           "healthy": "Healthy",
           "hurt": "Hurt",
           "injured": "Injured",
@@ -1384,7 +1384,10 @@
       },
       "transfer": {
         "export": "Export items with rules",
-        "exported": "Exported {count} items from {folder}",
+        "exported": {
+          "one": "Exported {count} item from {folder}",
+          "other": "Exported {count} items from {folder}"
+        },
         "import": "Import items with rules",
         "imported": "Imported items",
         "importedCount": "Imported {count} items into {folder}",

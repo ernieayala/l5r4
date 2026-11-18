@@ -18,7 +18,7 @@ The change to a character's Wounds or Void Points, drawn as text that floats up 
 | --- | --- | --- |
 | Sign | `+` for a gain, `−` (U+2212) for a loss | `formatFloatingText` (`module/utils/floating-text.js`) |
 | Amount | The change's size | `formatFloatingText` (`module/utils/floating-text.js`) |
-| Name | `l5r4.ui.floating.wounds` "Wounds", `l5r4.ui.floating.void` "Void Points" | `FLOATING_RESOURCES` (`module/utils/floating-text.js`) |
+| Name | `l5r4.ui.mechanics.wounds.label` "Wounds", `l5r4.ui.floating.void` "Void Points" | `FLOATING_RESOURCES` (`module/utils/floating-text.js`) |
 | Fill | Per resource and direction, `COLORS` (`module/services/scrolling-text.js`) | color.md, domain roles |
 | Stroke | Black, 4 px | `startScrollingText` (`module/services/scrolling-text.js`) |
 | Size | 28 px | `startScrollingText` (`module/services/scrolling-text.js`) |

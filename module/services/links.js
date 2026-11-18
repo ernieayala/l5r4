@@ -48,7 +48,7 @@ export function formatLinkText(spec) {
   if (spec.type === "Condition") {
     return T(CONFIG.statusEffects[spec.condition]?.name ?? spec.condition);
   }
-  return F("l5r4.ui.links.fear", { rank: spec.rank });
+  return F("l5r4.ui.mechanics.fear.label", { rank: spec.rank });
 }
 
 /**

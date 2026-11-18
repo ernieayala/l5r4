@@ -169,7 +169,7 @@ async function rollFearTest({ character, tn, fearRank, label } = {}) {
       if (message.system.outcome.success === false) {
         await applyEffectAnywhere(character, "feared", {
           level: fearRank,
-          name: F("l5r4.ui.mechanics.fear.effectName", { rank: fearRank })
+          name: F("l5r4.ui.mechanics.fear.label", { rank: fearRank })
         });
       }
     }

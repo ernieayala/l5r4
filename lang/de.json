@@ -342,7 +342,6 @@
         },
         "fear": {
           "catastrophicSuffix": "— Strafe: -{penalty}k0 auf alle Würfe KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
-          "effectName": "Furcht {rank}",
           "label": "Furcht {rank}",
           "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
           "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
@@ -428,7 +427,6 @@
           "grazed": "Gestreift",
           "healingApplied": "{amount} Wunden geheilt (Heilungsrate: {rate})",
           "healingFailed": "Fehler beim Anwenden der Heilung auf {name}",
-          "healRateFormula": "x 2 +",
           "healthy": "Gesund",
           "hurt": "Verletzt",
           "injured": "Verwundet",

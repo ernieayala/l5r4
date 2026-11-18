@@ -19,7 +19,7 @@ All classes and attributes are fixed names ([chat card](chat-card.md#fixed-names
 | Part | Markup | Shows |
 | --- | --- | --- |
 | Root | `div.chat-card.l5r4-flow-card` | A column |
-| Title | `div.dice-flavor` | `{{title}}: {{stage}}` |
+| Title | `div.dice-flavor` | `l5r4.ui.combat.flowTitle` "{flow}: {stage}" |
 | Log | `div.check-note`, one per line | What each step did; a grapple shows its last six lines (`render` (`module/services/combat/grapple.js`)) |
 | Buttons | `div.flow-actions.flexrow.-gap-sm`, one `<button type="button" data-flow-action data-duelist data-side>` each | One per step allowed now, stacked full width |
 
@@ -73,7 +73,7 @@ The buttons stack one per row, full width (`.l5r4-flow-card .flow-actions` (`scs
 | FC2 | A button exists only for a step the state allows now | Quench `l5r4-enhanced.combat` | A `roll` button only when `d.canRoll`, in `buildDuelButtons` (`module/services/combat/duel.js`) | Every button on every stage, refused on click (modeled) |
 | FC3 | A step either side may take names whose step it is; a step only the side in control takes follows the stage line that names that side | Review | `F("l5r4.ui.combat.duel.roll", { name: d.name })` (`module/services/combat/duel.js`) | Two buttons both labelled "Roll" (modeled) |
 | FC4 | `data-flow-action` values and `data-duelist` / `data-side` stay as they are | `tests/conventions/actions.test.js` (fixed names exempt) | `data-flow-action="concede"` | Renaming to `data-action="concede-duel"`: posted cards lose their buttons (modeled) |
-| FC5 | Title and stage are one localized sentence | Review | One key with `{flow}` and `{stage}` (modeled) | `{{title}}: {{stage}}` joined in the template (`templates/chat/flow.hbs`) |
+| FC5 | Title and stage are one localized sentence | Review | `{{localize "l5r4.ui.combat.flowTitle" flow=title stage=stage}}` (`templates/chat/flow.hbs`) | `{{title}}: {{stage}}` joined in the template (modeled) |
 
 ## Do and don't
 

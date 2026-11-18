@@ -342,7 +342,6 @@
         },
         "fear": {
           "catastrophicSuffix": "— Pénalité : -{penalty}k0 à tous les jets ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
-          "effectName": "Peur {rank}",
           "label": "Peur {rank}",
           "noFear": "Ce PNJ n'a pas d'effet de Peur configuré",
           "noTargets": "Aucun pion sélectionné pour le test de Peur",
@@ -428,7 +427,6 @@
           "grazed": "Effleuré",
           "healingApplied": "Guéri {amount} blessures (taux de guérison : {rate})",
           "healingFailed": "Échec de l'application de la guérison à {name}",
-          "healRateFormula": "x 2 +",
           "healthy": "En Bonne Santé",
           "hurt": "Blessé",
           "injured": "Gravement Blessé",

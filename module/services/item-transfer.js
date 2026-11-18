@@ -7,7 +7,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { F, T } from "../utils/localization.js";
+import { F, T, pluralKeyOf } from "../utils/localization.js";
 import { parseTransfer, buildRemappedRules, buildTransferPayload } from "../utils/item-transfer.js";
 
 /**
@@ -38,9 +38,12 @@ export function exportItemFolder(folder) {
     "application/json",
     `fvtt-l5r4-items-${folder.name.slugify()}.json`
   );
-  ui.notifications?.info(
-    F("l5r4.ui.transfer.exported", { count: items.length, folder: folder.name })
+  const key = pluralKeyOf(
+    game.i18n,
+    items.length,
+    category => `l5r4.ui.transfer.exported.${category}`
   );
+  ui.notifications?.info(F(key, { count: items.length, folder: folder.name }));
   return payload;
 }
 

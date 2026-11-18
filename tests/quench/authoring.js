@@ -3,7 +3,11 @@ import { createPurchasedItem, preparePurchase } from "../../module/services/purc
 import { applyTrackChange, ledgerEntriesOf } from "../../module/services/ledger.js";
 import { startNewSession } from "../../module/services/session.js";
 import { updateActivation } from "../../module/services/effects/activation.js";
-import { buildFolderTransfer, createImportedItems } from "../../module/services/item-transfer.js";
+import {
+  buildFolderTransfer,
+  createImportedItems,
+  exportItemFolder
+} from "../../module/services/item-transfer.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { rollHonor } from "../../module/services/dice/check/chat-actions.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
@@ -793,6 +797,41 @@ export function registerAuthoringTests(quench) {
             for (const copy of imported) {
               assert.deepEqual(copy.ownership, { default: O.NONE, [game.user.id]: O.OWNER });
             }
+          })
+        );
+
+        // #79
+        it(
+          "should say 1 item, not 1 items, after exporting a folder of one",
+          clean(async () => {
+            const folder = await foundry.documents.Folder.implementation.create({
+              name: "Quench Single",
+              type: "Item"
+            });
+            folders.push(folder);
+            await Item.createDocuments([
+              { ...createSkillData("Quench Lone", 0), folder: folder.id }
+            ]);
+            // Core downloads through a detached link it clicks [src: client/utils/helpers.mjs:128-139]; the link
+            // cancels its own click, so no file is saved, and the notice is what this checks
+            const createElement = document.createElement;
+            const info = ui.notifications.info;
+            const notices = [];
+            document.createElement = function (tag, ...rest) {
+              const element = createElement.call(this, tag, ...rest);
+              if (String(tag).toLowerCase() === "a") {
+                element.addEventListener("click", event => event.preventDefault());
+              }
+              return element;
+            };
+            ui.notifications.info = message => notices.push(message);
+            try {
+              exportItemFolder(folder);
+            } finally {
+              document.createElement = createElement;
+              ui.notifications.info = info;
+            }
+            assert.deepEqual(notices, ["Exported 1 item from Quench Single"]);
           })
         );
 
