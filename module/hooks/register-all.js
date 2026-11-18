@@ -46,8 +46,8 @@ import { onGetSceneControlButtonsGuard } from "../services/combat/guard.js";
 import { onGetSceneControlButtonsSession } from "../services/session.js";
 import { onGetFolderContextOptions } from "../services/item-transfer.js";
 import { onUpdateItemMemorization } from "../services/xp/versioning.js";
-import EffectPanel from "../apps/effect-panel.js";
-import CompendiumBrowser from "../apps/compendium-browser.js";
+import EffectPanelApplication from "../apps/effect-panel.js";
+import CompendiumBrowserApplication from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
 
 /** The hooks after which the open effect panel redraws: control changes, and effects or the actor change. */
@@ -143,9 +143,9 @@ function registerChatCardHooks() {
 /** The interface around the sheets: the effect panel, hotbar macros, floating numbers, and the compendium browser. */
 function registerInterfaceHooks() {
   // Effect panel: its token-controls button and redraws
-  Hooks.on("getSceneControlButtons", EffectPanel.onGetSceneControlButtons);
+  Hooks.on("getSceneControlButtons", EffectPanelApplication.onGetSceneControlButtons);
   for (const hook of EFFECT_PANEL_REDRAWS) {
-    Hooks.on(hook, EffectPanel.renderIfOpen);
+    Hooks.on(hook, EffectPanelApplication.renderIfOpen);
   }
 
   // Hotbar macros: a dropped skill, weapon, spell, kata, kiho, Trait, or Ring becomes a macro that rolls it
@@ -157,8 +157,8 @@ function registerInterfaceHooks() {
   Hooks.on("updateActor", onUpdateActorScrollingText);
 
   // Compendium browser: its index fields and the Compendium sidebar's button
-  CompendiumBrowser.registerIndexFields();
-  Hooks.on("renderCompendiumDirectory", CompendiumBrowser.onRenderCompendiumDirectory);
+  CompendiumBrowserApplication.registerIndexFields();
+  Hooks.on("renderCompendiumDirectory", CompendiumBrowserApplication.onRenderCompendiumDirectory);
 }
 
 /**

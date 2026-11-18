@@ -4,10 +4,10 @@ A small floating window listing the effects on the controlled token's actor, els
 
 | Item | Detail |
 | --- | --- |
-| Window | `module/apps/effect-panel.js`, class `EffectPanel`; target `EffectPanelApplication` ([naming.md](../../code-system/naming.md#classes)). `HandlebarsApplicationMixin(ApplicationV2)`, id `l5r4-enhanced-effect-panel`, classes `l5r4 l5r4-effect-panel`, icon `fa-solid fa-hourglass-half`, resizable, 320 px wide at top 80, left 120 |
+| Window | `module/apps/effect-panel.js`, class `EffectPanelApplication`; target `EffectPanelApplication` ([naming.md](../../code-system/naming.md#classes)). `HandlebarsApplicationMixin(ApplicationV2)`, id `l5r4-enhanced-effect-panel`, classes `l5r4 l5r4-effect-panel`, icon `fa-solid fa-hourglass-half`, resizable, 320 px wide at top 80, left 120 |
 | Template | `templates/apps/effect-panel.hbs`, the one part `effects` |
-| Opened by | The token-controls tool `l5r4-enhanced-effects`, added by `EffectPanel.onGetSceneControlButtons` (`module/apps/effect-panel.js`), which calls `EffectPanel.openOrClose()` |
-| Redraws on | `controlToken`, `createActiveEffect`, `updateActiveEffect`, `deleteActiveEffect`, `updateActor`, `updateCombat` (`EFFECT_PANEL_REDRAWS` (`module/hooks/register-all.js`)), each calling `EffectPanel.renderIfOpen` |
+| Opened by | The token-controls tool `l5r4-enhanced-effects`, added by `EffectPanelApplication.onGetSceneControlButtons` (`module/apps/effect-panel.js`), which calls `EffectPanelApplication.openOrClose()` |
+| Redraws on | `controlToken`, `createActiveEffect`, `updateActiveEffect`, `deleteActiveEffect`, `updateActor`, `updateCombat` (`EFFECT_PANEL_REDRAWS` (`module/hooks/register-all.js`)), each calling `EffectPanelApplication.renderIfOpen` |
 | SCSS | `scss/apps/_effect-panel.scss`: a window's styles go in `apps/`, named as its `module/apps/` file ([templates-and-styles.md](../../code-system/templates-and-styles.md#folders)) |
 | Copy | `l5r4.apps.effectPanel.*` ([localization.md](../content/localization.md#key-paths)) |
 | Quench | `l5r4-enhanced.table-tools` |
@@ -33,7 +33,7 @@ A small floating window listing the effects on the controlled token's actor, els
 | `open-source`   | Opens the item that carries the effect, its origin, or the effect |
 | `delete-effect` | Deletes an effect the user owns                                   |
 
-The `DEFAULT_OPTIONS.actions` keys are quoted (naming.md); the handlers are `EffectPanel.#onOpenSource` and `EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`).
+The `DEFAULT_OPTIONS.actions` keys are quoted (naming.md); the handlers are `EffectPanelApplication.#onOpenSource` and `EffectPanelApplication.#onDeleteEffect` (`module/apps/effect-panel.js`).
 
 ## Variants
 
@@ -42,8 +42,8 @@ The `DEFAULT_OPTIONS.actions` keys are quoted (naming.md); the handlers are `Eff
 | Actor with effects | Actor heading, one row per applied effect |
 | Actor with none | Actor heading, the empty line `l5r4.apps.effectPanel.none` with the actor's name |
 | No actor | The empty line `l5r4.apps.effectPanel.noActor` |
-| Effect on an item, or not owned | No remove button (`canRemove`, set by `EffectPanel#buildRow` (`module/apps/effect-panel.js`)) |
-| Effect with uses | "lasts" adds the uses left after the duration (`EffectPanel#buildRow` (`module/apps/effect-panel.js`)) |
+| Effect on an item, or not owned | No remove button (`canRemove`, set by `EffectPanelApplication#buildRow` (`module/apps/effect-panel.js`)) |
+| Effect with uses | "lasts" adds the uses left after the duration (`EffectPanelApplication#buildRow` (`module/apps/effect-panel.js`)) |
 
 ## States
 
@@ -57,7 +57,7 @@ The `DEFAULT_OPTIONS.actions` keys are quoted (naming.md); the handlers are `Eff
 
 ## Parameters
 
-Context from `EffectPanel#_prepareContext` (`module/apps/effect-panel.js`):
+Context from `EffectPanelApplication#_prepareContext` (`module/apps/effect-panel.js`):
 
 | Name | Type | Meaning |
 | --- | --- | --- |
@@ -96,7 +96,7 @@ The text column has `min-width: 0` and wraps (`.l5r4-effect-panel-text` (`scss/a
 | EF1 | Actions are kebab-case | `tests/conventions/actions.test.js` | `data-action="open-source"` | `data-action="removeEffect"` (modeled) |
 | EF2 | Delete shows `fa-trash`, the delete icon everywhere | `tests/conventions/design-system.test.js` (icon table), review | `<i class="fa-solid fa-trash" inert></i>` (`templates/apps/effect-panel.hbs`) | `<i class="fa-solid fa-xmark" inert></i>` for a delete (modeled) |
 | EF3 | An icon-only button carries `data-tooltip` and `aria-label` from one key, never `title` | `tests/conventions/templates.test.js` | `data-tooltip` and `aria-label` both `l5r4.apps.effectPanel.openSource` (templates-and-styles.md example) | `title="…"` alone on an icon button (modeled) |
-| EF4 | Remove shows only where the user may remove | Quench `l5r4-enhanced.table-tools` | `{{#if canRemove}}` (`templates/apps/effect-panel.hbs`), checked again on click (`EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`)) | A remove button on an item's effect that refuses on click (modeled) |
+| EF4 | Remove shows only where the user may remove | Quench `l5r4-enhanced.table-tools` | `{{#if canRemove}}` (`templates/apps/effect-panel.hbs`), checked again on click (`EffectPanelApplication.#onDeleteEffect` (`module/apps/effect-panel.js`)) | A remove button on an item's effect that refuses on click (modeled) |
 | EF5 | The window's styles live in their own file under `scss/apps/`, and nothing else does | `tests/conventions/styles.test.js` (one component per file) | `.l5r4-effect-panel` alone in `scss/apps/_effect-panel.scss` | The inline link's and the request card's rules in the effect panel's file (modeled) |
 | EF6 | Spacing and sizes read tokens | `tests/conventions/styles.test.js` | `padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);` (`scss/apps/_effect-panel.scss`) | `padding: 0.25rem 0.4rem;` (modeled) |
 

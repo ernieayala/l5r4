@@ -17,18 +17,37 @@ export function registerAnimationsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.animations`,
     context => {
-      const { describe, it, before, afterEach, assert } = context;
+      const { describe, it, before, after, afterEach, assert } = context;
       const clean = cleanTest(assert);
       let actor = null;
       let token = null;
+      let matchMedia;
 
       /** The Sequencer effects this system named for a status on the test token. */
       const playing = statusId =>
         Sequencer.EffectManager.getEffects({ name: `${SYS_ID}.${statusId}.${token.id}` });
 
+      /**
+       * Have the browser report the user's motion setting, whatever the machine running the batch asks for.
+       * @param {boolean} reduced
+       */
+      const reportMotion = reduced => {
+        window.matchMedia = query => ({
+          matches: query.includes("prefers-reduced-motion: reduce") ? reduced : false
+        });
+      };
+
       before(function () {
         if (!isSequencerAvailable() || !isJb2aAvailable() || !canvas.scene) {
           this.skip();
+        }
+        matchMedia = window.matchMedia;
+        reportMotion(false);
+      });
+
+      after(() => {
+        if (matchMedia) {
+          window.matchMedia = matchMedia;
         }
       });
 
@@ -52,6 +71,20 @@ export function registerAnimationsTests(quench) {
           assert.isTrue(await waitFor(() => playing("fullAttackStance").length === 1));
           await actor.toggleStatusEffect("fullAttackStance", { active: false });
           assert.isTrue(await waitFor(() => playing("fullAttackStance").length === 0));
+        });
+
+        // #79
+        it("should play no stance for a user who asked for less motion", async () => {
+          await placeActor("Sequencer: reduced motion");
+          reportMotion(true);
+          try {
+            await actor.toggleStatusEffect("fullAttackStance", { active: true });
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } finally {
+            reportMotion(false);
+          }
+          assert.lengthOf(playing("fullAttackStance"), 0, "the status icon shows the stance");
+          assert.isTrue(actor.statuses.has("fullAttackStance"));
         });
 
         it("should play the Concentration animation", async () => {

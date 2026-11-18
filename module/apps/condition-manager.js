@@ -15,7 +15,7 @@ import { applyEffect } from "../services/effects/apply.js";
 /**
  * The condition manager window for one actor.
  */
-export default class ConditionManager extends foundry.applications.api.HandlebarsApplicationMixin(
+export default class ConditionManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
   static DEFAULT_OPTIONS = {
@@ -39,7 +39,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
   };
 
   /**
-   * Create a new ConditionManager instance.
+   * Create a new ConditionManagerApplication instance.
    *
    * @param {Actor} actor - The actor whose conditions are being managed
    * @param {object} [options={}] - Additional application options
@@ -47,7 +47,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    */
   constructor(actor, options = {}) {
     if (!actor) {
-      throw new Error("ConditionManager requires an actor");
+      throw new Error("ConditionManagerApplication requires an actor");
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
@@ -79,7 +79,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    */
   async _prepareContext(_options) {
     if (!this.actor) {
-      console.warn(`${SYS_ID}`, "ConditionManager: No actor reference");
+      console.warn(`${SYS_ID}`, "ConditionManagerApplication: No actor reference");
       return this._getFallbackContext();
     }
 
@@ -150,7 +150,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
     super._onRender(context, options);
 
     if (!this.element) {
-      console.warn(`${SYS_ID}`, "ConditionManager _onRender: No element");
+      console.warn(`${SYS_ID}`, "ConditionManagerApplication _onRender: No element");
       return;
     }
 

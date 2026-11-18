@@ -33,7 +33,8 @@ export function registerEnrichers() {
 }
 
 /**
- * Render one link found in text.
+ * Render one link found in text: its button, and for a GM's Check link the request control beside it, under one root
+ * element, which core appends into its `<enriched-content>` wrapper [src: client/applications/ux/text-editor.mjs:264-273].
  * @param {RegExpMatchArray} match - [whole, type, params, label]
  * @returns {Promise<HTMLElement>}
  */
@@ -48,7 +49,9 @@ async function renderLink(match) {
     icon: ICONS[type],
     text: spec.ok ? formatLinkText(spec) : "",
     source,
-    reason: spec.ok ? "" : T(spec.error)
+    reason: spec.ok ? "" : T(spec.error),
+    // A GM's Check link carries a second control that posts a request card
+    canRequest: spec.ok && type === "Check" && game.user.isGM
   });
   return foundry.utils.parseHTML(html);
 }
@@ -64,13 +67,13 @@ function specOf(link) {
 }
 
 /**
- * Run a link from a click or from Enter or Space.
- * @param {HTMLElement} link
+ * Run a link's action when its button is pressed: a click, or Enter or Space, which a native button turns into one.
+ * @param {HTMLElement} button
  * @param {Function} action
  * @param {AbortSignal} signal
  */
-function onActivate(link, action, signal) {
-  link.addEventListener(
+function onActivate(button, action, signal) {
+  button.addEventListener(
     "click",
     event => {
       event.preventDefault();
@@ -79,20 +82,10 @@ function onActivate(link, action, signal) {
     },
     { signal }
   );
-  link.addEventListener(
-    "keydown",
-    event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        action();
-      }
-    },
-    { signal }
-  );
 }
 
 /**
- * Wire a rendered link. A GM's Check link gets a second button that posts a request card.
+ * Wire a rendered link, and a GM's request control beside a Check link.
  * @param {HTMLElement} element - The `<enriched-content>` wrapper
  * @param {{signal: AbortSignal}} options
  */
@@ -102,13 +95,8 @@ function onRenderLink(element, { signal }) {
     return;
   }
   onActivate(link, () => onLinkActivate(link, onLinkClick), signal);
-  if (
-    game.user.isGM &&
-    link.dataset.linkType === "Check" &&
-    !element.querySelector("[data-link-request]")
-  ) {
-    const request = renderRequestButton();
-    link.after(request);
+  const request = element.querySelector("[data-link-request]");
+  if (request) {
     onActivate(request, () => onLinkActivate(link, postCheckRequest), signal);
   }
 }
@@ -123,23 +111,4 @@ function onLinkActivate(link, action) {
   if (spec.ok) {
     action(spec);
   }
-}
-
-/**
- * The GM's button beside a Check link that posts a request card.
- * @returns {HTMLAnchorElement}
- */
-function renderRequestButton() {
-  const request = document.createElement("a");
-  request.className = "l5r4-inline-link-request";
-  request.setAttribute("role", "button");
-  request.tabIndex = 0;
-  request.dataset.linkRequest = "";
-  request.dataset.tooltip = T("l5r4.ui.links.request");
-  request.setAttribute("aria-label", T("l5r4.ui.links.request"));
-  const icon = document.createElement("i");
-  icon.className = "fa-solid fa-comment-dots";
-  icon.inert = true;
-  request.append(icon);
-  return request;
 }

@@ -1,7 +1,7 @@
 /**
  * Condition Manager Integration Tests
  *
- * Tests the ConditionManager ApplicationV2 dialog for toggling status conditions.
+ * Tests the ConditionManagerApplication ApplicationV2 dialog for toggling status conditions.
  * Verifies that conditions can be added/removed via the multi-checkbox interface
  * and that ActiveEffects are created/deleted correctly.
  *
@@ -18,7 +18,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import ConditionManager from "../../../module/apps/condition-manager.js";
+import ConditionManagerApplication from "../../../module/apps/condition-manager.js";
 import { checkEffects, guardRolls, settleFullDefense } from "../helpers.js";
 
 export function registerConditionManagerTests(quench) {
@@ -31,7 +31,7 @@ export function registerConditionManagerTests(quench) {
       // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("ConditionManager application", () => {
+      describe("ConditionManagerApplication application", () => {
         let actor;
 
         before(async () => {
@@ -85,21 +85,24 @@ export function registerConditionManagerTests(quench) {
         });
 
         describe("Initialization", () => {
-          it("should create ConditionManager instance with actor", () => {
-            const manager = new ConditionManager(actor);
+          it("should create ConditionManagerApplication instance with actor", () => {
+            const manager = new ConditionManagerApplication(actor);
 
             assert.exists(manager, "Manager created");
             assert.equal(manager.actor, actor, "Actor reference stored");
           });
 
           it("should throw error if created without actor", () => {
-            assert.throws(() => new ConditionManager(null), "ConditionManager requires an actor");
+            assert.throws(
+              () => new ConditionManagerApplication(null),
+              "ConditionManagerApplication requires an actor"
+            );
           });
         });
 
         describe("Condition list preparation", () => {
           it("should exclude stance effects from condition list", async () => {
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             const conditionList = context.conditionList;
@@ -120,7 +123,7 @@ export function registerConditionManagerTests(quench) {
           });
 
           it("should include non-stance conditions in list", async () => {
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             const conditionList = context.conditionList;
@@ -144,7 +147,7 @@ export function registerConditionManagerTests(quench) {
               }
             ]);
 
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             const dazedCondition = context.conditionList.find(c => c.id === "dazed");
@@ -157,7 +160,7 @@ export function registerConditionManagerTests(quench) {
             const [dazed] = await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Dazed", statuses: ["dazed"] }
             ]);
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             await manager.render(true);
             const checked = () =>
               manager.element.querySelector("multi-checkbox").value.includes("dazed");
@@ -171,7 +174,7 @@ export function registerConditionManagerTests(quench) {
 
           it("should mark inactive conditions correctly", async () => {
             // Don't add any conditions
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             const blindedCondition = context.conditionList.find(c => c.id === "blinded");
@@ -309,7 +312,7 @@ export function registerConditionManagerTests(quench) {
             ]);
 
             // ACT
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             // ASSERT - Stance should not appear in condition list
@@ -337,7 +340,7 @@ export function registerConditionManagerTests(quench) {
             ]);
 
             // ACT
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             // ASSERT - Only non-stance condition should be marked active
@@ -363,7 +366,7 @@ export function registerConditionManagerTests(quench) {
             ]);
 
             // ACT
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             // ASSERT - Disabled effect should not be marked as active
@@ -377,7 +380,7 @@ export function registerConditionManagerTests(quench) {
             assert.equal(actor.effects.size, 0, "No effects on actor");
 
             // ACT
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             // ASSERT - All conditions should be inactive
@@ -396,7 +399,7 @@ export function registerConditionManagerTests(quench) {
             ]);
 
             // ACT
-            const manager = new ConditionManager(actor);
+            const manager = new ConditionManagerApplication(actor);
             const context = await manager._prepareContext({});
 
             // ASSERT - Both conditions should be marked active

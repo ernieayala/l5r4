@@ -1,7 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import ArmorConfigApplication from "../../module/apps/armor-config.js";
 import CombatConfigApplication from "../../module/apps/combat-config.js";
-import ConditionManager from "../../module/apps/condition-manager.js";
+import ConditionManagerApplication from "../../module/apps/condition-manager.js";
 import EmphasisManagerApplication from "../../module/apps/emphasis-manager.js";
 import NpcAttackConfigApplication from "../../module/apps/npc-attack-config.js";
 import WealthManagerApplication from "../../module/apps/wealth-manager.js";
@@ -427,7 +427,7 @@ export function registerSheetsAndAppsTests(quench) {
           "should apply a condition checked in the condition manager and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
-            await exercise(new ConditionManager(pc), async app => {
+            await exercise(new ConditionManagerApplication(pc), async app => {
               assertTitle(app, "l5r4.apps.conditionManager.titleFor", { name: pc.name });
               const checkboxes = app.element.querySelector("multi-checkbox");
               const applied = new Promise(resolve => Hooks.once("createActiveEffect", resolve));

@@ -86,7 +86,7 @@ Each meaning the system shows has one icon, and an icon stands for one meaning. 
 | Recalculate | `fa-arrows-rotate` | `data-action="recalculate-xp"` (`templates/apps/xp-manager.hbs`) |  | Reset and refresh, 3 uses |
 | Open the wealth manager | `fa-calculator` | `templates/actor/_partials/_item-section.hbs`, window icon `WealthManagerApplication.DEFAULT_OPTIONS` (`module/apps/wealth-manager.js`) |  |  |
 | Open the XP manager | `fa-chart-line` | `data-action="open-xp-manager"` (`templates/actor/_partials/_stats.hbs`), window icon `XpManagerApplication.DEFAULT_OPTIONS` (`module/apps/xp-manager.js`) |  | `fa-star` means a favorite package |
-| Open the condition manager | `fa-heart-pulse` | `templates/actor/_partials/_combat.hbs`, window icon `ConditionManager.DEFAULT_OPTIONS` (`module/apps/condition-manager.js`) |  |  |
+| Open the condition manager | `fa-heart-pulse` | `templates/actor/_partials/_combat.hbs`, window icon `ConditionManagerApplication.DEFAULT_OPTIONS` (`module/apps/condition-manager.js`) |  |  |
 | Apply healing (rest) | `fa-bed` | `templates/actor/_partials/_wounds.hbs` |  |  |
 | Manage Emphases | `fa-list-check` | `templates/item/_type-details/skill.hbs`, window icon `EmphasisManagerApplication.DEFAULT_OPTIONS` (`module/apps/emphasis-manager.js`) |  |  |
 | Open the Honor, Glory, and Status ledger | `fa-book-bookmark` | `templates/actor/_partials/_ranks.hbs` |  |  |
@@ -94,7 +94,7 @@ Each meaning the system shows has one icon, and an icon stands for one meaning. 
 | Turn an effect on or off | `fa-toggle-on`, `fa-toggle-off` | `data-action="toggle-effect"` (`templates/item/_partials/_tab-effects.hbs`) |  | Region behaviors [src: templates/scene/parts/region-behaviors.hbs:22] |
 | Start or end an activation (kata, kiho, tattoo) | `fa-circle-play`, `fa-circle-stop` | `templates/cards/_partials/_activate.hbs` |  |  |
 | Post to chat | `fa-comment` | `data-action="post-item"` (`templates/cards/_partials/_controls.hbs`) |  |  |
-| Post a request card (GM) | `fa-comment-dots` | `renderRequestButton` (`module/setup/enrichers.js`) |  |  |
+| Post a request card (GM) | `fa-comment-dots` | `data-link-request` (`templates/links/inline-link.hbs`) |  |  |
 | Roll a check (Check link, request card) | `fa-dice-d10` | `ICONS.Check` (`module/setup/enrichers.js`), `templates/chat/check-request.hbs` |  | The d10 die (`client/config.mjs:432`) |
 | Re-roll and keep the better | `fa-dice` | `onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`) |  |  |
 | Contested roll | `fa-scale-balanced` | `onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`) |  |  |
@@ -105,8 +105,8 @@ Each meaning the system shows has one icon, and an icon stands for one meaning. 
 | Open the source document | `fa-up-right-from-square` | `data-action="open-source"` (`templates/apps/effect-panel.hbs`) |  | Pop out (`client/applications/sidebar/tabs/chat.mjs:344`) |
 | Import a compendium entry into the world | `fa-download` | `data-action="import-entry"` (`templates/apps/compendium-browser-results.hbs`) |  | Compendium import (`client/applications/sidebar/apps/compendium.mjs:130`) |
 | Export or import a folder file | `fa-file-export`, `fa-file-import` | `onGetFolderContextOptions` (`module/services/item-transfer.js`) |  | `client/applications/sidebar/document-directory.mjs:259`, `:264` |
-| Open the compendium browser | `fa-books` | Window icon `CompendiumBrowser.DEFAULT_OPTIONS` (`module/apps/compendium-browser.js`), sidebar button `templates/apps/compendium-browser-open.hbs` |  | None: core's `fa-book-atlas` is the Compendium tab and Create Compendium, beside the sidebar button |
-| Open the effect panel | `fa-hourglass-half` | `EffectPanel.DEFAULT_OPTIONS` and `EffectPanel.onGetSceneControlButtons` (`module/apps/effect-panel.js`) |  |  |
+| Open the compendium browser | `fa-books` | Window icon `CompendiumBrowserApplication.DEFAULT_OPTIONS` (`module/apps/compendium-browser.js`), sidebar button `templates/apps/compendium-browser-open.hbs` |  | None: core's `fa-book-atlas` is the Compendium tab and Create Compendium, beside the sidebar button |
+| Open the effect panel | `fa-hourglass-half` | `EffectPanelApplication.DEFAULT_OPTIONS` and `EffectPanelApplication.onGetSceneControlButtons` (`module/apps/effect-panel.js`) |  |  |
 | Configure an NPC attack | `fa-swords` | Window icon `NpcAttackConfigApplication.DEFAULT_OPTIONS` (`module/apps/npc-attack-config.js`) |  |  |
 | Start a duel | `fa-khanda` | `onGetSceneControlButtonsDuel` (`module/services/combat/duel.js`) |  |  |
 | Guard | `fa-shield-halved` | `onGetSceneControlButtonsGuard` (`module/services/combat/guard.js`) |  |  |

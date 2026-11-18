@@ -15,8 +15,8 @@ The system's own ApplicationV2 windows that are not sheets or dialogs: the effec
 
 | Window | File | Opened from | Shows | Saves |
 | --- | --- | --- | --- | --- |
-| Effect panel | `module/apps/effect-panel.js` | The token controls' hourglass tool, `EffectPanel.onGetSceneControlButtons` (`module/apps/effect-panel.js`); opens and closes | The effects on the controlled token's actor, else the user's character: `EffectPanel#actor` (`module/apps/effect-panel.js`) | Actions |
-| Compendium browser | `module/apps/compendium-browser.js` | A button in the Compendium sidebar's header, `CompendiumBrowser.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) | Every visible pack entry of a tab's types, filtered and searched | Actions |
+| Effect panel | `module/apps/effect-panel.js` | The token controls' hourglass tool, `EffectPanelApplication.onGetSceneControlButtons` (`module/apps/effect-panel.js`); opens and closes | The effects on the controlled token's actor, else the user's character: `EffectPanelApplication#actor` (`module/apps/effect-panel.js`) | Actions |
+| Compendium browser | `module/apps/compendium-browser.js` | A button in the Compendium sidebar's header, `CompendiumBrowserApplication.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) | Every visible pack entry of a tab's types, filtered and searched | Actions |
 | Rules editor | `module/sheets/rules-editor.js` | The Rules tab of an item sheet and of an Active Effect sheet | The document's `system.rules`, one card per rule or the list as JSON | Through the sheet's form |
 | XP manager | `module/apps/xp-manager.js` | The XP control in the PC header, `data-action="open-xp-manager"` (`templates/actor/_partials/_stats.hbs`) | XP spent of total and its breakdown, manual XP entries, purchases | Actions |
 | Wealth manager | `module/apps/wealth-manager.js` | The wealth control in the Items section title, `data-action="open-wealth-manager"` (`templates/actor/_partials/_item-section.hbs`) | Koku, bu, and zeni; add, remove, and convert | Actions |
@@ -53,11 +53,11 @@ The effect panel and the browser show one document per row, and the managers fol
 
 ### Effect panel
 
-320 px wide, auto height, first shown at the top left of the canvas: `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`). An actor heading, then the list, or one empty line. It redraws when token control, an effect, the actor, or the combat changes: `EFFECT_PANEL_REDRAWS` (`module/hooks/register-all.js`).
+320 px wide, auto height, first shown at the top left of the canvas: `EffectPanelApplication.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`). An actor heading, then the list, or one empty line. It redraws when token control, an effect, the actor, or the combat changes: `EFFECT_PANEL_REDRAWS` (`module/hooks/register-all.js`).
 
 ### Compendium browser
 
-Two parts: controls and results, `CompendiumBrowser.PARTS` (`module/apps/compendium-browser.js`).
+Two parts: controls and results, `CompendiumBrowserApplication.PARTS` (`module/apps/compendium-browser.js`).
 
 | Part | Holds |
 | --- | --- |
@@ -66,7 +66,7 @@ Two parts: controls and results, `CompendiumBrowser.PARTS` (`module/apps/compend
 | Count | "Entries: {count}": `l5r4-compendium-browser-count` (`templates/apps/compendium-browser-results.hbs`) |
 | Results | The rows, or "Nothing matches." in the list's place: `l5r4-compendium-browser-empty` (`templates/apps/compendium-browser-results.hbs`) |
 
-A search or filter change re-renders the results part only, so the control in use keeps its focus and value: `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`). The indexes are read once while the window is open and dropped on close: `CompendiumBrowser#_onClose` (`module/apps/compendium-browser.js`).
+A search or filter change re-renders the results part only, so the control in use keeps its focus and value: `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`). The indexes are read once while the window is open and dropped on close: `CompendiumBrowserApplication#_onClose` (`module/apps/compendium-browser.js`).
 
 ### Rules editor
 
@@ -87,11 +87,11 @@ When the document is not editable, every field is disabled and the toolbar switc
 | No actor | The panel says to select a token or assign a character | Effect panel (`l5r4.apps.effectPanel.noActor`) |
 | Empty | One italic line in the list's place (`foundations/states.md` rule 9) | Effect panel, browser, rules editor; the managers' lists (rule 4) |
 | Selected tab | Bold and the selected outline (`foundations/states.md`, Selected), `aria-pressed="true"` | Browser tabs: `.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`), its `&.active` |
-| Can't act | The control is not rendered: remove on an effect the user does not own, Import for a player | `canRemove` in `EffectPanel#buildRow` (`module/apps/effect-panel.js`); `canImport` in `CompendiumBrowser#_prepareContext` (`module/apps/compendium-browser.js`) |
+| Can't act | The control is not rendered: remove on an effect the user does not own, Import for a player | `canRemove` in `EffectPanelApplication#buildRow` (`module/apps/effect-panel.js`); `canImport` in `CompendiumBrowserApplication#_prepareContext` (`module/apps/compendium-browser.js`) |
 | Invalid rule | The error line under the legend with the invalid look (`foundations/states.md` rule 7) | Rules editor: `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`) |
 | Read-only | Fields disabled, edit controls left out | Rules editor on a document the user cannot edit |
-| Loading | The browser reads its indexes before its first render; the window opens when they are read | `CompendiumBrowser#getEntries` (`module/apps/compendium-browser.js`) |
-| Refused | A warning notification: no character to add to, no permission (`patterns/feedback.md`) | Browser Add: `CompendiumBrowser.#onAddEntry` (`module/apps/compendium-browser.js`) |
+| Loading | The browser reads its indexes before its first render; the window opens when they are read | `CompendiumBrowserApplication#getEntries` (`module/apps/compendium-browser.js`) |
+| Refused | A warning notification: no character to add to, no permission (`patterns/feedback.md`) | Browser Add: `CompendiumBrowserApplication.#onAddEntry` (`module/apps/compendium-browser.js`) |
 
 ## Rules
 
@@ -112,7 +112,7 @@ Every window follows `docs/code-system/foundry-patterns.md`, Window shape: `clas
 | Effect panel | `l5r4-effect-panel` | `l5r4-effect-panel-*` | `fa-solid fa-hourglass-half` |
 | Compendium browser | `l5r4-compendium-browser` | `l5r4-compendium-browser-*` | `fa-solid fa-books` |
 
-Conforming, `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`).
+Conforming, `EffectPanelApplication.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`).
 
 Non-conforming, modeled: a root class `xp-modal-dialog`, which names neither the file nor the system, with `fa-star`, which means a favorite in core (`foundations/iconography.md` rule 3).
 
@@ -122,7 +122,7 @@ A window saves in one of three ways and shows it:
 
 | Model | Windows | The user sees |
 | --- | --- | --- |
-| Live | Wound, Armor, and combat configuration; condition manager | No Save button. A field saves when it changes: `module/mixins/debounced-field-mixin.js`, or the condition manager's own listener, `ConditionManager#_onCheckboxChange` (`module/apps/condition-manager.js`); the sheet behind it updates |
+| Live | Wound, Armor, and combat configuration; condition manager | No Save button. A field saves when it changes: `module/mixins/debounced-field-mixin.js`, or the condition manager's own listener, `ConditionManagerApplication#_onCheckboxChange` (`module/apps/condition-manager.js`); the sheet behind it updates |
 | Submit | Emphasis manager, NPC attack configuration | A footer with the submit button and Cancel; the window closes on save |
 | Actions | XP manager, wealth manager, effect panel, compendium browser | Each button acts at once and the window redraws; no footer |
 
@@ -150,7 +150,7 @@ Non-conforming, `{{#if manualEntries}}` (`templates/apps/xp-manager.hbs`) and `{
 
 ### 5. The browser filters without losing the user's place
 
-Tabs are buttons with `aria-pressed` inside a `nav` with a name. Each filter is a native control inside its `<label>`. A filter or search change re-renders the results part alone. The count line carries `aria-live="polite"`, so a screen reader hears the new count after each change. "Clear filters" resets the search and every filter. A new tab starts with no filter chosen: `CompendiumBrowser.#onSelectTab` (`module/apps/compendium-browser.js`). Enforced by review and the browser's Quench batch.
+Tabs are buttons with `aria-pressed` inside a `nav` with a name. Each filter is a native control inside its `<label>`. A filter or search change re-renders the results part alone. The count line carries `aria-live="polite"`, so a screen reader hears the new count after each change. "Clear filters" resets the search and every filter. A new tab starts with no filter chosen: `CompendiumBrowserApplication.#onSelectTab` (`module/apps/compendium-browser.js`). Enforced by review and the browser's Quench batch.
 
 Conforming, `l5r4-compendium-browser-controls` (`templates/apps/compendium-browser.hbs`): the tab buttons, `aria-label` on the `nav`, and labelled filters.
 
@@ -226,7 +226,7 @@ Non-conforming, `<input type="text" disabled value="{{xp.spent}} / {{xp.total}}"
 | Element | Behavior |
 | --- | --- |
 | Row name and details | The text column shrinks and wraps beside the image: `.l5r4-effect-panel-text` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-text` (`scss/apps/_compendium-browser.scss`) |
-| Effect duration | Phrases joined with "; " and wrap: `EffectPanel#buildRow` (`module/apps/effect-panel.js`) |
+| Effect duration | Phrases joined with "; " and wrap: `EffectPanelApplication#buildRow` (`module/apps/effect-panel.js`) |
 | Browser tabs | One line each; the strip wraps when the window is narrow: `.l5r4-tabs.-filter` (`scss/apps/_compendium-browser.scss`) |
 | Rule field values | JSON fields are `textarea`s that grow by hand, `resize: vertical`: `.l5r4-rules-editor-field textarea` (`scss/components/_rules-editor.scss`) |
 | Manager labels | `form-group` labels wrap; the field keeps its width |

@@ -973,9 +973,16 @@ body > * {
  */
 .l5r4-inline-link,
 .l5r4-inline-link-request {
+  background: none;
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);
   border-radius: var(--l5r4-radius-sm);
+  color: inherit;
   cursor: pointer;
+  display: inline;
+  font: inherit;
+  height: auto;
+  line-height: inherit;
+  min-height: 0;
   padding: 0 var(--l5r4-space-4);
   white-space: nowrap;
 }

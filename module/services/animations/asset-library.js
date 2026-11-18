@@ -227,6 +227,15 @@ export function isSequencerAvailable() {
 }
 
 /**
+ * Whether this client's user asked for less motion. Read when an animation would start, so a change to the setting
+ * applies to the next one; under it the token's status icon and the chat card carry the state (motion.md rule 5).
+ * @returns {boolean}
+ */
+export function isMotionReduced() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
  * Whether Sequencer and JB2A are both active, so the animation hooks are wired. Each missing module is named in a
  * console warning, and the system runs without animations.
  *

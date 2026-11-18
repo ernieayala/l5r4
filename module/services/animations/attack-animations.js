@@ -5,7 +5,7 @@
  * that covers the distance between the tokens.
  */
 
-import { isJb2aAvailable, isSequencerAvailable } from "./asset-library.js";
+import { isJb2aAvailable, isMotionReduced, isSequencerAvailable } from "./asset-library.js";
 
 /**
  * Arrow animation base path for physical white arrows.
@@ -182,7 +182,8 @@ export function isBowWeapon(weapon) {
  * @returns {Promise<void>}
  */
 export async function startAttackAnimation(attacker, target, weapon) {
-  if (!weapon) {
+  // A user who asked for less motion reads the hit from the chat card (motion.md rule 5)
+  if (!weapon || isMotionReduced()) {
     return;
   }
 

@@ -25,7 +25,7 @@ The member-order checks are the local ESLint rule `l5r4/member-order` in `tools/
 
 Check: `l5r4/member-order`. Picked by majority where the code split: `DEFAULT_OPTIONS` first, constructor and getters before `_prepareContext`.
 
-Conforming, modeled on `EffectPanel` (`module/apps/effect-panel.js`), which keeps this order; the block shows a few of its members under shorter names, and gives the class its `naming.md` name:
+Conforming, modeled on `EffectPanelApplication` (`module/apps/effect-panel.js`), which keeps this order; the block shows a few of its members under shorter names, and gives the class its `naming.md` name:
 
 ```js
 export default class EffectPanelApplication extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -75,9 +75,9 @@ Not conforming (modeled): `PARTS` comes before `DEFAULT_OPTIONS`, and `DEFAULT_O
 
 Picked by majority: the literal template path over `TEMPLATE()`, the unprefixed actor-window id, the inline mixin, `render(true)` over `render({ force: true })`.
 
-Conforming, `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`).
+Conforming, `EffectPanelApplication.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`).
 
-Not conforming, `EffectPanel.openOrClose` (`module/apps/effect-panel.js`): it opens the panel with `render({ force: true })`, not `render(true)`.
+Not conforming, `EffectPanelApplication.openOrClose` (`module/apps/effect-panel.js`): it opens the panel with `render({ force: true })`, not `render(true)`.
 
 A template part renders one root element, or core throws [src: client/applications/api/handlebars-application.mjs:172].
 
@@ -95,7 +95,7 @@ A template part renders one root element, or core throws [src: client/applicatio
 
 A handler is the system's own method, not a Foundry override, so it takes `#`, never `_` (Stage 17 decision 15). Picked by majority: `(event, element)` as parameter names over `target`, `DEFAULT_OPTIONS.actions` over own delegation.
 
-Conforming, modeled on the `actions` of `EffectPanel.DEFAULT_OPTIONS` and on `EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`):
+Conforming, modeled on the `actions` of `EffectPanelApplication.DEFAULT_OPTIONS` and on `EffectPanelApplication.#onDeleteEffect` (`module/apps/effect-panel.js`):
 
 ```js
 static DEFAULT_OPTIONS = {

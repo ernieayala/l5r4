@@ -279,7 +279,7 @@ export default [
         { capIsNewExceptions: ["T", "F", "R", "TEMPLATE"], capIsNewExceptionPattern: "Mixin$" }
       ],
       "max-params": ["error", 3],
-      // docs/code-system/functions.md, Function length: near the 90th percentile of the system's functions
+      // docs/code-system/functions.md, Function length: 30 lines of code, a nested function counted in its outer
       "max-lines-per-function": ["error", { max: 30, skipBlankLines: true, skipComments: true }],
       "no-else-return": "error",
       "no-restricted-globals": ["error", ...DEPRECATED_GLOBALS],

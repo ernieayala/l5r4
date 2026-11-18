@@ -27,7 +27,9 @@ let browser = null;
 /**
  * The compendium browser window, one per client.
  */
-export default class CompendiumBrowser extends HandlebarsApplicationMixin(ApplicationV2) {
+export default class CompendiumBrowserApplication extends HandlebarsApplicationMixin(
+  ApplicationV2
+) {
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-compendium-browser`,
     classes: ["l5r4", "l5r4-compendium-browser"],
@@ -38,11 +40,11 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     },
     position: { width: 760, height: 660 },
     actions: {
-      "select-tab": CompendiumBrowser.#onSelectTab,
-      "clear-filters": CompendiumBrowser.#onClearFilters,
-      "add-entry": CompendiumBrowser.#onAddEntry,
-      "import-entry": CompendiumBrowser.#onImportEntry,
-      "open-entry": CompendiumBrowser.#onOpenEntry
+      "select-tab": CompendiumBrowserApplication.#onSelectTab,
+      "clear-filters": CompendiumBrowserApplication.#onClearFilters,
+      "add-entry": CompendiumBrowserApplication.#onAddEntry,
+      "import-entry": CompendiumBrowserApplication.#onImportEntry,
+      "open-entry": CompendiumBrowserApplication.#onOpenEntry
     }
   };
 
@@ -144,10 +146,10 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 
   /**
    * Open the browser, or bring it to the front.
-   * @returns {Promise<CompendiumBrowser>} The rendered browser
+   * @returns {Promise<CompendiumBrowserApplication>} The rendered browser
    */
   static open() {
-    browser ??= new CompendiumBrowser();
+    browser ??= new CompendiumBrowserApplication();
     return browser.render({ force: true });
   }
 
@@ -184,13 +186,13 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     if (actions.querySelector("[data-l5r4-browser]")) {
       return;
     }
-    button.addEventListener("click", () => CompendiumBrowser.open());
+    button.addEventListener("click", () => CompendiumBrowserApplication.open());
     actions.append(button);
   }
 
   /**
    * Show another tab, with no filter chosen.
-   * @this {CompendiumBrowser}
+   * @this {CompendiumBrowserApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */
@@ -202,7 +204,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 
   /**
    * Clear the search and every filter.
-   * @this {CompendiumBrowser}
+   * @this {CompendiumBrowserApplication}
    */
   static async #onClearFilters() {
     this.search = "";
@@ -212,7 +214,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 
   /**
    * Add an item to the user's character or the controlled token's actor.
-   * @this {CompendiumBrowser}
+   * @this {CompendiumBrowserApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */
@@ -230,7 +232,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 
   /**
    * Import a creature into the world. GMs only.
-   * @this {CompendiumBrowser}
+   * @this {CompendiumBrowserApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */
@@ -245,7 +247,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 
   /**
    * Open an entry's sheet.
-   * @this {CompendiumBrowser}
+   * @this {CompendiumBrowserApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */

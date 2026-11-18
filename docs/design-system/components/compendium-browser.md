@@ -4,10 +4,10 @@ One window over every system pack and world compendium the user can see, in tabs
 
 | Item | Detail |
 | --- | --- |
-| Window | `module/apps/compendium-browser.js`, class `CompendiumBrowser` (naming.md's target is `CompendiumBrowserApplication`). `HandlebarsApplicationMixin(ApplicationV2)`, id `l5r4-enhanced-compendium-browser`, classes `l5r4 l5r4-compendium-browser`, resizable, 760 × 660 |
+| Window | `module/apps/compendium-browser.js`, class `CompendiumBrowserApplication` (naming.md's target is `CompendiumBrowserApplication`). `HandlebarsApplicationMixin(ApplicationV2)`, id `l5r4-enhanced-compendium-browser`, classes `l5r4 l5r4-compendium-browser`, resizable, 760 × 660 |
 | Icon | `fa-solid fa-books`, on the window and the sidebar button (iconography.md rule 3): core's journal icon `fa-book-open` and its Compendium tab and Create Compendium icon `fa-book-atlas` stand beside the button, so neither is used |
-| Templates | Parts `controls` (`templates/apps/compendium-browser.hbs`) and `results` (`templates/apps/compendium-browser-results.hbs`, scrollable). A filter change re-renders `results` alone, so the field in use keeps focus: `CompendiumBrowser.PARTS` and `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`) |
-| Opened by | A button added to the Compendium sidebar's header: `CompendiumBrowser.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) |
+| Templates | Parts `controls` (`templates/apps/compendium-browser.hbs`) and `results` (`templates/apps/compendium-browser-results.hbs`, scrollable). A filter change re-renders `results` alone, so the field in use keeps focus: `CompendiumBrowserApplication.PARTS` and `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`) |
+| Opened by | A button added to the Compendium sidebar's header: `CompendiumBrowserApplication.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) |
 | Config | Tabs and filters in `module/config/browser.js` (`BROWSER_TABS`, `BROWSER_FILTERS`); filtering in `module/utils/browser-filter.js` |
 | SCSS | `scss/apps/_compendium-browser.scss`, the `.l5r4-compendium-browser` block, which also holds its filter tabs, `.l5r4-tabs.-filter` (`scss/apps/_compendium-browser.scss`); the target puts them in `scss/components/_tabs.scss` |
 | Copy | `l5r4.apps.compendiumBrowser.*` (localization.md); the title reads "Compendium browser" (voice.md, sentence case) |
@@ -46,7 +46,7 @@ Element classes are `l5r4-compendium-browser-<element>`, the window's block ([na
 | `add-entry`     | Adds the item to the user's character or the controlled token's actor |
 | `import-entry`  | Imports a creature into the world; GMs only                           |
 
-Search and filter fields are not actions: `input` and `change` listeners on `[data-browser-search]` and `[data-browser-filter]`, added in `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`).
+Search and filter fields are not actions: `input` and `change` listeners on `[data-browser-search]` and `[data-browser-filter]`, added in `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`).
 
 ## Variants
 
@@ -63,13 +63,13 @@ Search and filter fields are not actions: `input` and `change` listeners on `[da
 | Selected tab | Bold and `outline: var(--l5r4-state-selected-outline)` (states.md Selected) | `aria-pressed="true"`; core's `active` mirrors it, as `button.active` reads it |
 | Filtered | The count and the rows change; the field keeps focus | `results` part only |
 | No matches | One italic line, "Nothing matches." | Empty |
-| Dragging | Core's drag; the row carries `cursor: grab` | `dragstart` sets the document's UUID: `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`) |
-| Add with no actor | Warning `l5r4.apps.compendiumBrowser.noActor` | The guard at the top of `CompendiumBrowser.#onAddEntry` (`module/apps/compendium-browser.js`) |
+| Dragging | Core's drag; the row carries `cursor: grab` | `dragstart` sets the document's UUID: `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`) |
+| Add with no actor | Warning `l5r4.apps.compendiumBrowser.noActor` | The guard at the top of `CompendiumBrowserApplication.#onAddEntry` (`module/apps/compendium-browser.js`) |
 | Loading | Indexes are read once per opening (`#getEntries`); the window renders when they are in | No visible state |
 
 ## Parameters
 
-Context from `CompendiumBrowser#_prepareContext` (`module/apps/compendium-browser.js`):
+Context from `CompendiumBrowserApplication#_prepareContext` (`module/apps/compendium-browser.js`):
 
 | Name | Type | Meaning |
 | --- | --- | --- |
@@ -113,13 +113,13 @@ The text column, `.l5r4-compendium-browser-text` (`scss/apps/_compendium-browser
 
 | # | Rule | Enforced by | Conforming | Non-conforming |
 | --- | --- | --- | --- | --- |
-| CB1 | A filter change re-renders the results part only | Quench `l5r4-enhanced.packs` | `this.render({ parts: ["results"] })` in `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`) | Re-rendering the whole window on each keystroke, which drops the search field's focus (modeled) |
+| CB1 | A filter change re-renders the results part only | Quench `l5r4-enhanced.packs` | `this.render({ parts: ["results"] })` in `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`) | Re-rendering the whole window on each keystroke, which drops the search field's focus (modeled) |
 | CB2 | Every row action has a route without drag | Review | Add on each item row, `data-action="add-entry"` (`templates/apps/compendium-browser-results.hbs`) | Drag as the only way to put an item on a sheet (modeled) |
 | CB3 | The selected tab shows weight and outline, and states it in `aria-pressed` | Review (states.md Selected) | `aria-pressed="{{#if active}}true{{else}}false{{/if}}"` (`templates/apps/compendium-browser.hbs`) | A tab marked by color alone (modeled) |
 | CB4 | The tabs are the tabs component's filter variant; the selected one keeps core's `active`, which core's `button.active` rule reads (`foundry2.css:4126-4130`) | `tests/conventions/templates.test.js`; review | `l5r4-tabs-tab`, with `active` on the selected one, inside `l5r4-tabs -filter` (`templates/apps/compendium-browser.hbs`), as `tabs.md` shows | `class="l5r4-browser-tab active"`: a second tab component (modeled) |
 | CB5 | Actions are kebab-case | `tests/conventions/actions.test.js` | `data-action="select-tab"` (`templates/apps/compendium-browser.hbs`) | `data-action="selectTab"` (modeled) |
-| CB6 | JavaScript selects by data attribute, never by class | ESLint `no-restricted-syntax` | `querySelectorAll("[data-browser-filter]")` in `CompendiumBrowser#_onRender` (`module/apps/compendium-browser.js`) | `querySelectorAll(".l5r4-browser-row[data-uuid]")` (modeled) |
-| CB7 | No markup in JavaScript: the sidebar button comes from a template | ESLint `no-restricted-syntax` | `renderTemplate` and `foundry.utils.parseHTML` in `CompendiumBrowser.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) (templates-and-styles.md) | ``button.innerHTML = `<i class="fa-solid fa-book-open" inert></i>…` `` (modeled) |
+| CB6 | JavaScript selects by data attribute, never by class | ESLint `no-restricted-syntax` | `querySelectorAll("[data-browser-filter]")` in `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`) | `querySelectorAll(".l5r4-browser-row[data-uuid]")` (modeled) |
+| CB7 | No markup in JavaScript: the sidebar button comes from a template | ESLint `no-restricted-syntax` | `renderTemplate` and `foundry.utils.parseHTML` in `CompendiumBrowserApplication.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) (templates-and-styles.md) | ``button.innerHTML = `<i class="fa-solid fa-book-open" inert></i>…` `` (modeled) |
 | CB8 | The empty state is one italic `<p>` in the list's place | Review (states.md rule 9) | `{{else}}<p class="l5r4-compendium-browser-empty">…</p>` (modeled) | `<li class="l5r4-compendium-browser-empty">` (`templates/apps/compendium-browser-results.hbs`) inside the list |
 
 ## Do and don't

@@ -19,7 +19,7 @@ let panel = null;
 /**
  * The effect panel window, one per client.
  */
-export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV2) {
+export default class EffectPanelApplication extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-effect-panel`,
     classes: ["l5r4", "l5r4-effect-panel"],
@@ -30,8 +30,8 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     },
     position: { width: 320, height: "auto", top: 80, left: 120 },
     actions: {
-      "open-source": EffectPanel.#onOpenSource,
-      "delete-effect": EffectPanel.#onDeleteEffect
+      "open-source": EffectPanelApplication.#onOpenSource,
+      "delete-effect": EffectPanelApplication.#onDeleteEffect
     }
   };
 
@@ -63,13 +63,13 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Open the panel, or close it when it is open.
-   * @returns {Promise<EffectPanel>} The panel, once rendered or closed
+   * @returns {Promise<EffectPanelApplication>} The panel, once rendered or closed
    */
   static openOrClose() {
     if (panel?.rendered) {
       return panel.close();
     }
-    panel ??= new EffectPanel();
+    panel ??= new EffectPanelApplication();
     return panel.render({ force: true });
   }
 
@@ -95,13 +95,13 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
       title: "l5r4.apps.effectPanel.title",
       icon: "fa-solid fa-hourglass-half",
       button: true,
-      onChange: () => EffectPanel.openOrClose()
+      onChange: () => EffectPanelApplication.openOrClose()
     };
   }
 
   /**
    * Open an effect's source sheet, or the effect's own when it has none.
-   * @this {EffectPanel}
+   * @this {EffectPanelApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */
@@ -112,7 +112,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Remove an effect the user owns.
-   * @this {EffectPanel}
+   * @this {EffectPanelApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
    */

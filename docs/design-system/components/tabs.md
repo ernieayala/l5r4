@@ -86,7 +86,7 @@ A tab label is one line (`foundations/typography.md` T7) and short: the tab's na
 | T1 | The filter tab, `<button type="button" class="l5r4-tabs-tab` (`templates/apps/compendium-browser.hbs`) | `<a class="item {{tab.cssClass}}" data-action="changeTab" data-tab="{{tab.id}}">` (modeled) |
 | T2 | `aria-pressed="{{#if active}}true{{else}}false{{/if}}"` (`templates/apps/compendium-browser.hbs`) | The sheet tab bar with no roles (modeled) |
 | T3 | `{{#if (eq currentTab "details")}}active{{/if}}` on the panel (`templates/item/_partials/_tab-details.hbs`) | `class="item {{tab.cssClass}}"` on the tab, a class string built in JavaScript (modeled) |
-| T4 | `"select-tab": CompendiumBrowser.#onSelectTab` (`module/apps/compendium-browser.js`) | `changeTab: L5R4ItemSheet.prototype._onChangeTab` (modeled) |
+| T4 | `"select-tab": CompendiumBrowserApplication.#onSelectTab` (`module/apps/compendium-browser.js`) | `changeTab: L5R4ItemSheet.prototype._onChangeTab` (modeled) |
 | T5 | `font-weight: bold; outline: var(--l5r4-state-selected-outline);` on the selected `.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`) | A selected tab shown by a background color only (modeled) |
 
 A panel marks itself active with `{{#if (eq currentTab "<id>")}}active`. The tab buttons read `tab.active`, which `L5R4ItemSheet#prepareTabs` (`module/sheets/item-sheet.js`) sets, so no class string is built in JavaScript.

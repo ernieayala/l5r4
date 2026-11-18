@@ -51,8 +51,8 @@ import { onGetSceneControlButtonsDuel } from "../../../module/services/combat/du
 import { onGetSceneControlButtonsGuard } from "../../../module/services/combat/guard.js";
 import { onGetSceneControlButtonsSession } from "../../../module/services/session.js";
 import { onGetFolderContextOptions } from "../../../module/services/item-transfer.js";
-import EffectPanel from "../../../module/apps/effect-panel.js";
-import CompendiumBrowser from "../../../module/apps/compendium-browser.js";
+import EffectPanelApplication from "../../../module/apps/effect-panel.js";
+import CompendiumBrowserApplication from "../../../module/apps/compendium-browser.js";
 
 /**
  * Registers the `hooks.register-all` batch.
@@ -110,7 +110,7 @@ export function registerHookWiringTests(quench) {
             "updateActor",
             "updateCombat"
           ]) {
-            assertWiredInOrder(hook, [EffectPanel.renderIfOpen]);
+            assertWiredInOrder(hook, [EffectPanelApplication.renderIfOpen]);
           }
         });
 
@@ -162,7 +162,7 @@ export function registerHookWiringTests(quench) {
         it("should add the token controls in their order", () => {
           assertWiredInOrder("getSceneControlButtons", [
             onGetSceneControlButtonsEncounter,
-            EffectPanel.onGetSceneControlButtons,
+            EffectPanelApplication.onGetSceneControlButtons,
             onGetSceneControlButtonsDuel,
             onGetSceneControlButtonsGuard,
             onGetSceneControlButtonsSession
@@ -171,7 +171,7 @@ export function registerHookWiringTests(quench) {
 
         it("should wire the compendium browser's button and index fields", () => {
           assertWiredInOrder("renderCompendiumDirectory", [
-            CompendiumBrowser.onRenderCompendiumDirectory
+            CompendiumBrowserApplication.onRenderCompendiumDirectory
           ]);
           for (const documentName of ["Item", "Actor"]) {
             for (const field of getBrowserIndexFields(documentName)) {

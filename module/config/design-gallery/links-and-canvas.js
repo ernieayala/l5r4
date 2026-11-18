@@ -29,6 +29,21 @@ export const GALLERY_LINKS_AND_CANVAS = Object.freeze([
         }
       },
       {
+        label: "l5r4.apps.designGallery.samples.checkLinkGm",
+        partial: `${T}/links/inline-link.hbs`,
+        scope: "plain",
+        context: "plain",
+        with: {
+          ok: true,
+          type: "Check",
+          params: "skill=Kenjutsu|tn=20",
+          label: "",
+          icon: "fa-solid fa-dice-d10",
+          text: { i18n: "l5r4.ui.links.checkTn", data: { what: "Kenjutsu", tn: 20 } },
+          canRequest: true
+        }
+      },
+      {
         label: "l5r4.apps.designGallery.samples.damageLink",
         partial: `${T}/links/inline-link.hbs`,
         scope: "plain",
@@ -79,7 +94,7 @@ export const GALLERY_LINKS_AND_CANVAS = Object.freeze([
       }
     ],
     seeAlso: ["request-card"],
-    notes: ["l5r4.apps.designGallery.notes.linkRequest"]
+    notes: []
   },
   {
     page: "floating-number",

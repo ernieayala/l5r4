@@ -11,6 +11,7 @@ import {
   getStanceAnimation,
   getConditionAnimation,
   isJb2aAvailable,
+  isMotionReduced,
   isSequencerAvailable
 } from "./asset-library.js";
 
@@ -31,7 +32,7 @@ const LOAD_WAIT_MS = 5000;
  * Effect persists until explicitly removed via deleteAnimation().
  *
  * Defensive Coding:
- * - Returns early if Sequencer or JB2A not available
+ * - Returns early if Sequencer or JB2A not available, or the user asked for less motion
  * - Returns early if no animation config found for ID
  * - Returns early if actor has no active tokens
  * - Wraps Sequencer API calls in try/catch
@@ -47,8 +48,8 @@ const LOAD_WAIT_MS = 5000;
  * @returns {Promise<void>}
  */
 export async function startAnimation(actor, statusId, isStance = false) {
-  // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJb2aAvailable()) {
+  // Early return: Check module availability, and play nothing for a user who asked for less motion
+  if (!isSequencerAvailable() || !isJb2aAvailable() || isMotionReduced()) {
     return;
   }
 

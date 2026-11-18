@@ -15,14 +15,15 @@ A text link written in a journal, an item description, or a chat message as `@Ch
 
 The link's HTML is built each time core enriches the text, never stored, so its classes may change. The `data-link-*` attribute names are not stored either; the `data-link-type` values are.
 
-| Part | Markup | Class | Target, where the markup differs |
-| --- | --- | --- | --- |
-| Link | `<a role="button" tabindex="0" data-link-type data-link-params data-link-label>` with a click and a keydown listener | `l5r4-inline-link` | `<button type="button" class="l5r4-inline-link">` with the same `data-link-*`; the native button handles Enter and Space |
-| Icon | `<i inert>` from `ICONS` (`module/setup/enrichers.js`) | the icon's classes |  |
-| Text | Text node: `formatLinkText(spec)` (`module/services/links.js`), or the link's own label |  |  |
-| Request | `<a role="button" tabindex="0">` built in JavaScript with `document.createElement` by `renderRequestButton` (`module/setup/enrichers.js`), GM and Check only | `l5r4-inline-link-request` | Rendered by the template when `canRequest` is set: `<button type="button" class="l5r4-inline-link-request" data-tooltip="{{localize "l5r4.ui.links.request"}}" aria-label="{{localize "l5r4.ui.links.request"}}">` with `fa-comment-dots` |
-| Broken | `<span data-link-broken data-tooltip>`: `fa-link-slash`, the source text, the reason | `l5r4-inline-link -broken` |  |
-| Reason | `<span>` in parentheses | `l5r4-inline-link-reason` |  |
+| Part | Markup | Class |
+| --- | --- | --- |
+| Group | `<span>` around the link and its request control: the enricher's one root element (`renderLink` (`module/setup/enrichers.js`)) | `l5r4-inline-link-group` |
+| Link | `<button type="button" data-link-type data-link-params data-link-label>` with a click listener; the native button runs on Enter and Space | `l5r4-inline-link` |
+| Icon | `<i inert>` from `ICONS` (`module/setup/enrichers.js`) | the icon's classes |
+| Text | Text node: `formatLinkText(spec)` (`module/services/links.js`), or the link's own label |  |
+| Request | `<button type="button" data-link-request data-tooltip aria-label>` with `fa-comment-dots`, both labels `l5r4.ui.links.request`, rendered by the template when `canRequest` is set: a GM's Check link | `l5r4-inline-link-request` |
+| Broken | `<span data-link-broken data-tooltip>`: `fa-link-slash`, the source text, the reason | `l5r4-inline-link -broken` |
+| Reason | `<span>` in parentheses | `l5r4-inline-link-reason` |
 
 | Link type | Icon | Runs |
 | --- | --- | --- |
@@ -44,8 +45,8 @@ The link's HTML is built each time core enriches the text, never stored, so its 
 
 | State | Look |
 | --- | --- |
-| Default | A chip: thin muted frame, small corner, one line |
-| Hover, focus | Core's button looks on the target `<button>`; focus ring per states.md |
+| Default | A chip: thin muted frame, small corner, one line, in the text's own font and color (core's block button look is reset: `.l5r4-inline-link` (`scss/components/_inline-link.scss`)) |
+| Hover, focus | The pointer cursor on hover; core's focus ring on keyboard focus (states.md) |
 | Broken | Thick dashed frame in the text color and the help cursor; the reason in words beside the source |
 | No acting character | Warning `l5r4.ui.links.noActor` |
 | No targets | Warning `l5r4.ui.links.noTargets` |
@@ -54,17 +55,17 @@ The link's HTML is built each time core enriches the text, never stored, so its 
 
 Context from `renderLink` (`module/setup/enrichers.js`):
 
-| Name         | Type    | Meaning                                                                |
-| ------------ | ------- | ---------------------------------------------------------------------- |
-| `ok`         | boolean | The link parsed                                                        |
-| `type`       | string  | `Check`, `Damage`, `Condition`, `Fear` (fixed)                         |
-| `params`     | string  | The link's parameters as typed                                         |
-| `label`      | string  | The link's `{label}`, or empty                                         |
-| `icon`       | string  | Font Awesome classes for the type                                      |
-| `text`       | string  | What the link shows                                                    |
-| `source`     | string  | The whole link as typed, for a broken link                             |
-| `reason`     | string  | Why a broken link did not parse, localized                             |
-| `canRequest` | boolean | Target: a GM's Check link, so the template renders the request control |
+| Name         | Type    | Meaning                                                        |
+| ------------ | ------- | -------------------------------------------------------------- |
+| `ok`         | boolean | The link parsed                                                |
+| `type`       | string  | `Check`, `Damage`, `Condition`, `Fear` (fixed)                 |
+| `params`     | string  | The link's parameters as typed                                 |
+| `label`      | string  | The link's `{label}`, or empty                                 |
+| `icon`       | string  | Font Awesome classes for the type                              |
+| `text`       | string  | What the link shows                                            |
+| `source`     | string  | The whole link as typed, for a broken link                     |
+| `reason`     | string  | Why a broken link did not parse, localized                     |
+| `canRequest` | boolean | A GM's Check link, so the template renders the request control |
 
 The click reads the link again from its data attributes, which are page content (`specOf` (`module/setup/enrichers.js`)), never from the text.
 
@@ -83,7 +84,7 @@ The click reads the link again from its data attributes, which are page content 
 
 | Contract | Detail |
 | --- | --- |
-| Focus | `role="button"` and `tabindex="0"` on an `<a>`, with a keydown listener for Enter and Space (`onActivate` (`module/setup/enrichers.js`)). Target: a `<button type="button">`, which takes focus and runs on both keys with no listener |
+| Focus | A `<button type="button">`, which takes focus and runs on Enter and Space with no listener of its own (`onActivate` (`module/setup/enrichers.js`) listens for the click) |
 | Name | The link's text is its name. The request control carries a `data-tooltip` and `aria-label` pair, both `l5r4.ui.links.request` (`foundations/iconography.md` rule 4) |
 | Broken | Not a control: a `<span>` with its reason as visible text, so a reader hears why |
 | Icons | `inert` |
@@ -96,8 +97,8 @@ The chip stays on one line (`white-space: nowrap` on `.l5r4-inline-link` (`scss/
 
 | # | Rule | Enforced by | Conforming | Non-conforming |
 | --- | --- | --- | --- | --- |
-| IL1 | The link is a native button | `tests/conventions/templates.test.js` (native controls) | `<button type="button" class="l5r4-inline-link" data-link-type="{{type}}">` (target) | `<a class="l5r4-inline-link" …>` with `role="button" tabindex="0"` (`templates/links/inline-link.hbs`) |
-| IL2 | All link markup comes from the template; JavaScript writes no HTML | ESLint `no-restricted-syntax` | `renderTemplate(LINK_TEMPLATES.inlineLink, …)` then `foundry.utils.parseHTML`, in `renderLink` (`module/setup/enrichers.js`) | The request control built with `document.createElement` in `renderRequestButton` (`module/setup/enrichers.js`) |
+| IL1 | The link is a native button | `tests/conventions/templates.test.js` (native controls), Quench `l5r4-enhanced.table-tools` | `<button type="button" class="l5r4-inline-link"` with its data attributes (`templates/links/inline-link.hbs`) | `<a class="l5r4-inline-link" …>` with `role="button" tabindex="0"` (modeled) |
+| IL2 | All link markup comes from the template; JavaScript writes no HTML | ESLint `no-restricted-syntax` | `renderTemplate(LINK_TEMPLATES.inlineLink, …)` then `foundry.utils.parseHTML`, in `renderLink` (`module/setup/enrichers.js`), the request control included | The request control built with `document.createElement` (modeled) |
 | IL3 | JavaScript finds the link by its data attribute | ESLint `no-restricted-syntax` | `element.querySelector("[data-link-type]")` in `onRenderLink` (`module/setup/enrichers.js`) | `element.querySelector(".l5r4-link[data-link-type]")` (modeled) |
 | IL4 | A click re-parses the link from its attributes and runs nothing that did not parse | Quench `l5r4-enhanced.table-tools` | `const spec = specOf(link); if (spec.ok) { action(spec); }` in `onLinkActivate` (`module/setup/enrichers.js`) | Running the text the link displays (modeled) |
 | IL5 | A broken link shows its reason in words | Quench `l5r4-enhanced.table-tools`, review | `<span class="l5r4-inline-link-reason">({{reason}})</span>` (`templates/links/inline-link.hbs`) | A broken link marked by a dashed frame alone (modeled) |

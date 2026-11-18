@@ -57,7 +57,7 @@ Non-conforming (modeled):
 
 The effect panel, the compendium browser, the managers, and every dialog are ApplicationV2 windows: core gives them `--z-index-window` and brings the focused one to the front. Floating numbers go through `canvas.interface.createScrollingText` in `startScrollingText` (`module/services/scrolling-text.js`) and status animations through Sequencer; both draw on the canvas, which has no CSS stacking. The system sets no `z-index` on a window root, a tooltip, or a chat message. Enforced by `tests/conventions/styles.test.js` (rule 1: any `z-index` reads a layer token, and every layer token sits below 30) and review for the selector it lands on.
 
-Conforming, `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`): the panel's options set an id, classes, a window icon, and a position, and no stacking.
+Conforming, `EffectPanelApplication.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`): the panel's options set an id, classes, a window icon, and a position, and no stacking.
 
 Non-conforming, modeled on a window root:
 

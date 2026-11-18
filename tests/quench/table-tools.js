@@ -1,5 +1,5 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import EffectPanel from "../../module/apps/effect-panel.js";
+import EffectPanelApplication from "../../module/apps/effect-panel.js";
 import { onHotbarDrop } from "../../module/sheets/ui/macros.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
@@ -211,6 +211,24 @@ export function registerTableToolsTests(quench) {
       });
 
       describe("Request card", () => {
+        // #79
+        it(
+          "should render a GM's Check link and its request control as native buttons",
+          clean(async function () {
+            // A sheet render can outrun Mocha's 2 s default
+            this.timeout(10_000);
+            const { sheet, element } = await journalWith("@Check[trait=wil|tn=10]");
+            for (const control of [
+              element.querySelector("[data-link-type]"),
+              element.querySelector("[data-link-request]")
+            ]) {
+              assert.equal(control.tagName, "BUTTON");
+              assert.equal(control.type, "button");
+            }
+            await sheet.close({ animate: false });
+          })
+        );
+
         it(
           "should post a request card from a GM's Check link that rolls for the clicking user's character",
           clean(async function () {
@@ -248,7 +266,7 @@ export function registerTableToolsTests(quench) {
             this.timeout(10_000);
             const { actor } = await actingPC();
             await actor.toggleStatusEffect("dazed", { active: true });
-            await EffectPanel.openOrClose();
+            await EffectPanelApplication.openOrClose();
             const panel = foundry.applications.instances.get(`${SYS_ID}-effect-panel`);
             try {
               await waitFor(() => panel.element?.querySelector("[data-source-uuid]"));

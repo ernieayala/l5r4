@@ -39,7 +39,7 @@ Template, stylesheet, and test files have their own sections below.
 | Foundry subclass registered with core (document, sheet, die term) | `L5R4<Base>` | `L5R4Actor` (`module/documents/actor.js`), `L5R4PcSheet` (`module/sheets/pc-sheet.js`), `L5R4Die` (`module/services/dice/roll-keep-die.js`) | `ActorL5R4` (modeled) | Review |
 | Data model | `<Subtype>Data`; a shared base is `<Base>Data` | `SkillData` (`module/data/item/skill-data.js`), `ActorData` | `SkillModel` (modeled) | Review |
 | Rule model | `<RuleKey>Rule`, the rule key spelled as stored | `TNModifierRule`, `DiceRuleRule` (`module/data/rules/rule-models.js`) | `TnModifierRule` (modeled): the key `TNModifier` is fixed | Review |
-| App window | `<Name>Application` | `XpManagerApplication` (`module/apps/xp-manager.js`) | `EffectPanel` (`module/apps/effect-panel.js`), `CompendiumBrowser` (`module/apps/compendium-browser.js`), `ConditionManager` (`module/apps/condition-manager.js`) | Review |
+| App window | `<Name>Application` | `XpManagerApplication` (`module/apps/xp-manager.js`), `EffectPanelApplication` (`module/apps/effect-panel.js`) | `EffectPanel`, with no suffix (modeled) | Review |
 | Sheet handler | `<Name>Handler`, all-static, named export | `StanceHandler` (`module/sheets/handlers/stance-handler.js`) | `StanceActions` (modeled) | Review |
 
 ## Functions
@@ -123,12 +123,12 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 
 | Kind | Pattern | Conforming | Not conforming | Check |
 | --- | --- | --- | --- | --- |
-| Foundry protected override | `_name`, exactly as core names it | `CompendiumBrowser#_prepareContext` (`module/apps/compendium-browser.js`) |  | Review |
-| The system's own private member (method or field) | `#name` | `CompendiumBrowser#getEntries` (`module/apps/compendium-browser.js`), `L5R4ItemSheet#currentTab` (`module/sheets/item-sheet.js`) | `XpManagerApplication#_calculateTotal` (`module/apps/xp-manager.js`), `L5R4ItemSheet#_getAvailableTabs` (`module/sheets/item-sheet.js`) | `l5r4/naming`: `_name` only in a class that extends a Foundry class; review for the rest |
+| Foundry protected override | `_name`, exactly as core names it | `CompendiumBrowserApplication#_prepareContext` (`module/apps/compendium-browser.js`) |  | Review |
+| The system's own private member (method or field) | `#name` | `CompendiumBrowserApplication#getEntries` (`module/apps/compendium-browser.js`), `L5R4ItemSheet#currentTab` (`module/sheets/item-sheet.js`) | `XpManagerApplication#_calculateTotal` (`module/apps/xp-manager.js`), `L5R4ItemSheet#_getAvailableTabs` (`module/sheets/item-sheet.js`) | `l5r4/naming`: `_name` only in a class that extends a Foundry class; review for the rest |
 | Member another class calls | No prefix: it is public | `rollCheck` | `L5R4Actor#_finalizeWoundPenalties` (`module/documents/actor.js`), called from `pc-preparation.js` and `npc-preparation.js` → `finalizeWoundPenalties` | Review |
-| Action handler | `static #on<Action>`, the PascalCase form of its `data-action` | `EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`) for `delete-effect` | `_onAddXp` on the prototype for `add-xp` (modeled) | `l5r4/naming` |
+| Action handler | `static #on<Action>`, the PascalCase form of its `data-action` | `EffectPanelApplication.#onDeleteEffect` (`module/apps/effect-panel.js`) for `delete-effect` | `_onAddXp` on the prototype for `add-xp` (modeled) | `l5r4/naming` |
 | Module-private function | Bare name, not exported | `defensesOf` (`module/services/combat/damage.js`) | `_postRestMessage` → `postRestMessage` (modeled) | `l5r4/naming` |
-| Unused parameter | `_name` | `_event` in `EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`) |  | ESLint `no-unused-vars` (`argsIgnorePattern: "^_"`) |
+| Unused parameter | `_name` | `_event` in `EffectPanelApplication.#onDeleteEffect` (`module/apps/effect-panel.js`) |  | ESLint `no-unused-vars` (`argsIgnorePattern: "^_"`) |
 | Derived container on `system` | `system._derived`, `system._xp`: values preparation adds outside the schema | `sys._derived` in `prepareEffectiveTraits` (`module/documents/actor/calculations/shared-traits-rings-system.js`) | `sys.derivedValues` (modeled) | Review |
 | Boolean getter or local | `is`, `has`, or `can` prefix | `isLimited` in `L5R4PcSheet#_renderHTML` (`module/sheets/pc-sheet.js`) | `ItemData#rulesActive` (`module/data/item/base-data.js`) → `hasActiveRules` | Review |
 
@@ -189,7 +189,7 @@ The key structure lives in [`docs/design-system/content/localization.md`](../des
 | State class | `is-<state>`, on an element that also carries its `l5r4-` block class; the state itself rides on an attribute ([states.md](../design-system/foundations/states.md)). Core's `active` stays where core's CSS reads it | `&.is-collapsed` (`scss/components/_section.scss`) | `&.-filled` → `.is-filled` (modeled) | `templates.test.js`, `styles.test.js` |
 | Variant class | `-<variant>`, on an element that also carries its `l5r4-` block class | `l5r4-section-title -compact` (`templates/actor/_partials/_armor.hbs`) | `.ring-rank-fire`: the variant folded into the name (modeled) | `styles.test.js` |
 | Ring variant | `l5r4-<block>-<element>.-<ring>` | `.l5r4-ring-name.-earth` (modeled) | `.earth-ring`, `.ring-name-earth` (modeled) | `styles.test.js` |
-| Window root class | `l5r4-<file-name>` for the app in `module/apps/<file-name>.js` | `l5r4-effect-panel` in `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`) | `xp-modal-dialog` → `l5r4-xp-manager` (modeled) | Review |
+| Window root class | `l5r4-<file-name>` for the app in `module/apps/<file-name>.js` | `l5r4-effect-panel` in `EffectPanelApplication.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`) | `xp-modal-dialog` → `l5r4-xp-manager` (modeled) | Review |
 | Custom property | `--l5r4-{category}-{name}`; categories and names are the tokens in [`docs/design-system/foundations/`](../design-system/README.md) | `--l5r4-color-surface` (modeled) | `--air-ring-color`, `--controls` (modeled) | Stylelint `custom-property-pattern`, `styles.test.js` |
 | SCSS variable | `$kebab-case`, declared only in `scss/base/_variables.scss`. A color, size, space, duration, easing, or layer value is a custom property, never a `$variable` | `$air-ring-img` (`scss/base/_variables.scss`), an asset path | `$mask-animation-duration`: a duration is a token (modeled) | Stylelint `scss/dollar-variable-pattern`; review |
 

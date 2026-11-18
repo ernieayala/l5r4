@@ -11,7 +11,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
 import ArmorConfigApplication from "../../apps/armor-config.js";
 import CombatConfigApplication from "../../apps/combat-config.js";
-import ConditionManager from "../../apps/condition-manager.js";
+import ConditionManagerApplication from "../../apps/condition-manager.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
 import XpManagerApplication from "../../apps/xp-manager.js";
 import WealthManagerApplication from "../../apps/wealth-manager.js";
@@ -115,20 +115,20 @@ export class AppLauncherHandler {
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
-   * @see ConditionManager for condition management implementation
+   * @see ConditionManagerApplication for condition management implementation
    */
   static async openConditionManager(context, event, _element) {
     event?.preventDefault?.();
 
     try {
       const existingApp = Object.values(ui.windows).find(
-        app => app instanceof ConditionManager && app.actor.id === context.actor.id
+        app => app instanceof ConditionManagerApplication && app.actor.id === context.actor.id
       );
 
       if (existingApp) {
         existingApp.render(true); // Re-render to refresh checkbox state
       } else {
-        const conditionManager = new ConditionManager(context.actor);
+        const conditionManager = new ConditionManagerApplication(context.actor);
         await conditionManager.render(true);
       }
     } catch (err) {

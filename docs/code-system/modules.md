@@ -37,7 +37,7 @@ Imports come in layer order, lowest layer first, then the file's own folder. A g
 | 4 Documents | `module/documents/` | `import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js`) |
 | 5 Services | `module/services/` | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage-roll.js`) |
 | 6 Mixins | `module/mixins/` | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js`) |
-| 7 Apps | `module/apps/` | `import EffectPanel from "../apps/effect-panel.js";` (`module/hooks/register-all.js`) |
+| 7 Apps | `module/apps/` | `import EffectPanelApplication from "../apps/effect-panel.js";` (`module/hooks/register-all.js`) |
 | 8 Sheets | `module/sheets/` | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js`) |
 | 9 Setup | `module/setup/` | `import { migrateWorld } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js`) |
 | 10 Hooks | `module/hooks/` | `import { registerAllHooks } from "../module/hooks/register-all.js";` (`dist/l5r4-enhanced.js`) |

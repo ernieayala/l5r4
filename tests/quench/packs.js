@@ -4,7 +4,7 @@ import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { DragDropHandler } from "../../module/sheets/handlers/drag-drop-handler.js";
 import { RollHandler } from "../../module/sheets/handlers/roll-handler.js";
 import { getArmorTnPenalty } from "../../module/utils/armor-penalties.js";
-import CompendiumBrowser from "../../module/apps/compendium-browser.js";
+import CompendiumBrowserApplication from "../../module/apps/compendium-browser.js";
 import { getAnsweredRules } from "../../module/utils/choices.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { grantQueueOf } from "../../module/documents/item/lifecycle/grants.js";
@@ -1112,7 +1112,7 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const expected = (await spells(s => s.ring === "fire" && s.mastery === 2)).length;
             assert.isAbove(expected, 0, "Fire spells of Mastery Level 2 exist");
-            await CompendiumBrowser.open();
+            await CompendiumBrowserApplication.open();
             const app = foundry.applications.instances.get(`${SYS_ID}-compendium-browser`);
             try {
               app.tab = "spells";
@@ -1156,7 +1156,7 @@ export function registerPacksTests(quench) {
       describe("Compendium browser", () => {
         /** The open browser, on a tab. */
         const openOn = async tab => {
-          await CompendiumBrowser.open();
+          await CompendiumBrowserApplication.open();
           const app = foundry.applications.instances.get(`${SYS_ID}-compendium-browser`);
           app.tab = tab;
           app.choices = {};
