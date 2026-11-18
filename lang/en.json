@@ -1065,7 +1065,8 @@
           "rank": "Fear Rank",
           "rollForSelected": "Roll Fear for the selected tokens",
           "testLabel": "Fear {rank} test against {name}",
-          "testResult": "Fear {rank} test"
+          "testResult": "Fear {rank} test",
+          "title": "Fear"
         },
         "rings": {
           "air": "Air",
@@ -1131,6 +1132,7 @@
           "wil": "Willpower"
         },
         "wounds": {
+          "activeOf": "{rank} active",
           "alreadyFullHealth": "{name} is already at full health",
           "applied": "Applied {amount} Wounds to {name}",
           "appliedWithArmor": "{name} took {original} damage; armor reduced it by {reduction}; applied {final} Wounds",
@@ -1162,6 +1164,7 @@
           "noVoidPoints": "No Void Points available to reduce damage",
           "out": "Out",
           "penalty": "Penalty",
+          "penaltyOf": "{rank} penalty",
           "reducedApplied": "Void Point spent: damage reduced by 10; applied {amount} Wounds to {name}",
           "reducedWithArmor": "{name} took {original} damage; Void reduced it to {afterVoid} and armor by {reduction}; applied {final} Wounds",
           "reduceWithVoid": "Reduce with Void",
@@ -1169,6 +1172,7 @@
           "status": "Wounds: {current}/{max} (suffered: {suffered})",
           "suffered": "Wounds suffered",
           "threshold": "Threshold",
+          "thresholdOf": "{rank} threshold",
           "voidRestored": "Void: {count}/{count} restored",
           "woundBonus": "Wound bonus",
           "woundHealRate": "Wound heal rate",

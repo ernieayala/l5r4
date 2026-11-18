@@ -21,8 +21,8 @@
     </button>
   </div>
   <div class="l5r4-grid">
-    <span>{{localize "l5r4.character.stance.current"}}</span>
-    <div class="flexrow">
+    <span class="l5r4-grid-label">{{localize "l5r4.character.stance.current"}}</span>
+    <div class="flexrow l5r4-grid-value">
       <select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">
         {{#each config.stances as |label id|}}
           <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
@@ -31,7 +31,7 @@
         {{/each}}
       </select>
     </div>
-    <span>{{localize "l5r4.ui.common.initiative"}}</span>
+    <span class="l5r4-grid-label">{{localize "l5r4.ui.common.initiative"}}</span>
     <div class="flexrow -gap-sm l5r4-grid-value">
       <span class="l5r4-combat-initiative">{{initiativeFormula}}</span>
       {{#if (gt system.rings.void.rank 0)}}
@@ -46,7 +46,7 @@
           />
       {{/if}}
     </div>
-    <span>{{localize "l5r4.character.movement.title"}}</span>
+    <span class="l5r4-grid-label">{{localize "l5r4.character.movement.title"}}</span>
     <div class="flexrow -gap-sm l5r4-grid-value">
       <div>
         {{#if system.movement.showSimple}}
@@ -67,7 +67,7 @@
         </button>
       {{/if}}
     </div>
-    <span>{{localize "l5r4.character.movement.maximum"}}</span>
+    <span class="l5r4-grid-label">{{localize "l5r4.character.movement.maximum"}}</span>
     <div class="flexrow -gap-sm l5r4-grid-value">{{system.movement.maximum}}{{localize "l5r4.character.movement.feet"}}</div>
   </div>
 </section>

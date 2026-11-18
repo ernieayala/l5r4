@@ -15,9 +15,9 @@
     {{/if}}
   </div>
   <div class="l5r4-grid">
-    <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
+    <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
     {{#if (eq actor.type "pc")}}
-      <div class="flexrow">
+      <div class="flexrow l5r4-grid-value">
         <span>{{system.armorTn.current}}</span>
         {{#if (gt system.rings.void.rank 0)}}
           <input
@@ -31,7 +31,7 @@
         {{/if}}
       </div>
     {{else}}
-      <div class="flexrow"><input
+      <div class="flexrow l5r4-grid-value"><input
           type="number"
           name="system.armor.armorTn"
           value="{{system.armor.armorTn}}"
@@ -39,11 +39,11 @@
           aria-label="{{localize "l5r4.ui.mechanics.wounds.armorTn"}}"
         /></div>
     {{/if}}
-    <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
+    <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
     {{#if (eq actor.type "pc")}}
-      <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
+      <div class="flexrow l5r4-grid-value"><span>{{system.armorTn.reduction}}</span></div>
     {{else}}
-      <div class="flexrow"><input
+      <div class="flexrow l5r4-grid-value"><input
           type="number"
           name="system.armor.reduction"
           value="{{system.armor.reduction}}"

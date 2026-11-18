@@ -12,12 +12,12 @@ A two-column table of labels and values with a frame line around every cell. The
 
 ## Anatomy
 
-| Part | Element | Class | Where the code differs |
-| --- | --- | --- | --- |
-| Grid | `<div>` | `l5r4-grid` |  |
-| Label cell | `<span>` | `l5r4-grid-label` | No class: the stylesheet selects any span child, `> span` (`scss/components/_grid.scss`) |
-| Value cell | `<div>` | `l5r4-grid-value` | Most value cells carry no class: the stylesheet selects any div child, `> div` (`scss/components/_grid.scss`) |
-| Full row | `<div>` | `l5r4-grid-value -full` | `l5r4-wound-track`, whose `.l5r4-grid .l5r4-wound-track` (`scss/features/_wound-track.scss`) sets `grid-column: 1 / 3` |
+| Part       | Element  | Class                                                    |
+| ---------- | -------- | -------------------------------------------------------- |
+| Grid       | `<div>`  | `l5r4-grid`                                              |
+| Label cell | `<span>` | `l5r4-grid-label`                                        |
+| Value cell | `<div>`  | `l5r4-grid-value`                                        |
+| Full row   | `<div>`  | `l5r4-grid-value -full`, as the Wound track's root holds |
 
 Cells alternate label, value, label, value. A label cell names the value cell to its right.
 
@@ -73,9 +73,9 @@ A label wraps inside its cell and the row grows to fit; a value cell's text wrap
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| G1 | `.l5r4-grid-label { background: var(--l5r4-color-panel); }` (modeled on the label cell rule of `scss/components/_grid.scss`) | The label cells selected as `> span` (`scss/components/_grid.scss`) inside `.l5r4-grid` |
+| G1 | `.l5r4-grid-label` with `background: var(--l5r4-color-panel);` (`scss/components/_grid.scss`) | The label cells selected as `> span` inside `.l5r4-grid` (modeled) |
 | G2 | `border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);` (`foundations/frames.md` rule 1) | `border: 1px solid var(--table-header-border-color);` (modeled) |
-| G3 | `<input type="number" name="system.suffered" aria-label="{{localize "l5r4.ui.mechanics.wounds.suffered"}}" ...>` (modeled on the Wounds suffered input of `templates/actor/_partials/_wounds.hbs`) | The same input with no `aria-label`: `name="system.suffered"` (`templates/actor/_partials/_wounds.hbs`) |
+| G3 | `name="system.suffered"` with `aria-label="{{localize "l5r4.ui.mechanics.wounds.suffered"}}"` (`templates/actor/_partials/_wounds.hbs`) | The same input with no `aria-label` (modeled) |
 | G4 | Label, value, label, value in the PC sheet's `l5r4-grid` (`templates/actor/_partials/_armor.hbs`) | A checkbox placed as a third cell after the value (modeled) |
 
 ## Do and don't

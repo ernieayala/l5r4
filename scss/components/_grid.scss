@@ -13,12 +13,12 @@
   font-variant-numeric: tabular-nums;
   grid-template-columns: 1fr 1fr;
 
-  > span,
-  > div {
+  .l5r4-grid-label,
+  .l5r4-grid-value {
     border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
   }
 
-  > span {
+  .l5r4-grid-label {
     align-items: center;
     background: var(--l5r4-color-panel);
     border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
@@ -29,10 +29,14 @@
     padding: var(--l5r4-space-4);
   }
 
-  > div {
+  .l5r4-grid-value {
     align-items: center;
     font-size: var(--l5r4-font-size-label);
     padding: var(--l5r4-space-4);
+
+    &.-full {
+      grid-column: 1 / -1;
+    }
 
     > input,
     > select {

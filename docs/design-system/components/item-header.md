@@ -18,7 +18,7 @@ The top of the item sheet: the item's image, its name as an editable field, and,
 | Header | `<header>` | `l5r4-item-header flexrow -gap-md` |
 | Image | `<img data-action="editImage" data-edit="img" alt>` | `l5r4-item-header-image`, beside core's `flex0` |
 | Fields | `<div>` | `l5r4-item-header-fields` |
-| Name | `<h1>` holding `<input type="text" name="name" aria-label>` | `l5r4-item-header-name`; the code's input has no `aria-label` (E2) |
+| Name | `<h1>` holding `<input type="text" name="name" aria-label>`, named by `l5r4.ui.common.name` | `l5r4-item-header-name` |
 | Citation | `<p data-citation>` | `l5r4-citation` (fixed) (`templates/item/_partials/_header.hbs`) |
 
 The image uses core's `editImage` action, as core's own sheets do [src: templates/sheets/base-sheet.hbs:4]: core opens the file picker and saves on change (`client/applications/api/document-sheet.mjs:376-394`).

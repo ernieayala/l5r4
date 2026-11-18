@@ -1,29 +1,64 @@
 {{!-- The actor's Wound Ranks as a table (wound-track.md): name, penalty, threshold, and the current rank; in the
 wound configuration window an NPC's manual track, edited in place. Parameters: levels (system.woundLevels, or
 system.visibleWoundLevels on an NPC), editable (the manual track's inputs). --}}
-<div class="l5r4-wound-track">
-  <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
-  <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
-  <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
-  {{#if editable}}
-    <span>{{localize "l5r4.ui.common.active"}}</span>
-    {{#each levels as |lvl name|}}
-      <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-      <div><input type="number" name="manualWoundLevels.{{name}}.penalty" value="{{penalty}}" data-action="update-field" data-type="Number" min="0" /></div>
-      <div><input type="number" name="manualWoundLevels.{{name}}.value" value="{{value}}" data-action="update-field" data-type="Number" min="0" /></div>
-      <div><input type="checkbox" name="manualWoundLevels.{{name}}.active" {{checked active}} data-action="update-field" data-type="Boolean" /></div>
-    {{/each}}
-  {{else}}
-    <span>{{localize "l5r4.ui.common.current"}}</span>
-    {{#each levels as |lvl name|}}
-      <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-      <div>{{penaltyEff}}</div>
-      <div>{{value}}</div>
-      <div>
-        {{#if current}}
-          <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
-        {{/if}}
+<div class="l5r4-grid-value -full l5r4-wound-track" role="table" aria-label="{{localize "l5r4.ui.sheets.woundLevels"}}">
+  <div class="l5r4-wound-track-row -head" role="row">
+    <span class="l5r4-wound-track-head" role="columnheader">{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
+    <span class="l5r4-wound-track-head" role="columnheader">{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
+    <span class="l5r4-wound-track-head" role="columnheader">{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
+    {{#if editable}}
+      <span class="l5r4-wound-track-head" role="columnheader">{{localize "l5r4.ui.common.active"}}</span>
+    {{else}}
+      <span class="l5r4-wound-track-head" role="columnheader">{{localize "l5r4.ui.common.current"}}</span>
+    {{/if}}
+  </div>
+  {{#each levels as |lvl name|}}
+    {{#if ../editable}}
+      <div class="l5r4-wound-track-row" role="row">
+        <div class="l5r4-wound-track-cell" role="cell">{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
+        <div class="l5r4-wound-track-cell" role="cell">
+          <input
+            type="number"
+            name="manualWoundLevels.{{name}}.penalty"
+            value="{{lvl.penalty}}"
+            data-action="update-field"
+            data-type="Number"
+            min="0"
+            aria-label="{{localize "l5r4.ui.mechanics.wounds.penaltyOf" rank=(localize (concat "l5r4.ui.mechanics.wounds." name))}}"
+          />
+        </div>
+        <div class="l5r4-wound-track-cell" role="cell">
+          <input
+            type="number"
+            name="manualWoundLevels.{{name}}.value"
+            value="{{lvl.value}}"
+            data-action="update-field"
+            data-type="Number"
+            min="0"
+            aria-label="{{localize "l5r4.ui.mechanics.wounds.thresholdOf" rank=(localize (concat "l5r4.ui.mechanics.wounds." name))}}"
+          />
+        </div>
+        <div class="l5r4-wound-track-cell" role="cell">
+          <input
+            type="checkbox"
+            name="manualWoundLevels.{{name}}.active"
+            {{checked lvl.active}}
+            data-action="update-field"
+            data-type="Boolean"
+            aria-label="{{localize "l5r4.ui.mechanics.wounds.activeOf" rank=(localize (concat "l5r4.ui.mechanics.wounds." name))}}"
+          />
+        </div>
       </div>
-    {{/each}}
-  {{/if}}
+    {{else}}
+      <div class="l5r4-wound-track-row{{#if lvl.current}} is-current{{/if}}" role="row"{{#if lvl.current}} aria-current="true"{{/if}}>
+        <div class="l5r4-wound-track-cell" role="cell">{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
+        {{!-- A penalty above 0 carries its sign; Healthy's 0 does not (wound-track.md W4) --}}
+        <div class="l5r4-wound-track-cell" role="cell">{{#if lvl.penaltyEff}}{{numberFormat lvl.penaltyEff sign=true}}{{else}}0{{/if}}</div>
+        <div class="l5r4-wound-track-cell" role="cell">{{lvl.value}}</div>
+        <div class="l5r4-wound-track-cell" role="cell">
+          {{#if lvl.current}}<i class="fa-solid fa-check" inert></i>{{/if}}
+        </div>
+      </div>
+    {{/if}}
+  {{/each}}
 </div>

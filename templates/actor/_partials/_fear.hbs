@@ -1,11 +1,11 @@
 <section class="l5r4-section l5r4-fear">
   <div class="flexrow -gap-sm l5r4-section-title -compact" data-section-title>
-    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.mechanics.fear.rank"}}</h4>
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.mechanics.fear.title"}}</h4>
   </div>
   <div class="flexcol -gap-sm l5r4-fear-body">
     <div class="l5r4-grid">
-      <span>{{localize "l5r4.ui.common.rank"}}</span>
-      <div class="flexrow">
+      <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.fear.rank"}}</span>
+      <div class="flexrow l5r4-grid-value">
         <input
           name="system.fear.rank"
           type="number"
@@ -13,6 +13,7 @@
           min="0"
           max="10"
           data-type="Number"
+          aria-label="{{localize "l5r4.ui.mechanics.fear.rank"}}"
         />
       </div>
     </div>

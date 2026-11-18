@@ -21,22 +21,23 @@
     </button>
   </div>
   <div class="l5r4-grid">
-    <span>{{localize "l5r4.ui.mechanics.wounds.suffered"}}</span>
-    <div class="flexrow"><input
+    <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.suffered"}}</span>
+    <div class="flexrow l5r4-grid-value"><input
         type="number"
         name="system.suffered"
         value="{{system.suffered}}"
         data-type="Number"
+        aria-label="{{localize "l5r4.ui.mechanics.wounds.suffered"}}"
       /></div>
 
     {{#if (eq actor.type "pc")}}
-      <span data-tooltip="{{localize "l5r4.ui.mechanics.wounds.healRateBreakdown" sta=system.traits.sta rank=system.insight.rank mod=system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
-      <div class="flexrow">{{system.wounds.healRate}}</div>
+      <span class="l5r4-grid-label" data-tooltip="{{localize "l5r4.ui.mechanics.wounds.healRateBreakdown" sta=system.traits.sta rank=system.insight.rank mod=system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
+      <div class="flexrow l5r4-grid-value">{{system.wounds.healRate}}</div>
     {{/if}}
 
     {{#if (and (eq actor.type "npc") (eq system.woundMode "manual"))}}
-      <span>{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</span>
-      <div class="flexrow"><input
+      <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</span>
+      <div class="flexrow l5r4-grid-value"><input
           type="number"
           value="{{system.wounds.max}}"
           data-type="Number"

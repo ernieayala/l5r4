@@ -16,14 +16,14 @@ The section around the track is a compact section (`section.md`) and a grid (`gr
 
 ## Anatomy
 
-| Part | Element | Class | Class now |
-| --- | --- | --- | --- |
-| Track | `<div role="table" aria-label>` | `l5r4-wound-track` | `l5r4-wound-track` (`templates/actor/_partials/_wound-track.hbs`), a bare `div` with no role |
-| Header row | `<div role="row">`, `display: contents` | `l5r4-wound-track-row -head` | none: the four `<span>` are grid children |
-| Column head | `<span role="columnheader">` | `l5r4-wound-track-head` | bare `span` (`templates/actor/_partials/_wound-track.hbs`) |
-| Row | `<div role="row">`, `display: contents`; `aria-current="true"` on the actor's rank | `l5r4-wound-track-row`; `is-current` mirrors it | none |
-| Cell | `<div role="cell">` | `l5r4-wound-track-cell` | bare `div` (`templates/actor/_partials/_wound-track.hbs`) |
-| Current mark | `<i class="fa-solid fa-check" inert>` in the last cell of the current row | core Font Awesome | a disabled checked checkbox (`templates/actor/_partials/_wound-track.hbs`) |
+| Part | Element | Class |
+| --- | --- | --- |
+| Track | `<div role="table" aria-label>`, named "Wound Ranks" (`l5r4.ui.sheets.woundLevels`) | `l5r4-grid-value -full l5r4-wound-track`: a full grid row |
+| Header row | `<div role="row">`, `display: contents` | `l5r4-wound-track-row -head` |
+| Column head | `<span role="columnheader">` | `l5r4-wound-track-head` |
+| Row | `<div role="row">`, `display: contents`; `aria-current="true"` on the actor's rank | `l5r4-wound-track-row`; `is-current` mirrors it |
+| Cell | `<div role="cell">` | `l5r4-wound-track-cell` |
+| Current mark | `<i class="fa-solid fa-check" inert>` in the last cell of the current row | core Font Awesome |
 
 `display: contents` lets the row element group its cells for assistive technology while the four-column grid lays the cells out.
 
@@ -91,13 +91,13 @@ Rank names wrap inside the first column, which takes the free width (`1fr`); the
 
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
-| W1 | `<div role="row" class="l5r4-wound-track-row is-current" aria-current="true">` with bold name and `fa-check` (modeled) | `<input type="checkbox" disabled {{checked current}} data-type="Boolean" />` (`templates/actor/_partials/_wound-track.hbs`) |
-| W2 | `<div role="cell" class="l5r4-wound-track-cell">{{value}}</div>` (modeled on the threshold cell of `templates/actor/_partials/_wound-track.hbs`) | A disabled checkbox as the current mark (`templates/actor/_partials/_wound-track.hbs`) |
+| W1 | `aria-current="true"` on the current row, with `is-current` for the bold name and `fa-check` in its last cell (`templates/actor/_partials/_wound-track.hbs`) | A disabled checked checkbox as the mark (modeled) |
+| W2 | `<div class="l5r4-wound-track-cell" role="cell">{{lvl.value}}</div>` (`templates/actor/_partials/_wound-track.hbs`) | A disabled checkbox as the current mark (modeled) |
 | W3 | Column head "Wound Rank" from `l5r4.ui.mechanics.wounds.woundLevel` (`lang/en.json`) | A column head "Level" or "Wound Levels" (modeled) |
-| W4 | `+3` in the penalty column (modeled) | `3` with no sign: `{{penaltyEff}}` (`templates/actor/_partials/_wound-track.hbs`) is a bare number from `prepareWoundPenalties` (`module/documents/actor/calculations/wound-system.js`) |
+| W4 | `+3` in the penalty column: `{{numberFormat lvl.penaltyEff sign=true}}`, Healthy's `0` left unsigned (`templates/actor/_partials/_wound-track.hbs`) | `3` with no sign, the bare number `prepareWoundPenalties` (`module/documents/actor/calculations/wound-system.js`) gives (modeled) |
 | W5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=system.woundLevels editable=false}}` (`templates/actor/_partials/_wounds.hbs`) | The PC and NPC loops written out in the sheet partial and again in the wound configuration window (modeled) |
 | W6 | The heal rate label's tooltip in `templates/actor/_partials/_wounds.hbs`: one key, `l5r4.ui.mechanics.wounds.healRateBreakdown` (`lang/en.json`), with `{sta}`, `{rank}`, and `{mod}` | The same formula written out in the template, `× 2 +` between two values (modeled) |
-| W7 | `aria-label="{{localize "l5r4.ui.mechanics.wounds.penaltyOf" rank=(localize (concat "l5r4.ui.mechanics.wounds." name))}}"` (modeled) | The penalty input `name="manualWoundLevels.{{name}}.penalty"` (`templates/actor/_partials/_wound-track.hbs`), with no `aria-label` |
+| W7 | `aria-label="{{localize "l5r4.ui.mechanics.wounds.penaltyOf" rank=(localize (concat "l5r4.ui.mechanics.wounds." name))}}"` (`templates/actor/_partials/_wound-track.hbs`) | The penalty input with no `aria-label` (modeled) |
 
 ## Do and don't
 
@@ -111,13 +111,6 @@ Rank names wrap inside the first column, which takes the free width (`1fr`); the
 
 Fixed (Stage 17 decision 2): the stored `woundLevels`, `woundLevel`, and `manualWoundLevels` fields and the wound setting keys. The copy says Wound Rank; the code keeps `woundLevel` (Stage 17 decision 15).
 
-## Keys this page needs
-
-| Key | Value | For |
-| --- | --- | --- |
-| `l5r4.ui.mechanics.wounds.penaltyOf` | {rank} penalty | Editable penalty input name (W7) |
-| `l5r4.ui.mechanics.wounds.thresholdOf` | {rank} threshold | Editable threshold input name |
-| `l5r4.ui.mechanics.wounds.activeOf` | {rank} active | Editable active checkbox name |
-| `l5r4.ui.mechanics.wounds.current` | Current Wound Rank | `aria-label` context for the current mark |
+The editable inputs' names are `l5r4.ui.mechanics.wounds.penaltyOf`, `thresholdOf`, and `activeOf` ("{rank} penalty"); the current row states itself through `aria-current`, so its inert check mark needs no name.
 
 `fa-check` is the "Current Wound Rank" row in `foundations/iconography.md` rule 3.

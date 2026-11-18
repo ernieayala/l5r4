@@ -18,13 +18,11 @@ The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM ty
 | Part | Element | Class |
 | --- | --- | --- |
 | Section | `<section>` | `l5r4-section l5r4-fear` |
-| Title bar | Compact section title, "Fear Rank" | `l5r4-section-title -compact` |
+| Title bar | Compact section title, "Fear" | `l5r4-section-title -compact` |
 | Body | `<div>` holding the grid and the test | `flexcol -gap-sm l5r4-fear-body` |
-| Grid | One row: "Rank" and the input | `l5r4-grid` |
+| Grid | One row: "Fear Rank" and the input | `l5r4-grid` |
 | Rank input | `<input type="number" name="system.fear.rank" min="0" max="10" data-type="Number" aria-label>` | none |
 | Fear test | Core `<button type="button" data-action="test-fear" data-fear-rank data-tooltip>` | `button l5r4-fear-test`, core's `button` beside the block's class |
-
-The rank input in `templates/actor/_partials/_fear.hbs` carries no `aria-label` (R3).
 
 The test button's label reads "Fear {rank}" (`l5r4.ui.mechanics.fear.label`), so the rank it rolls is on the button.
 
@@ -74,8 +72,8 @@ The button label is short ("Fear 3") and wraps inside the button if a translatio
 | --- | --- | --- |
 | R1 | `<button type="button" class="l5r4-fear-test" data-action="test-fear" data-fear-rank="{{system.fear.rank}}" ...>` (modeled) | `<a class="button fear-test" data-action="test-fear" ...>` (modeled) |
 | R2 | "Roll Fear for the selected tokens": `l5r4.ui.mechanics.fear.rollForSelected` (`lang/en.json`) | "Click to test Fear against selected characters" (modeled) |
-| R3 | `aria-label="{{localize "l5r4.ui.mechanics.fear.rank"}}"` on the input (modeled) | The input, `name="system.fear.rank"` (`templates/actor/_partials/_fear.hbs`), with no `aria-label` |
-| R4 | Heading "Fear", grid label "Fear Rank" (modeled) | Heading "Fear Rank" over a grid label "Rank": `l5r4.ui.mechanics.fear.rank`, then `l5r4.ui.common.rank` (`templates/actor/_partials/_fear.hbs`) |
+| R3 | `aria-label="{{localize "l5r4.ui.mechanics.fear.rank"}}"` on the input (`templates/actor/_partials/_fear.hbs`) | The input with no `aria-label` (modeled) |
+| R4 | Heading `l5r4.ui.mechanics.fear.title`, "Fear", over the grid label `l5r4.ui.mechanics.fear.rank`, "Fear Rank" (`templates/actor/_partials/_fear.hbs`) | Heading "Fear Rank" over a grid label "Rank" (modeled) |
 
 ## Do and don't
 
@@ -89,9 +87,3 @@ The button label is short ("Fear 3") and wraps inside the button if a translatio
 `data-action="test-fear"`: "test" is a game verb, and the name is verb first (Stage 17 decision 16, `docs/code-system/naming.md`).
 
 Fixed (Stage 17 decision 2): `system.fear.rank`; the `@Fear[...]` text link and its `data-link-type` value `Fear` (`inline-link.md`).
-
-## Keys this page needs
-
-| Key                            | Value | For                      |
-| ------------------------------ | ----- | ------------------------ |
-| `l5r4.ui.mechanics.fear.title` | Fear  | The section heading (R4) |

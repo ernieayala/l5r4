@@ -396,6 +396,78 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #79: grid.md G3, fear-block.md R3-R4, item-header.md E2, wound-track.md W1, W2, W4, W7
+        it(
+          "should name the Wounds, Fear, and name inputs and mark the current Wound Rank and signed penalties",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const localize = key => game.i18n.localize(key);
+            await pc.update({ "system.suffered": 0 });
+            await pc.sheet.render({ force: true });
+            const el = pc.sheet.element;
+            assert.equal(
+              el.querySelector('input[name="system.suffered"]').getAttribute("aria-label"),
+              localize("l5r4.ui.mechanics.wounds.suffered")
+            );
+            const track = el.querySelector('[role="table"]');
+            assert.equal(track.getAttribute("aria-label"), localize("l5r4.ui.sheets.woundLevels"));
+            assert.isNull(track.querySelector("input"), "the sheet track holds no inputs");
+            const rows = [...track.querySelectorAll('[role="row"]')].slice(1);
+            const current = rows.filter(row => row.getAttribute("aria-current") === "true");
+            assert.deepEqual(current, [rows[0]], "Healthy is the one current rank");
+            assert.exists(rows[0].querySelector("i[inert]"), "the current mark");
+            const penalties = rows.map(row =>
+              row.querySelectorAll('[role="cell"]')[1].textContent.trim()
+            );
+            assert.equal(penalties[0], "0", "Healthy's penalty is unsigned");
+            assert.equal(penalties[1], `+${pc.system.woundLevels.nicked.penaltyEff}`, "Nicked");
+            await pc.sheet.close({ animate: false });
+
+            await npc.sheet.render({ force: true });
+            const fear = npc.sheet.element.querySelector('input[name="system.fear.rank"]');
+            assert.equal(fear.getAttribute("aria-label"), localize("l5r4.ui.mechanics.fear.rank"));
+            assert.equal(
+              fear.closest("section").querySelector("[data-section-title] h4").textContent.trim(),
+              localize("l5r4.ui.mechanics.fear.title"),
+              "the heading does not repeat the grid label"
+            );
+            await npc.sheet.close({ animate: false });
+
+            const before = npc.system.woundMode;
+            await npc.update({ "system.woundMode": "manual" });
+            const app = new WoundConfigApplication(npc);
+            await app.render({ force: true });
+            try {
+              const healthy = localize("l5r4.ui.mechanics.wounds.healthy");
+              for (const [column, key] of [
+                ["penalty", "penaltyOf"],
+                ["value", "thresholdOf"],
+                ["active", "activeOf"]
+              ]) {
+                assert.equal(
+                  app.element
+                    .querySelector(`input[name="manualWoundLevels.healthy.${column}"]`)
+                    .getAttribute("aria-label"),
+                  game.i18n.localize(`l5r4.ui.mechanics.wounds.${key}`, { rank: healthy }),
+                  column
+                );
+              }
+            } finally {
+              await app.close({ animate: false });
+              await npc.update({ "system.woundMode": before });
+            }
+
+            const item = await Item.create({ name: "Sheets header", type: "skill" });
+            created.push(item);
+            await item.sheet.render({ force: true });
+            assert.equal(
+              item.sheet.element.querySelector('input[name="name"]').getAttribute("aria-label"),
+              localize("l5r4.ui.common.name")
+            );
+            await item.sheet.close({ animate: false });
+          })
+        );
+
         it(
           "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {
