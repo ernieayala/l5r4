@@ -8,7 +8,7 @@ How a card the system posts to chat is put together: speaker, title, dice row wi
 | Paths | `CHAT_TEMPLATES` (`module/config/templates.js`) |
 | Posted by | `rollCheck`, through `postCheck` (`module/services/dice/check/roll-check.js`); `postCheckRequest` (`module/services/check-request.js`); damage results, `postResult` (`module/services/combat/damage.js`); effect prompts, `postPrompt` (`module/services/effects/prompts.js`); flow cards, `startFlow` (`module/services/combat/flow.js`); rest (`module/services/rest.js`) |
 | Wired by | `bind<Card>Card(message, html)` on `renderChatMessageHTML` (`docs/code-system/foundry-patterns.md`, Chat cards) |
-| SCSS | One file per card component in `scss/components/` (rule 6): `scss/components/_chat-card.scss`, `scss/components/_check-card.scss`, `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss` |
+| SCSS | One file per card component in `scss/components/` (rule 6): `scss/components/_chat-card.scss`, `scss/components/_check-card.scss`, `scss/components/_damage-result.scss`, `scss/components/_flow-card.scss`, `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss` |
 | Tokens | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-size-meta`, `--l5r4-color-text`, `--l5r4-color-line-muted`, `--l5r4-state-disabled-opacity` |
 | Components | Chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, button |
 | Checks | `tests/conventions/actions.test.js` (fixed names exempt by name), `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, ESLint `no-restricted-syntax`; "review" where no tool can judge |
@@ -22,7 +22,7 @@ Every card has the parts below in this order. A part with nothing to show render
 | 1 | Speaker | Core's message header, from `speaker: ChatMessage.getSpeaker({ actor })` | The actor who rolled or is affected; the GM's name on a request card (`postCheckRequest` (`module/services/check-request.js`)). The card never repeats it |
 | 2 | Root | `<div class="chat-card l5r4-<card>">` | One root per card |
 | 3 | Title | `div.dice-flavor` | What happened: the roll's label and its target, `dice-flavor` (`templates/chat/check.hbs`); the result, `dice-flavor` (`templates/chat/damage-result.hbs`); the flow and stage |
-| 4 | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change | `meta` size, `.check-applied` (`scss/components/_chat-card.scss`) |
+| 4 | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change | `meta` size, `.check-applied` (`scss/components/_check-card.scss`) |
 | 5 | Dice row | `{{{roll}}}`: core's `roll.render()`, in `renderCheckCard` (`module/services/dice/check/card.js`) | Core's formula, dice, and total; see **Dice row** |
 | 6 | TN and outcome | `div.l5r4-tn-result`: outcome, TN, then Raises, Free Raises spent on the TN, and the Wound penalty in parentheses | Only when the roll had a TN: `{{#if tn}}` around `l5r4-tn-result` (`templates/chat/check.hbs`) |
 | 7 | Free Raises left | `div.check-free-raises` | Only when some remain |
@@ -120,9 +120,9 @@ Non-conforming, modeled: a card that hides its total with a CSS class for player
 
 ### 6. Card styles live in one file per card
 
-Each card component has one file in `scss/components/`, named for its page: `scss/components/_chat-card.scss` (the shared shell: column layout, buttons one per row), `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss`, `scss/components/_check-card.scss`, `scss/components/_damage-result.scss` (target), and `scss/components/_flow-card.scss` (target). The selectors start at the card's fixed root class (`l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the dropped-dice mark in the check card's file (`components/dice-row.md` DR5). The check dialog's rules live in `scss/components/_check-dialog.scss`. The code differs: the check card's `.l5r4-roll`, the damage result, and the flow card are styled in `scss/components/_chat-card.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level file) and `tests/conventions/styles.test.js` (one component per file).
+Each card component has one file in `scss/components/`, named for its page: `scss/components/_chat-card.scss` (the shared shell: the posted item card and the note lines' italic), `scss/components/_request-card.scss`, `scss/components/_item-summary-card.scss`, `scss/components/_check-card.scss` (the check card's `.l5r4-roll` column and its dice row), `scss/components/_damage-result.scss`, and `scss/components/_flow-card.scss`. The selectors start at the card's fixed root class (`l5r4-roll`, `l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the dropped-dice mark in the check card's file (`components/dice-row.md` DR5). The check dialog's rules live in `scss/components/_check-dialog.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level file) and `tests/conventions/styles.test.js` (one component per file).
 
-Conforming, modeled on `.l5r4-damage-result` (`scss/components/_chat-card.scss`):
+Conforming, `.l5r4-damage-result` (`scss/components/_damage-result.scss`):
 
 ```scss
 .l5r4-damage-result {
@@ -136,7 +136,7 @@ Conforming, modeled on `.l5r4-damage-result` (`scss/components/_chat-card.scss`)
 }
 ```
 
-Non-conforming, `.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`): the undone card at a literal `opacity: 0.7`.
+Non-conforming (modeled): the undone card at a literal `opacity: 0.7`, or a card's rules in another card's file.
 
 ### 7. One key per line of card text
 
@@ -180,7 +180,7 @@ A state never rests on color: the outcome is a word, the undone card says so.
 | Element | Behavior |
 | --- | --- |
 | Title | Wraps; a long label or target name takes a second line |
-| Buttons | Full width, one per row, so a long label wraps and the button keeps its height (`.l5r4-flow-card .flow-actions` (`scss/components/_chat-card.scss`); `foundations/space-and-size.md`, Density) |
+| Buttons | Full width, one per row, so a long label wraps and the button keeps its height (`.flow-actions` in `.l5r4-flow-card` (`scss/components/_flow-card.scss`); `foundations/space-and-size.md`, Density) |
 | Notes | Wrap |
 | Modifier list | One line per modifier; a long source name wraps inside its line |
 | Dice | Core's: a pool past one line of dice wraps in the tooltip |

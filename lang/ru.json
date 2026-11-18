@@ -447,7 +447,7 @@
           "reducedApplied": "Очко Пустоты потрачено: Урон уменьшен на 10. Нанесено {amount} ран для {name}",
           "reducedWithArmor": "{name} получил {original} урона. Пустота уменьшила до {afterVoid}, броня поглотила {reduction}. Нанесено {final} ран.",
           "reduceWithVoid": "Уменьшить Пустотой",
-          "restedAndRecovered": "отдохнул и восстановил раны",
+          "restTitle": "{name} отдохнул и восстановил раны",
           "status": "Раны: {current}/{max} (получено: {suffered})",
           "suffered": "Полученные Раны",
           "threshold": "Порог",

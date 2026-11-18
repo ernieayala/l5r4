@@ -438,6 +438,8 @@
         "errors": {
           "openFailed": "Failed to open XP manager"
         },
+        "noAdjustments": "No XP added or taken away by hand.",
+        "noPurchases": "No XP spent yet.",
         "open": "Open the XP manager",
         "setDisadvantageCap": "Set cap",
         "title": "XP manager",
@@ -1163,7 +1165,7 @@
           "reducedApplied": "Void Point spent: damage reduced by 10; applied {amount} Wounds to {name}",
           "reducedWithArmor": "{name} took {original} damage; Void reduced it to {afterVoid} and armor by {reduction}; applied {final} Wounds",
           "reduceWithVoid": "Reduce with Void",
-          "restedAndRecovered": "rested and recovered Wounds",
+          "restTitle": "{name} rested and recovered Wounds",
           "status": "Wounds: {current}/{max} (suffered: {suffered})",
           "suffered": "Wounds suffered",
           "threshold": "Threshold",

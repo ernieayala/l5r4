@@ -4,11 +4,11 @@ The card that says what a damage roll did to one actor: the Wounds taken from th
 
 | Item | Detail |
 | --- | --- |
-| Template | `templates/chat/damage-result.hbs`, `CHAT_TEMPLATES.damageResult`. Not in the preload list (`PRELOAD_TEMPLATES` (`module/config/templates.js`)); `renderTemplate` loads it on first use. Target: the preload list names every `CHAT_TEMPLATES` path (review) |
+| Template | `templates/chat/damage-result.hbs`, `CHAT_TEMPLATES.damageResult`, preloaded in `PRELOAD_TEMPLATES` (`module/config/templates.js`), which names every `CHAT_TEMPLATES` path (`tests/unit/config/templates.test.js`) |
 | Posted by | `postResult` (`module/services/combat/damage.js`), on the GM's client through the `l5r4-enhanced.damage` query |
 | Stored in | `flags.l5r4-enhanced.damageResult` (fixed flag): the actor, Wounds, Reduction, and whether Void was spent, the actor killed, the damage undone |
 | Wired by | `bindDamageCards` (`module/services/combat/damage.js`) |
-| SCSS | `.l5r4-damage-result` (`scss/components/_chat-card.scss`); the target is its own file, `scss/components/_damage-result.scss` (target) |
+| SCSS | `.l5r4-damage-result` (`scss/components/_damage-result.scss`); its note lines share the chat card shell's italic (`scss/components/_chat-card.scss`) |
 | Quench | `l5r4-enhanced.combat` |
 
 ## Anatomy
@@ -58,8 +58,8 @@ Context from `postResult` (`module/services/combat/damage.js`): the stored resul
 
 | Token | Property | Part |
 | --- | --- | --- |
-| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-damage-result` (`scss/components/_chat-card.scss`)) |
-| `--l5r4-state-disabled-opacity` | `opacity` | `-undone` (`.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`), which writes `0.7`; the token is `0.75`) |
+| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-damage-result` (`scss/components/_damage-result.scss`)) |
+| `--l5r4-state-disabled-opacity` | `opacity` | `-undone` (`.l5r4-damage-result` (`scss/components/_damage-result.scss`)) |
 
 ## Keyboard and screen reader
 
@@ -76,7 +76,7 @@ A long actor name wraps in the title. The two buttons share one row; each label 
 | DM1 | A change to the result re-renders the same message; no second card | Quench `l5r4-enhanced.combat` | `existing.update({ content, flags })` in `postResult` (`module/services/combat/damage.js`) | Posting a new "Void spent" card under the old one (modeled) |
 | DM2 | The buttons act on the flags, which only the GM changes; a player's click goes to the GM as a query | Quench `l5r4-enhanced.combat` | `gm.query(DAMAGE_QUERY, request)` (`module/services/combat/damage.js`) | Updating the actor from the player's client (modeled) |
 | DM3 | Undone shows a note and drops the buttons, besides the disabled look | Review, in the gallery's chat section | `{{#if undone}}<div class="check-note">{{localize "l5r4.ui.combat.undoneNote"}}</div>{{/if}}` (`templates/chat/damage-result.hbs`) | Dimming alone (modeled) |
-| DM4 | The disabled look reads the state token | `tests/conventions/styles.test.js` (state rules read `--l5r4-state-*`) | `opacity: var(--l5r4-state-disabled-opacity);` | `opacity: 0.7;` (`scss/components/_chat-card.scss`) |
+| DM4 | The disabled look reads the state token | `tests/conventions/styles.test.js` (state rules read `--l5r4-state-*`) | `opacity: var(--l5r4-state-disabled-opacity);` in `&.-undone` (`scss/components/_damage-result.scss`) | `opacity: 0.7;` (modeled) |
 | DM5 | The Wounds in the title are the Wounds taken after a Void Point, as one sentence | Review | `wounds: taken` (`module/services/combat/damage.js`) | Title and a separate "minus 10" note for the reader to subtract (modeled) |
 
 ## Do and don't

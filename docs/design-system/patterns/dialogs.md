@@ -64,11 +64,13 @@ The one button is "Roll", the `ok` button of `askChoices` (`module/services/dice
 
 ### 1. Content comes from a template
 
-A dialog's content is a template in `templates/dialogs/`, named `<name>-dialog.hbs`, rendered with `foundry.applications.handlebars.renderTemplate` and listed in `DIALOG_TEMPLATES`. No dialog content is an HTML string built in JavaScript, and none uses the global `Dialog`. The template has no `<form>` of its own: core's form wraps it, and a nested form breaks the submit. A confirmation shares one template, `templates/dialogs/confirm-dialog.hbs`, with two parameters, `question` and `consequence`, each already localized. Enforced by ESLint `no-restricted-syntax` (no HTML strings; `DialogV2` content is a template; no global `Dialog`) and `tests/conventions/names.test.js` (the `-dialog.hbs` suffix).
+A dialog's content is a template in `templates/dialogs/`, named `<name>-dialog.hbs`, rendered with `foundry.applications.handlebars.renderTemplate` and listed in `DIALOG_TEMPLATES`. No dialog content is an HTML string built in JavaScript, and none uses the global `Dialog`. The template has no `<form>` of its own: core's form wraps it, and a nested form breaks the submit. A confirmation shares one template, `templates/dialogs/confirm-dialog.hbs`, with two parameters, `question` and `consequence`, each already localized. Enforced by ESLint `no-restricted-syntax` (no HTML strings; `DialogV2` content is a template; no global `Dialog`), `tests/conventions/names.test.js` (the `-dialog.hbs` suffix), and `tests/conventions/templates.test.js` (`dialog-form`: no `<form>` in `templates/dialogs/`).
 
 Conforming, `askChoices` (`module/services/dice/check/roll-check.js`): `renderTemplate(DIALOG_TEMPLATES.check, ...)` passed as `content`. Conforming, `askDisadvantageCap` in `module/services/xp/disadvantage-cap.js`: `R(DIALOG_TEMPLATES.disadvantageCap, { currentCap })` passed as `content`, the template with no `<form>` and its label linked to the field by `for`; the XP manager's `#onChangeDisadvantageCap` (`module/apps/xp-manager.js`) calls it and stores the answer.
 
-Non-conforming, `l5r4-unified-item-create-dialog` (`templates/dialogs/unified-item-create-dialog.hbs`): the template opens its own `<form>`. `askEmphasisName` (`module/apps/emphasis-manager.js`) renders `custom-emphasis-dialog.hbs` from a path written in place, not from `DIALOG_TEMPLATES`. Modeled: `` content: `<p>${...}</p>` ``, an HTML string.
+Conforming, `l5r4-unified-item-create-dialog` (`templates/dialogs/unified-item-create-dialog.hbs`): a `<div>` root in core's form. `askEmphasisName` (`module/apps/emphasis-manager.js`) renders `DIALOG_TEMPLATES.customEmphasis` (`module/config/templates.js`).
+
+Non-conforming (modeled): a dialog template that opens its own `<form>`; a template path written in place, not from `DIALOG_TEMPLATES`; `` content: `<p>${...}</p>` ``, an HTML string.
 
 ### 2. Buttons name the action
 

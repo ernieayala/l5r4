@@ -187,9 +187,10 @@ body > * {
 
 /**
  * Chat Messages
- * Styling for chat message content and L5R4-specific chat elements. Each rule sits under a fixed chat-card class
+ * The shell every L5R4 chat card shares, and the posted item card. Each rule sits under a fixed chat-card class
  * (docs/code-system/naming.md, Fixed names); the posted item card's `item` root also roots every sheet item row, so its
- * rules alone keep core's message wrapper as their scope
+ * rules alone keep core's message wrapper as their scope. Each card with a page of its own has its own file
+ * (patterns/chat-cards.md rule 6)
  */
 .message-content .item h4,
 .message-content .item h5 {
@@ -204,6 +205,18 @@ body > * {
   margin: 0;
 }
 
+.l5r4-roll .check-note,
+.l5r4-flow-card .check-note,
+.l5r4-damage-result .check-note {
+  font-style: italic;
+}
+
+/**
+ * Check Card
+ * The check card (components/check-card.md) and the dice row inside it (components/dice-row.md, DR5): core fades a
+ * dropped or re-rolled die, and the system strikes its number through, so it differs from a kept die by more than
+ * color. Rules sit under the card's fixed roots, which cards posted before them carry too
+ */
 .l5r4-roll {
   display: flex;
   flex-direction: column;
@@ -220,36 +233,37 @@ body > * {
   padding: 0;
 }
 
-.l5r4-flow-card,
+.l5r4-check .roll.discarded,
+.l5r4-check .roll.rerolled {
+  text-decoration: line-through;
+}
+
+/**
+ * Damage Result
+ * The card that applies damage (components/damage-result.md): a column with one full-width button per row, so long
+ * labels stay readable. An undone card takes the disabled look beside its "Undone." note
+ */
 .l5r4-damage-result {
   display: flex;
   flex-direction: column;
   gap: var(--l5r4-space-gap-tight);
 }
-
-.l5r4-roll .check-note,
-.l5r4-flow-card .check-note,
-.l5r4-damage-result .check-note {
-  font-style: italic;
-}
-
-.l5r4-flow-card .flow-actions {
-  flex-direction: column;
-}
-
 .l5r4-damage-result.-undone {
-  opacity: 0.7;
+  opacity: var(--l5r4-state-disabled-opacity);
 }
 
 /**
- * Check Card
- * The check card (components/check-card.md) and the dice row inside it (components/dice-row.md, DR5): core fades a
- * dropped or re-rolled die, and the system strikes its number through, so it differs from a kept die by more than
- * color. Rules sit under the card's fixed root, which cards posted before them carry too
+ * Flow Card
+ * The card of a combat flow, a duel or a grapple (components/flow-card.md): a column whose steps stack one button per
+ * row, full width, so a label with two names wraps in a button of its own
  */
-.l5r4-check .roll.discarded,
-.l5r4-check .roll.rerolled {
-  text-decoration: line-through;
+.l5r4-flow-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+}
+.l5r4-flow-card .flow-actions {
+  flex-direction: column;
 }
 
 /**
@@ -873,6 +887,10 @@ body > * {
   font-size: var(--l5r4-font-size-meta);
   margin: 0 0 var(--l5r4-space-4);
 }
+.l5r4-rules-editor .l5r4-rules-editor-empty {
+  font-style: italic;
+  margin: 0;
+}
 .l5r4-rules-editor .l5r4-rules-editor-field textarea {
   font-family: var(--l5r4-font-code);
   min-height: 2.5rem;
@@ -1014,26 +1032,26 @@ body > * {
 .l5r4-compendium-browser .window-content {
   display: flex;
   flex-direction: column;
-  gap: var(--l5r4-space-8);
+  gap: var(--l5r4-space-gap);
   overflow: hidden;
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-controls {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: var(--l5r4-space-8);
+  gap: var(--l5r4-space-gap);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-results-part {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--l5r4-space-4);
+  gap: var(--l5r4-space-gap-tight);
   min-height: 0;
 }
 .l5r4-compendium-browser .l5r4-tabs.-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--l5r4-space-4);
+  gap: var(--l5r4-space-gap-tight);
 }
 .l5r4-compendium-browser .l5r4-tabs-tab {
   flex: 0 0 auto;
@@ -1052,14 +1070,14 @@ body > * {
   align-items: end;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--l5r4-space-8);
+  gap: var(--l5r4-space-gap);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-filter {
   display: flex;
   flex: 0 1 9rem;
   flex-direction: column;
   font-size: var(--l5r4-font-size-meta);
-  gap: var(--l5r4-space-4);
+  gap: var(--l5r4-space-gap-tight);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-search {
   flex-basis: 14rem;
@@ -1125,6 +1143,7 @@ body > * {
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-empty {
   font-style: italic;
+  margin: 0;
 }
 
 /**
@@ -1903,6 +1922,13 @@ body > * {
   min-height: 0;
   padding: 0;
   text-align: start;
+}
+.l5r4-xp-manager .l5r4-xp-manager-total {
+  font-variant-numeric: tabular-nums;
+}
+.l5r4-xp-manager .l5r4-xp-manager-empty {
+  font-style: italic;
+  margin: 0;
 }
 .l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header {
   border-inline-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);

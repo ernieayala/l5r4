@@ -1,0 +1,15 @@
+/**
+ * Flow Card
+ * The card of a combat flow, a duel or a grapple (components/flow-card.md): a column whose steps stack one button per
+ * row, full width, so a label with two names wraps in a button of its own
+ */
+
+.l5r4-flow-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+
+  .flow-actions {
+    flex-direction: column;
+  }
+}

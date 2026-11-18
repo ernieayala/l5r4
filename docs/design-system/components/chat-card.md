@@ -47,7 +47,7 @@ The full list, with item cards, is in [naming.md](../../code-system/naming.md#fi
 | Effect prompt | `templates/chat/effect-prompt.hbs` | [effect-prompt.md](effect-prompt.md) |
 | Flow card | `templates/chat/flow.hbs` | [flow-card.md](flow-card.md) |
 | Item card with its summary | `templates/cards/<subtype>.hbs` + `templates/chat/item-summary.hbs` | [item-summary-card.md](item-summary-card.md) |
-| Healing card | `templates/chat/healing.hbs`, posted by `postRestMessage` (`module/services/rest.js`) | This page: a title-less `card-content` block of sentences |
+| Healing card | `templates/chat/healing.hbs`, posted by `postRestMessage` (`module/services/rest.js`) | This page: the title line "{name} rested and recovered Wounds" (`l5r4.ui.mechanics.wounds.restTitle`), then a `card-content` block of sentences |
 | Weapon card | `templates/chat/weapon.hbs` | This page. `CHAT_TEMPLATES.weaponCard` is defined and preloaded, and no code in `module/` or `dist/` renders it; cards posted before 4.0.0 keep its `weapon` class |
 | Damage card posted before 4.0.0 | Stored HTML only | This page. Wired by `bindLegacyDamageCard` (`module/services/combat/legacy-damage.js`) and `bindLegacyAttackCard` (`module/services/chat.js`), which read the card's data attributes as untrusted input |
 
@@ -70,9 +70,9 @@ Each card's template context is on its own page. Every card takes `title` (or `l
 
 | Token | Property | Part |
 | --- | --- | --- |
-| `--l5r4-space-gap-tight` | `gap` | Between a card's parts (`.l5r4-roll` and `.l5r4-damage-result` (`scss/components/_chat-card.scss`)) |
-| `--l5r4-font-size-meta` | `font-size` | Modifier list (`.check-applied` (`scss/components/_chat-card.scss`)) |
-| `--l5r4-state-disabled-opacity` | `opacity` | `-undone` (`.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`), which writes `0.7`) |
+| `--l5r4-space-gap-tight` | `gap` | Between a card's parts (`.l5r4-roll` (`scss/components/_check-card.scss`), `.l5r4-damage-result` (`scss/components/_damage-result.scss`)) |
+| `--l5r4-font-size-meta` | `font-size` | Modifier list (`.check-applied` (`scss/components/_check-card.scss`)) |
+| `--l5r4-state-disabled-opacity` | `opacity` | `-undone` (`.l5r4-damage-result` (`scss/components/_damage-result.scss`)) |
 | `--l5r4-font-size-label`, `--l5r4-space-8` | `font-size`, `margin-block-start` | Item card headings ([item summary card](item-summary-card.md)) |
 
 Text and surface colors are core's message colors; a card sets none of its own.
@@ -95,7 +95,7 @@ Actor, item, and target names reach titles, notes, and button labels. Core break
 
 | # | Rule | Enforced by | Conforming | Non-conforming |
 | --- | --- | --- | --- | --- |
-| CC1 | A card's root carries `chat-card` and one block class; its first child is the `dice-flavor` title line | `tests/conventions/templates.test.js` (root block class) | `<div class="chat-card l5r4-effect-prompt">` then `<div class="dice-flavor">` (`templates/chat/effect-prompt.hbs`) | `<div class="chat-card healing-card l5r4-healing-card">` then `<div class="card-content">` with no title line (`templates/chat/healing.hbs`) |
+| CC1 | A card's root carries `chat-card` and one block class; its first child is the `dice-flavor` title line | `tests/conventions/templates.test.js` (root block class) | `<div class="chat-card l5r4-effect-prompt">` then `<div class="dice-flavor">` (`templates/chat/effect-prompt.hbs`) | A root followed by `<div class="card-content">` with no title line (modeled) |
 | CC2 | Fixed names stay; a new part takes an `l5r4-` class | `tests/conventions/templates.test.js` (exempt list) | A new outcome line as `<div class="l5r4-check-outcome">` (modeled) | Renaming `check-note` to `l5r4-check-note` in `templates/chat/check.hbs`: posted cards lose the style (modeled) |
 | CC3 | Each action is a `<button type="button">` with a visible label and a `data-action` (a flow card: `data-flow-action`) | `tests/conventions/templates.test.js` (interactive elements are native controls) | `<button type="button" data-action="damage-undo">` (`templates/chat/damage-result.hbs`) | `<a data-action="damage-undo">` with no `href` (modeled) |
 | CC4 | A binding finds a card's controls by `[data-action]` or `[data-flow-action]`, never by class; a pre-4.0.0 card's class carries the fixed-name disable comment | ESLint `no-restricted-syntax` | `html.querySelector("[data-action='effect-prompt']")` in `bindPromptCard` (`module/services/effects/prompts.js`) | `html.querySelectorAll(".l5r4-damage-button")` with no disable comment (modeled) |

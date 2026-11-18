@@ -1,5 +1,7 @@
 <section class="l5r4-compendium-browser-results-part">
-  <p class="l5r4-compendium-browser-count">{{localize "l5r4.apps.compendiumBrowser.count" count=count}}</p>
+  {{!-- A screen reader hears the new count after each filter or search change --}}
+  <p class="l5r4-compendium-browser-count" aria-live="polite">{{localize "l5r4.apps.compendiumBrowser.count" count=count}}</p>
+  {{#if rows.length}}
   <ul class="l5r4-compendium-browser-results">
     {{#each rows}}
       <li class="l5r4-compendium-browser-row" draggable="true" data-uuid="{{uuid}}" data-id="{{id}}" data-pack="{{pack}}"
@@ -23,8 +25,9 @@
           </button>
         {{/if}}
       </li>
-    {{else}}
-      <li class="l5r4-compendium-browser-empty">{{localize "l5r4.apps.compendiumBrowser.none"}}</li>
     {{/each}}
   </ul>
+  {{else}}
+    <p class="l5r4-compendium-browser-empty">{{localize "l5r4.apps.compendiumBrowser.none"}}</p>
+  {{/if}}
 </section>

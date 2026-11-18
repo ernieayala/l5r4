@@ -45,7 +45,7 @@ export const GALLERY_PROMPT_AND_ITEM_CARDS = Object.freeze([
   {
     page: "flow-card",
     partials: [`${T}/chat/flow.hbs`],
-    scss: ["scss/components/_chat-card.scss"],
+    scss: ["scss/components/_flow-card.scss", "scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.duel",

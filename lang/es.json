@@ -443,7 +443,7 @@
           "reducedApplied": "Punto de Vacío gastado: Daño reducido en 10. Aplicadas {amount} heridas a {name}",
           "reducedWithArmor": "{name} recibió {original} de daño. Vacío redujo a {afterVoid}, armadura redujo {reduction}. Aplicadas {final} heridas.",
           "reduceWithVoid": "Reducir con Vacío",
-          "restedAndRecovered": "descansó y recuperó heridas",
+          "restTitle": "{name} descansó y recuperó heridas",
           "status": "Heridas: {current}/{max} (sufridas: {suffered})",
           "suffered": "Heridas Sufridas",
           "threshold": "Umbral",

@@ -7,7 +7,7 @@
   .window-content {
     display: flex;
     flex-direction: column;
-    gap: var(--l5r4-space-8);
+    gap: var(--l5r4-space-gap);
     overflow: hidden;
   }
 
@@ -15,21 +15,21 @@
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
-    gap: var(--l5r4-space-8);
+    gap: var(--l5r4-space-gap);
   }
 
   .l5r4-compendium-browser-results-part {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(--l5r4-space-4);
+    gap: var(--l5r4-space-gap-tight);
     min-height: 0;
   }
 
   .l5r4-tabs.-filter {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--l5r4-space-4);
+    gap: var(--l5r4-space-gap-tight);
   }
 
   .l5r4-tabs-tab {
@@ -53,7 +53,7 @@
     align-items: end;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--l5r4-space-8);
+    gap: var(--l5r4-space-gap);
   }
 
   .l5r4-compendium-browser-filter {
@@ -61,7 +61,7 @@
     flex: 0 1 9rem;
     flex-direction: column;
     font-size: var(--l5r4-font-size-meta);
-    gap: var(--l5r4-space-4);
+    gap: var(--l5r4-space-gap-tight);
   }
 
   .l5r4-compendium-browser-search {
@@ -137,7 +137,9 @@
     width: auto;
   }
 
+  // The Empty state (foundations/states.md): one italic line in the list's place
   .l5r4-compendium-browser-empty {
     font-style: italic;
+    margin: 0;
   }
 }

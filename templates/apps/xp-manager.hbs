@@ -1,11 +1,10 @@
 <section class="l5r4-xp-manager-body standard-form">
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.summary"}}</h3>
+    {{!-- A computed value is text, not a disabled field (foundations/states.md rule 6) --}}
     <div class="form-group">
       <label>{{localize "l5r4.character.experience.usedTotal"}}</label>
-      <div class="form-fields">
-        <input type="text" disabled value="{{xp.spent}} / {{xp.total}}" />
-      </div>
+      <span class="l5r4-xp-manager-total">{{xp.spent}}/{{xp.total}}</span>
     </div>
   </div>
   <ul class="l5r4-xp-manager-breakdown">
@@ -80,8 +79,7 @@
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" type="xp" columns=sortColumns.xpLedger}}
     <section class="l5r4-item-row-list -xp">
-      {{#if manualEntries}}
-        {{#each manualEntries}}
+      {{#each manualEntries}}
           <div class="l5r4-item-row -xp -expandable" data-entry-id="{{this.id}}">
             <h4 class="l5r4-item-row-name flexrow -gap-sm">
               <span>{{this.deltaFormatted}}</span>
@@ -100,8 +98,9 @@
               </button>
             </div>
           </div>
-        {{/each}}
-      {{/if}}
+      {{else}}
+        <p class="l5r4-xp-manager-empty">{{localize "l5r4.apps.xpManager.noAdjustments"}}</p>
+      {{/each}}
     </section>
   </div>
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
@@ -117,8 +116,7 @@
     </div>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="xp-purchases" type="xp-spent" columns=sortColumns.xp-purchases}}
     <section class="l5r4-item-row-list -xp-spent">
-      {{#if spentEntries}}
-        {{#each spentEntries}}
+      {{#each spentEntries}}
           <div class="l5r4-item-row -xp-spent -expandable">
             <h4 class="l5r4-item-row-name flexrow -gap-sm">
               <span>{{this.note}}</span>
@@ -126,8 +124,9 @@
             <div>{{this.deltaFormatted}}</div>
             <div>{{this.type}}</div>
           </div>
-        {{/each}}
-      {{/if}}
+      {{else}}
+        <p class="l5r4-xp-manager-empty">{{localize "l5r4.apps.xpManager.noPurchases"}}</p>
+      {{/each}}
     </section>
   </div>
 </section>

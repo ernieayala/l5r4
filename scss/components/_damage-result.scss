@@ -1,0 +1,15 @@
+/**
+ * Damage Result
+ * The card that applies damage (components/damage-result.md): a column with one full-width button per row, so long
+ * labels stay readable. An undone card takes the disabled look beside its "Undone." note
+ */
+
+.l5r4-damage-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+
+  &.-undone {
+    opacity: var(--l5r4-state-disabled-opacity);
+  }
+}

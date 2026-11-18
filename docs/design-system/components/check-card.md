@@ -9,7 +9,7 @@ The card the roll pipeline posts for every Skill, Trait, Ring, spell, attack, an
 | Posted by | `rollCheck` through `roll.toMessage({ type: "roll", system, speaker, content })` in `postCheck` (`module/services/dice/check/roll-check.js`) |
 | Wired by | `bindCheckCard` (`module/services/dice/check/chat-actions.js`), `bindAttackCard` (`module/services/combat/attack-card.js`) and `bindDamageCards` (`module/services/combat/damage.js`) |
 | Context menu | Re-roll and keep the better, Contested Roll (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)) |
-| SCSS | `scss/components/_check-card.scss`, under the fixed root `.l5r4-check`: the dropped-dice mark ([dice row](dice-row.md)). The card's layout is still the `.l5r4-roll` block (`scss/components/_chat-card.scss`); the target moves it into `scss/components/_check-card.scss` |
+| SCSS | `scss/components/_check-card.scss`: the card's column under the fixed root `.l5r4-roll`, and the dropped-dice mark under `.l5r4-check` ([dice row](dice-row.md)) |
 | Quench | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat` |
 
 ## Anatomy
@@ -81,10 +81,10 @@ Template context from `renderCheckCard` (`module/services/dice/check/card.js`): 
 
 | Token | Property | Part |
 | --- | --- | --- |
-| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-roll` (`scss/components/_chat-card.scss`)) |
-| `--l5r4-font-size-meta` | `font-size` | `check-applied` (`.check-applied` (`scss/components/_chat-card.scss`)) |
+| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-roll` (`scss/components/_check-card.scss`)) |
+| `--l5r4-font-size-meta` | `font-size` | `check-applied` (`.check-applied` (`scss/components/_check-card.scss`)) |
 
-`l5r4-check-damage` takes `width: 100%` (`.l5r4-check-damage` (`scss/components/_chat-card.scss`)), so the damage button spans the card.
+`l5r4-check-damage` takes `width: 100%` (`.l5r4-check-damage` (`scss/components/_check-card.scss`)), so the damage button spans the card.
 
 ## Keyboard and screen reader
 

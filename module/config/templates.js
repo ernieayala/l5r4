@@ -72,6 +72,7 @@ export const APP_TEMPLATES = Object.freeze({
  * @property {string} confirm - A confirmation: its question and an optional consequence
  * @property {string} choice - A choice prompt: a label and a select
  * @property {string} disadvantageCap - The XP manager's Disadvantage XP cap prompt
+ * @property {string} customEmphasis - The Emphasis manager's prompt for a custom Emphasis name
  */
 export const DIALOG_TEMPLATES = Object.freeze({
   check: `${PATHS.templates}/dialogs/check-dialog.hbs`,
@@ -83,7 +84,8 @@ export const DIALOG_TEMPLATES = Object.freeze({
   ledger: `${PATHS.templates}/dialogs/ledger-dialog.hbs`,
   confirm: `${PATHS.templates}/dialogs/confirm-dialog.hbs`,
   choice: `${PATHS.templates}/dialogs/choice-dialog.hbs`,
-  disadvantageCap: `${PATHS.templates}/dialogs/disadvantage-cap-dialog.hbs`
+  disadvantageCap: `${PATHS.templates}/dialogs/disadvantage-cap-dialog.hbs`,
+  customEmphasis: `${PATHS.templates}/dialogs/custom-emphasis-dialog.hbs`
 });
 
 /**
@@ -209,13 +211,17 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/cards/_partials/_bio-row.hbs`,
   `${PATHS.templates}/cards/_partials/_roll-button.hbs`,
 
-  // Chat Message Templates
+  // Chat Message Templates: every CHAT_TEMPLATES path
   `${PATHS.templates}/chat/check.hbs`,
   `${PATHS.templates}/chat/effect-prompt.hbs`,
+  `${PATHS.templates}/chat/damage-result.hbs`,
+  `${PATHS.templates}/chat/flow.hbs`,
   `${PATHS.templates}/chat/healing.hbs`,
   `${PATHS.templates}/chat/weapon.hbs`,
   `${PATHS.templates}/chat/check-request.hbs`,
   `${PATHS.templates}/chat/item-summary.hbs`,
+  `${PATHS.templates}/chat/note.hbs`,
+  `${PATHS.templates}/chat/contest.hbs`,
 
   // Text links (module/setup/enrichers.js)
   `${PATHS.templates}/links/inline-link.hbs`,
@@ -230,6 +236,8 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/dialogs/unified-item-create-dialog.hbs`,
   `${PATHS.templates}/dialogs/custom-emphasis-dialog.hbs`,
   `${PATHS.templates}/dialogs/ledger-dialog.hbs`,
+  `${PATHS.templates}/dialogs/confirm-dialog.hbs`,
+  `${PATHS.templates}/dialogs/choice-dialog.hbs`,
 
   // Application Templates
   `${PATHS.templates}/apps/armor-config.hbs`,
@@ -240,6 +248,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/apps/effect-panel.hbs`,
   `${PATHS.templates}/apps/compendium-browser.hbs`,
   `${PATHS.templates}/apps/compendium-browser-results.hbs`,
+  `${PATHS.templates}/apps/compendium-browser-open.hbs`,
   `${PATHS.templates}/apps/_partials/_wealth-change.hbs`,
 
   // Design gallery (module/apps/design-gallery.js): its parts include these partials

@@ -22,29 +22,35 @@
             </button>
           {{/if}}
         </legend>
-        {{#if rule.error}}<p class="l5r4-rules-editor-error" data-rule-error>{{rule.error}}</p>{{/if}}
+        {{#if rule.error}}
+          <p class="l5r4-rules-editor-error" id="{{@root.formId}}-rule-{{rule.index}}-error" data-rule-error>
+            <i class="fa-solid fa-circle-exclamation" inert></i>
+            {{rule.error}}
+          </p>
+        {{/if}}
         {{#each rule.fields as |field|}}
           <div class="form-group l5r4-rules-editor-field" data-kind="{{field.kind}}">
             <label>{{field.name}}</label>
+            {{!-- An invalid rule's fields point at its error line (foundations/states.md rule 7) --}}
             {{#if (eq field.kind "boolean")}}
-              <input type="checkbox" name="rules.{{rule.index}}.{{field.name}}" {{checked field.value}} {{disabled (not @root.rulesEditable)}} />
+              <input type="checkbox" name="rules.{{rule.index}}.{{field.name}}" {{checked field.value}} {{disabled (not @root.rulesEditable)}} {{#if rule.error}}aria-invalid="true" aria-describedby="{{@root.formId}}-rule-{{rule.index}}-error"{{/if}} />
             {{else if (eq field.kind "number")}}
-              <input type="number" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} />
+              <input type="number" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} {{#if rule.error}}aria-invalid="true" aria-describedby="{{@root.formId}}-rule-{{rule.index}}-error"{{/if}} />
             {{else if (eq field.kind "select")}}
-              <select name="rules.{{rule.index}}.{{field.name}}" {{disabled (not @root.rulesEditable)}}>
+              <select name="rules.{{rule.index}}.{{field.name}}" {{disabled (not @root.rulesEditable)}} {{#if rule.error}}aria-invalid="true" aria-describedby="{{@root.formId}}-rule-{{rule.index}}-error"{{/if}}>
                 {{#if field.nullable}}<option value=""></option>{{/if}}
                 {{selectOptions field.choices selected=field.value}}
               </select>
             {{else if (eq field.kind "json")}}
-              <textarea name="rules.{{rule.index}}.{{field.name}}" rows="2" spellcheck="false" {{disabled (not @root.rulesEditable)}}>{{field.value}}</textarea>
+              <textarea name="rules.{{rule.index}}.{{field.name}}" rows="2" spellcheck="false" {{disabled (not @root.rulesEditable)}} {{#if rule.error}}aria-invalid="true" aria-describedby="{{@root.formId}}-rule-{{rule.index}}-error"{{/if}}>{{field.value}}</textarea>
             {{else}}
-              <input type="text" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} />
+              <input type="text" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} {{#if rule.error}}aria-invalid="true" aria-describedby="{{@root.formId}}-rule-{{rule.index}}-error"{{/if}} />
             {{/if}}
           </div>
         {{/each}}
       </fieldset>
     {{else}}
-      <p class="hint">{{localize "l5r4.ui.rules.none"}}</p>
+      <p class="l5r4-rules-editor-empty">{{localize "l5r4.ui.rules.none"}}</p>
     {{/each}}
     {{#if rulesEditable}}
       <div class="l5r4-rules-editor-add flexrow -gap-sm">

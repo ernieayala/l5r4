@@ -443,7 +443,7 @@
           "reducedApplied": "Ponto de Vazio gasto: Dano reduzido em 10. Aplicados {amount} ferimentos a {name}",
           "reducedWithArmor": "{name} recebeu {original} de dano. Vazio reduziu para {afterVoid}, armadura reduziu {reduction}. Aplicados {final} ferimentos.",
           "reduceWithVoid": "Reduzir com Vazio",
-          "restedAndRecovered": "descansou e recuperou ferimentos",
+          "restTitle": "{name} descansou e recuperou ferimentos",
           "status": "Ferimentos: {current}/{max} (sofridos: {suffered})",
           "suffered": "Ferimentos Sofridos",
           "threshold": "Limite",

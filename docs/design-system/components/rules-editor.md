@@ -21,10 +21,10 @@ The editor for an item's or an Active Effect's `system.rules`: one card per rule
 | JSON | `<textarea name="rulesJson">`, monospace | `l5r4-rules-editor-json` |  |
 | Rule card | `<fieldset data-rule-index>`, the rule key as `<legend>` | `l5r4-rules-editor-card` |  |
 | Remove | Icon-only `<button type="button">` in the legend | `l5r4-rules-editor-delete` | `l5r4-rules-editor-delete inline-control icon` |
-| Error | `<p data-rule-error>`, one per rule that does not validate | `l5r4-rules-editor-error` |  |
+| Error | `<p data-rule-error>` led by an `inert` `fa-circle-exclamation`, one per rule that does not validate; its id, built from `formId`, is what the rule's fields name in `aria-describedby` | `l5r4-rules-editor-error` |  |
 | Field | Core's `form-group` with the field's name and one control by kind | `form-group l5r4-rules-editor-field` |  |
 | Add row | `<select data-rule-key>` with an `aria-label`, then the Add button | `l5r4-rules-editor-add flexrow -gap-sm` |  |
-| Empty | `p.hint` | core's `hint` | `l5r4-rules-editor-empty`, the Empty state of states.md |
+| Empty | `<p>`, the Empty state of states.md | `l5r4-rules-editor-empty` |  |
 
 The names follow naming.md's block-element pattern (`l5r4-<block>-<element>`, one block per file); frames.md and states.md use the same `l5r4-rules-editor-card` and `l5r4-rules-editor-error`.
 
@@ -49,7 +49,7 @@ The names follow naming.md's block-element pattern (`l5r4-<block>-<element>`, on
 | State | Look | Markup |
 | --- | --- | --- |
 | Empty | One line saying the item has no rules | The `{{else}}` of the `{{#each rules` loop (`templates/rules/_partials/_editor.hbs`) |
-| Invalid rule | The card's error line: `fa-circle-exclamation` and the message in `--l5r4-color-danger`; the field carries `aria-invalid` and `aria-describedby` to the line (states.md rule 7) | Target. The code shows the message in error color alone: `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`) |
+| Invalid rule | The card's error line: `fa-circle-exclamation` and the message in `--l5r4-color-danger`; each field of the rule carries `aria-invalid` and `aria-describedby` to the line (states.md rule 7) | `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`) |
 | JSON that does not parse | Core shows the thrown error; nothing saves | The `throw` in `parseRulesForm` (`module/sheets/rules-editor.js`) |
 | Action failed | Error notification with the message | The `catch` in `updateRules` (`module/sheets/rules-editor.js`) |
 | Read-only | Core's disabled look on every control | `{{disabled (not rulesEditable)}}` |
@@ -99,7 +99,7 @@ Every `data-action` is kebab-case (Stage 17 decision 15), as are the `RULES_EDIT
 | Controls | The view switch, Add, and remove are `<button type="button">`s; remove is icon-only, with `data-tooltip` and `aria-label` from `l5r4.ui.rules.delete` (iconography.md rule 4) |
 | Names | The add select is named by `aria-label`. Each field's `<label>` has no `for`; the target ties it as the check dialog does |
 | Groups | Each rule is a `<fieldset>` whose `<legend>` is its key, so a reader hears which rule a field belongs to |
-| Errors | The target error line is linked from the field by `aria-describedby` |
+| Errors | The error line is linked from each field of its rule by `aria-describedby`, and each of those fields carries `aria-invalid` |
 
 ## Long text
 
@@ -112,7 +112,7 @@ Rule keys are single words. A field value runs inside its input; JSON scrolls in
 | RE1 | Every control is a native control; an icon-only one carries `data-tooltip` and `aria-label` and an `inert` icon | `tests/conventions/templates.test.js` | The Add button, `data-action="create-rule"` (`templates/rules/_partials/_editor.hbs`); the icon-only remove button, `data-action="delete-rule"` (`templates/rules/_partials/_editor.hbs`), with `data-tooltip`, `aria-label`, and an `inert` icon | `<a class="rule-delete" data-action="rulesDelete" title="…"><i class="fa-solid fa-trash"></i></a>` (modeled) |
 | RE2 | Actions are kebab-case | `tests/conventions/actions.test.js` | `data-action="delete-rule"` (`templates/rules/_partials/_editor.hbs`) | `data-action="rulesDelete"` (modeled) |
 | RE3 | An action keeps what the form holds | Quench `l5r4-enhanced.authoring` | `updateRules` (`module/sheets/rules-editor.js`) reads the form first | Rebuilding the list from stored rules and dropping unsaved fields (modeled) |
-| RE4 | An invalid rule shows icon, words, and the state color, linked from its field | Review (states.md rule 7) | states.md rule 7 conforming example | `<p class="l5r4-rules-editor-error" data-rule-error>{{rule.error}}</p>` (`templates/rules/_partials/_editor.hbs`) |
+| RE4 | An invalid rule shows icon, words, and the state color, linked from its field | Quench `l5r4-enhanced.authoring`, review (states.md rule 7) | `l5r4-rules-editor-error` with its `fa-circle-exclamation` and the fields' `aria-describedby` (`templates/rules/_partials/_editor.hbs`) | `<p class="l5r4-rules-editor-error" data-rule-error>{{rule.error}}</p>`, words in color alone (modeled) |
 | RE5 | Read-only shows the same layout with every control disabled | Quench `l5r4-enhanced.authoring` | `{{disabled (not @root.rulesEditable)}}` (`templates/rules/_partials/_editor.hbs`) on each field | Hiding the rules from a viewer who cannot edit (modeled) |
 | RE6 | The editor's file holds the editor only | `tests/conventions/styles.test.js` (one component per file) | `scss/components/_rules-editor.scss` with `.l5r4-rules-editor` alone | `.l5r4-ledger` and `.item-activate.active` in the editor's file (modeled) |
 | RE7 | Borders read a width token and a color role | `tests/conventions/styles.test.js`, frames.md rule 1 | `border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);` in `.l5r4-rules-editor-card` (`scss/components/_rules-editor.scss`) | `border: 1px solid var(--color-border-dark-tertiary);` (modeled) |

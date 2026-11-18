@@ -146,7 +146,9 @@ Every list in a window has an `{{else}}` that renders one italic line in its pla
 
 Conforming, `l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`): "No effects on {name}." and, with no actor, "Select a token, or assign a character, to see its effects."
 
-Non-conforming, `{{#if manualEntries}}` (`templates/apps/xp-manager.hbs`) and `{{#if spentEntries}}` (`templates/apps/xp-manager.hbs`) with no `{{else}}`, so an empty ledger shows a header over nothing. `l5r4.ui.rules.none` (`templates/rules/_partials/_editor.hbs`) sets its empty line in the hint look; `l5r4.apps.emphasisManager.noEmphases` (`templates/apps/emphasis-manager.hbs`) in a bare `<p>`.
+Conforming, `l5r4-xp-manager-empty` (`templates/apps/xp-manager.hbs`), each ledger list's `{{else}}`, and `l5r4-rules-editor-empty` (`templates/rules/_partials/_editor.hbs`), the rules editor's.
+
+Non-conforming, `l5r4.apps.emphasisManager.noEmphases` (`templates/apps/emphasis-manager.hbs`) in a bare `<p>`.
 
 ### 5. The browser filters without losing the user's place
 
@@ -154,7 +156,9 @@ Tabs are buttons with `aria-pressed` inside a `nav` with a name. Each filter is 
 
 Conforming, `l5r4-compendium-browser-controls` (`templates/apps/compendium-browser.hbs`): the tab buttons, `aria-label` on the `nav`, and labelled filters.
 
-Non-conforming, `l5r4-compendium-browser-count` (`templates/apps/compendium-browser-results.hbs`): the count changes with no announcement.
+Conforming, `l5r4-compendium-browser-count` (`templates/apps/compendium-browser-results.hbs`): `aria-live="polite"` on the count line.
+
+Non-conforming (modeled): a count that changes with no announcement.
 
 ### 6. The rules editor keeps both views of one list
 
@@ -162,7 +166,9 @@ The form view and the JSON view edit the same `system.rules`; switching views sa
 
 Conforming, `l5r4-rules-editor-card` (`templates/rules/_partials/_editor.hbs`): one `fieldset` per rule with its key as the `legend`; `l5r4-rules-editor-delete` (`templates/rules/_partials/_editor.hbs`), the remove control, a button named "Remove this rule" with an `inert` icon.
 
-Non-conforming, `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`): the error line has no invalid icon, and no field links to it with `aria-describedby`.
+Conforming, `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`): the error line with the invalid icon, which each of its rule's fields names in `aria-describedby`.
+
+Non-conforming (modeled): an error line in color alone that no field points at.
 
 ### 7. One stylesheet per window
 
@@ -206,9 +212,9 @@ Non-conforming, modeled: camelCase keys such as `openSource`.
 
 A total the system works out (XP spent of total, current wealth) shows as text, never as a disabled input (`foundations/states.md` rule 6). Enforced by review.
 
-Conforming, `l5r4-wealth-manager-value` (`templates/apps/wealth-manager.hbs`): each coin's amount in a `div`.
+Conforming, `l5r4-wealth-manager-value` (`templates/apps/wealth-manager.hbs`): each coin's amount in a `div`; `l5r4-xp-manager-total` (`templates/apps/xp-manager.hbs`): the XP spent of total as text.
 
-Non-conforming, `<input type="text" disabled value="{{xp.spent}} / {{xp.total}}" />` (`templates/apps/xp-manager.hbs`).
+Non-conforming (modeled): `<input type="text" disabled value="{{xp.spent}} / {{xp.total}}" />`.
 
 ## Keyboard and screen reader
 

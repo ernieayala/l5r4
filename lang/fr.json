@@ -443,7 +443,7 @@
           "reducedApplied": "Point de Vide dépensé : Dégâts réduits de 10. Appliqué {amount} blessures à {name}",
           "reducedWithArmor": "{name} a reçu {original} dégâts. Vide réduit à {afterVoid}, armure réduite de {reduction}. Appliqué {final} blessures.",
           "reduceWithVoid": "Réduire avec Vide",
-          "restedAndRecovered": "s'est reposé et a récupéré des blessures",
+          "restTitle": "{name} s'est reposé et a récupéré des blessures",
           "status": "Blessures : {current}/{max} (subies : {suffered})",
           "suffered": "Blessures Subies",
           "threshold": "Seuil",

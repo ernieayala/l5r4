@@ -53,6 +53,17 @@
     text-align: start;
   }
 
+  // The spent of total XP is a computed value, so it reads as text (foundations/states.md rule 6)
+  .l5r4-xp-manager-total {
+    font-variant-numeric: tabular-nums;
+  }
+
+  // The Empty state (foundations/states.md): one italic line where the list would be
+  .l5r4-xp-manager-empty {
+    font-style: italic;
+    margin: 0;
+  }
+
   .l5r4-item-row-list {
     &.l5r4-sort-header {
       border-inline-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);

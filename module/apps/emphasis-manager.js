@@ -296,7 +296,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
  */
 async function askEmphasisName({ title, label, data }) {
   const content = await foundry.applications.handlebars.renderTemplate(
-    `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
+    DIALOG_TEMPLATES.customEmphasis,
     data
   );
 

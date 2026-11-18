@@ -131,6 +131,22 @@ export function registerXpManagerTests(quench) {
           assert.exists(flags.xpSpent, "Spent XP array exists");
           assert.isArray(flags.xpSpent, "xpSpent is array");
         });
+
+        // #79
+        it("should show XP spent of total as text, and an empty line for each empty list", () => {
+          const { spent, total } = actor.system._xp;
+          const body = dialog.element;
+          assert.isNull(
+            body.querySelector("input[disabled]"),
+            "no computed value in a disabled field"
+          );
+          assert.include(body.textContent, `${spent}/${total}`);
+          const empties = [...body.querySelectorAll("p")].map(p => p.textContent.trim());
+          assert.includeMembers(empties, [
+            game.i18n.localize("l5r4.apps.xpManager.noAdjustments"),
+            game.i18n.localize("l5r4.apps.xpManager.noPurchases")
+          ]);
+        });
       });
 
       describe("XP manager calculations", () => {

@@ -25,7 +25,7 @@ Element classes are `l5r4-compendium-browser-<element>`, the window's block ([na
 | Search | `<input type="search" data-browser-search>` | `-search`, on its `<label>` |
 | Clear | `<button type="button">` with a label | `-clear` |
 | Results | `<section>`: the count, then the list | `-results-part` |
-| Count | `<p>` | `-count` |
+| Count | `<p aria-live="polite">` | `-count` |
 | List | `<ul>` | `-results` |
 | Row | `<li draggable="true" data-uuid data-id data-pack data-document-name>` | `-row` |
 | Icon | `<img alt="">` | `-icon` |
@@ -34,7 +34,7 @@ Element classes are `l5r4-compendium-browser-<element>`, the window's block ([na
 | Details | `<span>`: kind · numbers · folder | `-details` |
 | Source | `<span>`: citation · pack | `-source` |
 | Add, Import | `<button type="button">`, icon and label | `-button` |
-| Empty | A `<p>` in the list's place (states.md rule 9); the code writes an `<li>` in the list (CB8) | `-empty` |
+| Empty | A `<p>` in the list's place (states.md rule 9, CB8) | `-empty` |
 
 ## Actions
 
@@ -85,8 +85,8 @@ Context from `CompendiumBrowserApplication#_prepareContext` (`module/apps/compen
 
 | Token | Property | Part |
 | --- | --- | --- |
-| `--l5r4-space-gap` | `gap` | Window content, controls, filters, row: `.window-content`, `.l5r4-compendium-browser-controls`, `.l5r4-compendium-browser-filters`, `.l5r4-compendium-browser-row` (`scss/apps/_compendium-browser.scss`); in the code, the first three read `--l5r4-space-8` |
-| `--l5r4-space-gap-tight` | `gap` | Results part, tabs, list, filter caption: `.l5r4-compendium-browser-results-part`, `.l5r4-tabs.-filter`, `.l5r4-compendium-browser-filter`, `.l5r4-compendium-browser-results` (`scss/apps/_compendium-browser.scss`); in the code, all but the list read `--l5r4-space-4` |
+| `--l5r4-space-gap` | `gap` | Window content, controls, filters, row: `.window-content`, `.l5r4-compendium-browser-controls`, `.l5r4-compendium-browser-filters`, `.l5r4-compendium-browser-row` (`scss/apps/_compendium-browser.scss`) |
+| `--l5r4-space-gap-tight` | `gap` | Results part, tabs, list, filter caption: `.l5r4-compendium-browser-results-part`, `.l5r4-tabs.-filter`, `.l5r4-compendium-browser-filter`, `.l5r4-compendium-browser-results` (`scss/apps/_compendium-browser.scss`) |
 | `--l5r4-space-control-block`, `--l5r4-space-control-inline` | `padding` | Tabs, row buttons: `.l5r4-tabs-tab`, `.l5r4-compendium-browser-button` (`scss/apps/_compendium-browser.scss`) |
 | `--l5r4-state-selected-outline` | `outline` | Selected tab, `&.active` in `.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`) |
 | `--l5r4-size-item-icon` | `flex-basis`, `width`, `height` | Icon, `.l5r4-compendium-browser-icon` (`scss/apps/_compendium-browser.scss`) |
@@ -102,7 +102,7 @@ Context from `CompendiumBrowserApplication#_prepareContext` (`module/apps/compen
 | Filters | Each control sits inside its `<label>`, so the caption is its name |
 | Rows | The name is a `<button>` that opens the sheet and takes focus |
 | No drag needed | Add puts an item on the character without a drag (`patterns/dialogs.md`, pickers with a route that needs no drag) |
-| Count | "Entries: {count}" above the list, so a reader hears how many rows follow |
+| Count | "Entries: {count}" above the list, in a polite live region, so a reader hears how many rows follow and the new count after each filter change |
 | Icons | `inert` on button icons; row images `alt=""` |
 
 ## Long text
@@ -120,7 +120,7 @@ The text column, `.l5r4-compendium-browser-text` (`scss/apps/_compendium-browser
 | CB5 | Actions are kebab-case | `tests/conventions/actions.test.js` | `data-action="select-tab"` (`templates/apps/compendium-browser.hbs`) | `data-action="selectTab"` (modeled) |
 | CB6 | JavaScript selects by data attribute, never by class | ESLint `no-restricted-syntax` | `querySelectorAll("[data-browser-filter]")` in `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`) | `querySelectorAll(".l5r4-browser-row[data-uuid]")` (modeled) |
 | CB7 | No markup in JavaScript: the sidebar button comes from a template | ESLint `no-restricted-syntax` | `renderTemplate` and `foundry.utils.parseHTML` in `CompendiumBrowserApplication.onRenderCompendiumDirectory` (`module/apps/compendium-browser.js`) (templates-and-styles.md) | ``button.innerHTML = `<i class="fa-solid fa-book-open" inert></i>…` `` (modeled) |
-| CB8 | The empty state is one italic `<p>` in the list's place | Review (states.md rule 9) | `{{else}}<p class="l5r4-compendium-browser-empty">…</p>` (modeled) | `<li class="l5r4-compendium-browser-empty">` (`templates/apps/compendium-browser-results.hbs`) inside the list |
+| CB8 | The empty state is one italic `<p>` in the list's place | Quench `l5r4-enhanced.packs`, review (states.md rule 9) | The `{{else}}` of `{{#if rows.length}}`: `<p class="l5r4-compendium-browser-empty">` (`templates/apps/compendium-browser-results.hbs`) | An `<li>` inside the list (modeled) |
 
 ## Do and don't
 

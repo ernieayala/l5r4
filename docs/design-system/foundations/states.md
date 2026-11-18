@@ -31,12 +31,12 @@ Invalid and warning take no state token of their own: they read color.md's `--l5
 | Selected | Bold text and `outline: var(--l5r4-state-selected-outline)` | `aria-pressed="true"` (a filter tab) or `aria-selected="true"`, with core's `active` class where core's CSS reads it (sheet tabs, and any `button.active`, `foundry2.css:4126-4130`) | Compendium browser tabs (`.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`), `data-action="select-tab"` (`templates/apps/compendium-browser.hbs`)) |
 | Checked (on) | Native checkbox; for a system-drawn toggle, a filled shape or the "on" icon of its pair (iconography.md) | `:checked`, or `aria-pressed="true"` on a toggle button | Void Point dots fill (`.l5r4-void-point` (`scss/features/_traits-rings.scss`)); effect toggle icons (`data-action="toggle-effect"` (`templates/item/_partials/_tab-effects.hbs`)); activation icon and accent color (`data-action="toggle-activation"` (`templates/cards/_partials/_activate.hbs`), `.l5r4-inline-control-activate.active` (`scss/components/_inline-control.scss`)) |
 | Expanded | The angle icon points up and the content shows | `aria-expanded` on the toggle, `is-collapsed` / `is-expanded` on the block | Section titles and item rows (`.l5r4-section-title` (`scss/components/_section.scss`), `.l5r4-item-row` (`scss/components/_item-row.scss`)); the toggle sets `aria-expanded` and swaps its angle icon on each press (`ItemCrudHandler.updateSectionCollapsed`, `ItemCrudHandler.updateItemExpanded` (`module/sheets/handlers/item-crud-handler.js`)) |
-| Disabled | Core's disabled look on core controls; `opacity: var(--l5r4-state-disabled-opacity)` on a system-drawn one. The reason sits in the control's `data-tooltip` | `disabled` attribute | Roll faces on a sheet the viewer cannot edit, with no sprite on hover (`.l5r4-button-face` (`scss/components/_button.scss`)); check dialog Void Point boxes (`name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`)); undone damage card at `opacity: 0.7` (`.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`)) |
-| Read-only | A value the viewer cannot change reads as text. On a sheet the viewer cannot edit, core disables every input (`client/applications/api/document-sheet.mjs:212-222`, `:253`) and its disabled look shows | Text, or core's `disabled` on a non-editable sheet | Computed values in disabled inputs (`{{xp.spent}} / {{xp.total}}` (`templates/apps/xp-manager.hbs`), `{{system.wounds.max}}` (`templates/actor/_partials/_wounds.hbs`)) |
-| Invalid | `aria-invalid="true"` on the field, and below it a message in `--l5r4-color-danger` led by `fa-circle-exclamation` | `aria-invalid`, `aria-describedby` to the message | Rule editor errors in error color, with no icon or link to the field (`l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`), `.l5r4-rules-editor-error` (`scss/components/_rules-editor.scss`)) |
+| Disabled | Core's disabled look on core controls; `opacity: var(--l5r4-state-disabled-opacity)` on a system-drawn one. The reason sits in the control's `data-tooltip` | `disabled` attribute | Roll faces on a sheet the viewer cannot edit, with no sprite on hover (`.l5r4-button-face` (`scss/components/_button.scss`)); check dialog Void Point boxes (`name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`)); undone damage card (`&.-undone` in `.l5r4-damage-result` (`scss/components/_damage-result.scss`)) |
+| Read-only | A value the viewer cannot change reads as text. On a sheet the viewer cannot edit, core disables every input (`client/applications/api/document-sheet.mjs:212-222`, `:253`) and its disabled look shows | Text, or core's `disabled` on a non-editable sheet | The XP manager's spent of total as text (`l5r4-xp-manager-total` (`templates/apps/xp-manager.hbs`)); a computed value still in a disabled input (`{{system.wounds.max}}` (`templates/actor/_partials/_wounds.hbs`)) |
+| Invalid | `aria-invalid="true"` on the field, and below it a message in `--l5r4-color-danger` led by `fa-circle-exclamation` | `aria-invalid`, `aria-describedby` to the message | Rule editor errors, the rule's fields linked to the line (`l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`), `.l5r4-rules-editor-error` (`scss/components/_rules-editor.scss`)) |
 | Warning | A line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, then the label in bold in `--l5r4-color-text` | `role="note"` on the line | The check dialog's maho casting warning and Void-spent warning (`l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`, `templates/dialogs/check-dialog.hbs`), `.l5r4-check-dialog-warning-icon` (`scss/components/_check-dialog.scss`)) |
 | Loading | The control is disabled and its icon is `fa-spinner fa-spin` until the action ends | `aria-busy="true"` and `disabled` | None shown; the effect delete guard keeps a `data-busy` flag with no visible state (`ItemEffectsHandler.deleteEffect` (`module/sheets/handlers/item-effects-handler.js`)) |
-| Empty | One italic line saying what is missing, where the list would be | A `<p>` in the list's place | Italic in the effect panel and the browser (`l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`), `l5r4-compendium-browser-empty` (`templates/apps/compendium-browser-results.hbs`)); a hint (`l5r4.ui.rules.none` (`templates/rules/_partials/_editor.hbs`)); a bare `<p>` (`l5r4.apps.emphasisManager.noEmphases` (`templates/apps/emphasis-manager.hbs`)); nothing (`{{#if manualEntries}}` and `{{#if spentEntries}}` (`templates/apps/xp-manager.hbs`)) |
+| Empty | One italic line saying what is missing, where the list would be | A `<p>` in the list's place | Italic in the effect panel, the browser, the rules editor, and the XP manager (`l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`), `l5r4-compendium-browser-empty` (`templates/apps/compendium-browser-results.hbs`), `l5r4-rules-editor-empty` (`templates/rules/_partials/_editor.hbs`), `l5r4-xp-manager-empty` (`templates/apps/xp-manager.hbs`)); a bare `<p>` (`l5r4.apps.emphasisManager.noEmphases` (`templates/apps/emphasis-manager.hbs`)) |
 | Locked | The value shows as text with `fa-lock` beside it; `data-tooltip` names what holds it (a rule, the GM). No edit control | Text, `fa-lock` `inert` | No component shows it. A Ring other than Void derives from its Traits and renders with no step control |
 
 ## Rules
@@ -146,7 +146,9 @@ Conforming, the XP field in `l5r4-pc-info` (`templates/actor/_partials/_stats.hb
 <span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>
 ```
 
-Non-conforming, the XP total in `l5r4-xp-manager-group` (`templates/apps/xp-manager.hbs`):
+Conforming, the XP total in `l5r4-xp-manager-total` (`templates/apps/xp-manager.hbs`): `{{xp.spent}}/{{xp.total}}` as text.
+
+Non-conforming (modeled):
 
 ```hbs
 <input type="text" disabled value="{{xp.spent}} / {{xp.total}}" />
@@ -156,11 +158,15 @@ Non-conforming, the XP total in `l5r4-xp-manager-group` (`templates/apps/xp-mana
 
 The message names the problem in words and starts with the state's icon (`fa-circle-exclamation` for invalid, `fa-triangle-exclamation` for warning, `inert`). An invalid message is in `--l5r4-color-danger`, a text pairing; a warning's icon is in `--l5r4-color-warning`, an indicator pairing, and its words in `--l5r4-color-text`. An invalid field links to its message with `aria-describedby`. Enforced by `tests/conventions/contrast.test.js` (the danger and warning pairings in `foundations/color.md`, in both themes) and review for the icon and the words.
 
-Conforming, modeled on `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`):
+Conforming, `l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`), which each field of the rule names in `aria-describedby`:
 
 ```hbs
 {{#if rule.error}}
-  <p class="l5r4-rules-editor-error" id="rule-{{rule.index}}-error">
+  <p
+    class="l5r4-rules-editor-error"
+    id="{{@root.formId}}-rule-{{rule.index}}-error"
+    data-rule-error
+  >
     <i class="fa-solid fa-circle-exclamation" inert></i>
     {{rule.error}}
   </p>
@@ -191,7 +197,9 @@ Conforming, `l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`):
 {{/if}}
 ```
 
-Non-conforming, `{{#if manualEntries}}` (`templates/apps/xp-manager.hbs`) with no `{{else}}`, so an empty ledger shows a header over nothing.
+Conforming, `l5r4-xp-manager-empty` (`templates/apps/xp-manager.hbs`): the `{{else}}` of each ledger list.
+
+Non-conforming (modeled): a list with no `{{else}}`, so an empty ledger shows a header over nothing.
 
 ## Partials and files
 

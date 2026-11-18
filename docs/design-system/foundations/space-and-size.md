@@ -57,7 +57,7 @@ The `-gap-*` classes keep their names; `-gap-sm` sits inside posted chat cards, 
 
 | Token | Value | Job | Read at |
 | --- | --- | --- | --- |
-| `--l5r4-space-gap-tight` | `--l5r4-space-4` | Between stacked rows: list rows, card rows, dialog rows | `.l5r4-item-row-list` (`scss/components/_item-row.scss`), `.l5r4-roll` and `.l5r4-flow-card` (`scss/components/_chat-card.scss`), `.l5r4-check-dialog-group` (`scss/components/_check-dialog.scss`), `.l5r4-effect-panel-list` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-results` (`scss/apps/_compendium-browser.scss`) |
+| `--l5r4-space-gap-tight` | `--l5r4-space-4` | Between stacked rows: list rows, card rows, dialog rows | `.l5r4-item-row-list` (`scss/components/_item-row.scss`), `.l5r4-roll` (`scss/components/_check-card.scss`), `.l5r4-flow-card` (`scss/components/_flow-card.scss`), `.l5r4-check-dialog-group` (`scss/components/_check-dialog.scss`), `.l5r4-effect-panel-list` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-results` (`scss/apps/_compendium-browser.scss`) |
 | `--l5r4-space-gap-controls` | `0.125rem` (2 px), off the scale | Between the buttons of an item row's control cluster, so four 24 px buttons fit `--l5r4-size-column-controls` | The cluster rule of `.l5r4-item-row` (`scss/components/_item-row.scss`) |
 | `--l5r4-space-gap` | `--l5r4-space-8` | Between parts of one row: icon and text, toggle and label, label and value | `.l5r4-effect-panel-row` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-row` (`scss/apps/_compendium-browser.scss`), `.l5r4-check-dialog-modifier` (`scss/components/_check-dialog.scss`), `.l5r4-xp-manager-breakdown` (`scss/apps/_xp-manager.scss`) |
 | `--l5r4-space-control-block` | `--l5r4-space-4` | Block padding inside a compact button or tab | `.l5r4-effect-panel-button` (`scss/apps/_effect-panel.scss`), `.l5r4-tabs-tab` and `.l5r4-compendium-browser-button` (`scss/apps/_compendium-browser.scss`) |
@@ -75,7 +75,7 @@ The `-gap-*` classes keep their names; `-gap-sm` sits inside posted chat cards, 
 | Dialogs | `gap-tight` | `gap` | Core's window padding | `gap` |
 | Panels and browsers | `gap-tight` | `gap` | Core's window padding | `gap` |
 
-Chat card buttons run full width, one per row (`.l5r4-flow-card` and `.l5r4-damage-result` (`scss/components/_chat-card.scss`)), so a long label wraps and the button keeps its height.
+Chat card buttons run full width, one per row (`.l5r4-flow-card` (`scss/components/_flow-card.scss`), `.l5r4-damage-result` (`scss/components/_damage-result.scss`)), so a long label wraps and the button keeps its height.
 
 ## Size scale
 

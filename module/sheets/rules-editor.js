@@ -24,6 +24,8 @@ export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/_partial
 export function buildRulesEditorContext(rules, mode, editable) {
   const answered = getAnsweredRules(rules);
   return {
+    // An error line's id, which its rule's fields point at, is unique to this render of this editor
+    formId: foundry.utils.randomID(),
     rulesMode: mode,
     rulesEditable: editable,
     ruleKeys: Object.fromEntries(RULE_KEYS.map(key => [key, key])),

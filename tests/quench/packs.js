@@ -1186,6 +1186,27 @@ export function registerPacksTests(quench) {
           })
         );
 
+        // #79
+        it(
+          "should say that nothing matches in one line in the list's place, and announce the count",
+          clean(async () => {
+            const app = await openOn("equipment");
+            try {
+              app.search = "no entry is called this";
+              await app.render();
+              const part = app.element.querySelector("[data-application-part='results']");
+              assert.isNull(part.querySelector("ul, li"), "no list holds the empty line");
+              assert.equal(
+                part.querySelector("p:not([aria-live])").textContent.trim(),
+                game.i18n.localize("l5r4.apps.compendiumBrowser.none")
+              );
+              assert.ok(part.querySelector("p[aria-live='polite']"), "the count is announced");
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
         it(
           "should switch tabs, clear filters, open a name's sheet, and import a creature",
           clean(async () => {

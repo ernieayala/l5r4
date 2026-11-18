@@ -94,6 +94,24 @@ export function registerRestRecoveryWorkflowTests(quench) {
           );
         });
 
+        // #79
+        it("should post the rest card with a title line naming who rested", async () => {
+          await actor.update({ "system.suffered": 5 });
+          const posted = new Promise(resolve => Hooks.once("createChatMessage", resolve));
+          await applyLongRest(actor);
+          const message = await posted;
+          try {
+            const card = foundry.utils.parseHTML(message.content);
+            assert.equal(
+              card.firstElementChild.textContent.trim(),
+              game.i18n.localize("l5r4.ui.mechanics.wounds.restTitle", { name: actor.name }),
+              "the card opens with its title line"
+            );
+          } finally {
+            await message.delete();
+          }
+        });
+
         it("should restore all spell slots to maximum", async () => {
           // ARRANGE - Deplete spell slots
           const rings = actor.system.rings;

@@ -443,7 +443,7 @@
           "reducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
           "reducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
           "reduceWithVoid": "Mit Leere Reduzieren",
-          "restedAndRecovered": "hat sich ausgeruht und Wunden geheilt",
+          "restTitle": "{name} hat sich ausgeruht und Wunden geheilt",
           "status": "Wunden: {current}/{max} (erlitten: {suffered})",
           "suffered": "Erlittene Wunden",
           "threshold": "Schwelle",

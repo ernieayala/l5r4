@@ -1,8 +1,9 @@
 /**
  * Chat Messages
- * Styling for chat message content and L5R4-specific chat elements. Each rule sits under a fixed chat-card class
+ * The shell every L5R4 chat card shares, and the posted item card. Each rule sits under a fixed chat-card class
  * (docs/code-system/naming.md, Fixed names); the posted item card's `item` root also roots every sheet item row, so its
- * rules alone keep core's message wrapper as their scope
+ * rules alone keep core's message wrapper as their scope. Each card with a page of its own has its own file
+ * (patterns/chat-cards.md rule 6)
  */
 
 .message-content {
@@ -24,45 +25,11 @@
   }
 }
 
-.l5r4-roll {
-  display: flex;
-  flex-direction: column;
-  gap: var(--l5r4-space-gap-tight);
-
-  .l5r4-damage-button,
-  .l5r4-check-damage {
-    width: 100%;
-  }
-
-  // Roll pipeline card: the modifiers that applied, under the label
-  .check-applied {
-    font-size: var(--l5r4-font-size-meta);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-}
-
-// Flow cards (duel, grapple) and damage results: one full-width button per row, so long labels stay readable
-.l5r4-flow-card,
-.l5r4-damage-result {
-  display: flex;
-  flex-direction: column;
-  gap: var(--l5r4-space-gap-tight);
-}
-
+// A note line reads as the card's commentary, in every card that has one
 .l5r4-roll,
 .l5r4-flow-card,
 .l5r4-damage-result {
   .check-note {
     font-style: italic;
   }
-}
-
-.l5r4-flow-card .flow-actions {
-  flex-direction: column;
-}
-
-.l5r4-damage-result.-undone {
-  opacity: 0.7;
 }

@@ -4,12 +4,12 @@ A card that runs a combat flow of several steps, an iaijutsu duel or a grapple: 
 
 | Item | Detail |
 | --- | --- |
-| Template | `templates/chat/flow.hbs`, `CHAT_TEMPLATES.flowCard`: no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)). Not in the preload list; `renderTemplate` loads it on first use |
+| Template | `templates/chat/flow.hbs`, `CHAT_TEMPLATES.flowCard`: no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)). Preloaded in `PRELOAD_TEMPLATES` (`module/config/templates.js`) |
 | Flows | `module/services/combat/duel.js` and `module/services/combat/grapple.js`, each with its `render`, registered with `registerFlow` (`module/services/combat/flow.js`) |
 | Posted by | `startFlow` (`module/services/combat/flow.js`) |
 | Stored in | `flags.l5r4-enhanced.flow` (fixed flag): the flow's name and state |
 | Wired by | `bindFlowCards` (`module/services/combat/flow.js`): each `[data-flow-action]` calls the flow's `click`, then `requestStep` |
-| SCSS | `.l5r4-flow-card` (`scss/components/_chat-card.scss`); the target is its own file, `scss/components/_flow-card.scss` (target) |
+| SCSS | `.l5r4-flow-card` (`scss/components/_flow-card.scss`); its note lines share the chat card shell's italic (`scss/components/_chat-card.scss`) |
 | Quench | `l5r4-enhanced.combat` |
 
 ## Anatomy
@@ -55,7 +55,7 @@ Context from each flow's `render(state)`:
 
 | Token | Property | Part |
 | --- | --- | --- |
-| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-flow-card` (`scss/components/_chat-card.scss`)); `flow-actions` stacks its buttons (`.l5r4-flow-card .flow-actions` (`scss/components/_chat-card.scss`)) |
+| `--l5r4-space-gap-tight` | `gap` | Root column (`.l5r4-flow-card` (`scss/components/_flow-card.scss`)); `flow-actions` stacks its buttons (`.flow-actions` in `.l5r4-flow-card` (`scss/components/_flow-card.scss`)) |
 
 ## Keyboard and screen reader
 
@@ -63,7 +63,7 @@ Every step is a `<button type="button">` with its label as its name. A step eith
 
 ## Long text
 
-The buttons stack one per row, full width (`.l5r4-flow-card .flow-actions` (`scss/components/_chat-card.scss`)), so a label with two actor names wraps in a button of its own ([chat card](chat-card.md#long-text)). The log wraps.
+The buttons stack one per row, full width (`.flow-actions` in `.l5r4-flow-card` (`scss/components/_flow-card.scss`)), so a label with two actor names wraps in a button of its own ([chat card](chat-card.md#long-text)). The log wraps.
 
 ## Rules
 

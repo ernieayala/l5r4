@@ -467,7 +467,18 @@ const RULES = {
         )
     ),
 
-  "templates/repeated-markup": repeatedMarkupOf
+  "templates/repeated-markup": repeatedMarkupOf,
+
+  // design-system/patterns/dialogs.md rule 1: core's DialogV2 wraps the content in its own form
+  "templates/dialog-form": tree =>
+    tree
+      .files("templates/dialogs", /\.hbs$/)
+      .flatMap(path =>
+        [...tree.text(path).matchAll(/<form[\s>]/g)].map(
+          match =>
+            `${path}:${lineOf(tree.text(path), match.index)}: a dialog template opens no <form>; core's dialog wraps it in one`
+        )
+      )
 };
 
 registerConventionSuite("Templates", RULES, "templates");

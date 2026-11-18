@@ -59,6 +59,12 @@
     margin: 0 0 var(--l5r4-space-4);
   }
 
+  // The Empty state (foundations/states.md): one italic line where the cards would be
+  .l5r4-rules-editor-empty {
+    font-style: italic;
+    margin: 0;
+  }
+
   .l5r4-rules-editor-field textarea {
     font-family: var(--l5r4-font-code);
     min-height: 2.5rem;

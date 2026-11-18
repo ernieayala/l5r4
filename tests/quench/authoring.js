@@ -307,6 +307,51 @@ export function registerAuthoringTests(quench) {
       });
 
       describe("Rules editor", () => {
+        // #79
+        it(
+          "should mark an invalid rule with an icon its fields point at, and say when there are none",
+          clean(async function () {
+            this.timeout(15_000);
+            const [broken, empty] = await Item.createDocuments([
+              {
+                name: "Character options: broken rule",
+                type: "technique",
+                system: { rules: [{ key: "TraitAdjust", trait: "luck", value: 1 }] }
+              },
+              { name: "Character options: no rules", type: "technique" }
+            ]);
+            worldItems.push(broken, empty);
+            const rulesTabOf = async item => {
+              await item.sheet.render({ force: true });
+              item.sheet.element
+                .querySelector('[data-action="change-tab"][data-tab="rules"]')
+                .click();
+              await item.sheet.render();
+              return item.sheet.element.querySelector("[data-rules-editor]");
+            };
+            try {
+              const editor = await rulesTabOf(broken);
+              const error = editor.querySelector("[data-rule-error]");
+              assert.ok(error.querySelector("i[inert]"), "the invalid icon");
+              const fields = [...editor.querySelectorAll('[name^="rules.0."]')];
+              assert.isAbove(fields.length, 0);
+              for (const field of fields) {
+                assert.equal(field.getAttribute("aria-describedby"), error.id, field.name);
+                assert.equal(field.getAttribute("aria-invalid"), "true", field.name);
+              }
+              const none = await rulesTabOf(empty);
+              const line = [...none.querySelectorAll("p")].find(
+                p => p.textContent.trim() === game.i18n.localize("l5r4.ui.rules.none")
+              );
+              assert.ok(line, "the empty line");
+              assert.equal(getComputedStyle(line).fontStyle, "italic", "the Empty state's look");
+            } finally {
+              await broken.sheet.close({ animate: false });
+              await empty.sheet.close({ animate: false });
+            }
+          })
+        );
+
         it(
           "should carry a Technique's rule authored in the editor to its owner's roll",
           clean(async function () {

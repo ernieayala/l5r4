@@ -71,6 +71,6 @@ Letter case is sentence case at every step (T4). The smallest text is `meta`; no
 | --- | --- | --- |
 | Section titles and their labels | One line | `.l5r4-section-title` (`scss/components/_section.scss`), `.l5r4-section-heading` (`scss/components/_section.scss`) |
 | Item row names | Wrap | The `.title` rule in `.l5r4-item-row-list` (`scss/components/_item-row.scss`) |
-| Chat card buttons | Full width, one per row, so long labels wrap | `.l5r4-flow-card` (`scss/components/_chat-card.scss`) |
+| Chat card buttons | Full width, one per row, so long labels wrap | `.l5r4-flow-card` (`scss/components/_flow-card.scss`) |
 | Text links | One line | `.l5r4-inline-link` (`scss/components/_inline-link.scss`) |
 | Effect panel and browser rows | The text column shrinks and wraps beside its icon | `.l5r4-effect-panel-text` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-text` (`scss/apps/_compendium-browser.scss`) |

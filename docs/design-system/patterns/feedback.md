@@ -101,7 +101,8 @@ One italic line in the list's place says what is missing and, where there is one
 | Compendium browser | `l5r4.apps.compendiumBrowser.none` | "Nothing matches." |
 | Rules editor | `l5r4.ui.rules.none` | "No rules." |
 | Emphasis manager | `l5r4.apps.emphasisManager.noEmphases` | "No Emphases in this list." |
-| XP manager | None | Nothing renders: `{{#if manualEntries}}` and `{{#if spentEntries}}` (`templates/apps/xp-manager.hbs`) have no `{{else}}` |
+| XP manager | `l5r4.apps.xpManager.noAdjustments` | "No XP added or taken away by hand." |
+| XP manager | `l5r4.apps.xpManager.noPurchases` | "No XP spent yet." |
 
 Enforced by review; `tests/lang.test.js` checks the period on keys used as sentences.
 
