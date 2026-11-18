@@ -16,7 +16,7 @@ Quench runs as the GM in one client. The paths that only a player meets (a playe
 | Seat | User | Client |
 | --- | --- | --- |
 | GM | The existing Gamemaster user | `http://127.0.0.1:30000` |
-| Players | Player users Ernie adds to the test world (count is Still open 1) | One client each, with its own cookie store |
+| Players | Two player users in the test world (decisions 7 and 8) | One client each, with its own cookie store |
 
 Foundry keeps one login per browser cookie store, and cookies are per host. Two seats can use two hosts (`127.0.0.1` and `localhost`); more need other loopback hosts, the machine name, or separate Chrome profiles through Claude in Chrome's browser switching. Procedure step 1 finds which works and records it here. Ernie can take any seat at any time.
 
@@ -64,11 +64,12 @@ Foundry keeps one login per browser cookie store, and cookies are per host. Two 
 4. Ernie, 2026-11-17: the open issues #72, #73, #79, #80, and #81 are fixed before the playtest starts, each in its own commit with a test that fails first, so play runs on the fixed system.
 5. Ernie, 2026-11-17: #79's 66 open items are all fixed, in commits grouped by area; the ones players see (sort direction, Wound penalty sign and current-rank mark, healing card title, empty lists, the maho warning, Void dot tooltips, disabled Void reasons) go to him as before/after captures for sign-off before the playtest. Ernie signed them off 2026-11-17.
 6. Ernie, 2026-11-17: the PC header's labels are plain text; the actions they held become icon buttons beside their values: recalculate the sheet after the Name field, and a GM-only switch between a computed and a typed Insight Rank after the rank. Both run on a plain click.
+7. Ernie, 2026-11-17: two player seats beside the GM; they cover every permission path above.
+8. Ernie, 2026-11-17: Claude creates the player users in the local test world as the GM, with no passwords, named for their seats.
 
 ### Still open
 
-1. How many player seats: fabula-ultima plays a GM and four players; two players cover every permission path above.
-2. Which cookie-store method gives the seats on this machine (Procedure step 1).
+1. Which cookie-store method gives the seats on this machine (Procedure step 1).
 
 ## Out of scope
 
