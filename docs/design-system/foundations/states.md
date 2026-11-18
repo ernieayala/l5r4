@@ -34,7 +34,7 @@ Invalid and warning take no state token of their own: they read color.md's `--l5
 | Disabled | Core's disabled look on core controls; `opacity: var(--l5r4-state-disabled-opacity)` on a system-drawn one. The reason sits in the control's `data-tooltip` | `disabled` attribute | Roll faces on a sheet the viewer cannot edit, with no sprite on hover (`.l5r4-button-face` (`scss/components/_button.scss`)); check dialog Void Point boxes (`name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`)); undone damage card at `opacity: 0.7` (`.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`)) |
 | Read-only | A value the viewer cannot change reads as text. On a sheet the viewer cannot edit, core disables every input (`client/applications/api/document-sheet.mjs:212-222`, `:253`) and its disabled look shows | Text, or core's `disabled` on a non-editable sheet | Computed values in disabled inputs (`{{xp.spent}} / {{xp.total}}` (`templates/apps/xp-manager.hbs`), `{{system.wounds.max}}` (`templates/actor/_partials/_wounds.hbs`)) |
 | Invalid | `aria-invalid="true"` on the field, and below it a message in `--l5r4-color-danger` led by `fa-circle-exclamation` | `aria-invalid`, `aria-describedby` to the message | Rule editor errors in error color, with no icon or link to the field (`l5r4-rules-editor-error` (`templates/rules/_partials/_editor.hbs`), `.l5r4-rules-editor-error` (`scss/components/_rules-editor.scss`)) |
-| Warning | A line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, then the label in bold in `--l5r4-color-text` | `role="note"` on the line | Maho casting warning in a class no stylesheet styles (`l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`)); the Void-spent warning set as a plain hint (`l5r4.ui.effects.voidSpentThisRound` (`templates/dialogs/check-dialog.hbs`)) |
+| Warning | A line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, then the label in bold in `--l5r4-color-text` | `role="note"` on the line | The check dialog's maho casting warning and Void-spent warning (`l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`, `templates/dialogs/check-dialog.hbs`), `.l5r4-check-dialog-warning-icon` (`scss/components/_check-dialog.scss`)) |
 | Loading | The control is disabled and its icon is `fa-spinner fa-spin` until the action ends | `aria-busy="true"` and `disabled` | None shown; the effect delete guard keeps a `data-busy` flag with no visible state (`ItemEffectsHandler.deleteEffect` (`module/sheets/handlers/item-effects-handler.js`)) |
 | Empty | One italic line saying what is missing, where the list would be | A `<p>` in the list's place | Italic in the effect panel and the browser (`l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`), `l5r4-compendium-browser-empty` (`templates/apps/compendium-browser-results.hbs`)); a hint (`l5r4.ui.rules.none` (`templates/rules/_partials/_editor.hbs`)); a bare `<p>` (`l5r4.apps.emphasisManager.noEmphases` (`templates/apps/emphasis-manager.hbs`)); nothing (`{{#if manualEntries}}` and `{{#if spentEntries}}` (`templates/apps/xp-manager.hbs`)) |
 | Locked | The value shows as text with `fa-lock` beside it; `data-tooltip` names what holds it (a rule, the GM). No edit control | Text, `fa-lock` `inert` | No component shows it. A Ring other than Void derives from its Traits and renders with no step control |
@@ -127,16 +127,14 @@ Non-conforming (modeled): a toggle with no `aria-expanded`, so only the parent's
 
 A disabled control stays where it is, so the layout does not move, and its `data-tooltip` says why it is disabled (no Void Points left, the GM's turn). Disabled is for a choice that is closed now and may open later; a value the viewer can never change is read-only, and one a rule or the GM holds is locked. Enforced by review; the copy of the reason follows `content/voice.md` (tooltips).
 
-Conforming, modeled on `name="void"` (`templates/dialogs/check-dialog.hbs`):
+Conforming, `name="void"` (`templates/dialogs/check-dialog.hbs`):
 
 ```hbs
 <input type="checkbox" name="void" {{disabled (not voidPoints)}}
   {{#unless voidPoints}}data-tooltip="{{localize "l5r4.ui.check.noVoidPoints"}}"{{/unless}} />
 ```
 
-`l5r4.ui.check.noVoidPoints` is a key this rule adds to `lang/en.json`.
-
-Non-conforming, `name="void"` (`templates/dialogs/check-dialog.hbs`): the box disables with no reason.
+Non-conforming (modeled): a box that disables with no reason.
 
 ### 6. A computed value is text, not a disabled input
 
@@ -169,7 +167,9 @@ Conforming, modeled on `l5r4-rules-editor-error` (`templates/rules/_partials/_ed
 {{/if}}
 ```
 
-Non-conforming, `l5r4.ui.effects.voidSpentThisRound` (`templates/dialogs/check-dialog.hbs`): the warning that a Void Point was already spent this Round uses the `hint` class, so it reads as help text.
+Conforming, the Void-spent warning in `l5r4-check-dialog-warning` (`templates/dialogs/check-dialog.hbs`): `role="note"`, the `inert` warning icon, then `l5r4.ui.effects.voidSpentThisRound`.
+
+Non-conforming (modeled): the same warning in the `hint` class, so it reads as help text.
 
 ### 8. Loading disables the control until the action ends
 

@@ -767,6 +767,7 @@
         "labelWithSuffix": "{label} {suffix}",
         "manual": "Situational",
         "modifiers": "Modifiers",
+        "noVoidPoints": "No Void Points left",
         "outcomeAgainstTn": "{outcome} against TN {tn}",
         "pool": "Pool",
         "raisesNote": "(Raises: {count})",

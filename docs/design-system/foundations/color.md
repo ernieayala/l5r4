@@ -101,7 +101,7 @@ Canvas text cannot read CSS, so the floating numbers' colors live in `COLORS` (`
 | `--l5r4-color-danger` | `--l5r4-palette-red-600` (light), `--l5r4-palette-red-400` (dark) | `#ba0104` | `#fc452b` | Rule editor errors, the invalid state (`foundations/states.md`) |
 | `--l5r4-color-success` | `--color-level-success` | `#26b231` | `#26b231` | Reserved |
 | `--l5r4-color-info` | `--color-level-info` | `#59a1f6` | `#59a1f6` | Reserved |
-| `--l5r4-color-warning` | `--l5r4-palette-amber-500` (light), `--color-level-warning` (dark) | `#ab6600` | `#ee9b3a` | Reserved |
+| `--l5r4-color-warning` | `--l5r4-palette-amber-500` (light), `--color-level-warning` (dark) | `#ab6600` | `#ee9b3a` | The warning state's icon (`foundations/states.md`): the check dialog's warning lines |
 | `--l5r4-color-shadow` | `--l5r4-palette-black` at 50% | `rgba(0, 0, 0, 0.5)` | `rgba(0, 0, 0, 0.5)` | Ring rank disc shadow, Ring medallion drop shadow |
 | `--l5r4-color-shadow-strong` | `--l5r4-palette-black` | `#000000` | `#000000` | Text shadow on the spell slot count |
 | `--l5r4-color-scrim` | `--l5r4-palette-black` at 40% | `rgba(0, 0, 0, 0.4)` | `rgba(0, 0, 0, 0.4)` | Overlay on the spell slot icon |

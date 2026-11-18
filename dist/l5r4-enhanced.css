@@ -131,6 +131,7 @@
   --l5r4-color-ring-rank-backdrop: transparent;
   --l5r4-color-void-point: var(--color-dark-6);
   --l5r4-color-void-point-hover: var(--l5r4-palette-gray-500);
+  --l5r4-color-warning: var(--l5r4-palette-amber-500);
   --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
 }
 
@@ -140,6 +141,7 @@
   --l5r4-color-ring-rank-backdrop: var(--color-cool-5-90);
   --l5r4-color-void-point: var(--l5r4-palette-gray-500);
   --l5r4-color-void-point-hover: var(--l5r4-palette-gray-400);
+  --l5r4-color-warning: var(--color-level-warning);
   --l5r4-image-ring-rank-backdrop: none;
 }
 
@@ -272,6 +274,12 @@ body > * {
 }
 .l5r4-check-dialog .l5r4-check-dialog-modifier-value {
   font-family: var(--l5r4-font-code);
+}
+.l5r4-check-dialog .l5r4-check-dialog-warning {
+  color: var(--l5r4-color-text);
+}
+.l5r4-check-dialog .l5r4-check-dialog-warning-icon {
+  color: var(--l5r4-color-warning);
 }
 
 /**

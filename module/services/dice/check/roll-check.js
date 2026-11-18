@@ -295,14 +295,17 @@ function formDataOf(form) {
  * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
  */
 async function askChoices(request, context) {
+  // Each field's label points at its control by id; the ids are unique to this dialog
+  const formId = foundry.utils.randomID();
   const extras = request.extras
-    ? await foundry.applications.handlebars.renderTemplate(
-        request.extras.template,
-        request.extras.data
-      )
+    ? await foundry.applications.handlebars.renderTemplate(request.extras.template, {
+        ...request.extras.data,
+        formId
+      })
     : "";
   const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.check, {
     ...context,
+    formId,
     extras
   });
   return foundry.applications.api.DialogV2.prompt({

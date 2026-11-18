@@ -196,6 +196,8 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
     const context = prepareItemSheetOptions(formatPhrases(merged));
     context.config.stances = STANCES;
     context.SYS_ID = SYS_ID;
+    // A form's labels point at their controls by id, so each rendered sample gets ids of its own
+    context.formId = foundry.utils.randomID();
     return context;
   }
 

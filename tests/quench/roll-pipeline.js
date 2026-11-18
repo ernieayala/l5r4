@@ -836,6 +836,97 @@ export function registerRollPipelineTests(quench) {
       });
 
       describe("Dialog choices", () => {
+        /**
+         * Open the check dialog an attack opens, read what `inspect` returns from it, and roll with its defaults.
+         * @param {Actor} actor
+         * @param {function(HTMLElement): object} inspect
+         * @returns {Promise<object>}
+         */
+        const inspectAttackDialog = async (actor, inspect) => {
+          let found;
+          const answered = new Promise(resolve =>
+            Hooks.once("renderDialogV2", app => {
+              found = inspect(app.element);
+              app.element.querySelector('[data-action="ok"]').click();
+              resolve();
+            })
+          );
+          keep(
+            await rollSkill({
+              actor,
+              traitRank: 3,
+              skillRank: 2,
+              skillName: "Kenjutsu",
+              skillTrait: "agi",
+              rollType: "attack"
+            })
+          );
+          await answered;
+          return found;
+        };
+
+        // #79
+        it(
+          "should name every field by its label, and say why an empty Void Point box is off",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.rings.void.value": 0 });
+            const found = await inspectAttackDialog(actor, element => ({
+              // A control is named by the label that wraps it or the label whose `for` is its id
+              unnamed: [...element.querySelectorAll("input[name], select[name]")]
+                .filter(
+                  control =>
+                    !control.closest("label") &&
+                    !(control.id && element.querySelector(`label[for="${control.id}"]`))
+                )
+                .map(control => control.name),
+              void: element.querySelector("[name=void]"),
+              maneuvers: element.querySelector("[name='maneuver.feint']").closest("fieldset")
+            }));
+            assert.deepEqual(found.unnamed, [], "every field's label points at it");
+            assert.isTrue(found.void.disabled);
+            assert.equal(
+              found.void.dataset.tooltip,
+              game.i18n.localize("l5r4.ui.check.noVoidPoints")
+            );
+            assert.isTrue(found.maneuvers.classList.contains("l5r4-check-dialog-group"));
+          })
+        );
+
+        // #79
+        it(
+          "should show maho's blood cost as a warning line",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Maho",
+                type: "spell",
+                system: { ring: "earth", mastery: 1, maho: true }
+              }
+            ]);
+            let warning;
+            const answered = new Promise(resolve =>
+              Hooks.once("renderDialogV2", app => {
+                warning = app.element.querySelector("[data-check-dialog] p[role=note]");
+                app.element.querySelector('[data-action="ok"]').click();
+                resolve();
+              })
+            );
+            keep(await rollMahoCast({ actor, spell, showDialog: true }));
+            await answered;
+            assert.ok(warning, "a warning line, role note");
+            const icon = warning.querySelector("i");
+            assert.isTrue(icon.inert);
+            const color = getComputedStyle(icon).color;
+            assert.notEqual(
+              color,
+              getComputedStyle(warning).color,
+              "the icon takes the warning color"
+            );
+          })
+        );
+
         it(
           "should list each modifier with a toggle, and add nothing for one switched off",
           clean(async () => {

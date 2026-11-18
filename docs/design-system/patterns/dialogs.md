@@ -52,7 +52,7 @@ One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide an
 | Void Point | Checkbox, the Void Points left in its label; disabled at none (`name="void"`, `name="voidSkill"`) | A Void Point may be spent |
 | Embrace Taint | Checkbox (`name="embraceTaint"`) | The rules allow it |
 | Emphasis | Select (`name="emphasis"`) | The Skill has Emphases |
-| Attack | Ranged checkbox and the maneuvers fieldset (`name="isRanged"`, `l5r4-check-dialog-maneuvers`) | An attack |
+| Attack | Ranged checkbox and the maneuvers fieldset (`name="isRanged"`, a `l5r4-check-dialog-group`) | An attack |
 | Social resistance | Checkbox (`name="socialResistance"`) | The rules allow it |
 | Roll, Keep, Total mods | Number inputs (`name="rollMod"`, `name="keepMod"`, `name="totalMod"`) | Always |
 | Keep fewer | Number input (`name="keep"`) | Always |
@@ -100,7 +100,9 @@ Conforming, `l5r4-check-dialog-modifier` (`templates/dialogs/check-dialog.hbs`):
 </label>
 ```
 
-Non-conforming, the label of `name="rollMod"` (`templates/dialogs/check-dialog.hbs`): `<label>{{localize "l5r4.ui.check.rollModifier"}}</label>` is not linked to its input; `l5r4-custom-emphasis-dialog` (`templates/dialogs/custom-emphasis-dialog.hbs`) puts a bare `<label>` beside its input and adds a ":" outside the key.
+Conforming, the label of `name="rollMod"` (`templates/dialogs/check-dialog.hbs`): `<label for="{{formId}}-roll-mod">` beside `<input id="{{formId}}-roll-mod">`, with `formId` unique to the open dialog.
+
+Non-conforming, `l5r4-custom-emphasis-dialog` (`templates/dialogs/custom-emphasis-dialog.hbs`): a bare `<label>` beside its input, with a ":" outside the key.
 
 ### 5. A toggle that changes the pool shows the change
 

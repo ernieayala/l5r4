@@ -77,18 +77,18 @@ Non-conforming, `applyWoundsToToken` (`module/services/combat/legacy-damage.js`)
 
 A warning about a choice sits beside the choice, in the warning look: a line led by `fa-triangle-exclamation` (`inert`) in `--l5r4-color-warning`, then the label in bold in `--l5r4-color-text`, with `role="note"` (`foundations/states.md`, Warning). It warns; it never blocks. A rule the system enforces disables the control instead (see **Disabled with a reason**). Enforced by review and `tests/conventions/contrast.test.js` (the warning pairing in `foundations/color.md`).
 
-Conforming, modeled on the Round-limit line, `{{#if voidOverLimit}}` (`templates/dialogs/check-dialog.hbs`):
+Conforming, the Round-limit line, `{{#if voidOverLimit}}` (`templates/dialogs/check-dialog.hbs`):
 
 ```hbs
 {{#if voidOverLimit}}
   <p class="l5r4-check-dialog-warning" role="note">
-    <i class="fa-solid fa-triangle-exclamation" inert></i>
+    <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
     {{localize "l5r4.ui.effects.voidSpentThisRound"}}
   </p>
 {{/if}}
 ```
 
-Non-conforming, `{{#if voidOverLimit}}` (`templates/dialogs/check-dialog.hbs`): the same text in `p.hint`, which reads as help; `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`): a class no stylesheet defines, with no icon and no `role="note"`, on three keys joined by `<br />`.
+Non-conforming (modeled): the same text in `p.hint`, which reads as help.
 
 ## Empty states
 
@@ -113,9 +113,9 @@ Non-conforming, the `{{else}}` of `{{#if emphasisList.length}}` (`templates/apps
 
 A control that cannot be used now stays in place, takes the disabled look, and its `data-tooltip` says why in words: "No Void Points left", "Not your turn". The reason is its own key under the feature's group, a label with no period (`content/voice.md`, Tooltips). A control the user can never use is left out (`patterns/chat-cards.md` rule 4, `patterns/panels-and-browsers.md`, States). Enforced by review; the gallery shows each disabled state with its tooltip.
 
-Conforming, modeled: `foundations/states.md` rule 5, the Void Point box with its reason in a `l5r4.ui.check.noVoidPoints` key.
+Conforming, `name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`): at zero the Void Point boxes disable and say "No Void Points left" (`l5r4.ui.check.noVoidPoints`).
 
-Non-conforming, `name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`): the Void Point boxes disable at zero with no reason.
+Non-conforming (modeled): a box that disables at zero with no reason.
 
 ## Floating numbers
 
