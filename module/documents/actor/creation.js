@@ -1,8 +1,8 @@
 /**
  * @module documents/actor/creation
  * @description What L5R4Actor's `_preCreate` does for an actor: the subtype's prototype token, its default image when
- * none is given, and the stored defaults the creation data leaves out (a PC's XP tracking flags, an NPC's wound
- * mode). Changes the actor with `updateSource()`.
+ * none is given, and the stored defaults the creation data leaves out (a PC's XP tracking flags and Void Points, an
+ * NPC's wound mode). Changes the actor with `updateSource()`.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -22,12 +22,18 @@ export function onActorPreCreate(actor, data) {
 }
 
 /**
- * A new PC's defaults: a linked, friendly prototype token with vision, the PC image when none is given, and the XP
- * tracking flags the creation data leaves out.
+ * A new PC's defaults: a linked, friendly prototype token with vision, the PC image when none is given, the XP
+ * tracking flags the creation data leaves out, and, when it gives none, Void Points equal to the Void Ring (Ernie's
+ * ruling, roadmap/STAGE-18-PLAYTEST.md decision 9).
+ * game-rules/25_rings_and_traits.md, p.78
  * @param {L5R4Actor} actor
  * @param {object} data - Initial actor data
  */
 function updatePcCreateSource(actor, data) {
+  if (data.system?.rings?.void?.value === undefined) {
+    actor.updateSource({ "system.rings.void.value": actor.system.rings.void.rank });
+  }
+
   actor.prototypeToken.updateSource({
     bar1: { attribute: "wounds" },
     bar2: { attribute: "suffered" },

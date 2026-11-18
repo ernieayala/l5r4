@@ -67,6 +67,29 @@ export function registerActorTests(quench) {
           assert.isArray(flags.xpSpent, "xpSpent is array");
           assert.equal(flags.xpBase, 40, "xpBase defaults to 40");
         });
+
+        // game-rules/25_rings_and_traits.md, p.78
+        it("should start a new PC with Void Points equal to its Void Ring", async () => {
+          actor = await Actor.create({ name: "Void Points PC", type: "pc" });
+          assert.equal(actor.system.rings.void.value, 2, "the default Void Ring 2");
+          await actor.delete();
+
+          actor = await Actor.create({
+            name: "Void Points PC",
+            type: "pc",
+            system: { rings: { void: { rank: 3 } } }
+          });
+          assert.equal(actor.system.rings.void.value, 3, "a Void Ring given at creation");
+        });
+
+        it("should keep the Void Points a new PC's data gives", async () => {
+          actor = await Actor.create({
+            name: "Void Points PC",
+            type: "pc",
+            system: { rings: { void: { rank: 3, value: 1 } } }
+          });
+          assert.equal(actor.system.rings.void.value, 1);
+        });
       });
 
       describe("Actor prepareDerivedData", () => {
