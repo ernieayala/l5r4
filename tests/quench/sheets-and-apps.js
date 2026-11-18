@@ -611,7 +611,13 @@ export function registerSheetsAndAppsTests(quench) {
             created.push(actor);
             await actor.createEmbeddedDocuments("Item", [
               createSkillData("Plain Skill", 1, "agi"),
-              createSkillData("Told Skill", 1, "agi", { system: { description: "Told details" } })
+              createSkillData("Told Skill", 1, "agi", { system: { description: "Told details" } }),
+              createSkillData("Mastered Skill", 3, "agi", {
+                system: { mastery3: "Mastered line", mastery5: "Rank 5 line" }
+              }),
+              createSkillData("Unmastered Skill", 2, "agi", { system: { mastery3: "Not yet" } }),
+              createSpellData("Ranged Spell", "fire", 1, { system: { range: "50 feet" } }),
+              createSkillData("School Skill", 1, "agi", { system: { school: true } })
             ]);
             const sheet = actor.sheet;
             await sheet.render({ force: true });
@@ -625,6 +631,26 @@ export function registerSheetsAndAppsTests(quench) {
               sheet.element.querySelector(`[data-item-id="${actor.items.getName(name).id}"]`);
             assert.isNull(row("Plain Skill").querySelector('[data-action="expand-item"]'));
             assert.exists(row("Told Skill").querySelector('[data-action="expand-item"]'));
+            // A Mastery Ability reached, or a spell's range alone, is a detail too
+            const mastered = row("Mastered Skill");
+            assert.exists(mastered.querySelector('[data-action="expand-item"]'), "Mastery row");
+            assert.include(mastered.textContent, "Mastered line");
+            assert.notInclude(mastered.textContent, "Rank 5 line", "a rank not reached");
+            assert.isNull(row("Unmastered Skill").querySelector('[data-action="expand-item"]'));
+            const ranged = row("Ranged Spell");
+            assert.exists(ranged.querySelector('[data-action="expand-item"]'), "range row");
+            assert.include(ranged.textContent, "50 feet");
+            // item-row.md: the School badge is painted in its row's text color, so it reads on every row
+            const badge = row("School Skill").querySelector('[role="img"]');
+            const badgeStyle = getComputedStyle(badge);
+            assert.equal(
+              badge.getAttribute("aria-label"),
+              game.i18n.localize("l5r4.character.skills.properties.school")
+            );
+            const { width, height } = badge.getBoundingClientRect();
+            assert.deepEqual([width, height], [16, 16], "its size in the name's flex row");
+            assert.equal(badgeStyle.backgroundColor, badgeStyle.color, "the text color");
+            assert.include(badgeStyle.maskImage, "school.webp", "the School image as its mask");
             await sheet.close({ animate: false });
 
             const item = actor.items.getName("Told Skill");
@@ -913,7 +939,7 @@ export function registerSheetsAndAppsTests(quench) {
         );
 
         it(
-          "should switch the wound mode in the NPC wound config",
+          "should switch the wound mode in the NPC wound config on a change, as a keyboard choice makes",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const before = npc.system.woundMode;
@@ -921,12 +947,19 @@ export function registerSheetsAndAppsTests(quench) {
             const app = new WoundConfigApplication(npc);
             await app.render({ force: true });
             try {
-              const select = app.element.querySelector('[data-action="update-wound-mode"]');
+              const select = app.element.querySelector('select[name="woundMode"]');
               select.value = next;
               const saved = nextUpdate(npc);
-              select.click();
+              select.dispatchEvent(new Event("change", { bubbles: true }));
               await saved;
               assert.equal(npc.system.woundMode, next);
+              // The mode decides which fields the window shows: formula mode has the Wound Ranks select
+              const shown = await waitFor(
+                () =>
+                  Boolean(app.element.querySelector('select[name="nrWoundLvls"]')) ===
+                  (next === "formula")
+              );
+              assert.isTrue(shown, "the window shows the new mode's fields");
             } finally {
               await app.close({ animate: false });
               await npc.update({ "system.woundMode": before });
@@ -973,6 +1006,53 @@ export function registerSheetsAndAppsTests(quench) {
               await deleted;
               assert.deepEqual(actor.getFlag(SYS_ID, "xpManual"), []);
             } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        it(
+          "should leave the Disadvantage cap and manual XP to the GM in the XP manager",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets XP Player" });
+            created.push(actor);
+            await actor.createEmbeddedDocuments("Item", [
+              { name: "Sheets Doubt", type: "disadvantage", system: { cost: 4 } }
+            ]);
+            const award = { id: "sheetsaward", delta: 5, note: "Sheets award" };
+            await actor.setFlag(SYS_ID, "xpManual", [award]);
+            const app = new XpManagerApplication(actor);
+            // The GM runs Quench; the user instance's own getter stands in for a player's
+            const asPlayer = () =>
+              Object.defineProperty(game.user, "isGM", { configurable: true, get: () => false });
+            const asGm = () => delete game.user.isGM;
+            try {
+              await app.render({ force: true });
+              const gmButtons = ["add-xp", "change-disadvantage-cap", "delete-xp-entry"].map(
+                action => app.element.querySelector(`[data-action="${action}"]`)
+              );
+              assert.isTrue(gmButtons.every(Boolean), "the GM sees every control");
+
+              asPlayer();
+              // A click on a control rendered for the GM still changes nothing for a player
+              const baseline = new Set(foundry.applications.instances.values());
+              for (const button of gmButtons) {
+                button.click();
+              }
+              await settle(500);
+              await dismissNewWindows(baseline, app);
+              assert.deepEqual(actor.getFlag(SYS_ID, "xpManual"), [award]);
+              assert.isUndefined(actor.getFlag(SYS_ID, "disadvantageCap"));
+
+              await app.render({ force: true });
+              for (const action of ["add-xp", "change-disadvantage-cap", "delete-xp-entry"]) {
+                assert.notExists(app.element.querySelector(`[data-action="${action}"]`), action);
+              }
+              assert.notExists(app.element.querySelector("[data-field='xp-amount']"), "no amount");
+              assert.include(app.element.textContent, award.note, "the award still shows");
+            } finally {
+              asGm();
               await app.close({ animate: false });
             }
           })

@@ -47,6 +47,18 @@ export default class SkillData extends ItemData {
   }
 
   /**
+   * The Mastery Abilities the Skill's rank has reached, lowest first: each Rank 3, 5, or 7 text at or below the rank.
+   * Rank 10's is a rule (ownedRules), not text.
+   * game-rules/58_skills_overview.md, p.133
+   * @type {Array<{rank: number, field: string, text: string}>} `field` names the text's field, as `mastery3`
+   */
+  get reachedMasteries() {
+    return [3, 5, 7]
+      .map(rank => ({ rank, field: `mastery${rank}`, text: this[`mastery${rank}`] }))
+      .filter(({ rank, text }) => this.rank >= rank && text);
+  }
+
+  /**
    * Rules the skill brings by its own fields: the roll, keep, and total bonus fields, which the skill sheet edits
    * and Active Effects on the skill change, act as one RollModifier on this skill's rolls; Rank 10 is the Mastery
    * Ability every Skill has, a Free Raise on all rolls made with it.

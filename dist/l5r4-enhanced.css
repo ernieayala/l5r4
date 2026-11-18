@@ -747,8 +747,11 @@ body > * {
   min-height: 2em;
 }
 .l5r4-item-row-list .l5r4-item-row .l5r4-item-row-badge {
+  background-color: currentcolor;
   block-size: 16px;
+  flex: none;
   inline-size: 16px;
+  mask: url("../assets/icons/school.webp") center/contain no-repeat;
 }
 .l5r4-item-row-list .l5r4-item-row .title, .l5r4-item-row-list .l5r4-item-row.-attacks .l5r4-item-row-name {
   text-wrap: revert;

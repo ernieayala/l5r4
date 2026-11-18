@@ -1,11 +1,11 @@
-<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules system.reachedMasteries.length)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
       {{name}}
       {{#if system.school}}
-        <img class="l5r4-item-row-badge flex0" src="{{iconPath 'school.webp'}}" alt="{{localize "l5r4.character.skills.properties.school"}}" />
+        <span class="l5r4-item-row-badge" role="img" aria-label="{{localize "l5r4.character.skills.properties.school"}}"></span>
       {{/if}}
     {{else}}
       {{name}}
@@ -31,18 +31,12 @@
         —
       {{/if}}
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
-    {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules system.reachedMasteries.length)}}
+    {{#if (or system.description system.specialRules system.reachedMasteries.length)}}
       <div class="l5r4-item-row-details">
-        {{#if (and (gte system.rank 3) system.mastery3)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery3"}}:</strong> {{system.mastery3}}</p>
-        {{/if}}
-        {{#if (and (gte system.rank 5) system.mastery5)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery5"}}:</strong> {{system.mastery5}}</p>
-        {{/if}}
-        {{#if (and (gte system.rank 7) system.mastery7)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery7"}}:</strong> {{system.mastery7}}</p>
-        {{/if}}
+        {{#each system.reachedMasteries}}
+          <p><strong>{{localize (concat "l5r4.character.skills.properties." field)}}:</strong> {{text}}</p>
+        {{/each}}
         {{> "systems/l5r4-enhanced/templates/cards/_partials/_detail-text.hbs" rules=system.specialRules description=system.description}}
       </div>
     {{/if}}

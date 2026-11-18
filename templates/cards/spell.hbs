@@ -1,4 +1,4 @@
-<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules system.range system.aoe system.duration)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}"
   data-document-type="Item"
@@ -10,8 +10,8 @@
     <div class="l5r4-item-row-cell">
       {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="cast-spell" pool=system.castFormula tooltip=(localize "l5r4.ui.mechanics.rolls.spellCasting")}}
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules)}}
-    {{#if (or system.description system.specialRules system.aoe system.duration)}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules system.range system.aoe system.duration)}}
+    {{#if (or system.description system.specialRules system.range system.aoe system.duration)}}
       <div class="l5r4-item-row-details">
         {{#if system.range}}
           <div>{{system.range}}</div>

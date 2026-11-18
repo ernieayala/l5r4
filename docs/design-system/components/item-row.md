@@ -19,7 +19,7 @@ One document on a sheet as one grid row: its name, the numbers players read most
 | List | `<section>` | `l5r4-item-row-list -<subtype>`, as `l5r4-item-row-list -skill` (`templates/actor/_partials/_skill-section.hbs`) |
 | Row | `<div data-item-id data-document-id>` | `item l5r4-item-row -<subtype>` + `-expandable` + core's `draggable` (`templates/cards/skill.hbs`) |
 | Name | `<h4>` | `flexrow -gap-sm title` (fixed) |
-| Badge | `<img alt>` after the name, on a Skill the School grants | `l5r4-item-row-badge` |
+| Badge | `<span role="img" aria-label>` after the name, on a Skill the School grants: the School image (`assets/icons/school.webp`, `$school-badge-img`) as a mask over the row's text color | `l5r4-item-row-badge` |
 | Number cell | `<div>` | `l5r4-item-row-cell` |
 | Field cell | `<div>` holding a row select (`form-field.md`) | `l5r4-item-row-cell` |
 | Roll cell | The roll button (`button.md`), `templates/cards/_partials/_roll-button.hbs` | `l5r4-button -roll` |
@@ -27,7 +27,7 @@ One document on a sheet as one grid row: its name, the numbers players read most
 | Controls | The inline control cluster (`inline-control.md`), `templates/cards/_partials/_controls.hbs` | `l5r4-inline-control -reveal` |
 | Details | `<div>` spanning every column, second grid row | `l5r4-item-row-details` |
 
-Every number and field cell is `<div class="l5r4-item-row-cell">`, an empty one included, as `<div class="l5r4-item-row-cell">{{system.rank}}</div>` (`templates/cards/skill.hbs`); a row select names itself with its column's key (`form-field.md` F1). The badge also carries core's `flex0`.
+Every number and field cell is `<div class="l5r4-item-row-cell">`, an empty one included, as `<div class="l5r4-item-row-cell">{{system.rank}}</div>` (`templates/cards/skill.hbs`); a row select names itself with its column's key (`form-field.md` F1). The badge is an empty span, so its style sets `flex: none` to keep its size in the name's flex row; core's `flex0` would shrink it to nothing.
 
 Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss`), read the size tokens:
 
@@ -81,7 +81,7 @@ Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss
 | `--l5r4-font-size-body` | Details text |
 | `--l5r4-border-width-thin` | Row select border |
 
-Contrast: `text` on `row-alt` is 8.51:1 light and 9.35:1 dark (`foundations/color.md`).
+Contrast: `text` on `row-alt` is 8.51:1 light and 9.35:1 dark (`foundations/color.md`). The badge is drawn in the text color, so it has the same contrast on every row.
 
 ## Keyboard and screen reader
 
@@ -89,7 +89,7 @@ Contrast: `text` on `row-alt` is 8.51:1 light and 9.35:1 dark (`foundations/colo
 | --- | --- |
 | Tab | Moves through the row's roll buttons, selects, and controls, left to right; the row takes no focus |
 | Drag | Pointer only, through core's `draggable`: a row drags to the hotbar or another sheet |
-| Screen reader | Reads the name as a level 4 heading, then each cell; the badge's `alt` names what it marks |
+| Screen reader | Reads the name as a level 4 heading, then each cell; the badge's `aria-label` names what it marks |
 
 ## Long text
 
@@ -104,7 +104,7 @@ A name wraps inside its column (`text-wrap: revert` on the row's `.title` (`scss
 | R3 | Handlers find the row by `[data-item-id]`, never by `.item` | ESLint `no-restricted-syntax` |
 | R4 | A list's variant matches its rows' subtype spelling, `-commonItem` included | `tests/conventions/styles.test.js`; Stylelint exception for `-commonItem` |
 | R5 | No presentational `width` or `height` attributes; an image's size is in its SCSS | `tests/conventions/templates.test.js` |
-| R6 | Every `<img>` has `alt`: the badge names what it marks | `tests/conventions/templates.test.js`; review for the value |
+| R6 | Every `<img>` has `alt`; the badge, a `role="img"` span, has an `aria-label` naming what it marks | `tests/conventions/templates.test.js` (`<img>`); review for the badge |
 | R7 | Column widths read size tokens; a width only one subtype uses is still a column token, because the columns are one scale | `tests/conventions/styles.test.js` |
 
 | # | Conforming | Non-conforming |
@@ -114,7 +114,7 @@ A name wraps inside its column (`text-wrap: revert` on the row's `.title` (`scss
 | R3 | `element?.closest?.("[data-item-id]")` in `ItemCrudHandler.#getItemRow` (`module/sheets/handlers/item-crud-handler.js`) | `element?.closest?.(".item")` (modeled) |
 | R4 | `l5r4-item-row-list -commonItem` (`templates/actor/_partials/_item-section.hbs`) with rows `item l5r4-item-row -{{type}}` (`templates/cards/commonItem.hbs`) | `&.-advantages` (modeled), which no template uses: the lists say `-advantage` |
 | R5 | `.l5r4-item-row-badge { block-size: 16px; inline-size: 16px; }` (modeled) | `<img class="flex0" width="16px" height="16px" ...>` (modeled) |
-| R6 | `<img class="l5r4-item-row-badge" src=... alt="{{localize "l5r4.ui.common.school"}}" />` (modeled) | The same image with no `alt` (modeled) |
+| R6 | `<span class="l5r4-item-row-badge" role="img" aria-label="{{localize "l5r4.character.skills.properties.school"}}"></span>` (`templates/cards/skill.hbs`) | The same span with no `aria-label` (modeled) |
 | R7 | `grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);` | `grid-template-columns: 1fr 80px 80px var(--controls);` (modeled) |
 
 ## Do and don't

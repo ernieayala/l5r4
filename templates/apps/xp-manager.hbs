@@ -14,7 +14,7 @@
               "l5r4.character.experience.breakdown.disadvantagesGrant"
             }}</strong>:</span>
         <span>{{xp.breakdown.disadvantagesGranted}}
-          (<button type="button" class="l5r4-xp-manager-cap" data-action="change-disadvantage-cap" data-tooltip="{{localize "l5r4.character.experience.breakdown.capHint"}}">{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}</button>)</span></li>{{/if}}
+          ({{#if isGM}}<button type="button" class="l5r4-xp-manager-cap" data-action="change-disadvantage-cap" data-tooltip="{{localize "l5r4.character.experience.breakdown.capHint"}}">{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}</button>{{else}}{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}{{/if}})</span></li>{{/if}}
     {{#if xp.breakdown.manual}}<li><span><strong>{{localize
               "l5r4.character.experience.breakdown.manualAdjustments"
             }}</strong>:</span>
@@ -48,6 +48,7 @@
             }}</strong>:</span>
         <span>{{xp.breakdown.spells}}</span></li>{{/if}}
   </ul>
+  {{#if isGM}}
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.adjustExperience"}}</h3>
     <div class="form-group">
@@ -76,6 +77,7 @@
       </div>
     </div>
   </div>
+  {{/if}}
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" type="xp" columns=sortColumns.xpLedger}}
     <section class="l5r4-item-row-list -xp">
@@ -86,16 +88,18 @@
             </h4>
             <div>{{this.note}}</div>
             <div>
-              <button
-                type="button"
-                class="inline-control icon"
-                data-action="delete-xp-entry"
-                data-entry-id="{{this.id}}"
-                data-tooltip="{{localize "l5r4.ui.common.delete"}}"
-                aria-label="{{localize "l5r4.ui.common.delete"}}"
-              >
-                <i class="fa-solid fa-trash" inert></i>
-              </button>
+              {{#if @root.isGM}}
+                <button
+                  type="button"
+                  class="inline-control icon"
+                  data-action="delete-xp-entry"
+                  data-entry-id="{{this.id}}"
+                  data-tooltip="{{localize "l5r4.ui.common.delete"}}"
+                  aria-label="{{localize "l5r4.ui.common.delete"}}"
+                >
+                  <i class="fa-solid fa-trash" inert></i>
+                </button>
+              {{/if}}
             </div>
           </div>
       {{else}}

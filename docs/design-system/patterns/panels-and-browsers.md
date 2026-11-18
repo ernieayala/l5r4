@@ -200,9 +200,9 @@ Every `DEFAULT_OPTIONS.actions` key and `data-action` value in these windows is 
 | Rules editor | `toggle-rules-view`, `delete-rule`, `create-rule` (`components/rules-editor.md`) |
 | Emphasis manager | `add-emphasis`, `edit-emphasis`, `delete-emphasis` |
 | Skill item sheet | `open-emphasis-manager` |
-| XP manager | `add-xp`, `delete-xp-entry`, `recalculate-xp` |
+| XP manager | `add-xp`, `delete-xp-entry`, `change-disadvantage-cap` (the GM's only), `recalculate-xp` |
 
-`close` in the Emphasis manager's footer is core's action and keeps core's name.
+`close` in the Emphasis manager's footer is core's action and keeps core's name. The XP manager renders `add-xp`, `delete-xp-entry`, and `change-disadvantage-cap` for a GM alone, and a player sees the cap as text (`foundations/states.md`, Read-only); the handlers do nothing for a player (`module/apps/xp-manager.js`).
 
 Conforming, `WealthManagerApplication.DEFAULT_OPTIONS` (`module/apps/wealth-manager.js`): `"add-money"`.
 

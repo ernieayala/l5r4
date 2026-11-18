@@ -3,7 +3,8 @@
  * @description A window over one character's experience points: manual XP entries with notes, the XP spent on
  * purchases (rebuilt from the actor's items when their version changes), sorting with the saved sort preference, and
  * the Disadvantage XP cap. It uses no DebouncedFieldMixin and no form submission: each button (add, delete, sort,
- * recalculate) is one action that writes the actor's flags.
+ * recalculate) is one action that writes the actor's flags. Manual XP and the cap are the GM's: a player's window
+ * shows them without their controls, and their actions do nothing for a player.
  */
 import { SYS_ID } from "../config/constants.js";
 import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
@@ -104,6 +105,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       const disadvantageCap = disadvantageCapOf(this._getFlags());
 
       return {
+        // The Disadvantage cap and manual XP are the GM's (roadmap/STAGE-18-PLAYTEST.md decision 9)
+        isGM: game.user.isGM,
         xp: buildXpSummary(xp),
         disadvantageCap,
         ...ledgers,
@@ -126,6 +129,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   _getFallbackContext() {
     return {
+      isGM: game.user.isGM,
       xp: {
         spent: 0,
         total: 40,
@@ -205,7 +209,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const amount = toInt(form.querySelector("[data-field='xp-amount']")?.value, 0);
     const note = form.querySelector("[data-field='xp-note']")?.value?.trim() || "";
 
-    if (amount === 0) {
+    if (!game.user.isGM || amount === 0) {
       return;
     }
 
@@ -244,6 +248,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   static async #onDeleteXpEntry(event, element) {
     event.preventDefault();
+    if (!game.user.isGM) {
+      return;
+    }
 
     const entryId = element.dataset.entryId;
     if (!entryId) {
@@ -332,6 +339,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   static async #onChangeDisadvantageCap(event, _element) {
     event.preventDefault();
+    if (!game.user.isGM) {
+      return;
+    }
 
     const currentCap = disadvantageCapOf(this._getFlags());
 

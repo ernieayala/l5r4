@@ -190,9 +190,14 @@
       min-height: 2em;
     }
 
+    // The School image drawn in the row's text color, so the badge reads on every row as its text does. An empty
+    // span has no content width, so it keeps its size in the name's flex row with flex: none
     .l5r4-item-row-badge {
+      background-color: currentcolor;
       block-size: 16px;
+      flex: none;
       inline-size: 16px;
+      mask: $school-badge-img center / contain no-repeat;
     }
 
     // The name keeps the posted card's `title` class; it takes the section heading's look and wraps. An NPC attack

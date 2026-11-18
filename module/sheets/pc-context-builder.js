@@ -282,23 +282,13 @@ export class PcContextBuilder {
    *   item ID, the display name (e.g., "Kenjutsu 5"), and the mastery ability text
    */
   static buildMasteryList(skills) {
-    const masteries = [];
-
-    // Scan all skills for unlocked masteries at ranks 3, 5, 7
-    for (const s of skills) {
-      const r = toInt(s.system?.rank);
-      if (s.system?.mastery3 && r >= 3) {
-        masteries.push({ _id: s.id, name: `${s.name} 3`, mastery: s.system.mastery3 });
-      }
-      if (s.system?.mastery5 && r >= 5) {
-        masteries.push({ _id: s.id, name: `${s.name} 5`, mastery: s.system.mastery5 });
-      }
-      if (s.system?.mastery7 && r >= 7) {
-        masteries.push({ _id: s.id, name: `${s.name} 7`, mastery: s.system.mastery7 });
-      }
-    }
-
-    return masteries;
+    return skills.flatMap(s =>
+      s.system.reachedMasteries.map(({ rank, text }) => ({
+        _id: s.id,
+        name: `${s.name} ${rank}`,
+        mastery: text
+      }))
+    );
   }
 
   /**

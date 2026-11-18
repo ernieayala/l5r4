@@ -60,9 +60,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       width: 500,
       height: 400
     },
-    actions: {
-      "update-wound-mode": WoundConfigApplication.#onUpdateWoundMode
-    },
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,
       submitOnChange: false,
@@ -239,7 +236,8 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
 
   /**
    * Update actor with new wound configuration value.
-   * Validates field value before updating, prevents updates after application close.
+   * Validates field value before updating, prevents updates after application close. The wound mode decides which
+   * fields the window shows, so a new mode renders it again.
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
@@ -259,6 +257,9 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       const updateData = { [`system.${field}`]: value };
 
       await this.actor.update(updateData);
+      if (field === "woundMode" && this.rendered) {
+        this.render();
+      }
     } catch (err) {
       logError("Failed to update wound configuration", err, {
         field,
@@ -284,35 +285,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
   }
 
   // close() method is provided by DebouncedFieldMixin
-
-  /**
-   * Handle wound mode change action.
-   * Switches between manual and formula-based wound calculation modes.
-   *
-   * @this {WoundConfigApplication}
-   * @param {Event} event - The change event
-   * @param {HTMLElement} element - The select element with new mode value
-   */
-  static async #onUpdateWoundMode(event, element) {
-    const newMode = element.value;
-
-    if (newMode === this.actor?.system?.woundMode) {
-      return;
-    }
-
-    try {
-      await this.actor.update({ "system.woundMode": newMode });
-      if (this.rendered) {
-        this.render();
-      }
-    } catch (err) {
-      logError("Failed to update wound mode", err, {
-        newMode,
-        actorId: this.actor.id
-      });
-      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
-    }
-  }
 }
 
 /**

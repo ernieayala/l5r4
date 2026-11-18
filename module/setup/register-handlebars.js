@@ -1,8 +1,8 @@
 /**
  * @module setup/register-handlebars
  * @description Registers the system's Handlebars helpers on the global `Handlebars` during `init`, so every template
- * can use them: `eq`, `and`, `or`, and `includes` for conditionals, `coalesce` for the first value that is set,
- * `iconPath` for icon paths, `math` for arithmetic and comparisons, and `concat` and `join` for strings.
+ * can use them: `includes` for conditionals beside core's `eq`, `and`, `or`, and `not`, `coalesce` for the first value
+ * that is set, `iconPath` for icon paths, `math` for arithmetic and comparisons, and `concat` and `join` for strings.
  */
 import { getIconPath } from "../utils/icons.js";
 
@@ -36,7 +36,7 @@ const MATH_OPERATIONS = Object.freeze({
  * all custom helpers available to Handlebars templates throughout the system.
  *
  * The registered helpers extend Handlebars' built-in functionality with:
- * - Logical operators for template conditionals (eq, and, or)
+ * - Array membership for template conditionals (includes)
  * - Null-safe value selection (coalesce)
  * - Mathematical operations and comparisons (math)
  * - String concatenation (concat)
@@ -49,12 +49,8 @@ const MATH_OPERATIONS = Object.freeze({
  * @returns {void}
  */
 export function registerHandlebarsHelpers() {
-  // Equality comparison: a === b
-  Handlebars.registerHelper("eq", (a, b) => a === b);
-  // Logical AND: a && b
-  Handlebars.registerHelper("and", (a, b) => a && b);
-  // Logical OR: true if at least one value is truthy
-  Handlebars.registerHelper("or", (a, b) => Boolean(a) || Boolean(b));
+  // eq, and, or, not, gte, ... are core's [src: client/applications/handlebars.mjs:139-147]; core's and/or take any
+  // number of arguments, so they are not registered again here
   Handlebars.registerHelper("includes", hasArrayValue);
   Handlebars.registerHelper("coalesce", getFirstSet);
   // Icon path resolution through the getIconPath utility (module/utils/icons.js)
