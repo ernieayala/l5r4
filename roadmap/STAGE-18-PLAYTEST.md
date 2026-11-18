@@ -67,6 +67,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 6. Ernie, 2026-11-17: the PC header's labels are plain text; the actions they held become icon buttons beside their values: recalculate the sheet after the Name field, and a GM-only switch between a computed and a typed Insight Rank after the rank. Both run on a plain click.
 7. Ernie, 2026-11-17: two player seats beside the GM; they cover every permission path above.
 8. Ernie, 2026-11-17: Claude creates the player users in the local test world as the GM, with no passwords, named for their seats.
+9. Ernie, 2026-11-18, from Session 0: a new PC starts with Void Points equal to its Void Ring (#91); the Disadvantage XP cap and manual XP adjustments are GM-only (#92); a second School asks whether it replaces the first before its choices (#93); an NPC attack with no damage has no damage button (#94); the browser's Page filter leaves out entries with no page (#95).
 
 ### Still open
 
