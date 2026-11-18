@@ -990,7 +990,8 @@
       },
       "grants": {
         "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
-        "waiting": "{name} learns {items} from {giver} once these School Skills reach rank 1: {skills}."
+        "waiting": "{name} learns {items} from {giver} once these School Skills reach rank 1: {skills}.",
+        "waitingRow": "Its Techniques wait for these School Skills at rank 1: {skills}"
       },
       "hints": {
         "decreaseTrait": "Decrease {trait}",

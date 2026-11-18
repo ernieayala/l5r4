@@ -218,7 +218,7 @@ The partials below read their parent's context where no parameter is named on th
 | `templates/actor/_partials/_<noun>-section.hbs` | Its list (`skills`, `weapons`, ...), `collapsedSections` |
 | `templates/actor/_partials/_expand.hbs` | `collapsed` |
 | `templates/actor/_partials/_unified-item-create.hbs` | None; the section's `data-scope` gives the type |
-| `templates/actor/_partials/_bio.hbs` | `bioClan`, `bioFamily`, `bioSchool`, `collapsedSections` |
+| `templates/actor/_partials/_bio.hbs` | `bioClan`, `bioFamily`, `bioSchools` (each `{item, waitingFor}`, the first School first), `collapsedSections` |
 | `templates/cards/<subtype>.hbs` | `name`, `type`, `system`, `inSheet`, `docId`; `ranged` on `weapon.hbs` |
 | `templates/cards/_partials/_controls.hbs` | None |
 | `templates/cards/_partials/_activate.hbs` | `active` |

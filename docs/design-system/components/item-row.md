@@ -52,7 +52,7 @@ Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss
 | --- | --- | --- |
 | Subtype | `-<subtype>` on list and row | The column set above |
 | Expandable | `-expandable` on the row | Renders the expand control and the details cell |
-| Bio | `-bio` on the row | Row on `--l5r4-color-panel` |
+| Bio | `-bio` on the row | Row on `--l5r4-color-panel`. One row per School, the first School first; a second School's details open with the School Skills its Techniques wait for (`waitingFor`, `templates/cards/_partials/_bio-row.hbs`) |
 | Attacks | `l5r4-item-row -attacks` | An NPC attack: two roll buttons, action, type, controls |
 | Ledger | `-xp`, `-xp-spent` | XP manager rows |
 

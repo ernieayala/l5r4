@@ -76,7 +76,13 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
         with: {
           bioClan: { id: "galleryClan", name: "Crane", system: { description: DESCRIPTION } },
           bioFamily: { id: "galleryFamily", name: "Kakita", system: {} },
-          bioSchool: { id: "gallerySchool", name: "Kakita Bushi", system: {} }
+          bioSchools: [
+            { item: { id: "gallerySchool", name: "Kakita Bushi", system: {} }, waitingFor: [] },
+            {
+              item: { id: "gallerySecondSchool", name: "Doji Courtier", system: {} },
+              waitingFor: ["Courtier", "Calligraphy"]
+            }
+          ]
         }
       },
       {

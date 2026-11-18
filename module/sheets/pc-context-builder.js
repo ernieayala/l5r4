@@ -6,6 +6,7 @@
  * templates and never changes a document.
  */
 
+import { SYS_ID } from "../config/constants.js";
 import { SORT_KEYS } from "../config/sort-keys.js";
 import { applySortPref } from "../utils/sorting.js";
 import { toInt } from "../utils/type-coercion.js";
@@ -327,18 +328,21 @@ export class PcContextBuilder {
    * - **Family**: Grants +1 to one trait (e.g., Hida → Stamina +1)
    * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
    *
-   * Characters can only have one of each bio item type at a time.
+   * A character has one Clan and one Family, and one School or more: a School added beside another (Multiple
+   * Schools, an Advanced School) is listed after the first (roadmap/STAGE-18 decision 11).
    *
    * @param {Item[]} allItems - Array of all items from actor.items
-   * @returns {{clan: Item|null, family: Item|null, school: Item|null}} Bio items by type, null where the
-   *   actor has none
+   * @returns {{clan: Item|null, family: Item|null, schools: Item[]}} Bio items by type, null where the actor has
+   *   none; every School, the first School first
    */
   static getBioItems(allItems) {
     const getItemsOfType = t => allItems.filter(i => i.type === t);
+    const isSecond = school => school.getFlag(SYS_ID, "secondSchool") === true;
+    const schools = getItemsOfType("school");
     return {
       clan: getItemsOfType("clan")[0] ?? null,
       family: getItemsOfType("family")[0] ?? null,
-      school: getItemsOfType("school")[0] ?? null
+      schools: [...schools.filter(s => !isSecond(s)), ...schools.filter(isSecond)]
     };
   }
 

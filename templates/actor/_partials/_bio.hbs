@@ -1,5 +1,6 @@
 {{!-- The Bio section: the character's Clan, Family, and School rows, or one italic line when there are none
-(patterns/sheets.md rule 4). Parameters: the sheet context (bioClan, bioFamily, bioSchool, collapsedSections). --}}
+(patterns/sheets.md rule 4). Parameters: the sheet context (bioClan, bioFamily, bioSchools, collapsedSections). Every
+School has a row, the first School first (roadmap/STAGE-18 decision 11). --}}
 <section class="flexcol -gap-sm l5r4-section -bio">
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="bio" label="l5r4.ui.sheets.background" collapsed=collapsedSections.bio expand=true}}
   <section class="l5r4-item-row-list -bio">
@@ -17,14 +18,15 @@
           system=bioFamily.system
           docId=bioFamily.id}}
     {{/if}}
-    {{#if bioSchool}}
+    {{#each bioSchools as |school|}}
       {{> "systems/l5r4-enhanced/templates/cards/school.hbs"
           inSheet=true
-          name=bioSchool.name
-          system=bioSchool.system
-          docId=bioSchool.id}}
-    {{/if}}
-    {{#unless (or bioClan (or bioFamily bioSchool))}}
+          name=school.item.name
+          system=school.item.system
+          docId=school.item.id
+          waitingFor=school.waitingFor}}
+    {{/each}}
+    {{#unless (or bioClan bioFamily bioSchools.length)}}
       <p class="l5r4-section-empty">{{localize "l5r4.ui.sheets.noBio"}}</p>
     {{/unless}}
   </section>

@@ -376,13 +376,22 @@ export default class L5R4PcSheet extends BaseActorSheet {
 }
 
 /**
- * The character's clan, family, and school items, for the bio fields.
+ * The character's Clan, Family, and School items, for the Bio rows. Each School comes with the School Skills its
+ * Techniques wait for, which a second School keeps in `flags.l5r4-enhanced.waitingFor`
+ * (module/documents/item/lifecycle/second-school.js).
  * @param {Item[]} all - The character's items
- * @returns {{bioClan: Item|null, bioFamily: Item|null, bioSchool: Item|null}}
+ * @returns {{bioClan: Item|null, bioFamily: Item|null, bioSchools: Array<{item: Item, waitingFor: string[]}>}}
  */
 function buildBioFields(all) {
   const bioItems = PcContextBuilder.getBioItems(all);
-  return { bioClan: bioItems.clan, bioFamily: bioItems.family, bioSchool: bioItems.school };
+  return {
+    bioClan: bioItems.clan,
+    bioFamily: bioItems.family,
+    bioSchools: bioItems.schools.map(item => ({
+      item,
+      waitingFor: item.getFlag(SYS_ID, "waitingFor") ?? []
+    }))
+  };
 }
 
 /**

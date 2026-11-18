@@ -474,6 +474,22 @@ export function registerAuthoringTests(quench) {
             assert.equal(named(actor, "Kenjutsu").system.freeRanks, 1, "no second free rank");
             assert.notOk(named(actor, "Quench Second Technique"), "the Technique waits");
 
+            // Decision 11: Bio shows both Schools, the first first; the second's row names what it waits for
+            await actor.sheet.render({ force: true });
+            try {
+              const bio = actor.sheet.element.querySelector(
+                '[data-section-title][data-scope="bio"]'
+              ).nextElementSibling;
+              const ids = [...bio.querySelectorAll("[data-item-id]")].map(r => r.dataset.itemId);
+              const first = named(actor, "Quench Bushi School").id;
+              assert.includeOrderedMembers(ids, [first, result.id], "both Schools, first first");
+              const row = bio.querySelector(`[data-item-id="${result.id}"]`);
+              assert.exists(row.querySelector('[data-action="expand-item"]'), "the row expands");
+              assert.include(row.textContent, "Quench Second Skill", "and lists the missing Skill");
+            } finally {
+              await actor.sheet.close({ animate: false });
+            }
+
             await actor.createEmbeddedDocuments("Item", [
               createSkillData("Quench Second Skill", 1, "agi", { system: { type: "bugei" } })
             ]);
