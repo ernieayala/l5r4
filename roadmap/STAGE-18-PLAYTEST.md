@@ -13,11 +13,11 @@ Quench runs as the GM in one client. The paths that only a player meets (a playe
 
 ## Setup
 
-| Seat | User | Client |
-| --- | --- | --- |
-| GM | The existing Gamemaster user | `http://localhost:30000` |
-| Player 1 | User "Player 1" | `http://127.0.0.1:30000` |
-| Player 2 | User "Player 2" | `http://127.0.0.2:30000` |
+| Seat     | User                         | Client                   |
+| -------- | ---------------------------- | ------------------------ |
+| GM       | The existing Gamemaster user | `http://localhost:30000` |
+| Player 1 | User "Player 1"              | `http://127.0.0.1:30000` |
+| Player 2 | User "Player 2"              | `http://127.0.0.2:30000` |
 
 Foundry keeps one login per browser cookie store, and cookies are per host, so each seat uses its own loopback host in one Chrome profile; Foundry listens on every loopback address. Checked 2026-11-17: all three logged in at once, each client's `game.user` its own user, and the GM's client lists all three active. The "Player" user stays for the `animations` batch. Ernie can take any seat at any time.
 
