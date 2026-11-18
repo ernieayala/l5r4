@@ -208,8 +208,9 @@ export function registerAuthoringTests(quench) {
             const { actor } = await schooled();
             await named(actor, "Kenjutsu").delete();
             const school = named(actor, "Quench Bushi School");
+            // The School writes its grants flag after the grant runs, so it can be absent at first
             await waitFor(
-              () => school.getFlag(SYS_ID, "grants").find(r => r.itemId === null) !== undefined
+              () => school.getFlag(SYS_ID, "grants")?.find(r => r.itemId === null) !== undefined
             );
             await actor.update({ "system.honor.points": 1 });
             await new Promise(resolve => setTimeout(resolve, 300));
@@ -323,15 +324,22 @@ export function registerAuthoringTests(quench) {
             worldItems.push(broken, empty);
             const rulesTabOf = async item => {
               await item.sheet.render({ force: true });
+              assert.exists(item.sheet.element, `${item.name}: the sheet renders`);
               item.sheet.element
                 .querySelector('[data-action="change-tab"][data-tab="rules"]')
                 .click();
               await item.sheet.render();
-              return item.sheet.element.querySelector("[data-rules-editor]");
+              const editor = item.sheet.element?.querySelector("[data-rules-editor]");
+              assert.exists(editor, `${item.name}: the rules tab shows its editor`);
+              return editor;
             };
             try {
               const editor = await rulesTabOf(broken);
               const error = editor.querySelector("[data-rule-error]");
+              assert.exists(
+                error,
+                `the error line: item ${broken.id}, sheet ${broken.sheet.document.id}, stored ${JSON.stringify(broken._source.system.rules)}, world ${JSON.stringify(game.items.get(broken.id)?._source.system.rules)}`
+              );
               assert.ok(error.querySelector("i[inert]"), "the invalid icon");
               const fields = [...editor.querySelectorAll('[name^="rules.0."]')];
               assert.isAbove(fields.length, 0);
