@@ -989,7 +989,8 @@
         "void": "Void Points"
       },
       "grants": {
-        "granted": "{name} gains {item} from {giver} (School Rank {rank})."
+        "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
+        "waiting": "{name} learns {items} from {giver} once these School Skills reach rank 1: {skills}."
       },
       "hints": {
         "decreaseTrait": "Decrease {trait}",

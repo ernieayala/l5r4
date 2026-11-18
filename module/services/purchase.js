@@ -61,11 +61,13 @@ export async function createPurchasedItem(actor, source) {
   if (!(await canAddItem(actor, source, rules))) {
     return null;
   }
-  const replaces = await askReplaces(actor, source);
-  const data = replaces === null ? null : await askItemChoices(source, rules);
-  if (!data) {
+  const placement = await askPlacement(actor, source);
+  const chosen = placement && (await askItemChoices(source, rules));
+  if (!chosen) {
     return null;
   }
+  const { replaces } = placement;
+  const data = placement.second ? buildSecondSchoolData(chosen) : chosen;
   if (replaces) {
     const prior = actor.items.filter(item => item.type === data.type).map(item => item.id);
     if (prior.length) {
@@ -89,20 +91,34 @@ function rulesOf(data) {
 }
 
 /**
- * Whether a new item replaces the character's item of its type: a PC's Clan, Family, or School does, except a School
- * the player adds beside the one the character has (askSchool).
+ * Where a new item goes: a PC's Clan, Family, or School replaces the character's item of its type, except a School
+ * the player adds beside the one the character has (askSchool), which is a second School (Multiple Schools).
+ * game-rules/64_advantages.md, p.151
  * @param {Actor} actor
  * @param {object} source - The item's source data
- * @returns {Promise<boolean|null>} null when the School question is closed
+ * @returns {Promise<{replaces: boolean, second: boolean}|null>} null when the School question is closed
  */
-async function askReplaces(actor, source) {
+async function askPlacement(actor, source) {
   const replaces = actor.type === "pc" && bioTypes.has(source.type);
   const schools = actor.items.filter(item => item.type === "school");
   if (!replaces || source.type !== "school" || !schools.length) {
-    return replaces;
+    return { replaces, second: false };
   }
   const answer = await askSchool(actor, source.name, schools);
-  return answer ? answer === "replace" : null;
+  return answer ? { replaces: answer === "replace", second: answer === "add" } : null;
+}
+
+/**
+ * A second School's data, marked so it gives no free Skills (module/documents/item/lifecycle/second-school.js).
+ * @param {object} data - The School's source data, choices made
+ * @returns {object} A copy with `flags.l5r4-enhanced.secondSchool`
+ */
+function buildSecondSchoolData(data) {
+  return foundry.utils.mergeObject(
+    data,
+    { flags: { [SYS_ID]: { secondSchool: true } } },
+    { inplace: false }
+  );
 }
 
 /**

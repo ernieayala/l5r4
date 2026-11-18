@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildGrantedSkill,
+  getMissingSchoolSkills,
   getPendingGrants,
   buildUngrantedSkill
 } from "../../../module/utils/grants.js";
@@ -50,6 +51,21 @@ describe("getPendingGrants", () => {
 
   it("should wait for an open choice", () => {
     expect(getPendingGrants([rule("{choice:extra}")], [], 5)).toEqual([]);
+  });
+});
+
+// game-rules/64_advantages.md, p.151
+describe("getMissingSchoolSkills", () => {
+  it("should list the School Skills the character has below rank 1, by name in any case", () => {
+    const ranks = new Map([
+      ["kenjutsu", 2],
+      ["iaijutsu", 0]
+    ]);
+    expect(getMissingSchoolSkills(["Kenjutsu", "Iaijutsu", "Battle"], ranks)).toEqual([
+      "Iaijutsu",
+      "Battle"
+    ]);
+    expect(getMissingSchoolSkills(["KENJUTSU"], ranks)).toEqual([]);
   });
 });
 

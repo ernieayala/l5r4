@@ -44,6 +44,27 @@ export function getPendingGrants(rules, records, schoolRank) {
 }
 
 /**
+ * The record of a grant that gave no item: a uuid that is not an item, or a second School's Skill.
+ * @param {string} uuid - The GrantItem rule's uuid
+ * @returns {GrantRecord}
+ */
+export function buildEmptyGrantRecord(uuid) {
+  return { uuid, itemId: null, created: false, freeRanks: 0, emphasis: "", freeEmphasis: 0 };
+}
+
+/**
+ * The School Skills a character holds below rank 1. A School added beside another (Multiple Schools) gives no free
+ * Skills, and its Techniques wait until this list is empty.
+ * game-rules/64_advantages.md, p.151
+ * @param {string[]} schoolSkills - The names of the Skills the School teaches
+ * @param {Map<string, number>} ranks - The character's Skill ranks, by lower-case name
+ * @returns {string[]} The missing names, as given
+ */
+export function getMissingSchoolSkills(schoolSkills, ranks) {
+  return schoolSkills.filter(name => (ranks.get(name.toLowerCase().trim()) ?? 0) < 1);
+}
+
+/**
  * A Skill's data once a grant gives it free ranks and an Emphasis: a School Skill, at least `skillRank`
  * ranks, those ranks free, and the Emphasis trained and free. A rank 0 Skill granted 1 rank and the Emphasis
  * "Void Recovery" becomes rank 1 with 1 free rank, a School Skill, with that Emphasis trained and free.

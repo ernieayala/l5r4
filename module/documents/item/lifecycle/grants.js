@@ -1,9 +1,10 @@
 /**
  * @module documents/item/lifecycle/grants
  * @description GrantItem rules on an actor's items (roadmap/STAGE-11 decisions 2 and 7): a School's Skills come with
- * it, its Techniques as the School Rank reaches them, and removing the School takes back what it gave. The client that
- * sent the change to the actor or item does the work (module/utils/change-origin.js), so one client makes each grant,
- * even when its user is signed in on others; changes to one actor run one after another.
+ * it, its Techniques as the School Rank reaches them (a second School's as module/documents/item/lifecycle/
+ * second-school.js says), and removing the School takes back what it gave. The client that sent the change to the
+ * actor or item does the work (module/utils/change-origin.js), so one client makes each grant, even when its user is
+ * signed in on others; changes to one actor run one after another.
  * game-rules/48_character_creation_expanded.md, p.102
  * game-rules/49_improving_your_character.md, p.104
  */
@@ -11,10 +12,16 @@
 import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { applyChoices } from "../../../utils/choices.js";
-import { buildGrantedSkill, getPendingGrants, buildUngrantedSkill } from "../../../utils/grants.js";
+import {
+  buildEmptyGrantRecord,
+  buildGrantedSkill,
+  getPendingGrants,
+  buildUngrantedSkill
+} from "../../../utils/grants.js";
 import { F, R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
+import { getSecondSchoolGrants, isSecondSchool } from "./second-school.js";
 
 /**
  * Grant work waiting per actor UUID, so one client's grants for an actor never overlap.
@@ -194,13 +201,17 @@ async function createDueGrants(actor) {
     }
     const records = [...recordsOf(giver)];
     const due = getPendingGrants(rules, records, rankOf(giver));
-    for (const rule of due) {
+    const { grant, skip } = isSecondSchool(giver)
+      ? await getSecondSchoolGrants(actor, giver, { rules, due })
+      : { grant: due, skip: [] };
+    records.push(...skip.map(rule => buildEmptyGrantRecord(rule.uuid)));
+    for (const rule of grant) {
       if (isActorGone()) {
         return;
       }
       records.push(await createDueGrant(actor, rule, { giver }));
     }
-    if (due.length && !isActorGone()) {
+    if ((grant.length || skip.length) && !isActorGone()) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
@@ -251,14 +262,7 @@ async function createDueGrant(actor, rule, { giver }) {
   const source = await fromUuid(rule.uuid);
   if (source?.documentName !== "Item") {
     console.warn(`${SYS_ID} | "${giver.name}" grants ${rule.uuid}, which is not an item`);
-    return {
-      uuid: rule.uuid,
-      itemId: null,
-      created: false,
-      freeRanks: 0,
-      emphasis: "",
-      freeEmphasis: 0
-    };
+    return buildEmptyGrantRecord(rule.uuid);
   }
   const record = await createGrantedItem(actor, rule, { giver, source });
   if (rule.rank > 0) {

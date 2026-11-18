@@ -430,6 +430,59 @@ export function registerAuthoringTests(quench) {
             assert.deepEqual(closed.titles, [schoolTitle], "and asks no choice");
           })
         );
+
+        // game-rules/64_advantages.md, p.151
+        it(
+          "should give a second School no free Skills and hold its Techniques until its Skills reach rank 1",
+          clean(async function () {
+            this.timeout(20_000);
+            const { actor, kenjutsu } = await schooled();
+            const created = await Item.createDocuments([
+              createSkillData("Quench Second Skill", 0, "agi", { system: { type: "bugei" } }),
+              { name: "Quench Second Technique", type: "technique", system: { rank: 1 } }
+            ]);
+            worldItems.push(...created);
+            const { "Quench Second Skill": secondSkill, "Quench Second Technique": secondTech } =
+              byName(created);
+            const second = {
+              name: "Quench Second Bushi School",
+              type: "school",
+              system: {
+                rules: [
+                  { key: "GrantItem", uuid: kenjutsu.uuid },
+                  { key: "GrantItem", uuid: secondSkill.uuid },
+                  { key: "GrantItem", uuid: secondTech.uuid, rank: 1 }
+                ]
+              }
+            };
+            const { result } = await answerPurchaseDialogs(
+              createPurchasedItem(actor, second),
+              "add"
+            );
+            assert.ok(result, "added beside the first School");
+            assert.isTrue(
+              await waitFor(() =>
+                posted.some(
+                  m =>
+                    m.content.includes("Quench Second Technique") &&
+                    m.content.includes("Quench Second Skill")
+                )
+              ),
+              "a chat note names the Skill the Technique waits for"
+            );
+            assert.notOk(named(actor, "Quench Second Skill"), "no free Skill");
+            assert.equal(named(actor, "Kenjutsu").system.freeRanks, 1, "no second free rank");
+            assert.notOk(named(actor, "Quench Second Technique"), "the Technique waits");
+
+            await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Quench Second Skill", 1, "agi", { system: { type: "bugei" } })
+            ]);
+            assert.isTrue(
+              await waitFor(() => Boolean(named(actor, "Quench Second Technique"))),
+              "the Technique comes once every School Skill is at rank 1"
+            );
+          })
+        );
       });
 
       describe("Rules editor", () => {
