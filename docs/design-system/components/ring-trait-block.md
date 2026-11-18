@@ -22,7 +22,7 @@ The five Rings and eight Traits of a PC or NPC laid out as one figure: each Ring
 | Ring medallion | `<div>` placing the image | `l5r4-ring -<ring>` |
 | Ring roll | `<button type="button" data-action="roll-ring" data-tooltip aria-label>` holding the image | `l5r4-ring-roll draggable` |
 | Ring image | `<img alt="">` | `l5r4-ring-image` |
-| Ring rank disc | `<span>` holding the face; the code writes an `<h4 data-ring-disc>` | `l5r4-ring-rank -<ring>` |
+| Ring rank disc | `<span data-ring-disc>` holding the face | `l5r4-ring-rank -<ring>` |
 | Ring rank face | `<span>`; on the Void Ring, the rank control's value `<button>` | `l5r4-ring-rank-face` |
 | Trait row | `<div data-trait-block>` | `l5r4-trait -<ring> -<trait>`, written in `templates/actor/_partials/_trait.hbs` |
 | Trait roll | The roll button, Ring variant | `l5r4-button -roll -<ring>`, from `templates/cards/_partials/_roll-button.hbs` |
@@ -108,7 +108,7 @@ Ring names are one line within three grid columns (96 px). A Trait name is one l
 | K3 | `background-color: var(--l5r4-color-ring-earth-tint);` (`foundations/color.md` C5) | `background-color: rgb(var(--earth-ring-color), 0.1);` (modeled) |
 | K4 | `<button type="button" class="l5r4-ring-roll draggable" data-action="roll-ring" data-system-ring="earth" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.rollRing" element=(localize "l5r4.ui.mechanics.rings.earth")}}" aria-label="{{localize "l5r4.ui.mechanics.rolls.rollRing" element=(localize "l5r4.ui.mechanics.rings.earth")}}"><img class="l5r4-ring-image" src=... alt="" /></button>` (modeled) | `<a class="ring-roll draggable" data-action="roll-ring" ...><img ... title="..." /></a>` (modeled) |
 | K5 | `<span class="l5r4-ring-rank -earth"><span class="l5r4-ring-rank-face">{{system.rings.earth}}</span></span>` (modeled) | A step control on the Earth rank (modeled) |
-| K6 | `.l5r4-traits-rings .l5r4-trait.-air .l5r4-rank-control` (three levels) | Six levels of nesting (modeled); `grid-column: 1/18` in a 16-column grid, on `.l5r4-void-points` (`scss/features/_traits-rings.scss`) |
+| K6 | `.l5r4-traits-rings .l5r4-trait.-air .l5r4-rank-control` (three levels); `grid-column: 1 / -1` on `.l5r4-void-points` (`scss/features/_traits-rings.scss`) | Six levels of nesting (modeled); `grid-column: 1/18` in a 16-column grid (modeled) |
 | K7 | `{{!-- Earth --}}` | `<!-- Earth ring -->` (modeled), which ships into the DOM |
 | K8 | `&:hover .l5r4-ring-image` setting `filter: var(--l5r4-shadow-drop) var(--l5r4-state-hover-filter)` in `.l5r4-ring-roll` (`scss/features/_traits-rings.scss`) | `&:hover img { transform: scale(1.1); }`, a scale of its own (modeled) |
 

@@ -592,6 +592,10 @@ export function registerSheetsAndAppsTests(quench) {
                 honor.previousElementSibling.hasAttribute("inert"),
                 "the copy under the face is inert"
               );
+
+              // ring-trait-block.md: the disc is text, not a heading; the Void Points span the grid's own lines
+              assert.equal(sheet.element.querySelector("[data-ring-disc='earth']").tagName, "SPAN");
+              assert.equal(getComputedStyle(dots().parentElement).gridColumnEnd, "-1");
             } finally {
               await sheet.close({ animate: false });
             }
