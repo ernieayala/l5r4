@@ -68,6 +68,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 7. Ernie, 2026-11-17: two player seats beside the GM; they cover every permission path above.
 8. Ernie, 2026-11-17: Claude creates the player users in the local test world as the GM, with no passwords, named for their seats.
 9. Ernie, 2026-11-18, from Session 0: a new PC starts with Void Points equal to its Void Ring (#91); the Disadvantage XP cap and manual XP adjustments are GM-only (#92); a second School asks whether it replaces the first before its choices (#93); an NPC attack with no damage has no damage button (#94); the browser's Page filter leaves out entries with no page (#95).
+10. Ernie, 2026-11-18: a School added beside another follows the Multiple Schools Advantage (p.151): it gives no free Skills, and its Techniques wait until the character has rank 1 in each of its School Skills; a chat note names the missing Skills (#96, from #85).
 
 ### Still open
 
