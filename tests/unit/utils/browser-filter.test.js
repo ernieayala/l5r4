@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BROWSER_FILTERS, BROWSER_TABS } from "../../../module/config/browser.js";
+import { SKILL_TRAITS } from "../../../module/config/localization.js";
 import {
   getBrowserIndexFields,
   getEntryNumbers,
@@ -108,6 +109,19 @@ describe("getFilterOptions", () => {
       "2",
       "10"
     ]);
+  });
+
+  it("should leave out the page an entry with no page holds", () => {
+    const entries = [{ system: { source: { page: 0 } } }, { system: { source: { page: 104 } } }];
+    expect(getFilterOptions(entries, "page")).toEqual(["104"]);
+  });
+});
+
+describe("BROWSER_FILTERS", () => {
+  it("should label every Trait a Skill can use, Void included", () => {
+    for (const key of Object.keys(SKILL_TRAITS)) {
+      expect(BROWSER_FILTERS.trait.labels[key], key).toBe(SKILL_TRAITS[key]);
+    }
   });
 });
 

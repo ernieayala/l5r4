@@ -11,8 +11,8 @@ import {
   KIHO_TYPES,
   RING_LABELS,
   SIZES,
-  SKILL_TYPES,
-  TRAITS
+  SKILL_TRAITS,
+  SKILL_TYPES
 } from "./localization.js";
 
 /**
@@ -23,6 +23,7 @@ import {
  * @property {Record<string, string>} [labels]  Value to localization key
  * @property {string} [labelPrefix]             Localization key prefix of each value
  * @property {boolean} [numeric]                Its values sort as numbers
+ * @property {*} [none]                         The stored value that means the field is unset, never offered
  */
 
 /**
@@ -51,7 +52,7 @@ export const BROWSER_FILTERS = Object.freeze({
     path: "system.trait",
     kind: "select",
     label: "l5r4.apps.compendiumBrowser.filters.trait",
-    labels: TRAITS
+    labels: SKILL_TRAITS
   },
   advantageType: {
     path: "system.type",
@@ -105,7 +106,9 @@ export const BROWSER_FILTERS = Object.freeze({
     path: "system.source.page",
     kind: "select",
     label: "l5r4.apps.compendiumBrowser.filters.page",
-    numeric: true
+    numeric: true,
+    // sourceField (module/data/fields.js) stores an item made at the table with page 0
+    none: 0
   }
 });
 

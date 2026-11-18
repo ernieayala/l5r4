@@ -62,7 +62,8 @@ export function getEntryNumbers(entry) {
 }
 
 /**
- * The values a select filter offers: the distinct values its entries hold, blank ones left out, sorted.
+ * The values a select filter offers: the distinct values its entries hold, blank ones and the filter's `none` value
+ * left out, sorted.
  * @param {object[]} entries
  * @param {string} filterId
  * @returns {string[]}
@@ -72,7 +73,7 @@ export function getFilterOptions(entries, filterId) {
   const values = new Set();
   for (const entry of entries) {
     const value = getValueAt(entry, filter.path);
-    if (value !== undefined && value !== null && value !== "") {
+    if (value !== undefined && value !== null && value !== "" && value !== filter.none) {
       values.add(String(value));
     }
   }
