@@ -219,6 +219,39 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // A control the user cannot use is not shown (#108)
+        it(
+          "should show Undo on a result card only to the roller's owner and a GM",
+          clean(async function () {
+            const { actor, katana } = await attacker();
+            const player = game.users.find(
+              user => !user.isGM && !actor.testUserPermission(user, "OWNER")
+            );
+            if (!player) {
+              this.skip();
+            }
+            const target = await defender();
+            const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
+              askForOptions: false
+            });
+            await applyDamage(damage, [target]);
+            const card = resultOf(damage);
+            const gm = game.users.current;
+            const undoShownTo = async user => {
+              game.users.current = user;
+              try {
+                return Boolean(
+                  (await card.renderHTML()).querySelector("[data-action='damage-undo']")
+                );
+              } finally {
+                game.users.current = gm;
+              }
+            };
+            assert.isTrue(await undoShownTo(gm), "the GM");
+            assert.isFalse(await undoShownTo(player), "a player who did not roll");
+          })
+        );
+
         // roadmap/STAGE-10 decision 4
         it(
           "should mark the target Dead for damage past Out, and undo lifts it",

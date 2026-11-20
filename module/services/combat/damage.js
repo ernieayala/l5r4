@@ -57,10 +57,13 @@ export function bindDamageCards(message, html) {
   }
   const result = message.getFlag(SYS_ID, "damageResult");
   if (result) {
+    // Each user sees only the buttons they may use (#108)
     const actor = fromUuidSync(result.actorUuid);
-    const voidButton = html.querySelector("[data-action='damage-void']");
-    if (voidButton && !actor?.isOwner) {
-      voidButton.remove();
+    if (!actor?.isOwner) {
+      html.querySelector("[data-action='damage-void']")?.remove();
+    }
+    if (!canUndoDamage(result, game.user)) {
+      html.querySelector("[data-action='damage-undo']")?.remove();
     }
     on("damage-void", () => requestDamageAction({ action: "void", messageId: message.id }));
     on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
@@ -251,13 +254,23 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     }
     await spendVoidPointOnDamage(message);
   } else if (action === "undo") {
-    const damage = game.messages.get(result.damageMessageId);
-    const roller = damage ? fromUuidSync(damage.system.actorUuid) : null;
-    if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
+    if (!canUndoDamage(result, user)) {
       throw new Error("Only the roller or a GM undoes this damage");
     }
     await applyDamageUndo(message);
   }
+}
+
+/**
+ * Whether a user may undo a damage result: a GM, or an owner of the actor who rolled the damage.
+ * @param {object} result - The result card's `damageResult` flag
+ * @param {User} user
+ * @returns {boolean}
+ */
+function canUndoDamage(result, user) {
+  const damage = game.messages.get(result.damageMessageId);
+  const roller = damage ? fromUuidSync(damage.system.actorUuid) : null;
+  return user.isGM || Boolean(roller?.testUserPermission(user, "OWNER"));
 }
 
 /**
