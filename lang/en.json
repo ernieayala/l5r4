@@ -224,7 +224,9 @@
           "reason": "Sample reason",
           "ruleError": "Sample error: this value must be a number.",
           "substitute": "Sample substitution",
-          "tattooEffect": "Sample effect text"
+          "tattooEffect": "Sample effect text",
+          "tnChanges": "Sample TN change +5",
+          "tnChangesNote": "(Sample TN change +5)"
         },
         "samples": {
           "activationOff": "Activation off",
@@ -325,7 +327,6 @@
           "techniqueRows": "Techniques",
           "textSection": "Text section: description",
           "titleTools": "Section with title tools",
-          "tnChanges": "TN changes: one line",
           "traitRank": "Trait rank control: Stamina 1",
           "twoTabs": "Two tabs",
           "undone": "Undone",
@@ -788,6 +789,7 @@
         "statBlock": "Stat block",
         "substitutes": "Substitutions",
         "titleAgainst": "{label} against {target}",
+        "tnChangesNote": "({changes})",
         "totalModifier": "Total modifier",
         "unskilled": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
         "void": "Spend a Void Point (+1k1)",

@@ -930,7 +930,7 @@ export function registerCombatTests(quench) {
             // The card lists every TN change it kept (roadmap/STAGE-18 decision 17, #115)
             assert.include(
               foundry.utils.parseHTML(piercing.content).textContent,
-              `${T("l5r4.ui.combat.arrowArmor.armor")} -5`,
+              `(${T("l5r4.ui.combat.arrowArmor.armor")} -5)`,
               "the card names the arrow's change"
             );
             // The dialog lists the arrow's change before the roll (#105)

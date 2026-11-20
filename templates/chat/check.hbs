@@ -15,7 +15,7 @@
       {{#if tn.freeRaisesToTN}}<span>{{localize "l5r4.ui.check.freeRaisesToTnNote" count=tn.freeRaisesToTN}}</span>{{/if}}
       {{#if tn.woundPenalty}}<span>{{localize "l5r4.ui.check.woundPenaltyNote" penalty=tn.woundPenalty}}</span>{{/if}}
       {{!-- Every TN change the roll kept, those ticked in the dialog included (decision 17, #115) --}}
-      {{#if tn.modifiers.length}}<span>{{> "systems/l5r4-enhanced/templates/chat/_partials/_tn-changes.hbs" changes=tn.modifiers}}</span>{{/if}}
+      {{#if tnChanges}}<span>{{tnChanges}}</span>{{/if}}
     </div>
   {{/if}}
   {{#if raisesWithoutTn}}

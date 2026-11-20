@@ -22,7 +22,7 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 | Title | `div.dice-flavor` | The roll's label, the target's name when there is one; suffixes for Unskilled, Emphasis, and Void Points spent (`buildCheckLabel` (`module/services/dice/check/message-data.js`)) |
 | Modifiers | `ul.check-applied`, one `li` per modifier | Each modifier that applied, with its `+XkY` or `+N` text |
 | Dice row | `{{{roll}}}` | [Dice row](dice-row.md) |
-| TN line | `div.l5r4-tn-result` | Outcome, the TN, Raises, Free Raises spent on the TN, the wound penalty, and every other TN change the roll kept as one line (`templates/chat/_partials/_tn-changes.hbs`, which the check dialog's TN hint shares) |
+| TN line | `div.l5r4-tn-result` | Outcome, the TN, Raises, Free Raises spent on the TN, the wound penalty, and every other TN change the roll kept, in parentheses like the wound penalty (`formatTnChanges` (`module/services/dice/check/card.js`), which the check dialog's TN hint shares) |
 | Free Raises | `div.check-free-raises` | Free Raises left after those spent on the TN |
 | Notes | `div.check-note`, one per note, maneuver note, and the damage sources line | Sentences the roll's rules add |
 | Buttons | `<button type="button" data-action="…">`; damage buttons in `div.damage-actions`, condition buttons in `div.check-conditions` | Next steps, below |

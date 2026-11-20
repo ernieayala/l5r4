@@ -19,7 +19,7 @@ import { getRaiseAllocation, getManeuverCost } from "../../../utils/damage.js";
 import { canEmbraceTaint, getHighestRing, getLostBonus } from "../../../utils/taint.js";
 import { getTargets } from "../resources/target-resolver.js";
 import { isVoidOverLimit } from "../../effects/uses.js";
-import { formatModifier } from "./card.js";
+import { formatModifier, formatTnChanges } from "./card.js";
 import { getCheckContext } from "./collect.js";
 
 /**
@@ -79,7 +79,7 @@ export function buildDialogContext(check) {
     substitutes: ctx.substitutes.map(s => ({ ...s, text: `${s.replace} → ${s.with}` })),
     hasTn: !isDamage,
     tn: check.defaultTn,
-    tnModifiers: ctx.tnModifiers,
+    tnChanges: formatTnChanges(ctx.tnModifiers),
     woundPenalty: check.woundPenalty,
     raisesAllowed: offered.allowed,
     unskilled,

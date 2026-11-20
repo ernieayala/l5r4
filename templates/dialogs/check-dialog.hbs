@@ -32,10 +32,8 @@
       <label for="{{formId}}-tn">{{localize "l5r4.ui.common.tn"}}</label>
       <input type="number" id="{{formId}}-tn" name="tn" value="{{tn}}" min="0" />
     </div>
-    {{#if tnModifiers.length}}
-      <p class="hint">
-        {{> "systems/l5r4-enhanced/templates/chat/_partials/_tn-changes.hbs" changes=tnModifiers}}
-      </p>
+    {{#if tnChanges}}
+      <p class="hint">{{tnChanges}}</p>
     {{/if}}
     <div class="form-group">
       <label for="{{formId}}-wound-penalty">{{localize "l5r4.ui.mechanics.combat.woundPenalty"}} ({{numberFormat woundPenalty sign=true}})</label>

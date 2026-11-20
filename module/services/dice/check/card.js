@@ -64,6 +64,9 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     tn: system.tn.effective === null ? null : system.tn,
     // A roll with no TN still shows the Raises a Contested Roll will count
     raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
+    tnChanges: system.tn.modifiers?.length
+      ? F("l5r4.ui.check.tnChangesNote", { changes: formatTnChanges(system.tn.modifiers) })
+      : "",
     freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
     outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
     appliedModifiers: system.modifiers
@@ -78,6 +81,16 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     honorRoll: isHonorRollOffered(system) && hasHonorToCall(game.actors.get(actorId)),
     actorId
   });
+}
+
+/**
+ * A roll's TN changes as one line, "Fatigued +5, Armor Piercing arrow ignores armor -12": the check dialog's TN hint,
+ * and inside the card's TN note (decision 17, #115).
+ * @param {{label: string, value: number}[]} changes
+ * @returns {string}
+ */
+export function formatTnChanges(changes) {
+  return changes.map(c => `${c.label} ${formatModifier({ total: c.value })}`).join(", ");
 }
 
 /**
