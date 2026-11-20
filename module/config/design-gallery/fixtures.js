@@ -154,7 +154,13 @@ export const CHECK = Object.freeze({
   label: "Kenjutsu",
   target: { name: "" },
   appliedModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, text: "+1k0" }],
-  tn: { effective: 20, raises: 1, freeRaisesToTN: 0, woundPenalty: 3 },
+  tn: {
+    effective: 20,
+    raises: 1,
+    freeRaisesToTN: 0,
+    woundPenalty: 3,
+    modifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, value: 5 }]
+  },
   outcome: { success: true },
   outcomeText: { i18n: "l5r4.ui.mechanics.rolls.success" },
   notes: [],

@@ -84,9 +84,16 @@ export const GALLERY_ROLL_CARDS = Object.freeze([
   },
   {
     page: "check-card",
-    partials: [`${T}/chat/check.hbs`],
+    partials: [`${T}/chat/check.hbs`, `${T}/chat/_partials/_tn-changes.hbs`],
     scss: ["scss/components/_check-card.scss", "scss/components/_chat-card.scss"],
     samples: [
+      {
+        label: "l5r4.apps.designGallery.samples.tnChanges",
+        partial: `${T}/chat/_partials/_tn-changes.hbs`,
+        scope: "chat",
+        context: "plain",
+        with: { changes: CHECK.tn.modifiers }
+      },
       {
         label: "l5r4.apps.designGallery.samples.success",
         partial: `${T}/chat/check.hbs`,

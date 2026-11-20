@@ -1,0 +1,4 @@
+{{!-- A roll's TN changes as one line, "Fatigued +5, Armor Piercing arrow ignores armor -12" (check-card.md). The
+check dialog shows the changes known when it opens; the card shows the changes the roll kept. Parameter: changes
+({label, value}[]). --}}
+{{#each changes}}{{label}} {{numberFormat value sign=true}}{{#unless @last}}, {{/unless}}{{/each}}

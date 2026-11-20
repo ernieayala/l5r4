@@ -213,6 +213,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/cards/_partials/_roll-button.hbs`,
 
   // Chat Message Templates: every CHAT_TEMPLATES path
+  `${PATHS.templates}/chat/_partials/_tn-changes.hbs`,
   `${PATHS.templates}/chat/check.hbs`,
   `${PATHS.templates}/chat/effect-prompt.hbs`,
   `${PATHS.templates}/chat/damage-result.hbs`,

@@ -925,7 +925,14 @@ export function registerCombatTests(quench) {
                 tn: target.system.armorTn.current,
                 askForOptions: false
               });
-            assert.equal((await shoot()).system.tn.effective, 20, "Armor Piercing: 25 - 5");
+            const piercing = await shoot();
+            assert.equal(piercing.system.tn.effective, 20, "Armor Piercing: 25 - 5");
+            // The card lists every TN change it kept (roadmap/STAGE-18 decision 17, #115)
+            assert.include(
+              foundry.utils.parseHTML(piercing.content).textContent,
+              `${T("l5r4.ui.combat.arrowArmor.armor")} -5`,
+              "the card names the arrow's change"
+            );
             // The dialog lists the arrow's change before the roll (#105)
             assert.deepInclude(
               getCheckContext(actor, { kind: "attack", weapon: bow, target }).tnModifiers,

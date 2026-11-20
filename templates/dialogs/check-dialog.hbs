@@ -34,7 +34,7 @@
     </div>
     {{#if tnModifiers.length}}
       <p class="hint">
-        {{#each tnModifiers}}{{label}} {{numberFormat value sign=true}}{{#unless @last}}, {{/unless}}{{/each}}
+        {{> "systems/l5r4-enhanced/templates/chat/_partials/_tn-changes.hbs" changes=tnModifiers}}
       </p>
     {{/if}}
     <div class="form-group">

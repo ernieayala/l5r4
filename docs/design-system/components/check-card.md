@@ -7,7 +7,7 @@ The card the roll pipeline posts for every Skill, Trait, Ring, spell, attack, an
 | Template | `templates/chat/check.hbs`, `CHAT_TEMPLATES.checkCard`; chat templates take no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)) |
 | Rendered by | `renderCheckCard` (`module/services/dice/check/card.js`), called as `renderCheckCard(system, roll, { actorId })` |
 | Posted by | `rollCheck` through `roll.toMessage({ type: "roll", system, speaker, content })` in `postCheck` (`module/services/dice/check/roll-check.js`) |
-| Wired by | `bindCheckCard` (`module/services/dice/check/chat-actions.js`), `bindAttackCard` (`module/services/combat/attack-card.js`) and `bindDamageCards` (`module/services/combat/damage.js`) |
+| Wired by | `bindCheckCard` (`module/services/dice/check/chat-actions.js`), `bindAttackCard` (`module/services/combat/attack-card.js`) and `bindDamageCards` (`module/services/combat/damage.js`); each removes the buttons its viewer may not press (`hideUnusable` (`module/utils/dom.js`)) |
 | Context menu | Re-roll and keep the better, Contested Roll (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)) |
 | SCSS | `scss/components/_check-card.scss`: the card's column under the fixed root `.l5r4-roll`, and the dropped-dice mark under `.l5r4-check` ([dice row](dice-row.md)) |
 | Quench | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat` |
@@ -22,7 +22,7 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 | Title | `div.dice-flavor` | The roll's label, the target's name when there is one; suffixes for Unskilled, Emphasis, and Void Points spent (`buildCheckLabel` (`module/services/dice/check/message-data.js`)) |
 | Modifiers | `ul.check-applied`, one `li` per modifier | Each modifier that applied, with its `+XkY` or `+N` text |
 | Dice row | `{{{roll}}}` | [Dice row](dice-row.md) |
-| TN line | `div.l5r4-tn-result` | Outcome, the TN, Raises, Free Raises spent on the TN, the wound penalty |
+| TN line | `div.l5r4-tn-result` | Outcome, the TN, Raises, Free Raises spent on the TN, the wound penalty, and every other TN change the roll kept as one line (`templates/chat/_partials/_tn-changes.hbs`, which the check dialog's TN hint shares) |
 | Free Raises | `div.check-free-raises` | Free Raises left after those spent on the TN |
 | Notes | `div.check-note`, one per note, maneuver note, and the damage sources line | Sentences the roll's rules add |
 | Buttons | `<button type="button" data-action="…">`; damage buttons in `div.damage-actions`, condition buttons in `div.check-conditions` | Next steps, below |
