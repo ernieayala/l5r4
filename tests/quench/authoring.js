@@ -790,6 +790,7 @@ export function registerAuthoringTests(quench) {
           clean(async function () {
             this.timeout(15_000);
             const enabled = game.settings.get(SYS_ID, "honorRoll");
+            const session = game.settings.get(SYS_ID, "session");
             const uniform = CONFIG.Dice.randomUniform;
             await game.settings.set(SYS_ID, "honorRoll", true);
             CONFIG.Dice.randomUniform = NINES;
@@ -817,12 +818,19 @@ export function registerAuthoringTests(quench) {
               assert.isFalse(reroll.system.outcome.success);
               assert.equal(actor.system.honor.rank, 2, "a failed Honor Roll costs a Rank");
               assert.isNull(await rollHonor(failed), "once a session");
+              // A used Honor Roll leaves no button to press this session (#114)
+              const honorButton = async () =>
+                (await failed.renderHTML()).querySelector("[data-action='honor-roll']");
+              assert.isNull(await honorButton(), "the button is gone once it is used");
 
               await game.settings.set(SYS_ID, "session", game.settings.get(SYS_ID, "session") + 1);
+              assert.exists(await honorButton(), "a new session shows it again");
               assert.ok(await rollHonor(failed), "a new session gives it back");
             } finally {
               CONFIG.Dice.randomUniform = uniform;
               await game.settings.set(SYS_ID, "honorRoll", enabled);
+              // The world's own session goes back, so its players' used Honor Rolls stay used (#114)
+              await game.settings.set(SYS_ID, "session", session);
             }
           })
         );
@@ -885,6 +893,8 @@ export function registerAuthoringTests(quench) {
             assert.equal(labels.yes, game.i18n.localize("l5r4.ui.session.start"));
             assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
             assert.equal(game.settings.get(SYS_ID, "session"), session + 1);
+            // The world's own session goes back, so its players' used Honor Rolls stay used (#114)
+            await game.settings.set(SYS_ID, "session", session);
             assert.equal(
               foundry.utils.parseHTML(posted.at(-1).content).textContent,
               game.i18n.localize("l5r4.ui.session.started")

@@ -45,6 +45,20 @@ export async function rollHonor(message) {
 }
 
 /**
+ * Whether an actor still has its Honor Roll this session: not used since the GM's last New session, and an Honor
+ * Rank to call on. A card shows no Honor Roll button otherwise (#114).
+ * game-rules/43_honor.md, p.92
+ * @param {Actor|null} actor - The roller
+ * @returns {boolean}
+ */
+export function hasHonorRollLeft(actor) {
+  return (
+    actor?.getFlag(SYS_ID, "honorRollSession") !== game.settings.get(SYS_ID, "session") &&
+    hasHonorToCall(actor)
+  );
+}
+
+/**
  * Whether the roll's actor may make its Honor Roll: the user owns the actor, the card offers the roll, the actor has
  * not used it this session, and it has an Honor Rank to roll. A refusal warns and gives null.
  * game-rules/43_honor.md, p.92

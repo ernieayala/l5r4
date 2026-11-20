@@ -15,7 +15,7 @@ import { hideUnusable } from "../../../utils/dom.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage-roll.js";
 import { renderCheckCard } from "./card.js";
-import { rollHonor } from "./honor-roll.js";
+import { hasHonorRollLeft, rollHonor } from "./honor-roll.js";
 
 /**
  * Roll damage for a hit from its attack's stored context (module/services/combat/damage-roll.js).
@@ -141,12 +141,14 @@ export function bindCheckCard(message, html) {
   if (message.type !== "roll") {
     return;
   }
-  const isRollers = Boolean(rollActor(message)?.isOwner);
+  const actor = rollActor(message);
+  const isRollers = Boolean(actor?.isOwner);
   hideUnusable(
     html,
-    "[data-action='check-damage'], [data-action='apply-condition'], [data-action='honor-roll']",
+    "[data-action='check-damage'], [data-action='apply-condition']",
     () => isRollers
   );
+  hideUnusable(html, "[data-action='honor-roll']", () => isRollers && hasHonorRollLeft(actor));
   html.querySelector("[data-action='check-damage']")?.addEventListener("click", event => {
     event.preventDefault();
     rollDamageFromMessage(message, { askForOptions: !event.shiftKey });
