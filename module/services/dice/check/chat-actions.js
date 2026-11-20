@@ -85,7 +85,7 @@ export async function rollHonor(message) {
     return null;
   }
   const source = message.system.toObject();
-  const { pool, modifiers } = buildHonorPool(actor, allowed.honor);
+  const { pool, modifiers } = buildHonorPool(actor, allowed.honor, source.modifiers);
   await actor.setFlag(SYS_ID, "honorRollSession", allowed.session);
   const roll = new foundry.dice.Roll(getPoolFormula(pool));
   await roll.evaluate();
@@ -259,18 +259,35 @@ function validateHonorRoll(message, actor) {
 }
 
 /**
- * The Honor Roll's pool: Honor Rank in rolled and kept dice, less what Taint Level 4 takes, the Ten Dice Rule last.
+ * The Honor Roll's pool: Honor Rank in rolled and kept dice, less the dice penalties the failed roll carried (Fear,
+ * Dazed, and the like fall on all die rolls; its bonuses do not carry over, since the Honor Rank replaces its dice;
+ * decision 16) and what Taint Level 4 takes, the Ten Dice Rule last.
  * game-rules/43_honor.md, p.92
+ * game-rules/42_fear.md, p.90
  * game-rules/89_shadowlands_taint.md, p.278
  * @param {Actor} actor - The roller
  * @param {number} honor - The Honor Rank
- * @returns {{pool: object, modifiers: object[]}} The pool, and the Taint modifier when there is one
+ * @param {object[]} failedModifiers - The failed roll's stored modifiers
+ * @returns {{pool: object, modifiers: object[]}} The pool, and the penalty modifiers it took
  */
-function buildHonorPool(actor, honor) {
+function buildHonorPool(actor, honor, failedModifiers) {
+  const modifiers = failedModifiers
+    .filter(m => m.enabled && (toInt(m.roll) < 0 || toInt(m.keep) < 0))
+    .map(m => ({
+      label: m.label,
+      roll: Math.min(0, toInt(m.roll)),
+      keep: Math.min(0, toInt(m.keep)),
+      total: 0
+    }));
   const penalty = getTaintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
-  const modifiers = penalty.roll
-    ? [{ label: T("l5r4.ui.taint.label"), roll: -penalty.roll, keep: -penalty.keep, total: 0 }]
-    : [];
+  if (penalty.roll) {
+    modifiers.push({
+      label: T("l5r4.ui.taint.label"),
+      roll: -penalty.roll,
+      keep: -penalty.keep,
+      total: 0
+    });
+  }
   const pool = buildPool({
     roll: honor,
     keep: honor,

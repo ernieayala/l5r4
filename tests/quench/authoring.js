@@ -3,6 +3,7 @@ import { createPurchasedItem, preparePurchase } from "../../module/services/purc
 import { applyTrackChange, ledgerEntriesOf } from "../../module/services/ledger.js";
 import { startNewSession } from "../../module/services/session.js";
 import { updateActivation } from "../../module/services/effects/activation.js";
+import { applyEffect } from "../../module/services/effects/apply.js";
 import {
   buildFolderTransfer,
   createImportedItems,
@@ -821,6 +822,45 @@ export function registerAuthoringTests(quench) {
               assert.ok(await rollHonor(failed), "a new session gives it back");
             } finally {
               CONFIG.Dice.randomUniform = uniform;
+              await game.settings.set(SYS_ID, "honorRoll", enabled);
+            }
+          })
+        );
+
+        // Fear's penalty falls on all die rolls, the Honor Roll's too (roadmap/STAGE-18 decision 16, #111)
+        // game-rules/42_fear.md, p.90
+        // game-rules/43_honor.md, p.92
+        it(
+          "should take the failed roll's dice penalties, and not its bonuses, into the Honor Roll",
+          clean(async function () {
+            this.timeout(15_000);
+            const enabled = game.settings.get(SYS_ID, "honorRoll");
+            await game.settings.set(SYS_ID, "honorRoll", true);
+            try {
+              const actor = track(
+                await createTestPC({
+                  name: "Character options: honorable and afraid",
+                  system: { honor: { rank: 3 } }
+                })
+              );
+              await applyEffect(actor, "feared", { level: 1 });
+              const failed = await rollCheck({
+                actor,
+                kind: "trait",
+                label: "Agility",
+                base: { roll: 2, keep: 2 },
+                trait: "agi",
+                modifiers: [{ label: "Quench bonus", roll: 2, keep: 1, total: 5 }],
+                tn: 100,
+                askForOptions: false
+              });
+              const reroll = await rollHonor(failed);
+              assert.deepInclude(
+                reroll.system.pool,
+                { roll: 2, keep: 2, bonus: 0 },
+                "3k3 less Fear 1"
+              );
+            } finally {
               await game.settings.set(SYS_ID, "honorRoll", enabled);
             }
           })
