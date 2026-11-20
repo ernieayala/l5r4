@@ -188,7 +188,13 @@ async function spendVoidPointOnDamage(card) {
     "system.suffered": Math.max(0, stored.suffered - getVoidReduction(result.wounds)),
     ...buildVoidUseUpdate(actor)
   });
-  await postResult(actor, { ...result, voidSpent: true }, card);
+  // Back within Out, the Void Point saves the life this damage took, as Undo would (#117)
+  const out = toInt(actor.system.woundLevels?.out?.value);
+  const saved = result.killed && !isDead(toInt(actor.system.suffered), out);
+  if (saved) {
+    await actor.toggleStatusEffect("dead", { active: false });
+  }
+  await postResult(actor, { ...result, voidSpent: true, killed: result.killed && !saved }, card);
 }
 
 /**

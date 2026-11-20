@@ -328,6 +328,36 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // A Void Point that brings the Wounds back within Out saves the life (#117)
+        // game-rules/25_rings_and_traits.md, p.78
+        // game-rules/33_wounds.md, p.82
+        it(
+          "should lift Dead when a Void Point takes the Wounds back within Out",
+          clean(async function () {
+            this.timeout(15_000);
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const out = target.system.woundLevels.out.value;
+            // 18 damage from out - 9 is out + 9: Dead; 10 fewer is out - 1
+            await target.update({ "system.suffered": out - 9 });
+            const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
+              askForOptions: false
+            });
+            await applyDamage(damage, [target]);
+            assert.isTrue(target.statuses.has("dead"), "past Out");
+            await click(resultOf(damage), "[data-action='damage-void']");
+            assert.isTrue(
+              await waitFor(() => target._source.system.suffered === out - 1),
+              "10 back"
+            );
+            assert.isTrue(await waitFor(() => !target.statuses.has("dead")), "Dead lifted");
+            assert.isFalse(
+              resultOf(damage).getFlag(SYS_ID, "damageResult").killed,
+              "the card no longer says so"
+            );
+          })
+        );
+
         // roadmap/STAGE-10 decision 4
         it(
           "should mark the target Dead for damage past Out, and undo lifts it",
