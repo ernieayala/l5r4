@@ -296,6 +296,9 @@ export function registerEffectsTests(quench) {
             await waitFor(() => !actor.statuses.has("stunned")),
             "ended with the Round"
           );
+          // An effect ending in this Reactions stage takes no save there (#116)
+          await waitFor(() => false, 500);
+          assert.lengthOf(prompts(actor, "save"), 1, "no save card for the Stunned that ended");
         });
 
         it("should not create a condition the actor is immune to", async () => {

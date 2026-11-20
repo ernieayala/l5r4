@@ -36,17 +36,20 @@ const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
 export const ANSWER_PROMPT_QUERY = `${SYS_ID}.answerPrompt`;
 
 /**
- * Post a card for each PeriodicSave of the actor's effects that rolls on this event.
+ * Post a card for each PeriodicSave of the actor's effects that rolls on this event. An effect whose duration ends on
+ * this same event takes no save there: core removes it on that event (#116).
+ * game-rules/41_conditional_effects.md, p.89
  * @param {Actor} actor
  * @param {string} event
  * @returns {Promise<void>}
  */
 export async function postSavePrompts(actor, event) {
   for (const save of actor.periodicSaves ?? []) {
-    if (save.event !== event) {
+    const effect = fromUuidSync(save.effectUuid);
+    const ending = effect?.duration.expiry === event && effect.duration.remaining <= 0;
+    if (save.event !== event || ending) {
       continue;
     }
-    const effect = fromUuidSync(save.effectUuid);
     const tn = effect?.getFlag(SYS_ID, "saveTn") ?? save.tn;
     await postPrompt(
       actor,
