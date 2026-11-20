@@ -487,6 +487,29 @@ export function registerEffectsTests(quench) {
           assert.equal(actor.system.rings.void.value, 1, "never blocked");
         });
 
+        // Initiative is Stage 1 of the first Round, before the combat begins in the tracker (#104)
+        // game-rules/31_combat_round.md, p.81
+        it("should count a Void Point spent before the combat begins toward Round 1", async function () {
+          this.timeout(10_000);
+          const actor = track(
+            await createTestPC({
+              name: "Effects void at Initiative",
+              system: { rings: { void: { rank: 3, value: 3 } } }
+            })
+          );
+          const combat = await foundry.documents.Combat.implementation.create({
+            scene: null,
+            active: true
+          });
+          combats.push(combat);
+          await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
+          await spendVoidPoint(actor);
+          await combat.startCombat();
+          assert.equal(combat.round, 1);
+          assert.equal(voidSpentOf(actor), 1, "the Initiative Void Point counts in Round 1");
+          assert.isTrue(isVoidOverLimit(actor), "the next roll's dialog warns");
+        });
+
         it("should raise the limit with a Resource rule for void", async () => {
           const actor = track(
             await createTestPC({

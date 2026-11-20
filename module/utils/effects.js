@@ -26,7 +26,7 @@ export const USE_PERIODS = Object.freeze(["turn", "round", "skirmish", "day"]);
  * key and count nothing: round 2 of combat "abc" is "abc:2", and a round outside combat is null.
  * @param {string} per - One of USE_PERIODS
  * @param {object} now
- * @param {string|null} [now.combatId] - The started combat the actor is in
+ * @param {string|null} [now.combatId] - The combat the actor is in
  * @param {number} [now.round]
  * @param {number|null} [now.turn]
  * @param {number} [now.worldTime] - Seconds
