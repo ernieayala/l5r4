@@ -345,7 +345,8 @@ export function registerEffectsTests(quench) {
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
         });
 
-        it("should end outside combat when the GM ends the encounter", async () => {
+        it("should end outside combat when the GM ends the encounter", async function () {
+          this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects fear encounter" }));
           await applyEffect(actor, "feared", { level: 1 });
           await game.time.advance(3600);
@@ -360,7 +361,20 @@ export function registerEffectsTests(quench) {
               resolve();
             });
           });
-          await Promise.all([answered, endEncounter()]);
+          // The GM's End encounter ends Fear on every actor: put back the world's own afterwards (#106)
+          const worldFear = game.actors
+            .filter(other => other !== actor)
+            .flatMap(other =>
+              other.effects.filter(e => e.statuses.has("feared")).map(e => [other, e.toObject()])
+            );
+          try {
+            await Promise.all([answered, endEncounter()]);
+          } finally {
+            for (const [other, data] of worldFear) {
+              await waitFor(() => !other.effects.has(data._id));
+              await other.createEmbeddedDocuments("ActiveEffect", [data], { keepId: true });
+            }
+          }
           assert.include(question, game.i18n.localize("l5r4.ui.effects.endEncounterConfirm"));
           assert.equal(labels.yes, game.i18n.localize("l5r4.ui.effects.endEncounter"));
           assert.equal(labels.no, game.i18n.localize("l5r4.ui.common.cancel"));
