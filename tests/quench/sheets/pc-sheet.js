@@ -14,7 +14,12 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import { createKatana, createSkillData, createSpellData } from "../../fixtures/item-fixtures.js";
+import {
+  createBow,
+  createKatana,
+  createSkillData,
+  createSpellData
+} from "../../fixtures/item-fixtures.js";
 import { waitFor } from "../helpers.js";
 
 /**
@@ -282,18 +287,44 @@ export function registerPcSheetTests(quench) {
 
         it("should show a Skill's new pool on its roll button after its Trait changes", async () => {
           const skill = actor.items.getName("Kenjutsu");
-          const row = sheet.element.querySelector(`[data-item-id="${skill.id}"]`);
-          const button = row.querySelector("[data-action='roll-skill']");
-          const before = button.textContent;
-          const select = row.querySelector("[data-field='system.trait']");
+          const button = () =>
+            sheet.element.querySelector(`[data-item-id="${skill.id}"] [data-action='roll-skill']`);
+          const before = button().textContent;
+          const select = sheet.element.querySelector(
+            `[data-item-id="${skill.id}"] [data-field='system.trait']`
+          );
           select.value = "sta";
           select.dispatchEvent(new Event("change", { bubbles: true }));
-          assert.isTrue(await waitFor(() => button.textContent !== before), "the button changes");
-          assert.equal(button.textContent, `${skill.system.roll}k${skill.system.keep}`);
+          assert.isTrue(await waitFor(() => button().textContent !== before), "the button changes");
+          assert.equal(button().textContent, `${skill.system.roll}k${skill.system.keep}`);
           assert.equal(
-            button.parentElement.querySelector("span").textContent,
-            button.textContent,
+            button().parentElement.querySelector("span").textContent,
+            button().textContent,
             "the mask shows the same pool"
+          );
+        });
+
+        // An arrow's dice join the bow's damage
+        // game-rules/74_weapons.md, p.198-199
+        it("should show a bow's new damage on its button after its arrow changes", async function () {
+          this.timeout(15_000);
+          const [bow] = await actor.createEmbeddedDocuments("Item", [createBow()]);
+          await sheet.render(true);
+          const button = () =>
+            sheet.element.querySelector(
+              `[data-item-id="${bow.id}"] [data-action='roll-weapon-damage']`
+            );
+          const before = button().textContent.trim();
+          const select = sheet.element.querySelector(
+            `[data-item-id="${bow.id}"] [data-field='system.arrow']`
+          );
+          select.value = "armor";
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          assert.isTrue(await waitFor(() => bow.system.arrow === "armor"), "the arrow is saved");
+          assert.notEqual(bow.system.derivedDamageFormula, before, "the arrow changes the damage");
+          assert.isTrue(
+            await waitFor(() => button().textContent.trim() === bow.system.derivedDamageFormula),
+            `the button shows ${bow.system.derivedDamageFormula}, not ${button().textContent.trim()}`
           );
         });
 

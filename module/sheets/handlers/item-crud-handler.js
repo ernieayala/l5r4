@@ -314,20 +314,14 @@ export class ItemCrudHandler {
 
     const value = this.#toFieldValue(el);
 
-    // Update the item
     const item = context.actor.items.get(id);
     if (!item) {
       return;
     }
 
-    await item.update({ [field]: value }, { render: false });
-
-    // For checkboxes, manually update the visual state
-    if (el.type === "checkbox" && el.dataset.type === "Boolean") {
-      el.checked = value;
-    }
-
-    await this.#renderFieldChange(context, { item, field, row });
+    // The update re-renders the sheet on every client: a field can change values shown elsewhere on it (an
+    // arrow's dice in the damage button, an armor's Armor TN, a Trait in the roll pool) (#101)
+    return item.update({ [field]: value });
   }
 
   /**
@@ -353,45 +347,6 @@ export class ItemCrudHandler {
       }
       default:
         return String(value ?? "");
-    }
-  }
-
-  /**
-   * Update the sheet parts an inline edit changes, without re-rendering the sheet for a skill's Trait: its roll
-   * buttons show the new pool. An equipped change re-renders, since the Armor TN shows in the header.
-   * @param {object} context - Handler context from actor sheet
-   * @param {object} edit
-   * @param {Item} edit.item - The edited item
-   * @param {string} edit.field - The edited field path
-   * @param {HTMLElement} edit.row - The item's row
-   * @returns {Promise<void>}
-   */
-  static async #renderFieldChange(context, { item, field, row }) {
-    // Update affected DOM elements without re-rendering entire sheet
-    if (field === "system.trait" && item.type === "skill") {
-      // Trait change: update roll formula buttons for this skill
-      // Item update triggers actor prepareDerivedData, which recalculates formulas
-      // Wait a tick for prepareDerivedData to complete, then update DOM
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      const skillRow = row;
-      const rollButtons = skillRow.querySelectorAll('[data-action="roll-skill"]');
-      rollButtons.forEach(button => {
-        const formula = `${item.system.roll}k${item.system.keep}`;
-        button.textContent = formula;
-
-        // Also update the mask span before the button (templates/cards/skill.hbs)
-        const mask = button.previousElementSibling;
-        if (mask) {
-          mask.textContent = formula;
-        }
-      });
-    } else if (field === "system.equipped") {
-      // Equipped change: update Armor TN in sheet
-      // Re-render is still needed here because Armor TN appears in header
-      if (context.actor.sheet?.rendered) {
-        context.actor.sheet.render(false);
-      }
     }
   }
 

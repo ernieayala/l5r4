@@ -114,7 +114,7 @@ ESLint core `require-await` reports 73 `async` functions with no `await`; many a
 | Await or return | `spendSlot` (`module/services/dice/check/spell-slots.js`) awaits `actor.update` under the lock and returns the lock's promise | `registerTemplates` (`dist/l5r4-enhanced.js`): `registerTemplates()` is called without `await`, so its errors become unhandled rejections |
 | `async` only when awaiting | `applyEffect` (`module/services/effects/apply.js`) awaits | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`): `async` and awaits nothing |
 | `Promise.all` | `formatEnrichedFields` (`module/sheets/item-sheet.js`) enriches every field at once | none found |
-| No timer ordering | `applyEffectAnywhere` (`module/services/effects/apply.js`) awaits the write or the GM query that makes it | `ItemCrudHandler.#renderFieldChange` (`module/sheets/handlers/item-crud-handler.js`) waits one tick with `setTimeout`, then patches button text; `updateUnderLock` (`module/services/dice/resources/void-points.js`) and `updateUnderLock` (`module/services/dice/check/spell-slots.js`) poll a lock every 10 ms where a promise queue like `updateGrantQueue` (`module/documents/item/lifecycle/grants.js`) would order the work |
+| No timer ordering | `applyEffectAnywhere` (`module/services/effects/apply.js`) awaits the write or the GM query that makes it | `updateUnderLock` (`module/services/dice/resources/void-points.js`) and `updateUnderLock` (`module/services/dice/check/spell-slots.js`) poll a lock every 10 ms where a promise queue like `updateGrantQueue` (`module/documents/item/lifecycle/grants.js`) would order the work |
 
 ## Early returns
 
