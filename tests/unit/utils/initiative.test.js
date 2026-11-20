@@ -79,4 +79,23 @@ describe("formatInitiativePool", () => {
     expect(formatInitiativePool({ ...pool, useVoid: true })).toBe("5k3+10");
     expect(formatInitiativePool({ ...pool, totalMod: -12, useVoid: true })).toBe("5k3-2");
   });
+
+  // The pool the tracker rolls: Fear's -3k0 leaves Ryo 1k3+4 and Hana 0k2 before the rule (#103)
+  // game-rules/26_special_dice_rules.md, p.77
+  // game-rules/41_conditional_effects.md, p.89
+  it("should show the pool under the Ten Dice Rule: at least 1k1, keeping no more than it rolls", () => {
+    expect(formatInitiativePool({ roll: 1, keep: 3, totalMod: 4, useVoid: false })).toBe("1k1+4");
+    expect(formatInitiativePool({ roll: 0, keep: 2, totalMod: 0, useVoid: false })).toBe("1k1");
+    // The book's 12k4 becomes 10k5
+    expect(formatInitiativePool({ roll: 12, keep: 4, totalMod: 0, useVoid: false })).toBe("10k5");
+  });
+
+  it("should add the Little Truths +2 when the world setting is on", () => {
+    expect(
+      formatInitiativePool(
+        { roll: 12, keep: 4, totalMod: 0, useVoid: false },
+        { littleTruths: true }
+      )
+    ).toBe("10k5+2");
+  });
 });

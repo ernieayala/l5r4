@@ -5,6 +5,7 @@
  * class in module/sheets/handlers/. Clicks go to _onAction, right-clicks to _onActionContext, and changes to
  * _onActionChange, which the subclasses override; handlers receive the context from _getHandlerContext().
  */
+import { SYS_ID } from "../config/constants.js";
 import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { getIconPath } from "../utils/icons.js";
 import { formatInitiativePool } from "../utils/initiative.js";
@@ -103,7 +104,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     const context = await super._prepareContext(options);
     context.sortColumns = SORT_COLUMNS;
     context.sortState = getSortPrefs(this.actor.id);
-    context.initiativeFormula = formatInitiativePool(this.actor.system.initiative);
+    context.initiativeFormula = formatInitiativePool(this.actor.system.initiative, {
+      littleTruths: game.settings.get(SYS_ID, "LtException")
+    });
     return context;
   }
 
