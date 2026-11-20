@@ -8,7 +8,7 @@
  * modifier keeps its label so the dialog lists it with a toggle and the card shows it.
  */
 
-import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
+import { ARROW_ARMOR_FACTOR, BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getBagEntries } from "../../../utils/rule-bag.js";
@@ -276,7 +276,7 @@ function getEffectBonusModifiers(actor, spec) {
 
 /**
  * The check's TN changes: its TNModifier rules, the target's range-limited Armor TN changes on an attack, the armor
- * penalty, and an attack weapon's own TN change.
+ * penalty, an attack weapon's own TN change, and its arrow's change to the target's armor.
  * @param {Actor} actor
  * @param {object} spec - getCheckContext's spec
  * @param {function(string): object[]} entriesOf - The actor's bag entries of a kind for this check
@@ -301,7 +301,34 @@ function getCheckTnModifiers(actor, spec, entriesOf) {
   if (kind === "attack" && weapon) {
     tnModifiers.push(...getWeaponTnModifiers(actor, weapon));
   }
+  if (kind === "attack" && weapon && target) {
+    tnModifiers.push(...getArrowTnModifiers(weapon, target));
+  }
   return tnModifiers;
+}
+
+/**
+ * A bow's arrow against the armor in the target's Armor TN: an Armor Piercing arrow ignores it and a Flesh Cutter
+ * doubles it. Listed with the context's changes so the roll dialog shows it before the roll (#105).
+ * game-rules/74_weapons.md, p.199
+ * @param {Item} weapon
+ * @param {Actor} target
+ * @returns {Array<{label: string, value: number, fromTarget: boolean}>}
+ */
+function getArrowTnModifiers(weapon, target) {
+  const arrow = weapon.system.isBow ? weapon.system.arrow : null;
+  const factor = ARROW_ARMOR_FACTOR[arrow];
+  const armor = toInt(target.system.armorTn?.bonus);
+  if (factor === undefined || !armor) {
+    return [];
+  }
+  return [
+    {
+      label: T(`l5r4.ui.combat.arrowArmor.${arrow}`),
+      value: (factor - 1) * armor,
+      fromTarget: true
+    }
+  ];
 }
 
 /**

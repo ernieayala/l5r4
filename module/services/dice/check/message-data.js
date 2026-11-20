@@ -9,22 +9,20 @@
  * game-rules/74_weapons.md, p.199
  */
 
-import { ARROW_ARMOR_FACTOR } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
  * The TN changes the roll keeps: a change for the other attack range drops out, as a modifier does; an attack
- * starting a grapple ignores the armor in the target's Armor TN; an Armor Piercing arrow ignores it and a Flesh
- * Cutter doubles it.
+ * starting a grapple, a choice made in the dialog, ignores the armor in the target's Armor TN. An arrow's change
+ * comes with the context's changes (getCheckTnModifiers, collect.js).
  * game-rules/40_grappling.md, p.88
- * game-rules/74_weapons.md, p.199
  * @param {object} check - From buildCheck
  * @param {object} terms - The chosen and prepared terms, with the maneuvers
  * @returns {{label: string, value: number, type?: string, fromTarget?: boolean}[]}
  */
 export function buildTnModifiers(check, terms) {
-  const { isDamage, ctx, target, kind, request } = check;
+  const { isDamage, ctx, target } = check;
   const { range, maneuvers } = terms;
   const tnModifiers = isDamage
     ? []
@@ -36,16 +34,6 @@ export function buildTnModifiers(check, terms) {
     tnModifiers.push({
       label: T("l5r4.ui.combat.grappleIgnoresArmor"),
       value: -armorBonus,
-      fromTarget: true
-    });
-  }
-  const arrow =
-    kind === "attack" && request.weapon?.system.isBow ? request.weapon.system.arrow : null;
-  const arrowFactor = ARROW_ARMOR_FACTOR[arrow];
-  if (arrowFactor !== undefined && armorBonus) {
-    tnModifiers.push({
-      label: T(`l5r4.ui.combat.arrowArmor.${arrow}`),
-      value: (arrowFactor - 1) * armorBonus,
       fromTarget: true
     });
   }

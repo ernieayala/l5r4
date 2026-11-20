@@ -817,6 +817,12 @@ export function registerCombatTests(quench) {
                 askForOptions: false
               });
             assert.equal((await shoot()).system.tn.effective, 20, "Armor Piercing: 25 - 5");
+            // The dialog lists the arrow's change before the roll (#105)
+            assert.deepInclude(
+              getCheckContext(actor, { kind: "attack", weapon: bow, target }).tnModifiers,
+              { label: T("l5r4.ui.combat.arrowArmor.armor"), value: -5, fromTarget: true },
+              "the roll dialog shows the Armor Piercing change"
+            );
             await bow.update({ "system.arrow": "flesh" });
             assert.equal((await shoot()).system.tn.effective, 30, "Flesh Cutter: 25 + 5");
           })
