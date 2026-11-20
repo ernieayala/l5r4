@@ -31,6 +31,9 @@ import { applyEffect, ownTurnStartOf } from "./apply.js";
 /** Name of the GM query that ends a Concentration for a player. */
 const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
 
+/** Name of the GM query that marks a player's prompt card answered: only the GM, its author, can change it. */
+export const ANSWER_PROMPT_QUERY = `${SYS_ID}.answerPrompt`;
+
 /**
  * Post a card for each PeriodicSave of the actor's effects that rolls on this event.
  * @param {Actor} actor
@@ -148,7 +151,7 @@ export async function endConcentration(effect) {
   await effect.delete();
 }
 
-/** Register the GM side of endConcentration. */
+/** Register the GM side of endConcentration and of marking a player's prompt answered. */
 export function registerPromptQueries() {
   CONFIG.queries[END_CONCENTRATION_QUERY] = async ({ effectUuid }) => {
     const effect = await fromUuid(String(effectUuid));
@@ -157,10 +160,20 @@ export function registerPromptQueries() {
     }
     await endConcentration(effect);
   };
+  CONFIG.queries[ANSWER_PROMPT_QUERY] = async ({ messageId }, { user }) => {
+    const message = game.messages.get(String(messageId));
+    const request = message?.getFlag(SYS_ID, "prompt");
+    const actor = request ? await fromUuid(request.actorUuid) : null;
+    if (!actor?.testUserPermission(user, "OWNER")) {
+      throw new Error(`Not a prompt the user may answer: ${messageId}`);
+    }
+    await message.setFlag(SYS_ID, "promptAnswered", true);
+  };
 }
 
 /**
- * Handle a click on a prompt card's button.
+ * Handle a click on a prompt card's button. A card takes one roll: a save is made once each Reactions stage (#109).
+ * game-rules/41_conditional_effects.md, p.89
  * @param {ChatMessage} message
  * @returns {Promise<void>}
  */
@@ -171,12 +184,16 @@ export async function onPromptClick(message) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return;
   }
-
-  if (request.kind === "fullDefense") {
-    await rollFullDefense(actor);
+  if (message.getFlag(SYS_ID, "promptAnswered")) {
+    ui.notifications?.info(T("l5r4.ui.effects.promptAnswered"));
     return;
   }
-
+  if (request.kind === "fullDefense") {
+    if (await rollFullDefense(actor)) {
+      await requestPromptAnswered(message);
+    }
+    return;
+  }
   const effect = await fromUuid(request.effectUuid);
   if (!effect) {
     ui.notifications?.info(T("l5r4.ui.effects.alreadyEnded"));
@@ -187,19 +204,12 @@ export async function onPromptClick(message) {
   if (success === undefined || success === null) {
     return;
   }
-
-  if (request.kind === "concentration") {
-    if (!success) {
-      await endConcentration(effect);
-    }
-    return;
-  }
-
-  await applySaveResult(effect, request, { success });
+  await requestPromptAnswered(message);
+  await applyPromptResult(effect, request, { success });
 }
 
 /**
- * Wire a prompt card's button.
+ * Wire a prompt card's button; an answered card shows none.
  * @param {ChatMessage} message
  * @param {HTMLElement} html
  */
@@ -207,10 +217,51 @@ export function bindPromptCard(message, html) {
   if (!message.getFlag(SYS_ID, "prompt")) {
     return;
   }
-  html.querySelector("[data-action='effect-prompt']")?.addEventListener("click", event => {
+  const button = html.querySelector("[data-action='effect-prompt']");
+  if (message.getFlag(SYS_ID, "promptAnswered")) {
+    button?.remove();
+    return;
+  }
+  button?.addEventListener("click", event => {
     event.preventDefault();
     onPromptClick(message);
   });
+}
+
+/**
+ * Mark a prompt card answered. Only the GM, the card's author, can change it, so a player's client asks the active
+ * GM.
+ * @param {ChatMessage} message
+ * @returns {Promise<void>}
+ */
+async function requestPromptAnswered(message) {
+  if (game.user.isGM) {
+    await message.setFlag(SYS_ID, "promptAnswered", true);
+    return;
+  }
+  if (!game.users.activeGM) {
+    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
+    return;
+  }
+  await game.users.activeGM.query(ANSWER_PROMPT_QUERY, { messageId: message.id });
+}
+
+/**
+ * Apply a prompt's roll: a failed Concentration check ends the Concentration; a save's result goes to its effect.
+ * game-rules/67_universal_spells.md, p.166
+ * @param {ActiveEffect} effect - The effect the prompt is for
+ * @param {object} request - The prompt's stored request
+ * @param {{success: boolean}} result
+ * @returns {Promise<void>}
+ */
+async function applyPromptResult(effect, request, { success }) {
+  if (request.kind === "concentration") {
+    if (!success) {
+      await endConcentration(effect);
+    }
+    return;
+  }
+  await applySaveResult(effect, request, { success });
 }
 
 /**

@@ -972,6 +972,7 @@
         "fullDefenseBonus": "Full Defense (+{bonus})",
         "immune": "{name} is immune to {effect}",
         "noGM": "No GM is connected to apply that effect",
+        "promptAnswered": "That roll has already been made",
         "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
         "saveText": "{roll} roll against TN {tn}.",
         "saveTitle": "{effect}: save",

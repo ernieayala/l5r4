@@ -236,6 +236,29 @@ export function registerEffectsTests(quench) {
           assert.equal(effect.getFlag(SYS_ID, "saveTn"), 195);
         });
 
+        // One save each Reactions stage (#109)
+        it("should take one roll from a save card and then show no Roll button", async function () {
+          this.timeout(20_000);
+          const actor = track(await createTestPC({ name: "Effects dazed once" }));
+          const combat = await startCombat([actor, 10]);
+          const effect = await applyEffect(actor, "dazed");
+          await effect.setFlag(SYS_ID, "saveTn", 200);
+          await combat.nextTurn();
+          await waitFor(() => prompts(actor, "save").length === 1);
+          const card = prompts(actor, "save")[0];
+          const rolls = () =>
+            messages.filter(m => m.type === "roll" && m.speaker.actor === actor.id);
+          await onPromptClick(card);
+          assert.equal(effect.getFlag(SYS_ID, "saveTn"), 195);
+          assert.lengthOf(rolls(), 1, "the save is rolled");
+          await onPromptClick(card);
+          assert.lengthOf(rolls(), 1, "a second click rolls nothing");
+          assert.isNull(
+            (await card.renderHTML()).querySelector("[data-action='effect-prompt']"),
+            "the card shows no Roll button"
+          );
+        });
+
         it("should end Stunned at the end of the next Round on a failed save", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects stunned" }));
