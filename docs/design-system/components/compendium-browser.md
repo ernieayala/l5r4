@@ -44,7 +44,7 @@ Element classes are `l5r4-compendium-browser-<element>`, the window's block ([na
 | `clear-filters` | Clears the search and every filter                                    |
 | `open-entry`    | Opens the entry's sheet                                               |
 | `add-entry`     | Adds the item to the user's character or the controlled token's actor |
-| `import-entry`  | Imports a creature into the world; GMs only                           |
+| `import-entry`  | Imports a creature into the world; GMs only. A creature the world already holds asks Replace, New, or Cancel, as core's compendium import does |
 
 Search and filter fields are not actions: `input` and `change` listeners on `[data-browser-search]` and `[data-browser-filter]`, added in `CompendiumBrowserApplication#_onRender` (`module/apps/compendium-browser.js`).
 

@@ -231,7 +231,9 @@ export default class CompendiumBrowserApplication extends HandlebarsApplicationM
   }
 
   /**
-   * Import a creature into the world. GMs only.
+   * Import a creature into the world. GMs only. Core keeps the pack's id on import, so a creature the world
+   * already holds asks whether to replace it or import a new one, as core's own compendium import does
+   * [src: client/applications/sidebar/apps/compendium.mjs:134-136] (roadmap/STAGE-18 decision 13, #100).
    * @this {CompendiumBrowserApplication}
    * @param {PointerEvent} _event
    * @param {HTMLElement} element
@@ -242,7 +244,7 @@ export default class CompendiumBrowserApplication extends HandlebarsApplicationM
     }
     const row = element.closest("[data-uuid]");
     const pack = game.packs.get(row.dataset.pack);
-    await game.actors.importFromCompendium(pack, row.dataset.id);
+    await game.actors.importFromCompendium(pack, row.dataset.id, {}, { dialog: true });
   }
 
   /**

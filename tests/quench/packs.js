@@ -985,14 +985,31 @@ export function registerPacksTests(quench) {
       // game-rules/99_creatures.md, p.318-331
       describe("Creatures", () => {
         const pack = () => game.packs.get(`${SYS_ID}.creatures`);
-        /** A creature imported from the pack, as the GM's Import does. */
+        /**
+         * A creature imported from the pack as a new actor. Core keeps the pack's id on import and replaces a world
+         * actor with that id [src: client/documents/abstract/document-collection.mjs:369-394], which the cleanup
+         * would then delete (#99).
+         */
         const imported = async name =>
           track(
             await game.actors.importFromCompendium(
               pack(),
-              pack().index.find(e => e.name === name)._id
+              pack().index.find(e => e.name === name)._id,
+              {},
+              { keepId: false }
             )
           );
+
+        // #99
+        it(
+          "should import a new actor each time, leaving the world's copy of the creature",
+          clean(async () => {
+            const first = await imported("Kappa");
+            const second = await imported("Kappa");
+            assert.notEqual(second.id, first.id);
+            assert.isTrue(game.actors.has(first.id), "the first copy is still in the world");
+          })
+        );
 
         // The creatures pack is GM-only (roadmap/STAGE-15 decision 7)
         it(
@@ -1238,6 +1255,44 @@ export function registerPacksTests(quench) {
               const imported = () => game.actors.find(a => !before.has(a.id) && a.name === "Kappa");
               assert.isTrue(await waitFor(imported), "the creature is in the world");
               track(imported());
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        // roadmap/STAGE-18 decision 13, #100
+        it(
+          "should ask on Import whether to replace a creature the world holds or add a new one",
+          clean(async function () {
+            this.timeout(20_000);
+            const app = await openOn("equipment");
+            const before = new Set(game.actors.map(a => a.id));
+            const copies = () => game.actors.filter(a => !before.has(a.id) && a.name === "Kappa");
+            try {
+              app.element.querySelector("[data-action='select-tab'][data-tab='creatures']").click();
+              assert.isTrue(await waitFor(() => app.tab === "creatures"));
+              app.search = "Kappa";
+              await app.render();
+              const importButton = () => app.element.querySelector("[data-action='import-entry']");
+
+              importButton().click();
+              assert.isTrue(await waitFor(() => copies().length === 1), "the first Import adds it");
+              const [first] = copies().map(track);
+              await first.update({ "system.suffered": 3 });
+
+              let asked = null;
+              Hooks.once("renderDialogV2", dialog => {
+                asked = dialog;
+              });
+              importButton().click();
+              assert.isTrue(await waitFor(() => asked !== null), "a repeat Import asks");
+              asked.element.querySelector("[data-action='copy']").click();
+              assert.isTrue(await waitFor(() => copies().length === 2), "New adds a second copy");
+              copies()
+                .filter(a => a.id !== first.id)
+                .forEach(track);
+              assert.equal(first.system.suffered, 3, "the world's copy keeps its Wounds");
             } finally {
               await app.close({ animate: false });
             }
