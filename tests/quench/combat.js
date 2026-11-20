@@ -252,6 +252,47 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // The warning shows on the clicking player's client, not the GM's (#113)
+        it(
+          "should warn a player with no Void Points on the player's own client, asking the GM nothing",
+          clean(async function () {
+            const player = game.users.find(user => !user.isGM);
+            if (!player) {
+              this.skip();
+            }
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            await target.update({
+              "system.rings.void.value": 0,
+              [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+            });
+            const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
+              askForOptions: false
+            });
+            await applyDamage(damage, [target]);
+            const card = resultOf(damage);
+            const gm = game.users.current;
+            const activeGM = game.users.activeGM;
+            const query = activeGM.query;
+            const warn = ui.notifications.warn;
+            const queries = [];
+            const warnings = [];
+            activeGM.query = (...request) => (queries.push(request), Promise.resolve());
+            ui.notifications.warn = message => warnings.push(message);
+            game.users.current = player;
+            try {
+              (await card.renderHTML()).querySelector("[data-action='damage-void']").click();
+              await waitFor(() => warnings.length > 0 || queries.length > 0, 2000);
+            } finally {
+              game.users.current = gm;
+              activeGM.query = query;
+              ui.notifications.warn = warn;
+            }
+            assert.lengthOf(queries, 0, "no request to the GM");
+            assert.deepEqual(warnings, [T("l5r4.ui.mechanics.wounds.noVoidPoints")]);
+          })
+        );
+
         // Every card shows a button only to the users who may press it (roadmap/STAGE-18 decision 15, #112)
         it(
           "should show the attack, damage, and grapple cards' buttons only to their actors' owners",

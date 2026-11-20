@@ -38,7 +38,9 @@ All classes and actions are fixed names ([chat card](chat-card.md#fixed-names)).
 | State | Look | Markup |
 | --- | --- | --- |
 | Open | Buttons shown | `canVoid`, `undone` false |
-| Viewer does not own the actor | Reduce with Void is removed on that client | `voidButton.remove()` in `bindDamageCards` (`module/services/combat/damage.js`) |
+| Viewer does not own the actor | Reduce with Void is removed on that client | `hideUnusable` (`module/utils/dom.js`) in `bindDamageCards` (`module/services/combat/damage.js`) |
+| Viewer neither rolled the damage nor is a GM | Undo is removed on that client | `hideUnusable` in `bindDamageCards` |
+| Owner with no Void Points left clicks Reduce with Void | A warning on the owner's own client; nothing is sent to the GM | `canReduceWithVoid` (`module/utils/damage.js`) |
 | Void spent | Reduce with Void gone; the Void note added | Re-render with `voidSpent: true` in `spendVoidPointOnDamage` (`module/services/combat/damage.js`) |
 | Undone | `opacity: var(--l5r4-state-disabled-opacity)`, the undone note, no buttons | `-undone` (fixed), re-render with `undone: true` in `applyDamageUndo` (`module/services/combat/damage.js`) |
 | No GM connected | Warning `l5r4.ui.effects.noGM` on a player's click; the card does not change | `requestDamageAction` (`module/services/combat/damage.js`) |

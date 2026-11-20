@@ -13,7 +13,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
+import { canReduceWithVoid, isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
@@ -48,29 +48,11 @@ export function bindDamageCards(message, html) {
       handler(event);
     });
   if (message.type === "roll" && message.system.kind === "damage") {
-    // The roller's owner or a GM applies the damage (#112)
-    const roller = fromUuidSync(message.system.actorUuid);
-    hideUnusable(
-      html,
-      "[data-action='damage-apply-target'], [data-action='damage-apply-selected']",
-      () => Boolean(roller?.isOwner)
-    );
-    on("damage-apply-target", async () => {
-      const target = await fromUuid(message.system.target.uuid);
-      await applyDamage(message, target ? [target] : []);
-    });
-    on("damage-apply-selected", () =>
-      applyDamage(message, [...new Set(canvas.tokens.controlled.map(t => t.actor).filter(Boolean))])
-    );
+    bindApplyButtons(message, html, on);
   }
   const result = message.getFlag(SYS_ID, "damageResult");
   if (result) {
-    // Each user sees only the buttons they may use (#108)
-    const actor = fromUuidSync(result.actorUuid);
-    hideUnusable(html, "[data-action='damage-void']", () => Boolean(actor?.isOwner));
-    hideUnusable(html, "[data-action='damage-undo']", () => canUndoDamage(result, game.user));
-    on("damage-void", () => requestDamageAction({ action: "void", messageId: message.id }));
-    on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
+    bindResultButtons(message, result, { html, on });
   }
 }
 
@@ -195,7 +177,7 @@ function buildResultNotes(result) {
 async function spendVoidPointOnDamage(card) {
   const result = card.getFlag(SYS_ID, "damageResult");
   const actor = await fromUuid(result.actorUuid);
-  if (result.voidSpent || result.undone || toInt(actor.system.rings.void.value) <= 0) {
+  if (!canReduceWithVoid(result, toInt(actor.system.rings.void.value))) {
     ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
     return;
   }
@@ -275,6 +257,49 @@ function canUndoDamage(result, user) {
   const damage = game.messages.get(result.damageMessageId);
   const roller = damage ? fromUuidSync(damage.system.actorUuid) : null;
   return user.isGM || Boolean(roller?.testUserPermission(user, "OWNER"));
+}
+
+/**
+ * Wire a damage roll card's Apply buttons, shown only to the roller's owner or a GM (#112).
+ * @param {ChatMessage} message - The damage roll
+ * @param {HTMLElement} html
+ * @param {function(string, Function): void} on - Binds a button's click by action
+ */
+function bindApplyButtons(message, html, on) {
+  const roller = fromUuidSync(message.system.actorUuid);
+  hideUnusable(
+    html,
+    "[data-action='damage-apply-target'], [data-action='damage-apply-selected']",
+    () => Boolean(roller?.isOwner)
+  );
+  on("damage-apply-target", async () => {
+    const target = await fromUuid(message.system.target.uuid);
+    await applyDamage(message, target ? [target] : []);
+  });
+  on("damage-apply-selected", () =>
+    applyDamage(message, [...new Set(canvas.tokens.controlled.map(t => t.actor).filter(Boolean))])
+  );
+}
+
+/**
+ * Wire a damage result card's Void and Undo buttons, each shown only to the users who may use it (#108). The Void
+ * check runs on the clicking client too, which can see the owner's Void Points, so a refusal warns that player (#113).
+ * @param {ChatMessage} message - The result card
+ * @param {object} result - Its `damageResult` flag
+ * @param {{html: HTMLElement, on: function(string, Function): void}} card - The rendered card and its click binder
+ */
+function bindResultButtons(message, result, { html, on }) {
+  const actor = fromUuidSync(result.actorUuid);
+  hideUnusable(html, "[data-action='damage-void']", () => Boolean(actor?.isOwner));
+  hideUnusable(html, "[data-action='damage-undo']", () => canUndoDamage(result, game.user));
+  on("damage-void", () => {
+    if (!canReduceWithVoid(result, toInt(actor.system.rings.void.value))) {
+      ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
+      return undefined;
+    }
+    return requestDamageAction({ action: "void", messageId: message.id });
+  });
+  on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
 }
 
 /**

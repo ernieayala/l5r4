@@ -4,6 +4,7 @@ import {
   getFeintBonus,
   isDead,
   getManeuverCost,
+  canReduceWithVoid,
   getVoidReduction,
   getWoundsTaken
 } from "../../../module/utils/damage.js";
@@ -172,6 +173,15 @@ describe("The getVoidReduction and isDead helpers", () => {
   it("should take back 10 Wounds for a Void Point, never more than were taken", () => {
     expect(getVoidReduction(14)).toBe(10);
     expect(getVoidReduction(6)).toBe(6);
+  });
+
+  // game-rules/25_rings_and_traits.md, p.78
+  it("should allow a Void Point on a result only once, before an undo, with a Void Point left", () => {
+    const fresh = { voidSpent: false, undone: false };
+    expect(canReduceWithVoid(fresh, 1)).toBe(true);
+    expect(canReduceWithVoid(fresh, 0)).toBe(false);
+    expect(canReduceWithVoid({ ...fresh, voidSpent: true }, 2)).toBe(false);
+    expect(canReduceWithVoid({ ...fresh, undone: true }, 2)).toBe(false);
   });
 
   // game-rules/33_wounds.md, p.82

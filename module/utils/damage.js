@@ -147,6 +147,18 @@ export function getVoidReduction(wounds) {
 }
 
 /**
+ * Whether a Void Point can still take Wounds off a damage result: none spent on it, not undone, and the damaged actor
+ * has one left (#113).
+ * game-rules/25_rings_and_traits.md, p.78
+ * @param {{voidSpent: boolean, undone: boolean}} result - The result card's `damageResult` flag
+ * @param {number} voidPoints - The damaged actor's Void Points
+ * @returns {boolean}
+ */
+export function canReduceWithVoid(result, voidPoints) {
+  return !result.voidSpent && !result.undone && voidPoints > 0;
+}
+
+/**
  * Whether Wounds past the Out Wound Rank kill (STAGE-10 decision 4).
  * game-rules/33_wounds.md, p.82
  * @param {number} suffered - Wounds suffered
