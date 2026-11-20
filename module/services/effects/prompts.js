@@ -23,6 +23,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { getNextSaveTn } from "../../utils/effects.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { rollSkill } from "../dice/rolls/skill-roll.js";
@@ -209,20 +210,22 @@ export async function onPromptClick(message) {
 }
 
 /**
- * Wire a prompt card's button; an answered card shows none.
+ * Wire a prompt card's button, shown only to the prompted actor's owner while the card is unanswered (#109, #112).
  * @param {ChatMessage} message
  * @param {HTMLElement} html
  */
 export function bindPromptCard(message, html) {
-  if (!message.getFlag(SYS_ID, "prompt")) {
+  const request = message.getFlag(SYS_ID, "prompt");
+  if (!request) {
     return;
   }
-  const button = html.querySelector("[data-action='effect-prompt']");
-  if (message.getFlag(SYS_ID, "promptAnswered")) {
-    button?.remove();
-    return;
-  }
-  button?.addEventListener("click", event => {
+  const actor = fromUuidSync(request.actorUuid);
+  hideUnusable(
+    html,
+    "[data-action='effect-prompt']",
+    () => Boolean(actor?.isOwner) && !message.getFlag(SYS_ID, "promptAnswered")
+  );
+  html.querySelector("[data-action='effect-prompt']")?.addEventListener("click", event => {
     event.preventDefault();
     onPromptClick(message);
   });

@@ -35,7 +35,7 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 | Apply to selected | `damage-apply-selected` | Every damage roll | `applyDamage` (`module/services/combat/damage.js`) |
 | {effect} on {target} | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition | `applyConditionFromMessage` (`module/services/dice/check/chat-actions.js`) |
 | Damage roll ({weapon}) | `check-damage` | A hit that is not a grapple | `rollDamageFromMessage` (`module/services/dice/check/chat-actions.js`); Shift+click skips the dialog |
-| Honor Roll | `honor-roll` | A failed Skill, Trait, Ring, or spell roll with the Honor Roll setting on (`game-rules/43_honor.md, p.92`) | `rollHonor` (`module/services/dice/check/chat-actions.js`) |
+| Honor Roll | `honor-roll` | A failed Skill, Trait, Ring, or spell roll with the Honor Roll setting on (`game-rules/43_honor.md, p.92`) | `rollHonor` (`module/services/dice/check/honor-roll.js`) |
 
 ## Variants
 

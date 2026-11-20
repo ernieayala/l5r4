@@ -9,6 +9,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
+import { hideUnusable } from "../../utils/dom.js";
 
 /** Name of the GM query that runs a flow step for a player. */
 const FLOW_QUERY = `${SYS_ID}.flow`;
@@ -17,6 +18,8 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
  * @typedef {object} Flow
  * @property {function(ChatMessage, object, DOMStringMap): Promise<object|null>} click  On the clicking client: roll
  *   if the step needs it, and return the step to send, or null
+ * @property {function(object, DOMStringMap): Actor|null} actorOf  The actor a button acts for; the card shows the
+ *   button only to that actor's owners (#112)
  * @property {function(object, {card: ChatMessage, data: object, user: User}): Promise<object>} step  On the GM:
  *   check the user, return the new state
  * @property {function(object): Promise<string>} render  The card's HTML for a state
@@ -116,6 +119,9 @@ export function bindFlowCards(message, html) {
   if (!handler) {
     return;
   }
+  hideUnusable(html, "[data-flow-action]", button =>
+    Boolean(handler.actorOf(flow.state, button.dataset)?.isOwner)
+  );
   for (const button of html.querySelectorAll("[data-flow-action]")) {
     button.addEventListener("click", async event => {
       event.preventDefault();

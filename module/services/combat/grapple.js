@@ -215,7 +215,27 @@ async function applyControllerAction(state, sides, { data, user }) {
   }
 }
 
+/**
+ * The side a grapple button acts for: its own side for a control roll, the side in control for the rest.
+ * @param {object} state
+ * @param {DOMStringMap} dataset
+ * @returns {number}
+ */
+function buttonSideOf(state, dataset) {
+  return dataset.flowAction === "control" ? Number(dataset.side) : state.control;
+}
+
 registerFlow("grapple", {
+  /**
+   * The actor a grapple button acts for.
+   * @param {object} state
+   * @param {DOMStringMap} dataset
+   * @returns {Actor|null}
+   */
+  actorOf(state, dataset) {
+    return sidesOf(state)[buttonSideOf(state, dataset)] ?? null;
+  },
+
   /**
    * A button on the grapple card, on the clicking client.
    * @param {ChatMessage} _card
@@ -225,7 +245,7 @@ registerFlow("grapple", {
    */
   async click(_card, state, dataset) {
     const action = dataset.flowAction;
-    const i = action === "control" ? Number(dataset.side) : state.control;
+    const i = buttonSideOf(state, dataset);
     if (!sidesOf(state)[i]?.isOwner) {
       ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
       return null;

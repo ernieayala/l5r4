@@ -14,6 +14,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
+import { hideUnusable } from "../../utils/dom.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /** Name of the GM query that carries a player's damage action. */
@@ -47,6 +48,13 @@ export function bindDamageCards(message, html) {
       handler(event);
     });
   if (message.type === "roll" && message.system.kind === "damage") {
+    // The roller's owner or a GM applies the damage (#112)
+    const roller = fromUuidSync(message.system.actorUuid);
+    hideUnusable(
+      html,
+      "[data-action='damage-apply-target'], [data-action='damage-apply-selected']",
+      () => Boolean(roller?.isOwner)
+    );
     on("damage-apply-target", async () => {
       const target = await fromUuid(message.system.target.uuid);
       await applyDamage(message, target ? [target] : []);
@@ -59,12 +67,8 @@ export function bindDamageCards(message, html) {
   if (result) {
     // Each user sees only the buttons they may use (#108)
     const actor = fromUuidSync(result.actorUuid);
-    if (!actor?.isOwner) {
-      html.querySelector("[data-action='damage-void']")?.remove();
-    }
-    if (!canUndoDamage(result, game.user)) {
-      html.querySelector("[data-action='damage-undo']")?.remove();
-    }
+    hideUnusable(html, "[data-action='damage-void']", () => Boolean(actor?.isOwner));
+    hideUnusable(html, "[data-action='damage-undo']", () => canUndoDamage(result, game.user));
     on("damage-void", () => requestDamageAction({ action: "void", messageId: message.id }));
     on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
   }

@@ -13,6 +13,7 @@ import { F, R, T } from "../utils/localization.js";
 import { buildPool, parseRollAndKeep, getPoolFormula } from "../utils/check.js";
 import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
+import { hideUnusable } from "../utils/dom.js";
 import { rollWeaponDamage } from "./dice/rolls/weapon-roll.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
@@ -93,6 +94,10 @@ export function bindLegacyAttackCard(message, html) {
   if (message.type === "roll") {
     return;
   }
+  // Shown only to the attacker's owner (#112)
+  hideUnusable(html, ".l5r4-damage-button", button =>
+    Boolean(game.actors.get(button.dataset.actorId)?.isOwner)
+  );
   // eslint-disable-next-line no-restricted-syntax -- fixed name, Stage 17 decision 2
   for (const button of html.querySelectorAll(".l5r4-damage-button")) {
     let isProcessing = false;

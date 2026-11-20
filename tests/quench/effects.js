@@ -246,6 +246,22 @@ export function registerEffectsTests(quench) {
           await combat.nextTurn();
           await waitFor(() => prompts(actor, "save").length === 1);
           const card = prompts(actor, "save")[0];
+          // Only the actor's owners see the Roll button (roadmap/STAGE-18 decision 15, #112)
+          const player = game.users.find(
+            user => !user.isGM && !actor.testUserPermission(user, "OWNER")
+          );
+          if (player) {
+            const gm = game.users.current;
+            game.users.current = player;
+            try {
+              assert.isNull(
+                (await card.renderHTML()).querySelector("[data-action='effect-prompt']"),
+                "a player who does not own the actor sees no Roll"
+              );
+            } finally {
+              game.users.current = gm;
+            }
+          }
           const rolls = () =>
             messages.filter(m => m.type === "roll" && m.speaker.actor === actor.id);
           await onPromptClick(card);

@@ -226,6 +226,16 @@ function updateStage(state) {
 
 registerFlow("duel", {
   /**
+   * The duelist a duel button acts for.
+   * @param {object} state
+   * @param {DOMStringMap} dataset
+   * @returns {Actor|null}
+   */
+  actorOf(state, dataset) {
+    return sidesOf(state, Number(dataset.duelist)).actor ?? null;
+  },
+
+  /**
    * A button on the duel card: roll this stage for the duelist the user owns, or concede.
    * @param {ChatMessage} _card
    * @param {object} state

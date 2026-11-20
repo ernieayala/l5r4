@@ -51,6 +51,22 @@ export function on(root, type, { selector, handler, capture = false }) {
 }
 
 /**
+ * Hide, by removing, the controls a selector matches that this viewer may not use: a card shows no button its viewer cannot
+ * press (design system, patterns/panels-and-browsers.md "Can't act"; roadmap/STAGE-18 decision 15). The click's own
+ * check stays, since a card's controls are read back from chat.
+ * @param {Element} root - The rendered card
+ * @param {string} selector - The controls
+ * @param {function(Element): boolean} mayUse - Whether the viewer may use one control
+ */
+export function hideUnusable(root, selector, mayUse) {
+  for (const control of root.querySelectorAll(selector)) {
+    if (!mayUse(control)) {
+      control.remove();
+    }
+  }
+}
+
+/**
  * Handle one event on the root: call the handler with the closest element matching the selector, when the event
  * came from an Element and that element is within the root.
  * @param {Event} ev - The event the root received

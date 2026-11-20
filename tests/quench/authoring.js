@@ -10,7 +10,7 @@ import {
   exportItemFolder
 } from "../../module/services/item-transfer.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
-import { rollHonor } from "../../module/services/dice/check/chat-actions.js";
+import { rollHonor } from "../../module/services/dice/check/honor-roll.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSchoolData, createSkillData } from "../fixtures/item-fixtures.js";

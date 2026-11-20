@@ -21,7 +21,7 @@ const honorRollKinds = new Set(["skill", "attack", "trait", "ring", "spell", "ma
 /**
  * Whether a check's card offers the optional Honor Roll (roadmap/STAGE-11 decision 3): the world setting is on and
  * the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on the
- * click (module/services/dice/check/chat-actions.js, rollHonor).
+ * click (module/services/dice/check/honor-roll.js, rollHonor).
  * game-rules/43_honor.md, p.92
  * @param {object} system - RollMessageData source
  * @returns {boolean}

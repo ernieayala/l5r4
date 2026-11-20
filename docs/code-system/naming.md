@@ -73,6 +73,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `migrate` | Change stored source data to the current shape | `migratePcSource` (`module/data/migrate-source.js`), `migrateArmorTypes` |
 | `register` | Add to a Foundry registry or hook during init | `registerEffectQueries` (`module/services/effects/apply.js`) |
 | `bind` | Attach listeners to a rendered chat card | `bindCheckCard` (`module/services/dice/check/chat-actions.js`) |
+| `hide` | Remove from rendered HTML a control the viewer may not use | `hideUnusable` (`module/utils/dom.js`) |
 | `on` | Handle a hook or a DOM event | `onPreUpdateActorWounds` (`module/services/effects/automation.js`) |
 | `build` | Assemble a plain object or array from its inputs; no side effects | `buildPool` (`module/utils/check.js`) |
 | `parse` | Turn text into a value | `parseRulesJson` (`module/utils/rule-json.js`) |

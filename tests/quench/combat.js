@@ -252,6 +252,41 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // Every card shows a button only to the users who may press it (roadmap/STAGE-18 decision 15, #112)
+        it(
+          "should show the attack, damage, and grapple cards' buttons only to their actors' owners",
+          clean(async function () {
+            this.timeout(20_000);
+            const { actor, katana } = await attacker();
+            const player = game.users.find(
+              user => !user.isGM && !actor.testUserPermission(user, "OWNER")
+            );
+            if (!player) {
+              this.skip();
+            }
+            const target = await defender();
+            const gm = game.users.current;
+            const buttonsFor = async (user, message) => {
+              game.users.current = user;
+              try {
+                const html = await message.renderHTML();
+                return [...html.querySelectorAll("button[data-action], button[data-flow-action]")];
+              } finally {
+                game.users.current = gm;
+              }
+            };
+            const hit = await attack(actor, katana, target);
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            const grab = await grappleAttack(actor, target);
+            await startGrapple(grab);
+            const flowCard = game.messages.contents.findLast(m => m.getFlag(SYS_ID, "flow"));
+            for (const [name, message] of Object.entries({ hit, damage, grab, flowCard })) {
+              assert.isNotEmpty(await buttonsFor(gm, message), `${name}: the GM sees its buttons`);
+              assert.isEmpty(await buttonsFor(player, message), `${name}: a player sees none`);
+            }
+          })
+        );
+
         // roadmap/STAGE-10 decision 4
         it(
           "should mark the target Dead for damage past Out, and undo lifts it",
