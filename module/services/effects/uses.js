@@ -19,6 +19,15 @@ import { getPeriodKey, getUsesSpent } from "../../utils/effects.js";
 const VOID_PER_ROUND = 1;
 
 /**
+ * The started combat an actor is in, which need not be the viewed scene's active combat (#110).
+ * @param {Actor} actor
+ * @returns {Combat|null}
+ */
+export function startedCombatOf(actor) {
+  return game.combats.find(c => c.started && c.getCombatantsByActor(actor).length > 0) ?? null;
+}
+
+/**
  * The key of the current period for an actor: its combat gives turn, round, and skirmish keys, a started one before
  * one not yet begun. A combat not yet begun is Round 1: Initiative is rolled in the first Round's Stage 1, before
  * the GM begins the combat in the tracker (#104).
@@ -28,8 +37,10 @@ const VOID_PER_ROUND = 1;
  * @returns {string|null}
  */
 export function currentPeriodOf(actor, per) {
-  const combats = game.combats.filter(c => c.getCombatantsByActor(actor).length > 0);
-  const combat = combats.find(c => c.started) ?? combats[0] ?? null;
+  const combat =
+    startedCombatOf(actor) ??
+    game.combats.find(c => c.getCombatantsByActor(actor).length > 0) ??
+    null;
   const { secondsPerMinute, minutesPerHour, hoursPerDay } = game.time.calendar.days;
   return getPeriodKey(per, {
     combatId: combat?.id ?? null,

@@ -316,7 +316,6 @@ export function registerActiveEffectsTests(quench) {
         it("should write the stored value for +10 Armor TN", async () => {
           await setUp("Active effects: armor void");
           await combat.startCombat();
-          assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
           let content = "";
           let buttons = {};
           foundry.applications.api.DialogV2.confirm = async options => {

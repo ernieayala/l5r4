@@ -8,6 +8,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
+import { startedCombatOf } from "./uses.js";
 
 /** Name of the GM query that applies an effect for a player (registered in registerEffectQueries). */
 export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
@@ -106,12 +107,13 @@ export function effectsOf(actor, id) {
 /**
  * The start of an effect timed from the actor's own Turn, so "until his next Turn" counts from his combatant
  * whoever is acting now: core's start data [src: client/documents/active-effect.mjs:960-971] with the actor's
- * combatant. Undefined outside combat, leaving core's own start; a partial start makes core drop the effect.
+ * combatant, in the started combat the actor is in, which need not be the viewed scene's (#110). Undefined outside
+ * combat, leaving core's own start; a partial start makes core drop the effect.
  * @param {Actor} actor
  * @returns {object|undefined}
  */
 export function ownTurnStartOf(actor) {
-  const combat = game.combat?.started ? game.combat : null;
+  const combat = startedCombatOf(actor);
   const combatant = combat?.getCombatantsByActor(actor)[0];
   if (!combatant) {
     return undefined;

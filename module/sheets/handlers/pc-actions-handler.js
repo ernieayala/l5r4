@@ -8,7 +8,7 @@
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
+import { buildVoidUseUpdate, startedCombatOf, warnVoidLimit } from "../../services/effects/uses.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -30,7 +30,7 @@ export class PcActionsHandler {
    * - Void Point is spent immediately when activated
    *
    * **Validation:**
-   * - Must be in active combat (game.combat exists and started)
+   * - Must be in a started combat (the actor's own, not only the viewed scene's)
    * - Must be actor's turn (current combatant matches actor)
    * - Must have Void Points available (system.rings.void.value > 0)
    * - Requires user confirmation via dialog
@@ -178,9 +178,9 @@ export class PcActionsHandler {
    * @returns {string|null} The warning's i18n key, or null when the actor can spend
    */
   static #getArmorVoidProblem(actor) {
-    // Check if in combat
-    const combat = game.combat;
-    if (!combat || !combat.started) {
+    // The actor's own started combat, which need not be the viewed scene's (#110)
+    const combat = startedCombatOf(actor);
+    if (!combat) {
       return "l5r4.ui.effects.voidArmorNoCombat";
     }
 
