@@ -20,7 +20,7 @@ export const WOUND_LEVELS = Object.freeze({
   injured: { value: 26, penalty: 15, penaltyEff: 15, current: false },
   crippled: { value: 30, penalty: 20, penaltyEff: 20, current: false },
   down: { value: 34, penalty: 40, penaltyEff: 40, current: false },
-  out: { value: 38, penalty: 40, penaltyEff: 40, current: false }
+  out: { value: 38, penalty: 0, penaltyEff: 0, current: false }
 });
 
 /** One row per Item subtype, in the shape the sheet's sorted lists give the section partials. */

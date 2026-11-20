@@ -84,7 +84,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
       visibleWoundLevels: {
         healthy: { value: 15, penaltyEff: 0, current: false },
         nicked: { value: 21, penaltyEff: 3, current: true },
-        out: { value: 57, penaltyEff: 40, current: false }
+        out: { value: 57, penaltyEff: 0, current: false }
       },
       fear: { rank: 3 },
       notes: ""

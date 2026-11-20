@@ -242,6 +242,23 @@ export function registerWoundPenaltyAllRollsTests(quench) {
           penalty = 0;
           await rollWithTN(() => rollTrait({ actor, traitName: "str", traitRank: 4 }));
         });
+
+        // Healthy and Out carry no penalty whatever the modifier (roadmap/STAGE-18 decision 14, #102)
+        it("should add the penalty modifier only to the ranks between Healthy and Out", async () => {
+          await actor.update({ "system.woundsPenaltyMod": 5 });
+          const penaltyAt = async suffered => {
+            await actor.update({ "system.suffered": suffered });
+            return actor.system.woundPenalty;
+          };
+          const levels = actor.system.woundLevels;
+          try {
+            assert.equal(await penaltyAt(0), 0, "Healthy");
+            assert.equal(await penaltyAt(levels.healthy.value + 1), 3 + 5, "Nicked");
+            assert.equal(await penaltyAt(levels.out.value), 0, "Out");
+          } finally {
+            await actor.update({ "system.woundsPenaltyMod": 0, "system.suffered": 0 });
+          }
+        });
       });
     },
     { displayName: "L5R4: Wound penalty on every roll" }

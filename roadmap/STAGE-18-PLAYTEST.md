@@ -72,6 +72,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 11. Ernie, 2026-11-18: the Bio section lists every School the character holds, first School first, and a second School's row lists the School Skills its Techniques wait for (#97). #97 is fixed before Session 1.
 12. Ernie, 2026-11-18, from Session 1: a roll with no TN shows no TN line, only its Raises, which count in a Contested Roll (p.80); no TN is made from Raises (#98).
 13. Ernie, 2026-11-20, from Session 2's setup: the compendium browser's Import asks, as core's compendium import does, whether to replace a creature the world already holds or import a new one; it never overwrites one silently (#100).
+14. Ernie, 2026-11-20, from Session 2: Out carries no TN penalty, as printed (p.82), on PCs and NPCs, whatever its stored penalty or the penalty modifier; Healthy and Out are the two ranks a modifier never reaches (#102).
 
 ### Still open
 

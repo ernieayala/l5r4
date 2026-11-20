@@ -210,10 +210,9 @@ export default class L5R4Actor extends Actor {
     }
     prepareWoundRollOption(this, sys, current);
 
-    // Calculate effective penalty (base penalty + modifiers, minimum 0)
-    const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
-    sys.woundPenalty = curEffPenalty;
-    sys.wounds.penalty = curEffPenalty;
+    // The current rank's effective penalty, as prepareWoundPenalties set it on every rank (#102)
+    sys.woundPenalty = current.penaltyEff;
+    sys.wounds.penalty = current.penaltyEff;
 
     return current;
   }

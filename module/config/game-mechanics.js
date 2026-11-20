@@ -185,7 +185,9 @@ export const WOUND_LEVEL_ORDER = Object.freeze([
 
 /**
  * Default TN penalties for each wound level per L5R4 Combat and Wounds rules.
- * Each wound level increases the Target Number of all rolls by the specified amount.
+ * Each wound level increases the Target Number of all rolls by the specified amount. Out prints none: its character
+ * is unconscious (roadmap/STAGE-18 decision 14).
+ * game-rules/33_wounds.md, p.82
  * @type {Readonly<{healthy: number, nicked: number, grazed: number, hurt: number, injured: number, crippled: number, down: number, out: number}>}
  * @constant
  */
@@ -197,7 +199,7 @@ export const DEFAULT_WOUND_PENALTIES = Object.freeze({
   injured: 15,
   crippled: 20,
   down: 40,
-  out: 40
+  out: 0
 });
 
 /**

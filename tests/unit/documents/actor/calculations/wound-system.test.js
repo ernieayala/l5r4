@@ -76,6 +76,21 @@ describe("prepareWoundPenalties", () => {
       expect(sys.woundLevels.hurt.penaltyEff).toBe(15); // 10 + 5
     });
 
+    // Out prints no penalty: the character is unconscious and acts no more (roadmap/STAGE-18 decision 14)
+    // game-rules/33_wounds.md, p.82
+    // #102
+    it("should give Out no penalty, whatever its stored penalty or the modifier", () => {
+      const sys = {
+        woundsPenaltyMod: 5,
+        woundLevels: { down: { penalty: 40 }, out: { penalty: 40 } }
+      };
+
+      prepareWoundPenalties(sys);
+
+      expect(sys.woundLevels.down.penaltyEff).toBe(45);
+      expect(sys.woundLevels.out.penaltyEff).toBe(0);
+    });
+
     it("should handle zero penalty modifier", () => {
       // ARRANGE
       const sys = {

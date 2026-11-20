@@ -10,7 +10,7 @@ import { toInt } from "../../../utils/type-coercion.js";
 
 /**
  * Set each Wound Rank's `penaltyEff`: its penalty plus the actor's `woundsPenaltyMod`, never below 0, and 0 for
- * Healthy.
+ * Healthy and Out.
  * @param {object} sys - Actor's system data
  */
 export function prepareWoundPenalties(sys) {
@@ -90,8 +90,9 @@ export function prepareHealRate(sys, insightRank) {
 }
 
 /**
- * A Wound Rank's penalty with the penalty modifier, never below 0. Healthy carries no penalty, so a modifier never
- * gives it one.
+ * A Wound Rank's penalty with the penalty modifier, never below 0. Healthy and Out carry no penalty, so a modifier or
+ * a stored penalty never gives them one: Out's character is unconscious and acts no more (roadmap/STAGE-18
+ * decision 14, #102).
  * game-rules/33_wounds.md, p.82
  * @param {string} key - Wound level key
  * @param {number} penalty - The level's own penalty
@@ -99,7 +100,7 @@ export function prepareHealRate(sys, insightRank) {
  * @returns {number}
  */
 export function getEffectiveWoundPenalty(key, penalty, mod) {
-  return key === "healthy" ? 0 : Math.max(0, toInt(penalty) + mod);
+  return key === "healthy" || key === "out" ? 0 : Math.max(0, toInt(penalty) + mod);
 }
 
 /**
