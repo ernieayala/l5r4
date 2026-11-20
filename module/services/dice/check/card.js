@@ -10,6 +10,7 @@
 import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
+import { toInt } from "../../../utils/type-coercion.js";
 
 /**
  * Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls.
@@ -32,6 +33,17 @@ export function isHonorRollOffered(system) {
     honorRollKinds.has(system.kind) &&
     !system.honorRollOf
   );
+}
+
+/**
+ * Whether the roller has an Honor Rank to call on for an Honor Roll: a character at Rank 0 has none, and an NPC has
+ * no Honor at all. The card shows no button the roller could never use (#107).
+ * game-rules/43_honor.md, p.92
+ * @param {Actor|null|undefined} actor - The roller
+ * @returns {boolean}
+ */
+export function hasHonorToCall(actor) {
+  return toInt(actor?.system.honor?.rank) >= 1;
 }
 
 /**
@@ -63,7 +75,7 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
     grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
     applyTarget: system.kind === "damage" ? system.target?.name : "",
-    honorRoll: isHonorRollOffered(system),
+    honorRoll: isHonorRollOffered(system) && hasHonorToCall(game.actors.get(actorId)),
     actorId
   });
 }

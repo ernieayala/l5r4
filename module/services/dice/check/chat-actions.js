@@ -22,7 +22,7 @@ import { getTaintEffects } from "../../../utils/taint.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage-roll.js";
 import { applyTrackChange } from "../../ledger.js";
-import { isHonorRollOffered, renderCheckCard } from "./card.js";
+import { hasHonorToCall, isHonorRollOffered, renderCheckCard } from "./card.js";
 
 /**
  * Roll damage for a hit from its attack's stored context (module/services/combat/damage-roll.js).
@@ -249,14 +249,13 @@ function validateHonorRoll(message, actor) {
     ui.notifications?.warn(F("l5r4.ui.honorRoll.used", { name: actor.name }));
     return null;
   }
-  // A character without an Honor Rank has nothing to call on; an NPC has no Honor at all. A Taint penalty that
-  // shrinks the pool floors at 1k1 like any other (module/utils/ten-dice.js)
-  const honor = toInt(actor.system.honor?.rank);
-  if (honor < 1) {
+  // A card posted before the roller lost his last Honor Rank still offers the roll. A Taint penalty that shrinks
+  // the pool floors at 1k1 like any other (module/utils/ten-dice.js)
+  if (!hasHonorToCall(actor)) {
     ui.notifications?.warn(F("l5r4.ui.honorRoll.noDice", { name: actor.name }));
     return null;
   }
-  return { honor, session };
+  return { honor: toInt(actor.system.honor.rank), session };
 }
 
 /**

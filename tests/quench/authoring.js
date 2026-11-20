@@ -11,7 +11,7 @@ import {
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { rollHonor } from "../../module/services/dice/check/chat-actions.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
-import { createTestPC } from "../fixtures/actor-fixtures.js";
+import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSchoolData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
   answerCheckDialog,
@@ -875,12 +875,28 @@ export function registerAuthoringTests(quench) {
                 tn: 100,
                 askForOptions: false
               });
+              // A control the roller can never use is not shown (#107)
+              assert.notInclude(failed.content, 'data-action="honor-roll"', "the card offers none");
               const before = game.messages.size;
               assert.isNull(await rollHonor(failed));
               assert.equal(game.messages.size, before, "no roll posted");
               assert.isUndefined(
                 actor.getFlag(SYS_ID, "honorRollSession"),
                 "the session's roll is kept"
+              );
+              const npc = track(await createTestNPC({ name: "Character options: bandit" }));
+              const npcFailed = await rollCheck({
+                actor: npc,
+                kind: "attack",
+                label: "Club",
+                base: { roll: 2, keep: 2 },
+                tn: 100,
+                askForOptions: false
+              });
+              assert.notInclude(
+                npcFailed.content,
+                'data-action="honor-roll"',
+                "an NPC has no Honor"
               );
             } finally {
               await game.settings.set(SYS_ID, "honorRoll", enabled);
