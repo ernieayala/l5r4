@@ -57,6 +57,8 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 - Written here by the Stage 16 sweep, each left open by an earlier stage: a real mouse drag from the compendium browser and from a compendium window onto a sheet (Claude in Chrome's drag reaches no drop target, so a person makes this one gesture if the tool still cannot); the Active Effect sheet's changes (core 14.370 keeps each change's phase in a hidden input, `templates/sheets/active-effect/change.hbs`, so there is no phase dropdown: a change added on the sheet takes `initial`, which a Trait change needs), the Token HUD status icons, and the subtype labels of the create-document dialog clicked through; and none of the intermittent console errors Stages 6-13 saw once in full runs (`TypeError: Failed to fetch`, unhandled rejections from core's chat pop-up, core `#postNotification` errors) in any seat's console.
 - The gate passes after the fixes.
 
+Met 2026-11-21 and signed off by Ernie: the last full Quench run 1832 tests, 1812 passed, 20 pending, 0 failed; 69 of 69 `automated` entries with beats; no open `playtest` issues; Ernie made both real mouse drags onto a sheet, and both worked.
+
 ## Decisions
 
 1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
