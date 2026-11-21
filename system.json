@@ -10,8 +10,8 @@
     }
   ],
   "url": "https://github.com/ernieayala/l5r4",
-  "manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json",
-  "download": "https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip",
+  "manifest": "https://github.com/ernieayala/l5r4/releases/download/v4.0.0-rc.1/system.json",
+  "download": "https://github.com/ernieayala/l5r4/releases/download/v4.0.0-rc.1/l5r4.zip",
   "compatibility": {
     "minimum": "14.370",
     "verified": "14.370",
@@ -268,5 +268,5 @@
     }
   ],
   "license": "MIT",
-  "version": "3.2.1"
+  "version": "4.0.0-rc.1"
 }
