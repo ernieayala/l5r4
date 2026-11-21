@@ -1,5 +1,9 @@
 name: Release L5R4 System
 
+# Attaches the manifest and zip to a release published by hand on GitHub. A release the Create Release workflow
+# publishes carries them already, and GitHub starts no workflow for an event made with GITHUB_TOKEN, so this does not
+# run for it.
+
 on:
   release:
     types: [published]
@@ -11,119 +15,60 @@ jobs:
       contents: write
     env:
       HUSKY: 0
-    
+      TAG: ${{ github.event.release.tag_name }}
+      PRERELEASE: ${{ github.event.release.prerelease }}
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v7
-      with:
-        node-version: '24'
-        # Disable cache to avoid version conflicts
-        # cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
 
-    - name: Install dependencies (force fresh install)
-      run: |
-        rm -rf node_modules
-        npm install --force
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build CSS
-      run: npm run build:css
+      - name: Test
+        run: npm run test
 
-    - name: Extract version from tag
-      id: get_version
-      run: |
-        # Extract version from tag, handling both v1.0.0 and 1.0.0 formats
-        if [[ $GITHUB_REF == refs/tags/v* ]]; then
-          VERSION=${GITHUB_REF#refs/tags/v}
-        else
-          VERSION=${GITHUB_REF#refs/tags/}
-        fi
-        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Extracted version: $VERSION"
-        echo "Full ref: $GITHUB_REF"
+      - name: Build CSS
+        run: npm run build:css
 
-    - name: Update system.json version and URLs
-      run: |
-        VERSION="${{ steps.get_version.outputs.VERSION }}"
-        
-        # Update version field
-        sed -i 's/"version": ".*"/"version": "'"$VERSION"'"/' system.json
-        
-        # Check if this is a pre-release (contains hyphen)
-        if [[ "$VERSION" == *"-"* ]]; then
-          echo "📦 Pre-release detected: $VERSION"
-          echo "Updating URLs to point to specific version..."
-          
-          # Update manifest URL to specific version
-          sed -i 's|"manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json"|"manifest": "https://github.com/ernieayala/l5r4/releases/download/v'"$VERSION"'/system.json"|' system.json
-          
-          # Update download URL to specific version
-          sed -i 's|"download": "https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip"|"download": "https://github.com/ernieayala/l5r4/releases/download/v'"$VERSION"'/l5r4.zip"|' system.json
-        else
-          echo "✅ Stable release detected: $VERSION"
-          echo "Keeping URLs pointing to /latest/ for Foundry auto-update"
-        fi
-        
-        # Verify the changes
-        echo ""
-        echo "Updated system.json:"
-        grep -E '"version"|"manifest"|"download"' system.json
+      - name: Lint
+        run: npm run lint
 
-    - name: Create system ZIP
-      run: |
-        # Create a clean ZIP excluding development files
-        zip -r l5r4.zip . \
-          -x "*.git*" \
-          -x ".gitignore" \
-          -x "node_modules/*" \
-          -x "scss/*" \
-          -x "gulpfile.js" \
-          -x "package*.json" \
-          -x ".github/*" \
-          -x ".windsurf/*" \
-          -x "scripts/*" \
-          -x "tests/*" \
-          -x "_for_research/*" \
-          -x "game-rules/*" \
-          -x "pc-images/*" \
-          -x "npc-images/*" \
-          -x ".prettierignore" \
-          -x ".prettierrc" \
-          -x ".stylelintignore" \
-          -x ".stylelintrc.json" \
-          -x "madge-analysis.json" \
-          -x "RELEASE_CHECKLIST*.md"
-        
-        echo "Created l5r4.zip with contents:"
-        unzip -l l5r4.zip
+      - name: Format
+        run: npm run format:check
 
-    - name: Upload release assets
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          system.json
-          l5r4.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Circular imports
+        run: npm run deps:circular
 
-    - name: Notify completion
-      run: |
-        VERSION="${{ steps.get_version.outputs.VERSION }}"
-        
-        echo "✅ Release v$VERSION completed successfully!"
-        echo "📦 Assets uploaded:"
-        echo "  - system.json (manifest file)"
-        echo "  - l5r4.zip (system package)"
-        echo ""
-        echo "🔗 Release-specific URLs:"
-        echo "  - Download: https://github.com/ernieayala/l5r4/releases/download/v$VERSION/l5r4.zip"
-        echo "  - Manifest: https://github.com/ernieayala/l5r4/releases/download/v$VERSION/system.json"
-        
-        if [[ "$VERSION" == *"-"* ]]; then
-          echo ""
-          echo "⚠️  Pre-release: system.json URLs point to this specific version"
-        else
-          echo ""
-          echo "✅ Stable release: system.json URLs point to /latest/ for auto-updates"
-        fi
+      - name: Compendium packs
+        run: npm run build:packs
+
+      - name: Coverage
+        run: npm run coverage:check
+
+      # tools/manifest.mjs validates the version, and changes only system.json's version and URLs
+      - name: Update system.json version and URLs
+        run: |
+          VERSION="${TAG#v}"
+          TYPE=release
+          if [ "$PRERELEASE" = "true" ]; then
+            TYPE=prerelease
+          fi
+          node tools/manifest.mjs "$VERSION" "$TYPE"
+
+      - name: Create system ZIP
+        run: |
+          node tools/release-files.mjs > "$RUNNER_TEMP/release-files.txt"
+          zip -q l5r4.zip -@ < "$RUNNER_TEMP/release-files.txt"
+          unzip -l l5r4.zip
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$TAG" system.json l5r4.zip --clobber

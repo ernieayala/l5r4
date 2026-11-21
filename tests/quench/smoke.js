@@ -37,8 +37,9 @@ function importRules() {
 /**
  * Batch `l5r4-enhanced.smoke`: the system loads from its v14 manifest, its stylesheet sits in the `system`
  * cascade layer, and every Actor and Item subtype creates, opens its system sheet (the only one offered, and
- * the default), and saves a rename through the sheet. Each create-and-edit test fails on a console error.
- * Documents created here are deleted after the batch.
+ * the default), and saves a rename through the sheet. Each create-and-edit test fails on a console error, and any
+ * deprecated API called from the system's files throws (compatibility mode FAILURE scoped to
+ * `systems/l5r4-enhanced/`, roadmap/00-OVERVIEW.md X4). Documents created here are deleted after the batch.
  * @param {object} quench  The Quench API object.
  */
 export function registerSmokeTests(quench) {
@@ -48,20 +49,35 @@ export function registerSmokeTests(quench) {
       const { describe, it, before, after, assert } = context;
       const clean = cleanTest(assert);
       const created = [];
+      let compatibility;
 
       // A chat pop-up rejection from an earlier batch's cleanup would otherwise land in the first clean test
       before(async function () {
         this.timeout(10_000);
         await settleChatNotifications();
+        compatibility = CONFIG.compatibility;
+        CONFIG.compatibility = {
+          mode: CONST.COMPATIBILITY_MODES.FAILURE,
+          includePatterns: [new RegExp(`systems/${SYS_ID}/`)],
+          excludePatterns: []
+        };
       });
 
       after(async () => {
+        CONFIG.compatibility = compatibility;
         for (const doc of created) {
           await doc.delete();
         }
       });
 
       describe("System", () => {
+        it("should throw on a deprecated API called from the system's files", () => {
+          assert.throws(
+            () => foundry.utils.logCompatibilityWarning("Smoke probe", { since: 14, until: 16 }),
+            /Smoke probe/
+          );
+        });
+
         it("should register its config namespace and document classes", () => {
           assert.exists(CONFIG.l5r4?.rings, "CONFIG.l5r4.rings");
           assert.exists(CONFIG.l5r4?.traits, "CONFIG.l5r4.traits");

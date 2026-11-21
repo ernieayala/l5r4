@@ -97,6 +97,7 @@ Not conforming: `c349256` and `6cd48d3`, whose messages end with an assistant `C
 
 | Rule | Detail | Check |
 | --- | --- | --- |
-| Tags | `v<major>.<minor>.<patch>`, or `v<major>.<minor>.<patch>-<pre>` for a pre-release, created by `.github/workflows/create-release.yml` | `create-release.yml` validates the format and refuses an existing tag |
-| Version commit | `create-release.yml` commits the version change to `package.json`, `package-lock.json`, `system.json`, and `dist/l5r4-enhanced.css`, with the subject the workflow writes; no one makes that commit by hand | Review |
-| Release workflows | `create-release.yml` and `release.yml` tag, commit, and publish, so they change only in the release stage or when Ernie asks | Review |
+| Tags | `v<major>.<minor>.<patch>`, or `v<major>.<minor>.<patch>-<pre>` for a pre-release, created by `.github/workflows/create-release.yml` | `tools/manifest.mjs` validates the format (`tests/release.test.js`); `create-release.yml` refuses an existing tag |
+| Version commit | `create-release.yml` commits the version change to `package.json`, `package-lock.json`, and `system.json`, with the subject the workflow writes; no one makes that commit by hand. `tools/manifest.mjs` changes only `system.json`'s `version`, `manifest`, and `download` | `tests/release.test.js` |
+| Release zip | Holds only the paths `tools/release-files.mjs` lists; a new file ships once it is added there, and licensed material, the plan, tests, sources, and tooling never do | `tests/release.test.js` |
+| Release workflows | `create-release.yml` and `release.yml` run the whole gate before they build anything; `create-release.yml` builds the zip before it commits, tags, or pushes. They tag, commit, and publish, so they change only in the release stage or when Ernie asks | Review |
