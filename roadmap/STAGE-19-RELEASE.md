@@ -40,7 +40,7 @@
 
 | Where | Check |
 | --- | --- |
-| Code comments, JSDoc, `lang/en.json`, templates, Vitest fixtures built from book examples, `tests/quench/` | No run of 12 or more words matching `game-rules/` (the 2026-11-12 method, run locally since `game-rules/` is gitignored). Each hit is rewritten in own words with its page citation, as its own commit |
+| Every tracked text file: code comments, JSDoc, `lang/`, templates, Vitest fixtures built from book examples, `tests/quench/`, docs | No run of 12 or more words inside one segment matching `game-rules/` (decision 5; run locally since `game-rules/` is gitignored). Each hit is rewritten in own words with its page citation, as its own commit |
 | `src/packs/` | `npm run packs:verify` (Stage 15) finds no run of six or more words matching `game-rules/`; flavor fields are empty and mechanical summaries are within Stage 15's cap |
 | Git history | No path under `content/` or `game-rules/` was ever committed: `git log --all -- content game-rules` prints nothing |
 
@@ -66,6 +66,8 @@
 1. The zip is built from an allowlist, not an exclude list, so a new file stays out until someone adds it. Basis: the Audit's exclude list fell behind the repo; fabula-ultima `roadmap/STAGE-20-RELEASE.md` builds its zip the same way.
 2. The manifest rewrite is one tested function both workflows call. Basis: two untested copies (Audit).
 3. Ernie, 2026-11-21: #82 (GM queries and active-GM work run once per client of the GM user) and #84 (a sheet submit rewrites an invalid rule select value) are fixed before the release work, each with a test that fails first.
+4. Ernie, 2026-11-21: the history check found `game-rules/` in commits c738988 and ad4e7e3 (2025-10), reachable from `main`, every branch, and tags v2.0.0-v3.2.1. The history is rewritten with `git filter-repo` to drop `game-rules/` and `content/` from every branch and tag, then force-pushed; the stale branches `release/3.2.0`, `fix/issue-32-wound-penalty-display`, and `fix/issue-34-skill-bonuses-to-weapon-attacks` are deleted instead of rewritten; GitHub Support is asked to purge cached views and pull request refs.
+5. Ernie, 2026-11-21: the book-text sweep counts a run only inside one segment prose can live in (a JS comment or string, a JSON string value, a template text node, a Markdown paragraph or table cell). Rank names and printed numbers are data the content policy allows, so the Wound Rank penalty list in `tests/quench/workflows/wound-penalty-all-rolls.js` stays.
 
 ## Out of scope
 
