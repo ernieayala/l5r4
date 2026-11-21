@@ -9,7 +9,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import { grantQueueOf } from "../../../module/documents/item/lifecycle/grants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { cleanTest, guardRolls, withAnotherClient } from "../helpers.js";
+import { cleanTest, guardRolls, waitFor, withAnotherClient } from "../helpers.js";
 
 /**
  * Registers the `workflows.change-origin` batch.
@@ -130,6 +130,33 @@ export function registerChangeOriginTests(quench) {
               actor.getFlag(SYS_ID, "xpRetroactiveVersion"),
               5,
               "the client that added the Skill marks it"
+            );
+          })
+        );
+
+        // #125: a player who does not own the caster cannot write the flag
+        // game-rules/66_magic_and_spell_casting.md, p.164
+        it(
+          "should mark the XP history stale only on the client that memorized a spell",
+          clean(async () => {
+            const actor = track(
+              await createTestPC({ name: "Changes from another client: memorized" })
+            );
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            await actor.setFlag(SYS_ID, "xpRetroactiveVersion", 5);
+            await withAnotherClient(() => spell.update({ "system.memorized": true }));
+            await settle();
+            assert.equal(
+              actor.getFlag(SYS_ID, "xpRetroactiveVersion"),
+              5,
+              "the client that memorized it marks it"
+            );
+            await spell.update({ "system.memorized": false });
+            assert.isTrue(
+              await waitFor(() => actor.getFlag(SYS_ID, "xpRetroactiveVersion") === 0),
+              "this client's own change marks it"
             );
           })
         );

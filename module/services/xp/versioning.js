@@ -8,6 +8,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { isOwnChange } from "../../utils/change-origin.js";
 import { logError } from "../../utils/error-logging.js";
 import { buildXpHistory } from "./calculator.js";
 
@@ -121,14 +122,17 @@ export async function updateXpHistory(actor) {
 
 /**
  * `updateItem` hook: a spell memorized or forgotten marks its owner's XP history for rebuilding, because a memorized
- * spell costs XP equal to its Mastery Level.
+ * spell costs XP equal to its Mastery Level. Only the client that sent the change marks it: every client receives the
+ * change, and one whose user does not own the caster cannot write the flag (module/utils/change-origin.js).
  * game-rules/66_magic_and_spell_casting.md, p.164
  * @param {Item} item - The updated item
  * @param {object} change - The update's changed data
+ * @param {object} options - The update's options
  * @returns {Promise<void>}
  */
-export async function onUpdateItemMemorization(item, change) {
-  if (item.type !== "spell" || change.system?.memorized === undefined || !item.actor) {
+export async function onUpdateItemMemorization(item, change, options) {
+  const memorization = item.type === "spell" && change.system?.memorized !== undefined;
+  if (!memorization || !item.actor || !isOwnChange(options, game.socket.id)) {
     return;
   }
   await item.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
