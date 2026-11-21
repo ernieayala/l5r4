@@ -1010,6 +1010,29 @@ export function registerPacksTests(quench) {
             );
           })
         );
+
+        // Air Fist lowers unarmed damage only (#121); an unarmed strike is a weapon tied to Jiujutsu, as
+        // Jiujutsu's own Mastery Abilities read it
+        // game-rules/87_kiho.md, p.262
+        it(
+          "should take the Air Ring from unarmed damage only while Air Fist is active",
+          clean(async () => {
+            const { actor, item } = await holding("kiho", "Air Fist", {
+              traits: { str: 2, ref: 3, awa: 3, agi: 2 }
+            });
+            const [unarmed, bo] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Unarmed", type: "weapon", system: { associatedSkill: "Jiujutsu" } },
+              { name: "Bo", type: "weapon", system: { associatedSkill: "Polearms" } }
+            ]);
+            await updateActivation(actor, item);
+            const airFist = weapon =>
+              getCheckContext(actor, { kind: "damage", weapon })
+                .modifiers.filter(m => m.label.startsWith("Air Fist"))
+                .reduce((sum, m) => sum + m.total, 0);
+            assert.equal(airFist(unarmed), -actor.system.rings.air, "unarmed");
+            assert.equal(airFist(bo), 0, "a weapon");
+          })
+        );
       });
 
       // game-rules/99_creatures.md, p.318-331

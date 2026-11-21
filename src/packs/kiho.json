@@ -30,7 +30,8 @@
           {
             "key": "RollModifier",
             "selector": "damage",
-            "total": "0 - @rings.air"
+            "total": "0 - @rings.air",
+            "predicate": ["weapon:skill:jiujutsu"]
           }
         ],
         "specialRules": "Making any attack other than an unarmed one cancels it. Lasts one day at most."
