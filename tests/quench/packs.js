@@ -642,9 +642,11 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const { actor: frail } = await holding("disadvantages", "Low Pain Threshold");
             const { actor: tough } = await holding("advantages", "Strength of the Earth");
+            // Healthy and Out carry no penalty, whatever the modifier (decision 14, #102)
             for (const [key, level] of Object.entries(frail.system.woundLevels)) {
-              const base = key === "healthy" ? 0 : level.penalty;
-              assert.equal(level.penaltyEff, key === "healthy" ? 0 : base + 5, `frail ${key}`);
+              const unpenalized = key === "healthy" || key === "out";
+              const base = unpenalized ? 0 : level.penalty;
+              assert.equal(level.penaltyEff, unpenalized ? 0 : base + 5, `frail ${key}`);
               assert.equal(
                 tough.system.woundLevels[key].penaltyEff,
                 Math.max(0, base - 3),
