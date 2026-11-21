@@ -1020,10 +1020,13 @@ export function registerPacksTests(quench) {
             const { actor, item } = await holding("kiho", "Air Fist", {
               traits: { str: 2, ref: 3, awa: 3, agi: 2 }
             });
-            const [unarmed, bo] = await actor.createEmbeddedDocuments("Item", [
+            // Read by name: the server returns created documents in no fixed order
+            const created = await actor.createEmbeddedDocuments("Item", [
               { name: "Unarmed", type: "weapon", system: { associatedSkill: "Jiujutsu" } },
               { name: "Bo", type: "weapon", system: { associatedSkill: "Polearms" } }
             ]);
+            const unarmed = created.find(i => i.name === "Unarmed");
+            const bo = created.find(i => i.name === "Bo");
             await updateActivation(actor, item);
             const airFist = weapon =>
               getCheckContext(actor, { kind: "damage", weapon })
