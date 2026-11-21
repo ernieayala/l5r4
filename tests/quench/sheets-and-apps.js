@@ -537,6 +537,39 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // The dots name the maximum the character may hold: Taint Level 4 lowers it below the Void Ring (#122)
+        // game-rules/89_shadowlands_taint.md, p.278
+        it(
+          "should name the Taint-lowered Void Point maximum on the dots",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const named = current =>
+              game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsValue", { current, max: 1 });
+            await pc.update({
+              "system.rings.void.rank": 2,
+              "system.rings.void.value": 0,
+              "system.shadowTaint.rank": 4
+            });
+            const sheet = pc.sheet;
+            await sheet.render({ force: true });
+            try {
+              assert.equal(pc.system.rings.void.max, 1, "Void Ring 2, less 1 at Level 4");
+              const dots = () => sheet.element.querySelector('[data-action="adjust-void-points"]');
+              assert.equal(dots().getAttribute("aria-label"), named(0), "rendered");
+              const saved = nextUpdate(pc);
+              dots().click();
+              await saved;
+              assert.isTrue(
+                await waitFor(() => dots().getAttribute("aria-label") === named(1)),
+                "repainted"
+              );
+            } finally {
+              await sheet.close({ animate: false });
+              await pc.update({ "system.shadowTaint.rank": 0 });
+            }
+          })
+        );
+
         // #79: void-point-dots.md V1, rank-control.md Q3 and the track's inert under-label
         it(
           "should render the Void Points filled and named, and name each rank arrow",

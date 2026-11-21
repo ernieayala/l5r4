@@ -86,9 +86,11 @@ export class VoidPointsHandler {
       d.classList.toggle("is-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
+    // The prepared maximum, which Taint Level 4 lowers below the Void Ring
+    // game-rules/89_shadowlands_taint.md, p.278
     const label = game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsValue", {
       current: cur,
-      max: actor.system.rings.void.rank
+      max: actor.system.rings.void.max
     });
     node.dataset.tooltip = label;
     node.setAttribute("aria-label", label);

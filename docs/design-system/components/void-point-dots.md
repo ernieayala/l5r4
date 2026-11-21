@@ -5,7 +5,7 @@ The actor's current Void Points as a row of nine dots under the Void Ring, fille
 | Item | Detail |
 | --- | --- |
 | Partial | `templates/actor/_partials/_void-points.hbs`, included by `_traits-rings.hbs` |
-| Parameters | `value` (`system.rings.void.value`), `max` (`system.rings.void.rank`) |
+| Parameters | `value` (`system.rings.void.value`), `max` (`system.rings.void.max`) |
 | SCSS | `scss/features/_void-points.scss` (target), holding `.l5r4-void-points` (`scss/features/_traits-rings.scss`) and the dot rules after it |
 | Block class | `l5r4-void-points` |
 | Handler | `BaseActorSheet#_onVoidPointsAdjust` (`module/sheets/base-actor-sheet.js`), then `VoidPointsHandler.updateVoidPoints` and `VoidPointsHandler.updateVoidDots` (`module/sheets/handlers/void-points-handler.js`) |
@@ -90,7 +90,7 @@ No text in the dots. The label is "Void Points" on one line under them; a longer
 | V2 | `&:hover { filter: var(--l5r4-state-hover-filter); }` (`foundations/states.md` rule 1) | `&:hover { border-color: #888; transform: scale(1.2); }` (modeled) |
 | V3 | `border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);` (modeled) | `border: 2px solid #666;` (modeled) |
 | V4 | `root?.querySelector?.("[data-action='adjust-void-points']")` in `VoidPointsHandler.updateVoidDots` (`module/sheets/handlers/void-points-handler.js`) | `root?.querySelector?.(".void-points-dots")` (modeled) |
-| V5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_void-points.hbs" value=system.rings.void.value max=system.rings.void.rank}}` (`templates/actor/_partials/_traits-rings.hbs`) | The nine dots written out in each sheet's header (modeled) |
+| V5 | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_void-points.hbs" value=system.rings.void.value max=system.rings.void.max}}` (`templates/actor/_partials/_traits-rings.hbs`) | The nine dots written out in each sheet's header (modeled) |
 | V6 | `block-size: var(--l5r4-size-void-point);` on each dot, the size `.l5r4-void-point` (`scss/features/_traits-rings.scss`) sets | `min-block-size: var(--l5r4-size-target);` on the button, which adds height under the Void Ring (modeled) |
 
 ## Do and don't
@@ -105,4 +105,4 @@ No text in the dots. The label is "Void Points" on one line under them; a longer
 
 The action is `adjust-void-points`, verb first (`docs/code-system/naming.md`); a filled dot's state class is `is-filled` (state classes are `is-`, naming.md).
 
-`l5r4.ui.mechanics.rings.voidPointsValue` reads "Void Points: {current}/{max} (click: +1, right-click: -1)"; `{max}` is the Void Ring rank, and the dots show nine.
+`l5r4.ui.mechanics.rings.voidPointsValue` reads "Void Points: {current}/{max} (click: +1, right-click: -1)"; `{max}` is the prepared maximum, `system.rings.void.max`: the Void Ring less what Taint takes (`game-rules/89_shadowlands_taint.md, p.278`). The dots show nine.
