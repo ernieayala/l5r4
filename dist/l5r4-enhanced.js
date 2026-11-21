@@ -103,7 +103,7 @@ Hooks.once("init", async () => {
  * @listens Hooks#quenchReady
  */
 Hooks.once("quenchReady", async quench => {
-  // eslint-disable-next-line no-restricted-syntax -- the release zip leaves out tests/ (release.yml -x "tests/*"), so only a world with Quench loads it
+  // eslint-disable-next-line no-restricted-syntax -- the release zip leaves out tests/ (tools/release-files.mjs), so only a world with Quench loads it
   const { registerQuenchTests } = await import("../tests/quench/index.js");
   await registerQuenchTests(quench);
 });
