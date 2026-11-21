@@ -259,7 +259,7 @@ A choice can fill a field with fixed values too, as a Trait: `{ "key": "TraitAdj
 
 ### XP prices
 
-The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four times the new rank, Family and School bonuses included; the Void Ring six times; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an Advantage, kata, or kiho its cost; Disadvantages give up to 10. A `Cost` rule sets a new price with a formula over the base price `@cost`:
+The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four times the new rank, Family and School bonuses included; the Void Ring six times; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an Advantage its cost; a kata or kiho its Mastery Level (pp.231, 259), and a monk's School Kiho nothing; Disadvantages give up to 10. A `Cost` rule sets a new price with a formula over the base price `@cost`:
 
 | `selector`                           | Prices                                                  |
 | ------------------------------------ | ------------------------------------------------------- |
@@ -341,7 +341,7 @@ One rule per school skill:
 
 ### Free Raises
 
-The **Free Raises** field on the item's Modifiers tab adds to every roll's Free Raises. A Free Raise counts as a Raise without adding 5 to the TN and does not count toward the Void Ring limit on Raises (Core Rulebook p.79).
+A `FreeRaise` rule gives Free Raises to the rolls its selector names. A Free Raise counts as a Raise without adding 5 to the TN and does not count toward the Void Ring limit on Raises (Core Rulebook p.79). A world from 3.2.1 that set an item's old Free Raises field gets a `FreeRaise` rule on every roll in its place; narrow its selector on the Rules tab.
 
 ---
 

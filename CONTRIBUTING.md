@@ -67,6 +67,10 @@ The checks in `tests/conventions/` and the local ESLint rules in `tools/eslint/`
 
 The system automates the Legend of the Five Rings 4th Edition Core Rulebook. A change to a rule cites the printed page in its JSDoc and checks the book's worked examples as Vitest cases. The repository is public: never paste the book's text into code, comments, commits, issues, or pull requests. Cite pages instead.
 
+## Translations
+
+`lang/en.json` is the source; `de`, `es`, `fr`, `pt-BR`, and `ru` fall back to English for any key they lack. [Issue #128](https://github.com/ernieayala/l5r4/issues/128) lists the keys 4.0.0 added, by section. Keep `{placeholders}` as they are, and follow [docs/design-system/content/](docs/design-system/content/) for wording.
+
 ## Pull requests
 
 1. Branch from `main`.

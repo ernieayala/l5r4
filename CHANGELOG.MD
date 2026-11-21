@@ -9,7 +9,100 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [4.0.0] - Unreleased
 
+4.0.0 runs on Foundry VTT 14 only and automates most of the Core Rulebook's mechanics: rules carried as data on items and effects, one roll dialog for every roll, effects that expire on their own, and damage that goes from the attack card to the target's Wounds. Page numbers below are the Core Rulebook's printed pages.
+
+### Upgrading from 3.2.1
+
+- Requires Foundry VTT 14.370 or later within version 14. Foundry 13 cannot install 4.0.0; stay on 3.2.1 there (manifest `https://github.com/ernieayala/l5r4/releases/download/v3.2.1/system.json`).
+- The system id stays `l5r4-enhanced`, so worlds, flags, and the manifest URL are unchanged. The `l5r4-migrator` module is only for worlds from the old `l5r4` system.
+- Back up the world, then open it as a GM. The migrations run once, on the first load by a GM, when "Run migrations on startup" is on (the default). They cover world actors and items, items on actors, unlinked tokens, and every unlocked Actor and Item compendium: unlock your world compendiums before that first load.
+- What the migration converts:
+  - Family and School Trait and Void bonuses become `TraitAdjust` rules.
+  - An item's Free Raises value becomes a `FreeRaise` rule on every roll, which you can narrow on the Rules tab.
+  - Master of Blood gets its rules.
+  - Stance, condition, and Fear effects get their rules. An old Fear effect ends with the encounter. Old timed effects keep no duration.
+  - NPCs with the stored 2k2 Initiative roll the formula instead.
+  - Bows become weapons. Emphases split into available and trained lists. Icons move to `.webp`.
+- Removed on load: the Skill "Insight bonus" field, the kata and kiho `cost` field, and the PC Void-on-Armor-TN markers.
+- After upgrading, check:
+  - XP totals. Void XP now counts its bonus, kata and kiho cost their Mastery Level, and Family and School bonuses to the same Trait are free.
+  - Insight Rank. It counts only bought ranks and creation bonuses, plus Courtier and Etiquette Mastery Insight.
+  - NPC Wounds and Initiative.
+- A Full Defense roll saved by 3.2.1 is not carried over; 4.0.0 asks for the roll at each Turn start.
+- Damage cards posted before 4.0.0 keep their Apply buttons.
+- New text shows in English until each translation adds it. The status effect names moved from `EFFECT.*` to `l5r4.ui.statusEffects.*`.
+
+### Added
+
+- Rule engine: every Item and Active Effect carries `system.rules`, applied while the actor is prepared.
+  - Rules support 28 keys, among them TraitAdjust, RollModifier, ArmorTN, Reduction, FreeRaise, DiceRule, ApplyCondition, ChoiceSet, GrantItem, Cost, and Prerequisite.
+  - Selectors, predicates, and formulas such as `@rings.air` and `@school.rank` control where a rule applies and how much it gives. Typed bonuses stack as the book stacks them.
+  - Armor rules apply while it is worn, weapon rules to that weapon's rolls, and kata, kiho, and tattoo rules while they are active. `ACTIVE_EFFECTS.md` describes every key.
+- One roll dialog for Skill, Trait, Ring, spell, maho, attack, damage, Initiative, and inline rolls.
+  - It lists each modifier with its source and a box to leave it off.
+  - It covers Raises (at most the Void Ring, p.79), Free Raises, a Void Point (+1k1, p.78), an Emphasis (p.133), keeping fewer dice, and situational modifiers.
+  - An attack starts at its target's Armor TN. The roll's context is stored on the chat message.
+  - New chat menu entries: "Contested Roll" (p.80) and "Re-roll, keep the better".
+  - Inline `[[XkY]]` rolls take `u` (unskilled), `e` (Emphasis), and `xN` (explode on N).
+  - A Ring roll can cast a spell with no spell item, choosing the spell slot in the dialog.
+- Effects and durations:
+  - Stances and conditions are status effects that carry their rules. Effects expire at Turn start or end, Round end, combat end, the end of an encounter, or a time in the world, and are deleted when they do.
+  - Dazed and Stunned roll their saves in the Reactions stage; the Dazed TN drops by 5 after each failure (p.89).
+  - Full Defense asks for its roll at each Turn start. Center Stance gives +10 Initiative next Round and +1k1 plus the Void Ring on one roll (p.84).
+  - Concentration asks for a Willpower roll after a heavy hit (p.166).
+  - Fear ends with its combat or with the GM's "End encounter" control (p.90).
+  - The once-per-Round Void Point limit warns without blocking (p.78).
+  - Prone follows the Wound Rank at Down and Out.
+- Damage loop:
+  - The attack card rolls damage from the weapon, Strength, arrow, Increased Damage Raises, and rules, and applies it to the attack's target, or the selected tokens, after Reduction.
+  - Invulnerability (p.319) and Spirit (p.320) creatures are handled.
+  - "Reduce with Void" on the result card takes 10 Wounds off (p.78), and Undo reverses the damage. Past Out marks the character Dead (p.82).
+  - Maneuvers paid with Raises (pp.85-87): Called Shot, Disarm, Extra Attack, Feint, Guard, Increased Damage, Knockdown.
+  - Iaijutsu duels (pp.87-88) and grapples (pp.88-89) run as chat-card flows; Guard is set from the token controls (p.88).
+- Rule authoring and character options:
+  - A Rules tab on item sheets and on the system's Active Effect sheet, with a form per rule key and a JSON view.
+  - Prerequisites, choices, and granted items are handled when an item is dropped on a character.
+  - A School grants its Skills (p.102) and each Technique as its School Rank arrives. A second School asks whether to replace the first or add beside it.
+  - Kata, kiho, and tattoos are switched on with a play button on the sheet.
+  - The XP manager reads prices from `Cost` rules. A kiho can be marked a free School Kiho, with a warning past the School's allowance (p.231).
+  - The Ledger records Honor, Glory, Status, and Taint gains and losses with a reason (p.90).
+  - Shadowlands Taint penalties apply at Taint Ranks 3 and 4, and Embracing the Taint is a choice in the dialog (pp.277-279).
+  - Item folders export and import items with their rules.
+  - The PC sheet gets a recalculate button and a GM switch between computed and typed Insight Rank.
+- Table tools:
+  - Text links `@Check`, `@Damage`, `@Condition`, and `@Fear` work in journals, item descriptions, and chat. The GM's Check links also post request cards that each player rolls.
+  - An effect panel (the hourglass in the token controls) lists effects with their source and remaining time.
+  - Skills, weapons, spells, kata, kiho, Traits, and Rings drag to the hotbar as macros.
+  - Wound and Void Point changes float over tokens.
+- Compendium packs and browser:
+  - 15 packs in the "L5R4 Core Rulebook" folder: Clans, Families, Schools, Techniques, Skills, Advantages, Disadvantages, Spells, Kata, Kiho, Tattoos, Weapons, Armor, Equipment, and Creatures (GM only).
+  - Entries carry names, printed numbers, rules, and a page citation, never the book's text. Item sheets, NPC sheets, and chat cards show the source page.
+  - A Compendium Browser (Browse in the Compendium sidebar) has tabs, filters, a name search, Add to your character, and the GM's creature Import.
+- Settings:
+  - "Optional rule: Honor Roll" (p.92), with a GM "New session" control.
+  - "Floating Wound and Void numbers".
+  - A GM design gallery.
+- Weapons:
+  - Thrown weapons can add Strength and explode (pp.200, 202).
+  - Bows get a minimum Strength, mounted and on-foot TNs, and shots into melee (p.199).
+- Skills: Skill Rank 10's Free Raise (p.133), Iaijutsu Mastery at Ranks 5 and 7 (p.140), and a Void Point that lets a rank-0 Skill roll as rank 1 (p.78).
+- A struck duelist can yield (p.87).
+- When the GM has the game open in more than one window, only one of them answers players' requests.
+
 ### Changed
+
+- Wound penalties raise the TN instead of lowering the total (p.82). Healthy and Out carry no penalty.
+- Unskilled rolls never explode and take no Raises or Free Raises; a Void Point on one gives +1k1 (pp.78, 80).
+- The Raise limit is the Void Ring (p.79). Void Points are no longer spent on damage.
+- Skill item bonuses and Full Attack's +2k1 count once.
+- Initiative pools follow the Ten Dice Rule (p.77). A Void Point gives +10 for that roll only (p.78). A macro's own Initiative formula is used.
+- Item chat cards post in the chat log's message mode instead of always publicly.
+- Clan, Family, and School drops replace the old one in a single step.
+- NPC attacks are three slots: deleting one clears it, and "Add Attack" fills the first empty one.
+- Chat cards show a button only to the users who may press it.
+- A roll with no TN shows only its Raises.
+- Cards list every TN change the roll used.
+- The Honor Roll takes the roller's dice penalties.
 
 Wording. Dialog buttons name their action ("Set cap", "Allow", "Start session", "Spend Void Point", "Remove") in place of OK and Yes/No, and the XP manager's add button reads "Add XP". Window and card titles that pair a name with a label are one translatable phrase each; a translation that had translated the wound configuration title keeps it. A check made with a Void Point is labelled "[Void]" in place of "Void!". A spent spell slot reads "[Use spell slot Fire]" or "[Use Void spell slot]", and an empty Void slot reads "Void spell slots: 0".
 
@@ -186,14 +279,88 @@ Data attributes and prepared values renamed (none is stored in world data):
 - `L5R4Combat.resolveInitiativeBonuses` -> `L5R4Combat.askInitiativeBonuses`; `L5R4Combat.events` -> `L5R4Combat.EVENTS`
 - `CONFIG.l5r4.npcNumberWoundLvls` -> `CONFIG.l5r4.npcNumberWoundLevels`
 
-`game.system.api.rollItem` and `rollTrait`, which hotbar macros call, are unchanged.
-
 ### Removed
 
+- `template.json`, replaced by one data model per Actor and Item type.
+- The Skill "Insight bonus" field (#75), the kata and kiho `cost` field (#43), and the PC fields `armorTn.useVoid` and `voidRound`. A Void Point on Armor TN is now an effect that lasts to the end of the Round (p.78).
+- The `voidInitiative` actor flag and the Combat and Combatant prototype patches.
+- The 3.2.1 `attackBonus` and `damageBonus` effect flags and behavior keyed by stance or item name; rules replace them.
 - CSS rules no template used: `-gap-xl`, `clear-btn`, `void-points-amount`, `item-list -advantages`, `expanded-text -npc`, `editor-container`, `price-section`, `price-field`, `sheet-content > h4`
 - Classes no style or script read: `info-group`, `sized`, `effects` (item effects tab wrapper), `message` (design gallery), `rules` (Active Effect Rules tab)
 
 ### Fixed
+
+Rules checked against the Core Rulebook:
+
+- An exploding 10 adds to its own die before dice are kept (p.77) (#46)
+- Ten Dice Rule: extra rolled dice become kept dice only while fewer than ten are kept, then each extra die is +2, and no pool keeps more than it rolls (pp.77, 89) (#47). The Little Truths option adds +2 only to pools that conversion left under ten kept dice (#71)
+- A contested roll with Raises must win by 5 per Raise (p.80) (#48)
+- Full Attack's +2k1 applies to melee attacks only (p.84) (#49)
+- Dazed no longer lowers damage rolls, reaches Initiative, and prevents starting a duel (p.89) (#50)
+- Prone gives -2k0 to attacks with weapons that are not large (p.89) (#51)
+- Armor Piercing and Flesh Cutter arrows change the target's armor bonus (p.199) (#52)
+- Riding armor gives its mounted bonus and its penalty on foot (p.198) (#53)
+- A Feint's margin is measured against Armor TN + 10 (p.86) (#54)
+- Insight counts bought ranks and creation bonuses only (p.104) (#55); Courtier and Etiquette add their Mastery Insight (pp.135-136) (#72)
+- Spell Casting: players cannot cast above their School Rank unless the GM allows it, Affinity and Deficiency move that limit, Void spells roll Void, and universal spells use the chosen element (pp.163-165) (#57)
+- Master of Blood adds +10 to the TN of spells that are not maho (p.280) (#58)
+- Skill Rank 10 gives its Free Raise (p.133) (#59)
+- Fear and Dazed reach the Initiative pool (pp.89-90) (#60)
+- The duel Assessment counts an NPC as Insight Rank 1 (p.87) (#61)
+- Maho Taint goes through the ledger and rolls into a new Taint Rank (p.275) (#62)
+- Status can go below 0 (pp.94-95) (#63)
+- Family and School bonuses to the same Trait, and to Void, are free creation ranks (pp.102-103) (#44, #65)
+- Lost characters add their Taint Rank to physical Trait rolls and have no Void Points (p.279) (#68)
+- An item's Free Raises no longer reach every roll (p.79) (#69)
+- Horsemanship Rank 3 allows Full Attack while mounted (pp.89, 140) (#73)
+- The Honor modifier against Intimidation applies to resisting rolls only (p.91) (#81)
+- Strength from an Active Effect reaches weapon damage, and XP charges only bought Strength (pp.103, 198) (#29)
+- NPC Initiative rolls (1 + Reflexes)k(Reflexes) (p.81) (#30)
+- A weapon's "Explodes on" value applies to its damage rolls (p.77) (#37)
+- NPC formula Wound levels keep their Earth-based values (p.82) (#38)
+- NPCs heal on a long rest (p.84) (#40)
+- Mounted +1k0 reaches Skill weapon attacks (p.89) (#41)
+- Shift-click Trait rolls include Trait bonuses (#42)
+- Kata and kiho XP is their Mastery Level (pp.231, 259) (#43)
+- Timed effects on unlinked combatants keep expiring after a reload (#45)
+
+Found in play:
+
+- The Rules tab no longer marks a `{choice:...}` placeholder as an error (#74), and saving an item sheet keeps a rule value its list has no option for (#84)
+- Clicking an item sheet's image opens the file picker (#76)
+- A School grants each Technique once (#80)
+- Skill and spell rows with Mastery, area, or duration lines expand (#83)
+- A School's Skill choice no longer offers Skills it already grants (p.102) (#85)
+- The Wound configuration mode saves when changed from the keyboard (#86)
+- The XP manager names Trait and Void purchases by the ranks on the sheet (p.103) (#87)
+- The School badge on Skill rows stays visible on darker rows (#88)
+- The browser's Trait filter shows "Void" translated (#89), and its Page filter leaves out entries with no page (#95)
+- A kiho above the character's Mastery Level is refused for a player and allowed for the GM (p.261) (#90)
+- A new PC starts with Void Points equal to its Void Ring (p.78) (#91)
+- The Disadvantage XP cap and manual XP changes are GM only (#92)
+- A second School asks to replace or add before its choices, gives no free Skills, and holds its Techniques until its Skills reach rank 1 (p.151) (#93, #96); the Bio lists every School (#97)
+- An NPC attack with no damage shows no damage button (#94)
+- A roll with no TN no longer shows a TN made from its Raises (p.80) (#98)
+- The browser's Import asks before replacing a world creature (#100)
+- Changing a bow's arrow updates its damage button at once (pp.198-199) (#101), and its attack dialog lists the arrow's Armor TN change (p.199) (#105)
+- Out shows no TN penalty (p.82) (#102)
+- The sheet's Initiative pool follows the Ten Dice Rule under Fear (pp.77, 89) (#103), and a Void Point spent on Initiative counts in Round 1 (pp.78, 81) (#104)
+- The Honor Roll is offered only to a character with an Honor Rank, once per session, with the roller's dice penalties (pp.90, 92) (#107, #111, #114)
+- Undo shows only to the roller's owner and the GM (#108), and other card buttons only to who may press them (#112)
+- A save card takes one roll per save, and Stunned ending at Round end posts none (p.89) (#109, #116)
+- Effects timed to a Turn end from the actor's own combat (p.84) (#110)
+- "Reduce with Void" with no Void Points warns the player who clicked it (p.78) (#113)
+- A grapple's TN change shows in the dialog and on the card (p.88) (#115)
+- A Void Point that brings Wounds back within Out lifts Dead (pp.78, 82) (#117)
+- A Technique's Focus bonus is offered on the duel's Focus roll only (#118), and Focus Free Raises reach the Strike (pp.79, 87) (#119)
+- Air Fist lowers unarmed damage only (p.262) (#121)
+- The Void Point dots and Void Points held follow a maximum lowered by Taint (pp.278-279) (#122, #124)
+- Maho's extra blood Free Raises can lower the TN (pp.79, 268) (#123)
+- Memorizing a spell no longer has other clients write the caster's XP (#125)
+- A monk's School Kiho cost no XP (p.231) (#127)
+- When the GM has the game open in two windows, a player's request is carried out once (#82)
+
+Sheets and windows:
 
 - NPC sheet Skills sort by their Roll and Emphasis heads, which did nothing before
 - NPC sheet attack rows show the attack's damage type in the Type column, which was always empty
@@ -205,6 +372,17 @@ Data attributes and prepared values renamed (none is stored in world data):
 - Each Ring's roll button names its Ring ("Roll Air") in place of "Ring Roll"
 - A damage card posted before 4.0.0 applies at most 99 Wounds from its stored damage
 - Pools, ranks, and other numbers line up in their columns (tabular figures); the XP manager's separators match core's windows
+
+### For module and macro authors
+
+- `game.system.api.rollItem(uuid)` and `rollTrait(actorUuid, key)` are new; the hotbar macros call them.
+- `CONFIG.Dice.terms.d` is the system's `L5R4Die`, whose `xa` modifier adds an explosion to its die.
+- ChatMessage types `roll` (pool, modifiers, TN, Raises, target, outcome) and `checkRequest`.
+- `CONFIG.Combat.documentClass` and `CONFIG.Combatant.documentClass` are `L5R4Combat` and `L5R4Combatant`. Active Effects carry `system.rules`, `system.level`, and `system.group`, and use v14 `system.changes`. A Trait change must use the `initial` phase to reach derived values.
+- Expired effects are deleted. `encounterEnd` is a new expiry event.
+- The hook `l5r4-enhanced.immuneStatus` (actor, effect) fires when a `ConditionImmunity` rule blocks a status.
+- GM queries: `l5r4-enhanced.damage`, `.flow`, `.applyEffect`, `.settleCenter`, `.endConcentration`, `.answerPrompt`. The system uses the `system.l5r4-enhanced` socket channel.
+- Status effect ids are unchanged; an effect created with only `statuses: [id]` gets that status's rules.
 
 ---
 

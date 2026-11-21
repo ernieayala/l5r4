@@ -4,7 +4,7 @@
 
 A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, character progression, combat, spellcasting, and everything else you need to run games in Rokugan.
 
-[![Foundry v13](https://img.shields.io/badge/Foundry-v13-informational)](https://foundryvtt.com/) [![Version 3.2.1](https://img.shields.io/badge/Version-3.2.1-blue)](https://github.com/ernieayala/l5r4/releases) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
+[![Foundry v14](https://img.shields.io/badge/Foundry-v14-informational)](https://foundryvtt.com/) [![Version 4.0.0](https://img.shields.io/badge/Version-4.0.0-blue)](https://github.com/ernieayala/l5r4/releases) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
 
 **Questions?** Discord: **@erniez**
 
@@ -30,6 +30,21 @@ A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, cha
 ---
 
 ## Installation
+
+**Requires Foundry VTT 14 (14.370 or later).** On Foundry 13, use version 3.2.1 instead, from its manifest URL:
+
+```
+https://github.com/ernieayala/l5r4/releases/download/v3.2.1/system.json
+```
+
+### Upgrading from 3.2.1
+
+1. Back up your world, then update Foundry to 14.370 or later and the system to 4.0.0
+2. Unlock any world compendiums of Actors or Items you want converted
+3. Open the world as a GM: the world's data converts once, on that first load
+4. Check XP totals, Insight Rank, and NPC Wounds and Initiative, which follow the book more closely now
+
+See the [Changelog](CHANGELOG.MD) for what changed.
 
 ### Fresh Install
 
@@ -233,7 +248,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 
 - Purchase multiple emphases per skill
 - Each emphasis costs 2 XP
-- Checkbox in roll dialog to use emphasis
+- Choose a trained emphasis in the roll dialog to re-roll 1s
 
 **Wound Config**
 
@@ -320,8 +335,10 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 
 **House Rules** (World)
 
-- Little Truths Ten Dice Rule (excess dice grant +2, default: off)
-- Allow Armor Stacking (default: off, highest only)
+- Apply Little Truths exception (a pool the Ten Dice Rule converted gets +2, default: off)
+- Optional rule: Honor Roll (default: off; the GM starts each session with the New session token control)
+
+Armor stacking is set per character in the Armor Config window (default: off, highest armor only).
 
 **Display** (Client)
 
