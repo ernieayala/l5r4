@@ -19,6 +19,7 @@ import {
   cleanTest,
   createDrawnToken,
   settleChatNotifications,
+  waitFor,
   watchConsole
 } from "./helpers.js";
 
@@ -489,6 +490,30 @@ export function registerRulesTests(quench) {
               actor.system.rings.void.rank - 1,
               "Level 4: one less"
             );
+          })
+        );
+
+        // Void Points held drop to a maximum the Taint lowers (#124)
+        // game-rules/89_shadowlands_taint.md, p.278-279
+        it(
+          "should lower the Void Points held when Taint lowers their maximum",
+          clean(async function () {
+            this.timeout(10_000);
+            const actor = track(await createTestPC({ name: "Rule engine: tainted void" }));
+            await actor.update({ "system.rings.void.rank": 2, "system.rings.void.value": 2 });
+            await actor.update({ "system.shadowTaint.rank": 4 });
+            assert.isTrue(
+              await waitFor(() => actor._source.system.rings.void.value === 1),
+              "Level 4: one less"
+            );
+            await actor.update({ "system.shadowTaint.rank": 5 });
+            assert.isTrue(
+              await waitFor(() => actor._source.system.rings.void.value === 0),
+              "Lost: none"
+            );
+            // A held count under the maximum stays
+            await actor.update({ "system.shadowTaint.rank": 0 });
+            assert.equal(actor._source.system.rings.void.value, 0);
           })
         );
 

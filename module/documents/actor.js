@@ -170,13 +170,15 @@ export default class L5R4Actor extends Actor {
 
   /**
    * A change that raises Insight Rank (a Trait, the Void Ring) can bring a School's next Technique due
-   * (roadmap/STAGE-11 decision 2). Only the client that sent the change grants it.
+   * (roadmap/STAGE-11 decision 2), and one that lowers the Void Point maximum (the Taint Rank, the Void Ring) takes
+   * the Void Points held down to it. Only the client that sent the change acts on it.
    * @override
    */
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
     if (isOwnChange(options, game.socket.id)) {
       applyGrants(this);
+      updateVoidPointsToMax(this, changed);
     }
   }
 
@@ -225,4 +227,24 @@ export default class L5R4Actor extends Actor {
   hasFear() {
     return this.system?.fear?.active ?? false;
   }
+}
+
+/**
+ * Take the Void Points held down to the maximum a change to the Taint Rank or the Void Ring lowered: Taint Level 4
+ * costs one, and a Lost character has none. A change to anything else leaves the count as the player or GM set it.
+ * game-rules/89_shadowlands_taint.md, p.278-279
+ * @param {L5R4Actor} actor - The updated actor, prepared with the change
+ * @param {object} changed - The update's changes
+ * @returns {Promise<void>|undefined}
+ */
+function updateVoidPointsToMax(actor, changed) {
+  const touched = ["system.shadowTaint.rank", "system.rings.void.rank"].some(path =>
+    foundry.utils.hasProperty(changed, path)
+  );
+  const max = toInt(actor.system.rings.void.max);
+  // The stored value, not the prepared one, so an Active Effect on Void Points is never written into storage (B6)
+  if (!touched || actor._source.system.rings.void.value <= max) {
+    return undefined;
+  }
+  return actor.update({ "system.rings.void.value": max });
 }
