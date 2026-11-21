@@ -65,6 +65,7 @@
 
 1. The zip is built from an allowlist, not an exclude list, so a new file stays out until someone adds it. Basis: the Audit's exclude list fell behind the repo; fabula-ultima `roadmap/STAGE-20-RELEASE.md` builds its zip the same way.
 2. The manifest rewrite is one tested function both workflows call. Basis: two untested copies (Audit).
+3. Ernie, 2026-11-21: #82 (GM queries and active-GM work run once per client of the GM user) and #84 (a sheet submit rewrites an invalid rule select value) are fixed before the release work, each with a test that fails first.
 
 ## Out of scope
 
