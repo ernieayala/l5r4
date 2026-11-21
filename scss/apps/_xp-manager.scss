@@ -58,6 +58,16 @@
     font-variant-numeric: tabular-nums;
   }
 
+  // The Warning state (foundations/states.md): the icon in the warning color, the line in the text color
+  .l5r4-xp-manager-warning {
+    color: var(--l5r4-color-text);
+    margin: 0;
+  }
+
+  .l5r4-xp-manager-warning-icon {
+    color: var(--l5r4-color-warning);
+  }
+
   // The Empty state (foundations/states.md): one italic line where the list would be
   .l5r4-xp-manager-empty {
     font-style: italic;

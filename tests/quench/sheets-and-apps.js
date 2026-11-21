@@ -1044,6 +1044,53 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // A School Kiho costs no XP; the XP manager warns past the Monk School's allowance (decision 19, #127)
+        // game-rules/80_brotherhood_of_shinsei.md, p.231
+        it(
+          "should price a School Kiho at 0 and warn past the Monk School's allowance",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets monk" });
+            created.push(actor);
+            const kiho = (name, mastery, schoolKiho) => ({
+              name,
+              type: "kiho",
+              system: { mastery, schoolKiho }
+            });
+            await actor.createEmbeddedDocuments("Item", [
+              { name: "Sheets Temple", type: "school", system: { kiho: 3, rank: 1 } },
+              kiho("Sheets Kiho A", 3, true),
+              kiho("Sheets Kiho B", 3, true),
+              kiho("Sheets Kiho C", 4, true),
+              kiho("Sheets Kiho D", 3, false)
+            ]);
+            const priceOf = name => actor.system._xp.entries.find(e => e.name === name)?.delta;
+            assert.equal(priceOf("Sheets Kiho A"), 0, "a School Kiho");
+            assert.equal(priceOf("Sheets Kiho C"), 0, "a School Kiho at Mastery 4");
+            assert.equal(priceOf("Sheets Kiho D"), 3, "a bonus kiho at its Mastery Level");
+            const warnings = async () => {
+              const app = new XpManagerApplication(actor);
+              await app.render({ force: true });
+              try {
+                return [...app.element.querySelectorAll('p[role="note"]')].map(p =>
+                  p.textContent.trim()
+                );
+              } finally {
+                await app.close({ animate: false });
+              }
+            };
+            assert.deepEqual(await warnings(), [], "3 of 3 School Kiho, 1 of 1 bonus kiho");
+            await actor.createEmbeddedDocuments("Item", [
+              kiho("Sheets Kiho E", 2, true),
+              kiho("Sheets Kiho F", 2, false)
+            ]);
+            assert.deepEqual(await warnings(), [
+              game.i18n.localize("l5r4.character.experience.tooManySchoolKiho"),
+              game.i18n.localize("l5r4.character.experience.tooManyBonusKiho")
+            ]);
+          })
+        );
+
         it(
           "should leave the Disadvantage cap and manual XP to the GM in the XP manager",
           clean(async function () {

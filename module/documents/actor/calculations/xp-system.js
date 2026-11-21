@@ -12,7 +12,12 @@ import {
   getCreationFreeBonus,
   getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
-import { getCostPricer, getXpEntries, getXpTotals } from "../../../utils/xp-ledger.js";
+import {
+  getCostPricer,
+  getKihoLimits,
+  getXpEntries,
+  getXpTotals
+} from "../../../utils/xp-ledger.js";
 
 /**
  * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25
@@ -59,7 +64,7 @@ export function preparePcExperience(actor, sys) {
   });
   const entries = getXpEntries(build, price);
   // The entries stay on the prepared data for the XP manager's history (module/services/xp/calculator.js)
-  sys._xp = { ...getXpTotals(build, entries), entries };
+  sys._xp = { ...getXpTotals(build, entries), entries, kiho: kihoLimitsOf(actor) };
 }
 
 /**
@@ -162,7 +167,7 @@ function xpSkillsOf(actor) {
 
 /**
  * The priced items: Advantages and Disadvantages at their cost; a kata, a kiho, and a memorized spell at their
- * Mastery Level (#43).
+ * Mastery Level (#43), and a kiho the Monk School gives at 0 (Stage 18 decision 19).
  * game-rules/66_magic_and_spell_casting.md, p.164
  * game-rules/80_brotherhood_of_shinsei.md, p.231
  * game-rules/86_kata.md, p.259
@@ -178,15 +183,32 @@ function xpItemsOf(actor) {
       ["kata", "kiho"].includes(item.type) ||
       (item.type === "spell" && item.system.memorized === true)
     ) {
+      const free = item.type === "kiho" && item.system.schoolKiho;
       items.push({
         id: item.id,
         type: item.type,
         name: item.name,
-        cost: toInt(item.system.mastery)
+        cost: free ? 0 : toInt(item.system.mastery)
       });
     }
   }
   return items;
+}
+
+/**
+ * The character's kiho against what its Monk Schools allow, for the XP manager's warning; null with no Monk School.
+ * game-rules/80_brotherhood_of_shinsei.md, p.231
+ * @param {Actor} actor
+ * @returns {ReturnType<typeof getKihoLimits>}
+ */
+function kihoLimitsOf(actor) {
+  const schools = actor.items
+    .filter(item => item.type === "school")
+    .map(item => ({ kiho: toInt(item.system.kiho), rank: item.system.schoolRank }));
+  const kiho = actor.items
+    .filter(item => item.type === "kiho")
+    .map(item => ({ schoolKiho: item.system.schoolKiho }));
+  return getKihoLimits(schools, kiho);
 }
 
 /**

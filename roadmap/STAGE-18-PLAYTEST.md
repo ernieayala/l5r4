@@ -77,6 +77,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 16. Ernie, 2026-11-20, from Session 2: an Honor Roll (p.92) takes the roller's dice penalties, Fear (p.90), Dazed, and the rest, as it already takes Taint's; kept dice never exceed rolled dice (#111).
 17. Ernie, 2026-11-20, from Session 2: a roll's card lists every TN change the roll kept (Fatigued, an arrow, a grapple ignoring armor), from its stored TN record, so the card explains its TN whatever was ticked in the dialog (#115).
 18. Ernie, 2026-11-21, from Session 3: once a duel's first strike hits, the struck duelist gets "{name} yields" beside their Roll button; yielding ends the duel card as Over with the yield noted, and striking back, dishonorable in a duel to first blood (p.87), stays their choice (#120).
+19. Ernie, 2026-11-21, after Session 3: a kiho has a "School Kiho" box the player ticks for the kiho their School gives (p.231); XP prices a ticked kiho at 0. A Monk School records how many kiho it starts with (three; four for the Temples of the Thousand Fortunes), and the XP manager warns when the ticked kiho exceed that plus two per School Rank past 1, or the other kiho exceed the cumulative Monk School Rank (#127).
 
 ### Still open
 

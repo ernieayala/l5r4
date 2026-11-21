@@ -277,6 +277,8 @@ An Advantage that costs 1 less for a Crane character:
 
 Kiho at one and a half times their price, rounded up: `{ "key": "Cost", "selector": "item:kiho", "value": "ceil(@cost * 1.5)" }`. A price never drops below 0.
 
+A monk's kiho from the Monk School are free (p.231): tick **School Kiho** on the kiho's Details tab. A Monk School's **Starting kiho** (Details tab) is how many it gives at Rank 1, three for the Brotherhood Schools and four for the Temples of the Thousand Fortunes; each later School Rank gives two more. Other kiho are bonus kiho at their Mastery Level, one per Rank of all Monk Schools together. The XP Manager counts both and warns past either limit.
+
 ### Kata and kiho
 
 A kata's or kiho's rules apply while it is active, not while it is owned (pp.259, 261). The play button on its row of the character sheet activates it: the system makes an Active Effect carrying its rules. A second kata ends the first; a kiho ends another of its type, except Martial kiho. The stop button, or deleting the effect, ends it. A tattoo works the same way (p.115): one at a time, and its effect lasts twice the School Rank in Rounds. A tattoo marked **Always active** on its Details tab, such as the Mantis, applies while it is owned instead.

@@ -459,6 +459,7 @@
       },
       "experience": {
         "adjustExperience": "Adjust XP",
+        "bonusKiho": "Bonus kiho",
         "breakdown": {
           "advantages": "Advantages",
           "base": "Base",
@@ -484,10 +485,13 @@
         "purchases": "Purchases",
         "reason": "Reason",
         "recalculate": "Recalculate XP purchases from current character state",
+        "schoolKiho": "School Kiho",
         "skillChange": "{name} {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "spellMemorized": "Memorized: {name}",
         "summary": "XP summary",
+        "tooManyBonusKiho": "More bonus kiho than the Monk School Rank allows (p.231).",
+        "tooManySchoolKiho": "More School Kiho ticked than the Monk School gives (p.231).",
         "traitChange": "{label} {from}→{to}",
         "usedTotal": "Used / total",
         "voidChange": "Void {from}→{to}",
@@ -647,7 +651,11 @@
         "internal": "Internal",
         "karmic": "Karmic",
         "martial": "Martial",
-        "mystic": "Mystic"
+        "mystic": "Mystic",
+        "schoolKiho": "School Kiho",
+        "schoolKihoHint": "One of the kiho the Monk School gives, which cost no XP (p.231).",
+        "startingKiho": "Starting kiho",
+        "startingKihoHint": "Kiho a Monk School gives at Rank 1, 0 for other Schools; each later Rank gives two more (p.231)."
       },
       "maho": {
         "additionalBlood": "Additional blood",

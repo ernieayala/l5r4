@@ -1011,6 +1011,26 @@ export function registerPacksTests(quench) {
           })
         );
 
+        // Each Brotherhood School starts with three kiho, the Temples of the Thousand Fortunes four (#127)
+        // game-rules/80_brotherhood_of_shinsei.md, p.231-233
+        it(
+          "should give the Brotherhood Schools their starting kiho and other Schools none",
+          clean(async () => {
+            for (const [name, count] of [
+              ["Four Temples Monk", 3],
+              ["Order of Heroes Monk", 3],
+              ["Shrine of the Seven Thunders Monk", 3],
+              ["Temple of Kaimetsu-uo Monk", 3],
+              ["Temple of Osano-wo Monk", 3],
+              ["Temples of the Thousand Fortunes Monk", 4],
+              ["Order of the Spider Monks", 0],
+              ["Kakita Bushi School", 0]
+            ]) {
+              assert.equal((await entry("schools", name)).system.kiho, count, name);
+            }
+          })
+        );
+
         // Air Fist lowers unarmed damage only (#121); an unarmed strike is a weapon tied to Jiujutsu, as
         // Jiujutsu's own Mastery Abilities read it
         // game-rules/87_kiho.md, p.262

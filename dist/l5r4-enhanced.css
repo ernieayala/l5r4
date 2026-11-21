@@ -1936,6 +1936,13 @@ body > * {
 .l5r4-xp-manager .l5r4-xp-manager-total {
   font-variant-numeric: tabular-nums;
 }
+.l5r4-xp-manager .l5r4-xp-manager-warning {
+  color: var(--l5r4-color-text);
+  margin: 0;
+}
+.l5r4-xp-manager .l5r4-xp-manager-warning-icon {
+  color: var(--l5r4-color-warning);
+}
 .l5r4-xp-manager .l5r4-xp-manager-empty {
   font-style: italic;
   margin: 0;

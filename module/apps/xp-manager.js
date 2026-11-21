@@ -393,12 +393,24 @@ function disadvantageCapOf(flags) {
 }
 
 /**
- * The XP totals and the spending breakdown the window shows, each defaulted when preparation left it unset.
+ * The XP totals and the spending breakdown the window shows, each defaulted when preparation left it unset, and a
+ * monk's kiho against what the Monk Schools allow, with a warning for each limit passed (Stage 18 decision 19).
+ * game-rules/80_brotherhood_of_shinsei.md, p.231
  * @param {object} xp - The actor's prepared `system._xp`
  * @returns {object}
  */
 function buildXpSummary(xp) {
+  const kiho = xp.kiho ?? null;
   return {
+    kiho,
+    kihoWarnings: [
+      ...(kiho && kiho.school > kiho.schoolAllowed
+        ? ["l5r4.character.experience.tooManySchoolKiho"]
+        : []),
+      ...(kiho && kiho.bonus > kiho.bonusAllowed
+        ? ["l5r4.character.experience.tooManyBonusKiho"]
+        : [])
+    ],
     spent: xp.spent ?? 0,
     total: xp.total ?? 40,
     available: xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0),

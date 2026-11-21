@@ -1352,6 +1352,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 3,
         "rules": [
           {
             "key": "TraitAdjust",
@@ -3401,6 +3402,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 3,
         "rules": [
           {
             "key": "TraitAdjust",
@@ -4012,6 +4014,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 3,
         "rules": [
           {
             "key": "TraitAdjust",
@@ -4575,6 +4578,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 3,
         "rules": [
           {
             "key": "TraitAdjust",
@@ -4648,6 +4652,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 3,
         "rules": [
           {
             "key": "TraitAdjust",
@@ -4715,6 +4720,7 @@
       "coverage": "partial",
       "system": {
         "shugenja": false,
+        "kiho": 4,
         "rules": [
           {
             "key": "TraitAdjust",
