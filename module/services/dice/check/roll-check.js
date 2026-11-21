@@ -72,7 +72,8 @@ import {
  * @property {boolean} [askForOptions=true] Show the dialog; without it every default applies
  * @property {{template: string, data: object}} [extras] Extra dialog fields for the caller
  * @property {function(object): Promise<object|null>} [prepare] Runs on the dialog's choices before the roll; may
- *   add `labelSuffix`, `modifiers`, `freeRaises`, or return null to stop
+ *   add `labelSuffix`, `modifiers`, `freeRaises` and the `freeRaisesToTn` of them spent on the TN, or return null
+ *   to stop
  * @property {function(): Promise<void>} [cancel] Runs when the check stops after `prepare` went through and before
  *   the roll (a spell slot `prepare` took is given back)
  * @property {function({success: boolean|null, total: number}): Promise<{labelSuffix?: string}>} [beforePost]

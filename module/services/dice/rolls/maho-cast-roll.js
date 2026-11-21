@@ -54,18 +54,21 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
 
 /**
  * Pay the blood cost before the roll: the cost and any additional blood the dialog adds, taken as Wounds unless the
- * blood comes from someone else. Each additional full cost gives one Free Raise.
+ * blood comes from someone else. Each additional full cost gives one Free Raise, which the caster may spend on the
+ * TN instead.
+ * game-rules/28_raises.md, p.79
  * game-rules/88_maho.md, p.267-268
  * @param {L5R4Actor} actor - The caster
  * @param {object} choices - The roll dialog's choices
  * @param {{bloodCost: number}} cost - The spell's blood cost in Wounds
- * @returns {Promise<{freeRaises: number, labelSuffix: string}>} rollCheck's `prepare` result
+ * @returns {Promise<{freeRaises: number, freeRaisesToTn: number, labelSuffix: string}>} rollCheck's `prepare` result
  */
 async function spendBloodCost(actor, choices, { bloodCost }) {
-  // Dialog input: a whole number of Wounds, never negative
+  // Dialog input: whole numbers, never negative, and no more Free Raises on the TN than the blood buys
   const additional = Math.max(0, toInt(choices.additionalBlood));
   const total = bloodCost + additional;
   const freeRaises = Math.floor(additional / bloodCost);
+  const freeRaisesToTn = Math.min(Math.max(0, toInt(choices.bloodRaisesToTn)), freeRaises);
   if (choices.bloodSource !== "other") {
     // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
     const suffered = Math.min(
@@ -76,6 +79,7 @@ async function spendBloodCost(actor, choices, { bloodCost }) {
   }
   return {
     freeRaises,
+    freeRaisesToTn,
     labelSuffix: F("l5r4.magic.maho.bloodSuffix", { total })
   };
 }

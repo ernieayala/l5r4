@@ -652,6 +652,8 @@
       "maho": {
         "additionalBlood": "Additional blood",
         "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "bloodRaisesToTn": "Free Raises of extra blood on the TN",
+        "bloodRaisesToTnHint": "Each lowers the TN by 5, up to the Free Raises the extra blood buys.",
         "bloodRequired": "Blood cost required",
         "bloodSource": {
           "label": "Blood source",

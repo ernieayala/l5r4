@@ -483,6 +483,43 @@ export function registerRollPipelineTests(quench) {
           })
         );
 
+        // A Free Raise of extra blood may lower the TN instead (#123)
+        // game-rules/28_raises.md, p.79
+        // game-rules/88_maho.md, p.268
+        it(
+          "should let a maho cast spend its extra-blood Free Raises on the TN",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Maho",
+                type: "spell",
+                system: { ring: "earth", mastery: 1, maho: true }
+              }
+            ]);
+            let offered = null;
+            const answered = new Promise(resolve =>
+              Hooks.once("renderDialogV2", app => {
+                const form = app.element.querySelector("form") ?? app.element;
+                const field = form.querySelector('[name="bloodRaisesToTn"]');
+                offered = Boolean(field);
+                form.querySelector('[name="additionalBlood"]').value = "2";
+                if (field) {
+                  field.value = "1";
+                }
+                app.element.querySelector('[data-action="ok"]').click();
+                resolve();
+              })
+            );
+            const message = keep(await rollMahoCast({ actor, spell, showDialog: true }));
+            await answered;
+            assert.isTrue(offered, "the maho group offers the field");
+            assert.equal(message.system.tn.freeRaises, 1);
+            assert.equal(message.system.tn.freeRaisesToTN, 1, "spent on the TN");
+            assert.equal(message.system.tn.effective, 5, "TN 10 lowered by 5");
+          })
+        );
+
         // game-rules/89_shadowlands_taint.md, p.275
         it(
           "should raise maho Taint to a new Rank at ten points, through the ledger",

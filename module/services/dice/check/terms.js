@@ -135,17 +135,22 @@ export function buildChosenTerms(check, choices) {
 }
 
 /**
- * The terms the caller's preparation adds: its modifiers, its Free Raises, its TN, and its label suffix. Free Raises
- * from the roll's own preparation (a duel's Focus, maho blood) obey the same rule: none on an Unskilled Roll.
+ * The terms the caller's preparation adds: its modifiers, its Free Raises and those of them it spends on the TN, its
+ * TN, and its label suffix. Free Raises from the roll's own preparation (maho blood) obey the same rule: none on an
+ * Unskilled Roll.
+ * game-rules/28_raises.md, p.79
  * game-rules/30_skill_rolls_expanded.md, p.80
  * @param {object} chosen - From buildChosenTerms
  * @param {object} prepared - What the request's `prepare` returned
- * @returns {{applied: object[], totalFreeRaises: number, tnBase: number, labelSuffix: string|undefined}}
+ * @returns {{applied: object[], totalFreeRaises: number, freeRaisesToTn: number, tnBase: number,
+ *   labelSuffix: string|undefined}}
  */
 export function buildPreparedTerms(chosen, prepared) {
+  const allowed = chosen.raisesAllowed;
   return {
     applied: [...chosen.applied, ...(prepared.modifiers ?? [])],
-    totalFreeRaises: chosen.raisesAllowed ? chosen.freeRaises + toInt(prepared.freeRaises) : 0,
+    totalFreeRaises: allowed ? chosen.freeRaises + toInt(prepared.freeRaises) : 0,
+    freeRaisesToTn: chosen.freeRaisesToTn + (allowed ? toInt(prepared.freeRaisesToTn) : 0),
     tnBase: prepared.tn !== undefined ? prepared.tn : chosen.tnBase,
     labelSuffix: prepared.labelSuffix
   };
