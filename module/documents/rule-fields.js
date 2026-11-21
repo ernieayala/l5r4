@@ -5,7 +5,6 @@
  * submitted text turned back into the field's type. Validation stays with the model.
  */
 
-import { hasOpenChoice } from "../utils/choices.js";
 import { createRule, RULE_MODELS } from "../data/rules/rule-models.js";
 
 /**
@@ -21,8 +20,8 @@ import { createRule, RULE_MODELS } from "../data/rules/rule-models.js";
 /**
  * The editor's view of one stored rule: its fields, and the validation error that keeps the engine from using it.
  * The error comes from the rule as the engine reads it, its choices made (`answered`, from `getAnsweredRules`), so a
- * `{choice:...}` in a field with fixed values is no error. Such a field's select keeps the placeholder as an option,
- * so saving the form leaves it in place.
+ * `{choice:...}` in a field with fixed values is no error. A select keeps a stored value it has no option for, such
+ * as a placeholder or an invalid value, so saving the form leaves it in place.
  * @param {object} source - An entry of `system.rules`, stored user JSON
  * @param {object} [answered=source] - The same rule with its item's choices made
  * @returns {{key: string, error: string|null, fields: RuleFieldView[]}}
@@ -96,7 +95,8 @@ export function parseRuleForm(source, values) {
 
 /**
  * The editor's view of one field of a stored rule: its stored value, or the field's initial value when the rule
- * leaves it out. A select whose value is a `{choice:...}` placeholder keeps it as an option.
+ * leaves it out. A select keeps a stored value that is not one of its choices, a `{choice:...}` placeholder or an
+ * invalid value, as an option, so saving the form never changes a field the user did not touch (#84).
  * @param {object} source - An entry of `system.rules`, stored user JSON
  * @param {object} model
  * @param {string} model.name - The field's name
@@ -106,12 +106,11 @@ export function parseRuleForm(source, values) {
 function buildFieldView(source, { name, field }) {
   const kind = kindOf(field);
   const value = name in source ? source[name] : field.getInitialValue({});
-  const placeholder = typeof value === "string" && hasOpenChoice(value) ? { [value]: value } : {};
   return {
     name,
     kind,
     value: formatFieldValue(kind, value),
-    choices: kind === "select" ? { ...placeholder, ...choicesOf(field) } : null,
+    choices: kind === "select" ? selectChoicesOf(field, value) : null,
     nullable: Boolean(field.nullable)
   };
 }
@@ -148,6 +147,20 @@ function kindOf(field) {
 function choicesOf(field) {
   const values = Array.isArray(field.choices) ? field.choices : Object.keys(field.choices);
   return Object.fromEntries(values.map(value => [value, value]));
+}
+
+/**
+ * A select's options: the field's choices, led by the stored value when it is none of them.
+ * @param {foundry.data.fields.StringField} field
+ * @param {*} value - The stored value
+ * @returns {Record<string, string>}
+ */
+function selectChoicesOf(field, value) {
+  const choices = choicesOf(field);
+  if (value === null || value === undefined || value === "" || String(value) in choices) {
+    return choices;
+  }
+  return { [String(value)]: String(value), ...choices };
 }
 
 /**

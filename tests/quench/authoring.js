@@ -654,6 +654,35 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #84
+        it(
+          "should keep a select value that is not one of its options through a save, and show the error",
+          clean(async function () {
+            this.timeout(15_000);
+            // A world item, so no owner's rule engine warns that it skips the invalid rule
+            const [technique] = await Item.createDocuments([
+              {
+                name: "Character options: invalid select",
+                type: "technique",
+                system: { rules: [{ key: "TraitAdjust", trait: "luck", value: 1 }] }
+              }
+            ]);
+            worldItems.push(technique);
+            const sheet = technique.sheet;
+            await sheet.render({ force: true });
+            sheet.element.querySelector('[data-action="change-tab"][data-tab="rules"]').click();
+            await sheet.render();
+            assert.isNotNull(
+              sheet.element.querySelector("[data-rule-error]"),
+              "the rule is invalid"
+            );
+            assert.equal(sheet.element.querySelector('[name="rules.0.trait"]').value, "luck");
+            await changeThroughSheet(sheet, '[name="rules.0.value"]', "2");
+            assert.deepInclude(technique._source.system.rules[0], { trait: "luck", value: 2 });
+            await sheet.close();
+          })
+        );
+
         it(
           "should give the Active Effect sheet a Rules tab that saves system.rules",
           clean(async function () {
