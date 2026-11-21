@@ -836,7 +836,9 @@
           "rollLabel": "{stage}: {name}",
           "start": "Iaijutsu duel: selected token against targeted token",
           "strike": "Strike",
-          "title": "Iaijutsu duel"
+          "title": "Iaijutsu duel",
+          "yield": "{name} yields",
+          "yielded": "{name} yields."
         },
         "errors": {
           "raisesInvalid": "Attack Raises must be numbers",

@@ -27,7 +27,7 @@ All classes and attributes are fixed names ([chat card](chat-card.md#fixed-names
 
 | Variant | Buttons |
 | --- | --- |
-| Duel | `roll` "Roll for {name}" and `concede` "{name} concedes" per duelist while the stage allows (`buildDuelButtons` (`module/services/combat/duel.js`)) |
+| Duel | `roll` "Roll for {name}" and `concede` "{name} concedes" per duelist while the stage allows; at the Strike, `concede` reads "{name} yields" for the duelist a first strike hit (`buildDuelButtons`, `canConcede` (`module/services/combat/duel.js`)) |
 | Grapple | `control` "Control roll: {name}" for each side that has not rolled, and `hit`, `throw`, `break`, `pass` for the side in control, until the grapple is over (`render` (`module/services/combat/grapple.js`)) |
 | Over | No buttons; the stage reads done or over |
 

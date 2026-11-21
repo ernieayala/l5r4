@@ -9,7 +9,8 @@
  *   more wins the first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic
  *   (simultaneous).
  * - Strike: Iaijutsu / Reflexes attacks against the opponent's Armor TN, posted as attacks, so damage follows
- *   through the attack card.
+ *   through the attack card. Once a first strike hits, the struck duelist may yield, which ends the duel, or strike
+ *   back, which a duel to first blood counts dishonorable (Ernie's ruling, Stage 18 decision 18).
  *
  * The GM starts a duel from the token controls with one token selected and one targeted.
  * game-rules/39_iaijutsu_dueling.md, p.87-88
@@ -280,6 +281,9 @@ registerFlow("duel", {
       throw new Error("Not this user's duelist, or the duel is over");
     }
     if (data.action === "concede") {
+      if (!canConcede(state, i)) {
+        throw new Error("This duelist may not concede now");
+      }
       state.conceded = i;
       state.stage = "done";
       return state;
@@ -334,9 +338,31 @@ function buildDuelists(state) {
       index: i,
       name: actor?.name ?? "?",
       canRoll: state.stage !== "done" && !rolled && (state.stage !== "strike" || strikesNow),
-      canConcede: state.stage === "assessment" || state.stage === "focus"
+      canConcede: canConcede(state, i)
     };
   });
+}
+
+/**
+ * Whether a duelist may concede now: either one at Assessment or Focus; at the Strike, the one a first strike has
+ * hit, before striking back, who has lost a duel to first blood (Ernie's ruling, Stage 18 decision 18).
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ * @param {object} state
+ * @param {number} i - The duelist's index
+ * @returns {boolean}
+ */
+function canConcede(state, i) {
+  if (state.stage === "assessment" || state.stage === "focus") {
+    return true;
+  }
+  const first = state.firstStrike;
+  return (
+    state.stage === "strike" &&
+    first !== null &&
+    i !== first &&
+    Boolean(state.rolls.strike[first]?.success) &&
+    state.rolls.strike[i] === null
+  );
 }
 
 /**
@@ -348,7 +374,8 @@ function buildDuelists(state) {
  */
 function buildDuelLines(state, duelists) {
   const lines = state.facts ? buildAssessmentLines(state, duelists) : [];
-  if (state.stage === "strike" || (state.stage === "done" && state.conceded === null)) {
+  const focusSettled = state.rolls.focus.every(roll => roll !== null);
+  if (state.stage === "strike" || (state.stage === "done" && focusSettled)) {
     lines.push(
       state.firstStrike === null
         ? T("l5r4.ui.combat.duel.kharmic")
@@ -359,7 +386,8 @@ function buildDuelLines(state, duelists) {
     );
   }
   if (state.conceded !== null) {
-    lines.push(F("l5r4.ui.combat.duel.conceded", { name: duelists[state.conceded].name }));
+    const key = focusSettled ? "yielded" : "conceded";
+    lines.push(F(`l5r4.ui.combat.duel.${key}`, { name: duelists[state.conceded].name }));
   }
   return lines;
 }
@@ -397,11 +425,13 @@ function buildDuelButtons(state, duelists) {
     ...(d.canRoll
       ? [{ action: "roll", label: F("l5r4.ui.combat.duel.roll", { name: d.name }), data: d.index }]
       : []),
-    ...(d.canConcede && state.stage !== "done"
+    ...(d.canConcede
       ? [
           {
             action: "concede",
-            label: F("l5r4.ui.combat.duel.concede", { name: d.name }),
+            label: F(`l5r4.ui.combat.duel.${state.stage === "strike" ? "yield" : "concede"}`, {
+              name: d.name
+            }),
             data: d.index
           }
         ]

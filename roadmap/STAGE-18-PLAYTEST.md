@@ -76,6 +76,7 @@ Foundry keeps one login per browser cookie store, and cookies are per host, so e
 15. Ernie, 2026-11-20, from Session 2: every chat card renders a button only for the users who may press it (the design system's "Can't act" rule); the click still refuses anyone else. Covers the Honor Roll (#107), damage Undo (#108), save and Full Defense prompts, and grapple and duel flow cards (#112).
 16. Ernie, 2026-11-20, from Session 2: an Honor Roll (p.92) takes the roller's dice penalties, Fear (p.90), Dazed, and the rest, as it already takes Taint's; kept dice never exceed rolled dice (#111).
 17. Ernie, 2026-11-20, from Session 2: a roll's card lists every TN change the roll kept (Fatigued, an arrow, a grapple ignoring armor), from its stored TN record, so the card explains its TN whatever was ticked in the dialog (#115).
+18. Ernie, 2026-11-21, from Session 3: once a duel's first strike hits, the struck duelist gets "{name} yields" beside their Roll button; yielding ends the duel card as Over with the yield noted, and striking back, dishonorable in a duel to first blood (p.87), stays their choice (#120).
 
 ### Still open
 

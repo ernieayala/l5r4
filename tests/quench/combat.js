@@ -961,6 +961,52 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // The duelist a first strike hits may yield, which ends the duel; striking back stays their choice
+        // (decision 18, #120)
+        // game-rules/39_iaijutsu_dueling.md, p.87
+        it(
+          "should let the duelist the first strike hit yield, and end the duel",
+          clean(async function () {
+            this.timeout(15_000);
+            const master = track(
+              await createTestPC({
+                name: "Combat iaijutsu first blood",
+                system: { traits: { awa: 5, ref: 3 } }
+              })
+            );
+            await master.createEmbeddedDocuments("Item", [createSkillData("Iaijutsu", 7, "ref")]);
+            const target = await defender();
+            const card = await startDuel(master, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const buttons = () =>
+              [...card.content.matchAll(/data-flow-action="(\w+)"[^>]*data-duelist="(\d)"/g)].map(
+                ([, action, i]) => `${action}:${i}`
+              );
+            const stop = autoAnswerRolls();
+            try {
+              for (const stage of ["assessment", "focus"]) {
+                await click(card, "[data-flow-action='roll'][data-duelist='0']");
+                await waitFor(() => state().rolls[stage][0] !== null);
+                await click(card, "[data-flow-action='roll'][data-duelist='1']");
+                await waitFor(() => state().stage !== stage);
+              }
+              assert.deepEqual(buttons(), ["roll:0"], "no yield before the first strike");
+              // 10k3 of nines (27) against Armor TN 20
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.strike[0] !== null);
+            } finally {
+              stop();
+            }
+            assert.isTrue(state().rolls.strike[0].success, "the first strike hits");
+            assert.sameMembers(buttons(), ["roll:1", "concede:1"], "strike back or yield");
+            assert.include(card.content, F("l5r4.ui.combat.duel.yield", { name: target.name }));
+            await click(card, "[data-flow-action='concede'][data-duelist='1']");
+            assert.isTrue(await waitFor(() => state().stage === "done"), "the duel is over");
+            assert.include(card.content, F("l5r4.ui.combat.duel.yielded", { name: target.name }));
+            assert.deepEqual(buttons(), []);
+          })
+        );
+
         // A Technique's Focus-roll bonus reaches the Focus roll only (#118)
         // game-rules/51_crane_schools.md, p.109
         it(
