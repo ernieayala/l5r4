@@ -50,8 +50,9 @@ describe("The release manifest (tools/manifest.mjs)", () => {
   });
 
   it("should change only the three values in system.json's text, so its layout stays", () => {
-    const updated = updateManifestText(text, "4.0.0-rc.1", "release");
-    expect(JSON.parse(updated)).toEqual(buildReleaseManifest(manifest, "4.0.0-rc.1", "release"));
+    // A version the repo never carries, so all three values change whatever system.json holds now
+    const updated = updateManifestText(text, "9.9.9-test.1", "release");
+    expect(JSON.parse(updated)).toEqual(buildReleaseManifest(manifest, "9.9.9-test.1", "release"));
     const before = text.split("\n");
     const changed = updated.split("\n").filter((line, i) => line !== before[i]);
     expect(changed.map(line => line.trim().split(":")[0])).toEqual([
