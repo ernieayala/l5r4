@@ -63,6 +63,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `roll` | Roll dice | `rollCheck` (`module/services/dice/check/roll-check.js`), `rollContest` |
 | `post` | Post a chat card | `postCheckRequest` (`module/services/check-request.js`) |
 | `request` | Ask the GM's client to run an operation through a GM query | `requestStep` (`module/services/combat/flow.js`), `requestDamageAction` |
+| `emit` | Send a message on the system socket | `emitGmClientMessage` (`module/services/gm-client.js`) |
 | `open` | Open a window: an app, a sheet, or a dialog that stays open | `openArmorConfig` (`module/sheets/handlers/app-launcher-handler.js`), `openLedgerDialog` |
 | `ask` | Show a dialog and wait for the user's answer | `askChoices` (`module/services/dice/check/roll-check.js`), `askChoice` |
 | `is` | Predicate: a state | `isDead` (`module/utils/damage.js`), `isLost` |

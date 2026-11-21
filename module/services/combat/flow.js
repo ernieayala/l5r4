@@ -10,6 +10,7 @@ import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
+import { registerGmQuery } from "../gm-client.js";
 
 /** Name of the GM query that runs a flow step for a player. */
 const FLOW_QUERY = `${SYS_ID}.flow`;
@@ -135,7 +136,7 @@ export function bindFlowCards(message, html) {
 
 /** Register the GM side of flow steps. */
 export function registerFlowQueries() {
-  CONFIG.queries[FLOW_QUERY] = (request, { user }) => applyFlowStep(request, user);
+  registerGmQuery(FLOW_QUERY, (request, { user }) => applyFlowStep(request, user));
 }
 
 /**

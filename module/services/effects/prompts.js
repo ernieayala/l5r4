@@ -27,6 +27,7 @@ import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { rollSkill } from "../dice/rolls/skill-roll.js";
+import { registerGmQuery } from "../gm-client.js";
 import { applyEffect, ownTurnStartOf } from "./apply.js";
 
 /** Name of the GM query that ends a Concentration for a player. */
@@ -157,14 +158,14 @@ export async function endConcentration(effect) {
 
 /** Register the GM side of endConcentration and of marking a player's prompt answered. */
 export function registerPromptQueries() {
-  CONFIG.queries[END_CONCENTRATION_QUERY] = async ({ effectUuid }) => {
+  registerGmQuery(END_CONCENTRATION_QUERY, async ({ effectUuid }) => {
     const effect = await fromUuid(String(effectUuid));
     if (effect?.documentName !== "ActiveEffect" || !effect.statuses.has("concentration")) {
       throw new Error(`Not a Concentration effect: ${effectUuid}`);
     }
     await endConcentration(effect);
-  };
-  CONFIG.queries[ANSWER_PROMPT_QUERY] = async ({ messageId }, { user }) => {
+  });
+  registerGmQuery(ANSWER_PROMPT_QUERY, async ({ messageId }, { user }) => {
     const message = game.messages.get(String(messageId));
     const request = message?.getFlag(SYS_ID, "prompt");
     const actor = request ? await fromUuid(request.actorUuid) : null;
@@ -172,7 +173,7 @@ export function registerPromptQueries() {
       throw new Error(`Not a prompt the user may answer: ${messageId}`);
     }
     await message.setFlag(SYS_ID, "promptAnswered", true);
-  };
+  });
 }
 
 /**

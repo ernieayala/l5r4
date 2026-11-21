@@ -46,6 +46,7 @@ import { onGetSceneControlButtonsGuard } from "../services/combat/guard.js";
 import { onGetSceneControlButtonsSession } from "../services/session.js";
 import { onGetFolderContextOptions } from "../services/item-transfer.js";
 import { onUpdateItemMemorization } from "../services/xp/versioning.js";
+import { registerGmClient } from "../services/gm-client.js";
 import EffectPanelApplication from "../apps/effect-panel.js";
 import CompendiumBrowserApplication from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
@@ -71,6 +72,8 @@ const CHANGE_ORIGIN_DOCUMENTS = Object.freeze(["Actor", "Item", "ActiveEffect", 
  * @returns {void}
  */
 export function registerAllHooks() {
+  // GM clients: the GM user's clients agree on the one that answers GM queries and runs GM-only work (#82)
+  Hooks.once("ready", registerGmClient);
   registerChangeOriginHooks();
   registerAnimationHooks();
   registerEffectHooks();

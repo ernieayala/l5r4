@@ -7,6 +7,8 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { grantQueueOf } from "../../../module/documents/item/lifecycle/grants.js";
+import { APPLY_EFFECT_QUERY } from "../../../module/services/effects/apply.js";
+import { isAnsweringGmClient, onGmClientMessage } from "../../../module/services/gm-client.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 import { cleanTest, guardRolls, waitFor, withAnotherClient } from "../helpers.js";
@@ -158,6 +160,40 @@ export function registerChangeOriginTests(quench) {
               await waitFor(() => actor.getFlag(SYS_ID, "xpRetroactiveVersion") === 0),
               "this client's own change marks it"
             );
+          })
+        );
+      });
+
+      // #82: core sends a GM query to every client of the GM user, so only one of them answers
+      describe("GM clients", () => {
+        const earlier = { id: "quench-earlier-gm-client", startedAt: 0, userId: game.user.id };
+
+        it(
+          "should leave a GM query to the GM client that started first, and answer once it leaves",
+          clean(async function () {
+            this.timeout(10_000);
+            const actor = track(await createTestPC({ name: "Changes from another client: query" }));
+            const query = () =>
+              CONFIG.queries[APPLY_EFFECT_QUERY](
+                { actorUuid: actor.uuid, id: "dazed" },
+                { user: game.user }
+              );
+            const settled = promise =>
+              Promise.race([
+                promise.then(() => true),
+                new Promise(resolve => setTimeout(() => resolve(false), 500))
+              ]);
+            onGmClientMessage({ ...earlier, type: "hello" });
+            try {
+              assert.isFalse(isAnsweringGmClient(), "another GM client started first");
+              assert.isFalse(await settled(query()), "this client does not answer");
+              assert.isFalse(actor.statuses.has("dazed"), "nor does the work");
+            } finally {
+              onGmClientMessage({ ...earlier, type: "bye" });
+            }
+            assert.isTrue(isAnsweringGmClient(), "the other one left");
+            assert.isTrue(await settled(query()), "this client answers");
+            assert.isTrue(actor.statuses.has("dazed"));
           })
         );
       });

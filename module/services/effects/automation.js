@@ -19,6 +19,7 @@ import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { isOwnChange } from "../../utils/change-origin.js";
 import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { isAnsweringGmClient } from "../gm-client.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
 
@@ -97,14 +98,14 @@ export function onPreUpdateActorWounds(actor, changes, options) {
 }
 
 /**
- * After a Wounds change, on the active GM: sync Prone and check Concentration.
+ * After a Wounds change, on the active GM's answering client (#82): sync Prone and check Concentration.
  * @param {Actor} actor
  * @param {object} changes
  * @param {object} options
  * @returns {Promise<void>}
  */
 export async function onUpdateActorWounds(actor, changes, options) {
-  if (!game.users.activeGM?.isSelf) {
+  if (!game.users.activeGM?.isSelf || !isAnsweringGmClient()) {
     return;
   }
   if (!foundry.utils.hasProperty(changes, "system.suffered") && !changes.system?.wounds) {

@@ -8,6 +8,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
+import { registerGmQuery } from "../gm-client.js";
 import { startedCombatOf } from "./uses.js";
 
 /** Name of the GM query that applies an effect for a player (registered in registerEffectQueries). */
@@ -136,7 +137,7 @@ export function onImmuneStatus(actor, effect) {
  * checked, and only statuses and the system's own effects can be applied this way.
  */
 export function registerEffectQueries() {
-  CONFIG.queries[APPLY_EFFECT_QUERY] = async ({ actorUuid, id, options }) => {
+  registerGmQuery(APPLY_EFFECT_QUERY, async ({ actorUuid, id, options }) => {
     const actor = await fromUuid(String(actorUuid));
     if (actor?.documentName !== "Actor" || !(CONFIG.statusEffects[id] || SYSTEM_EFFECTS[id])) {
       throw new Error(`Cannot apply "${id}" to ${actorUuid}`);
@@ -148,7 +149,7 @@ export function registerEffectQueries() {
       origin: options?.origin,
       ...(turnOf ? { turnOf: options.turnOf } : {})
     });
-  };
+  });
 }
 
 /**

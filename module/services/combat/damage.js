@@ -15,6 +15,7 @@ import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { canReduceWithVoid, isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
+import { registerGmQuery } from "../gm-client.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /** Name of the GM query that carries a player's damage action. */
@@ -58,7 +59,7 @@ export function bindDamageCards(message, html) {
 
 /** Register the GM side of damage actions. */
 export function registerDamageQueries() {
-  CONFIG.queries[DAMAGE_QUERY] = (request, { user }) => applyDamageAction(request, user);
+  registerGmQuery(DAMAGE_QUERY, (request, { user }) => applyDamageAction(request, user));
 }
 
 /**

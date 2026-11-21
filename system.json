@@ -31,6 +31,7 @@
       }
     ]
   },
+  "socket": true,
   "esmodules": ["dist/l5r4-enhanced.js"],
   "styles": [{ "src": "dist/l5r4-enhanced.css", "layer": "system" }],
   "packs": [

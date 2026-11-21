@@ -1,7 +1,7 @@
 /**
  * @module services/effects/combat-events
  * @description What turn and round events do for effects, called by L5R4Combat (module/documents/combat.js) on the
- * active GM:
+ * active GM, where they run on its answering client only (module/services/gm-client.js, #82):
  * - each event posts the saves that roll on it (Reactions stage = roundEnd);
  * - at the start of a Turn, an actor in Full Defense is asked for the Defense / Reflexes roll again, and a
  *   concentrating caster is reminded of the upkeep;
@@ -15,6 +15,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, R } from "../../utils/localization.js";
+import { isAnsweringGmClient, registerGmQuery } from "../gm-client.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
 
@@ -39,7 +40,7 @@ export const COMBAT_EVENTS = Object.freeze({
    */
   async turn(event, _combat, combatant) {
     const actor = combatant.actor;
-    if (!actor) {
+    if (!actor || !isAnsweringGmClient()) {
       return;
     }
     await postSavePrompts(actor, event);
@@ -65,6 +66,9 @@ export const COMBAT_EVENTS = Object.freeze({
    * @param {Combat} combat
    */
   async round(event, combat) {
+    if (!isAnsweringGmClient()) {
+      return;
+    }
     for (const actor of new Set(combat.combatants.map(c => c.actor).filter(Boolean))) {
       await postSavePrompts(actor, event);
     }
@@ -85,13 +89,13 @@ export const COMBAT_EVENTS = Object.freeze({
 
 /** Register the GM side of beforeNextRound for players who end the Round. */
 export function registerCombatQueries() {
-  CONFIG.queries[CENTER_QUERY] = async ({ combatId }) => {
+  registerGmQuery(CENTER_QUERY, async ({ combatId }) => {
     const combat = game.combats.get(String(combatId));
     if (!combat?.started) {
       throw new Error(`No started combat ${combatId}`);
     }
     await applyCenterStance(combat);
-  };
+  });
 }
 
 /**

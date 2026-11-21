@@ -173,7 +173,7 @@ Every connected client runs `_onCreate`, `_onUpdate`, `_onDelete`, and the `crea
 | Rule | Check |
 | --- | --- |
 | Work a change starts that writes to the world, opens a dialog, or plays an animation runs where `isOwnChange(options, game.socket.id)` holds; never on `userId === game.user.id` | Quench `l5r4-enhanced.workflows.change-origin` |
-| Work only a GM may do runs on `game.users.activeGM?.isSelf`, or through a GM query (**GM queries**) | review |
+| Work only a GM may do runs on `game.users.activeGM?.isSelf` and `isAnsweringGmClient()` (`module/services/gm-client.js`), or through a GM query (**GM queries**): the GM user's clients agree on one, so a GM signed in twice does it once | Quench `l5r4-enhanced.workflows.change-origin` |
 | A change made with `noHook` carries no stamp, so no client runs work after it | review |
 
 Conforming, `L5R4Item#_onCreate` (`module/documents/item.js`): grants and the XP history's stale mark run only where `isOwnChange` holds.
@@ -265,7 +265,7 @@ A player's client asks the active GM to change a document the player does not ow
 | Rule | Check |
 | --- | --- |
 | The name is an exported constant, `` <NAME>_QUERY = `${SYS_ID}.<camelCase>` ``, in the service that owns the change | review |
-| One `register<Feature>Queries()` per service assigns `CONFIG.queries[<NAME>_QUERY]`; `init` calls it | review |
+| One `register<Feature>Queries()` per service registers each query with `registerGmQuery` (`module/services/gm-client.js`), never by assigning `CONFIG.queries` itself: core sends a query to every client of the GM user and takes the first answer, so only the answering client runs it; `init` calls it | review |
 | The handler treats its payload as untrusted: it resolves documents by UUID, checks ids against known lists, and throws on bad input | review |
 | The caller changes the document itself when `document.isOwner`; otherwise it calls `game.users.activeGM.query(...)`, and warns with an i18n key when no GM is active | review |
 | The caller is named `request*` (`naming.md`) | Local ESLint verb rule (`naming.md`) |
