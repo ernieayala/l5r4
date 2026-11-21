@@ -3,20 +3,17 @@
  * Actor sheet sidebar component (actor image and compact sections)
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  .actor-img {
-    align-items: center;
-    display: flex;
-    height: 240px;
-    justify-content: center;
-    max-width: 240px;
-    min-width: 240px;
-    width: 240px;
+.l5r4-portrait {
+  align-items: center;
+  display: flex;
+  height: var(--l5r4-size-portrait);
+  justify-content: center;
+  max-width: var(--l5r4-size-portrait);
+  min-width: var(--l5r4-size-portrait);
+  width: var(--l5r4-size-portrait);
 
-    img {
-      max-height: 100%;
-      max-width: 100%;
-    }
+  img {
+    max-height: 100%;
+    max-width: 100%;
   }
 }

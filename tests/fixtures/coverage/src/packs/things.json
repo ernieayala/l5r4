@@ -1,0 +1,9 @@
+{
+  "name": "things",
+  "documentType": "Item",
+  "entries": [
+    { "name": "Full Thing", "page": 1, "coverage": "full" },
+    { "name": "Partial Thing", "page": 2, "coverage": "partial" },
+    { "name": "Bare Thing", "page": 3, "coverage": "none" }
+  ]
+}

@@ -1,0 +1,23 @@
+/**
+ * Item Summary Card
+ * The rule lines and book citation an item or creature shows in place of the book's text (module/documents/summary.js)
+ */
+
+.l5r4-citation {
+  font-size: var(--l5r4-font-size-meta);
+  font-style: italic;
+  margin: var(--l5r4-space-4) 0 0;
+}
+
+// The list keeps its 20px indent on the space scale: a 4px margin and a 16px padding
+.l5r4-rule-lines {
+  margin: var(--l5r4-space-4) 0 var(--l5r4-space-8);
+  margin-inline-start: var(--l5r4-space-4);
+  padding-inline-start: var(--l5r4-space-16);
+}
+
+.l5r4-item-summary {
+  border-block-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);
+  margin-block-start: var(--l5r4-space-4);
+  padding-block-start: var(--l5r4-space-4);
+}

@@ -1,0 +1,275 @@
+/**
+ * @module documents/actor/rules
+ * @description The rule engine's actor side (roadmap/STAGE-07-RULE-ENGINE.md, AUTOMATION.md §1). It collects
+ * `system.rules` from the actor's items and applied Active Effects, then runs them at fixed points of preparation:
+ *
+ * 1. `applyInitialRules`, right after core applies "initial"-phase effects: roll options from statuses and worn
+ *    armor; TraitAdjust, so Rings and derived values see it as they see a Trait effect.
+ * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
+ *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
+ * 3. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
+ * 4. `prepareWoundRollOption` (roll-options.js), once the Wound Rank is known.
+ *
+ * The roll options themselves are module/documents/actor/roll-options.js.
+ */
+
+import { SYS_ID } from "../../config/constants.js";
+import {
+  applyRollOptionRules,
+  getDerivedRuleOutputs,
+  getTraitAdjustments
+} from "../../utils/rule-engine.js";
+import { getSelectorBonus } from "../../utils/rule-bag.js";
+import { getArmorTn } from "../../utils/effects.js";
+import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
+import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
+import { getStackedModifiers } from "../../utils/modifier-stacking.js";
+import { toInt } from "../../utils/type-coercion.js";
+import { createRule } from "../../data/rules/rule-models.js";
+import { prepareInitialRollOptions, prepareRankRollOptions } from "./roll-options.js";
+
+/** Rule problems already reported, so a bad rule warns once, not on every preparation. */
+const reported = new Set();
+
+/**
+ * Every valid rule that applies to the actor, sorted by priority. Rules come from items whose rules are active
+ * (worn armor, every other item) and from applied effects, which core already filters for disabled and suppressed
+ * ones and for item effects that do not transfer.
+ * @param {Actor} actor
+ * @returns {import("../../utils/rule-engine.js").RuleEntry[]}
+ */
+export function rulesOf(actor) {
+  const sources = [
+    ...itemRuleSourcesOf(actor),
+    ...effectRuleSourcesOf(actor),
+    ...taintRuleSourcesOf(actor)
+  ];
+
+  const entries = [];
+  for (const { rule, ...from } of sources) {
+    // system.rules is user-authored JSON: a trust boundary, so each entry is validated.
+    try {
+      entries.push({ rule: createRule(rule), ...from });
+    } catch (err) {
+      onRuleProblem(actor, from.source, err.message);
+    }
+  }
+  // Array#sort is stable, so equal priorities keep their collection order.
+  return entries.sort((a, b) => a.rule.priority - b.rule.priority);
+}
+
+/**
+ * Collect the rules, seed the status, armor, owned-item, and rank roll options, and apply TraitAdjust. Runs at the
+ * end of the "initial" Active Effect phase.
+ * @param {Actor} actor
+ */
+export function applyInitialRules(actor) {
+  actor.rules = rulesOf(actor);
+  prepareInitialRollOptions(actor);
+
+  const { adjustments, errors } = getTraitAdjustments(
+    actor.rules,
+    actor.getRollData(),
+    actor.rollOptions
+  );
+  for (const { source, message } of errors) {
+    onRuleProblem(actor, source, message);
+  }
+  const sys = actor.system;
+  for (const [trait, delta] of Object.entries(adjustments)) {
+    if (trait === "void") {
+      sys.rings.void.rank += delta;
+    } else {
+      sys.traits[trait] += delta;
+    }
+  }
+}
+
+/**
+ * Run the rules that need Traits and Rings: add their roll options, write the Initiative and Wounds outputs onto the
+ * prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * @param {Actor} actor
+ * @param {object} sys - The actor's prepared system data, after prepareTraitsAndRings.
+ */
+export function applyDerivedRules(actor, sys) {
+  const options = actor.rollOptions;
+  prepareRankRollOptions(actor, sys);
+  applyRollOptionRules(actor.rules, options);
+
+  const out = getDerivedRuleOutputs(actor.rules, actor.getRollData(), options);
+  for (const { source, message } of out.errors) {
+    onRuleProblem(actor, source, message);
+  }
+
+  applyRuleModifiers(sys, out);
+  prepareActorRuleOutputs(actor, out);
+  applyInitiativeRollModifiers(sys, { bag: out.bag, options });
+  prepareMaxVoidPoints(sys);
+}
+
+/**
+ * Compute the Armor TN from its base, armor, and manual modifier with the ArmorTN rules (module/utils/effects.js,
+ * getArmorTn), and add Reduction rules. Sets `armorTn.current` and `armorTn.vs`, the range-limited changes an
+ * attacker's roll reads, such as Prone's.
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {Actor} actor
+ * @param {object} sys
+ * @param {{base: number, armor: number, other: number}} parts
+ */
+export function applyArmorRules(actor, sys, { base, armor, other }) {
+  const { current, vs } = getArmorTn({
+    base,
+    armor,
+    other,
+    rules: actor.armorRules,
+    stack: getStackedModifiers
+  });
+  sys.armorTn.current = current;
+  sys.armorTn.vs = vs;
+  sys.armorTn.reduction = Math.max(0, sys.armorTn.reduction + sys.armorTn.ruleReduction);
+}
+
+/**
+ * Warn once about a rule that failed validation or whose value did not resolve.
+ * @param {Actor} actor
+ * @param {string} source
+ * @param {string} message
+ */
+function onRuleProblem(actor, source, message) {
+  const id = `${actor.uuid}|${source}|${message}`;
+  if (reported.has(id)) {
+    return;
+  }
+  reported.add(id);
+  console.warn(`${SYS_ID} | Rule on "${source}" (${actor.name}) skipped: ${message}`);
+}
+
+/**
+ * The rule sources of the items whose rules are active, a choice not yet made waiting for it.
+ * @param {Actor} actor
+ * @returns {object[]} Each rule with its source name, item id, and for a weapon its weapon id
+ */
+function itemRuleSourcesOf(actor) {
+  const sources = [];
+  for (const item of actor.items) {
+    if (item.system.rulesActive) {
+      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
+      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
+      sources.push(
+        ...applyChoices(item.system.ownedRules)
+          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
+          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
+          .map(rule => ({
+            rule,
+            source: item.name,
+            itemId: item.id,
+            ...extra
+          }))
+      );
+    }
+  }
+  return sources;
+}
+
+/**
+ * The rule sources of the applied effects.
+ * @param {Actor} actor
+ * @returns {object[]} Each rule with its source name, effect UUID, and the effect's level when it has one
+ */
+function effectRuleSourcesOf(actor) {
+  const sources = [];
+  for (const effect of actor.appliedEffects) {
+    const extra = { effectUuid: effect.uuid };
+    if (effect.system.level !== null) {
+      extra.level = effect.system.level;
+    }
+    sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name, ...extra })));
+  }
+  return sources;
+}
+
+/**
+ * The Taint rule source: Taint Level 3 and 4 penalize social Skill rolls (STAGE-11 decision 5).
+ * game-rules/89_shadowlands_taint.md, p.278
+ * @param {Actor} actor
+ * @returns {object[]} The penalty's rule, or none below Level 3
+ */
+function taintRuleSourcesOf(actor) {
+  const { socialPenalty } = getTaintEffects(toInt(actor.system.shadowTaint.rank));
+  if (!socialPenalty) {
+    return [];
+  }
+  const source = game.i18n.localize("l5r4.ui.taint.label");
+  return [
+    {
+      rule: { key: "RollModifier", selector: "skill-tag:social", roll: -socialPenalty },
+      source
+    }
+  ];
+}
+
+/**
+ * Add the Initiative, Wounds, Reduction, and movement outputs onto the prepared data.
+ * @param {object} sys - The actor's prepared system data
+ * @param {object} out - From getDerivedRuleOutputs
+ */
+function applyRuleModifiers(sys, out) {
+  sys.initiative.rollMod += out.initiative.roll;
+  sys.initiative.keepMod += out.initiative.keep;
+  sys.initiative.totalMod += out.initiative.total;
+  sys.woundsMod += out.woundsPerRank;
+  sys.woundsPenaltyMod += out.woundPenalty;
+  sys.armorTn.ruleReduction = out.reduction;
+  sys.movementWater = out.movementWater;
+}
+
+/**
+ * Keep on the actor the outputs later steps and the roll pipeline read: ArmorTN rules, Reduction parts, damage
+ * defenses, condition immunities, periodic saves, resources, ledger rules, and the modifier bag.
+ * @param {Actor} actor
+ * @param {object} out - From getDerivedRuleOutputs
+ */
+function prepareActorRuleOutputs(actor, out) {
+  actor.armorRules = out.armor;
+  actor.reductionParts = out.reductionParts;
+  actor.damageDefenses = out.defenses;
+  actor.conditionImmunities = out.immunities;
+  actor.periodicSaves = out.saves;
+  actor.resources = out.resources;
+  actor.ledgerRules = out.ledger;
+  actor.ruleBag = out.bag;
+}
+
+/**
+ * Add the roll modifiers on every roll to the Initiative pool: Fear is on all die rolls, Dazed on all actions.
+ * RollModifier rules on "any" or "initiative" join the pool; optional and range-limited ones do not.
+ * game-rules/42_fear.md, p.90
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {object} sys - The actor's prepared system data
+ * @param {object} rolls
+ * @param {object} rolls.bag - The modifier bag
+ * @param {Set<string>} rolls.options - The actor's roll options
+ */
+function applyInitiativeRollModifiers(sys, { bag, options }) {
+  const initiativeOptions = new Set([...options, "check:initiative"]);
+  const onInitiative = getSelectorBonus(bag, ["any", "initiative"], {
+    options: initiativeOptions
+  });
+  sys.initiative.rollMod += onInitiative.roll;
+  sys.initiative.keepMod += onInitiative.keep;
+  sys.initiative.totalMod += onInitiative.total;
+}
+
+/**
+ * Prepare the maximum Void Points: Taint Level 4 costs a Void Point from the maximum, not from the Void Ring; the
+ * Lost have none.
+ * game-rules/89_shadowlands_taint.md, p.278-279
+ * @param {object} sys - The actor's prepared system data
+ */
+function prepareMaxVoidPoints(sys) {
+  sys.rings.void.max = getMaxVoidPoints(
+    toInt(sys.rings.void.rank),
+    toInt(sys.shadowTaint.rank),
+    getHighestRing(sys.rings)
+  );
+}

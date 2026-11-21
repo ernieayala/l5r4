@@ -1,342 +1,98 @@
 {
   "l5r4": {
-    "ui": {
-      "tabs": {
-        "details": "Detalles",
-        "modifiers": "Modificadores",
-        "description": "Descripción",
-        "effects": "Efectos Activos"
-      },
-      "mechanics": {
-        "rings": {
-          "ring": "Anillo",
-          "fire": "Fuego",
-          "water": "Agua",
-          "air": "Aire",
-          "earth": "Tierra",
-          "void": "Vacío",
-          "voidPoints": "Puntos de Vacío",
-          "all": "Todos",
-          "voidTnBoost": "Usar Vacío",
-          "voidInitBoost": "Usar Vacío"
-        },
-        "traits": {
-          "sta": "Resistencia",
-          "wil": "Voluntad",
-          "str": "Fuerza",
-          "per": "Percepción",
-          "ref": "Reflejos",
-          "awa": "Consciencia",
-          "agi": "Agilidad",
-          "int": "Inteligencia"
-        },
-        "rolls": {
-          "success": "Éxito",
-          "failure": "Fracaso",
-          "missed": "Fallado",
-          "explodesOn": "Explota En",
-          "withEmphasis": "con Énfasis",
-          "unskilled": "Sin Habilidad",
-          "traitRoll": "Tirada de Atributo",
-          "ringRoll": "Tirada de Anillo",
-          "skillRoll": "Tirada de Habilidad",
-          "damageRoll": "Tirada de Daño",
-          "attackRoll": "Tirada de Ataque",
-          "spellCasting": "Tirada de Lanzar Hechizo",
-          "castSpell": "Lanzar {spell} ({ring})",
-          "castMaho": "Lanzar Maho: {spell} ({ring})",
-          "unskilledRoll": "Tirada sin Habilidad",
-          "emphasis": "Énfasis",
-          "raise": "Incremento",
-          "raises": "Incrementos",
-          "freeRaises": "Incrementos Gratis",
-          "automatic": "Automático",
-          "formula": "Fórmula",
-          "result": "Resultado",
-          "socialResistance": "Resistencia Social",
-          "socialResistanceDescription": "Resistiendo Intimidación o Tentación"
-        },
-        "notifications": {
-          "itemCreated": "Creado {type}: {name}",
-          "itemDeleted": "Eliminado {type}: {name}",
-          "itemUpdated": "Actualizado {type}: {name}",
-          "woundConfigFailed": "Error al abrir configuración de heridas",
-          "woundConfigUpdateFailed": "Error al actualizar configuración de heridas",
-          "invalidWoundConfigValue": "Valor de configuración de heridas inválido"
-        },
-        "combat": {
-          "attack": "Ataque",
-          "melee": "Cuerpo a Cuerpo",
-          "ranged": "A Distancia",
-          "multiplier": "Multiplicador",
-          "woundPenalty": "Penalización por Heridas",
-          "armorTnBonus": "Bonificación de ND de Armadura",
-          "targeting": {
-            "vs": "vs",
-            "multipleTargets": "objetivos - ND no establecido automáticamente"
-          }
-        },
-        "wounds": {
-          "wounds": "Heridas",
-          "armorTn": "ND de Armadura",
-          "armorTnBase": "ND de Armadura Base",
-          "armorReduction": "Reducción",
-          "woundLevel": "Nivel",
-          "woundsSuffered": "Heridas Sufridas",
-          "maxWounds": "Heridas Máximas",
-          "penalty": "Penalización",
-          "woundHealRate": "Tasa de Curación de Heridas",
-          "healRateFormula": "x 2 +",
-          "woundMode": "Modo de Heridas",
-          "manual": "Manual",
-          "formula": "Fórmula",
-          "woundConfiguration": "Configuración de Heridas",
-          "earthMultiplier": "Multiplicador de Tierra",
-          "woundBonus": "Bonificación de Heridas",
-          "threshold": "Umbral",
-          "healthy": "Saludable",
-          "nicked": "Rasguñado",
-          "grazed": "Rozado",
-          "hurt": "Lastimado",
-          "injured": "Herido",
-          "crippled": "Lisiado",
-          "down": "Caído",
-          "out": "Fuera de Combate",
-          "applyHealing": "Aplicar Curación",
-          "applyHealingTitle": "Aplicar curación natural por descanso",
-          "naturalHealing": "Curación Natural",
-          "restedAndRecovered": "descansó y recuperó heridas",
-          "healingApplied": "Sanó {amount} heridas (tasa de curación: {rate})",
-          "woundStatus": "Heridas: {current}/{max} (sufridas: {suffered})",
-          "fullyHealed": "¡Completamente curado!",
-          "alreadyFullHealth": "{name} ya está con salud completa",
-          "noHealRate": "{name} no tiene tasa de curación configurada",
-          "healingFailed": "Error al aplicar curación a {name}",
-          "applyWounds": "Aplicar Heridas",
-          "reduceWithVoid": "Reducir con Vacío",
-          "woundsApplied": "Aplicadas {amount} heridas a {name}",
-          "woundsAppliedWithArmor": "{name} recibió {original} de daño. La armadura redujo {reduction}. Aplicadas {final} heridas.",
-          "woundsReducedApplied": "Punto de Vacío gastado: Daño reducido en 10. Aplicadas {amount} heridas a {name}",
-          "woundsReducedWithArmor": "{name} recibió {original} de daño. Vacío redujo a {afterVoid}, armadura redujo {reduction}. Aplicadas {final} heridas.",
-          "noTokenSelected": "No hay ficha seleccionada. Selecciona una ficha para aplicar heridas.",
-          "noVoidPoints": "No hay Puntos de Vacío disponibles para reducir daño"
-        },
-        "stances": {
-          "pending": "Pendiente",
-          "attack": "Postura de Ataque",
-          "fullAttack": "Postura de Ataque Total",
-          "defense": "Postura de Defensa",
-          "fullDefense": "Postura de Defensa Total",
-          "center": "Postura Centrada",
-          "fullDefenseDescription": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura.",
-          "cannotAttackDefense": "No puedes atacar mientras estás en Postura de Defensa",
-          "fullAttackBonus": "Postura de Ataque Total: +2k1"
-        },
-        "mounted": {
-          "fullAttackRestriction": "La postura de Ataque Total requiere Equitación 3+ mientras estás montado",
-          "attackBonus": "Montado/Posición Superior: +1k0"
-        },
-        "fear": {
-          "fearRank": "Rango de Miedo",
-          "fearLabel": "Miedo {rank}",
-          "effectName": "Miedo {rank}",
-          "clickToTest": "Clic para probar Miedo contra personajes seleccionados",
-          "testResult": "Prueba de Miedo {rank}",
-          "testSuccess": "Resistió Miedo {rank}",
-          "testFailure": "Falló Prueba de Miedo {rank}",
-          "penaltyApplied": "Penalización: -{penalty}k0 a todas las tiradas",
-          "catastrophicFailure": "¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
-          "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
-          "noWillpower": "{character} no tiene el atributo Voluntad",
-          "noFear": "Este PNJ no tiene efecto de Miedo configurado",
-          "testAgainst": "vs {creature}",
-          "rollFailed": "Tirada de prueba de Miedo falló - fórmula inválida o datos corruptos",
-          "templateFailed": "Plantilla de chat de prueba de Miedo falló al renderizar"
+    "apps": {
+      "conditionManager": {
+        "errors": {
+          "openFailed": "Error al abrir el Administrador de Condiciones"
         }
-      },
-      "common": {
-        "roll": "Tirar",
-        "cancel": "Cancelar",
-        "ok": "Aceptar",
-        "add": "Agregar",
-        "none": "Ninguno",
-        "keep": "Conservar",
-        "raise": "Incremento",
-        "init": "Iniciativa",
-        "bonus": "Bonificación",
-        "mod": "Modificador",
-        "multi": "Multiplicador",
-        "rate": "Tasa",
-        "current": "Actual",
-        "total": "Total",
-        "left": "restante",
-        "close": "Cerrar",
-        "apply": "Aplicar",
-        "toChat": "Al Chat",
-        "effect": "Efecto",
-        "simple": "Simple",
-        "complex": "Complejo",
-        "free": "Libre",
-        "action": "Acción",
-        "edit": "Editar",
-        "delete": "Eliminar",
-        "name": "Nombre",
-        "description": "Descripción",
-        "notes": "Notas",
-        "activeEffects": "Efectos Activos",
-        "conditions": "Condiciones",
-        "active": "Activo",
-        "new": "Nuevo",
-        "auto": "Auto",
-        "disabled": "desactivado",
-        "rank": "Rango",
-        "clan": "Clan",
-        "school": "Escuela",
-        "xp": "Puntos de Experiencia",
-        "insight": "Perspicacia",
-        "skill": "Habilidad",
-        "damage": "Daño",
-        "type": "Tipo",
-        "ring": "Anillo",
-        "mastery": "Maestría",
-        "tn": "ND",
-        "cost": "Costo",
-        "save": "Guardar",
-        "armor": "Armadura"
-      },
-      "armor": {
-        "allowStacking": "Permitir Apilamiento de Armadura"
       },
       "emphasisManager": {
-        "title": "Administrar Énfasis de Habilidades",
-        "manageFor": "Administrar Énfasis Disponibles para",
-        "manage": "Administrar Énfasis",
         "addCustom": "Agregar Énfasis Personalizado",
         "custom": "Personalizado",
-        "none": "No hay énfasis disponibles",
-        "help": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
-        "noEmphases": "No hay énfasis en la lista",
-        "limitReached": "No puedes entrenar más de {max} énfasis con este rango de habilidad"
+        "hint": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
+        "manage": "Administrar Énfasis",
+        "noEmphases": "No hay énfasis en la lista"
       },
       "wealthManager": {
-        "title": "Administrador de Riqueza",
-        "tooltip": "Administrar Riqueza",
-        "currentWealth": "Riqueza Actual",
-        "addMoney": "Agregar Dinero",
-        "removeMoney": "Quitar Dinero",
-        "amount": "Cantidad",
-        "denomination": "Denominación",
         "add": "Agregar",
-        "remove": "Quitar",
+        "addMoney": "Agregar Dinero",
+        "amount": "Cantidad",
         "convert": "Convertir Moneda",
-        "convertZeniToBu": "Convertir 10 Zeni a 1 Bu",
-        "convertBuToZeni": "Convertir 1 Bu a 10 Zeni",
         "convertBuToKoku": "Convertir 5 Bu a 1 Koku",
+        "convertBuToZeni": "Convertir 1 Bu a 10 Zeni",
         "convertKokuToBu": "Convertir 1 Koku a 5 Bu",
-        "insufficientFunds": "Fondos insuficientes para esta transacción",
-        "insufficientForConversion": "Fondos insuficientes para esta conversión"
+        "convertZeniToBu": "Convertir 10 Zeni a 1 Bu",
+        "currentWealth": "Riqueza Actual",
+        "denomination": "Denominación",
+        "errors": {
+          "openFailed": "Error al abrir el Administrador de Riqueza"
+        },
+        "open": "Administrar Riqueza",
+        "remove": "Quitar",
+        "removeMoney": "Quitar Dinero"
       },
-      "sheets": {
-        "bio": "Trasfondo",
-        "skill": "Habilidad",
-        "skills": "Habilidades",
-        "weapon": "Arma",
-        "weapons": "Armas",
-        "armor": "Armadura",
-        "item": "Objeto",
-        "items": "Objetos",
-        "addItem": "Agregar Objeto",
-        "notes": "Notas",
-        "spell": "Hechizo",
-        "spells": "Hechizos",
-        "technique": "Técnica",
-        "techniques": "Técnicas",
-        "armors": "Armaduras",
-        "advantage": "Ventaja",
-        "advantages": "Ventajas",
-        "disadvantage": "Desventaja",
-        "disadvantages": "Desventajas",
-        "kata": "Kata",
-        "katas": "Katas",
-        "kiho": "Kiho",
-        "kihos": "Kihos",
-        "tattoo": "Tatuaje",
-        "tattoos": "Tatuajes",
-        "equipment": "Equipamiento",
-        "abilities": "Habilidades",
-        "character": "Personaje",
-        "rulesSummary": "Resumen de Reglas",
-        "description": "Descripción",
-        "woundLevels": "Niveles de Heridas",
-        "spellSlots": "Espacios de Hechizo",
-        "demands": "Demandas",
-        "traits": "Atributos",
-        "itemSheetTitle": "Hoja de Objeto",
-        "xpModal": "Experiencia"
-      },
-      "notifications": {
-        "actorNotFound": "Actor no encontrado para tirada de daño",
-        "noPermissionDamage": "No tienes permiso para tirar daño para este actor",
-        "noValidWeapon": "No se encontró arma válida para tirada de ataque",
-        "fullDefenseRollFailed": "Error al realizar tirada de Defensa Total. Por favor, tira manualmente.",
-        "invalidRingForSpell": "Anillo inválido para espacio de hechizo: {ring}",
-        "noActorForVoid": "No hay actor disponible para gastar puntos de vacío",
-        "chatMessageFailed": "Error al publicar tirada en el chat - ver consola para detalles",
-        "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
-        "deficiencyBlocksCasting": "Deficiencia en {ring} reduce tu Rango de Escuela a cero - no puedes lanzar",
-        "noSpellSlots": "Te quedaste sin espacios de hechizo para este anillo",
-        "conditionApplyFailed": "Error al aplicar {condition} a {actor}",
-        "invalidSkillName": "Nombre de habilidad inválido proporcionado",
-        "invalidDamageValue": "Valor de daño inválido proporcionado",
-        "noTargetForSwap": "No se seleccionó objetivo para intercambio de iniciativa",
-        "noCombatActive": "No hay combate activo para modificar iniciativa",
-        "notInCombat": "El personaje no está en combate activo",
-        "wealthManagerFailed": "Error al abrir el Administrador de Riqueza",
-        "conditionManagerFailed": "Error al abrir el Administrador de Condiciones"
-      },
-      "voidActions": {
-        "title": "Acciones de Puntos de Vacío",
-        "enhanceRoll": "Mejorar Tirada (+1k1)",
-        "tempSkill": "Obtener Habilidad Temporal",
-        "reduceDamage": "Reducir Daño (-10)",
-        "increaseArmorTN": "Aumentar ND de Armadura (+10)",
-        "swapInitiative": "Intercambiar Iniciativa",
-        "increaseInitiative": "Aumentar Iniciativa (+10)",
-        "tempSkillGranted": "Punto de Vacío gastado: Obtenido rango temporal en {skill}",
-        "damageReduced": "Punto de Vacío gastado: Daño reducido de {original} a {reduced} (-{amount})",
-        "armorTnBonus": "Vacío: ND de Armadura +10",
-        "armorTnIncreased": "Punto de Vacío gastado: ND de Armadura aumentado en 10 para esta Ronda",
-        "armorTnAlreadyActive": "La bonificación de ND de Armadura por Punto de Vacío ya está activa",
-        "initiativeSwapped": "Punto de Vacío gastado: {source} intercambió iniciativa con {target}",
-        "initiativeIncreased": "Punto de Vacío gastado: Iniciativa aumentada de {oldValue} a {newValue}"
-      },
-      "hints": {
-        "leftRightToAdjust": "Izquierda y Derecha para Ajustar",
-        "leftClickPlusRightClickMinus": "Shift+Clic izquierdo: +1, Shift+Clic derecho: -1",
-        "voidPointsClickAdjust": "Clic izquierdo: +1, Clic derecho: -1",
-        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0",
-        "shiftClickToChat": "Shift+Clic para publicar en el chat",
-        "postToChat": "Publicar en el chat"
-      },
-      "dialogs": {
-        "deleteItem": {
-          "title": "¿Eliminar Objeto?",
-          "content": "¿Estás seguro de que quieres eliminar {name}?"
-        }
+      "woundConfig": {
+        "title": "Configuración de Heridas",
+        "titleFor": "Configuración de Heridas: {name}"
       }
     },
     "character": {
-      "skills": {
-        "properties": {
-          "type": "Tipo",
-          "trait": "Atributo",
-          "emphasis": "Énfasis",
-          "school": "Habilidad de escuela",
-          "mastery3": "Maestría Rango 3",
-          "mastery5": "Maestría Rango 5",
-          "mastery7": "Maestría Rango 7",
-          "insightbonus": "Bonificación de Perspicacia"
+      "advantages": {
+        "ancestor": "Ancestro",
+        "material": "Material",
+        "mental": "Mental",
+        "physical": "Física",
+        "social": "Social",
+        "spiritual": "Espiritual"
+      },
+      "experience": {
+        "adjustExperience": "Ajustar Experiencia",
+        "breakdown": {
+          "advantages": "Ventajas",
+          "base": "Base",
+          "cap": "límite",
+          "capHint": "Clic para cambiar la EXP máxima obtenida de desventajas.",
+          "disadvantagesGrant": "Desventajas",
+          "kata": "Kata",
+          "kiho": "Kiho",
+          "manualAdjustments": "Ajustes manuales",
+          "skills": "Habilidades",
+          "spells": "Hechizos",
+          "traits": "Atributos",
+          "void": "Vacío"
         },
+        "disadvantageCapLabel": "EXP Máximo",
+        "fallbackLabels": {
+          "skillCreated": "Habilidad Creada",
+          "skillIncreased": "Habilidad Aumentada",
+          "traitIncrease": "Aumento de Atributo",
+          "voidIncrease": "Aumento de Vacío"
+        },
+        "note": "Nota",
+        "purchases": "Compras",
+        "reason": "Razón",
+        "recalculate": "Recalcular compras de EXP desde el estado actual del personaje",
+        "skillChange": "{name} {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "spellMemorized": "Memorizado: {name}",
+        "summary": "Resumen de Experiencia",
+        "traitChange": "{label} {from}→{to}",
+        "usedTotal": "Usado / Total",
+        "voidChange": "Vacío {from}→{to}",
+        "xpAmount": "Cantidad"
+      },
+      "movement": {
+        "feet": "pies",
+        "maximum": "Movimiento Máximo",
+        "title": "Movimiento"
+      },
+      "ranks": {
+        "gloryRank": "Gloria",
+        "honorRank": "Honor",
+        "statusRank": "Rango de Estatus",
+        "taintRank": "Corrupción de las Tierras de Sombra"
+      },
+      "skills": {
         "names": {
           "acting": "Actuación",
           "animalHandling": "Manejo de Animales",
@@ -346,8 +102,8 @@
           "calligraphy": "Caligrafía",
           "chainWeapons": "Armas de Cadena",
           "commerce": "Comercio",
-          "craft": "Oficio",
           "courtier": "Cortesano",
+          "craft": "Oficio",
           "defense": "Defensa",
           "divination": "Adivinación",
           "engineering": "Ingeniería",
@@ -380,105 +136,48 @@
           "temptation": "Tentación",
           "warFan": "Abanico de Guerra",
           "weapons": "Armas"
+        },
+        "properties": {
+          "emphasis": "Énfasis",
+          "mastery3": "Maestría Rango 3",
+          "mastery5": "Maestría Rango 5",
+          "mastery7": "Maestría Rango 7",
+          "school": "Habilidad de escuela",
+          "trait": "Atributo",
+          "type": "Tipo"
         }
       },
       "skillTypes": {
-        "high": "Alta",
         "bugei": "Bugei",
-        "merch": "Mercante",
-        "low": "Baja"
-      },
-      "advantages": {
-        "physical": "Física",
-        "mental": "Mental",
-        "social": "Social",
-        "material": "Material",
-        "spiritual": "Espiritual",
-        "ancestor": "Ancestro"
-      },
-      "ranks": {
-        "honorRank": "Honor",
-        "honorPoints": "Puntos de Honor",
-        "gloryRank": "Gloria",
-        "gloryPoints": "Puntos de Gloria",
-        "statusRank": "Rango de Estatus",
-        "statusPoints": "Puntos de Estatus",
-        "shadowRank": "Corrupción de las Tierras de Sombra",
-        "shadowPoints": "Puntos de Sombra",
-        "insightRank": "Rango de Perspicacia",
-        "insightPoints": "Puntos de Perspicacia"
+        "high": "Alta",
+        "low": "Baja",
+        "merch": "Mercante"
       },
       "stance": {
-        "title": "Combate",
-        "current": "Postura Actual"
-      },
-      "movement": {
-        "title": "Movimiento",
-        "maximum": "Movimiento Máximo",
-        "feet": "pies"
-      },
-      "experience": {
-        "xpAmount": "Cantidad",
-        "note": "Nota",
-        "reason": "Razón",
-        "adjustExperience": "Ajustar Experiencia",
-        "experienceSummary": "Resumen de Experiencia",
-        "usedTotal": "Usado / Total",
-        "poolChanges": "Cambios de Reserva",
-        "when": "Cuándo",
-        "none": "Sin entradas",
-        "purchases": "Compras",
-        "xpLog": "Registro de EXP",
-        "traitChange": "{label} {from}→{to}",
-        "voidChange": "Vacío {from}→{to}",
-        "skillCreate": "{name} 0→{rank}",
-        "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalcular compras de EXP desde el estado actual del personaje",
-        "recalculateSuccess": "Compras de EXP recalculadas exitosamente",
-        "recalculateFailed": "Error al recalcular compras de EXP",
-        "disadvantageCapLabel": "EXP Máximo",
-        "disadvantageCapTitle": "Establecer Límite de Desventajas",
-        "disadvantageCapTooltip": "Clic para cambiar la EXP máxima obtenida de desventajas",
-        "breakdown": {
-          "base": "Base",
-          "disadvantagesGrant": "Desventajas",
-          "cap": "límite",
-          "manualAdjustments": "Ajustes manuales",
-          "traits": "Atributos",
-          "void": "Vacío",
-          "skills": "Habilidades",
-          "advantages": "Ventajas",
-          "kata": "Kata",
-          "kiho": "Kiho",
-          "spells": "Hechizos"
-        },
-        "fallbackLabels": {
-          "advantage": "Ventaja",
-          "disadvantage": "Desventaja",
-          "traitIncrease": "Aumento de Atributo",
-          "voidIncrease": "Aumento de Vacío",
-          "skillCreated": "Habilidad Creada",
-          "skillIncreased": "Habilidad Aumentada"
-        },
-        "spellMemorized": "Memorizado: {name}"
+        "current": "Postura Actual",
+        "title": "Combate"
       }
     },
     "equipment": {
+      "armor": {
+        "equipped": "Equipado",
+        "reduction": "Reducción",
+        "type": "Tipo de Armadura",
+        "types": {
+          "ashigaru": "Armadura Ashigaru",
+          "heavy": "Armadura Pesada",
+          "light": "Armadura Ligera",
+          "riding": "Armadura de Montar"
+        }
+      },
+      "general": {
+        "keywords": "Palabras Clave",
+        "keywordsPlaceholder": "ej., Samurái, Campesino",
+        "nemuranai": "Nemuranai",
+        "price": "Precio"
+      },
       "weapons": {
-        "attackType": "Tipo de Ataque",
-        "size": "Tamaño",
-        "damageKeep": "Dados de Daño Conservados",
-        "range": "Alcance",
         "arrow": "Flecha",
-        "typeWeapon": "Arma",
-        "typeBow": "Arco",
-        "rangedAttack": "Ataque a Distancia",
-        "associatedSkill": "Habilidad Asociada",
-        "fallback": "Alternativa",
-        "skillExample": {
-          "bow": "Kyujutsu",
-          "weapon": "Kenjutsu"
-        },
         "arrows": {
           "armor": "Perforante",
           "flesh": "Cortacarne",
@@ -486,166 +185,350 @@
           "rope": "Cortacuerdas",
           "willow": "Hoja de Sauce"
         },
+        "associatedSkill": "Habilidad Asociada",
+        "attackType": "Tipo de Ataque",
+        "damageKeep": "Dados de Daño Conservados",
+        "range": "Alcance",
+        "rangedAttack": "Ataque a Distancia",
+        "size": "Tamaño",
         "sizes": {
-          "small": "Pequeño",
+          "large": "Grande",
           "medium": "Mediano",
-          "large": "Grande"
-        }
-      },
-      "armor": {
-        "reduction": "Reducción",
-        "equipped": "Equipado",
-        "armorType": "Tipo de Armadura",
-        "types": {
-          "ashigaru": "Armadura Ashigaru",
-          "light": "Armadura Ligera",
-          "heavy": "Armadura Pesada",
-          "riding": "Armadura de Montar"
-        }
-      },
-      "keywords": "Palabras Clave",
-      "keywordsPlaceholder": "ej., Samurái, Campesino",
-      "nemuranai": "Nemuranai",
-      "price": "Precio",
-      "general": {}
+          "small": "Pequeño"
+        },
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "typeBow": "Arco",
+        "typeWeapon": "Arma"
+      }
     },
     "magic": {
-      "spells": {
-        "range": "Alcance",
-        "aoe": "Área de Efecto",
-        "duration": "Duración",
-        "cast": "Lanzar",
-        "raises": "Incrementos",
-        "affinity": "Afinidad",
-        "deficiency": "Deficiencia",
-        "maho": "Maho",
-        "useSpellSlot": "Usar Espacio de Hechizo",
-        "voidSlot": "Usar Espacio de Hechizo de Vacío",
-        "slotsRestored": "Todos los espacios de hechizo restaurados al máximo",
-        "restored": "restaurados",
-        "memorized": "Memorizado"
-      },
-      "maho": {
-        "warningTitle": "Magia de Sangre - Maho Prohibido",
-        "bloodRequired": "Costo de Sangre Requerido",
-        "additionalBloodBonus": "Cada cantidad adicional de costo de sangre otorga +1 Incremento Gratis",
-        "bloodSource": {
-          "label": "Fuente de Sangre",
-          "self": "Propio",
-          "other": "Otro"
-        },
-        "additionalBlood": "Sangre Adicional",
-        "castMaho": "Lanzar Hechizo Maho",
-        "mahoCasting": "Lanzamiento de Maho",
-        "bloodCost": "Sangre",
-        "freeRaises": "Incrementos Gratis",
-        "taintGained": "Corrupción Obtenida",
-        "taintGainedNotification": "Obtenido {taint} puntos de Corrupción de las Tierras de Sombra por lanzar maho"
-      },
       "kiho": {
         "internal": "Interno",
         "karmic": "Kármico",
         "martial": "Marcial",
         "mystic": "Místico"
       },
-      "techniques": {
-        "single": "Técnica",
-        "plural": "Técnicas"
+      "maho": {
+        "additionalBlood": "Sangre Adicional",
+        "additionalBloodBonus": "Cada cantidad adicional de costo de sangre otorga +1 Incremento Gratis",
+        "bloodRequired": "Costo de Sangre Requerido",
+        "bloodSource": {
+          "label": "Fuente de Sangre",
+          "other": "Otro",
+          "self": "Propio"
+        },
+        "bloodSuffix": "[Sangre: {total}]",
+        "casting": "Lanzamiento de Maho",
+        "castingLabel": "Lanzamiento de Maho: {spell}",
+        "taintGained": "Corrupción Obtenida",
+        "taintGainedNotification": "Obtenido {taint} puntos de Corrupción de las Tierras de Sombra por lanzar maho",
+        "taintSuffix": "[Corrupción Obtenida: {taint}]",
+        "warningTitle": "Magia de Sangre - Maho Prohibido"
+      },
+      "spells": {
+        "affinity": "Afinidad",
+        "affinityTag": "[Afinidad]",
+        "areaOfEffect": "Área de Efecto",
+        "cast": "Lanzar",
+        "concentrationName": "Concentración: {spell}",
+        "deficiency": "Deficiencia",
+        "deficiencyTag": "[Deficiencia]",
+        "duration": "Duración",
+        "maho": "Maho",
+        "memorized": "Memorizado",
+        "raises": "Incrementos",
+        "range": "Alcance",
+        "slotsRestored": "Todos los espacios de hechizo restaurados al máximo",
+        "slotSuffix": "[Usar Espacio de Hechizo {element}]",
+        "useSpellSlot": "Usar Espacio de Hechizo",
+        "voidSlot": "Usar Espacio de Hechizo de Vacío",
+        "voidSlotSuffix": "[Usar Espacio de Hechizo de Vacío]"
       }
     },
     "system": {
-      "migration": {
-        "itemTypeChangeInfo": "L5R4: migrado {count} Objeto(s) de \"commonItem\" a \"item\".",
-        "itemTypeChangeError": "L5R4: Error en migración de tipo de objeto. Ver consola para detalles.",
-        "iconsUpdated": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
-        "compendiumIconsUpdated": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
-      },
       "errors": {
         "deleteEffect": "Error al eliminar efecto."
+      },
+      "migration": {
+        "compendiumIconsUpdated": {
+          "one": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen.",
+          "other": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
+        },
+        "iconsUpdated": {
+          "one": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
+          "other": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo."
+        }
+      },
+      "settings": {
+        "forceMigration": {
+          "hint": "Fuerza la ejecución de todas las migraciones en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de que se complete la migración.",
+          "name": "Forzar migración al iniciar"
+        },
+        "LtException": {
+          "hint": "Cuando los dados conservados se reducen por debajo de 10 por conversión, suma 2.",
+          "name": "Aplicar excepción de Pequeñas Verdades"
+        },
+        "runMigration": {
+          "hint": "Si está habilitado, las migraciones de datos pendientes se ejecutarán la próxima vez que cargue el mundo. Deshabilita para omitir migraciones en caso de problemas.",
+          "name": "Ejecutar migraciones al iniciar"
+        }
+      }
+    },
+    "ui": {
+      "armor": {
+        "allowStacking": "Permitir Apilamiento de Armadura"
+      },
+      "combat": {
+        "multipleTargets": "objetivos - ND no establecido automáticamente",
+        "vs": "vs"
+      },
+      "common": {
+        "action": "Acción",
+        "active": "Activo",
+        "armor": "Armadura",
+        "bonus": "Bonificación",
+        "cancel": "Cancelar",
+        "clan": "Clan",
+        "conditions": "Condiciones",
+        "cost": "Costo",
+        "current": "Actual",
+        "damage": "Daño",
+        "delete": "Eliminar",
+        "disabled": "desactivado",
+        "edit": "Editar",
+        "effect": "Efecto",
+        "free": "Libre",
+        "initiative": "Iniciativa",
+        "insight": "Perspicacia",
+        "modifier": "Modificador",
+        "multi": "Multiplicador",
+        "name": "Nombre",
+        "new": "Nuevo",
+        "none": "Ninguno",
+        "rank": "Rango",
+        "ring": "Anillo",
+        "roll": "Tirar",
+        "save": "Guardar",
+        "school": "Escuela",
+        "simple": "Simple",
+        "tn": "ND",
+        "type": "Tipo",
+        "xp": "Puntos de Experiencia"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "content": "¿Estás seguro de que quieres eliminar {name}?",
+          "title": "¿Eliminar Objeto?"
+        }
+      },
+      "effects": {
+        "autoProne": "Auto: Postrado"
+      },
+      "hints": {
+        "postToChat": "Publicar en el chat",
+        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0"
+      },
+      "mechanics": {
+        "combat": {
+          "attack": "Ataque",
+          "attackSlot": "Ataque {slot}",
+          "damageSlot": "Daño {slot}",
+          "woundPenalty": "Penalización por Heridas"
+        },
+        "fear": {
+          "catastrophicSuffix": "— Penalización: -{penalty}k0 a todas las tiradas ¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
+          "label": "Miedo {rank}",
+          "noFear": "Este PNJ no tiene efecto de Miedo configurado",
+          "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
+          "noWillpower": "{name} no tiene el atributo Voluntad",
+          "penaltySuffix": "— Penalización: -{penalty}k0 a todas las tiradas",
+          "rank": "Rango de Miedo",
+          "rollForSelected": "Clic para probar Miedo contra personajes seleccionados",
+          "testLabel": "Prueba de Miedo {rank} vs {name}",
+          "testResult": "Prueba de Miedo {rank}"
+        },
+        "rings": {
+          "air": "Aire",
+          "all": "Todos",
+          "earth": "Tierra",
+          "fire": "Fuego",
+          "ring": "Anillo",
+          "void": "Vacío",
+          "voidInitBoost": "Usar Vacío",
+          "voidPoints": "Puntos de Vacío",
+          "voidPointsEmpty": "Puntos de Vacío: 0",
+          "voidTnBoost": "Usar Vacío",
+          "water": "Agua"
+        },
+        "rolls": {
+          "attackRoll": "Tirada de Ataque",
+          "castingSuffix": "(Tirada de Lanzar Hechizo)",
+          "damageRoll": "Tirada de Daño",
+          "emphasis": "Énfasis",
+          "emphasisLabel": "{label} (Énfasis: {emphasisName})",
+          "explodesOn": "Explota En",
+          "failure": "Fracaso",
+          "freeRaises": "Incrementos Gratis",
+          "missed": "Fallado",
+          "namedRoll": "Tirar: {roll}",
+          "raises": "Incrementos",
+          "ringRollLabel": "Tirada de Anillo: {element}",
+          "skillRoll": "Tirada de Habilidad",
+          "skillRollLabel": "Tirada de Habilidad: {skillName} / {traitName}",
+          "socialResistance": "Resistencia Social",
+          "socialResistanceHint": "Resistiendo Intimidación o Tentación.",
+          "spellCasting": "Tirada de Lanzar Hechizo",
+          "spellCastingLabel": "Tirada de Lanzar Hechizo: {spell}",
+          "success": "Éxito",
+          "traitRoll": "Tirada de Atributo",
+          "traitRollLabel": "{traitName} Tirar",
+          "unskilledLabel": "{label} [Sin Habilidad]",
+          "voidLabel": "{label} [Vacío]",
+          "weaponAttackRoll": "{weapon} Tirada de Ataque"
+        },
+        "stances": {
+          "attack": "Postura de Ataque",
+          "center": "Postura Centrada",
+          "defense": "Postura de Defensa",
+          "fullAttack": "Postura de Ataque Total",
+          "fullDefense": "Postura de Defensa Total",
+          "fullDefenseHint": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura."
+        },
+        "traits": {
+          "agi": "Agilidad",
+          "awa": "Consciencia",
+          "int": "Inteligencia",
+          "per": "Percepción",
+          "ref": "Reflejos",
+          "sta": "Resistencia",
+          "str": "Fuerza",
+          "wil": "Voluntad"
+        },
+        "wounds": {
+          "alreadyFullHealth": "{name} ya está con salud completa",
+          "applied": "Aplicadas {amount} heridas a {name}",
+          "appliedWithArmor": "{name} recibió {original} de daño. La armadura redujo {reduction}. Aplicadas {final} heridas.",
+          "applyHealing": "Aplicar Curación",
+          "applyHealingTitle": "Aplicar curación natural por descanso",
+          "applyWounds": "Aplicar Heridas",
+          "armorReduction": "Reducción",
+          "armorTn": "ND de Armadura",
+          "armorTnBase": "ND de Armadura Base",
+          "crippled": "Lisiado",
+          "down": "Caído",
+          "earthMultiplier": "Multiplicador de Tierra",
+          "formula": "Fórmula",
+          "fullyHealed": "¡Completamente curado!",
+          "grazed": "Rozado",
+          "healingApplied": "Sanó {amount} heridas (tasa de curación: {rate})",
+          "healingFailed": "Error al aplicar curación a {name}",
+          "healthy": "Saludable",
+          "hurt": "Lastimado",
+          "injured": "Herido",
+          "label": "Heridas",
+          "manual": "Manual",
+          "maxWounds": "Heridas Máximas",
+          "naturalHealing": "Curación Natural",
+          "nicked": "Rasguñado",
+          "noHealRate": "{name} no tiene tasa de curación configurada",
+          "noTokenSelected": "No hay ficha seleccionada. Selecciona una ficha para aplicar heridas.",
+          "noVoidPoints": "No hay Puntos de Vacío disponibles para reducir daño",
+          "out": "Fuera de Combate",
+          "penalty": "Penalización",
+          "reducedApplied": "Punto de Vacío gastado: Daño reducido en 10. Aplicadas {amount} heridas a {name}",
+          "reducedWithArmor": "{name} recibió {original} de daño. Vacío redujo a {afterVoid}, armadura redujo {reduction}. Aplicadas {final} heridas.",
+          "reduceWithVoid": "Reducir con Vacío",
+          "restTitle": "{name} descansó y recuperó heridas",
+          "status": "Heridas: {current}/{max} (sufridas: {suffered})",
+          "suffered": "Heridas Sufridas",
+          "threshold": "Umbral",
+          "woundBonus": "Bonificación de Heridas",
+          "woundHealRate": "Tasa de Curación de Heridas",
+          "woundLevel": "Nivel",
+          "woundMode": "Modo de Heridas"
+        }
+      },
+      "notifications": {
+        "actorNotFound": "Actor no encontrado para tirada de daño",
+        "deficiencyBlocksCasting": "Deficiencia en {ring} reduce tu Rango de Escuela a cero - no puedes lanzar",
+        "invalidRingForSpell": "Anillo inválido para espacio de hechizo: {ring}",
+        "noActorForVoid": "No hay actor disponible para gastar puntos de vacío",
+        "noPermissionDamage": "No tienes permiso para tirar daño para este actor",
+        "noSpellSlots": "Te quedaste sin espacios de hechizo para este anillo",
+        "noValidWeapon": "No se encontró arma válida para tirada de ataque",
+        "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero"
+      },
+      "sheets": {
+        "abilities": "Habilidades",
+        "addItem": "Agregar Objeto",
+        "advantage": "Ventaja",
+        "advantages": "Ventajas",
+        "armor": "Armadura",
+        "background": "Trasfondo",
+        "character": "Personaje",
+        "demands": "Demandas",
+        "description": "Descripción",
+        "disadvantage": "Desventaja",
+        "disadvantages": "Desventajas",
+        "equipment": "Equipamiento",
+        "item": "Objeto",
+        "items": "Objetos",
+        "kata": "Kata",
+        "kiho": "Kiho",
+        "mastery": "Maestría",
+        "notes": "Notas",
+        "rulesSummary": "Resumen de Reglas",
+        "skill": "Habilidad",
+        "skills": "Habilidades",
+        "spell": "Hechizo",
+        "spells": "Hechizos",
+        "spellSlots": "Espacios de Hechizo",
+        "tattoo": "Tatuaje",
+        "tattoos": "Tatuajes",
+        "technique": "Técnica",
+        "techniques": "Técnicas",
+        "weapon": "Arma",
+        "weapons": "Armas",
+        "woundLevels": "Niveles de Heridas"
+      },
+      "statusEffects": {
+        "blinded": "Cegado",
+        "concentration": "Concentración",
+        "dazed": "Aturdido",
+        "dead": "Muerto",
+        "entangled": "Enredado",
+        "fasting": "Ayunando",
+        "fatigued": "Fatigado",
+        "feared": "Atemorizado",
+        "grappled": "Agarrado",
+        "guarded": "Protegido",
+        "guarding": "Protegiendo",
+        "mounted": "Montado/Posición Superior",
+        "prone": "Postrado",
+        "stunned": "Atontado"
+      },
+      "tabs": {
+        "description": "Descripción",
+        "details": "Detalles",
+        "effects": "Efectos Activos",
+        "modifiers": "Modificadores"
       }
     },
     "world": {
       "wealth": {
-        "koku": "Koku",
         "bu": "Bu",
+        "koku": "Koku",
         "zeni": "Zeni"
       }
     }
   },
-  "SETTINGS": {
-    "allowArmorStacking": {
-      "name": "Permitir apilamiento de armadura",
-      "label": "Múltiples piezas de \"armadura\" pueden apilarse (para representar bonificaciones, etc.)"
-    },
-    "LtException": {
-      "name": "Aplicar excepción de Pequeñas Verdades",
-      "label": "Cuando los dados conservados se reducen por debajo de 10 por conversión, suma 2."
-    },
-    "runMigration": {
-      "name": "Ejecutar migraciones al iniciar",
-      "label": "Si está habilitado, las migraciones de datos pendientes se ejecutarán la próxima vez que cargue el mundo. Deshabilita para omitir migraciones en caso de problemas."
-    },
-    "lastMigratedVersion": {
-      "name": "Última versión migrada",
-      "label": "Interno. No cambiar."
-    },
-    "forceMigration": {
-      "name": "Forzar migración al iniciar",
-      "label": "Fuerza la ejecución de todas las migraciones en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de que se complete la migración."
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Cegado: -3k3 ataques a distancia, -1k1 ataques cuerpo a cuerpo, -1k1 tiradas de Defensa, ND de Armadura = Ref+5+Armadura, Anillo de Agua -2 para movimiento"
-    },
-    "dazed": {
-      "restrictions": "Aturdido: -3k0 a todas las acciones, solo posturas Defensa/Defensa Total, no puede duelar"
-    },
-    "entangled": {
-      "restrictions": "Enredado: No puede Moverse ni tomar Acciones Complejas excepto tirada de Fuerza para liberarse"
-    },
-    "fatigued": {
-      "restrictions": "Fatigado: +5 ND a tiradas físicas, habilidades y lanzamiento de hechizos (se acumula por día), no puede usar postura de Ataque Total"
-    },
-    "feared": {
-      "restrictions": "Atemorizado: -Xk0 a todas las tiradas (X = Rango de Miedo), dura hasta el final del encuentro"
-    },
-    "grappled": {
-      "restrictions": "Agarrado: ND de Armadura = 5 + bonificación de armadura solamente"
-    },
-    "guarded": {
-      "restrictions": "Protegido: +10 ND de Armadura mientras está protegido por aliado a 5 pies (hasta el próximo turno del guardián)"
-    },
-    "guarding": {
-      "restrictions": "Protegiendo: -5 ND de Armadura mientras protege aliado a 5 pies (hasta tu próximo turno)"
-    },
-    "prone": {
-      "restrictions": "Postrado: -10 ND de Armadura vs cuerpo a cuerpo, -2k0 ataques, no puede Moverse, solo posturas Ataque/Defensa"
-    },
-    "stunned": {
-      "restrictions": "Atontado: No puede tomar ninguna acción, ND de Armadura = 5 + bonificación de armadura"
-    }
-  },
-  "EFFECT": {
-    "blinded": "Cegado",
-    "concentration": "Concentración",
-    "dazed": "Aturdido",
-    "dead": "Muerto",
-    "entangled": "Enredado",
-    "fasting": "Ayunando",
-    "fatigued": "Fatigado",
-    "feared": "Atemorizado",
-    "grappled": "Agarrado",
-    "guarded": "Protegido",
-    "guarding": "Protegiendo",
-    "mounted": "Montado/Posición Superior",
-    "prone": "Postrado",
-    "stunned": "Atontado"
-  },
   "TYPES": {
     "Actor": {
-      "pc": "PJ",
-      "npc": "PNJ"
+      "npc": "PNJ",
+      "pc": "PJ"
     },
     "Item": {
       "advantage": "Ventaja",

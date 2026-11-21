@@ -1,0 +1,7 @@
+{
+  "files": {
+    "templates/apps/effect-panel.hbs": "<section class=\"l5r4-effect-panel\">\n  <button type=\"button\" data-action=\"removeEffect\"></button>\n  <button type=\"button\" data-action=\"open-nothing\"></button>\n</section>\n",
+    "module/apps/effect-panel.js": "export default class EffectPanelApplication {\n  static DEFAULT_OPTIONS = {\n    actions: { removeEffect: EffectPanelApplication.#onRemoveEffect }\n  };\n\n  static #onRemoveEffect() {}\n}\n",
+    "module/sheets/unused-actions.js": "export const UNUSED_ACTIONS = Object.freeze({\n  \"open-nothing\"() {}\n});\n"
+  }
+}

@@ -1,10 +1,7 @@
 /**
- * Item Data Normalization
- * Ensures consistent data types and formats for weapon/bow items.
- *
  * @module setup/migrations/items/normalize
+ * @description Ensures consistent data types and formats for weapon and bow items.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**
@@ -18,7 +15,7 @@ import { SYS_ID } from "../../../config/constants.js";
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
  */
-export async function normalizeItems(docs, label) {
+export async function migrateWeaponSizes(docs, label) {
   for (const doc of docs) {
     try {
       if (doc.documentName !== "Item") {

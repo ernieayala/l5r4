@@ -1,0 +1,51 @@
+/**
+ * Grid
+ * Two-column label and value grid of the sheet sidebar blocks (components/grid.md)
+ */
+
+// The wound configuration window's Wound Ranks table keeps the look it had, an exception Ernie kept (wound-track.md):
+// framing it as a grid makes each row 3px shorter and its text 2px larger, a size change Stage 17 decision 9 does not
+// take. `:where()` keeps the exception from raising the rule's specificity
+.l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) {
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  border-block-end: none;
+  display: grid;
+  font-variant-numeric: tabular-nums;
+  grid-template-columns: 1fr 1fr;
+
+  .l5r4-grid-label,
+  .l5r4-grid-value {
+    border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+  }
+
+  .l5r4-grid-label {
+    align-items: center;
+    background: var(--l5r4-color-panel);
+    border-inline-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    display: inline-flex;
+    font-family: var(--l5r4-font-label);
+    font-size: var(--l5r4-font-size-label);
+    height: 100%;
+    padding: var(--l5r4-space-4);
+  }
+
+  .l5r4-grid-value {
+    align-items: center;
+    font-size: var(--l5r4-font-size-label);
+    padding: var(--l5r4-space-4);
+
+    &.-full {
+      grid-column: 1 / -1;
+    }
+
+    > input,
+    > select {
+      height: auto;
+      line-height: 1;
+    }
+
+    > span {
+      padding: 0 var(--l5r4-space-8);
+    }
+  }
+}

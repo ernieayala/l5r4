@@ -1,8 +1,10 @@
-<div class="form-group">
-  <label>{{localize "l5r4.equipment.armor.armorType"}}</label>
-  <div class="form-fields">
-    <select name="system.armorType">
-      {{selectOptions config.armorTypes selected=system.armorType localize=true}}
-    </select>
+<div class="l5r4-item-details">
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.armor.type"}}</label>
+    <div class="form-fields">
+      <select name="system.armorType">
+        {{selectOptions config.armorTypes selected=system.armorType localize=true}}
+      </select>
+    </div>
   </div>
 </div>

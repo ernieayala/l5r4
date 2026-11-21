@@ -1,33 +1,14 @@
 /**
- * PC Actions Handler
- *
- * Handles character action operations for PC sheets including healing/rest and
- * Void Point spending mechanics. Delegates to services for complex operations.
- *
- * **Responsibilities:**
- * - Natural healing/rest application
- * - Void Point armor TN boost (combat-only, turn-based)
- * - Void Point initiative boost (pre-roll flag)
- *
- * **Game Rules Integration:**
- * - Natural Healing: (Stamina × 2) + Insight Rank per night
- * - Void for Armor TN: +10 TN for 1 round, must be on actor's turn
- * - Void for Initiative: +10 initiative, spent when rolled
- *
- * **Foundry API:**
- * - Uses Actor.update() for state changes
- * - Integrates with game.combat for turn/round tracking
- * - Uses Dialog.confirm() for user confirmation
- * - Posts ui.notifications for user feedback
- *
  * @module sheets/handlers/pc-actions-handler
+ * @description PC sheet actions for Void Point spending and the Insight Rank's mode, delegating to services: Void
+ * for Armor TN gives +10 for one Round and only on the actor's turn in combat, after a DialogV2 confirmation; Void
+ * for Initiative sets a flag the initiative roll spends for +10; a GM's lock button switches the Insight Rank
+ * between computed and typed.
  */
-
-// Utils
-import { T } from "../../utils/localization.js";
-
-// Services
-import { applyLongRest } from "../../services/rest.js";
+import { DIALOG_TEMPLATES } from "../../config/templates.js";
+import { F, R, T } from "../../utils/localization.js";
+import { applyEffect, effectsOf } from "../../services/effects/apply.js";
+import { buildVoidUseUpdate, startedCombatOf, warnVoidLimit } from "../../services/effects/uses.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -40,31 +21,6 @@ import { applyLongRest } from "../../services/rest.js";
  */
 export class PcActionsHandler {
   /**
-   * Applies natural healing to the character.
-   *
-   * **Game Rules Context:**
-   * Characters heal (Stamina × 2) + Insight Rank wounds per night of rest.
-   * Healing cannot reduce suffered wounds below 0 (no over-healing).
-   *
-   * **Implementation:**
-   * Delegates to healing service which:
-   * - Calculates healing amount from actor.system.wounds.healRate
-   * - Reduces suffered wounds by healing amount
-   * - Posts chat message with healing summary
-   * - Handles edge cases (already at full health, invalid heal rate)
-   *
-   * @param {Object} context - Handler context from actor sheet
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - Click event on healing button
-   * @param {HTMLElement} _element - Button element (unused)
-   * @returns {Promise<void>}
-   */
-  static async handleApplyHealing(context, event, _element) {
-    event?.preventDefault?.();
-    return applyLongRest(context.actor);
-  }
-
-  /**
    * Toggles Void Point armor TN boost.
    *
    * **Game Rules Context:**
@@ -72,112 +28,58 @@ export class PcActionsHandler {
    * - Spend Void at beginning of round for +10 Armor TN for 1 round
    * - Only works if in combat on the actor's turn
    * - Void Point is spent immediately when activated
-   * - Effect expires at end of round (tracked via system.armorTn.voidRound)
    *
    * **Validation:**
-   * - Must be in active combat (game.combat exists and started)
+   * - Must be in a started combat (the actor's own, not only the viewed scene's)
    * - Must be actor's turn (current combatant matches actor)
    * - Must have Void Points available (system.rings.void.value > 0)
    * - Requires user confirmation via dialog
    *
    * **Implementation:**
-   * On activation:
-   * - Validates all prerequisites (combat, turn, void points)
-   * - Shows confirmation dialog
-   * - Spends 1 Void Point
-   * - Sets system.armorTn.useVoid = true
-   * - Records current round in system.armorTn.voidRound
-   * - Posts notification
+   * On activation the Void Point is spent and the "voidArmor" effect (+10 Armor TN) is created; core's effect
+   * registry ends it at the end of the Round (module/config/status-effects.js). Unticking ends the effect early.
+   * game-rules/25_rings_and_traits.md, p.78
    *
-   * On deactivation:
-   * - Simply clears flags without spending Void
-   *
-   * **Effect Duration:**
-   * The Void Point armor boost is automatically cleared by combat hooks when
-   * the round advances. This handler only manages the activation/deactivation.
-   *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Checkbox change event
    * @param {HTMLElement} element - Checkbox element
    * @returns {Promise<void>}
    */
-  static async handleToggleArmorVoid(context, event, element) {
+  static async updateArmorVoid(context, event, element) {
     event?.preventDefault?.();
-    const checked = element.checked;
+    const actor = context.actor;
 
-    // Deactivation path: just clear flags
-    if (!checked) {
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
+    // Deactivation path: end the effect; the Void Point stays spent
+    if (!element.checked) {
+      await this.#deleteArmorVoid(actor);
       return;
     }
 
     // Activation path: validate prerequisites
-
-    // Check if in combat
-    const combat = game.combat;
-    if (!combat || !combat.started) {
-      ui.notifications?.warn("Must be in active combat to use Void for Armor TN");
+    const problem = this.#getArmorVoidProblem(actor);
+    if (problem) {
+      ui.notifications?.warn(T(problem));
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
-      return;
-    }
-
-    // Check if it's this actor's turn
-    const currentCombatant = combat.combatant;
-    if (!currentCombatant || currentCombatant.actorId !== context.actor.id) {
-      ui.notifications?.warn("Can only use Void for Armor TN on your turn");
-      element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
-      return;
-    }
-
-    // Check void points available
-    const voidCurrent = context.actor.system?.rings?.void?.value ?? 0;
-    if (voidCurrent <= 0) {
-      ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
-      element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
     // Confirm with dialog
-    const confirmed = await Dialog.confirm({
-      title: "Spend Void Point",
-      content: "<p>Spend a Void Point to increase Armor TN by +10 for 1 round?</p>",
-      yes: () => true,
-      no: () => false
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: T("l5r4.ui.effects.voidArmorTitle") },
+      content: await R(DIALOG_TEMPLATES.confirm, {
+        question: T("l5r4.ui.effects.voidArmorQuestion")
+      }),
+      yes: { label: T("l5r4.ui.common.spendVoidPoint") },
+      no: { label: T("l5r4.ui.common.cancel") }
     });
 
     if (!confirmed) {
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
-    // Spend void and activate (useVoid stays true until round end)
-    await context.actor.update({
-      "system.rings.void.value": voidCurrent - 1,
-      "system.armorTn.useVoid": true,
-      "system.armorTn.voidRound": combat.round
-    });
-
-    ui.notifications?.info(`${context.actor.name} spent Void Point - Armor TN +10 for 1 round`);
+    await this.#spendArmorVoid(actor);
   }
 
   /**
@@ -197,17 +99,120 @@ export class PcActionsHandler {
    * Unlike armor Void (which requires combat and turn validation), this flag
    * can be set anytime before initiative is rolled.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Checkbox change event
    * @param {HTMLElement} element - Checkbox element
    * @returns {Promise<void>}
    */
-  static async handleToggleInitiativeVoid(context, event, element) {
+  static async updateInitiativeVoid(context, event, element) {
     event?.preventDefault?.();
     const checked = element.checked;
 
     // Just toggle the flag - Void spending happens during initiative roll
     await context.actor.update({ "system.initiative.useVoid": checked });
+  }
+
+  /**
+   * Toggles Insight Rank calculation mode between automatic and manual.
+   *
+   * **GM-Only Feature:**
+   * Only GMs can toggle this setting. The lock button after the Insight Rank switches between:
+   * - Automatic: Rank calculated from Insight Points (default)
+   * - Manual: the GM types the rank value
+   *
+   * **What It Does:**
+   * 1. Checks for GM permission (non-GMs ignored)
+   * 2. Toggles actor.system.insight.autoCalculate flag
+   * 3. Re-renders sheet to show input field or calculated value
+   *
+   * **Use Cases:**
+   * - Special NPCs with non-standard rank progression
+   * - Testing specific rank values
+   * - Temporary rank adjustments for story purposes.
+   *
+   * @param {object} context - Handler context from actor sheet
+   * @param {Actor} context.actor - The actor document
+   * @param {Event} event - Click event on the rank mode button
+   * @param {HTMLElement} _element - The rank mode button (unused)
+   * @returns {Promise<void>}
+   */
+  static async updateRankMode(context, event, _element) {
+    event?.preventDefault?.();
+
+    // Only GMs can toggle rank mode
+    if (!game.user.isGM) {
+      return;
+    }
+
+    // Toggle autoCalculate flag (default true if undefined)
+    const current = context.actor.system.insight?.autoCalculate ?? true;
+    await context.actor.update({
+      "system.insight.autoCalculate": !current
+    });
+
+    // Notify user of mode change
+    const key = !current
+      ? "l5r4.character.ranks.insightAutomatic"
+      : "l5r4.character.ranks.insightManual";
+    ui.notifications?.info(F(key, { name: context.actor.name }));
+  }
+
+  /**
+   * End the actor's Void for Armor TN effect early; the Void Point stays spent.
+   * @param {Actor} actor
+   * @returns {Promise<void>}
+   */
+  static async #deleteArmorVoid(actor) {
+    const effects = effectsOf(actor, "voidArmor").map(e => e.id);
+    if (effects.length) {
+      await actor.deleteEmbeddedDocuments("ActiveEffect", effects);
+    }
+  }
+
+  /**
+   * Why the actor cannot spend a Void Point on Armor TN now: no combat has started, it is not the actor's turn, or
+   * the actor has no Void Points.
+   * game-rules/25_rings_and_traits.md, p.78
+   * @param {Actor} actor
+   * @returns {string|null} The warning's i18n key, or null when the actor can spend
+   */
+  static #getArmorVoidProblem(actor) {
+    // The actor's own started combat, which need not be the viewed scene's (#110)
+    const combat = startedCombatOf(actor);
+    if (!combat) {
+      return "l5r4.ui.effects.voidArmorNoCombat";
+    }
+
+    // Check if it's this actor's turn
+    const currentCombatant = combat.combatant;
+    if (!currentCombatant || currentCombatant.actorId !== actor.id) {
+      return "l5r4.ui.effects.voidArmorNotTurn";
+    }
+
+    // Check void points available
+    const voidCurrent = actor.system?.rings?.void?.value ?? 0;
+    if (voidCurrent <= 0) {
+      return "l5r4.ui.mechanics.wounds.noVoidPoints";
+    }
+    return null;
+  }
+
+  /**
+   * Spend the Void Point, then +10 Armor TN as an effect ending with the Round.
+   * game-rules/25_rings_and_traits.md, p.78
+   * @param {Actor} actor
+   * @returns {Promise<void>}
+   */
+  static async #spendArmorVoid(actor) {
+    // The write starts from the stored value, so an Active Effect on Void Points is never written into storage (B6).
+    warnVoidLimit(actor);
+    await actor.update({
+      "system.rings.void.value": actor._source.system.rings.void.value - 1,
+      ...buildVoidUseUpdate(actor)
+    });
+    await applyEffect(actor, "voidArmor");
+
+    ui.notifications?.info(F("l5r4.ui.effects.voidArmorSpent", { name: actor.name }));
   }
 }

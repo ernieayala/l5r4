@@ -1,353 +1,47 @@
-<section class="flexcol -gap-sm stats">
-  <div class="flexrow -gap-lg pc-info">
+<section class="flexcol -gap-sm l5r4-sheet-main">
+  <div class="flexrow -gap-lg l5r4-pc-info">
     <div class="flexcol flex1">
-      <div class="flexrow -gap-sm">
-        <h4 class="flex0 title">{{localize "l5r4.ui.common.name"}}</h4>
-        <div class="flexrow -gap-xs info-group">
-          <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}" />
+      <label class="l5r4-form-field flexrow -gap-sm">
+        <span class="flex0 l5r4-form-field-label">{{localize "l5r4.ui.common.name"}}</span>
+        <div class="flexrow">
+          <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize "l5r4.ui.common.name"}}" />
         </div>
-      </div>
-    </div>
-  </div>
-  <div class="traits-rings">
-    <!-- Earth ring -->
-    <h4 class="ring-name ring-name-earth">{{localize "l5r4.ui.mechanics.rings.earth"}}</h4>
-    <h4 class="ring-rank ring-rank-earth"><span>{{system.rings.earth}}</span></h4>
-    <div class="earth-ring">
-      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.earth}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.earth"}}" data-system-ring="earth">
-        <img src="{{iconPath 'earth.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="earth-ring-img" />
-      </a>
-    </div>
-    <div class="trait trait-stamina">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.sta}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.sta"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.sta"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.sta"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="sta" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="sta">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.sta}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="sta">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-    <div class="trait trait-willpower">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.wil}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.wil"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.wil"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.wil"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="wil" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="wil">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.wil}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="wil">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-
-    <!-- Air ring -->
-    <h4 class="ring-name ring-name-air">{{localize "l5r4.ui.mechanics.rings.air"}}</h4>
-    <h4 class="ring-rank ring-rank-air"><span>{{system.rings.air}}</span></h4>
-    <div class="air-ring">
-      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.air}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.air"}}" data-system-ring="air">
-        <img src="{{iconPath 'air.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="air-ring-img" />
-      </a>
-    </div>
-    <div class="trait trait-reflex">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.ref}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.ref"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.ref"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.ref"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="ref" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="ref">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.ref}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="ref">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-    <div class="trait trait-awarness">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.awa}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.awa"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.awa"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.awa"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="awa" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="awa">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.awa}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="awa">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-
-    <!-- Water ring -->
-    <h4 class="ring-name ring-name-water">{{localize "l5r4.ui.mechanics.rings.water"}}</h4>
-    <h4 class="ring-rank ring-rank-water"><span>{{system.rings.water}}</span></h4>
-    <div class="water-ring">
-      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.water}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.water"}}" data-system-ring="water">
-        <img src="{{iconPath 'water.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="water-ring-img" />
-      </a>
-    </div>
-    <div class="trait trait-strength">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.str}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.str"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.str"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.str"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="str" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="str">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.str}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="str">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-    <div class="trait trait-perception">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.per}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.per"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.per"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.per"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="per" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="per">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.per}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="per">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-
-    <!-- Fire ring -->
-    <h4 class="ring-name ring-name-fire">{{localize "l5r4.ui.mechanics.rings.fire"}}</h4>
-    <h4 class="ring-rank ring-rank-fire"><span>{{system.rings.fire}}</span></h4>
-    <div class="fire-ring">
-      <div>
-        <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.fire}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.fire"}}" data-system-ring="fire">
-          <img src="{{iconPath 'fire.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="fire-ring-img" />
-        </a>
-      </div>
-    </div>
-    <div class="trait trait-agility">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.agi}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.agi"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.agi"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.agi"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="agi" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="agi">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.agi}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="agi">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-    <div class="trait trait-intelligence">
-      <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.int}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.int"}}">
-        <span class="mas">{{localize "l5r4.ui.mechanics.traits.int"}}</span>
-        <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.int"}}</span>
-      </div>
-      <span class="trait-rank" data-action="trait-rank" data-trait="int" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
-          <a class="trait-increase" data-action="trait-increase" data-trait="int">
-            <i class="fas fa-chevron-up"></i>
-          </a>
-          <span>{{@root.traitsEff.int}}</span>
-          <a class="trait-decrease" data-action="trait-decrease" data-trait="int">
-            <i class="fas fa-chevron-down"></i>
-          </a>
-        </span>
-    </div>
-
-    <!-- Void ring -->
-    <h4 class="ring-name ring-name-void">{{localize "l5r4.ui.mechanics.rings.void"}}</h4>
-    <div class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}"><span>{{system.rings.void.rank}}</span></div>
-    <div class="void-ring">
-      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.void.rank}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.void"}}" data-system-ring="void">
-        <img src="{{iconPath 'void.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="void-ring-img" />
-      </a>
-    </div>
-    {{#if @root.showNpcVoidPoints}}
-      <div class="void-points">
-        <div class="void-points-dots" data-action="void-points-dots" data-value="{{system.rings.void.value}}" role="button"
-            title="{{localize "l5r4.ui.hints.voidPointsClickAdjust"}}">
-          <span class="void-dot" data-idx="1"></span>
-          <span class="void-dot" data-idx="2"></span>
-          <span class="void-dot" data-idx="3"></span>
-          <span class="void-dot" data-idx="4"></span>
-          <span class="void-dot" data-idx="5"></span>
-          <span class="void-dot" data-idx="6"></span>
-          <span class="void-dot" data-idx="7"></span>
-          <span class="void-dot" data-idx="8"></span>
-          <span class="void-dot" data-idx="9"></span>
-        </div>
-        <p class="void-points-name">{{localize "l5r4.ui.mechanics.rings.voidPoints"}}</p>
-      </div>
-    {{/if}}
-  </div>
-
-  <section class="flexcol -gap-sm">
-    <div class="flexrow -gap-sm section-title">
-      <h4 class="title">{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}</h4>
-    </div>
-    <section class="item-list -attacks -header">
-      <div class="item">
-        <span>{{localize "l5r4.ui.common.name"}}</span>
-        <span>{{localize "l5r4.ui.mechanics.combat.attack"}}</span>
-        <span>{{localize "l5r4.ui.common.damage"}}</span>
-        <span>{{localize "l5r4.ui.common.action"}}</span>
-        <span>{{localize "l5r4.ui.common.type"}}</span>
-        <span></span>
-      </div>
-    </section>
-    <section class="item-list -attacks">
-      <div class="item -attacks -expandable" data-attack-section="attack1">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack1.name}}{{system.attack1.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 1{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack1.roll}}k{{system.attack1.keep}}{{#if system.attack1.modifier}}{{numberFormat system.attack1.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack1.roll}}"
-             data-keep="{{system.attack1.keep}}"
-             data-modifier="{{system.attack1.modifier}}"
-             data-description="{{system.attack1.type}}"
-             data-label="{{#if system.attack1.name}}{{system.attack1.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 1{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack1.roll}}k{{system.attack1.keep}}{{#if system.attack1.modifier}}{{numberFormat system.attack1.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage1.roll}}k{{system.damage1.keep}}{{#if system.damage1.modifier}}{{numberFormat system.damage1.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage1.roll}}"
-             data-keep="{{system.damage1.keep}}"
-             data-modifier="{{system.damage1.modifier}}"
-             data-description="{{system.damage1.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 1"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage1.roll}}k{{system.damage1.keep}}{{#if system.damage1.modifier}}{{numberFormat system.damage1.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack1.type}}
-        </div>
-        <div>
-          {{system.attack1.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack1" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
-      <div class="item -attacks -expandable" data-attack-section="attack2">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack2.name}}{{system.attack2.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 2{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack2.roll}}k{{system.attack2.keep}}{{#if system.attack2.modifier}}{{numberFormat system.attack2.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack2.roll}}"
-             data-keep="{{system.attack2.keep}}"
-             data-modifier="{{system.attack2.modifier}}"
-             data-description="{{system.attack2.type}}"
-             data-label="{{#if system.attack2.name}}{{system.attack2.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 2{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack2.roll}}k{{system.attack2.keep}}{{#if system.attack2.modifier}}{{numberFormat system.attack2.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage2.roll}}k{{system.damage2.keep}}{{#if system.damage2.modifier}}{{numberFormat system.damage2.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage2.roll}}"
-             data-keep="{{system.damage2.keep}}"
-             data-modifier="{{system.damage2.modifier}}"
-             data-description="{{system.damage2.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 2"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage2.roll}}k{{system.damage2.keep}}{{#if system.damage2.modifier}}{{numberFormat system.damage2.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack2.type}}
-        </div>
-        <div>
-          {{system.attack2.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack2" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
-      <div class="item -attacks -expandable" data-attack-section="attack3">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack3.name}}{{system.attack3.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 3{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack3.roll}}k{{system.attack3.keep}}{{#if system.attack3.modifier}}{{numberFormat system.attack3.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack3.roll}}"
-             data-keep="{{system.attack3.keep}}"
-             data-modifier="{{system.attack3.modifier}}"
-             data-description="{{system.attack3.type}}"
-             data-label="{{#if system.attack3.name}}{{system.attack3.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 3{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack3.roll}}k{{system.attack3.keep}}{{#if system.attack3.modifier}}{{numberFormat system.attack3.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage3.roll}}k{{system.damage3.keep}}{{#if system.damage3.modifier}}{{numberFormat system.damage3.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage3.roll}}"
-             data-keep="{{system.damage3.keep}}"
-             data-modifier="{{system.damage3.modifier}}"
-             data-description="{{system.damage3.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 3"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage3.roll}}k{{system.damage3.keep}}{{#if system.damage3.modifier}}{{numberFormat system.damage3.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack3.type}}
-        </div>
-        <div>
-          {{system.attack3.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack3" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
-    </section>
-  </section>
-
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_skills-section.hbs"}}
-
-  <section class="flexcol -gap-sm">
-    <div class="flexrow -gap-sm section-title">
-      <h4 class="title">{{localize "l5r4.ui.sheets.notes"}}</h4>
-    </div>
-    <div class="section-container">
-      {{#if editable}}
-        <prose-mirror
-          name="system.notes"
-          value="{{ system.notes }}"
-          document-uuid="{{ actor.uuid }}"
-          class="sized"
-          compact>
-          {{{ enriched.notes }}}
-        </prose-mirror>
-      {{else}}
-        <div class="editor editor-content">
-          {{{ enriched.notes }}}
-        </div>
+      </label>
+      {{#if summary.citation}}
+        <p class="l5r4-citation">{{summary.citation}}</p>
       {{/if}}
     </div>
+  </div>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_traits-rings.hbs" system=system traitsEff=@root.traitsEff showVoidPoints=@root.showNpcVoidPoints}}
+
+  <section class="l5r4-section flexcol -gap-sm">
+    {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" label="l5r4.ui.sheets.attackAndDamage"}}
+      {{#if firstEmptyAttack}}
+        <button type="button" class="inline-control icon flex0" data-action="add-attack" data-attack-key="{{firstEmptyAttack}}" data-tooltip="{{localize "l5r4.ui.dialogs.addAttack"}}" aria-label="{{localize "l5r4.ui.dialogs.addAttack"}}"><i class="fa-solid fa-plus" inert></i></button>
+      {{/if}}
+    {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" type="attacks" columns=@root.sortColumns.npcAttacks}}
+    <section class="l5r4-item-row-list -attacks">
+      {{#each attacks}}
+        {{#unless empty}}
+          <div class="l5r4-item-row -attacks" data-attack-section="{{key}}">
+            <h4 class="l5r4-item-row-name flexrow -gap-sm" data-attack-title>{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}</h4>
+            {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-attack" pool=attackPool tooltip=(localize "l5r4.ui.mechanics.combat.attack") data=(object attack-num=num roll=attack.roll keep=attack.keep modifier=attack.modifier description=actionLabel label=attackLabel)}}
+            {{#if hasDamage}}
+              {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-damage" pool=damagePool tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll") data=(object roll=damage.roll keep=damage.keep modifier=damage.modifier description=damage.type label=damageLabel)}}
+            {{else}}
+              <div class="l5r4-item-row-cell">—</div>
+            {{/if}}
+            <div class="l5r4-item-row-cell">{{actionLabel}}</div>
+            <div class="l5r4-item-row-cell">{{damage.type}}</div>
+            {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" attackKey=key}}
+          </div>
+        {{/unless}}
+      {{/each}}
+    </section>
   </section>
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_skill-section.hbs"}}
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_note-section.hbs" system=system actor=actor enriched=enriched editable=editable}}
 </section>

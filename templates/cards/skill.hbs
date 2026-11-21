@@ -1,87 +1,55 @@
-<div class="item -{{type}}{{#if (or system.description system.specialRules)}} -expandable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules system.reachedMasteries.length)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
       {{name}}
       {{#if system.school}}
-        <img class="flex0" width="16px" height="16px" src="{{iconPath 'school.webp'}}" />
+        <span class="l5r4-item-row-badge" role="img" aria-label="{{localize "l5r4.character.skills.properties.school"}}"></span>
       {{/if}}
     {{else}}
       {{name}}
     {{/if}}
   </h4>
   {{#if inSheet}}
-    <div>{{system.rank}}</div>
-    <div>
-      <select data-action="inline-edit" data-field="system.trait" data-dtype="String">
+    <div class="l5r4-item-row-cell">{{system.rank}}</div>
+    <div class="l5r4-item-row-cell">
+      <select
+        data-action="update-item-field"
+        data-field="system.trait"
+        data-type="String"
+        aria-label="{{localize "l5r4.character.skills.properties.trait"}}"
+      >
         {{selectOptions @root.config.traits selected=system.trait localize=true}}
       </select>
     </div>
-    <div class="button-mask-container">
-      <span class="mas">{{system.rollDice}}k{{system.rollKeep}}</span>
-      <a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a>
-    </div>
-    <div class="emphasis-display">
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-skill" pool=system.rollFormula tooltip=(localize "l5r4.ui.mechanics.rolls.skillRoll")}}
+    <div class="l5r4-item-row-emphases">
       {{#if system.trainedEmphases.length}}
         {{join system.trainedEmphases ", "}}
       {{else}}
         —
       {{/if}}
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
-    {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
-      <div class="expanded-text">
-        {{#if (and (gte system.rank 3) system.mastery3)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery3"}}:</strong> {{system.mastery3}}</p>
-        {{/if}}
-        {{#if (and (gte system.rank 5) system.mastery5)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery5"}}:</strong> {{system.mastery5}}</p>
-        {{/if}}
-        {{#if (and (gte system.rank 7) system.mastery7)}}
-          <p><strong>{{localize "l5r4.character.skills.properties.mastery7"}}:</strong> {{system.mastery7}}</p>
-        {{/if}}
-        {{#if system.specialRules}}
-          <p>{{{system.specialRules}}}</p>
-        {{/if}}
-        {{#if system.description}}
-          <p>{{{system.description}}}</p>
-        {{/if}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules system.reachedMasteries.length)}}
+    {{#if (or system.description system.specialRules system.reachedMasteries.length)}}
+      <div class="l5r4-item-row-details">
+        {{#each system.reachedMasteries}}
+          <p><strong>{{localize (concat "l5r4.character.skills.properties." field)}}:</strong> {{text}}</p>
+        {{/each}}
+        {{> "systems/l5r4-enhanced/templates/cards/_partials/_detail-text.hbs" rules=system.specialRules description=system.description}}
       </div>
     {{/if}}
   {{/if}}
   {{#unless inSheet}}
     <p><strong>{{localize "l5r4.character.skills.properties.trait"}}:</strong> {{localize (concat "l5r4.ui.mechanics.traits." system.trait)}}</p>
     <p><strong>{{localize "l5r4.character.skills.properties.type"}}:</strong> {{localize (concat "l5r4.character.skillTypes." system.type)}}</p>
-    {{#if system.specialRules}}
-      <h5>{{localize "l5r4.ui.sheets.rulesSummary"}}</h5>
-      <p>
-        {{{system.specialRules}}}
-      </p>
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.rulesSummary" text=system.specialRules}}
+    {{#if (gte system.rank 3)}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.character.skills.properties.mastery3" text=system.mastery3}}
     {{/if}}
-    {{#if (and (gte system.rank 3) system.mastery3)}}
-      <h5>{{localize "l5r4.character.skills.properties.mastery3"}}</h5>
-      <p>
-        {{{system.mastery3}}}
-      </p>
-    {{/if}}
-    {{#if system.mastery5}}
-      <h5>{{localize "l5r4.character.skills.properties.mastery5"}}</h5>
-      <p>
-        {{{system.mastery5}}}
-      </p>
-    {{/if}}
-    {{#if system.mastery7}}
-      <h5>{{localize "l5r4.character.skills.properties.mastery7"}}</h5>
-      <p>
-        {{{system.mastery7}}}
-      </p>
-    {{/if}}
-    {{#if system.description}}
-      <h5>{{localize "l5r4.ui.sheets.description"}}</h5>
-      <p>
-        {{{system.description}}}
-      </p>
-    {{/if}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.character.skills.properties.mastery5" text=system.mastery5}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.character.skills.properties.mastery7" text=system.mastery7}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.description" text=system.description}}
   {{/unless}}
 </div>

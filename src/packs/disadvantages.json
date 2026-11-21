@@ -1,0 +1,1433 @@
+{
+  "name": "disadvantages",
+  "label": "Disadvantages",
+  "documentType": "Item",
+  "types": [
+    "disadvantage"
+  ],
+  "pages": [
+    [
+      145,
+      162
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Antisocial",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 156,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "version",
+            "prompt": "Which version?",
+            "options": [
+              {
+                "value": "minor",
+                "label": "2 XP: -1k0"
+              },
+              {
+                "value": "major",
+                "label": "4 XP: -1k1"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "antisocial:{choice:version}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": -1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "keep": -1,
+            "predicate": [
+              "antisocial:major"
+            ]
+          }
+        ],
+        "specialRules": "Set the cost to 4 for the -1k1 version. Crab characters gain 1 more XP."
+      }
+    },
+    {
+      "name": "Ascetic",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 156,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "Ledger",
+            "track": "glory",
+            "direction": "gain",
+            "value": "@points / 2"
+          }
+        ],
+        "specialRules": "School Outfit keeps only the gear your duties need. Dragon and monk characters gain 3 XP."
+      }
+    },
+    {
+      "name": "Bad Eyesight",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 156,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "range": "ranged",
+            "roll": -1,
+            "keep": -1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:per",
+            "roll": -1,
+            "keep": -1
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Bad Fortune",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 156,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Agree a misfortune with the GM. Moto Curse: Unicorn, 4 XP, -1k0 against Taint. Yogo Curse: Scorpion, 4 XP."
+      }
+    },
+    {
+      "name": "Bad Health",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 156,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Earth counts one lower when your Wound Ranks are sized and when you resist disease."
+      }
+    },
+    {
+      "name": "Bitter Betrothal",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 156,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Imperial characters gain 3 XP."
+      }
+    },
+    {
+      "name": "Black Sheep",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 156,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Kin deal with you only through Allies; no School Rank in a family School without a willing sensei."
+      }
+    },
+    {
+      "name": "Blackmailed",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 156,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 0,
+        "rules": [],
+        "specialRules": "Worth XP matching your Status Rank. The blackmailer calls in favors now and then."
+      }
+    },
+    {
+      "name": "Blind",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 156,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "range": "ranged",
+            "roll": -3,
+            "keep": -3
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "range": "melee",
+            "roll": -1,
+            "keep": -1
+          },
+          {
+            "key": "ArmorTN",
+            "mode": "base",
+            "value": "@traits.ref + 5"
+          },
+          {
+            "key": "Movement",
+            "water": -2
+          }
+        ],
+        "specialRules": "A Simple Move Action needs Athletics/Agility at TN 20 or you fall Prone. No sight-based Perception rolls."
+      }
+    },
+    {
+      "name": "Brash",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 157,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Threatened or insulted: Willpower plus Honor Rank vs TN 25, or you attack at once. Lion characters gain 4 XP."
+      }
+    },
+    {
+      "name": "Can't Lie",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 157,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "You never lie. Letting a lie you know of pass unchallenged takes a Willpower roll at TN 20."
+      }
+    },
+    {
+      "name": "Cast Out",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 157,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 1,
+        "rules": [],
+        "specialRules": "1 XP for one temple, 3 XP for a whole sect; its monks read your Glory as Infamy."
+      }
+    },
+    {
+      "name": "Compulsion",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 157,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Resisting the urge takes Willpower: TN 15 for 2 XP, 20 for 3 XP, 25 for 4 XP."
+      }
+    },
+    {
+      "name": "Consumed",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 157,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with Dark Paragon or Failure of Bushido",
+            "requires": [
+              {
+                "not": "item:advantage:dark paragon"
+              },
+              {
+                "not": "item:disadvantage:failure of bushido"
+              }
+            ]
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "tenet",
+            "prompt": "Which tenet?",
+            "options": [
+              {
+                "value": "consumed-control",
+                "label": "Control (4 XP)"
+              },
+              {
+                "value": "consumed-determination",
+                "label": "Determination (6 XP)"
+              },
+              {
+                "value": "consumed-insight",
+                "label": "Insight (4 XP)"
+              },
+              {
+                "value": "consumed-knowledge",
+                "label": "Knowledge (4 XP)"
+              },
+              {
+                "value": "consumed-perfection",
+                "label": "Perfection (5 XP)"
+              },
+              {
+                "value": "consumed-strength",
+                "label": "Strength (5 XP)"
+              },
+              {
+                "value": "consumed-will",
+                "label": "Will (4 XP)"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "{choice:tenet}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "consumed-control"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "consumed-control"
+            ]
+          },
+          {
+            "key": "TNModifier",
+            "selector": "skill",
+            "value": 5,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "TNModifier",
+            "selector": "attack",
+            "value": 5,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "TNModifier",
+            "selector": "spell",
+            "value": 5,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "skill",
+            "cap": -1,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "cap": -1,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "spell",
+            "cap": -1,
+            "predicate": [
+              "consumed-perfection"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "calledShot",
+            "cost": 1,
+            "predicate": [
+              "consumed-strength"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "feint",
+            "cost": 1,
+            "predicate": [
+              "consumed-strength"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "disarm",
+            "cost": 1,
+            "predicate": [
+              "consumed-strength"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": -1,
+            "predicate": [
+              "consumed-strength"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:courtier",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "consumed-will"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:temptation",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "consumed-will"
+            ]
+          }
+        ],
+        "specialRules": "Cost: the tenet's XP, +1 Spider, Perfection 6 for Crane. Unmodeled: Determination (no Void on rolls), Insight, Knowledge"
+      }
+    },
+    {
+      "name": "Contrary",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 158,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "In tense moments a Willpower roll (TN 5-25, GM's call) keeps you out of it. Imperial and courtier: 4 XP."
+      }
+    },
+    {
+      "name": "Cursed by the Realm",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 158,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with Touch of the Spirit Realms",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              }
+            ]
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "realm",
+            "prompt": "Which realm?",
+            "options": [
+              {
+                "value": "realm-chikushudo",
+                "label": "Chikushudo"
+              },
+              {
+                "value": "realm-gakido",
+                "label": "Gaki-do"
+              },
+              {
+                "value": "realm-jigoku",
+                "label": "Jigoku"
+              },
+              {
+                "value": "realm-maigo",
+                "label": "Maigo no Musha"
+              },
+              {
+                "value": "realm-meido",
+                "label": "Meido"
+              },
+              {
+                "value": "realm-sakkaku",
+                "label": "Sakkaku"
+              },
+              {
+                "value": "realm-tengoku",
+                "label": "Tengoku"
+              },
+              {
+                "value": "realm-toshigoku",
+                "label": "Toshigoku"
+              },
+              {
+                "value": "realm-yomi",
+                "label": "Yomi"
+              },
+              {
+                "value": "realm-yumedo",
+                "label": "Yume-do"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "{choice:realm}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:animal handling",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "realm-chikushudo"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": -1,
+            "keep": -1,
+            "optional": true,
+            "label": "Roll against a spirit",
+            "predicate": [
+              "realm-maigo"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:per",
+            "roll": -1,
+            "optional": true,
+            "label": "Idle, drifting into a trance",
+            "predicate": [
+              "realm-meido"
+            ]
+          }
+        ],
+        "specialRules": "Shugenja gain 5 XP. Unmodeled: Jigoku (-1k1 vs Taint), Tengoku (+10 TN in temples), Toshigoku, Yume-do, Yomi."
+      }
+    },
+    {
+      "name": "Dark Fate",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 158,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Once per session, Wounds that would kill you leave you at one Wound instead."
+      }
+    },
+    {
+      "name": "Dark Secret",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 158,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Ninja characters gain 5 XP."
+      }
+    },
+    {
+      "name": "Dependant",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 158,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 0,
+        "rules": [],
+        "specialRules": "XP set with the GM by how helpless the ward is and how often they appear, about 2 to 6."
+      }
+    },
+    {
+      "name": "Disbeliever",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 158,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Social Skill rolls with shugenja or monks: TN +5."
+      }
+    },
+    {
+      "name": "Dishonored",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 158,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Ledger",
+            "track": "status",
+            "direction": "gain",
+            "value": 0
+          }
+        ],
+        "specialRules": "Set your Status Rank to 1."
+      }
+    },
+    {
+      "name": "Disturbing Countenance",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 159,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "TNModifier",
+            "selector": "skill-tag:social",
+            "value": 5
+          }
+        ],
+        "specialRules": "Spider characters gain 4 XP."
+      }
+    },
+    {
+      "name": "Doubt",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Pick a School Skill; each of its rolls carries one wasted Raise: TN +5 and one fewer Raise allowed."
+      }
+    },
+    {
+      "name": "Driven",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 159,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Elemental Imbalance",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Shugenja only, 2 XP per rank. Casting your element needs Willpower vs TN 15, +5 for each rank, or it goes astray."
+      }
+    },
+    {
+      "name": "Epilepsy",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Stress or flashing light: Willpower TN 15 or a seizure; Willpower TN 10 each minute ends it. Crane: 5 XP."
+      }
+    },
+    {
+      "name": "Failure of Bushido",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 159,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with Paragon or Consumed",
+            "requires": [
+              {
+                "not": "item:advantage:paragon"
+              },
+              {
+                "not": "item:disadvantage:consumed"
+              }
+            ]
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "tenet",
+            "prompt": "Which tenet?",
+            "options": [
+              {
+                "value": "failure-compassion",
+                "label": "Compassion (3 XP)"
+              },
+              {
+                "value": "failure-courage",
+                "label": "Courage (4 XP)"
+              },
+              {
+                "value": "failure-courtesy",
+                "label": "Courtesy (4 XP)"
+              },
+              {
+                "value": "failure-duty",
+                "label": "Duty (6 XP)"
+              },
+              {
+                "value": "failure-honesty",
+                "label": "Honesty (3 XP)"
+              },
+              {
+                "value": "failure-honor",
+                "label": "Honor (3 XP)"
+              },
+              {
+                "value": "failure-sincerity",
+                "label": "Sincerity (4 XP)"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "{choice:tenet}"
+          },
+          {
+            "key": "TNModifier",
+            "selector": "skill:sincerity",
+            "value": 5,
+            "predicate": [
+              "failure-sincerity"
+            ]
+          },
+          {
+            "key": "RaiseRule",
+            "selector": "skill:sincerity",
+            "cap": -1,
+            "predicate": [
+              "failure-sincerity"
+            ]
+          }
+        ],
+        "specialRules": "Cost: the tenet's XP, +1 for ninja. Only Sincerity is modeled; the rest limit Void, Honor, TNs, or Raises."
+      }
+    },
+    {
+      "name": "Fascination",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 159,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 1,
+        "rules": [],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Forced Retirement",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "No more School Ranks; new Insight Ranks go to an unaligned Monk School. Clanless. Monks gain 5 XP."
+      }
+    },
+    {
+      "name": "Frail Mind",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "When you roll Willpower in a Contested Roll, the other side gets +2k0."
+      }
+    },
+    {
+      "name": "Gaijin Name",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 159,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 1,
+        "rules": [],
+        "specialRules": "On Social Skill rolls each die explodes once at most (20 tops). Unicorn characters gain 2 XP."
+      }
+    },
+    {
+      "name": "Greedy",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Temptation (Bribery) rolls made on you get +1k1. Mantis characters gain 4 XP."
+      }
+    },
+    {
+      "name": "Gullible",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Sincerity (Deceit) rolls made on you get +1k1."
+      }
+    },
+    {
+      "name": "Haunted",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "While your ancestor is displeased, once per session the GM puts -1k1 on a roll of yours."
+      }
+    },
+    {
+      "name": "Hostage",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 160,
+      "coverage": "full",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Idealistic",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "Ledger",
+            "track": "honor",
+            "direction": "loss",
+            "value": "@points + 1"
+          }
+        ],
+        "specialRules": "Lion characters gain 3 XP."
+      }
+    },
+    {
+      "name": "Infamous",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Your Glory Rank is an Infamy Rank: it works the same, but those who know you fear you."
+      }
+    },
+    {
+      "name": "Insensitive",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Risking yourself for someone who offers you nothing costs a Void Point. Scorpion characters gain 3 XP."
+      }
+    },
+    {
+      "name": "Jealousy",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Lame",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 160,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Movement",
+            "water": "1 - @rings.water"
+          }
+        ],
+        "specialRules": "TN +10 on Agility rolls and Agility Skill rolls that need your legs."
+      }
+    },
+    {
+      "name": "Lechery",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Temptation (Seduction) rolls made on you get +1k1."
+      }
+    },
+    {
+      "name": "Lord Moon's Curse",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "3/5/7 XP. Full moon: +1 Void Point that night; Willpower TN 15, +5 per level past 1st, or lose control."
+      }
+    },
+    {
+      "name": "Lost Love",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 160,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Reminded of the loss: all TNs +5 till a Void Point is spent to refocus. Twice a day at most, an hour apart."
+      }
+    },
+    {
+      "name": "Low Pain Threshold",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 160,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Wounds",
+            "penalty": 5
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Missing Limb",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 6,
+        "rules": [],
+        "specialRules": "TN +10 on any task that needs the missing limb."
+      }
+    },
+    {
+      "name": "Momoku",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 8,
+        "rules": [],
+        "specialRules": "Void Points go only to School Techniques that call for them; none of the basic Void uses."
+      }
+    },
+    {
+      "name": "Obligation",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "3 XP for a minor debt, 6 XP for a major one."
+      }
+    },
+    {
+      "name": "Obtuse",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 161,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "skill-type:high",
+            "value": "@cost * 2"
+          },
+          {
+            "key": "Cost",
+            "selector": "skill:investigation",
+            "value": "@cost / 2"
+          },
+          {
+            "key": "Cost",
+            "selector": "skill:medicine",
+            "value": "@cost / 2"
+          }
+        ],
+        "specialRules": "Crab and bushi characters gain 4 XP."
+      }
+    },
+    {
+      "name": "Overconfident",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Outnumbered or outmatched: Perception TN 20 to see it and back off. Lion and Mantis characters gain 4 XP."
+      }
+    },
+    {
+      "name": "Permanent Wound",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Your Healthy Wound Rank always counts as filled. Bushi characters gain 5 XP."
+      }
+    },
+    {
+      "name": "Phobia",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 1,
+        "rules": [],
+        "specialRules": "1 to 3 XP. Facing your fear: all TNs +5 per XP taken."
+      }
+    },
+    {
+      "name": "Rumormonger",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 161,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Keeping gossip quiet: Willpower at TN 5 x the top Glory Rank involved. Courtier characters gain 5 XP."
+      }
+    },
+    {
+      "name": "Seven Fortunes' Curse",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 161,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "fortune",
+            "prompt": "Which Fortune?",
+            "options": [
+              {
+                "value": "curse-benten",
+                "label": "Benten"
+              },
+              {
+                "value": "curse-bishamon",
+                "label": "Bishamon"
+              },
+              {
+                "value": "curse-daikoku",
+                "label": "Daikoku"
+              },
+              {
+                "value": "curse-ebisu",
+                "label": "Ebisu"
+              },
+              {
+                "value": "curse-fukurokujin",
+                "label": "Fukurokujin"
+              },
+              {
+                "value": "curse-hotei",
+                "label": "Hotei (6 XP)"
+              },
+              {
+                "value": "curse-jurojin",
+                "label": "Jurojin"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "{choice:fortune}"
+          },
+          {
+            "key": "TNModifier",
+            "selector": "skill:etiquette",
+            "value": 10,
+            "predicate": [
+              "curse-benten"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:commerce",
+            "roll": -1,
+            "keep": -1,
+            "predicate": [
+              "curse-daikoku"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": -1,
+            "keep": -1,
+            "optional": true,
+            "label": "With a non-samurai",
+            "predicate": [
+              "curse-ebisu"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": -2,
+            "optional": true,
+            "label": "Resisting poison or disease",
+            "predicate": [
+              "curse-jurojin",
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Hotei: 6 XP, Void costs of abilities double. Bishamon: Str -1 for weapon DR. Fukurokujin: Lore TN +5. Daikoku: -1 koku."
+      }
+    },
+    {
+      "name": "Shadowlands Taint",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Start with a Shadowlands Taint Rank of 0.5."
+      }
+    },
+    {
+      "name": "Small",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 162,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with the Large Advantage",
+            "requires": [
+              {
+                "not": "item:advantage:large"
+              }
+            ]
+          },
+          {
+            "key": "Movement",
+            "water": -1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": -1,
+            "optional": true,
+            "label": "Melee attack damage"
+          }
+        ],
+        "specialRules": "Cannot take the Large Advantage."
+      }
+    },
+    {
+      "name": "Social Disadvantage",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Start at Status Rank 0."
+      }
+    },
+    {
+      "name": "Soft-Hearted",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Killing needs Willpower TN 20; after a kill, all TNs +10 for a day. Phoenix characters gain 3 XP."
+      }
+    },
+    {
+      "name": "Sworn Enemy",
+      "type": "disadvantage",
+      "folder": "Social",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "+1 XP per Insight Rank the foe has over you; +2 XP for a nemesis, against whom you spend no Void."
+      }
+    },
+    {
+      "name": "Touch of the Void",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "A Void Point on a roll gives +2k1, then Willpower TN 30 or Dazed for a Round. Phoenix: 4 XP."
+      }
+    },
+    {
+      "name": "True Love",
+      "type": "disadvantage",
+      "folder": "Mental",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Choosing duty over your beloved costs a Void Point."
+      }
+    },
+    {
+      "name": "Unlucky",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "2 XP per rank. Once per rank each session, the GM makes you re-roll a roll and keep the new one."
+      }
+    },
+    {
+      "name": "Weakness",
+      "type": "disadvantage",
+      "folder": "Physical",
+      "page": 162,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "trait",
+            "prompt": "Which Trait?",
+            "list": "traits"
+          },
+          {
+            "key": "TraitAdjust",
+            "trait": "{choice:trait}",
+            "value": -1
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Wrath of the Kami",
+      "type": "disadvantage",
+      "folder": "Spiritual",
+      "page": 162,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Spells of the chosen element cast at you gain one Free Raise. Shugenja characters gain 4 XP."
+      }
+    }
+  ]
+}

@@ -1,0 +1,1956 @@
+{
+  "rules": [
+    {
+      "file": "01_foreword.md",
+      "pages": "5-6",
+      "status": "advice"
+    },
+    {
+      "file": "02_introduction.md",
+      "pages": "7-10",
+      "status": "advice"
+    },
+    {
+      "file": "03_note_for_returning_players.md",
+      "pages": "11-12",
+      "status": "advice"
+    },
+    {
+      "file": "04_creation_and_history.md",
+      "pages": "13-23",
+      "status": "advice"
+    },
+    {
+      "file": "05_geography.md",
+      "pages": "24-25",
+      "status": "advice"
+    },
+    {
+      "file": "06_celestial_order_emperors_champions.md",
+      "pages": "26-28",
+      "status": "advice"
+    },
+    {
+      "file": "07_rituals_of_life_ronin_geisha.md",
+      "pages": "29-31",
+      "status": "advice"
+    },
+    {
+      "file": "08_daily_life_and_etiquette.md",
+      "pages": "31-38",
+      "status": "advice"
+    },
+    {
+      "file": "09_religion_and_philosophy.md",
+      "pages": "39-41",
+      "status": "advice"
+    },
+    {
+      "file": "10_bushido_face_and_seppuku.md",
+      "pages": "42-45",
+      "status": "advice"
+    },
+    {
+      "file": "11_politics_economics_crime.md",
+      "pages": "46-49",
+      "status": "advice"
+    },
+    {
+      "file": "12_dueling_and_blood_feuds.md",
+      "pages": "49-50, 52",
+      "status": "advice"
+    },
+    {
+      "file": "13_war_in_rokugan.md",
+      "pages": "52-53",
+      "status": "advice"
+    },
+    {
+      "file": "14_great_clans_overview.md",
+      "pages": "55",
+      "status": "advice"
+    },
+    {
+      "file": "15_crab_clan.md",
+      "pages": "56-57",
+      "status": "advice"
+    },
+    {
+      "file": "16_crane_clan.md",
+      "pages": "58-59",
+      "status": "advice"
+    },
+    {
+      "file": "17_dragon_clan.md",
+      "pages": "60-61",
+      "status": "advice"
+    },
+    {
+      "file": "18_lion_clan.md",
+      "pages": "62-63",
+      "status": "advice"
+    },
+    {
+      "file": "19_mantis_clan.md",
+      "pages": "64-65",
+      "status": "advice"
+    },
+    {
+      "file": "20_phoenix_clan.md",
+      "pages": "66-67",
+      "status": "advice"
+    },
+    {
+      "file": "21_scorpion_clan.md",
+      "pages": "68-69",
+      "status": "advice"
+    },
+    {
+      "file": "22_unicorn_clan.md",
+      "pages": "70-71, 74",
+      "status": "advice"
+    },
+    {
+      "file": "23_roll_and_keep.md",
+      "pages": "75",
+      "status": "automated",
+      "code": [
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/roll-keep-die.js",
+        "module/utils/check.js"
+      ],
+      "tests": [
+        "tests/unit/utils/check.test.js"
+      ]
+    },
+    {
+      "file": "24_target_numbers.md",
+      "pages": "76",
+      "status": "automated",
+      "code": [
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
+        "module/utils/mechanics.js"
+      ],
+      "tests": [
+        "tests/unit/utils/mechanics.test.js"
+      ]
+    },
+    {
+      "file": "25_rings_and_traits.md",
+      "pages": "76-78",
+      "status": "automated",
+      "code": [
+        "module/config/status-effects.js",
+        "module/data/item/weapon-data.js",
+        "module/data/migrate-source.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
+        "module/documents/combat.js",
+        "module/documents/combatant.js",
+        "module/services/combat/damage.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/check/terms.js",
+        "module/services/dice/roll-keep-die.js",
+        "module/services/dice/rolls/weapon-roll.js",
+        "module/services/effects/uses.js",
+        "module/services/initiative.js",
+        "module/sheets/handlers/pc-actions-handler.js",
+        "module/utils/check.js",
+        "module/utils/damage.js",
+        "module/utils/initiative.js",
+        "module/utils/mechanics.js",
+        "module/utils/ten-dice.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/services/initiative.js",
+        "tests/quench/services/void-points.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/unit/data/migrate-source.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/initiative.test.js",
+        "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/ten-dice.test.js"
+      ]
+    },
+    {
+      "file": "26_special_dice_rules.md",
+      "pages": "77",
+      "status": "automated",
+      "code": [
+        "module/data/item/weapon-data.js",
+        "module/data/migrate-source.js",
+        "module/documents/combatant.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/roll-keep-die.js",
+        "module/utils/check.js",
+        "module/utils/initiative.js",
+        "module/utils/ten-dice.js"
+      ],
+      "tests": [
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/services/initiative.js",
+        "tests/unit/data/migrate-source.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/initiative.test.js",
+        "tests/unit/utils/ten-dice.test.js"
+      ]
+    },
+    {
+      "file": "27_skills_in_rolls.md",
+      "pages": "79",
+      "status": "automated",
+      "code": [
+        "module/data/rules/rule-models.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/rolls/skill-roll.js",
+        "module/sheets/handlers/roll-handler.js",
+        "module/utils/check.js",
+        "module/utils/damage.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/table-tools.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "28_raises.md",
+      "pages": "79",
+      "status": "automated",
+      "code": [
+        "module/data/rules/rule-models.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/check/terms.js",
+        "module/services/dice/rolls/skill-roll.js",
+        "module/sheets/handlers/roll-handler.js",
+        "module/utils/check.js",
+        "module/utils/damage.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/table-tools.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "29_types_of_rolls.md",
+      "pages": "79-80",
+      "status": "automated",
+      "code": [
+        "module/data/item/school-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/services/combat/contest.js",
+        "module/services/combat/flow.js",
+        "module/services/combat/grapple.js",
+        "module/services/dice/check/chat-actions.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/rolls/ring-roll.js",
+        "module/services/dice/rolls/simple-roll.js",
+        "module/services/dice/rolls/skill-roll.js",
+        "module/services/dice/rolls/spell-cast-roll.js",
+        "module/services/dice/rolls/trait-roll.js",
+        "module/services/dice/rolls/weapon-roll.js",
+        "module/services/links.js",
+        "module/sheets/handlers/pc-roll-handler.js",
+        "module/sheets/handlers/roll-handler.js",
+        "module/utils/check.js",
+        "module/utils/damage.js",
+        "module/utils/spell-casting.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/table-tools.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/spell-casting.test.js"
+      ]
+    },
+    {
+      "file": "30_skill_rolls_expanded.md",
+      "pages": "80",
+      "status": "automated",
+      "code": [
+        "module/data/item/school-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/services/combat/contest.js",
+        "module/services/combat/flow.js",
+        "module/services/combat/grapple.js",
+        "module/services/dice/check/chat-actions.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/check/terms.js",
+        "module/services/dice/rolls/ring-roll.js",
+        "module/services/dice/rolls/simple-roll.js",
+        "module/services/dice/rolls/skill-roll.js",
+        "module/services/dice/rolls/spell-cast-roll.js",
+        "module/services/dice/rolls/trait-roll.js",
+        "module/services/dice/rolls/weapon-roll.js",
+        "module/services/links.js",
+        "module/sheets/handlers/pc-roll-handler.js",
+        "module/sheets/handlers/roll-handler.js",
+        "module/utils/check.js",
+        "module/utils/spell-casting.js"
+      ],
+      "tests": [
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/table-tools.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/spell-casting.test.js"
+      ]
+    },
+    {
+      "file": "30_skill_rolls_expanded.md",
+      "pages": "81",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "31_combat_round.md",
+      "pages": "81-82",
+      "status": "automated",
+      "code": [
+        "module/config/expiry-events.js",
+        "module/config/game-mechanics.js",
+        "module/config/rule-keys.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/actor/preparation/npc-preparation.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/combat.js",
+        "module/documents/combatant.js",
+        "module/documents/item/preparation/derived-data.js",
+        "module/services/combat/damage-roll.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/setup/migrations/actors/npc-initiative.js",
+        "module/utils/check.js",
+        "module/utils/damage.js",
+        "module/utils/effects.js",
+        "module/utils/initiative.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/data-models.js",
+        "tests/quench/documents/combat-modifiers.js",
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/initiative.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/quench/world-upgrade.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/initiative.test.js"
+      ]
+    },
+    {
+      "file": "32_attack_and_defense.md",
+      "pages": "82",
+      "status": "automated",
+      "code": [
+        "module/config/expiry-events.js",
+        "module/config/rule-keys.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/combat.js",
+        "module/documents/item/preparation/derived-data.js",
+        "module/services/combat/damage-roll.js",
+        "module/services/dice/check/message-data.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/utils/check.js",
+        "module/utils/damage.js",
+        "module/utils/effects.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/effects.test.js"
+      ]
+    },
+    {
+      "file": "33_wounds.md",
+      "pages": "82",
+      "status": "automated",
+      "code": [
+        "module/config/expiry-events.js",
+        "module/config/rule-keys.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/combat.js",
+        "module/documents/item/preparation/derived-data.js",
+        "module/services/combat/damage-roll.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/utils/check.js",
+        "module/utils/damage.js",
+        "module/utils/effects.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/unit/documents/actor/calculations/wound-system.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/effects.test.js"
+      ]
+    },
+    {
+      "file": "34_ambush_falling_drowning.md",
+      "pages": "83",
+      "status": "manual",
+      "decision": "roadmap/STAGE-16-COVERAGE-AUDIT.md decision 6: left to the table"
+    },
+    {
+      "file": "34_ambush_falling_drowning.md",
+      "pages": "84",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/config/status-effects.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/active-effect.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/combat.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/automation.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/sheets/handlers/stance-handler.js",
+        "module/utils/effects.js",
+        "module/utils/stances.js"
+      ],
+      "tests": [
+        "tests/quench/apps/condition-manager.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/helpers.js",
+        "tests/quench/packs.js",
+        "tests/quench/regressions.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/stance-effect-preservation.js",
+        "tests/quench/services/stance.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/quench/workflows/skill-stance-combinations.js",
+        "tests/quench/workflows/stance-edge-cases.js",
+        "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/rule-engine.test.js",
+        "tests/unit/utils/stances.test.js"
+      ]
+    },
+    {
+      "file": "35_healing_wounds.md",
+      "pages": "84",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/config/status-effects.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/active-effect.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/combat.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/automation.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/sheets/handlers/stance-handler.js",
+        "module/utils/effects.js",
+        "module/utils/stances.js"
+      ],
+      "tests": [
+        "tests/quench/apps/condition-manager.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/helpers.js",
+        "tests/quench/packs.js",
+        "tests/quench/regressions.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/stance-effect-preservation.js",
+        "tests/quench/services/stance.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/quench/workflows/skill-stance-combinations.js",
+        "tests/quench/workflows/stance-edge-cases.js",
+        "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/rule-engine.test.js",
+        "tests/unit/utils/stances.test.js"
+      ]
+    },
+    {
+      "file": "36_stances.md",
+      "pages": "84",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/config/status-effects.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/active-effect.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/combat.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/automation.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/sheets/handlers/stance-handler.js",
+        "module/utils/effects.js",
+        "module/utils/stances.js"
+      ],
+      "tests": [
+        "tests/quench/apps/condition-manager.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/helpers.js",
+        "tests/quench/packs.js",
+        "tests/quench/regressions.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/stance-effect-preservation.js",
+        "tests/quench/services/stance.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/quench/workflows/skill-stance-combinations.js",
+        "tests/quench/workflows/stance-edge-cases.js",
+        "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/rule-engine.test.js",
+        "tests/unit/utils/stances.test.js"
+      ]
+    },
+    {
+      "file": "37_actions.md",
+      "pages": "85",
+      "status": "automated",
+      "code": [
+        "module/config/rule-keys.js",
+        "module/data/rules/rule-models.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/unit/utils/rule-engine.test.js"
+      ]
+    },
+    {
+      "file": "37_actions.md",
+      "pages": "85",
+      "status": "manual",
+      "decision": "module/data/rules/rule-models.js ActionCostRule: shown on the card, not enforced"
+    },
+    {
+      "file": "38_maneuvers.md",
+      "pages": "85-87",
+      "status": "automated",
+      "code": [
+        "module/config/rule-keys.js",
+        "module/config/status-effects.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/rules/rule-models.js",
+        "module/services/combat/contest.js",
+        "module/services/combat/damage-roll.js",
+        "module/services/combat/duel.js",
+        "module/services/combat/guard.js",
+        "module/services/dice/check/card.js",
+        "module/services/dice/check/message-data.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/check/terms.js",
+        "module/utils/damage.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "39_iaijutsu_dueling.md",
+      "pages": "87-88",
+      "status": "automated",
+      "code": [
+        "module/config/rule-keys.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/rules/rule-models.js",
+        "module/services/combat/contest.js",
+        "module/services/combat/damage-roll.js",
+        "module/services/combat/duel.js",
+        "module/services/combat/grapple.js",
+        "module/services/combat/guard.js",
+        "module/services/dice/check/roll-check.js",
+        "module/utils/damage.js"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "40_grappling.md",
+      "pages": "88-89",
+      "status": "automated",
+      "code": [
+        "module/config/rule-keys.js",
+        "module/config/status-effects.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
+        "module/documents/actor/rules.js",
+        "module/documents/combat.js",
+        "module/services/combat/duel.js",
+        "module/services/combat/grapple.js",
+        "module/services/dice/check/collect.js",
+        "module/services/dice/check/message-data.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/sheets/handlers/stance-handler.js",
+        "module/utils/check.js",
+        "module/utils/effects.js",
+        "module/utils/stances.js",
+        "module/utils/ten-dice.js"
+      ],
+      "tests": [
+        "tests/quench/apps/condition-manager.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/quench/workflows/attack-edge-cases.js",
+        "tests/quench/workflows/conditions-edge-cases.js",
+        "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/quench/workflows/status-effects-all-rolls.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/rule-engine.test.js",
+        "tests/unit/utils/stances.test.js",
+        "tests/unit/utils/ten-dice.test.js"
+      ]
+    },
+    {
+      "file": "41_conditional_effects.md",
+      "pages": "89",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/config/rule-keys.js",
+        "module/config/status-effects.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
+        "module/documents/actor/rules.js",
+        "module/documents/combat.js",
+        "module/services/combat/duel.js",
+        "module/services/combat/grapple.js",
+        "module/services/dice/check/collect.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "module/sheets/handlers/stance-handler.js",
+        "module/utils/check.js",
+        "module/utils/effects.js",
+        "module/utils/stances.js",
+        "module/utils/ten-dice.js"
+      ],
+      "tests": [
+        "tests/quench/apps/condition-manager.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/armor-tn-calculation.js",
+        "tests/quench/workflows/attack-edge-cases.js",
+        "tests/quench/workflows/conditions-edge-cases.js",
+        "tests/quench/workflows/stance-switching-workflow.js",
+        "tests/quench/workflows/status-effects-all-rolls.js",
+        "tests/quench/workflows/status-effects-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/check.test.js",
+        "tests/unit/utils/effects.test.js",
+        "tests/unit/utils/rule-engine.test.js",
+        "tests/unit/utils/stances.test.js",
+        "tests/unit/utils/status-data.test.js",
+        "tests/unit/utils/ten-dice.test.js"
+      ]
+    },
+    {
+      "file": "42_fear.md",
+      "pages": "90",
+      "status": "automated",
+      "code": [
+        "module/config/expiry-events.js",
+        "module/config/game-mechanics.js",
+        "module/config/rule-keys.js",
+        "module/config/status-effects.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/fear-system.js",
+        "module/documents/actor/rules.js",
+        "module/documents/combat.js",
+        "module/services/effects/automation.js",
+        "module/services/fear.js",
+        "module/services/ledger.js",
+        "module/services/links.js",
+        "module/utils/fear.js",
+        "module/utils/ledger.js",
+        "module/utils/link-syntax.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/fear-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/floating-text.test.js",
+        "tests/unit/utils/link-syntax.test.js",
+        "tests/unit/utils/rule-engine.test.js"
+      ]
+    },
+    {
+      "file": "43_honor.md",
+      "pages": "90-92",
+      "status": "automated",
+      "code": [
+        "module/config/expiry-events.js",
+        "module/config/game-mechanics.js",
+        "module/config/rule-keys.js",
+        "module/config/status-effects.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/base-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/fear-system.js",
+        "module/documents/actor/rules.js",
+        "module/documents/combat.js",
+        "module/services/dice/check/card.js",
+        "module/services/dice/check/chat-actions.js",
+        "module/services/effects/automation.js",
+        "module/services/fear.js",
+        "module/services/ledger.js",
+        "module/services/links.js",
+        "module/services/session.js",
+        "module/setup/settings/world.js",
+        "module/utils/fear.js",
+        "module/utils/ledger.js",
+        "module/utils/link-syntax.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/quench/combat.js",
+        "tests/quench/effects.js",
+        "tests/quench/table-tools.js",
+        "tests/quench/workflows/fear-workflow.js",
+        "tests/unit/config/status-effects.test.js",
+        "tests/unit/utils/floating-text.test.js",
+        "tests/unit/utils/link-syntax.test.js",
+        "tests/unit/utils/rule-engine.test.js"
+      ]
+    },
+    {
+      "file": "43_honor.md",
+      "pages": "91",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "44_glory.md",
+      "pages": "93",
+      "status": "automated",
+      "code": [
+        "module/config/rule-keys.js",
+        "module/data/rules/rule-models.js",
+        "module/utils/ledger.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/unit/utils/ledger.test.js"
+      ]
+    },
+    {
+      "file": "44_glory.md",
+      "pages": "93",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "45_status.md",
+      "pages": "93-95",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/config/rule-keys.js",
+        "module/data/rules/rule-models.js",
+        "module/sheets/handlers/pc-adjustment-handler.js",
+        "module/utils/ledger.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/unit/utils/ledger.test.js"
+      ]
+    },
+    {
+      "file": "45_status.md",
+      "pages": "94",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "46_monks.md",
+      "pages": "95",
+      "status": "manual",
+      "decision": "roadmap/STAGE-16-COVERAGE-AUDIT.md decision 6: left to the table"
+    },
+    {
+      "file": "46_monks.md",
+      "pages": "98",
+      "status": "advice"
+    },
+    {
+      "file": "47_character_creation_summary.md",
+      "pages": "99",
+      "status": "advice"
+    },
+    {
+      "file": "48_character_creation_expanded.md",
+      "pages": "100-101",
+      "status": "advice"
+    },
+    {
+      "file": "48_character_creation_expanded.md",
+      "pages": "102-104",
+      "status": "automated",
+      "code": [
+        "module/data/actor/pc-data.js",
+        "module/data/item/school-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/item/lifecycle/grants.js",
+        "module/services/purchase.js",
+        "module/setup/migrations/actors/xp-free-trait-base.js",
+        "module/utils/grants.js",
+        "module/utils/mechanics.js",
+        "module/utils/rule-engine.js",
+        "module/utils/rule-summary.js",
+        "module/utils/xp-calculations.js",
+        "module/utils/xp-ledger.js"
+      ],
+      "tests": [
+        "tests/packs-example.test.js",
+        "tests/quench/active-effects.js",
+        "tests/quench/authoring.js",
+        "tests/quench/packs.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/initiative.js",
+        "tests/unit/utils/grants.test.js",
+        "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/xp-ledger.test.js"
+      ]
+    },
+    {
+      "file": "49_improving_your_character.md",
+      "pages": "104-105",
+      "status": "automated",
+      "code": [
+        "module/data/actor/pc-data.js",
+        "module/data/item/school-data.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/item/lifecycle/grants.js",
+        "module/utils/mechanics.js",
+        "module/utils/spell-casting.js",
+        "module/utils/xp-ledger.js",
+        "src/packs/families.json"
+      ],
+      "tests": [
+        "tests/packs-example.test.js",
+        "tests/quench/authoring.js",
+        "tests/quench/packs.js",
+        "tests/quench/rules.js",
+        "tests/quench/services/initiative.js",
+        "tests/unit/utils/grants.test.js",
+        "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/spell-casting.test.js",
+        "tests/unit/utils/xp-ledger.test.js"
+      ]
+    },
+    {
+      "file": "50_crab_schools.md",
+      "pages": "105-108",
+      "status": "automated",
+      "code": [
+        "module/data/item/school-data.js",
+        "module/services/dice/check/collect.js",
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js",
+        "tests/unit/utils/spell-casting.test.js"
+      ]
+    },
+    {
+      "file": "50_crab_schools.md",
+      "pages": "106-108",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "51_crane_schools.md",
+      "pages": "109-111",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "51_crane_schools.md",
+      "pages": "109-111",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "52_dragon_schools.md",
+      "pages": "112-115",
+      "status": "automated",
+      "code": [
+        "module/data/item/tattoo-data.js",
+        "module/services/effects/activation.js",
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/tattoos.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "52_dragon_schools.md",
+      "pages": "113-115",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "53_lion_schools.md",
+      "pages": "116-119",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "53_lion_schools.md",
+      "pages": "117-119",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "54_mantis_schools.md",
+      "pages": "120-122",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "54_mantis_schools.md",
+      "pages": "120-122",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "55_phoenix_schools.md",
+      "pages": "123-125",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "55_phoenix_schools.md",
+      "pages": "123-125",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "56_scorpion_schools.md",
+      "pages": "126-127, 129",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "56_scorpion_schools.md",
+      "pages": "126-129",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "57_unicorn_schools.md",
+      "pages": "129-132",
+      "status": "automated",
+      "code": [
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "57_unicorn_schools.md",
+      "pages": "129-132",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "58_skills_overview.md",
+      "pages": "133",
+      "status": "automated",
+      "code": [
+        "module/data/item/skill-data.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/rolls/skill-roll.js",
+        "module/sheets/pc-context-builder.js",
+        "module/utils/check.js"
+      ],
+      "tests": [
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/unit/utils/check.test.js"
+      ]
+    },
+    {
+      "file": "58_skills_overview.md",
+      "pages": "134",
+      "status": "automated",
+      "code": [
+        "module/data/item/skill-data.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/unit/utils/taint.test.js"
+      ]
+    },
+    {
+      "file": "59_high_skills.md",
+      "pages": "135-139",
+      "status": "automated",
+      "code": [
+        "src/packs/skills.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "59_high_skills.md",
+      "pages": "135-139",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "60_bugei_skills.md",
+      "pages": "139-143",
+      "status": "automated",
+      "code": [
+        "module/services/combat/duel.js",
+        "module/services/dice/check/collect.js",
+        "src/packs/skills.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/combat.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "60_bugei_skills.md",
+      "pages": "139-143",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "61_merchant_skills.md",
+      "pages": "143-144",
+      "status": "automated",
+      "code": [
+        "module/services/dice/check/collect.js",
+        "src/packs/skills.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "61_merchant_skills.md",
+      "pages": "143-144",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "62_low_skills.md",
+      "pages": "144-145",
+      "status": "automated",
+      "code": [
+        "module/documents/actor/calculations/xp-system.js",
+        "module/utils/xp-ledger.js",
+        "src/packs/skills.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js",
+        "tests/unit/utils/xp-ledger.test.js"
+      ]
+    },
+    {
+      "file": "62_low_skills.md",
+      "pages": "144-145",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "63_advantages_and_disadvantages.md",
+      "pages": "145",
+      "status": "automated",
+      "code": [
+        "module/documents/actor/calculations/xp-system.js",
+        "module/utils/xp-ledger.js",
+        "src/packs/skills.json"
+      ],
+      "tests": [
+        "tests/quench/packs.js",
+        "tests/unit/utils/xp-ledger.test.js"
+      ]
+    },
+    {
+      "file": "63_advantages_and_disadvantages.md",
+      "pages": "146",
+      "status": "automated",
+      "code": [
+        "src/packs/advantages.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "63_advantages_and_disadvantages.md",
+      "pages": "146",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "64_advantages.md",
+      "pages": "146-155",
+      "status": "automated",
+      "code": [
+        "module/services/purchase.js",
+        "src/packs/advantages.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "64_advantages.md",
+      "pages": "146-155",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "65_disadvantages.md",
+      "pages": "156-162",
+      "status": "automated",
+      "code": [
+        "src/packs/disadvantages.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "65_disadvantages.md",
+      "pages": "156-162",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "66_magic_and_spell_casting.md",
+      "pages": "163-164",
+      "status": "automated",
+      "code": [
+        "module/data/item/school-data.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "module/services/dice/rolls/spell-cast-roll.js",
+        "module/utils/spell-casting.js",
+        "src/packs/spells.json"
+      ],
+      "tests": [
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/workflows/spell-casting-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js",
+        "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/spell-casting.test.js"
+      ]
+    },
+    {
+      "file": "67_universal_spells.md",
+      "pages": "164-166",
+      "status": "automated",
+      "code": [
+        "module/documents/actor/calculations/item-enrichment-system.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "module/documents/combat.js",
+        "module/services/dice/rolls/spell-cast-roll.js",
+        "module/services/effects/automation.js",
+        "module/services/effects/combat-events.js",
+        "module/services/effects/prompts.js",
+        "src/packs/spells.json"
+      ],
+      "tests": [
+        "tests/quench/effects.js",
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/workflows/spell-casting-workflow.js",
+        "tests/quench/workflows/wound-penalty-all-rolls.js"
+      ]
+    },
+    {
+      "file": "67_universal_spells.md",
+      "pages": "164-165",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "68_air_spells.md",
+      "pages": "167-173",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "69_earth_spells.md",
+      "pages": "173-180",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "70_fire_spells.md",
+      "pages": "180-186",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "71_water_spells.md",
+      "pages": "187-193",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "72_void_spells.md",
+      "pages": "193-197",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "73_armor.md",
+      "pages": "198",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/utils/armor-penalties.js",
+        "module/utils/damage.js",
+        "src/packs/armor.json"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/packs.js",
+        "tests/unit/utils/armor-penalties.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "73_armor.md",
+      "pages": "198",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "74_weapons.md",
+      "pages": "198-199",
+      "status": "automated",
+      "code": [
+        "module/config/game-mechanics.js",
+        "module/data/item/weapon-data.js",
+        "module/documents/actor/preparation/pc-preparation.js",
+        "module/documents/item/preparation/derived-data.js",
+        "module/services/dice/check/collect.js",
+        "module/services/dice/check/message-data.js",
+        "module/services/dice/check/roll-check.js",
+        "module/utils/armor-penalties.js",
+        "module/utils/damage.js",
+        "src/packs/armor.json"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/packs.js",
+        "tests/unit/utils/armor-penalties.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "74_weapons.md",
+      "pages": "200-205",
+      "status": "automated",
+      "code": [
+        "module/data/item/weapon-data.js",
+        "module/documents/item/preparation/melee-damage.js",
+        "module/services/dice/check/roll-check.js",
+        "src/packs/equipment.json",
+        "src/packs/weapons.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/unit/utils/damage.test.js",
+        "tests/unit/utils/rule-summary.test.js"
+      ]
+    },
+    {
+      "file": "74_weapons.md",
+      "pages": "200-205",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "75_miscellaneous_equipment.md",
+      "pages": "205-207",
+      "status": "automated",
+      "code": [
+        "src/packs/equipment.json",
+        "src/packs/weapons.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "75_miscellaneous_equipment.md",
+      "pages": "205",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "75_miscellaneous_equipment.md",
+      "pages": "210",
+      "status": "advice"
+    },
+    {
+      "file": "76_spider_clan.md",
+      "pages": "211-213, 215",
+      "status": "automated",
+      "code": [
+        "module/data/rules/rule-models.js",
+        "src/packs/clans.json",
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "76_spider_clan.md",
+      "pages": "212-215",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "77_minor_clans.md",
+      "pages": "215-225",
+      "status": "automated",
+      "code": [
+        "src/packs/clans.json",
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "77_minor_clans.md",
+      "pages": "215-225",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "78_school_tags_expanded.md",
+      "pages": "226",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "78_school_tags_expanded.md",
+      "pages": "227",
+      "status": "automated",
+      "code": [
+        "src/packs/clans.json",
+        "src/packs/families.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "78_school_tags_expanded.md",
+      "pages": "227",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "79_imperial_families.md",
+      "pages": "227-230",
+      "status": "automated",
+      "code": [
+        "src/packs/clans.json",
+        "src/packs/families.json",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "79_imperial_families.md",
+      "pages": "227-230",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "80_brotherhood_of_shinsei.md",
+      "pages": "231",
+      "status": "automated",
+      "code": [
+        "module/data/item/kiho-data.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/quench/active-effects.js"
+      ]
+    },
+    {
+      "file": "80_brotherhood_of_shinsei.md",
+      "pages": "231-233",
+      "status": "automated",
+      "code": [
+        "module/data/item/kiho-data.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/active-effects.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "80_brotherhood_of_shinsei.md",
+      "pages": "231-233",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "81_ronin.md",
+      "pages": "233-235",
+      "status": "automated",
+      "code": [
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "81_ronin.md",
+      "pages": "233-235",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "82_mass_battle.md",
+      "pages": "236-241",
+      "status": "out",
+      "decision": "roadmap/00-OVERVIEW.md Not planned"
+    },
+    {
+      "file": "83_ancestors.md",
+      "pages": "241",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "83_ancestors.md",
+      "pages": "242-244",
+      "status": "automated",
+      "code": [
+        "src/packs/advantages.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "83_ancestors.md",
+      "pages": "242-244",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "84_advanced_schools_and_alternate_paths.md",
+      "pages": "245-246",
+      "status": "automated",
+      "code": [
+        "module/services/purchase.js"
+      ],
+      "tests": [
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "84_advanced_schools_and_alternate_paths.md",
+      "pages": "247-257",
+      "status": "automated",
+      "code": [
+        "module/services/purchase.js",
+        "src/packs/schools.json",
+        "src/packs/techniques.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "84_advanced_schools_and_alternate_paths.md",
+      "pages": "247-257",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "85_crafting.md",
+      "pages": "258",
+      "status": "manual",
+      "decision": "roadmap/STAGE-16-COVERAGE-AUDIT.md decision 6: left to the table"
+    },
+    {
+      "file": "86_kata.md",
+      "pages": "259",
+      "status": "automated",
+      "code": [
+        "module/data/effect/base-data.js",
+        "module/data/item/kata-data.js",
+        "module/documents/active-effect.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "module/services/effects/activation.js",
+        "src/packs/kata.json"
+      ],
+      "tests": [
+        "tests/quench/active-effects.js",
+        "tests/quench/authoring.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "86_kata.md",
+      "pages": "259-260",
+      "status": "automated",
+      "code": [
+        "module/data/effect/base-data.js",
+        "module/data/item/kata-data.js",
+        "module/documents/active-effect.js",
+        "module/documents/actor/calculations/xp-system.js",
+        "module/services/effects/activation.js",
+        "src/packs/kata.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/active-effects.js",
+        "tests/quench/authoring.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "86_kata.md",
+      "pages": "259-260",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "87_kiho.md",
+      "pages": "261",
+      "status": "automated",
+      "code": [
+        "module/data/item/kiho-data.js",
+        "module/services/effects/activation.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "87_kiho.md",
+      "pages": "262-263, 265",
+      "status": "automated",
+      "code": [
+        "src/packs/kiho.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js"
+      ]
+    },
+    {
+      "file": "87_kiho.md",
+      "pages": "262-267",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "88_maho.md",
+      "pages": "267-268",
+      "status": "automated",
+      "code": [
+        "module/services/dice/rolls/maho-cast-roll.js",
+        "src/packs/kiho.json",
+        "src/packs/spells.json"
+      ],
+      "tests": [
+        "tests/quench/packs.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js"
+      ]
+    },
+    {
+      "file": "88_maho.md",
+      "pages": "268-274",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "89_shadowlands_taint.md",
+      "pages": "274",
+      "status": "advice"
+    },
+    {
+      "file": "89_shadowlands_taint.md",
+      "pages": "275, 277-279",
+      "status": "automated",
+      "code": [
+        "module/documents/actor/rules.js",
+        "module/services/dice/check/chat-actions.js",
+        "module/services/dice/check/roll-check.js",
+        "module/services/dice/check/terms.js",
+        "module/services/dice/rolls/maho-cast-roll.js",
+        "module/services/rest.js",
+        "module/utils/taint.js"
+      ],
+      "tests": [
+        "tests/quench/authoring.js",
+        "tests/quench/roll-pipeline.js",
+        "tests/quench/rules.js",
+        "tests/unit/utils/taint.test.js"
+      ]
+    },
+    {
+      "file": "89_shadowlands_taint.md",
+      "pages": "276, 279-281",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "89_shadowlands_taint.md",
+      "pages": "280",
+      "status": "automated",
+      "code": [
+        "module/services/dice/rolls/maho-cast-roll.js",
+        "module/setup/migrations/items/item-rules.js"
+      ],
+      "tests": [
+        "tests/quench/rules.js"
+      ]
+    },
+    {
+      "file": "89_shadowlands_taint.md",
+      "pages": "284",
+      "status": "advice"
+    },
+    {
+      "file": "90_running_a_campaign.md",
+      "pages": "285-286",
+      "status": "advice"
+    },
+    {
+      "file": "91_types_of_campaigns.md",
+      "pages": "286-288",
+      "status": "advice"
+    },
+    {
+      "file": "91_types_of_campaigns.md",
+      "pages": "289-290",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "92_balancing_characters_and_campaigns.md",
+      "pages": "291",
+      "status": "advice"
+    },
+    {
+      "file": "93_adventures_and_structure.md",
+      "pages": "291-298",
+      "status": "advice"
+    },
+    {
+      "file": "93_adventures_and_structure.md",
+      "pages": "299",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "94_experience_points.md",
+      "pages": "300",
+      "status": "manual",
+      "decision": "roadmap/STAGE-16-COVERAGE-AUDIT.md decision 6: left to the table"
+    },
+    {
+      "file": "95_thirty_six_plots.md",
+      "pages": "301-308",
+      "status": "advice"
+    },
+    {
+      "file": "96_storytelling_and_villains.md",
+      "pages": "309-312",
+      "status": "advice"
+    },
+    {
+      "file": "97_honor_glory_infamy_status_for_gms.md",
+      "pages": "312",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "98_being_a_good_game_master.md",
+      "pages": "313-315",
+      "status": "advice"
+    },
+    {
+      "file": "98_being_a_good_game_master.md",
+      "pages": "316-317",
+      "status": "manual",
+      "decision": "roadmap/AUTOMATION.md §4: a GM or player choice the system prompts for and never resolves"
+    },
+    {
+      "file": "98_being_a_good_game_master.md",
+      "pages": "318",
+      "status": "automated",
+      "code": [
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/npc-wound-system.js"
+      ],
+      "tests": [
+        "tests/quench/packs.js",
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js"
+      ]
+    },
+    {
+      "file": "99_creatures.md",
+      "pages": "318-320",
+      "status": "automated",
+      "code": [
+        "module/data/chat/roll-message-data.js",
+        "module/data/rules/rule-models.js",
+        "module/documents/actor/calculations/npc-wound-system.js",
+        "module/services/dice/check/collect.js",
+        "module/utils/damage.js",
+        "module/utils/rule-engine.js",
+        "src/packs/creatures.json"
+      ],
+      "tests": [
+        "tests/quench/combat.js",
+        "tests/quench/packs.js",
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js",
+        "tests/unit/utils/damage.test.js"
+      ]
+    },
+    {
+      "file": "99_creatures.md",
+      "pages": "321-325, 327-331",
+      "status": "automated",
+      "code": [
+        "src/packs/creatures.json"
+      ],
+      "tests": [
+        "tests/packs.test.js",
+        "tests/quench/packs.js",
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js"
+      ]
+    },
+    {
+      "file": "99_creatures.md",
+      "pages": "321-325, 327-331",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "99_creatures.md",
+      "pages": "326",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 11: the Ghost prints no stat block"
+    },
+    {
+      "file": "100_poison.md",
+      "pages": "332-333",
+      "status": "manual",
+      "decision": "roadmap/STAGE-15-COMPENDIUM-PACKS.md decision 9: what the pack entries' rules cannot express"
+    },
+    {
+      "file": "101_location_guide.md",
+      "pages": "334-369",
+      "status": "advice"
+    },
+    {
+      "file": "102_adventure_seeds.md",
+      "pages": "369-371",
+      "status": "advice"
+    },
+    {
+      "file": "103_sample_adventure.md",
+      "pages": "372-383",
+      "status": "advice"
+    },
+    {
+      "file": "104_resources_and_inspirations.md",
+      "pages": "384, 389-394",
+      "status": "advice"
+    },
+    {
+      "file": "105_index.md",
+      "pages": "394-400",
+      "status": "advice"
+    }
+  ],
+  "untested": {
+    "actions": {},
+    "settings": {
+      "lastMigratedVersion": "Hidden; only the ready hook's migration gate writes it (dist/l5r4-enhanced.js), on a world opened by a newer version. The world-upgrade batch reads it after a real upgrade (tests/quench/world-upgrade.js)"
+    }
+  }
+}

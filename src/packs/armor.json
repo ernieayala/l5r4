@@ -1,0 +1,58 @@
+{
+  "name": "armor",
+  "label": "Armor",
+  "documentType": "Item",
+  "types": ["armor"],
+  "pages": [[198, 198]],
+  "entries": [
+    {
+      "name": "Ashigaru Armor",
+      "type": "armor",
+      "page": 198,
+      "coverage": "full",
+      "system": {
+        "bonus": 3,
+        "reduction": 1,
+        "armorType": "ashigaru",
+        "price": { "koku": 5, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Light Armor",
+      "type": "armor",
+      "page": 198,
+      "coverage": "full",
+      "system": {
+        "bonus": 5,
+        "reduction": 3,
+        "armorType": "light",
+        "price": { "koku": 25, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Heavy Armor",
+      "type": "armor",
+      "page": 198,
+      "coverage": "full",
+      "system": {
+        "bonus": 10,
+        "reduction": 5,
+        "armorType": "heavy",
+        "price": { "koku": 40, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Riding Armor",
+      "type": "armor",
+      "page": 198,
+      "coverage": "partial",
+      "system": {
+        "bonus": 4,
+        "reduction": 4,
+        "armorType": "riding",
+        "price": { "koku": 55, "bu": 0, "zeni": 0 },
+        "specialRules": "Counts as heavy armor for any effect that names an armor type."
+      }
+    }
+  ]
+}

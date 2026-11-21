@@ -1,0 +1,15 @@
+// A fixed chat-card class (docs/code-system/naming.md, Fixed names) sits outside the file's block
+.l5r4-roll {
+  display: flex;
+}
+
+.l5r4-chat-card {
+  display: block;
+}
+
+// The one named unscoped selector (docs/code-system/templates-and-styles.md, Stylesheets)
+.message-content {
+  .item {
+    display: block;
+  }
+}

@@ -1,0 +1,480 @@
+import { CHANGE_ORIGIN_OPTION } from "../../module/config/constants.js";
+import { buildPool, parseRollAndKeep, getPoolFormula } from "../../module/utils/check.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { getSlotStatus, spendSlot } from "../../module/services/dice/check/spell-slots.js";
+
+/**
+ * Spend a spell slot the way a cast does (module/services/dice/check/spell-slots.js): the slot the choice names,
+ * then the spend under the caster's lock, which checks the count again.
+ * @param {Actor|object} actor  The caster
+ * @param {string} ring  The Ring the spell is cast in
+ * @param {{isVoid?: boolean}} [options]  Spend a Void slot in place of the Ring's
+ * @returns {Promise<{success: boolean, message: string|null, label: string}>} The spend, with the slot's card label
+ *   when a slot was spent
+ */
+export async function spendCastSlot(actor, ring, { isVoid = false } = {}) {
+  const slot = getSlotStatus(actor, ring, isVoid ? "void" : "elemental");
+  const result = await spendSlot(actor, slot.path);
+  return {
+    ...result,
+    message: result.message ?? slot.message,
+    label: result.success ? slot.label : ""
+  };
+}
+
+/**
+ * Answer the next check dialog: set its fields, then click Roll.
+ * @param {Record<string, string|boolean>} values  Field name to value; booleans set checkboxes
+ * @returns {Promise<string[]>} Resolves with the dialog's modifier labels once it is answered
+ */
+export function answerCheckDialog(values = {}) {
+  return new Promise(resolve => {
+    Hooks.once("renderDialogV2", app => {
+      const form = app.element.querySelector("form") ?? app.element;
+      const labels = [...app.element.querySelectorAll("[data-modifier-label]")].map(e =>
+        e.textContent.trim()
+      );
+      for (const [name, value] of Object.entries(values)) {
+        const input = form.querySelector(`[name="${name}"]`);
+        if (input.type === "checkbox") {
+          input.checked = Boolean(value);
+        } else {
+          input.value = String(value);
+        }
+      }
+      app.element.querySelector('[data-action="ok"]').click();
+      resolve(labels);
+    });
+  });
+}
+
+/**
+ * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
+ * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes).
+ * game-rules/36_stances.md, p.84
+ * @returns {function(): void}  Stops answering
+ */
+export function autoAnswerRolls() {
+  const id = Hooks.on("renderDialogV2", app => {
+    app.element.querySelector('[data-action="ok"]')?.click();
+  });
+  return () => Hooks.off("renderDialogV2", id);
+}
+
+/**
+ * For a batch whose actions roll as a side effect (taking the Full Defense Stance): answer each roll dialog with its
+ * defaults while the batch runs. The messages it posts are deleted with every batch's (withPostedMessagesDeleted).
+ * game-rules/36_stances.md, p.84
+ * @param {{before: Function, after: Function}} context  The batch's Quench context
+ */
+export function guardRolls({ before, after }) {
+  let stop;
+  before(() => {
+    stop = autoAnswerRolls();
+  });
+  after(() => stop());
+}
+
+/** The socket id `withAnotherClient` stamps changes with: no client has it. */
+export const ANOTHER_CLIENT_ID = "another-client";
+
+/**
+ * Run a function with every Actor, Item, Active Effect, and chat message change this client sends stamped as another
+ * client's (module/services/change-origin.js), so this client sees the change as one of its user's other clients
+ * receives it. The stamp hooks run after the system's, which register during init.
+ * @template T
+ * @param {function(): Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+export async function withAnotherClient(fn) {
+  const restamp = options => {
+    options[CHANGE_ORIGIN_OPTION] = ANOTHER_CLIENT_ID;
+  };
+  const hooks = ["Actor", "Item", "ActiveEffect", "ChatMessage"].flatMap(documentName => [
+    [
+      `preCreate${documentName}`,
+      Hooks.on(`preCreate${documentName}`, (_doc, _data, o) => restamp(o))
+    ],
+    [`preUpdate${documentName}`, Hooks.on(`preUpdate${documentName}`, (_doc, _c, o) => restamp(o))],
+    [`preDelete${documentName}`, Hooks.on(`preDelete${documentName}`, (_doc, o) => restamp(o))]
+  ]);
+  try {
+    return await fn();
+  } finally {
+    for (const [hook, id] of hooks) {
+      Hooks.off(hook, id);
+    }
+  }
+}
+
+/**
+ * Wait until a condition holds. Core runs combat turn events from `Combat#_onUpdate` without awaiting them
+ * [src: client/documents/combat.mjs:658-673], so what they do (effect expiry, save cards) lands after `nextTurn()`
+ * resolves.
+ * @param {function(): boolean} condition
+ * @param {number} [timeout=5000]  Milliseconds before giving up
+ * @returns {Promise<boolean>} Whether the condition held in time
+ */
+export async function waitFor(condition, timeout = 5000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    if (condition()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  return condition();
+}
+
+/**
+ * Create a token on the viewed scene and wait until core has drawn it. The placeable exists before its draw
+ * finishes, and the draw loads the texture [src: client/canvas/placeables/token.mjs:1229] before it adds the target
+ * arrows [src: client/canvas/placeables/token.mjs:1279], so a token targeted earlier throws on the next canvas tick
+ * [src: client/canvas/layers/tokens.mjs:466].
+ *
+ * @param {object} data  Token data
+ * @returns {Promise<TokenDocument>}
+ */
+export async function createDrawnToken(data) {
+  const drawn = new Set();
+  // Core calls drawToken at the end of each draw [src: client/canvas/placeables/placeable-object.mjs:546]
+  const hook = Hooks.on("drawToken", token => drawn.add(token.document.id));
+  try {
+    const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data]);
+    if (!(await waitFor(() => drawn.has(token.id)))) {
+      await token.delete();
+      throw new Error(`Token ${token.name} was not drawn`);
+    }
+    return token;
+  } finally {
+    Hooks.off("drawToken", hook);
+  }
+}
+
+/**
+ * Wait for the Full Defense roll that taking the stance starts (module/services/effects/automation.js) to write its
+ * bonus, so a test deleting the actor next does not leave that write to fail on the server inside a later test.
+ * Nothing to wait for when the actor is not in the stance.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export async function settleFullDefense(actor) {
+  if (actor.statuses.has("fullDefenseStance")) {
+    await waitFor(() =>
+      actor.effects.some(e => e.getFlag("l5r4-enhanced", "effectId") === "fullDefense")
+    );
+  }
+}
+
+/**
+ * What an actor's rules, stances, and conditions give one check, read through the roll pipeline's own collection
+ * (module/services/dice/check/collect.js): the dice and total of the modifiers the dialog starts ticked for that
+ * attack range, and the TN changes.
+ * @param {Actor} actor
+ * @param {string} kind  skill, trait, ring, spell, attack, damage, ...
+ * @param {object} [spec]
+ * @param {"melee"|"ranged"} [spec.range="melee"]
+ * @param {Actor|null} [spec.target]
+ * @param {string} [spec.skill]
+ * @param {string} [spec.trait]
+ * @param {string} [spec.ring]
+ * @returns {{roll: number, keep: number, total: number, tn: number}}
+ */
+export function checkEffects(actor, kind, { range = "melee", target = null, ...spec } = {}) {
+  const ctx = getCheckContext(actor, { kind, target, ...spec });
+  const inRange = m => !m.range || m.range === range;
+  const modifiers = ctx.modifiers.filter(m => m.enabled && inRange(m));
+  const sum = key => modifiers.reduce((total, m) => total + m[key], 0);
+  return {
+    roll: sum("roll"),
+    keep: sum("keep"),
+    total: sum("total"),
+    tn: ctx.tnModifiers.filter(inRange).reduce((total, m) => total + m.value, 0)
+  };
+}
+
+/**
+ * The Foundry formula the roll pipeline builds for a pool already under the Ten Dice Rule
+ * (module/utils/check.js getPoolFormula), from rolled dice, kept dice, and a bonus.
+ * @param {number} roll
+ * @param {number} keep
+ * @param {number} bonus
+ * @param {{emphasis?: boolean, unskilled?: boolean, explode?: number}} [options]
+ * @returns {string}
+ */
+export function buildFormula(
+  roll,
+  keep,
+  bonus,
+  { emphasis = false, unskilled = false, explode = 10 } = {}
+) {
+  return getPoolFormula({
+    roll,
+    keep,
+    bonus,
+    explode: unskilled ? null : explode,
+    rerollOnes: emphasis
+  });
+}
+
+/**
+ * Inline Roll & Keep notation as the chat parser reads it: the parsed flags and the pool after the Ten Dice Rule.
+ * @param {string} notation  Such as "e7k3+2"
+ * @returns {{roll: number, keep: number, bonus: number, unskilled: boolean, rerollOnes: boolean,
+ *   explode: number|null}}
+ */
+export function parseNotation(notation) {
+  const parsed = parseRollAndKeep(notation);
+  return { ...buildPool(parsed), unskilled: parsed.unskilled, rerollOnes: parsed.rerollOnes };
+}
+
+/** How long a test waits for a document update before failing. */
+const UPDATE_TIMEOUT_MS = 5000;
+
+/**
+ * Core shows a new message as a pop-up card: it adds the card hidden, waits for a spacer animation, then looks the
+ * card up again to reveal it [src: client/applications/sidebar/tabs/chat.mjs:1288-1327]. A message deleted before the
+ * reveal takes its card with it, and the lookup rejects inside whatever test runs then. The animation waits for
+ * frames, which Chrome stops while its window is covered, so settleChatNotifications finishes the spacer animations
+ * itself rather than waiting for them. The system never deletes messages; tests that clean up their messages do.
+ */
+const PENDING_CHAT_CARD = "#chat-notifications .chat-log :is(.message[hidden], .spacer)";
+
+/** Time for a message created right before the call to start its pop-up. */
+const CHAT_NOTIFICATION_START_MS = 500;
+
+/** Longest wait for pending pop-ups before giving up. */
+const CHAT_NOTIFICATION_TIMEOUT_MS = 15_000;
+
+/**
+ * Finish each chat pop-up's spacer animation as soon as core starts it, so the card is revealed at once and a test
+ * that deletes its messages right after a roll does not reject inside a later test (see PENDING_CHAT_CARD). Core
+ * calls `animate` in the same task that appends the spacer, so the observer, which runs after that task, finds it.
+ * Installed once, for the test world only, by tests/quench/index.js.
+ */
+export function revealChatPopupsAtOnce() {
+  new MutationObserver(records => {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/chat/notifications.hbs
+        if (node.classList?.contains("spacer") && node.closest("#chat-notifications")) {
+          for (const animation of node.getAnimations()) {
+            animation.finish();
+          }
+        }
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+}
+
+/**
+ * The Quench API with each batch muted: from its first hook to its last, core's dice sound is off, so no roll message
+ * starts loading audio during a run. Chrome fails about one in a hundred concurrent loads of the same file with a
+ * media "Format error", which core logs and the clean-console checks would fail on, in whichever batch is running
+ * when the load fails. No test checks sound. Core reads `CONFIG.sounds.dice` when it builds each message
+ * (`ChatMessage#_preCreate`, `Roll#toMessage`), so the mute reaches every roll.
+ * @param {object} quench - The Quench API object
+ * @returns {object} The same API, whose `registerBatch` mutes the batch it registers
+ */
+export function withDiceSoundMuted(quench) {
+  return Object.create(quench, {
+    registerBatch: {
+      value: (key, fn, options) =>
+        quench.registerBatch(
+          key,
+          context => {
+            let diceSound;
+            context.before(() => {
+              diceSound = CONFIG.sounds.dice;
+              CONFIG.sounds.dice = null;
+            });
+            fn(context);
+            context.after(() => {
+              CONFIG.sounds.dice = diceSound;
+            });
+          },
+          options
+        )
+    }
+  });
+}
+
+/**
+ * The Quench API with each batch tidy in chat: the messages this client posts from the batch's first hook to its
+ * last are deleted when it ends, so a run leaves the world's chat log as it found it, as the batches already leave
+ * its actors and items (#126). Another user's messages stay.
+ * @param {object} quench - The Quench API object
+ * @returns {object} The same API, whose `registerBatch` deletes the messages the batch posts
+ */
+export function withPostedMessagesDeleted(quench) {
+  return Object.create(quench, {
+    registerBatch: {
+      value: (key, fn, options) =>
+        quench.registerBatch(
+          key,
+          context => {
+            const posted = [];
+            let hook;
+            context.before(() => {
+              hook = Hooks.on("createChatMessage", message => {
+                if (message.author?.id === game.user.id) {
+                  posted.push(message);
+                }
+              });
+            });
+            fn(context);
+            context.after(async function () {
+              this.timeout(30_000);
+              Hooks.off("createChatMessage", hook);
+              await settleChatNotifications();
+              const ids = posted.map(message => message.id).filter(id => game.messages.has(id));
+              await ChatMessage.implementation.deleteDocuments(ids);
+            });
+          },
+          options
+        )
+    }
+  });
+}
+
+/**
+ * Reveal every chat pop-up card that has started, so a message deleted now does not reject in a later test, and a
+ * rejection from an earlier batch lands before this one starts. Finishing a spacer's animation resolves the promise
+ * core awaits whether or not the browser is drawing frames.
+ * @returns {Promise<void>}
+ */
+export async function settleChatNotifications() {
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  await wait(CHAT_NOTIFICATION_START_MS);
+  const deadline = Date.now() + CHAT_NOTIFICATION_TIMEOUT_MS;
+  while (document.querySelector(PENDING_CHAT_CARD) && Date.now() < deadline) {
+    // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/chat/notifications.hbs
+    for (const spacer of document.querySelectorAll("#chat-notifications .chat-log .spacer")) {
+      for (const animation of spacer.getAnimations()) {
+        animation.finish();
+      }
+    }
+    await wait(100);
+  }
+}
+
+/**
+ * Timeout for a test that closes several windows. Foundry 14.370 animates every ApplicationV2 close (about
+ * 1 s each), so two or more closes outrun Mocha's 2000 ms default.
+ */
+export const MULTI_CLOSE_TIMEOUT_MS = 10_000;
+
+/**
+ * Record console output at the given levels until `stop()` is called. The output still reaches the console.
+ * @param {Array<"error"|"warn">} levels
+ * @returns {{messages: string[], stop: () => void}}
+ */
+export function watchConsole(levels) {
+  const messages = [];
+  // Replacing console methods is the point here: the wrapper records output, then passes it through.
+  // eslint-disable-next-line no-console
+  const originals = Object.fromEntries(levels.map(level => [level, console[level]]));
+  for (const level of levels) {
+    // eslint-disable-next-line no-console
+    console[level] = (...args) => {
+      messages.push(`${level}: ${args.map(arg => arg?.stack ?? String(arg)).join(" ")}`);
+      originals[level](...args);
+    };
+  }
+  return { messages, stop: () => Object.assign(console, originals) };
+}
+
+/**
+ * Wrap a test body so the test fails if it logs a console error or warning, posts an error notification, or
+ * leaves a promise rejection or an error unhandled (an async click handler that throws reaches neither console
+ * method). Info and warning notifications are the system telling the user why an action did nothing, so they are
+ * not echoed to the console during the test; core echoes a notification only once it is displayed, which can be
+ * after the test ends [src: client/applications/ui/notifications.mjs:278-281]. The body runs with Mocha's test
+ * context, so it can call `this.timeout()`.
+ * @param {object} assert  Chai assert from the Quench context.
+ * @returns {(body: () => Promise<void>) => () => Promise<void>}
+ */
+export function cleanTest(assert) {
+  return body =>
+    async function () {
+      const watch = watchConsole(["error", "warn"]);
+      const onRejection = event =>
+        watch.messages.push(`unhandled rejection: ${event.reason?.stack ?? event.reason}`);
+      const onError = event =>
+        watch.messages.push(`uncaught: ${event.error?.stack ?? event.message}`);
+      const notify = ui.notifications.notify;
+      ui.notifications.notify = function (message, type, options = {}) {
+        if (type === "error") {
+          watch.messages.push(`error notification: ${message}`);
+        }
+        return notify.call(this, message, type, { ...options, console: false });
+      };
+      window.addEventListener("unhandledrejection", onRejection);
+      window.addEventListener("error", onError);
+      try {
+        await body.call(this);
+      } finally {
+        watch.stop();
+        ui.notifications.notify = notify;
+        window.removeEventListener("unhandledrejection", onRejection);
+        window.removeEventListener("error", onError);
+      }
+      assert.deepEqual(watch.messages, [], "console errors or warnings during the test");
+    };
+}
+
+/**
+ * Resolve once `document` has been updated, or reject after UPDATE_TIMEOUT_MS. Call it before triggering the
+ * update, so the hook is listening when it fires.
+ * @param {foundry.abstract.Document} document
+ * @returns {Promise<void>}
+ */
+export function nextUpdate(document) {
+  const hook = `update${document.documentName}`;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      Hooks.off(hook, id);
+      reject(new Error(`No ${hook} for ${document.name} within ${UPDATE_TIMEOUT_MS} ms`));
+    }, UPDATE_TIMEOUT_MS);
+    const id = Hooks.on(hook, updated => {
+      if (updated !== document) {
+        return;
+      }
+      clearTimeout(timer);
+      Hooks.off(hook, id);
+      resolve();
+    });
+  });
+}
+
+/**
+ * Change a form control on a rendered sheet the way a user does, then wait for the save and the re-render.
+ * Renders run one at a time, so awaiting a new render waits for the one the update queued.
+ * @param {foundry.applications.api.DocumentSheetV2} sheet
+ * @param {string} selector  CSS selector of the input.
+ * @param {string} value
+ */
+export async function changeThroughSheet(sheet, selector, value) {
+  await sheet.render();
+  const input = sheet.element.querySelector(selector);
+  const saved = nextUpdate(sheet.document);
+  input.value = value;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await saved;
+  await sheet.render();
+}
+
+/**
+ * The text of a rendered dialog's buttons by their action, so a test can check each names what it does
+ * (docs/design-system/patterns/dialogs.md, rule 2).
+ * @param {foundry.applications.api.DialogV2} app
+ * @returns {Record<string, string>}
+ */
+export function buttonLabelsOf(app) {
+  return Object.fromEntries(
+    [...app.element.querySelectorAll("button[data-action]")].map(button => [
+      button.dataset.action,
+      button.textContent.trim()
+    ])
+  );
+}

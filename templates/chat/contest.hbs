@@ -1,0 +1,2 @@
+{{!-- A Contested Roll's result (module/services/dice/check/chat-actions.js). entries: {name, total, raises}; verdict: the winner or the tie, localized --}}
+<div class="chat-card l5r4-contest"><div class="dice-flavor">{{localize "l5r4.ui.check.contest"}}</div><ul>{{#each entries}}<li>{{name}}: {{total}}{{#if raises}} ({{localize "l5r4.ui.mechanics.rolls.raises"}}: {{raises}}){{/if}}</li>{{/each}}</ul><p><strong>{{verdict}}</strong></p></div>

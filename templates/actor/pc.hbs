@@ -1,9 +1,9 @@
-<form class="{{cssClass}}" autocomplete="off">
-  <div class="main-sheet">
+<form class="l5r4-sheet {{cssClass}}" autocomplete="off">
+  <div class="l5r4-sheet-body" data-sheet-body>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_stats.hbs"}}
-    <div class="flexcol -gap-sm sidebar">
-      <div class="actor-img">
-        <img src="{{actor.img}}" data-edit="img" data-actor-image title="{{actor.name}}" />
+    <div class="flexcol -gap-sm l5r4-sheet-sidebar">
+      <div class="l5r4-portrait">
+        <img src="{{actor.img}}" data-edit="img" data-actor-image alt="{{actor.name}}" data-tooltip="{{actor.name}}" />
       </div>
       {{> "systems/l5r4-enhanced/templates/actor/_partials/_ranks.hbs"}}
       {{> "systems/l5r4-enhanced/templates/actor/_partials/_combat.hbs"}}

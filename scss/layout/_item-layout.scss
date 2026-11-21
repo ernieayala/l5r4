@@ -1,36 +1,29 @@
 /**
  * Item Layout
- * Layouts for item sheets
+ * The item sheet's header, tab panels, and Active Effects list. The window's own rules are in sheets/_item-sheet.scss
  */
 
-.l5r4.item {
-  .window-content {
-    gap: 0.5rem;
-    overflow: auto;
+.l5r4-item-header {
+  .l5r4-item-header-image {
+    block-size: 64px;
+    inline-size: 64px;
   }
 
-  .tab {
-    gap: 0.25rem;
-
-    .prose-title {
-      margin: 0.5rem 0 0;
-    }
-  }
-
-  .header-fields > h1 {
+  .l5r4-item-header-fields > h1 {
     margin: 0;
 
     input {
       height: auto;
     }
   }
+}
 
-  .sheet-content > h4 {
-    margin: 1rem 0 0.5rem;
+// One tab panel per part (templates/item/_partials/_tab-*.hbs)
+.l5r4-section.tab {
+  gap: var(--l5r4-space-4);
 
-    &.prose-title {
-      margin-block-end: 0;
-    }
+  .l5r4-item-description-heading {
+    margin: var(--l5r4-space-8) 0 0;
   }
 
   // Prose Editor
@@ -41,53 +34,55 @@
   prose-mirror {
     border-block-end: var(--sidebar-separator);
   }
+}
 
-  // Active Effects
-  .effects-list {
-    margin: 0;
-    padding: 0;
+// Active Effects
+.l5r4-effect-list {
+  margin: 0;
+  padding: 0;
 
-    .effect {
-      margin-block-start: 0.5rem;
-    }
+  .l5r4-effect-list-row {
+    margin-block-start: var(--l5r4-space-8);
   }
 
-  .effect-controls {
+  .l5r4-inline-control {
     flex-wrap: nowrap;
   }
 
-  // Price section fieldset styling
-  .price-section {
-    border: 1px solid var(--color-border-dark-tertiary);
-    border-radius: 4px;
-    margin: 0;
-    padding: 0.5rem;
-
-    legend {
-      font-weight: bold;
-      padding: 0 0.25rem;
-    }
-
-    .form-fields {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 1rem;
-    }
-
-    .price-field {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      gap: 0.25rem;
-
-      label {
-        font-size: 0.85rem;
-        font-weight: normal;
-      }
-
-      input {
-        width: 100%;
-      }
-    }
+  // A <button> laid out as the bare link it replaced: everything undoes core's button face
+  .l5r4-effect-list-button {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
+    transition: none;
   }
+}
+
+// A subtype partial's root draws no box, so each of its fields stays a flex item of the tab, spaced by the tab's gap
+.l5r4-item-details,
+.l5r4-item-modifiers {
+  display: contents;
+}
+
+// The Skill's emphasis manager control, a <button> in its fieldset legend laid out as the link it replaced: every
+// declaration undoes core's button face
+.l5r4-item-details .l5r4-item-details-emphases {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: inline;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  text-rendering: inherit;
 }

@@ -1,0 +1,8 @@
+{{!-- The roll button (button.md): the face shows the pool it rolls, over an inert copy the brush-stroke mask reveals.
+Parameters: action (the face's data-action), pool (the label: the XkY string the context computes, or a Trait's
+name), tooltip (the localized roll kind), ring (the Ring variant, optional), draggable (core's hotbar drag, optional),
+data (an object of the face's other data-* attributes, each key the name after data-, optional). --}}
+<div class="l5r4-button -roll{{#if ring}} -{{ring}}{{/if}}{{#if draggable}} draggable{{/if}}">
+  <span class="l5r4-button-under" inert>{{pool}}</span>
+  <button type="button" class="l5r4-button-face" data-action="{{action}}"{{#each data}} data-{{@key}}="{{this}}"{{/each}} data-tooltip="{{tooltip}}">{{pool}}</button>
+</div>

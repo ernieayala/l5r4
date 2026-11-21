@@ -1,88 +1,48 @@
 /**
- * @file NPC Actor Data Preparation
  * @module documents/actor/preparation/npc-preparation
- *
- * Handles derived data calculation for NPC actors in the L5R4 system.
- * Coordinates trait/ring calculations, initiative, wounds, stance automation,
- * and condition effects in the correct dependency order.
- *
- * Key responsibilities:
- * - Calculate NPC initiative (custom or formula-based)
- * - Process wound levels (manual or formula mode)
- * - Apply stance and condition effects
- * - Enrich embedded items
- *
- * Architecture: Pure calculation functions that mutate sys object in place.
- * Foundry API: Uses actor._source for detecting custom initiative values.
+ * @description Prepares an NPC's derived data in dependency order: Traits and Rings, the rules that need them,
+ * Initiative (the GM's stored pool or the formula), Armor TN with its rules, Wound Ranks in manual or formula mode,
+ * healing, movement, the owned items' formulas, and Fear. Modifies the actor's system data in place; reads
+ * `actor._source` to tell a stored Initiative pool from a prepared one.
  */
 
+import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
-
-import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
-
-import { WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
-import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
+import { getInitiativePool } from "../../../utils/initiative.js";
+import {
+  prepareTraitsAndRings,
+  prepareMovement
+} from "../calculations/shared-traits-rings-system.js";
+import { prepareHealRate } from "../calculations/wound-system.js";
 import {
   prepareNpcManualWounds,
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
-} from "../calculations/wound-system.js";
-import { applyConditionEffects } from "../calculations/condition-effects.js";
-import { enrichActorItems } from "../calculations/item-enrichment.js";
+} from "../calculations/npc-wound-system.js";
+import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
+import { prepareFear } from "../calculations/fear-system.js";
+import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Prepares derived data for NPC actors.
  *
  * Calculates all derived values for NPCs including traits, initiative, wounds,
- * and applies stance/condition effects. Executes calculations in dependency order.
+ * and Armor TN with its rules. Executes calculations in dependency order.
  *
  * @param {Actor} actor - The NPC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
- * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
  *
  * @returns {void} Mutates sys object in place
- *
- * @example
- * // Called from Actor.prepareData()
- * prepareNpcData(this, this.system, finalizeWoundPenalties);
  */
-export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
+export function prepareNpcData(actor, sys) {
   // Calculate base traits and rings first (required for initiative)
   prepareTraitsAndRings(sys);
 
-  // Initialize initiative structure
-  sys.initiative = sys.initiative || {};
-  const ref = toInt(sys.traits?.ref);
-  const insightRank = toInt(sys.insight?.rank) || 0;
+  // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
+  applyDerivedRules(actor, sys);
 
-  // Check for custom initiative values in source data
-  // NPCs can have manually set initiative instead of formula
-  const sourceRoll = toInt(actor._source?.system?.initiative?.roll);
-  const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
-
-  const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
-  const baseRoll = hasCustomInitiative ? sourceRoll : insightRank + ref;
-  const baseKeep = hasCustomInitiative ? sourceKeep : ref;
-
-  const rollMod = toInt(sys.initiative.rollMod) || 0;
-  const keepMod = toInt(sys.initiative.keepMod) || 0;
-
-  // Store effective values (before modifiers)
-  sys.initiative.effRoll = baseRoll;
-  sys.initiative.effKeep = baseKeep;
-
-  // Calculate final initiative with modifiers
-  sys.initiative.roll = baseRoll + rollMod;
-  sys.initiative.keep = baseKeep + keepMod;
-  sys.initiative.totalMod = toInt(sys.initiative.totalMod);
-
-  // Initialize armor TN structure
-  // NPCs use simplified armor (single TN value, no calculation)
-  sys.armorTn = sys.armorTn || {};
-  sys.armorTn.base = 0;
-  sys.armorTn.bonus = 0;
-  sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
-  sys.armorTn.current = toInt(sys.armor?.armorTn ?? 0);
+  prepareNpcInitiative(actor, sys);
+  prepareNpcArmorTn(actor, sys);
 
   // Initialize wound level structures
   sys.woundLevels = sys.woundLevels || {};
@@ -99,13 +59,10 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   }
 
   // Apply wound penalties to traits/rings
-  finalizeWoundPenaltiesFn(sys, order, woundMode);
+  actor._finalizeWoundPenalties(sys, order, woundMode);
 
-  // Apply stance effects (must happen after traits are calculated)
-  applyStanceAutomation(actor, sys);
-
-  // Apply condition effects (must happen after stance)
-  applyConditionEffects(actor, sys);
+  // Healing per night's rest, an NPC counting as Insight Rank 1 (#40)
+  prepareHealRate(sys, NPC_INSIGHT_RANK);
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);
@@ -114,5 +71,41 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   prepareVisibleWoundLevels(sys, order);
 
   // Enrich embedded items with calculated data
-  enrichActorItems(actor);
+  prepareItemFormulas(actor);
+
+  prepareFear(sys);
+}
+
+/**
+ * Prepare the Initiative pool: the GM's stored pool when both its numbers are above 0, otherwise Insight Rank +
+ * Reflexes, keep Reflexes, an NPC counting as Insight Rank 1 (Ernie's ruling); then the modifiers, rules included.
+ * game-rules/31_combat_round.md, p.81
+ * @param {Actor} actor - The NPC actor; `actor._source` holds the stored pool
+ * @param {object} sys - The actor's system data object (mutated in place)
+ */
+function prepareNpcInitiative(actor, sys) {
+  const sourceRoll = toInt(actor._source.system.initiative.roll);
+  const sourceKeep = toInt(actor._source.system.initiative.keep);
+  const custom = sourceRoll > 0 && sourceKeep > 0;
+  const formula = getInitiativePool({
+    insightRank: NPC_INSIGHT_RANK,
+    reflexes: toInt(sys._derived.traitsEff.ref)
+  });
+  sys.initiative.roll = (custom ? sourceRoll : formula.roll) + toInt(sys.initiative.rollMod);
+  sys.initiative.keep = (custom ? sourceKeep : formula.keep) + toInt(sys.initiative.keepMod);
+  sys.initiative.totalMod = toInt(sys.initiative.totalMod);
+}
+
+/**
+ * Prepare the Armor TN: NPCs use simplified armor, one entered Armor TN with the armor in it, so it stands as the
+ * base and armor adds 0; then the ArmorTN and Reduction rules.
+ * @param {Actor} actor - The NPC actor
+ * @param {object} sys - The actor's system data object (mutated in place)
+ */
+function prepareNpcArmorTn(actor, sys) {
+  sys.armorTn = sys.armorTn || {};
+  sys.armorTn.base = 0;
+  sys.armorTn.bonus = 0;
+  sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
+  applyArmorRules(actor, sys, { base: toInt(sys.armor?.armorTn ?? 0), armor: 0, other: 0 });
 }

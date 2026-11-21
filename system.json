@@ -1,7 +1,8 @@
 {
+  "type": "system",
   "id": "l5r4-enhanced",
   "title": "Legend of the Five Rings 4e Enhanced",
-  "description": "Enhanced implementation of Legend of the Five Rings 4th Edition for Foundry VTT v13+. Built with modern architecture featuring complete character management, authentic L5R4 mechanics, automated stance system, and comprehensive XP tracking.",
+  "description": "Enhanced implementation of Legend of the Five Rings 4th Edition for Foundry VTT v14. Built with modern architecture featuring complete character management, authentic L5R4 mechanics, automated stance system, and comprehensive XP tracking.",
   "authors": [
     {
       "name": "Ernie Ayala",
@@ -12,13 +13,186 @@
   "manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json",
   "download": "https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip",
   "compatibility": {
-    "minimum": 13,
-    "verified": 13,
-    "maximum": 13
+    "minimum": "14.370",
+    "verified": "14.370",
+    "maximum": "14"
   },
+  "relationships": {
+    "recommends": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "reason": "Plays stance, condition, and attack animations, with JB2A"
+      },
+      {
+        "id": "JB2A_DnD5e",
+        "type": "module",
+        "reason": "Animation assets for stances, conditions, and attacks (the Patreon collection works too)"
+      }
+    ]
+  },
+  "socket": true,
   "esmodules": ["dist/l5r4-enhanced.js"],
-  "styles": ["dist/l5r4-enhanced.css"],
-  "packs": [],
+  "styles": [{ "src": "dist/l5r4-enhanced.css", "layer": "system" }],
+  "packs": [
+    {
+      "name": "clans",
+      "label": "Clans",
+      "path": "packs/clans",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "families",
+      "label": "Families",
+      "path": "packs/families",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "schools",
+      "label": "Schools",
+      "path": "packs/schools",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "techniques",
+      "label": "Techniques",
+      "path": "packs/techniques",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "advantages",
+      "label": "Advantages",
+      "path": "packs/advantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "disadvantages",
+      "label": "Disadvantages",
+      "path": "packs/disadvantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "skills",
+      "label": "Skills",
+      "path": "packs/skills",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "kata",
+      "label": "Kata",
+      "path": "packs/kata",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "spells",
+      "label": "Spells",
+      "path": "packs/spells",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "kiho",
+      "label": "Kiho",
+      "path": "packs/kiho",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "tattoos",
+      "label": "Tattoos",
+      "path": "packs/tattoos",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "weapons",
+      "label": "Weapons",
+      "path": "packs/weapons",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "armor",
+      "label": "Armor",
+      "path": "packs/armor",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "equipment",
+      "label": "Equipment",
+      "path": "packs/equipment",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "creatures",
+      "label": "Creatures",
+      "path": "packs/creatures",
+      "type": "Actor",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "NONE", "ASSISTANT": "OWNER" }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "L5R4 Core Rulebook",
+      "sorting": "m",
+      "folders": [
+        {
+          "name": "Character",
+          "sorting": "m",
+          "packs": [
+            "clans",
+            "families",
+            "schools",
+            "techniques",
+            "kata",
+            "skills",
+            "advantages",
+            "disadvantages"
+          ]
+        },
+        {
+          "name": "Magic",
+          "sorting": "m",
+          "packs": ["spells", "kiho", "tattoos"]
+        },
+        {
+          "name": "Equipment",
+          "sorting": "m",
+          "packs": ["weapons", "armor", "equipment"]
+        },
+        {
+          "name": "Creatures",
+          "sorting": "m",
+          "packs": ["creatures"]
+        }
+      ]
+    }
+  ],
   "languages": [
     {
       "lang": "en",
@@ -53,24 +227,29 @@
   ],
   "documentTypes": {
     "Actor": {
-      "pc": {},
-      "npc": {}
+      "pc": { "htmlFields": ["notes"] },
+      "npc": { "htmlFields": ["notes"] }
     },
     "Item": {
-      "advantage": {},
-      "armor": {},
-      "clan": {},
-      "commonItem": {},
-      "disadvantage": {},
-      "family": {},
-      "school": {},
-      "kata": {},
-      "kiho": {},
-      "skill": {},
-      "spell": {},
-      "tattoo": {},
-      "technique": {},
-      "weapon": {}
+      "advantage": { "htmlFields": ["description", "specialRules", "demands"] },
+      "armor": { "htmlFields": ["description", "specialRules"] },
+      "bow": { "htmlFields": ["description", "specialRules"] },
+      "clan": { "htmlFields": ["description", "specialRules"] },
+      "commonItem": { "htmlFields": ["description", "specialRules"] },
+      "disadvantage": { "htmlFields": ["description", "specialRules"] },
+      "family": { "htmlFields": ["description", "specialRules"] },
+      "school": { "htmlFields": ["description", "specialRules"] },
+      "kata": { "htmlFields": ["description", "specialRules"] },
+      "kiho": { "htmlFields": ["description", "specialRules"] },
+      "skill": { "htmlFields": ["description", "specialRules"] },
+      "spell": { "htmlFields": ["description", "specialRules"] },
+      "tattoo": { "htmlFields": ["description", "specialRules", "effect"] },
+      "technique": { "htmlFields": ["description", "specialRules"] },
+      "weapon": { "htmlFields": ["description", "specialRules"] }
+    },
+    "ChatMessage": {
+      "roll": {},
+      "checkRequest": {}
     }
   },
   "grid": {

@@ -3,27 +3,32 @@
  * Modal dialog for managing character experience points
  */
 
-.xp-modal-dialog {
+@use "../base/variables" as *;
+
+.l5r4-xp-manager {
   .window-content {
     overflow-y: auto;
 
+    // The heading and the breakdown rows are dividers, so they take core's separator
+    // (docs/design-system/foundations/frames.md, rule 2)
     h3 {
-      border-block-end: 1px solid var(--color-border);
+      border-block-end: var(--sidebar-separator);
       margin: 0;
     }
   }
 
-  .xp-breakdown-list {
+  .l5r4-xp-manager-breakdown {
+    font-variant-numeric: tabular-nums;
     list-style: none;
     margin: 0;
     padding: 0;
 
     li {
-      border-block-end: 1px solid var(--color-border);
+      border-block-end: var(--sidebar-separator);
       display: flex;
-      gap: 0.5rem;
+      gap: var(--l5r4-space-gap);
       justify-content: space-between;
-      padding: 0.25rem;
+      padding: var(--l5r4-space-4);
 
       &:last-child {
         border-block-end: none;
@@ -31,18 +36,53 @@
     }
   }
 
-  .item-list {
-    &.-header {
-      border-inline-start: 1px solid var(--table-header-border-color);
+  // Buttons that read as the text they replace: core's button look undone, its focus ring kept. A sort head is a
+  // grid item, so its display computes to block
+  .l5r4-xp-manager-cap,
+  .l5r4-sort-header-button {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: inline;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
+  }
+
+  // The spent of total XP is a computed value, so it reads as text (foundations/states.md rule 6)
+  .l5r4-xp-manager-total {
+    font-variant-numeric: tabular-nums;
+  }
+
+  // The Warning state (foundations/states.md): the icon in the warning color, the line in the text color
+  .l5r4-xp-manager-warning {
+    color: var(--l5r4-color-text);
+    margin: 0;
+  }
+
+  .l5r4-xp-manager-warning-icon {
+    color: var(--l5r4-color-warning);
+  }
+
+  // The Empty state (foundations/states.md): one italic line where the list would be
+  .l5r4-xp-manager-empty {
+    font-style: italic;
+    margin: 0;
+  }
+
+  .l5r4-item-row-list {
+    &.l5r4-sort-header {
+      border-inline-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
     }
 
-    .title {
-      align-items: center;
-      display: inline-flex;
-      font-size: var(--font-size-18);
-      margin: 0;
-      min-height: var(--input-height);
+    .l5r4-item-row-name {
       text-wrap: nowrap;
+
+      @include title-row;
     }
   }
 }

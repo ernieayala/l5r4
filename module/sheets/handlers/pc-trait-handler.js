@@ -1,51 +1,15 @@
 /**
- * PC Trait Adjustment Handler
- *
- * Handles trait adjustments for PC characters with family bonus integration.
- * Implements special logic for PC traits that differ from the base sheet's trait handling.
- *
- * **Responsibilities:**
- * - Adjust trait values via shift+click sheet interactions (safety mechanism)
- * - Calculate effective trait values (base + family bonus)
- * - Enforce trait bounds while preserving family bonuses
- * - Convert form submission data to account for family bonuses
- *
- * **Why Separate from BaseActorSheet:**
- * PCs have family bonuses that modify traits, requiring special calculation logic:
- * - Effective Trait = Base Trait + Family Bonus
- * - Minimum effective trait = Family Bonus (base cannot go negative)
- * - Sheet displays effective values, but stores base values in system data
- * - Form submissions contain effective values that must be converted to base values
- *
- * **Game Rules Context:**
- * Per character creation rules:
- * - All traits begin at rank 2
- * - Family selection grants +1 to one trait (making it 3 at start)
- * - Traits can increase to rank 10 ("out of a possible 10")
- * - Trait advancement costs 4 × new rank in XP
- *
- * **User Interaction:**
- * - Shift+Click required on trait +/- buttons (prevents accidental changes)
- * - Adjusts effective trait value by ±1
- * - Automatically calculates base trait value by subtracting family bonus
- * - Enforces minimum (family bonus) and maximum (9 effective) bounds
- *
- * **Implementation Notes:**
- * ⚠️ Current max effective trait is 9, but game rules state traits go to 10.
- * This differs from BaseActorSheet which allows up to 10. Consider if this is
- * intentional (UI safety) or a bug that needs correction.
- *
- * **Foundry API:**
- * - Actor.update() with diff option for efficient updates (Foundry v13+)
- * - Uses _source for pending changes before system property fallback
- * - Application v2 event delegation via dataset attributes
- *
  * @module sheets/handlers/pc-trait-handler
+ * @description PC Trait adjustments that account for the family bonus. The sheet shows the effective Trait (base +
+ * family bonus) and stores the base, so a Shift+Click on a Trait's +/- buttons moves the effective value by one,
+ * keeps it between the family bonus and 9, and writes back the base. A plain click rolls the Trait. The cap of 9
+ * effective differs from BaseActorSheet, which allows 10 as the rules do; whether that is intended UI safety or a
+ * fault is open.
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { FamilyBonusService } from "../../services/family-bonus-service.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
+import { FamilyBonusService } from "../../services/family-bonus.js";
 import { RollHandler } from "./roll-handler.js";
 
 /**
@@ -83,8 +47,8 @@ export class PcTraitHandler {
    * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
    * **Without Shift Key:**
-   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
-   * This allows quick trait rolls by clicking directly on the trait rank.
+   * Performs a trait roll (XkX where X = trait rank) via RollHandler.rollClickedTrait().
+   * A click on the trait rank rolls the trait.
    *
    * **With Shift Key:**
    * Adjusts a PC's trait value, accounting for family bonuses.
@@ -127,13 +91,14 @@ export class PcTraitHandler {
    * - Uses diff:true for efficient Foundry update (only changed properties sent)
    * - Non-blocking error handling (logs warning, doesn't throw)
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (shiftKey determines roll vs adjust behavior)
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @param {number} delta - Direction of adjustment: positive = increase, negative = decrease
    * @returns {Promise<void>}
    */
-  static async adjust(context, event, element, delta) {
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
+  static async updateTraitRank(context, event, element, delta) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
@@ -146,38 +111,16 @@ export class PcTraitHandler {
 
     // If shift key NOT pressed, perform trait roll instead of adjustment
     if (!event?.shiftKey) {
-      return RollHandler.traitRoll(context, event, element);
+      return RollHandler.rollClickedTrait(context, event, element);
     }
 
-    // Read current base trait value (pending changes in _source take precedence)
-    const base =
-      Number(
-        context.actor._source?.system?.traits?.[key] ?? context.actor.system?.traits?.[key] ?? 0
-      ) || 0;
-
-    // Get family bonus for this trait (+1 for family's bonus trait, 0 otherwise)
-    const fam = FamilyBonusService.getBonus(context.actor, key);
-
-    // Calculate current effective trait (what user sees on sheet)
-    const effNow = base + fam;
-
-    // Define effective trait bounds
-    // Min: Cannot go below family bonus (base trait can't be negative)
-    // Max: 9 (⚠️ Note: game rules state traits go to 10, but this caps at 9)
-    const effMin = Math.max(0, fam);
-    const effMax = 9;
-
-    // Calculate desired and clamped effective trait values
-    const wantEff = effNow + (delta > 0 ? 1 : -1);
-    const nextEff = clamp(wantEff, effMin, effMax);
+    const change = this.#getBaseTraitChange(context.actor, key, delta);
 
     // No-op if already at boundary
-    if (nextEff === effNow) {
+    if (!change) {
       return;
     }
-
-    // Convert effective trait back to base trait for storage
-    const nextBase = nextEff - fam;
+    const { base, nextBase } = change;
 
     try {
       // Update actor with new base trait value (diff:true = efficient update)
@@ -195,43 +138,43 @@ export class PcTraitHandler {
   /**
    * Increases a PC's trait value by 1 without requiring Shift key.
    *
-   * Delegates to base TraitHandler.increase() which handles the shift key bypass.
-   * The base handler will call back to this class's adjust() method which properly
+   * Delegates to base TraitHandler.updateTraitRankUp() which handles the shift key bypass.
+   * The base handler will call back to this class's updateTraitRank() method which properly
    * handles family bonuses for PCs.
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async increase(context, event, element) {
-    // Delegate to base TraitHandler which will call back to our adjust() method
+  static async updateTraitRankUp(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our updateTraitRank() method
     // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, +1);
+    return this.updateTraitRank(context, modifiedEvent, element, +1);
   }
 
   /**
    * Decreases a PC's trait value by 1 without requiring Shift key.
    *
-   * Delegates to base TraitHandler.decrease() which handles the shift key bypass.
-   * The base handler will call back to this class's adjust() method which properly
+   * Delegates to base TraitHandler.updateTraitRankDown() which handles the shift key bypass.
+   * The base handler will call back to this class's updateTraitRank() method which properly
    * handles family bonuses for PCs.
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async decrease(context, event, element) {
-    // Delegate to base TraitHandler which will call back to our adjust() method
+  static async updateTraitRankDown(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our updateTraitRank() method
     // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, -1);
+    return this.updateTraitRank(context, modifiedEvent, element, -1);
   }
 
   /**
@@ -251,7 +194,7 @@ export class PcTraitHandler {
    * - Subtracts bonus: 3 - 1 = 2 (WRONG!)
    * - Result: Character loses a trait point
    *
-   * This bug occurred in Issue #1 when convertSubmitData was called on every form
+   * This bug occurred in Issue #1 when toBaseTraitData was called on every form
    * submission even though traits weren't in the form.
    *
    * **Purpose (if traits become form inputs):**
@@ -284,14 +227,14 @@ export class PcTraitHandler {
    *
    * **Current Status:**
    * NOT USED - Traits are edited via Shift+Click handlers, not form inputs.
-   * Handlers use actor._source to read base values directly, avoiding conversion issues.
+   * Handlers read base values from actor._source, so no conversion runs.
    *
    * @param {L5R4Actor} actor - The actor being updated (needed for family bonus lookup)
-   * @param {Object} submitData - Form data from ActorSheetV2 submission
-   * @param {Object} [submitData.system.traits] - Trait values from form (must be effective values!)
-   * @returns {Object} Modified submitData with base trait values for storage
+   * @param {object} submitData - Form data from ActorSheetV2 submission
+   * @param {object} [submitData.system.traits] - Trait values from form (must be effective values!)
+   * @returns {object} Modified submitData with base trait values for storage
    */
-  static convertSubmitData(actor, submitData) {
+  static toBaseTraitData(actor, submitData) {
     const t = submitData?.system?.traits;
     if (!t || typeof t !== "object") {
       return submitData;
@@ -317,5 +260,43 @@ export class PcTraitHandler {
     }
 
     return submitData;
+  }
+
+  /**
+   * The base Trait a one-step adjustment stores: the effective Trait (base + family bonus) moved by one and kept
+   * between the family bonus and 9, less the family bonus.
+   * @param {Actor} actor - A PC
+   * @param {string} key - The Trait key
+   * @param {number} delta - Positive to raise, else lower
+   * @returns {{base: number, nextBase: number}|null} The current and new base, or null when the effective Trait is
+   * already at its bound
+   */
+  static #getBaseTraitChange(actor, key, delta) {
+    // Read current base trait value (pending changes in _source take precedence)
+    const base =
+      Number(actor._source?.system?.traits?.[key] ?? actor.system?.traits?.[key] ?? 0) || 0;
+
+    // Get family bonus for this trait (+1 for family's bonus trait, 0 otherwise)
+    const fam = FamilyBonusService.getBonus(actor, key);
+
+    // Calculate current effective trait (what user sees on sheet)
+    const effNow = base + fam;
+
+    // Define effective trait bounds
+    // Min: Cannot go below family bonus (base trait can't be negative)
+    // Max: 9 (⚠️ Note: game rules state traits go to 10, but this caps at 9)
+    const effMin = Math.max(0, fam);
+    const effMax = 9;
+
+    // Calculate desired and clamped effective trait values
+    const wantEff = effNow + (delta > 0 ? 1 : -1);
+    const nextEff = getClamped(wantEff, effMin, effMax);
+
+    if (nextEff === effNow) {
+      return null;
+    }
+
+    // Convert effective trait back to base trait for storage
+    return { base, nextBase: nextEff - fam };
   }
 }

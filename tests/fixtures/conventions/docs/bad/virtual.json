@@ -1,0 +1,8 @@
+{
+  "files": {
+    "docs/code-system/page.md": "# Page\n\nThe guard sits in `module/utils/wounds.js:12-14`, and the label at `:30`.\n\n| Case | Source |\n| ---- | ------ |\n| Bare continuation | `:7` |\n| Repo template | `templates/actor/pc.hbs:4` |\n| After an example | `` label += ` ${name}!` `` (`module/utils/wounds.js:3`) |\n\nThe threshold is `getThreshold` (`module/utils/wounds.js`), drawn by `.l5r4-missing` (`scss/components/_wound-track.scss`).\nIt reads `WoundTrack#render` (`module/utils/wounds.js`) and `l5r4.wounds.missing` (`lang/en.json`).\n",
+    "module/utils/wounds.js": "export class WoundTrack {\n  draw() {}\n}\n\nexport function getWoundThreshold(earth) {\n  return earth * 5;\n}\n",
+    "scss/components/_wound-track.scss": ".l5r4-wound-track {\n  display: grid;\n}\n",
+    "lang/en.json": "{\n  \"l5r4\": {\n    \"wounds\": {\n      \"title\": \"Wounds\"\n    }\n  }\n}\n"
+  }
+}

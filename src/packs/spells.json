@@ -1,0 +1,3720 @@
+{
+  "name": "spells",
+  "label": "Spells",
+  "documentType": "Item",
+  "types": [
+    "spell"
+  ],
+  "pages": [
+    [
+      164,
+      197
+    ],
+    [
+      267,
+      274
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Commune",
+      "type": "spell",
+      "folder": "Universal",
+      "page": 165,
+      "coverage": "none",
+      "system": {
+        "ring": "all",
+        "mastery": 1,
+        "keywords": "",
+        "range": "20'",
+        "aoe": "Self",
+        "duration": "Concentration",
+        "raises": "+1 question each; Raises for clearer answers, old events, or waking idle kami (GM)",
+        "specialRules": "Talk with a local kami of any element but Void; it answers 2 questions honestly as best it can."
+      }
+    },
+    {
+      "name": "Sense",
+      "type": "spell",
+      "folder": "Universal",
+      "page": 164,
+      "coverage": "none",
+      "system": {
+        "ring": "all",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "50' radius around caster",
+        "duration": "Instantaneous",
+        "raises": "Range +10'",
+        "specialRules": "Pick an element; learn how many of its kami are nearby and roughly where. Kansen are not detected."
+      }
+    },
+    {
+      "name": "Summon",
+      "type": "spell",
+      "folder": "Universal",
+      "page": 165,
+      "coverage": "none",
+      "system": {
+        "ring": "all",
+        "mastery": 1,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "1 cubic foot of material",
+        "duration": "Permanent",
+        "raises": "Range +10'; +1 cubic foot; 1-4 Raises (GM sets) for a specific material, never precious or jade",
+        "specialRules": "Creates 1 cu. ft. of the element in open space in range; it acts normally. Not inside objects or creatures."
+      }
+    },
+    {
+      "name": "Blessed Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "10' radius around caster",
+        "duration": "Concentration",
+        "raises": "3 Raises: may target another",
+        "specialRules": "+15 Armor TN against non-magical ranged attacks while you concentrate."
+      }
+    },
+    {
+      "name": "By the Light of the Moon",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "20' radius around caster",
+        "duration": "1 minute",
+        "raises": "+5' radius; +1 minute duration",
+        "specialRules": "Only you see non-magically hidden objects, compartments, and trapdoors in the area as faint glowing outlines."
+      }
+    },
+    {
+      "name": "Cloak of Night",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Illusion",
+        "range": "Touch",
+        "aoe": "One object",
+        "duration": "1 hour",
+        "raises": "Duration +1 hour",
+        "specialRules": "An inanimate object no bigger than you turns invisible. Higher-Mastery detection sees it; equal Mastery: Contested Air."
+      }
+    },
+    {
+      "name": "Legacy of Kaze-no-Kami",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Craft",
+        "range": "School Rank x 10 miles",
+        "aoe": "One known person in range",
+        "duration": "Special",
+        "raises": "Area +1 recipient; Range +10 miles",
+        "specialRules": "A wind bird whispers your 1-minute message to a known target; any damage ends it; waits up to 1 week if blocked."
+      }
+    },
+    {
+      "name": "Nature's Touch",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "10'",
+        "aoe": "One creature",
+        "duration": "Special",
+        "raises": "Range +10'",
+        "specialRules": "A natural animal (not Shadowlands or otherworldly) understands your words while you focus on it; no obedience."
+      }
+    },
+    {
+      "name": "Tempest of Air",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Thunder",
+        "range": "Personal",
+        "aoe": "Cone 75' long, 15' wide",
+        "duration": "Instantaneous",
+        "raises": "Cone +5' wide or +5' long; Damage +1k0; Knockdown contest +5 to your Air TN",
+        "specialRules": "All in the cone take 1k1 Wounds and roll Earth in a contest vs your Air; each loser is Knocked Down."
+      }
+    },
+    {
+      "name": "To Seek the Truth",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal / Touch",
+        "aoe": "One touched person (or caster)",
+        "duration": "5 minutes",
+        "raises": "Duration +1 minute",
+        "specialRules": "Lifts temporary mental/social penalties from techniques, wounds, or spells; TN + source rank/Mastery. Not Disadvantages."
+      }
+    },
+    {
+      "name": "Token of Memory",
+      "type": "spell",
+      "folder": "Air",
+      "page": 167,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Craft, Illusion",
+        "range": "10'",
+        "aoe": "One illusory object, 1 cu. ft.",
+        "duration": "1 hour",
+        "raises": "Size +1 cubic foot; Duration +1 hour",
+        "specialRules": "Stationary, intangible illusory object; vanishes if moved. Copying a known item: 1 Raise; owner rolls Perception vs it."
+      }
+    },
+    {
+      "name": "Way of Deception",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Illusion",
+        "range": "20'",
+        "aoe": "One illusory double of caster",
+        "duration": "Concentration plus 5 minutes",
+        "raises": "+1 double per 2 Raises; Range +5'; 2 Raises: double holds its pose if you leave range",
+        "specialRules": "An image of you appears in range and copies your actions; it vanishes once you leave range."
+      }
+    },
+    {
+      "name": "Yari of Air",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "Craft, Thunder",
+        "range": "Personal or 20'",
+        "aoe": "One created weapon",
+        "duration": "5 minutes",
+        "raises": "+1k0 damage; +5 minutes; +5' range; 1 Raise: another spear",
+        "specialRules": "Air spear DR 1k1; School Rank replaces Spears; with Spears, 1 Free Raise (Feint/Increased Damage). Ally in 20' can use."
+      }
+    },
+    {
+      "name": "Benten's Touch",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal / Touch",
+        "aoe": "Target person (may be caster)",
+        "duration": "1 hour",
+        "raises": "1 Raise: range 5'",
+        "specialRules": "Target's Social Skill roll totals gain +1k1 and your Air Ring."
+      }
+    },
+    {
+      "name": "Call Upon the Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Travel",
+        "range": "Personal or 20'",
+        "aoe": "Target person (may be caster)",
+        "duration": "1 minute",
+        "raises": "Duration +1 minute; Range +5'",
+        "specialRules": "Target flies: Free Moves only, no Simple Moves, max 10'/round; drifts down safely at the end. Strong wind hinders."
+      }
+    },
+    {
+      "name": "Hidden Visage",
+      "type": "spell",
+      "folder": "Air",
+      "page": 168,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 minutes",
+        "raises": "3 Raises: target another in sight; Duration +5 minutes",
+        "specialRules": "Your face shifts so you pass as someone else of like age, build, race, and gender; cannot copy a specific person."
+      }
+    },
+    {
+      "name": "Mists of Illusion",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Craft, Illusion",
+        "range": "20'",
+        "aoe": "10' radius",
+        "duration": "1 minute",
+        "raises": "+5' area; +1 minute; +5' range",
+        "specialRules": "Stationary sight-only illusions of anything you imagine, fitting in the area; no sound or smell."
+      }
+    },
+    {
+      "name": "Secrets on the Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "",
+        "range": "10 miles",
+        "aoe": "20' radius",
+        "duration": "Concentration",
+        "raises": "+5' radius; +5 miles range",
+        "specialRules": "After a 10-minute ritual at a site, cast within 48 hours to hear speech there; one site at a time; lost focus ends it."
+      }
+    },
+    {
+      "name": "The Kami's Whisper",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Illusion",
+        "range": "50'",
+        "aoe": "10' radius",
+        "duration": "1 round",
+        "raises": "+5' radius; +1 round; +5' range",
+        "specialRules": "Creates a false sound or voice no louder than speech; a voice says 20 words at most and cannot mimic a given person."
+      }
+    },
+    {
+      "name": "Whispering Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Divination",
+        "range": "20'",
+        "aoe": "Target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'",
+        "specialRules": "Learn whether the target's latest statement was true; a sincerely held false belief reads as true."
+      }
+    },
+    {
+      "name": "Wolf's Proposal",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "10 minutes",
+        "raises": "2 Raises: target another; Duration +5 minutes; +1 Honor Rank per 2 Raises",
+        "specialRules": "Your Honor Rank counts as 3 higher against Lore: Bushido rolls that gauge your Honor."
+      }
+    },
+    {
+      "name": "Essence of Air",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round",
+        "specialRules": "You turn insubstantial: can't touch objects, pass solids at 1'/round, Water Ring halved (round down), no casting."
+      }
+    },
+    {
+      "name": "Mask of Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 170,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 hour",
+        "raises": "2 Raises: target another; Duration +10 minutes",
+        "specialRules": "Look like any humanoid within 1' of your height (a kenku works; a goblin or ogre does not)."
+      }
+    },
+    {
+      "name": "Striking the Storm",
+      "type": "spell",
+      "folder": "Air",
+      "page": 170,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "3 rounds",
+        "raises": "Duration +1 round",
+        "specialRules": "+20 Armor TN against melee and ranged attacks; you cannot hear speech meanwhile."
+      }
+    },
+    {
+      "name": "Summon Fog",
+      "type": "spell",
+      "folder": "Air",
+      "page": 170,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "50' radius",
+        "duration": "1 minute",
+        "raises": "+5' radius; +1 minute; +10' range",
+        "specialRules": "Fog cuts sight to 5' in the area; dampens fabric, may douse small flames (GM), ruins rice paper."
+      }
+    },
+    {
+      "name": "Summoning the Gale",
+      "type": "spell",
+      "folder": "Air",
+      "page": 170,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "50'",
+        "aoe": "Target person (may be caster)",
+        "duration": "Concentration",
+        "raises": "Range +5'",
+        "specialRules": "All within 30' of the target get +15 Armor TN vs ranged attacks and -3k3 on their own ranged attack rolls."
+      }
+    },
+    {
+      "name": "The Eye Shall Not See",
+      "type": "spell",
+      "folder": "Air",
+      "page": 169,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "Personal or Touch",
+        "aoe": "Self or target individual",
+        "duration": "Concentration",
+        "raises": "",
+        "specialRules": "People within 20' of the subject don't notice them unless they make noise or draw notice; those farther see normally."
+      }
+    },
+    {
+      "name": "Your Heart's Enemy",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "Illusion",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Target faces Fear 4 from an image of their worst fear; others see only a small haze."
+      }
+    },
+    {
+      "name": "Call the Spirit",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "",
+        "range": "Special",
+        "aoe": "Target spirit",
+        "duration": "5 minutes",
+        "raises": "Duration +1 minute",
+        "specialRules": "Summon a spirit from any realm (Fortunes immune), a specific one if known; it can't attack unless you strike first."
+      }
+    },
+    {
+      "name": "False Realm",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "Battle, Illusion",
+        "range": "250'",
+        "aoe": "100' radius",
+        "duration": "1 hour",
+        "raises": "+10' radius; +10 minutes",
+        "specialRules": "Change how terrain in the area looks, sounds, and smells; the illusion has no substance."
+      }
+    },
+    {
+      "name": "Gift of Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 minutes",
+        "raises": "Duration +1 minute",
+        "specialRules": "Invisible to non-magical sight (still heard, smelled, touched); making an attack ends the spell."
+      }
+    },
+    {
+      "name": "Know the Mind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "",
+        "range": "10'",
+        "aoe": "Target individual",
+        "duration": "3 rounds",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Hear the target's surface thoughts; Contested Perception vs their Awareness reveals true emotions."
+      }
+    },
+    {
+      "name": "Netsuke of Wind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "Craft, Illusion",
+        "range": "Touch",
+        "aoe": "One hand-held object",
+        "duration": "1 hour",
+        "raises": "Duration +10 minutes",
+        "specialRules": "Create a working solid object, 1 or 2 hands, up to 20 lbs; a weapon deals damage. Vanishes at the end."
+      }
+    },
+    {
+      "name": "Symbol of Air",
+      "type": "spell",
+      "folder": "Air",
+      "page": 171,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "Ward",
+        "range": "Touch",
+        "aoe": "Special",
+        "duration": "Permanent",
+        "raises": "",
+        "specialRules": "Passers roll Earth vs your Air; losers roll Willpower vs your casting total or sleep 1 hour (harm wakes). One at a time."
+      }
+    },
+    {
+      "name": "Cloud the Mind",
+      "type": "spell",
+      "folder": "Air",
+      "page": 172,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Permanent",
+        "raises": "+1 day of effect per Raise",
+        "specialRules": "Contested Air vs target's Earth: they lose the last 5 days of memory and accept your version of events."
+      }
+    },
+    {
+      "name": "Draw Back the Shadow",
+      "type": "spell",
+      "folder": "Air",
+      "page": 172,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "30' radius",
+        "duration": "Instantaneous",
+        "raises": "Area +5' radius; Range +10'",
+        "specialRules": "Dispels illusions of Mastery 4 or less; Mastery 5-6 need Contested Air; other effects: your Air vs caster's Ring."
+      }
+    },
+    {
+      "name": "Echoes on the Breeze",
+      "type": "spell",
+      "folder": "Air",
+      "page": 172,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "One target individual",
+        "duration": "Concentration",
+        "raises": "",
+        "specialRules": "Two-way whispered link with someone you know, any distance, while you concentrate; either side may end it."
+      }
+    },
+    {
+      "name": "Legion of the Moon",
+      "type": "spell",
+      "folder": "Air",
+      "page": 172,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "10' radius around caster",
+        "duration": "5 minutes",
+        "raises": "Area +5'; Duration +1 minute",
+        "specialRules": "Chosen people in the area turn invisible to normal senses; one who physically touches an outsider drops out."
+      }
+    },
+    {
+      "name": "Slayer's Knives",
+      "type": "spell",
+      "folder": "Air",
+      "page": 172,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "Thunder",
+        "range": "30'",
+        "aoe": "10' wide air corridor",
+        "duration": "Instantaneous",
+        "raises": "+3' width; +1k0 damage per 3 Raises",
+        "specialRules": "Deals (Air+2)kAir to all in the corridor; those hit roll Earth TN 20 or are Knocked Down; shreds paper and light cloth."
+      }
+    },
+    {
+      "name": "Rise, Air",
+      "type": "spell",
+      "folder": "Air",
+      "page": 173,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 6,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One summoned spirit",
+        "duration": "Concentration",
+        "raises": "",
+        "specialRules": "Kami: Physical Traits = Air, Jiujitsu Air/2, DR AirkAir, Wounds as Earth=Air, Invulnerable; blocks Simple Moves in 20'."
+      }
+    },
+    {
+      "name": "The False Legion",
+      "type": "spell",
+      "folder": "Air",
+      "page": 173,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 6,
+        "keywords": "Battle, Illusion",
+        "range": "Personal",
+        "aoe": "Within 100' of caster",
+        "duration": "Concentration",
+        "raises": "Area +10'; +5 figures per Raise",
+        "specialRules": "Up to Air x 10 mobile figures of types you know; seen, heard, smelled, but intangible; they stay in the area."
+      }
+    },
+    {
+      "name": "Wrath of Kaze-no-Kami (Hurricane)",
+      "type": "spell",
+      "folder": "Air",
+      "page": 173,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 6,
+        "keywords": "Thunder",
+        "range": "Personal",
+        "aoe": "1-mile radius on caster",
+        "duration": "Concentration (special)",
+        "raises": "",
+        "specialRules": "Hurricane up to 1 hour, calm 20' eye; exposed take 1k1 Wounds/minute, 10% chance of 5k5 instead. Once a month per area."
+      }
+    },
+    {
+      "name": "Armor of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 173,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Battle, Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "10 rounds",
+        "raises": "+2 rounds duration",
+        "specialRules": "Reduction = Earth Ring + School Rank; Water counts 1 lower for movement."
+      }
+    },
+    {
+      "name": "Courage of the Seven Thunders",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 173,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Battle",
+        "range": "30'",
+        "aoe": "Up to School Rank targets",
+        "duration": "10 minutes",
+        "raises": "+1 minute duration; +1 target",
+        "specialRules": "+5k0 vs Fear (+3k0 outside the Seven Great Clans); no benefit at Taint Rank 1+. Combined ritual allowed."
+      }
+    },
+    {
+      "name": "Earth's Stagnation",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target",
+        "duration": "6 rounds",
+        "raises": "+2 rounds duration; +10' range; +1 target (max 4)",
+        "specialRules": "Target takes -2k0 on Agility rolls; Water counts 1 lower for movement."
+      }
+    },
+    {
+      "name": "Earth's Touch",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Defense",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "1 hour",
+        "raises": "+30 min duration; +1 target per 2 Raises (max 3)",
+        "specialRules": "+1 to one Earth Trait of the caster's choice; the Earth Ring itself is unchanged."
+      }
+    },
+    {
+      "name": "Elemental Ward",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Wards",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "1 hour",
+        "raises": "+30 min duration; +1 target per 2 Raises",
+        "specialRules": "Pick an Element (not Void or Maho): its spells on the target take +School Rank x 5 TN, friendly ones too."
+      }
+    },
+    {
+      "name": "Jade Strike",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Jade, Thunder",
+        "range": "100'",
+        "aoe": "One target",
+        "duration": "Instantaneous",
+        "raises": "+1k0 damage; +10' range; +1 target (max 5)",
+        "specialRules": "3k3 damage to a target with Taint Rank 1+, none otherwise. Cannot be intercepted or deflected."
+      }
+    },
+    {
+      "name": "Jurojin's Balm",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "1 hour",
+        "raises": "+30 min duration; +1 target per 2 Raises (max 5)",
+        "specialRules": "Re-roll a failed Stamina roll vs poison at +2k0; cures and prevents drunkenness."
+      }
+    },
+    {
+      "name": "Minor Binding",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Craft",
+        "range": "60'",
+        "aoe": "One target",
+        "duration": "2 hours",
+        "raises": "+1 hour duration; +20' range",
+        "specialRules": "Binds a Tainted Shadowlands creature of Earth 3 or less, helpless; not the Lost or Oni Lords."
+      }
+    },
+    {
+      "name": "Soul of Stone",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 174,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Defense",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "1 hour",
+        "raises": "+30 min duration",
+        "specialRules": "+3k0 to resist manipulation, Temptation, Compulsions; -1k0 on Awareness rolls to influence others."
+      }
+    },
+    {
+      "name": "Tetsubo of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 175,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "Craft, Jade",
+        "range": "Personal or 20'",
+        "aoe": "One created weapon",
+        "duration": "5 minutes",
+        "raises": "+1k0 damage; +5 minutes duration; +5' range; 1 Raise: other heavy weapon form",
+        "specialRules": "2k2 tetsubo; School Rank may replace Heavy Weapons; with that Skill, Free Raise on Knockdown. May go to an ally."
+      }
+    },
+    {
+      "name": "Be the Mountain",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 175,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Defense",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "4 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "Willing ally gains Reduction 5 x School Rank (max 20); no Simple Move Actions while it lasts."
+      }
+    },
+    {
+      "name": "Earth Becomes Sky",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 175,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Jade, Thunder",
+        "range": "100'",
+        "aoe": "One target creature",
+        "duration": "Instantaneous",
+        "raises": "+1k0 damage; +1 target; 2 Raises: boulders count as Jade",
+        "specialRules": "Boulder damage with DR equal to Earth Ring; -1k1 per extra target (min 1k1)."
+      }
+    },
+    {
+      "name": "Embrace of Kenro-ji-jin",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Travel",
+        "range": "Personal or Touch",
+        "aoe": "One target creature",
+        "duration": "1 hour",
+        "raises": "+30 min duration",
+        "specialRules": "Target moves through earth like air and sees 100 yards; no outside interaction; surfacing ends it."
+      }
+    },
+    {
+      "name": "Force of Will",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Battle",
+        "range": "50'",
+        "aoe": "One target",
+        "duration": "2 rounds",
+        "raises": "+1 round duration (4 rounds max)",
+        "specialRules": "Target ignores Wound Rank penalties and effects, even death at Out; all apply when it ends."
+      }
+    },
+    {
+      "name": "Grasp of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target",
+        "duration": "5 rounds",
+        "raises": "+1 round duration; +5' range; +1 target per 2 Raises",
+        "specialRules": "Target moves only 3' per Simple Move; escape with a Complex Action Raw Strength roll vs TN Earth x 5."
+      }
+    },
+    {
+      "name": "Hands of Clay",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Travel",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "10 minutes",
+        "raises": "+5 minutes duration",
+        "specialRules": "Climb walls at half speed (round up); on ceilings 3' per Simple Action. May fall when it ends."
+      }
+    },
+    {
+      "name": "The Mountain's Feet",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Defense",
+        "range": "Personal or 20'",
+        "aoe": "One target",
+        "duration": "1 hour",
+        "raises": "+30 min duration; +1 target per 2 Raises",
+        "specialRules": "+3k0 vs Knockdown; spells to lift or topple target need a Contested Element roll vs caster's Earth."
+      }
+    },
+    {
+      "name": "Wholeness of the World",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "Defense",
+        "range": "Personal or 20'",
+        "aoe": "One target creature",
+        "duration": "10 minutes",
+        "raises": "+1 minute duration; +5' range; +1 target per 2 Raises",
+        "specialRules": "Target's Rings and Traits cannot be raised or lowered by any effect."
+      }
+    },
+    {
+      "name": "Bonds of Ningen-do",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 176,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "Wards",
+        "range": "500'",
+        "aoe": "One target spirit creature",
+        "duration": "30 days",
+        "raises": "+1 day duration; +10' range; +1 target per 2 Raises",
+        "specialRules": "10-minute ritual (-1 minute per helper, min 1): bind a spirit-realm creature to obey, or banish it."
+      }
+    },
+    {
+      "name": "Earth Kami's Blessing",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 177,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "Battle",
+        "range": "Personal or 20'",
+        "aoe": "Caster or one target creature",
+        "duration": "10 minutes",
+        "raises": "+1 minute duration",
+        "specialRules": "+2 Wounds at each Wound Rank; +1k1 on Earth, Stamina, Willpower rolls; Wounds taken remain at the end."
+      }
+    },
+    {
+      "name": "Earth's Protection",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 177,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "Defense, Wards",
+        "range": "Personal",
+        "aoe": "10' radius from caster",
+        "duration": "Concentration",
+        "raises": "+5' radius per 2 Raises (max 30'); 2 Raises: extra -1k1 damage",
+        "specialRules": "Hostile Air, Fire, Water spells in the area: +10 TN to cast; their damage -1k1 (min 1k1)."
+      }
+    },
+    {
+      "name": "Purge the Taint",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 177,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "Jade",
+        "range": "Personal",
+        "aoe": "50' radius around caster",
+        "duration": "Permanent",
+        "raises": "+10' radius",
+        "specialRules": "1-hour ritual removes Taint from land, plants, objects (not creatures); afterward +15 TN to cast spells there."
+      }
+    },
+    {
+      "name": "Sharing the Strength of Many",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 177,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "Up to six people",
+        "duration": "5 rounds",
+        "raises": "+1 round duration; +5' range",
+        "specialRules": "Each target adds the group's lowest Earth Ring to Ring, Trait, Skill roll totals (not Spell Casting)."
+      }
+    },
+    {
+      "name": "Strength of the Crow",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 177,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "Jade",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "School Rank in hours",
+        "raises": "+1 hour duration; +1 target",
+        "specialRules": "+5k5 to resist gaining new Taint from outside; Maho takes +10 TN against the target."
+      }
+    },
+    {
+      "name": "The Wolf's Mercy",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "10 rounds",
+        "raises": "+10' range; +1 target",
+        "specialRules": "Earth Ring -1 (Wounds shrink) and Strength -1; a Tainted target loses 2 Earth instead (min 1)."
+      }
+    },
+    {
+      "name": "Armor of the Emperor",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 rounds",
+        "raises": "+2 rounds duration",
+        "specialRules": "Each damage die from enemy attacks is reduced by School Rank (min 0)."
+      }
+    },
+    {
+      "name": "Essence of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "Battle",
+        "range": "Personal or 20'",
+        "aoe": "Self or one creature",
+        "duration": "10 rounds",
+        "raises": "+1 round duration; +5' range; +1 target per 2 Raises; +1 Earth per 2 Raises (max +3)",
+        "specialRules": "Earth Ring +1 with matching Wounds; Wounds revert when it ends, which may kill."
+      }
+    },
+    {
+      "name": "Symbol of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "Wards",
+        "range": "Touch",
+        "aoe": "Special",
+        "duration": "Permanent",
+        "raises": "+1k0 damage",
+        "specialRules": "Passers: Air vs caster's Earth; losers roll Strength vs casting total or are Prone and Stunned; Tainted take 2k2."
+      }
+    },
+    {
+      "name": "Tomb of Jade",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "Jade",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "Concentration",
+        "raises": "+10' range; +1k1 to caster's Contested roll per Raise",
+        "specialRules": "Tainted target only. Contested Earth each round: caster wins, 2k2 Wounds; target wins, spell ends."
+      }
+    },
+    {
+      "name": "Wall of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 178,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "Defense",
+        "range": "100'",
+        "aoe": "Wall up to 10' high, 100' wide",
+        "duration": "10 minutes",
+        "raises": "+1' height or +10' width per Raise; +1 minute duration; +10' range",
+        "specialRules": "Breaking through needs a Strength roll vs TN (Earth + School Rank) x 5."
+      }
+    },
+    {
+      "name": "Earthquake",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 179,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "1 mile radius",
+        "duration": "1 minute",
+        "raises": "+500 yards area; +1 minute duration per 2 Raises",
+        "specialRules": "Others in area: Prone, Stunned, 2k1 Wounds; anyone indoors (caster too) takes 6k6. Wooden buildings fall."
+      }
+    },
+    {
+      "name": "Major Binding",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 179,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "Jade, Wards",
+        "range": "100'",
+        "aoe": "One target Shadowlands creature",
+        "duration": "12 hours",
+        "raises": "+1 hour duration; +50' range",
+        "specialRules": "10-minute ritual (-1 minute per helper); combined Earth vs target's Earth; a win binds a Lost or Tainted being."
+      }
+    },
+    {
+      "name": "Strike at the Roots",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 179,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "3 rounds",
+        "raises": "+1 round duration; +10' range; +1 target per 2 Raises; +1k1 to Contested roll per Raise",
+        "specialRules": "Contested Earth; on a loss the target's Earth Ring drops to 1 (Wounds shrink, may kill)."
+      }
+    },
+    {
+      "name": "The Kami's Strength",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 179,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "Battle",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "5 rounds",
+        "raises": "+1 round duration; +10' range",
+        "specialRules": "Reduction 20; Strength and one more physical Trait + caster's Earth; no Simple Move Actions."
+      }
+    },
+    {
+      "name": "The Kami's Will",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 179,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "Defense",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "10 rounds",
+        "raises": "+1 round duration; +10' range",
+        "specialRules": "X = caster's Earth: Willpower +X; non-Maho spells on target -XkX; target -Xk0 on Social Skill rolls."
+      }
+    },
+    {
+      "name": "Essence of Jade",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 6,
+        "keywords": "Defense, Jade",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "10 rounds",
+        "raises": "+1 round duration; +5' range; +1 target per 2 Raises (max 3)",
+        "specialRules": "Target cannot gain Taint and is immune to Maho. Fails on, and reveals, a target with Taint Rank 1+."
+      }
+    },
+    {
+      "name": "Power of the Earth Dragon",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 6,
+        "keywords": "Defense",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "10 minutes",
+        "raises": "+1 minute duration; +10' range; +1 target; +10 Wounds absorbed per Raise",
+        "specialRules": "Absorbs all damage to each target until 100 Wounds absorbed; nemuranai bypass it."
+      }
+    },
+    {
+      "name": "Prison of Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 6,
+        "keywords": "Wards",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "Permanent",
+        "raises": "+5' range; +1k1 to caster's Contested roll per Raise",
+        "specialRules": "Needs a gem or pearl. Contested Willpower; a win traps a Jigoku, Gaki-do, Toshigoku, or Tainted creature."
+      }
+    },
+    {
+      "name": "Rise, Earth",
+      "type": "spell",
+      "folder": "Earth",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 6,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One summoned spirit",
+        "duration": "Concentration",
+        "raises": "",
+        "specialRules": "Earth kami: Physical Traits = Earth, Jiujitsu half Earth, DR = Earth, Invulnerable; no Simple Moves within 20'."
+      }
+    },
+    {
+      "name": "Biting Steel",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Craft",
+        "range": "Touch",
+        "aoe": "1 bladed weapon",
+        "duration": "1 minute",
+        "raises": "+1 minute duration",
+        "specialRules": "A non-magical steel blade gains +1k1 DR."
+      }
+    },
+    {
+      "name": "Burning Kiss of Steel",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 180,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Battle",
+        "range": "Touch",
+        "aoe": "Melee weapon you hold",
+        "duration": "5 minutes",
+        "raises": "+2 minutes duration",
+        "specialRules": "+1k1 to melee attack rolls; +2k2 vs mounted or larger-than-human foes. Ends if the weapon is dropped."
+      }
+    },
+    {
+      "name": "Envious Flames",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "2k2 Wounds, never misses. A shugenja hit mid-cast rolls Willpower vs TN 20 + damage."
+      }
+    },
+    {
+      "name": "Extinguish",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "100' radius",
+        "duration": "Instantaneous",
+        "raises": "+20' area",
+        "specialRules": "Puts out non-magical fire; fire damage is -1k1 DR until the next round starts."
+      }
+    },
+    {
+      "name": "Fires of Purity",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Defense",
+        "range": "25'",
+        "aoe": "One target",
+        "duration": "1 minute",
+        "raises": "+1k0 damage per 2 Raises",
+        "specialRules": "Touching or meleeing the target costs 2k2 Wounds; target's melee hits deal +2k2. Ranged attacks unaffected."
+      }
+    },
+    {
+      "name": "Fury of Osano-wo",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Thunder",
+        "range": "300'",
+        "aoe": "One target",
+        "duration": "Instantaneous",
+        "raises": "+1k0 damage per 2 Raises",
+        "specialRules": "Outdoors only. 5k2 Wounds (6k2 or 6k3 in storms); within 10' Stamina TN 15 or deafened 2 rounds."
+      }
+    },
+    {
+      "name": "Katana of Fire",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Battle, Craft",
+        "range": "Personal or 20'",
+        "aoe": "One created weapon",
+        "duration": "5 minutes",
+        "raises": "+1k0 damage; +5 minutes duration; +5' range; 1 Raise: another sword form",
+        "specialRules": "2k2 katana; School Rank may replace Kenjutsu; with Kenjutsu add Honor Rank to damage. May go to an ally."
+      }
+    },
+    {
+      "name": "Never Alone",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target",
+        "duration": "5 rounds",
+        "raises": "+1 target",
+        "specialRules": "+Fire Ring to attack, Skill, Trait rolls until a failed attack or Skill roll, or any Wounds."
+      }
+    },
+    {
+      "name": "The Fires That Cleanse",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 181,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Self",
+        "aoe": "30' radius",
+        "duration": "Instantaneous",
+        "raises": "+5' radius per 2 Raises",
+        "specialRules": "Everyone in area, caster too, takes Fire Ring DR (one roll); the caster takes half, rounded up."
+      }
+    },
+    {
+      "name": "The Raging Forge",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "Craft",
+        "range": "Touch",
+        "aoe": "One weapon or armor",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Removes cracks, nicks, and blemishes from an ordinary-quality item; cannot fix broken items."
+      }
+    },
+    {
+      "name": "Disrupt the Aura",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "Target person or creature",
+        "duration": "24 hours",
+        "raises": "+12 hours duration",
+        "specialRules": "Magical healing of the target automatically fails; Medicine still works."
+      }
+    },
+    {
+      "name": "Enticing Dance of the Flame",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "20' radius",
+        "duration": "2 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "3k2 Wounds to all in the area on casting; 2k1 more at the start of each later round they stay."
+      }
+    },
+    {
+      "name": "Hurried Steps",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "2 rounds",
+        "raises": "",
+        "specialRules": "Next Fire spell casts 4 rounds faster; Mastery 3 or less is a Simple Action. Start it within 2 rounds."
+      }
+    },
+    {
+      "name": "Mental Quickness",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One item",
+        "duration": "10 minutes",
+        "raises": "",
+        "specialRules": "Whoever carries the item gains +3 Intelligence."
+      }
+    },
+    {
+      "name": "Relentless Heat",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 183,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "Defense",
+        "range": "Touch",
+        "aoe": "One armor",
+        "duration": "10 rounds",
+        "raises": "+2 rounds duration",
+        "specialRules": "Melee attackers of the wearer are Fatigued until their next Turn; Full Attack drops to Attack."
+      }
+    },
+    {
+      "name": "Tail of the Fire Dragon",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 183,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "4 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "Flame whip reaching 30': attack (Agility + 2 x School Rank)kAgility, DR equal to Fire Ring."
+      }
+    },
+    {
+      "name": "The Fires From Within",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 182,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target",
+        "duration": "Instantaneous",
+        "raises": "+1 target per 2 Raises",
+        "specialRules": "Fireball dealing damage with DR equal to Fire Ring."
+      }
+    },
+    {
+      "name": "Ward of Purity",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 183,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "Ward",
+        "range": "Touch",
+        "aoe": "15' radius from object touched",
+        "duration": "1 day",
+        "raises": "",
+        "specialRules": "Tainted or Lying Darkness beings need Contested Willpower (you +5) to enter; Fire + Insight Wounds per round."
+      }
+    },
+    {
+      "name": "Breath of the Fire Dragon",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 183,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "15' long, 5' wide blast",
+        "duration": "4 rounds",
+        "raises": "",
+        "specialRules": "Simple Action once per round: breathe fire at all in area, DR = Fire Ring. No speech or casting."
+      }
+    },
+    {
+      "name": "Fiery Wrath",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 183,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One structure, or 50' square",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Flammable material burns to ash; only magic puts it out. One structure; living beings unharmed."
+      }
+    },
+    {
+      "name": "Haze of Battle",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "Battle",
+        "range": "10'",
+        "aoe": "One target",
+        "duration": "5 rounds (1 hour outside combat)",
+        "raises": "+1 round duration",
+        "specialRules": "Locked in Full Attack Stance; out of combat gains Brash and Contrary. Resist: Willpower vs your roll + Fire."
+      }
+    },
+    {
+      "name": "Hungry Blade",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "Craft",
+        "range": "50'",
+        "aoe": "One weapon",
+        "duration": "5 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "Wielder +1k0 to attack; damage dice explode on 8+ (once per die on an 8 or 9)."
+      }
+    },
+    {
+      "name": "Ravenous Swarms",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target person",
+        "duration": "5 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "4k3 Wounds; if the target casts a Fire spell meanwhile, it fails and he takes 3k3."
+      }
+    },
+    {
+      "name": "Shining Light",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "30'",
+        "aoe": "One target armor",
+        "duration": "10 rounds",
+        "raises": "+1k0 damage per 2 Raises; +2 rounds duration",
+        "specialRules": "Each melee attacker of the wearer takes 2k2 Wounds, Blinded through to that round's Reactions Stage."
+      }
+    },
+    {
+      "name": "The Fist of Osano-wo",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "Thunder",
+        "range": "50'",
+        "aoe": "20' radius",
+        "duration": "1 round",
+        "raises": "+10' radius",
+        "specialRules": "Damage DR equal to Fire Ring to all in area; flimsy or flammable buildings are destroyed or burn."
+      }
+    },
+    {
+      "name": "Death of Flame",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target",
+        "duration": "5 rounds",
+        "raises": "",
+        "specialRules": "Agility and Intelligence -Fire Ring (min 1). Without Concentration, target may roll Contested Fire each turn."
+      }
+    },
+    {
+      "name": "Defense of the Firestorm",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 184,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "Defense",
+        "range": "Touch",
+        "aoe": "One target armor",
+        "duration": "5 rounds",
+        "raises": "+1 round duration",
+        "specialRules": "Wearer's Armor TN +20; wooden weapons and arrows burn up before hitting, dealing no damage."
+      }
+    },
+    {
+      "name": "Symbol of Fire",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "Ward",
+        "range": "100'",
+        "aoe": "10' radius",
+        "duration": "Permanent",
+        "raises": "",
+        "specialRules": "Passers roll Water vs caster's Fire; losers are Dazed, Blinded 1 round, take 3k3. One Symbol at a time."
+      }
+    },
+    {
+      "name": "The Mending Forge",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "Craft",
+        "range": "Touch",
+        "aoe": "One target item",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "1-minute casting, all pieces present: restores an item; Fine or nemuranai items need an offering to burn."
+      }
+    },
+    {
+      "name": "Wall of Fire",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "Special",
+        "duration": "1 hour",
+        "raises": "Per Raise: +10' height, +1' thickness, or +25' length",
+        "specialRules": "10' x 1' x 25' wall, 6k6 Wounds on touch; those in its spot roll Reflexes TN 20 to avoid."
+      }
+    },
+    {
+      "name": "Ward of Thunder",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "keywords": "Defense, Ward, Thunder",
+        "range": "Touch",
+        "aoe": "15' radius from the armor",
+        "duration": "1 hour",
+        "raises": "",
+        "specialRules": "Within 15': immune to non-magical fire and thunder; others' Fire spells into the area +20 TN."
+      }
+    },
+    {
+      "name": "Destructive Wave",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "25' radius",
+        "duration": "Instantaneous",
+        "raises": "+1k1 damage per 2 Raises",
+        "specialRules": "7k7 Wounds to everyone in the area except the caster, allies included."
+      }
+    },
+    {
+      "name": "Everburning Rage",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 185,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target",
+        "duration": "1 round",
+        "raises": "+1 round duration; +1 target",
+        "specialRules": "Target counts as at the Down Wound Rank with its penalties, without taking Wounds."
+      }
+    },
+    {
+      "name": "Follow the Flame",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Special",
+        "duration": "5 rounds",
+        "raises": "+1k0 damage per Raise",
+        "specialRules": "Each round send fire at a visible target within 300' (75'/round): 6k5, then half each round while burning."
+      }
+    },
+    {
+      "name": "Light of the Sun",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "Jade",
+        "range": "100'",
+        "aoe": "30' radius",
+        "duration": "10 rounds",
+        "raises": "",
+        "specialRules": "2k2/round in area; humans +2k1 per Honor Rank below 4, +2k2 if Tainted; Honor 0 Blinded Fire Ring rounds."
+      }
+    },
+    {
+      "name": "Wings of the Phoenix",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "Travel",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "10 rounds",
+        "raises": "",
+        "specialRules": "Fly: Water x 10 as a Free Action, Water x 20 as a Simple Action; set down safely when it ends."
+      }
+    },
+    {
+      "name": "Beam of the Inferno",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 6,
+        "keywords": "",
+        "range": "200'",
+        "aoe": "One target",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "10k10 Wounds to one target."
+      }
+    },
+    {
+      "name": "Globe of the Everlasting Sun",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 6,
+        "keywords": "Defense",
+        "range": "500'",
+        "aoe": "1 mile",
+        "duration": "1 day",
+        "raises": "",
+        "specialRules": "Buildings in area immune to magical fire; Fire spells cast there +15 TN; normal fire spreads slowly."
+      }
+    },
+    {
+      "name": "The Soul's Blade",
+      "type": "spell",
+      "folder": "Fire",
+      "page": 186,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 6,
+        "keywords": "Craft",
+        "range": "Touch",
+        "aoe": "One target weapon",
+        "duration": "5 rounds",
+        "raises": "+1 round duration per 3 Raises",
+        "specialRules": "Weapon overcomes Invulnerability; anyone it hits is Stunned."
+      }
+    },
+    {
+      "name": "Bo of Water",
+      "type": "spell",
+      "folder": "Water",
+      "page": 187,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Craft",
+        "range": "Personal or 20'",
+        "aoe": "One created weapon",
+        "duration": "5 minutes",
+        "raises": "+1k0 damage; +5 minutes; +5' range; 1 Raise: another staff form",
+        "specialRules": "Staff DR 1k2; School Rank may replace Staves; Staves users get 1 Free Raise for Knockdown. Ally in 20' may wield it."
+      }
+    },
+    {
+      "name": "Clarity of Purpose",
+      "type": "spell",
+      "folder": "Water",
+      "page": 187,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Battle",
+        "range": "Personal",
+        "aoe": "10' radius around caster",
+        "duration": "2 rounds",
+        "raises": "+5' area; +1 round per 2 Raises",
+        "specialRules": "Allies in the area add +5 to their Initiative Score."
+      }
+    },
+    {
+      "name": "Ebbing Strength",
+      "type": "spell",
+      "folder": "Water",
+      "page": 187,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Defense",
+        "range": "20'",
+        "aoe": "One target creature",
+        "duration": "3 rounds",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Shift up to School Rank of one Physical Trait from you to target (max 2x rank). At 0 you pass out; lasts 1 round."
+      }
+    },
+    {
+      "name": "Path to Inner Peace",
+      "type": "spell",
+      "folder": "Water",
+      "page": 187,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Heals Wounds equal to the casting roll's margin over its TN."
+      }
+    },
+    {
+      "name": "Reflections of Pan Ku",
+      "type": "spell",
+      "folder": "Water",
+      "page": 187,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Divination",
+        "range": "Touch",
+        "aoe": "One object",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Reveals every power of the object (nemuranai, curse, scroll's spell) and a rough history. Ciphers stay unread."
+      }
+    },
+    {
+      "name": "Reversal of Fortunes",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "",
+        "range": "10'",
+        "aoe": "One target individual",
+        "duration": "3 rounds",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Once per round the target may reroll one roll right after making it, keeping either result."
+      }
+    },
+    {
+      "name": "Speed of the Waterfall",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Travel",
+        "range": "Touch",
+        "aoe": "One target individual or creature",
+        "duration": "1 hour",
+        "raises": "Duration +10 minutes; 2 Raises: Range 10'",
+        "specialRules": "Target's max movement per round becomes Water x 20' + 2x caster's Water. Grants no extra actions."
+      }
+    },
+    {
+      "name": "Spirit of the Water",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Battle",
+        "range": "20'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'; 5 Raises: extra action is Complex",
+        "specialRules": "Target gains 1 extra Simple Action in this round's Reactions Stage; it cannot be an attack."
+      }
+    },
+    {
+      "name": "Sympathetic Energies",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'; 3 Raises: move an effect between two other willing targets",
+        "specialRules": "Move one spell effect currently on you to a willing target. Unwilling targets never qualify."
+      }
+    },
+    {
+      "name": "The Rushing Wave",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "Travel",
+        "range": "10'",
+        "aoe": "One target individual",
+        "duration": "1 round",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Target's Free Move covers Water x 10' instead of x 5'; must be used next Turn unless Duration is raised."
+      }
+    },
+    {
+      "name": "Cloak of the Miya",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round",
+        "specialRules": "Armor TN + (Water Ring + School Rank)."
+      }
+    },
+    {
+      "name": "Inari's Blessing",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Craft",
+        "range": "Personal",
+        "aoe": "Created sustenance",
+        "duration": "Instantaneous",
+        "raises": "+1 person fed per Raise; Raises can improve food quality (GM)",
+        "specialRules": "Food and drink for School Rank + 1 people for one day. Casting TN doubled in the Shadowlands."
+      }
+    },
+    {
+      "name": "Reflective Pool",
+      "type": "spell",
+      "folder": "Water",
+      "page": 188,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Divination",
+        "range": "10 miles",
+        "aoe": "Body of water / target location",
+        "duration": "5 minutes",
+        "raises": "+1 minute; +10 miles range",
+        "specialRules": "Watch a familiar place (lived there or meditated 10+ min) through any water; sight only, no sound."
+      }
+    },
+    {
+      "name": "Rejuvenating Vapors",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "+1 target per 2 Raises",
+        "specialRules": "Rested as after a full night: clears fatigue, restores Void-Ring spell slots; not Void Points or daily powers. 1/24 hrs."
+      }
+    },
+    {
+      "name": "Stand Against the Waves",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Battle",
+        "range": "10'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +10' per 3 Raises",
+        "specialRules": "Target gains a Simple Action (attack only) in this round's Reactions Stage, Complex if needed. Never a second spell."
+      }
+    },
+    {
+      "name": "The Ties That Bind",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Divination",
+        "range": "10 miles",
+        "aoe": "Self",
+        "duration": "Instantaneous",
+        "raises": "Range +2 miles",
+        "specialRules": "Learn direction and rough distance to one familiar object in range."
+      }
+    },
+    {
+      "name": "Wave-Borne Speed",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "Travel",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "2 Rounds",
+        "raises": "",
+        "specialRules": "Water counts +2 for Move Action distance this round and next."
+      }
+    },
+    {
+      "name": "Wisdom & Clarity",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 hour",
+        "raises": "Duration +30 minutes; 2 Raises: target another",
+        "specialRules": "Read twice as fast with perfect recall of the text; no help with unknown languages or ciphers."
+      }
+    },
+    {
+      "name": "Near to Ice",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round; 2 Raises: Range 10'",
+        "specialRules": "Target ignores current Wound penalties; later penalties apply only the amount above the ignored one. No healing."
+      }
+    },
+    {
+      "name": "Regrow the Wound",
+      "type": "spell",
+      "folder": "Water",
+      "page": 189,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Concentration",
+        "raises": "+1 Water for healing per Raise",
+        "specialRules": "Target heals Water + School Rank Wounds each round; touch needed only at casting."
+      }
+    },
+    {
+      "name": "Silent Waters",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "Defense",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "Variable",
+        "raises": "",
+        "specialRules": "Store a second spell (ML 3 or less, any element) that fires on a physical trigger you name. One stored spell at a time."
+      }
+    },
+    {
+      "name": "Strike of the Tsunami",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "Battle",
+        "range": "25'",
+        "aoe": "Cone, 10' wide at the far end",
+        "duration": "Instantaneous",
+        "raises": "Damage +1k0; Range +5'; Earth Roll TN +5 per Raise",
+        "specialRules": "3k3 Wounds to all in the cone; opponents roll Earth vs TN 15 or are Knocked Down."
+      }
+    },
+    {
+      "name": "Visions of the Future",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "Divination",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 minute",
+        "raises": "",
+        "specialRules": "Gaze into a large still pool for a symbolic but accurate glimpse of coming events; only you see it."
+      }
+    },
+    {
+      "name": "Walking upon the Waves",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "Travel",
+        "range": "Touch",
+        "aoe": "One individual (caster allowed)",
+        "duration": "10 minutes",
+        "raises": "Duration +1 minute; +1 target per Raise",
+        "specialRules": "Target walks on water as Basic Terrain; rough or stormy water is Difficult Terrain."
+      }
+    },
+    {
+      "name": "Water Kami's Blessing",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One individual (caster allowed)",
+        "duration": "5 rounds",
+        "raises": "Water counts 1 rank higher per 2 Raises",
+        "specialRules": "Target rolls extra dice equal to your Water on every Perception-based roll."
+      }
+    },
+    {
+      "name": "Dominion of Suitengu",
+      "type": "spell",
+      "folder": "Water",
+      "page": 190,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "Divination",
+        "range": "100 miles",
+        "aoe": "Two bodies of water",
+        "duration": "Concentration",
+        "raises": "Range +10 miles",
+        "specialRules": "Look out of any known water in range via a pool at least 1' wide and 1\" deep; sight only."
+      }
+    },
+    {
+      "name": "Ebb & Flow of Battle",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "Battle",
+        "range": "Personal",
+        "aoe": "Chosen allies within 50' radius",
+        "duration": "5 rounds",
+        "raises": "+1 round of duration for every 2 Raises",
+        "specialRules": "Chosen allies' Water x 10' move takes a Free Action, not a Simple one."
+      }
+    },
+    {
+      "name": "Heart of the Water Dragon",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "School Rank targets, caster allowed",
+        "duration": "1 round per School Rank",
+        "raises": "Duration +1 round; +1k0 healing per 2 Raises",
+        "specialRules": "Each time a target takes damage, it heals 1k1 Wounds."
+      }
+    },
+    {
+      "name": "Strike of the Flowing Waters",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "",
+        "range": "10'",
+        "aoe": "One individual (caster allowed)",
+        "duration": "1 round",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Ignore foe Armor TN boosts from armor, ML 1-3 spells, non-Technique effects (unarmored -5); not stances/Reduction."
+      }
+    },
+    {
+      "name": "Symbol of Water",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "Ward",
+        "range": "Touch",
+        "aoe": "Special",
+        "duration": "Permanent",
+        "raises": "",
+        "specialRules": "Ward on a passage: crossers make Contested Fire vs your Water or face Fear 7. One per caster; another casting dispels."
+      }
+    },
+    {
+      "name": "The Path Not Taken",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 day",
+        "raises": "+1 bonus spell slot per 5 Raises",
+        "specialRules": "Move unused spell slots from one chosen Ring to another for one day."
+      }
+    },
+    {
+      "name": "Ever-Changing Waves",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "keywords": "Illusion",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 hour",
+        "raises": "Duration +1 hour",
+        "specialRules": "Take a natural creature's shape: keep your Mental Traits, best of each Physical Trait, gain its natural abilities."
+      }
+    },
+    {
+      "name": "Hands of the Tides",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "keywords": "Battle, Travel",
+        "range": "100' radius around caster",
+        "aoe": "Up to Water Ring willing targets",
+        "duration": "Instantaneous",
+        "raises": "Area +10'; +1 target per 2 Raises",
+        "specialRules": "Swap places among the chosen willing targets; every starting spot stays occupied."
+      }
+    },
+    {
+      "name": "Power of the Ocean",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "keywords": "Defense",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "School Rank in days",
+        "raises": "Duration +1 day per 3 Raises",
+        "specialRules": "1-hr ritual, willing: no food/sleep, School Rank Void refills, heal 2x Water/hr, slots at dawn; exhausted half as long."
+      }
+    },
+    {
+      "name": "Suitengu's Embrace",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "keywords": "Thunder",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'",
+        "specialRules": "Target acts as Down; Stamina TN 15 each round: 3 successes recover, 2 straight fails = unconscious, dies in 1 min."
+      }
+    },
+    {
+      "name": "The Final Bond",
+      "type": "spell",
+      "folder": "Water",
+      "page": 191,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "keywords": "Divination",
+        "range": "Special",
+        "aoe": "One target object or individual",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Learn rough location of one very familiar object or close person anywhere in Rokugan; fails outside it."
+      }
+    },
+    {
+      "name": "Peace of the Kami",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 6,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "",
+        "specialRules": "Cures all diseases and poisons and heals every Wound."
+      }
+    },
+    {
+      "name": "Rise, Water",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 6,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One summoned spirit",
+        "duration": "Concentration",
+        "raises": "",
+        "specialRules": "Summons a water kami: Physical Traits = Water, Jiujutsu = half Water, DR = Water, Invulnerable, moves 15' x Water."
+      }
+    },
+    {
+      "name": "Water's Sweet Clarity",
+      "type": "spell",
+      "folder": "Water",
+      "page": 192,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 6,
+        "keywords": "Divination",
+        "range": "Personal",
+        "aoe": "Target body of water",
+        "duration": "3 rounds",
+        "raises": "",
+        "specialRules": "Ask one question; the water answers with three images that onlookers can also see."
+      }
+    },
+    {
+      "name": "Boundless Sight",
+      "type": "spell",
+      "folder": "Void",
+      "page": 193,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "50 miles",
+        "aoe": "Self",
+        "duration": "4 rounds",
+        "raises": "+1 round; +5 miles range",
+        "specialRules": "See and hear a place you have visited, undetected; your Armor TN drops to 5 meanwhile."
+      }
+    },
+    {
+      "name": "Drawing the Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 193,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "Instantaneous",
+        "raises": "+1 Void Point per 3 Raises",
+        "specialRules": "Gain School Rank + 1 Void Points; any above your max fade 1 per round you spend none."
+      }
+    },
+    {
+      "name": "Flow Through the Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 193,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "1 cubic foot of elemental matter",
+        "duration": "Permanent",
+        "raises": "Area +1 cubic foot",
+        "specialRules": "Turn the affected water, fire, air, or soil into one other element."
+      }
+    },
+    {
+      "name": "See Through Lies",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "Target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'; +1 Advantage or Disadvantage per Raise",
+        "specialRules": "Learn the target's highest-point Advantage or Disadvantage (your pick)."
+      }
+    },
+    {
+      "name": "Sense Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "25' radius around the caster",
+        "duration": "Concentration",
+        "raises": "Area +5' radius",
+        "specialRules": "Trance: sense where every living creature in the area is; spirits and Shadowlands beings show as gaps."
+      }
+    },
+    {
+      "name": "The Void's Caress",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "1 minute",
+        "raises": "Duration +1 minute",
+        "specialRules": "Suppress one Mental or Spiritual Disadvantage worth up to 5 points; Taint itself cannot be removed."
+      }
+    },
+    {
+      "name": "Touch the Emptiness",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'",
+        "specialRules": "1k1 damage and the target is Dazed."
+      }
+    },
+    {
+      "name": "Witness the Untold",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 1,
+        "keywords": "Divination",
+        "range": "15'",
+        "aoe": "One target individual",
+        "duration": "3 rounds",
+        "raises": "Range +5'",
+        "specialRules": "While delaying, you may interrupt the target after it declares but before it acts, once each round."
+      }
+    },
+    {
+      "name": "Altering the Course",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 minute",
+        "raises": "Duration +1 minute",
+        "specialRules": "You may spend several Void Points on one roll (only rolls that allow Void; never damage)."
+      }
+    },
+    {
+      "name": "Drink of Your Essence",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'",
+        "specialRules": "Learn the target's Rings, current Wound penalty, and present mood in one word."
+      }
+    },
+    {
+      "name": "False Whispers",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target individual",
+        "duration": "1 minute",
+        "raises": "",
+        "specialRules": "Target repeats the next sentence you speak in its own voice; works once, and cannot cast spells."
+      }
+    },
+    {
+      "name": "Reach Through the Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "Object up to 5 lbs",
+        "duration": "Instantaneous",
+        "raises": "+1 lb per 2 Raises; Range +5'",
+        "specialRules": "Move a small object at range without touching it."
+      }
+    },
+    {
+      "name": "Severed from the Stream",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round; Range +5'",
+        "specialRules": "Target must win a Contested Void Roll vs you (once per turn, no action) to spend Void Points."
+      }
+    },
+    {
+      "name": "The Empty Voice",
+      "type": "spell",
+      "folder": "Void",
+      "page": 194,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 2,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "5 minutes",
+        "raises": "",
+        "specialRules": "Cast other-element spells of ML 1-2 with no spoken prayer."
+      }
+    },
+    {
+      "name": "Echoes in the Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "Concentration",
+        "raises": "Range +5'",
+        "specialRules": "While you concentrate on the target, you hear its thoughts."
+      }
+    },
+    {
+      "name": "Kharmic Intent",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "keywords": "",
+        "range": "20'",
+        "aoe": "One target individual",
+        "duration": "10 minutes",
+        "raises": "Duration +1 minute; Range +5'",
+        "specialRules": "Pool Void Points with one willing target; either may spend them. Split back at the end, up to each max."
+      }
+    },
+    {
+      "name": "Moment of Clarity",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "2 rounds",
+        "raises": "Duration +1 round",
+        "specialRules": "Pick a Skill: you have ranks equal to your Void Ring, replacing (not adding to) your own."
+      }
+    },
+    {
+      "name": "Read the Essence",
+      "type": "spell",
+      "folder": "Void",
+      "page": 195,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "keywords": "Divination",
+        "range": "Personal",
+        "aoe": "One target object",
+        "duration": "Instantaneous (special)",
+        "raises": "",
+        "specialRules": "Vision of the object's last holder or a major event tied to it; GM decides. Key items may hold you longer."
+      }
+    },
+    {
+      "name": "Void Release",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'",
+        "specialRules": "Contested Void: steal 1 Void Point, +1 per 5 you win by; extras over max lapse in 1 hour. Target needs Void."
+      }
+    },
+    {
+      "name": "Balance of Elements",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One individual (caster allowed)",
+        "duration": "5 rounds (combat) or 5 minutes",
+        "raises": "Duration +1 round or +1 minute; +1k1 healing per 2 Raises",
+        "specialRules": "Suppress all Disadvantages and penalties from spells of ML 3 or less; heals 3k3 Wounds."
+      }
+    },
+    {
+      "name": "Draw Closed the Veil",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target spirit",
+        "duration": "Instantaneous",
+        "raises": "Range +5'; +1 spirit per Raise",
+        "specialRules": "Banish a non-Ningen-do spirit home for Void Ring months; embodied spirits get a Contested Willpower Roll."
+      }
+    },
+    {
+      "name": "Fill with Emptiness",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "3 Raises: Range 10'",
+        "specialRules": "Target regains all spent Void Points, up to max."
+      }
+    },
+    {
+      "name": "Void Strike",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target individual",
+        "duration": "Instantaneous",
+        "raises": "Range +5'; +1k0 damage per 2 Raises",
+        "specialRules": "Damage roll with DR = Void Ring."
+      }
+    },
+    {
+      "name": "Divide the Soul",
+      "type": "spell",
+      "folder": "Void",
+      "page": 196,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "1 minute",
+        "raises": "Duration +1 minute",
+        "specialRules": "Exist in two spots in sight, both acting; one Spell Casting Roll per round; Wounds add up; if one dies, both do."
+      }
+    },
+    {
+      "name": "Reforge",
+      "type": "spell",
+      "folder": "Void",
+      "page": 197,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One object",
+        "duration": "Permanent",
+        "raises": "",
+        "specialRules": "Turn one uniform, non-living object into another of similar size; a second casting reverses it."
+      }
+    },
+    {
+      "name": "Unbound Essence",
+      "type": "spell",
+      "folder": "Void",
+      "page": 197,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 5,
+        "keywords": "",
+        "range": "25'",
+        "aoe": "One target individual",
+        "duration": "1 hour",
+        "raises": "Duration +1 hour; Range +5'",
+        "specialRules": "Target's Rings, with their paired Traits, are shuffled at random."
+      }
+    },
+    {
+      "name": "Ring of the Void",
+      "type": "spell",
+      "folder": "Void",
+      "page": 197,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 6,
+        "keywords": "",
+        "range": "Personal",
+        "aoe": "Self",
+        "duration": "Concentration; 1 hour casting",
+        "raises": "Casting time -5 minutes per Raise",
+        "specialRules": "Commune with the Void Dragon and ask questions; it may not answer. Learned by insight, no scroll."
+      }
+    },
+    {
+      "name": "Rise from the Ashes",
+      "type": "spell",
+      "folder": "Void",
+      "page": 197,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 6,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target individual",
+        "duration": "Instantaneous; 1 hour casting",
+        "raises": "+1 hour further back per Raise",
+        "specialRules": "Revert target to its state 8 hours earlier (wounds, poison, Taint); not the dead. You lose all Void Points for 3 days."
+      }
+    },
+    {
+      "name": "Unmake the World",
+      "type": "spell",
+      "folder": "Void",
+      "page": 197,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 6,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One creature or object",
+        "duration": "Instantaneous",
+        "raises": "Range +10'",
+        "specialRules": "Destroy the target: creatures need Contested Void vs Earth, mundane objects always; nemuranai risky (GM)."
+      }
+    },
+    {
+      "name": "Bleeding",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 268,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person/creature",
+        "duration": "Indefinite",
+        "raises": "Bleed +1 Wound/Round each; +1 target each",
+        "specialRules": "Wounded target only. 1 Wound at start of each of its Turns; ends on Medicine (Wound Treatment)/Int TN 20 or full heal.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Blood and Darkness",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Centered on caster",
+        "aoe": "30' radius",
+        "duration": "10 rounds",
+        "raises": "Area +5' radius each; Duration +2 rounds each",
+        "specialRules": "Fixed zone: all inside but the caster are Blind. Only anti-blindness magic or Shadowlands powers see through.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Blood Rite",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target person/creature",
+        "duration": "10 minutes",
+        "raises": "Duration +2 minutes each; Special: heal 1k0 more each",
+        "specialRules": "Heals 1k1 Wounds; one physical Trait (caster picks) +1 Rank for duration. Target gains 1k1 Taint. Wounds can drop after.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Disrupt the Limb",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 1,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person's limb",
+        "duration": "10 rounds",
+        "raises": "Duration +2 rounds each; Range +10' each",
+        "specialRules": "Chosen arm or leg: +15 TN to physical actions using it. A leg also inflicts the Lame Disadvantage.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Inspire Fear",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person",
+        "duration": "1 hour",
+        "raises": "Duration +10 minutes; Range +10'; Targets +1 (each per Raise)",
+        "specialRules": "Target gains a 3-point Phobia of the caster's choosing for the duration.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Legacy of the Dark One",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target person/creature",
+        "duration": "5 rounds",
+        "raises": "Duration +1 round each; Targets +1 each; +1 Void Point lost per 2 Raises",
+        "specialRules": "Target is stripped of 1 Void Point, which stays unrecoverable until the spell ends.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Sinful Dreams",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 1,
+        "keywords": "",
+        "range": "300'",
+        "aoe": "One target intelligent creature",
+        "duration": "1 hour",
+        "raises": "Range +50' each; +1 Free Raise granted per 2 Raises",
+        "specialRules": "Sleeping or resting target. For 24 hours after, caster has 1 Free Raise on Temptation and Intimidation against it.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Summon Undead Champion",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 269,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 1,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One humanoid corpse",
+        "duration": "1 hour",
+        "raises": "+1 hour of Duration per 2 Raises; Range +20' each; +1 corpse each",
+        "specialRules": "Animates a corpse as a zombie (Book of Void p.331) obeying simple orders; collapses at spell end or if destroyed.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Written in Blood",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 270,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 1,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "Message of up to 10 words",
+        "duration": "1 week",
+        "raises": "Duration +1 day each; +3 words each",
+        "specialRules": "Hidden blood message reappears when caster's condition is met; only magic detects it. Expires unread after duration.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Caress of Fu Leng",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 270,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target object",
+        "duration": "Instantaneous",
+        "raises": "Range +10' each",
+        "specialRules": "Destroys one visible jade object, leaving black slime. No effect on awakened nemuranai.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Curse of the Unblinking Eye",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 270,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 2,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target creature",
+        "duration": "2 days",
+        "raises": "+1 day of Duration per 2 Raises (max 7); +1 target per 2 Raises",
+        "specialRules": "Victim cannot sleep, so no Void or spell slot recovery. Daily Raw Stamina vs TN 5 + 5 per sleepless night or Fatigued.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Curse of Weakness",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 270,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person or creature",
+        "duration": "10 rounds",
+        "raises": "Duration +2 rounds each; Range +10' each; +1 target per 2 Raises",
+        "specialRules": "+10 TN to all physical and mental Skill/Trait rolls, Spell Casting included; Armor TN -10.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Drain the Soul",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 270,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person/creature",
+        "duration": "10 minutes",
+        "raises": "Duration +2 minutes; Range +10'; Targets +1 (each per Raise); -1 more Stamina per 2 Raises",
+        "specialRules": "Stamina -1 (minimum 1) for the duration; may lower Earth and so Wounds per rank.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Pain",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 271,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "One target creature",
+        "duration": "1 round",
+        "raises": "Duration +1 round each; Range +5' each; +1 target per 2 Raises",
+        "specialRules": "Target falls Prone and loses its next Turn. Willpower TN 20 or cries out, risking Honor/Glory.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Puppet Master",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 271,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 2,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target undead creature",
+        "duration": "4 hours",
+        "raises": "Duration +2 hours; Range +20'; +1 undead (each per Raise)",
+        "specialRules": "Control undead: free mindless ones automatic; free-willed or controlled need Contested Willpower vs it or master.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Spreading the Darkness",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 271,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 2,
+        "keywords": "",
+        "range": "30'",
+        "aoe": "Two target persons",
+        "duration": "Permanent",
+        "raises": "Range +10' each",
+        "specialRules": "Shift up to Earth + Insight Rank Taint from Tainted target to other; last point stays. Unwilling: Contested Willpower.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Armor of Obsidian",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 271,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One person or creature, or self",
+        "duration": "10 minutes or until used",
+        "raises": "Duration +5 minutes each; +1 spell negated per 2 Raises",
+        "specialRules": "Negates the next Jade-keyword spell that strikes or affects the target, then ends.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Death Beyond Life",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 271,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "",
+        "range": "Touch",
+        "aoe": "One target person",
+        "duration": "24 hours",
+        "raises": "Duration +24 hours each",
+        "specialRules": "Living target. If it dies in duration, revives 8 hours later at Down, +1 Taint Rank, unless body scattered or burned.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Essence of Undeath",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 272,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One humanoid corpse",
+        "duration": "Indefinite",
+        "raises": "Range +20' each; +1 target per 3 Raises",
+        "specialRules": "Animates an Undead Revenant (Book of Void p.330) that obeys spoken commands until destroyed.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Hate's Heart",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 272,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "3 rounds",
+        "raises": "+1 round of Duration per 2 Raises; Range +10' each",
+        "specialRules": "Victim must attack whoever it faces at casting. Each Turn, Honor TN 30 to resist, but then only Free/Simple Actions.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Summon Oni",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 272,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One summoned oni",
+        "duration": "Indefinite",
+        "raises": "+1k0 to the control roll each; stronger oni (GM)",
+        "specialRules": "Oni must be named (caster or close tie), then Contested Willpower to control; +3k2 if own name. Namer gets Oni Mark.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Chains of Jigoku",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 273,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One creature or person",
+        "duration": "10 minutes",
+        "raises": "Duration +5 minutes; Range +10'; +1k0 to hold roll (each per Raise)",
+        "specialRules": "Living target only: immobile and helpless, may still speak. Escapes via Strength vs caster's Earth contested roll.",
+        "maho": true
+      }
+    },
+    {
+      "name": "No Pure Breaths",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 273,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target creature",
+        "duration": "Instantaneous (lasting penalty)",
+        "raises": "Damage +1k0 each; Range +20' each; +1 target per 2 Raises",
+        "specialRules": "DR = target's Air in kept dice, plus +10 TN to all actions until healed by magic, kiho, or other supernatural means.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Stealing the Soul",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 273,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "keywords": "",
+        "range": "1 mile",
+        "aoe": "One target person",
+        "duration": "1 day",
+        "raises": "+1 more Trait Rank drained per 2 Raises",
+        "specialRules": "Needs a token of the target; ritual allowed. -1 Rank to a chosen Trait (min 1); each extra caster drains another Trait.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Truth Is a Scourge",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 273,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target person",
+        "duration": "10 minutes",
+        "raises": "Duration +2 minutes; Range +10'; Targets +1 (each per Raise)",
+        "specialRules": "Target cannot lie and spills harmful secrets; Willpower TN 30 to hold back the truth.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Possession",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 274,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "keywords": "",
+        "range": "100'",
+        "aoe": "One target person",
+        "duration": "1 day",
+        "raises": "+1 day of Duration per 2 Raises; +25' Range each; +1k0 to the Willpower contest each",
+        "specialRules": "Needs target's name and blood or hair. Contested Willpower: win: control body (own mental stats); lose: 2k1 Wounds.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Strength of Darkness",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 274,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "keywords": "",
+        "range": "Personal / Touch",
+        "aoe": "One target person",
+        "duration": "10 rounds",
+        "raises": "Duration +1 round each; +1 Rank to a physical Trait per 2 Raises",
+        "specialRules": "+1 Earth Ring and +1 to the other three physical Traits; sees through any visual impairment. Wounds drop at end.",
+        "maho": true
+      }
+    },
+    {
+      "name": "Touch of Death",
+      "type": "spell",
+      "folder": "Maho",
+      "page": 274,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "keywords": "",
+        "range": "50'",
+        "aoe": "One target creature",
+        "duration": "Instantaneous",
+        "raises": "Range +10' each; +1 target per 2 Raises",
+        "specialRules": "Target takes 7k7 Wounds and ages 10 years; the aging is permanent.",
+        "maho": true
+      }
+    }
+  ]
+}

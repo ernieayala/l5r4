@@ -1,43 +1,29 @@
 /**
  * Ranks
- * Honor, Glory, Status, and Shadow/Taint rank displays
- * Note: Animation styles are in components/_animations.scss
+ * The 2 by 2 track of Honor, Glory, Status, and Shadow/Taint rank blocks, and the ledger link under them on a PC sheet.
+ * Each block is a rank control (components/_rank-control.scss)
  */
 
-.l5r4.pc,
-.l5r4.npc {
-  .ranks {
-    display: grid;
-    gap: 0.2rem;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
+.l5r4-ranks {
+  display: grid;
+  gap: var(--l5r4-space-4);
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
 
-  .rank-name {
-    background: var(--table-header-bg-color);
-    border: 1px solid var(--table-header-border-color);
-    color: var(--table-header-text-color);
-    cursor: pointer;
-    display: flex;
-    font-size: var(--font-size-16);
-    line-height: 1;
-    padding: 0.25rem 0;
+  // A <button> laid out as the link it replaced: everything but `grid-column` and `text-align` undoes core's
+  // button face
+  .l5r4-ranks-ledger {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
+    grid-column: 1 / -1;
+    height: auto;
+    min-height: 0;
+    padding: 0;
     text-align: center;
-    transition: all 150ms ease-out;
-
-    &:hover {
-      filter: brightness(1.1);
-    }
-
-    &:active {
-      filter: brightness(0.95);
-      transform: scale(0.98);
-    }
-
-    span:first-child {
-      font-family: var(--font-h4);
-      font-size: var(--font-size-18);
-      font-weight: 600;
-    }
+    text-rendering: inherit;
   }
 }

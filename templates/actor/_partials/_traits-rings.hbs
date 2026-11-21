@@ -1,0 +1,25 @@
+{{!-- The five Rings and eight Traits as one figure (ring-trait-block.md), the same on the PC and NPC sheets.
+Parameters: system, traitsEff (the effective Trait ranks shown), showVoidPoints (the Void Point dots under the Void
+Ring). --}}
+<div class="l5r4-traits-rings">
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_ring.hbs" ring="earth" rank=system.rings.earth}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="sta" name="stamina" ring="earth" rank=traitsEff.sta}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="wil" name="willpower" ring="earth" rank=traitsEff.wil}}
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_ring.hbs" ring="air" rank=system.rings.air}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="ref" name="reflexes" ring="air" rank=traitsEff.ref}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="awa" name="awareness" ring="air" rank=traitsEff.awa}}
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_ring.hbs" ring="water" rank=system.rings.water}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="str" name="strength" ring="water" rank=traitsEff.str}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="per" name="perception" ring="water" rank=traitsEff.per}}
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_ring.hbs" ring="fire" rank=system.rings.fire}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="agi" name="agility" ring="fire" rank=traitsEff.agi}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_trait.hbs" trait="int" name="intelligence" ring="fire" rank=traitsEff.int}}
+
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_ring.hbs" ring="void" rank=system.rings.void.rank}}
+  {{#if showVoidPoints}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_void-points.hbs" value=system.rings.void.value max=system.rings.void.max}}
+  {{/if}}
+</div>

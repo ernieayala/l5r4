@@ -48,19 +48,30 @@ Thumbs.db
 
 # Project-specific directories
 for-research/
-game-rules/
 .windsurf/
 
-# Test coverage reports
-tests/coverage/
-coverage/
+# The purchased L5R 4e Core Rulebook (content/) and rules transcribed from it (game-rules/).
+# Licensed material in a public repository: never committed. Anchored to the root, so the coverage tool's
+# fixture tree (tests/fixtures/coverage/game-rules/, made-up pages) is committed.
+/content/
+/game-rules/
+
+# Test coverage reports (npm run test:coverage), at the root only: tools/coverage/ is the coverage audit
+/coverage/
 test_priority/
+
+# The coverage audit's report: it prints headings from game-rules/ (npm run coverage)
+tools/coverage/report.md
 
 # Vitest cache
 .vitest/
+
+# Compendium packs, built from src/packs/ by npm run build:packs (the sources are committed)
+/packs/
 
 # Madge dependency analysis
 madge-analysis.json
 
 # Claude Code project config. Kept on disk, never committed.
 .claude/
+CLAUDE.md

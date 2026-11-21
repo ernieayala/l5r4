@@ -1,0 +1,62 @@
+{{!-- A rank stepped in place (rank-control.md): the up arrow, the value, and the down arrow as sibling buttons.
+Parameters: variant (trait or void), trait (key, Trait only), label (the Trait's localized name, Trait only), value
+(the rank shown). The Void Ring's control is also its Ring rank disc. --}}
+{{#if (eq variant "void")}}
+  <div class="l5r4-ring-rank -void l5r4-rank-control -void">
+    <button
+      type="button"
+      class="l5r4-rank-control-arrow -up"
+      data-action="increase-void-ring"
+      data-tooltip="{{localize "l5r4.ui.hints.increaseVoidRing"}}"
+      aria-label="{{localize "l5r4.ui.hints.increaseVoidRing"}}"
+    >
+      <i class="fa-solid fa-chevron-up" inert></i>
+    </button>
+    <button
+      type="button"
+      class="l5r4-rank-control-value l5r4-ring-rank-face"
+      data-action="adjust-void-ring"
+      data-ring="void"
+      data-tooltip="{{localize "l5r4.ui.hints.voidRingRank"}}"
+    >{{value}}</button>
+    <button
+      type="button"
+      class="l5r4-rank-control-arrow -down"
+      data-action="decrease-void-ring"
+      data-tooltip="{{localize "l5r4.ui.hints.decreaseVoidRing"}}"
+      aria-label="{{localize "l5r4.ui.hints.decreaseVoidRing"}}"
+    >
+      <i class="fa-solid fa-chevron-down" inert></i>
+    </button>
+  </div>
+{{else}}
+  <div class="l5r4-rank-control -trait">
+    <button
+      type="button"
+      class="l5r4-rank-control-arrow -up"
+      data-action="increase-trait"
+      data-trait="{{trait}}"
+      data-tooltip="{{localize "l5r4.ui.hints.increaseTrait" trait=label}}"
+      aria-label="{{localize "l5r4.ui.hints.increaseTrait" trait=label}}"
+    >
+      <i class="fa-solid fa-chevron-up" inert></i>
+    </button>
+    <button
+      type="button"
+      class="l5r4-rank-control-value"
+      data-action="adjust-trait"
+      data-trait="{{trait}}"
+      data-tooltip="{{localize "l5r4.ui.hints.traitRank" trait=label}}"
+    >{{value}}</button>
+    <button
+      type="button"
+      class="l5r4-rank-control-arrow -down"
+      data-action="decrease-trait"
+      data-trait="{{trait}}"
+      data-tooltip="{{localize "l5r4.ui.hints.decreaseTrait" trait=label}}"
+      aria-label="{{localize "l5r4.ui.hints.decreaseTrait" trait=label}}"
+    >
+      <i class="fa-solid fa-chevron-down" inert></i>
+    </button>
+  </div>
+{{/if}}

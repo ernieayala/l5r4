@@ -1,0 +1,90 @@
+{{!-- Foundations: each token docs/design-system/foundations/ names, its value and ratio filled in for the window's
+theme by module/apps/design-gallery.js. A token the stylesheet does not declare reads "Not defined". --}}
+<section class="l5r4-design-gallery-part">
+  <header class="l5r4-design-gallery-toolbar">
+    <h2>{{localize "l5r4.apps.designGallery.sections.foundations"}}</h2>
+    <span class="l5r4-design-gallery-theme" data-gallery-theme></span>
+    <button type="button" data-action="toggle-theme">{{localize "l5r4.apps.designGallery.toggleTheme"}}</button>
+  </header>
+
+  <h3>{{localize "l5r4.apps.designGallery.foundations.color"}}</h3>
+  <p class="l5r4-design-gallery-note">{{localize "l5r4.apps.designGallery.notes.surface"}}</p>
+  {{#each colors}}
+    <h4>{{localize group}}</h4>
+    <table class="l5r4-design-gallery-tokens">
+      <thead>
+        <tr>
+          <th><span class="l5r4-design-gallery-hidden">{{localize "l5r4.apps.designGallery.foundations.swatch"}}</span></th>
+          <th>{{localize "l5r4.apps.designGallery.foundations.token"}}</th>
+          <th>{{localize "l5r4.apps.designGallery.foundations.value"}}</th>
+          <th>{{localize "l5r4.apps.designGallery.foundations.contrast"}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each tokens}}
+          <tr data-token="{{token}}">
+            <td>
+              <svg class="l5r4-design-gallery-chip" viewBox="0 0 1 1" aria-hidden="true"><rect data-token-chip fill="none" /></svg>
+            </td>
+            <td><code>{{token}}</code></td>
+            <td data-token-value></td>
+            <td data-token-ratio></td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{/each}}
+
+  <h3>{{localize "l5r4.apps.designGallery.foundations.typography"}}</h3>
+  <table class="l5r4-design-gallery-tokens">
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
+    <tbody>
+      {{#each type.faces}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+      {{#each type.steps}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>{{localize "l5r4.apps.designGallery.foundations.space"}}</h3>
+  <table class="l5r4-design-gallery-tokens">
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
+    <tbody>
+      {{#each space.steps}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+      {{#each space.semantic}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+      {{#each space.sizes}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>{{localize "l5r4.apps.designGallery.foundations.icons"}}</h3>
+  <ul class="l5r4-design-gallery-icons">
+    {{#each icons}}
+      <li>
+        <span class="l5r4-design-gallery-glyphs">{{#each icons}}<i class="fa-solid {{this}}" inert></i>{{/each}}</span>
+        <span>{{localize meaning}}</span>
+        <code>{{#each icons}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</code>
+      </li>
+    {{/each}}
+  </ul>
+
+  <h3>{{localize "l5r4.apps.designGallery.foundations.frames"}}</h3>
+  <table class="l5r4-design-gallery-tokens">
+    {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-head.hbs"}}
+    <tbody>
+      {{#each frames.frames}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+      {{#each frames.others}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_token-row.hbs"}}
+      {{/each}}
+    </tbody>
+  </table>
+</section>

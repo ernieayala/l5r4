@@ -1,21 +1,9 @@
 /**
- * Migration Settings Registration
- *
- * Registers Foundry VTT world settings that control the system's data migration behavior.
- * These settings work in conjunction with migrations.js to handle schema updates, legacy
- * data conversions, and icon path migrations when the system version changes.
- *
- * Settings registered:
- * - runMigration: User-controlled flag to enable/disable automatic migrations
- * - forceMigration: Developer/troubleshooting flag to force re-run all migrations
- * - lastMigratedVersion: Internal version tracking for incremental migrations
- *
- * API: game.settings (Foundry VTT Settings API)
- * Scope: world (all settings persist in world database, shared across users)
- *
  * @module setup/settings/migration
+ * @description Registers the world settings that control the data migration in `module/setup/migrations.js`:
+ * `runMigration` turns automatic migration on or off, `forceMigration` runs every step again, and the hidden
+ * `lastMigratedVersion` records the version the world last migrated to.
  */
-
 import { SYS_ID } from "../../config/constants.js";
 
 /**
@@ -41,8 +29,8 @@ export function registerMigrationSettings() {
   game.settings.register(SYS_ID, "runMigration", {
     scope: "world", // Shared setting across all users in this world
     config: true, // Visible in Foundry settings menu
-    name: "SETTINGS.runMigration.name",
-    hint: "SETTINGS.runMigration.label",
+    name: "l5r4.system.settings.runMigration.name",
+    hint: "l5r4.system.settings.runMigration.hint",
     type: Boolean,
     default: true
   });
@@ -54,8 +42,8 @@ export function registerMigrationSettings() {
   game.settings.register(SYS_ID, "forceMigration", {
     scope: "world", // Shared setting across all users in this world
     config: true, // Visible in Foundry settings menu
-    name: "SETTINGS.forceMigration.name",
-    hint: "SETTINGS.forceMigration.label",
+    name: "l5r4.system.settings.forceMigration.name",
+    hint: "l5r4.system.settings.forceMigration.hint",
     type: Boolean,
     default: false
   });

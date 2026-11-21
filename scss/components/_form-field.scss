@@ -1,0 +1,33 @@
+/**
+ * Form Field
+ * A header label and the value beside it on the PC and NPC sheets (components/form-field.md). The sheets' bare-input
+ * reset is in sheets/_actor-sheet.scss
+ */
+
+@use "../base/variables" as *;
+
+// The label is text in the face core gives a fourth-level heading: its font, bold, one line high
+.l5r4-form-field-label {
+  font-family: var(--l5r4-font-label);
+  font-weight: bold;
+  line-height: 1;
+  text-wrap: nowrap;
+
+  @include title-row;
+}
+
+.l5r4-form-field-value {
+  align-items: center;
+  color: var(--l5r4-color-text);
+  display: inline-flex;
+  font-family: inherit;
+  font-size: inherit;
+  height: var(--input-height);
+  line-height: var(--input-height);
+  margin: 0;
+  min-width: 20px;
+  padding: 0 var(--l5r4-space-8);
+  text-align: inherit;
+  user-select: text;
+  width: calc(100% - 2px);
+}

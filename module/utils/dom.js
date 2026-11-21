@@ -1,5 +1,5 @@
 /**
- * @module dom
+ * @module utils/dom
  * @description DOM manipulation utilities for event delegation.
  *
  * Provides event delegation helpers that attach listeners to parent elements
@@ -16,30 +16,17 @@ import { logError } from "./error-logging.js";
  *
  * Uses event delegation pattern: attaches listener to parent (root) element
  * and handles events from matching child elements. The handler is called only
- * when the event target or its ancestors match the selector.
- *
+ * when the event target or its ancestors match the selector, such as clicks on `[data-action="roll"]` buttons
+ * or changes on `select[data-field]` elements.
  * @param {Element|Document} root - Parent element to attach listener to
- * @param {string} selector - CSS selector for target elements (use data attributes)
  * @param {string} type - Event type (e.g., "click", "change", "submit")
- * @param {Function} handler - Event handler function (ev, el) => void
- * @param {Object} [options={}] - Event listener options
- * @param {boolean} [options.capture=false] - Use capture phase
+ * @param {object} listener
+ * @param {string} listener.selector - CSS selector for target elements (use data attributes)
+ * @param {Function} listener.handler - Event handler function (ev, el) => void
+ * @param {boolean} [listener.capture=false] - Use capture phase
  * @returns {void}
- *
- * @example
- * // Listen for clicks on buttons with data-action attribute
- * on(document, '[data-action="roll"]', 'click', (ev, el) => {
- *   console.log('Roll button clicked', el);
- * });
- *
- * @example
- * // Listen for changes on select elements
- * on(form, 'select[data-field]', 'change', (ev, el) => {
- *   const field = el.dataset.field;
- *   console.log(`Field ${field} changed to ${el.value}`);
- * });
  */
-export function on(root, selector, type, handler, options = {}) {
+export function on(root, type, { selector, handler, capture = false }) {
   // Defensive validation: ensure root is valid EventTarget
   if (!root?.addEventListener) {
     logError("on() requires valid EventTarget root", new TypeError("Invalid root"), { root });
@@ -60,28 +47,49 @@ export function on(root, selector, type, handler, options = {}) {
     return;
   }
 
-  const useCapture = options.capture ?? false;
+  root.addEventListener(type, ev => onDelegatedEvent(ev, { root, selector, handler }), capture);
+}
 
-  root.addEventListener(
-    type,
-    ev => {
-      let el = null;
-      // Only process events from Element nodes (not text nodes, etc.)
-      if (ev.target instanceof Element) {
-        try {
-          // Find closest ancestor (including target) matching selector
-          el = ev.target.closest(selector);
-        } catch (e) {
-          // Invalid selector syntax - log and skip
-          logError("on() invalid selector caused closest() error", e, { selector });
-          return;
-        }
-      }
-      // Only call handler if matching element found and is within root
-      if (el && root.contains(el)) {
-        handler(ev, el);
-      }
-    },
-    useCapture
-  );
+/**
+ * Hide, by removing, the controls a selector matches that this viewer may not use: a card shows no button its viewer cannot
+ * press (design system, patterns/panels-and-browsers.md "Can't act"; roadmap/STAGE-18 decision 15). The click's own
+ * check stays, since a card's controls are read back from chat.
+ * @param {Element} root - The rendered card
+ * @param {string} selector - The controls
+ * @param {function(Element): boolean} mayUse - Whether the viewer may use one control
+ */
+export function hideUnusable(root, selector, mayUse) {
+  for (const control of root.querySelectorAll(selector)) {
+    if (!mayUse(control)) {
+      control.remove();
+    }
+  }
+}
+
+/**
+ * Handle one event on the root: call the handler with the closest element matching the selector, when the event
+ * came from an Element and that element is within the root.
+ * @param {Event} ev - The event the root received
+ * @param {object} listener
+ * @param {Element|Document} listener.root - The element the listener is attached to
+ * @param {string} listener.selector - CSS selector for target elements
+ * @param {Function} listener.handler - Event handler function (ev, el) => void
+ */
+function onDelegatedEvent(ev, { root, selector, handler }) {
+  let el = null;
+  // Only process events from Element nodes (not text nodes, etc.)
+  if (ev.target instanceof Element) {
+    try {
+      // Find closest ancestor (including target) matching selector
+      el = ev.target.closest(selector);
+    } catch (e) {
+      // Invalid selector syntax - log and skip
+      logError("on() invalid selector caused closest() error", e, { selector });
+      return;
+    }
+  }
+  // Only call handler if matching element found and is within root
+  if (el && root.contains(el)) {
+    handler(ev, el);
+  }
 }

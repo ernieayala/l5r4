@@ -1,4 +1,4 @@
-<section class="standard-form">
+<section class="l5r4-armor-config-body standard-form">
   <div class="form-group">
     <label>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</label>
     <input
@@ -6,7 +6,7 @@
       name="armorTn.mod"
       value="{{system.armorTn.mod}}"
       data-type="Number"
-      data-action="field-change"
+      data-action="update-field"
     />
   </div>
 
@@ -17,7 +17,7 @@
       name="armorTn.reductionMod"
       value="{{system.armorTn.reductionMod}}"
       data-type="Number"
-      data-action="field-change"
+      data-action="update-field"
     />
   </div>
 
@@ -27,7 +27,7 @@
       type="checkbox"
       name="allowArmorStacking"
       {{checked allowArmorStacking}}
-      data-action="field-change"
+      data-action="update-field"
     />
   </div>
 </section>

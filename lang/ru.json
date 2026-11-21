@@ -1,342 +1,98 @@
 {
   "l5r4": {
-    "ui": {
-      "tabs": {
-        "details": "Детали",
-        "modifiers": "Модификаторы",
-        "description": "Описание",
-        "effects": "Активные Эффекты"
-      },
-      "mechanics": {
-        "rings": {
-          "ring": "Кольцо",
-          "fire": "Огонь",
-          "water": "Вода",
-          "air": "Воздух",
-          "earth": "Земля",
-          "void": "Пустота",
-          "voidPoints": "Очки Пустоты",
-          "all": "Все",
-          "voidTnBoost": "Использовать Пустоту",
-          "voidInitBoost": "Использовать Пустоту"
-        },
-        "traits": {
-          "sta": "Выносливость",
-          "wil": "Воля",
-          "str": "Сила",
-          "per": "Восприятие",
-          "ref": "Рефлексы",
-          "awa": "Осознанность",
-          "agi": "Ловкость",
-          "int": "Интеллект"
-        },
-        "rolls": {
-          "success": "Успех",
-          "failure": "Неудача",
-          "missed": "Промах",
-          "explodesOn": "Взрывается На",
-          "withEmphasis": "с Акцентом",
-          "unskilled": "Без Навыка",
-          "traitRoll": "Бросок Черты",
-          "ringRoll": "Бросок Кольца",
-          "skillRoll": "Бросок Навыка",
-          "damageRoll": "Бросок Урона",
-          "attackRoll": "Бросок Атаки",
-          "spellCasting": "Бросок Заклинания",
-          "castSpell": "Сотворить {spell} ({ring})",
-          "castMaho": "Сотворить Махо: {spell} ({ring})",
-          "unskilledRoll": "Бросок без Навыка",
-          "emphasis": "Акцент",
-          "raise": "Повышение",
-          "raises": "Повышения",
-          "freeRaises": "Бесплатные Повышения",
-          "automatic": "Автоматический",
-          "formula": "Формула",
-          "result": "Результат",
-          "socialResistance": "Социальное Сопротивление",
-          "socialResistanceDescription": "Сопротивление Запугиванию или Искушению"
-        },
-        "notifications": {
-          "itemCreated": "Создано {type}: {name}",
-          "itemDeleted": "Удалено {type}: {name}",
-          "itemUpdated": "Обновлено {type}: {name}",
-          "woundConfigFailed": "Не удалось открыть настройки ран",
-          "woundConfigUpdateFailed": "Не удалось обновить настройки ран",
-          "invalidWoundConfigValue": "Недопустимое значение настройки ран"
-        },
-        "combat": {
-          "attack": "Атака",
-          "melee": "Ближний Бой",
-          "ranged": "Дальний Бой",
-          "multiplier": "Множитель",
-          "woundPenalty": "Штраф от Ран",
-          "armorTnBonus": "Бонус СЛ Брони",
-          "targeting": {
-            "vs": "против",
-            "multipleTargets": "цели - СЛ не установлена автоматически"
-          }
-        },
-        "wounds": {
-          "wounds": "Раны",
-          "armorTn": "СЛ Брони",
-          "armorTnBase": "Базовая СЛ Брони",
-          "armorReduction": "Поглощение",
-          "woundLevel": "Уровень",
-          "woundsSuffered": "Полученные Раны",
-          "maxWounds": "Макс. Раны",
-          "penalty": "Штраф",
-          "woundHealRate": "Скорость Заживления Ран",
-          "healRateFormula": "x 2 +",
-          "woundMode": "Режим Ран",
-          "manual": "Вручную",
-          "formula": "Формула",
-          "woundConfiguration": "Настройка Ран",
-          "earthMultiplier": "Множитель Земли",
-          "woundBonus": "Бонус Ран",
-          "threshold": "Порог",
-          "healthy": "Здоров",
-          "nicked": "Царапина",
-          "grazed": "Ссадина",
-          "hurt": "Ранен",
-          "injured": "Ранен Серьезно",
-          "crippled": "Искалечен",
-          "down": "Повержен",
-          "out": "Вне Боя",
-          "applyHealing": "Применить Исцеление",
-          "applyHealingTitle": "Применить естественное исцеление от отдыха",
-          "naturalHealing": "Естественное Исцеление",
-          "restedAndRecovered": "отдохнул и восстановил раны",
-          "healingApplied": "Исцелено {amount} ран (скорость исцеления: {rate})",
-          "woundStatus": "Раны: {current}/{max} (получено: {suffered})",
-          "fullyHealed": "Полностью исцелён!",
-          "alreadyFullHealth": "{name} уже полностью здоров",
-          "noHealRate": "У {name} не настроена скорость исцеления",
-          "healingFailed": "Не удалось применить исцеление к {name}",
-          "applyWounds": "Нанести Раны",
-          "reduceWithVoid": "Уменьшить Пустотой",
-          "woundsApplied": "Нанесено {amount} ран для {name}",
-          "woundsAppliedWithArmor": "{name} получил {original} урона. Броня поглотила {reduction}. Нанесено {final} ран.",
-          "woundsReducedApplied": "Очко Пустоты потрачено: Урон уменьшен на 10. Нанесено {amount} ран для {name}",
-          "woundsReducedWithArmor": "{name} получил {original} урона. Пустота уменьшила до {afterVoid}, броня поглотила {reduction}. Нанесено {final} ран.",
-          "noTokenSelected": "Не выбран токен. Выберите токен для нанесения ран.",
-          "noVoidPoints": "Нет Очков Пустоты для уменьшения урона"
-        },
-        "stances": {
-          "pending": "Ожидание",
-          "attack": "Атакующая Стойка",
-          "fullAttack": "Полная Атака",
-          "defense": "Защитная Стойка",
-          "fullDefense": "Полная Защита",
-          "center": "Центрированная Стойка",
-          "fullDefenseDescription": "Сделайте бросок Защиты/Рефлексов. Добавьте половину результата (округлённую вверх) к вашей СЛ Брони на время этой стойки.",
-          "cannotAttackDefense": "Нельзя атаковать в Защитной Стойке",
-          "fullAttackBonus": "Полная Атака: +2к1"
-        },
-        "mounted": {
-          "fullAttackRestriction": "Полная Атака требует Верховой Езды 3+, когда верхом",
-          "attackBonus": "Верхом/Выше: +1к0"
-        },
-        "fear": {
-          "fearRank": "Ранг Страха",
-          "fearLabel": "Страх {rank}",
-          "effectName": "Страх {rank}",
-          "clickToTest": "Нажмите, чтобы проверить Страх против выбранных персонажей",
-          "testResult": "Проверка Страха {rank}",
-          "testSuccess": "Устоял перед Страхом {rank}",
-          "testFailure": "Провал Проверки Страха {rank}",
-          "penaltyApplied": "Штраф: -{penalty}к0 ко всем броскам",
-          "catastrophicFailure": "КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж убегает или съёживается в ужасе.",
-          "noTargets": "Не выбраны токены для проверки Страха",
-          "noWillpower": "У {character} нет черты Воля",
-          "noFear": "У этого НПС не настроен эффект Страха",
-          "testAgainst": "против {creature}",
-          "rollFailed": "Бросок проверки Страха не удался - недопустимая формула или повреждённые данные",
-          "templateFailed": "Не удалось отобразить шаблон чата проверки Страха"
+    "apps": {
+      "conditionManager": {
+        "errors": {
+          "openFailed": "Не удалось открыть Менеджер состояний"
         }
-      },
-      "common": {
-        "roll": "Бросить",
-        "cancel": "Отмена",
-        "ok": "ОК",
-        "add": "Добавить",
-        "none": "Нет",
-        "keep": "Оставить",
-        "raise": "Повышение",
-        "init": "Инициатива",
-        "bonus": "Бонус",
-        "mod": "Модификатор",
-        "multi": "Множитель",
-        "rate": "Скорость",
-        "current": "Текущий",
-        "total": "Всего",
-        "left": "осталось",
-        "close": "Закрыть",
-        "apply": "Применить",
-        "toChat": "В Чат",
-        "effect": "Эффект",
-        "simple": "Простое",
-        "complex": "Сложное",
-        "free": "Свободное",
-        "action": "Действие",
-        "edit": "Изменить",
-        "delete": "Удалить",
-        "name": "Имя",
-        "description": "Описание",
-        "notes": "Заметки",
-        "activeEffects": "Активные Эффекты",
-        "conditions": "Состояния",
-        "active": "Активный",
-        "new": "Новый",
-        "auto": "Авто",
-        "disabled": "отключено",
-        "rank": "Ранг",
-        "clan": "Клан",
-        "school": "Школа",
-        "xp": "Очки Опыта",
-        "insight": "Озарение",
-        "skill": "Навык",
-        "damage": "Урон",
-        "type": "Тип",
-        "ring": "Кольцо",
-        "mastery": "Мастерство",
-        "tn": "СЛ",
-        "cost": "Стоимость",
-        "save": "Сохранить",
-        "armor": "Доспех"
-      },
-      "armor": {
-        "allowStacking": "Разрешить Наложение Доспехов"
       },
       "emphasisManager": {
-        "title": "Управление Акцентами Навыков",
-        "manageFor": "Управление Доступными Акцентами для",
-        "manage": "Управление Акцентами",
         "addCustom": "Добавить Пользовательский Акцент",
         "custom": "Пользовательский",
-        "none": "Нет доступных акцентов",
-        "help": "Выберите, какие акценты доступны для этого навыка. Тренируйте их на листе персонажа.",
-        "noEmphases": "Нет акцентов в списке",
-        "limitReached": "Невозможно тренировать больше {max} акцентов при этом ранге навыка"
+        "hint": "Выберите, какие акценты доступны для этого навыка. Тренируйте их на листе персонажа.",
+        "manage": "Управление Акцентами",
+        "noEmphases": "Нет акцентов в списке"
       },
       "wealthManager": {
-        "title": "Управление Богатством",
-        "tooltip": "Управление Богатством",
-        "currentWealth": "Текущее Богатство",
-        "addMoney": "Добавить Деньги",
-        "removeMoney": "Убрать Деньги",
-        "amount": "Количество",
-        "denomination": "Номинал",
         "add": "Добавить",
-        "remove": "Убрать",
+        "addMoney": "Добавить Деньги",
+        "amount": "Количество",
         "convert": "Конвертировать Валюту",
-        "convertZeniToBu": "Конвертировать 10 Зени в 1 Бу",
-        "convertBuToZeni": "Конвертировать 1 Бу в 10 Зени",
         "convertBuToKoku": "Конвертировать 5 Бу в 1 Коку",
+        "convertBuToZeni": "Конвертировать 1 Бу в 10 Зени",
         "convertKokuToBu": "Конвертировать 1 Коку в 5 Бу",
-        "insufficientFunds": "Недостаточно средств для этой транзакции",
-        "insufficientForConversion": "Недостаточно средств для этой конверсии"
+        "convertZeniToBu": "Конвертировать 10 Зени в 1 Бу",
+        "currentWealth": "Текущее Богатство",
+        "denomination": "Номинал",
+        "errors": {
+          "openFailed": "Не удалось открыть Управление Богатством"
+        },
+        "open": "Управление Богатством",
+        "remove": "Убрать",
+        "removeMoney": "Убрать Деньги"
       },
-      "sheets": {
-        "bio": "Предыстория",
-        "skill": "Навык",
-        "skills": "Навыки",
-        "weapon": "Оружие",
-        "weapons": "Оружие",
-        "armor": "Броня",
-        "item": "Предмет",
-        "items": "Предметы",
-        "addItem": "Добавить Предмет",
-        "notes": "Заметки",
-        "spell": "Заклинание",
-        "spells": "Заклинания",
-        "technique": "Техника",
-        "techniques": "Техники",
-        "armors": "Броня",
-        "advantage": "Преимущество",
-        "advantages": "Преимущества",
-        "disadvantage": "Недостаток",
-        "disadvantages": "Недостатки",
-        "kata": "Ката",
-        "katas": "Ката",
-        "kiho": "Кихо",
-        "kihos": "Кихо",
-        "tattoo": "Татуировка",
-        "tattoos": "Татуировки",
-        "equipment": "Снаряжение",
-        "abilities": "Способности",
-        "character": "Персонаж",
-        "rulesSummary": "Краткие Правила",
-        "description": "Описание",
-        "woundLevels": "Уровни Ран",
-        "spellSlots": "Ячейки Заклинаний",
-        "demands": "Требования",
-        "traits": "Черты",
-        "itemSheetTitle": "Лист Предмета",
-        "xpModal": "Опыт"
-      },
-      "notifications": {
-        "actorNotFound": "Актёр не найден для броска урона",
-        "noPermissionDamage": "У вас нет прав бросать урон для этого актёра",
-        "noValidWeapon": "Не найдено подходящего оружия для броска атаки",
-        "fullDefenseRollFailed": "Не удалось сделать бросок Полной Защиты. Пожалуйста, бросьте вручную.",
-        "invalidRingForSpell": "Недопустимое кольцо для ячейки заклинания: {ring}",
-        "noActorForVoid": "Нет актёра для траты очков пустоты",
-        "chatMessageFailed": "Не удалось опубликовать бросок в чате - смотрите консоль для подробностей",
-        "schoolRankZero": "Вы не можете сотворить заклинание с Рангом Школы, уменьшенным до нуля",
-        "deficiencyBlocksCasting": "Недостаток в {ring} уменьшает ваш Ранг Школы до нуля - невозможно сотворить",
-        "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца",
-        "conditionApplyFailed": "Не удалось применить {condition} к {actor}",
-        "invalidSkillName": "Предоставлено недопустимое имя навыка",
-        "invalidDamageValue": "Предоставлено недопустимое значение урона",
-        "noTargetForSwap": "Не выбрана цель для обмена инициативой",
-        "noCombatActive": "Нет активного боя для изменения инициативы",
-        "notInCombat": "Персонаж не находится в активном бою",
-        "wealthManagerFailed": "Не удалось открыть Управление Богатством",
-        "conditionManagerFailed": "Не удалось открыть Менеджер состояний"
-      },
-      "voidActions": {
-        "title": "Действия Очков Пустоты",
-        "enhanceRoll": "Улучшить Бросок (+1к1)",
-        "tempSkill": "Получить Временный Навык",
-        "reduceDamage": "Уменьшить Урон (-10)",
-        "increaseArmorTN": "Увеличить СЛ Брони (+10)",
-        "swapInitiative": "Обменять Инициативу",
-        "increaseInitiative": "Увеличить Инициативу (+10)",
-        "tempSkillGranted": "Очко Пустоты потрачено: Получен временный ранг в {skill}",
-        "damageReduced": "Очко Пустоты потрачено: Урон уменьшен с {original} до {reduced} (-{amount})",
-        "armorTnBonus": "Пустота: СЛ Брони +10",
-        "armorTnIncreased": "Очко Пустоты потрачено: СЛ Брони увеличена на 10 на этот Раунд",
-        "armorTnAlreadyActive": "Бонус СЛ Брони от Очка Пустоты уже активен",
-        "initiativeSwapped": "Очко Пустоты потрачено: {source} обменял инициативу с {target}",
-        "initiativeIncreased": "Очко Пустоты потрачено: Инициатива увеличена с {oldValue} до {newValue}"
-      },
-      "hints": {
-        "leftRightToAdjust": "Влево и Вправо для Настройки",
-        "leftClickPlusRightClickMinus": "Shift+Левый клик: +1, Shift+Правый клик: -1",
-        "voidPointsClickAdjust": "Левый клик: +1, Правый клик: -1",
-        "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0",
-        "shiftClickToChat": "Shift+Клик для публикации в чате",
-        "postToChat": "Опубликовать в чате"
-      },
-      "dialogs": {
-        "deleteItem": {
-          "title": "Удалить Предмет?",
-          "content": "Вы уверены, что хотите удалить {name}?"
-        }
+      "woundConfig": {
+        "title": "Настройка Ран",
+        "titleFor": "Настройка Ран: {name}"
       }
     },
     "character": {
-      "skills": {
-        "properties": {
-          "type": "Тип",
-          "trait": "Черта",
-          "emphasis": "Акцент",
-          "school": "Школьный навык",
-          "mastery3": "Мастерство Ранг 3",
-          "mastery5": "Мастерство Ранг 5",
-          "mastery7": "Мастерство Ранг 7",
-          "insightbonus": "Бонус Озарения"
+      "advantages": {
+        "ancestor": "Предок",
+        "material": "Материальное",
+        "mental": "Ментальное",
+        "physical": "Физическое",
+        "social": "Социальное",
+        "spiritual": "Духовное"
+      },
+      "experience": {
+        "adjustExperience": "Настроить Опыт",
+        "breakdown": {
+          "advantages": "Преимущества",
+          "base": "База",
+          "cap": "лимит",
+          "capHint": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков.",
+          "disadvantagesGrant": "Недостатки",
+          "kata": "Ката",
+          "kiho": "Кихо",
+          "manualAdjustments": "Ручные настройки",
+          "skills": "Навыки",
+          "spells": "Заклинания",
+          "traits": "Черты",
+          "void": "Пустота"
         },
+        "disadvantageCapLabel": "Макс. Опыт",
+        "fallbackLabels": {
+          "skillCreated": "Навык Создан",
+          "skillIncreased": "Навык Увеличен",
+          "traitIncrease": "Увеличение Черты",
+          "voidIncrease": "Увеличение Пустоты"
+        },
+        "note": "Заметка",
+        "purchases": "Покупки",
+        "reason": "Причина",
+        "recalculate": "Пересчитать покупки опыта от текущего состояния персонажа",
+        "skillChange": "{name} {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "spellMemorized": "Выучено: {name}",
+        "summary": "Сводка Опыта",
+        "traitChange": "{label} {from}→{to}",
+        "usedTotal": "Использовано / Всего",
+        "voidChange": "Пустота {from}→{to}",
+        "xpAmount": "Количество"
+      },
+      "movement": {
+        "feet": "фут",
+        "maximum": "Максимальное Движение",
+        "title": "Движение"
+      },
+      "ranks": {
+        "gloryRank": "Слава",
+        "honorRank": "Честь",
+        "statusRank": "Ранг Статуса",
+        "taintRank": "Порча Земель Теней"
+      },
+      "skills": {
         "names": {
           "acting": "Актёрство",
           "animalHandling": "Обращение с Животными",
@@ -346,8 +102,8 @@
           "calligraphy": "Каллиграфия",
           "chainWeapons": "Цепное Оружие",
           "commerce": "Торговля",
-          "craft": "Ремесло",
           "courtier": "Придворный",
+          "craft": "Ремесло",
           "defense": "Защита",
           "divination": "Гадание",
           "engineering": "Инженерия",
@@ -380,105 +136,48 @@
           "temptation": "Искушение",
           "warFan": "Боевой Веер",
           "weapons": "Оружие"
+        },
+        "properties": {
+          "emphasis": "Акцент",
+          "mastery3": "Мастерство Ранг 3",
+          "mastery5": "Мастерство Ранг 5",
+          "mastery7": "Мастерство Ранг 7",
+          "school": "Школьный навык",
+          "trait": "Черта",
+          "type": "Тип"
         }
       },
       "skillTypes": {
-        "high": "Высокий",
         "bugei": "Бугэй",
-        "merch": "Купеческий",
-        "low": "Низкий"
-      },
-      "advantages": {
-        "physical": "Физическое",
-        "mental": "Ментальное",
-        "social": "Социальное",
-        "material": "Материальное",
-        "spiritual": "Духовное",
-        "ancestor": "Предок"
-      },
-      "ranks": {
-        "honorRank": "Честь",
-        "honorPoints": "Очки Чести",
-        "gloryRank": "Слава",
-        "gloryPoints": "Очки Славы",
-        "statusRank": "Ранг Статуса",
-        "statusPoints": "Очки Статуса",
-        "shadowRank": "Порча Земель Теней",
-        "shadowPoints": "Очки Тени",
-        "insightRank": "Ранг Озарения",
-        "insightPoints": "Очки Озарения"
+        "high": "Высокий",
+        "low": "Низкий",
+        "merch": "Купеческий"
       },
       "stance": {
-        "title": "Бой",
-        "current": "Текущая Стойка"
-      },
-      "movement": {
-        "title": "Движение",
-        "maximum": "Максимальное Движение",
-        "feet": "фут"
-      },
-      "experience": {
-        "xpAmount": "Количество",
-        "note": "Заметка",
-        "reason": "Причина",
-        "adjustExperience": "Настроить Опыт",
-        "experienceSummary": "Сводка Опыта",
-        "usedTotal": "Использовано / Всего",
-        "poolChanges": "Изменения Пула",
-        "when": "Когда",
-        "none": "Нет записей",
-        "purchases": "Покупки",
-        "xpLog": "Журнал Опыта",
-        "traitChange": "{label} {from}→{to}",
-        "voidChange": "Пустота {from}→{to}",
-        "skillCreate": "{name} 0→{rank}",
-        "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Пересчитать покупки опыта от текущего состояния персонажа",
-        "recalculateSuccess": "Покупки опыта успешно пересчитаны",
-        "recalculateFailed": "Не удалось пересчитать покупки опыта",
-        "disadvantageCapLabel": "Макс. Опыт",
-        "disadvantageCapTitle": "Установить Лимит Недостатков",
-        "disadvantageCapTooltip": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков",
-        "breakdown": {
-          "base": "База",
-          "disadvantagesGrant": "Недостатки",
-          "cap": "лимит",
-          "manualAdjustments": "Ручные настройки",
-          "traits": "Черты",
-          "void": "Пустота",
-          "skills": "Навыки",
-          "advantages": "Преимущества",
-          "kata": "Ката",
-          "kiho": "Кихо",
-          "spells": "Заклинания"
-        },
-        "fallbackLabels": {
-          "advantage": "Преимущество",
-          "disadvantage": "Недостаток",
-          "traitIncrease": "Увеличение Черты",
-          "voidIncrease": "Увеличение Пустоты",
-          "skillCreated": "Навык Создан",
-          "skillIncreased": "Навык Увеличен"
-        },
-        "spellMemorized": "Выучено: {name}"
+        "current": "Текущая Стойка",
+        "title": "Бой"
       }
     },
     "equipment": {
+      "armor": {
+        "equipped": "Надето",
+        "reduction": "Поглощение",
+        "type": "Тип Брони",
+        "types": {
+          "ashigaru": "Броня Асигару",
+          "heavy": "Тяжёлая Броня",
+          "light": "Лёгкая Броня",
+          "riding": "Броня для Верховой Езды"
+        }
+      },
+      "general": {
+        "keywords": "Ключевые Слова",
+        "keywordsPlaceholder": "напр., Самурай, Крестьянин",
+        "nemuranai": "Немуранай",
+        "price": "Цена"
+      },
       "weapons": {
-        "attackType": "Тип Атаки",
-        "size": "Размер",
-        "damageKeep": "Оставляемые Кости Урона",
-        "range": "Дальность",
         "arrow": "Стрела",
-        "typeWeapon": "Оружие",
-        "typeBow": "Лук",
-        "rangedAttack": "Дальняя Атака",
-        "associatedSkill": "Связанный Навык",
-        "fallback": "Альтернатива",
-        "skillExample": {
-          "bow": "Кюдзюцу",
-          "weapon": "Кэндзюцу"
-        },
         "arrows": {
           "armor": "Бронебойная",
           "flesh": "Рассекающая Плоть",
@@ -486,166 +185,354 @@
           "rope": "Режущая Верёвки",
           "willow": "Ивовый Лист"
         },
+        "associatedSkill": "Связанный Навык",
+        "attackType": "Тип Атаки",
+        "damageKeep": "Оставляемые Кости Урона",
+        "range": "Дальность",
+        "rangedAttack": "Дальняя Атака",
+        "size": "Размер",
         "sizes": {
-          "small": "Малое",
+          "large": "Большое",
           "medium": "Среднее",
-          "large": "Большое"
-        }
-      },
-      "armor": {
-        "reduction": "Поглощение",
-        "equipped": "Надето",
-        "armorType": "Тип Брони",
-        "types": {
-          "ashigaru": "Броня Асигару",
-          "light": "Лёгкая Броня",
-          "heavy": "Тяжёлая Броня",
-          "riding": "Броня для Верховой Езды"
-        }
-      },
-      "keywords": "Ключевые Слова",
-      "keywordsPlaceholder": "напр., Самурай, Крестьянин",
-      "nemuranai": "Немуранай",
-      "price": "Цена",
-      "general": {}
+          "small": "Малое"
+        },
+        "skillExample": {
+          "bow": "Кюдзюцу",
+          "weapon": "Кэндзюцу"
+        },
+        "typeBow": "Лук",
+        "typeWeapon": "Оружие"
+      }
     },
     "magic": {
-      "spells": {
-        "range": "Дальность",
-        "aoe": "Область Действия",
-        "duration": "Длительность",
-        "cast": "Сотворить",
-        "raises": "Повышения",
-        "affinity": "Родство",
-        "deficiency": "Недостаток",
-        "maho": "Махо",
-        "useSpellSlot": "Использовать Ячейку Заклинания",
-        "voidSlot": "Использовать Ячейку Заклинания Пустоты",
-        "slotsRestored": "Все ячейки заклинаний восстановлены до максимума",
-        "restored": "восстановлено",
-        "memorized": "Выучено"
-      },
-      "maho": {
-        "warningTitle": "Кровавая Магия - Запретное Махо",
-        "bloodRequired": "Требуется Кровавая Цена",
-        "additionalBloodBonus": "Каждая дополнительная кровавая цена даёт +1 Бесплатное Повышение",
-        "bloodSource": {
-          "label": "Источник Крови",
-          "self": "Себя",
-          "other": "Другого"
-        },
-        "additionalBlood": "Дополнительная Кровь",
-        "castMaho": "Сотворить Заклинание Махо",
-        "mahoCasting": "Сотворение Махо",
-        "bloodCost": "Кровь",
-        "freeRaises": "Бесплатные Повышения",
-        "taintGained": "Получена Порча",
-        "taintGainedNotification": "Получено {taint} очков Порчи Земель Теней от сотворения махо"
-      },
       "kiho": {
         "internal": "Внутреннее",
         "karmic": "Кармическое",
         "martial": "Боевое",
         "mystic": "Мистическое"
       },
-      "techniques": {
-        "single": "Техника",
-        "plural": "Техники"
+      "maho": {
+        "additionalBlood": "Дополнительная Кровь",
+        "additionalBloodBonus": "Каждая дополнительная кровавая цена даёт +1 Бесплатное Повышение",
+        "bloodRequired": "Требуется Кровавая Цена",
+        "bloodSource": {
+          "label": "Источник Крови",
+          "other": "Другого",
+          "self": "Себя"
+        },
+        "bloodSuffix": "[Кровь: {total}]",
+        "casting": "Сотворение Махо",
+        "castingLabel": "Сотворение Махо: {spell}",
+        "taintGained": "Получена Порча",
+        "taintGainedNotification": "Получено {taint} очков Порчи Земель Теней от сотворения махо",
+        "taintSuffix": "[Получена Порча: {taint}]",
+        "warningTitle": "Кровавая Магия - Запретное Махо"
+      },
+      "spells": {
+        "affinity": "Родство",
+        "affinityTag": "[Родство]",
+        "areaOfEffect": "Область Действия",
+        "cast": "Сотворить",
+        "concentrationName": "Концентрация: {spell}",
+        "deficiency": "Недостаток",
+        "deficiencyTag": "[Недостаток]",
+        "duration": "Длительность",
+        "maho": "Махо",
+        "memorized": "Выучено",
+        "raises": "Повышения",
+        "range": "Дальность",
+        "slotsRestored": "Все ячейки заклинаний восстановлены до максимума",
+        "slotSuffix": "[Использовать Ячейку Заклинания {element}]",
+        "useSpellSlot": "Использовать Ячейку Заклинания",
+        "voidSlot": "Использовать Ячейку Заклинания Пустоты",
+        "voidSlotSuffix": "[Использовать Ячейку Заклинания Пустоты]"
       }
     },
     "system": {
-      "migration": {
-        "itemTypeChangeInfo": "L5R4: мигрировано {count} предмет(ов) из \"commonItem\" в \"item\".",
-        "itemTypeChangeError": "L5R4: Ошибка миграции типа предмета. Смотрите консоль для подробностей.",
-        "iconsUpdated": "Миграция L5R4: Обновлено {count} путей изображений мира.",
-        "compendiumIconsUpdated": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений."
-      },
       "errors": {
         "deleteEffect": "Не удалось удалить эффект."
+      },
+      "migration": {
+        "compendiumIconsUpdated": {
+          "few": "Миграция L5R4 (Компендиумы): Обновлено {count} пути изображений.",
+          "many": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений.",
+          "one": "Миграция L5R4 (Компендиумы): Обновлён {count} путь изображения.",
+          "other": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений."
+        },
+        "iconsUpdated": {
+          "few": "Миграция L5R4: Обновлено {count} пути изображений мира.",
+          "many": "Миграция L5R4: Обновлено {count} путей изображений мира.",
+          "one": "Миграция L5R4: Обновлён {count} путь изображения мира.",
+          "other": "Миграция L5R4: Обновлено {count} путей изображений мира."
+        }
+      },
+      "settings": {
+        "forceMigration": {
+          "hint": "Принудительно запускает все миграции при следующей загрузке мира, независимо от версии. Автоматически сбрасывается после завершения миграции.",
+          "name": "Принудительная миграция при старте"
+        },
+        "LtException": {
+          "hint": "Когда оставляемые кости уменьшаются ниже 10 при конвертации, добавить 2.",
+          "name": "Применить исключение Малых Истин"
+        },
+        "runMigration": {
+          "hint": "Если включено, ожидающие миграции данных будут выполнены при следующей загрузке мира. Отключите, чтобы пропустить миграции для устранения неполадок.",
+          "name": "Запускать миграции при старте"
+        }
+      }
+    },
+    "ui": {
+      "armor": {
+        "allowStacking": "Разрешить Наложение Доспехов"
+      },
+      "combat": {
+        "multipleTargets": "цели - СЛ не установлена автоматически",
+        "vs": "против"
+      },
+      "common": {
+        "action": "Действие",
+        "active": "Активный",
+        "armor": "Доспех",
+        "bonus": "Бонус",
+        "cancel": "Отмена",
+        "clan": "Клан",
+        "conditions": "Состояния",
+        "cost": "Стоимость",
+        "current": "Текущий",
+        "damage": "Урон",
+        "delete": "Удалить",
+        "disabled": "отключено",
+        "edit": "Изменить",
+        "effect": "Эффект",
+        "free": "Свободное",
+        "initiative": "Инициатива",
+        "insight": "Озарение",
+        "modifier": "Модификатор",
+        "multi": "Множитель",
+        "name": "Имя",
+        "new": "Новый",
+        "none": "Нет",
+        "rank": "Ранг",
+        "ring": "Кольцо",
+        "roll": "Бросить",
+        "save": "Сохранить",
+        "school": "Школа",
+        "simple": "Простое",
+        "tn": "СЛ",
+        "type": "Тип",
+        "xp": "Очки Опыта"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "content": "Вы уверены, что хотите удалить {name}?",
+          "title": "Удалить Предмет?"
+        }
+      },
+      "effects": {
+        "autoProne": "Авто: Повержен"
+      },
+      "hints": {
+        "postToChat": "Опубликовать в чате",
+        "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0"
+      },
+      "mechanics": {
+        "combat": {
+          "attack": "Атака",
+          "attackSlot": "Атака {slot}",
+          "damageSlot": "Урон {slot}",
+          "woundPenalty": "Штраф от Ран"
+        },
+        "fear": {
+          "catastrophicSuffix": "— Штраф: -{penalty}к0 ко всем броскам КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж убегает или съёживается в ужасе.",
+          "label": "Страх {rank}",
+          "noFear": "У этого НПС не настроен эффект Страха",
+          "noTargets": "Не выбраны токены для проверки Страха",
+          "noWillpower": "У {name} нет черты Воля",
+          "penaltySuffix": "— Штраф: -{penalty}к0 ко всем броскам",
+          "rank": "Ранг Страха",
+          "rollForSelected": "Нажмите, чтобы проверить Страх против выбранных персонажей",
+          "testLabel": "Проверка Страха {rank} против {name}",
+          "testResult": "Проверка Страха {rank}"
+        },
+        "rings": {
+          "air": "Воздух",
+          "all": "Все",
+          "earth": "Земля",
+          "fire": "Огонь",
+          "ring": "Кольцо",
+          "void": "Пустота",
+          "voidInitBoost": "Использовать Пустоту",
+          "voidPoints": "Очки Пустоты",
+          "voidPointsEmpty": "Очки Пустоты: 0",
+          "voidTnBoost": "Использовать Пустоту",
+          "water": "Вода"
+        },
+        "rolls": {
+          "attackRoll": "Бросок Атаки",
+          "castingSuffix": "(Бросок Заклинания)",
+          "damageRoll": "Бросок Урона",
+          "emphasis": "Акцент",
+          "emphasisLabel": "{label} (Акцент: {emphasisName})",
+          "explodesOn": "Взрывается На",
+          "failure": "Неудача",
+          "freeRaises": "Бесплатные Повышения",
+          "missed": "Промах",
+          "namedRoll": "Бросить: {roll}",
+          "raises": "Повышения",
+          "ringRollLabel": "Бросок Кольца: {element}",
+          "skillRoll": "Бросок Навыка",
+          "skillRollLabel": "Бросок Навыка: {skillName} / {traitName}",
+          "socialResistance": "Социальное Сопротивление",
+          "socialResistanceHint": "Сопротивление Запугиванию или Искушению.",
+          "spellCasting": "Бросок Заклинания",
+          "spellCastingLabel": "Бросок Заклинания: {spell}",
+          "success": "Успех",
+          "traitRoll": "Бросок Черты",
+          "traitRollLabel": "{traitName} Бросить",
+          "unskilledLabel": "{label} [Без Навыка]",
+          "voidLabel": "{label} [Пустота]",
+          "weaponAttackRoll": "{weapon} Бросок Атаки"
+        },
+        "stances": {
+          "attack": "Атакующая Стойка",
+          "center": "Центрированная Стойка",
+          "defense": "Защитная Стойка",
+          "fullAttack": "Полная Атака",
+          "fullDefense": "Полная Защита",
+          "fullDefenseHint": "Сделайте бросок Защиты/Рефлексов. Добавьте половину результата (округлённую вверх) к вашей СЛ Брони на время этой стойки."
+        },
+        "traits": {
+          "agi": "Ловкость",
+          "awa": "Осознанность",
+          "int": "Интеллект",
+          "per": "Восприятие",
+          "ref": "Рефлексы",
+          "sta": "Выносливость",
+          "str": "Сила",
+          "wil": "Воля"
+        },
+        "wounds": {
+          "alreadyFullHealth": "{name} уже полностью здоров",
+          "applied": "Нанесено {amount} ран для {name}",
+          "appliedWithArmor": "{name} получил {original} урона. Броня поглотила {reduction}. Нанесено {final} ран.",
+          "applyHealing": "Применить Исцеление",
+          "applyHealingTitle": "Применить естественное исцеление от отдыха",
+          "applyWounds": "Нанести Раны",
+          "armorReduction": "Поглощение",
+          "armorTn": "СЛ Брони",
+          "armorTnBase": "Базовая СЛ Брони",
+          "crippled": "Искалечен",
+          "down": "Повержен",
+          "earthMultiplier": "Множитель Земли",
+          "formula": "Формула",
+          "fullyHealed": "Полностью исцелён!",
+          "grazed": "Ссадина",
+          "healingApplied": "Исцелено {amount} ран (скорость исцеления: {rate})",
+          "healingFailed": "Не удалось применить исцеление к {name}",
+          "healthy": "Здоров",
+          "hurt": "Ранен",
+          "injured": "Ранен Серьезно",
+          "label": "Раны",
+          "manual": "Вручную",
+          "maxWounds": "Макс. Раны",
+          "naturalHealing": "Естественное Исцеление",
+          "nicked": "Царапина",
+          "noHealRate": "У {name} не настроена скорость исцеления",
+          "noTokenSelected": "Не выбран токен. Выберите токен для нанесения ран.",
+          "noVoidPoints": "Нет Очков Пустоты для уменьшения урона",
+          "out": "Вне Боя",
+          "penalty": "Штраф",
+          "reducedApplied": "Очко Пустоты потрачено: Урон уменьшен на 10. Нанесено {amount} ран для {name}",
+          "reducedWithArmor": "{name} получил {original} урона. Пустота уменьшила до {afterVoid}, броня поглотила {reduction}. Нанесено {final} ран.",
+          "reduceWithVoid": "Уменьшить Пустотой",
+          "restTitle": "{name} отдохнул и восстановил раны",
+          "status": "Раны: {current}/{max} (получено: {suffered})",
+          "suffered": "Полученные Раны",
+          "threshold": "Порог",
+          "woundBonus": "Бонус Ран",
+          "woundHealRate": "Скорость Заживления Ран",
+          "woundLevel": "Уровень",
+          "woundMode": "Режим Ран"
+        }
+      },
+      "notifications": {
+        "actorNotFound": "Актёр не найден для броска урона",
+        "deficiencyBlocksCasting": "Недостаток в {ring} уменьшает ваш Ранг Школы до нуля - невозможно сотворить",
+        "invalidRingForSpell": "Недопустимое кольцо для ячейки заклинания: {ring}",
+        "noActorForVoid": "Нет актёра для траты очков пустоты",
+        "noPermissionDamage": "У вас нет прав бросать урон для этого актёра",
+        "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца",
+        "noValidWeapon": "Не найдено подходящего оружия для броска атаки",
+        "schoolRankZero": "Вы не можете сотворить заклинание с Рангом Школы, уменьшенным до нуля"
+      },
+      "sheets": {
+        "abilities": "Способности",
+        "addItem": "Добавить Предмет",
+        "advantage": "Преимущество",
+        "advantages": "Преимущества",
+        "armor": "Броня",
+        "background": "Предыстория",
+        "character": "Персонаж",
+        "demands": "Требования",
+        "description": "Описание",
+        "disadvantage": "Недостаток",
+        "disadvantages": "Недостатки",
+        "equipment": "Снаряжение",
+        "item": "Предмет",
+        "items": "Предметы",
+        "kata": "Ката",
+        "kiho": "Кихо",
+        "mastery": "Мастерство",
+        "notes": "Заметки",
+        "rulesSummary": "Краткие Правила",
+        "skill": "Навык",
+        "skills": "Навыки",
+        "spell": "Заклинание",
+        "spells": "Заклинания",
+        "spellSlots": "Ячейки Заклинаний",
+        "tattoo": "Татуировка",
+        "tattoos": "Татуировки",
+        "technique": "Техника",
+        "techniques": "Техники",
+        "weapon": "Оружие",
+        "weapons": "Оружие",
+        "woundLevels": "Уровни Ран"
+      },
+      "statusEffects": {
+        "blinded": "Ослеплён",
+        "concentration": "Концентрация",
+        "dazed": "Ошеломлён",
+        "dead": "Мёртв",
+        "entangled": "Опутан",
+        "fasting": "Пост",
+        "fatigued": "Утомлён",
+        "feared": "Испуган",
+        "grappled": "Схвачен",
+        "guarded": "Защищён",
+        "guarding": "Защитник",
+        "mounted": "Верхом/Выше",
+        "prone": "Повержен",
+        "stunned": "Оглушён"
+      },
+      "tabs": {
+        "description": "Описание",
+        "details": "Детали",
+        "effects": "Активные Эффекты",
+        "modifiers": "Модификаторы"
       }
     },
     "world": {
       "wealth": {
-        "koku": "Коку",
         "bu": "Бу",
+        "koku": "Коку",
         "zeni": "Дзени"
       }
     }
   },
-  "SETTINGS": {
-    "allowArmorStacking": {
-      "name": "Разрешить накладывание брони",
-      "label": "Несколько элементов \"брони\" могут накладываться (для представления бонусов и т.д.)"
-    },
-    "LtException": {
-      "name": "Применить исключение Малых Истин",
-      "label": "Когда оставляемые кости уменьшаются ниже 10 при конвертации, добавить 2."
-    },
-    "runMigration": {
-      "name": "Запускать миграции при старте",
-      "label": "Если включено, ожидающие миграции данных будут выполнены при следующей загрузке мира. Отключите, чтобы пропустить миграции для устранения неполадок."
-    },
-    "lastMigratedVersion": {
-      "name": "Последняя мигрированная версия",
-      "label": "Внутреннее. Не изменять."
-    },
-    "forceMigration": {
-      "name": "Принудительная миграция при старте",
-      "label": "Принудительно запускает все миграции при следующей загрузке мира, независимо от версии. Автоматически сбрасывается после завершения миграции."
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Ослеплён: -3к3 дальние атаки, -1к1 ближние атаки, -1к1 броски Защиты, СЛ Брони = Реф+5+Броня, Кольцо Воды -2 для движения"
-    },
-    "dazed": {
-      "restrictions": "Ошеломлён: -3к0 ко всем действиям, только стойки Защита/Полная Защита, не может дуэлировать"
-    },
-    "entangled": {
-      "restrictions": "Опутан: Не может Двигаться или совершать Сложные Действия кроме броска Силы для освобождения"
-    },
-    "fatigued": {
-      "restrictions": "Утомлён: +5 СЛ к физическим броскам, навыкам и сотворению заклинаний (накапливается за день), не может использовать стойку Полная Атака"
-    },
-    "feared": {
-      "restrictions": "Испуган: -Xк0 ко всем броскам (X = Ранг Страха), длится до конца столкновения"
-    },
-    "grappled": {
-      "restrictions": "Схвачен: СЛ Брони = 5 + только бонус брони"
-    },
-    "guarded": {
-      "restrictions": "Защищён: +10 СЛ Брони пока защищён союзником в пределах 5 футов (до следующего хода защитника)"
-    },
-    "guarding": {
-      "restrictions": "Защитник: -5 СЛ Брони пока защищает союзника в пределах 5 футов (до вашего следующего хода)"
-    },
-    "prone": {
-      "restrictions": "Повержен: -10 СЛ Брони против ближнего боя, -2к0 атаки, не может Двигаться, только стойки Атака/Защита"
-    },
-    "stunned": {
-      "restrictions": "Оглушён: Не может совершать никакие действия, СЛ Брони = 5 + бонус брони"
-    }
-  },
-  "EFFECT": {
-    "blinded": "Ослеплён",
-    "concentration": "Концентрация",
-    "dazed": "Ошеломлён",
-    "dead": "Мёртв",
-    "entangled": "Опутан",
-    "fasting": "Пост",
-    "fatigued": "Утомлён",
-    "feared": "Испуган",
-    "grappled": "Схвачен",
-    "guarded": "Защищён",
-    "guarding": "Защитник",
-    "mounted": "Верхом/Выше",
-    "prone": "Повержен",
-    "stunned": "Оглушён"
-  },
   "TYPES": {
     "Actor": {
-      "pc": "ИП",
-      "npc": "НПС"
+      "npc": "НПС",
+      "pc": "ИП"
     },
     "Item": {
       "advantage": "Преимущество",

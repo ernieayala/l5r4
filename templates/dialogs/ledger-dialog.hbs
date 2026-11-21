@@ -1,0 +1,27 @@
+<div class="l5r4-ledger-dialog standard-form">
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.ledger.track"}}</label>
+    <select name="track">{{selectOptions tracks}}</select>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.ledger.points"}}</label>
+    <input type="number" name="points" value="1" step="1" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.ledger.reason"}}</label>
+    <input type="text" name="reason" />
+  </div>
+  <p class="hint">{{localize "l5r4.ui.ledger.hint"}}</p>
+  {{#if entries.length}}
+    <ol class="l5r4-ledger-dialog-entries">
+      {{#each entries}}
+        <li>
+          <span class="l5r4-ledger-dialog-track">{{track}}</span>
+          <span class="l5r4-ledger-dialog-points">{{numberFormat points sign=true}}</span>
+          {{#if changed}}<span class="hint">({{numberFormat asked sign=true}})</span>{{/if}}
+          <span class="l5r4-ledger-dialog-reason">{{reason}}</span>
+        </li>
+      {{/each}}
+    </ol>
+  {{/if}}
+</div>

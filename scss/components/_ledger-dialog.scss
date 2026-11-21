@@ -1,0 +1,24 @@
+/**
+ * Ledger Dialog
+ * The Honor, Glory, Status, and Taint ledger dialog (module/services/ledger.js)
+ */
+
+// The list keeps its 20px indent on the space scale: a 4px margin and a 16px padding
+.l5r4-ledger-dialog .l5r4-ledger-dialog-entries {
+  font-size: var(--l5r4-font-size-meta);
+  margin: var(--l5r4-space-8) 0 0;
+  margin-inline-start: var(--l5r4-space-4);
+  max-height: 12rem;
+  overflow-y: auto;
+  padding-inline-start: var(--l5r4-space-16);
+
+  li {
+    display: flex;
+    gap: var(--l5r4-space-8);
+  }
+
+  .l5r4-ledger-dialog-points {
+    font-variant-numeric: tabular-nums;
+    font-weight: bold;
+  }
+}

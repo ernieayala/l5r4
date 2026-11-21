@@ -1,5 +1,5 @@
 /**
- * @module type-coercion
+ * @module utils/type-coercion
  * @description Defensive type coercion utilities.
  *
  * Provides safe conversion functions that handle edge cases (null, undefined,
@@ -17,15 +17,10 @@
  * - Invalid numbers: returns fallback
  * - null/undefined: returns fallback
  *
+ * So "42" gives 42, " 5 " gives 5, "invalid" gives 0, and null with a fallback of 10 gives 10.
  * @param {*} v - Value to convert
  * @param {number} [fallback=0] - Value to return if conversion fails
  * @returns {number} Parsed integer or fallback
- *
- * @example
- * toInt("42") // 42
- * toInt(" 5 ") // 5 (trimmed)
- * toInt("invalid") // 0 (fallback)
- * toInt(null, 10) // 10 (custom fallback)
  */
 export function toInt(v, fallback = 0) {
   // Symbols cannot be converted to numbers
@@ -53,15 +48,10 @@ export function toInt(v, fallback = 0) {
  * - Invalid numbers: returns fallback
  * - null/undefined: returns fallback
  *
+ * So "42.5" gives 42.5, " 3.14 " gives 3.14, "invalid" gives 0, and null with a fallback of 10 gives 10.
  * @param {*} v - Value to convert
  * @param {number} [fallback=0] - Value to return if conversion fails
  * @returns {number} Parsed number or fallback
- *
- * @example
- * toNumber("42.5") // 42.5
- * toNumber(" 3.14 ") // 3.14 (trimmed)
- * toNumber("invalid") // 0 (fallback)
- * toNumber(null, 10) // 10 (custom fallback)
  */
 export function toNumber(v, fallback = 0) {
   // Symbols cannot be converted to numbers
@@ -87,15 +77,10 @@ export function toNumber(v, fallback = 0) {
  * - null/undefined: returns fallback
  * - All other values: converted to string
  *
+ * So 42 gives "42", null and a symbol give "", and undefined with a fallback of "N/A" gives "N/A".
  * @param {*} value - Value to convert
  * @param {string} [fallback=""] - Value to return if conversion fails
  * @returns {string} String value or fallback
- *
- * @example
- * toString(42) // "42"
- * toString(null) // "" (fallback)
- * toString(Symbol("test")) // "" (fallback)
- * toString(undefined, "N/A") // "N/A" (custom fallback)
  */
 export function toString(value, fallback = "") {
   // Symbols and null/undefined cannot be safely converted
@@ -109,20 +94,14 @@ export function toString(value, fallback = "") {
  * Clamps value to range [min, max].
  *
  * Ensures value is between min and max (inclusive).
- * Returns 0 if any parameter is NaN.
- *
+ * Returns 0 if any parameter is NaN. Within 0-10, 5 stays 5, 15 becomes 10, -5 becomes 0, and "invalid"
+ * gives 0.
  * @param {number} value - Value to clamp
  * @param {number} min - Minimum allowed value
  * @param {number} max - Maximum allowed value
  * @returns {number} Clamped value or 0 if any parameter is NaN
- *
- * @example
- * clamp(5, 0, 10) // 5 (within range)
- * clamp(15, 0, 10) // 10 (clamped to max)
- * clamp(-5, 0, 10) // 0 (clamped to min)
- * clamp("invalid", 0, 10) // 0 (NaN fallback)
  */
-export function clamp(value, min, max) {
+export function getClamped(value, min, max) {
   const n = Number(value);
   const minVal = Number(min);
   const maxVal = Number(max);

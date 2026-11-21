@@ -6,10 +6,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { toInt, clamp } from "../../../module/utils/type-coercion.js";
+import { toInt, getClamped } from "../../../module/utils/type-coercion.js";
 
 describe("toInt", () => {
-  describe("valid numeric inputs", () => {
+  describe("Valid numeric inputs", () => {
     it("should convert integer to itself", () => {
       // ARRANGE
       const input = 42;
@@ -66,7 +66,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("whitespace handling", () => {
+  describe("Whitespace handling", () => {
     it("should trim leading whitespace from string", () => {
       // ARRANGE
       const input = "  42";
@@ -101,7 +101,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("floating point handling", () => {
+  describe("Floating point handling", () => {
     it("should truncate floating point number to integer", () => {
       // ARRANGE
       const input = 42.7;
@@ -125,7 +125,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("edge cases with fallback", () => {
+  describe("Edge cases with fallback", () => {
     it("should return fallback for null", () => {
       // ARRANGE
       const input = null;
@@ -236,7 +236,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("custom fallback values", () => {
+  describe("Custom fallback values", () => {
     it("should use custom fallback when provided", () => {
       // ARRANGE
       const input = null;
@@ -273,7 +273,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("special numeric values", () => {
+  describe("Special numeric values", () => {
     it("should handle Infinity as fallback", () => {
       // ARRANGE
       const input = Infinity;
@@ -296,10 +296,140 @@ describe("toInt", () => {
       expect(result).toBe(0);
     });
   });
+
+  describe("Trait reading from _derived.traitsEff", () => {
+    describe("Object trait format through toInt", () => {
+      it("should return 0 when trait is object {rank: 2}", () => {
+        // ARRANGE
+        const traitObject = { rank: 2 };
+
+        // ACT
+        const result = toInt(traitObject);
+
+        // ASSERT
+        expect(result).toBe(0);
+      });
+
+      it("should return rank when accessing .rank property", () => {
+        // ARRANGE
+        const traitObject = { rank: 2 };
+
+        // ACT
+        const result = toInt(traitObject.rank);
+
+        // ASSERT
+        expect(result).toBe(2);
+      });
+
+      it("should return rank when using ?? fallback chain", () => {
+        // ARRANGE
+        const traitObject = { rank: 2 };
+
+        // ACT
+        const result = toInt(traitObject?.rank ?? traitObject);
+
+        // ASSERT
+        expect(result).toBe(2);
+      });
+    });
+
+    describe("Simulated derived traitsEff format", () => {
+      it("should read numeric value from traitsEff", () => {
+        // ARRANGE - simulates sys._derived.traitsEff structure
+        const sys = {
+          _derived: {
+            traitsEff: {
+              ref: 2,
+              sta: 3,
+              agi: 4
+            }
+          }
+        };
+
+        // ACT
+        const reflexes = toInt(sys._derived.traitsEff.ref);
+
+        // ASSERT
+        expect(reflexes).toBe(2);
+      });
+
+      it("should handle missing traitsEff gracefully", () => {
+        // ARRANGE
+        const sys = { _derived: {} };
+
+        // ACT
+        const reflexes = toInt(sys._derived.traitsEff?.ref);
+
+        // ASSERT
+        expect(reflexes).toBe(0);
+      });
+
+      it("should handle undefined _derived gracefully", () => {
+        // ARRANGE
+        const sys = {};
+
+        // ACT
+        const reflexes = toInt(sys._derived?.traitsEff?.ref);
+
+        // ASSERT
+        expect(reflexes).toBe(0);
+      });
+    });
+
+    describe("Armor TN calculation simulation", () => {
+      it("should calculate correct base TN from traitsEff", () => {
+        // ARRANGE
+        const sys = {
+          _derived: { traitsEff: { ref: 2 } }
+        };
+
+        // ACT
+        const reflexes = toInt(sys._derived.traitsEff.ref);
+        const baseTN = reflexes * 5 + 5;
+
+        // ASSERT
+        expect(baseTN).toBe(15); // NOT 5
+      });
+
+      it("should get a wrong base TN when reading the trait object itself", () => {
+        // ARRANGE - wrong approach (reading object)
+        const sys = {
+          traits: { ref: { rank: 2 } }
+        };
+
+        // ACT
+        const reflexes = toInt(sys.traits?.ref); // BUG: returns 0
+        const baseTN = reflexes * 5 + 5;
+
+        // ASSERT
+        expect(baseTN).toBe(5); // WRONG but demonstrates bug
+      });
+    });
+
+    describe("Initiative calculation simulation", () => {
+      it("should calculate correct initiative from traitsEff", () => {
+        // ARRANGE
+        const sys = {
+          _derived: { traitsEff: { ref: 2 } },
+          insight: { rank: 1 },
+          initiative: { rollMod: 0, keepMod: 0 }
+        };
+
+        // ACT
+        const ref = toInt(sys._derived.traitsEff.ref);
+        const insightRank = toInt(sys.insight?.rank);
+        const rollMod = toInt(sys.initiative.rollMod);
+        const initiativeRoll = insightRank + ref + rollMod;
+
+        // ASSERT
+        expect(initiativeRoll).toBe(3); // 1 + 2 + 0
+      });
+    });
+  });
 });
 
 describe("clamp", () => {
-  describe("value within range", () => {
+  describe("Value within range", () => {
     it("should return value when within range", () => {
       // ARRANGE
       const value = 5;
@@ -307,7 +437,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -320,7 +450,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -333,14 +463,14 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
     });
   });
 
-  describe("value outside range", () => {
+  describe("Value outside range", () => {
     it("should clamp to min when value below min", () => {
       // ARRANGE
       const value = -5;
@@ -348,7 +478,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -361,7 +491,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
@@ -374,14 +504,14 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
     });
   });
 
-  describe("string coercion", () => {
+  describe("String coercion", () => {
     it("should coerce string values to numbers", () => {
       // ARRANGE
       const value = "5";
@@ -389,7 +519,7 @@ describe("clamp", () => {
       const max = "10";
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -402,14 +532,14 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
     });
   });
 
-  describe("negative ranges", () => {
+  describe("Negative ranges", () => {
     it("should handle negative ranges", () => {
       // ARRANGE
       const value = -5;
@@ -417,7 +547,7 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-5);
@@ -430,7 +560,7 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-10);
@@ -443,14 +573,14 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-1);
     });
   });
 
-  describe("floating point values", () => {
+  describe("Floating point values", () => {
     it("should handle floating point value", () => {
       // ARRANGE
       const value = 5.7;
@@ -458,7 +588,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5.7);
@@ -471,22 +601,22 @@ describe("clamp", () => {
       const max = 9.9;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5.5);
     });
   });
 
-  describe("edge cases with invalid inputs", () => {
-    it("should clamp null (coerced to 0) to min when min > 0", () => {
+  describe("Edge cases with invalid inputs", () => {
+    it("should clamp null, coerced to 0, to min when min > 0", () => {
       // ARRANGE
       const value = null;
       const min = 1;
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       // Number(null) = 0, which is below min of 1, so clamped to 1
@@ -500,7 +630,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -513,7 +643,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -526,7 +656,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -539,7 +669,7 @@ describe("clamp", () => {
       const max = NaN;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -552,7 +682,7 @@ describe("clamp", () => {
       const max = NaN;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -565,14 +695,14 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
     });
   });
 
-  describe("special numeric values", () => {
+  describe("Special numeric values", () => {
     it("should clamp Infinity to max", () => {
       // ARRANGE
       const value = Infinity;
@@ -580,7 +710,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
@@ -593,14 +723,14 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
     });
   });
 
-  describe("zero-based ranges", () => {
+  describe("Zero-based ranges", () => {
     it("should handle 0 as minimum", () => {
       // ARRANGE
       const value = 5;
@@ -608,7 +738,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -621,7 +751,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);

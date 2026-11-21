@@ -1,0 +1,25 @@
+{{#if ok}}
+  {{!-- No whitespace inside the group, so the chip sits flush with the text around it --}}
+  <span class="l5r4-inline-link-group">
+    {{~!~}}
+    <button type="button" class="l5r4-inline-link" data-link-type="{{type}}" data-link-params="{{params}}" data-link-label="{{label}}">
+      <i class="{{icon}}" inert></i> {{text}}
+    </button>
+    {{~#if canRequest~}}
+      <button
+        type="button"
+        class="l5r4-inline-link-request"
+        data-link-request
+        data-tooltip="{{localize "l5r4.ui.links.request"}}"
+        aria-label="{{localize "l5r4.ui.links.request"}}"
+      >
+        <i class="fa-solid fa-comment-dots" inert></i>
+      </button>
+    {{~/if~}}
+  </span>
+{{else}}
+  <span class="l5r4-inline-link -broken" data-link-broken data-tooltip="{{reason}}">
+    <i class="fa-solid fa-link-slash" inert></i> {{source}}
+    <span class="l5r4-inline-link-reason">({{reason}})</span>
+  </span>
+{{/if}}

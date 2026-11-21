@@ -6,581 +6,620 @@
 
 @use "../base/variables" as *;
 
-.l5r4.pc,
-.l5r4.npc {
-  .traits-rings {
+// Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring). Each arrow is a <button>:
+// `border-radius`, `font-family`, `line-height`, `min-height`, and `padding` undo core's button face
+@mixin rank-arrows {
+  // Focus on an arrow shows both, as the pointer does (foundations/states.md rule 3)
+  &:hover,
+  &:focus-within {
+    .l5r4-rank-control-arrow.-up,
+    .l5r4-rank-control-arrow.-down {
+      opacity: 1;
+    }
+
+    .l5r4-rank-control-arrow.-up {
+      top: calc(-1 * var(--l5r4-size-stepper));
+    }
+
+    .l5r4-rank-control-arrow.-down {
+      bottom: calc(-1 * var(--l5r4-size-stepper));
+    }
+  }
+
+  .l5r4-rank-control-arrow.-up,
+  .l5r4-rank-control-arrow.-down {
+    align-items: center;
+    background-color: inherit;
+    border: var(--l5r4-border-width-thin) solid;
+    border-color: inherit;
+    border-radius: 0;
+    color: inherit;
+    display: flex;
+    font-family: inherit;
+    font-size: var(--l5r4-size-icon-sm);
+    height: var(--l5r4-size-stepper);
+    justify-content: center;
+    left: -2px;
+    line-height: inherit;
+    min-height: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    right: -1px;
+    transition:
+      opacity var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      top var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      bottom var(--l5r4-duration-fast) var(--l5r4-easing-standard);
+    z-index: var(--l5r4-layer-control);
+  }
+
+  .l5r4-rank-control-arrow.-up {
+    top: 0;
+  }
+
+  .l5r4-rank-control-arrow.-down {
+    bottom: 0;
+  }
+}
+
+.l5r4-traits-rings {
+  display: grid;
+  grid-template-columns:
+    1fr repeat(6, var(--l5r4-size-ring-rank)) 8px 8px repeat(6, var(--l5r4-size-ring-rank))
+    1fr;
+  grid-template-rows: min-content 1fr 1fr 2px 1fr 1fr 1fr min-content min-content;
+  overflow: hidden;
+  place-items: center center;
+
+  .l5r4-ring-name {
+    align-items: center;
+    align-self: start;
+    display: inline-flex;
+    justify-content: center;
+    margin: 0;
+    min-height: var(--l5r4-size-target);
+    text-align: center;
+    width: 100%;
+  }
+
+  .l5r4-ring-rank {
+    background-color: var(--l5r4-color-ring-rank-face);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
+    border-radius: var(--l5r4-radius-round);
+    color: var(--l5r4-color-text);
     display: grid;
-    grid-template-columns: 1fr 32px 32px 32px 32px 32px 32px 8px 8px 32px 32px 32px 32px 32px 32px 1fr;
-    grid-template-rows: min-content 1fr 1fr 2px 1fr 1fr 1fr min-content min-content;
-    overflow: hidden;
-    place-items: center center;
+    font-family: var(--l5r4-font-display);
+    font-size: var(--l5r4-font-size-medallion);
+    font-weight: bold;
+    height: var(--l5r4-size-ring-rank);
+    margin: 0;
+    place-content: center center;
+    position: relative;
+    width: var(--l5r4-size-ring-rank);
+    z-index: var(--l5r4-layer-medallion);
 
-    .ring-name {
-      align-items: center;
-      align-self: start;
-      display: inline-flex;
-      justify-content: center;
-      margin: 0;
-      min-height: 24px;
-      text-align: center;
-      width: 100%;
+    // The backdrop comes from custom properties set per theme (below), so the nearest themed ancestor decides it:
+    // a light sheet inside a dark interface matches both .theme-light and .theme-dark as ancestors (issue #30)
+    &::before {
+      background-color: var(--l5r4-color-ring-rank-backdrop);
+      background-image: var(--l5r4-image-ring-rank-backdrop);
+      background-position: center;
+      background-size: cover;
+      border: var(--l5r4-border-width-thick) solid transparent;
+      border-radius: var(--l5r4-radius-round);
+      content: "";
+      inset: -4px;
+      position: absolute;
     }
 
-    .ring-rank {
-      background-color: var(--content-link-background);
-      border: 1px solid var(--table-header-border-color);
-      border-radius: 50%;
-      color: var(--color-text-primary);
-      display: grid;
-      font-family: var(--font-h1);
-      font-size: 29px;
-      font-weight: 600;
-      height: 32px;
-      margin: 0;
-      place-content: center center;
-      position: relative;
-      width: 32px;
-      z-index: 10;
-
-      &::before {
-        background-position: center;
-        background-size: cover;
-        border: 2px solid transparent;
-        border-radius: 50%;
-        content: "";
-        inset: -4px;
-        position: absolute;
-
-        .theme-light & {
-          background-image: url("../../../ui/parchment.jpg");
-        }
-
-        .theme-dark & {
-          background-color: var(--color-cool-5-90);
-        }
+    &.-fire {
+      .l5r4-ring-rank-face {
+        background-color: var(--l5r4-color-ring-fire-tint);
+        border-color: var(--l5r4-color-ring-fire);
       }
+    }
 
-      &.ring-rank-fire {
-        span {
-          background-color: rgb(var(--fire-ring-color), 0.1);
-          border-color: rgb(var(--fire-ring-color));
-        }
+    &.-earth {
+      .l5r4-ring-rank-face {
+        background-color: var(--l5r4-color-ring-earth-tint);
+        border-color: var(--l5r4-color-ring-earth);
       }
+    }
 
-      &.ring-rank-earth {
-        span {
-          background-color: rgb(var(--earth-ring-color), 0.1);
-          border-color: rgb(var(--earth-ring-color));
-        }
+    &.-air {
+      .l5r4-ring-rank-face {
+        background-color: var(--l5r4-color-ring-air-tint);
+        border-color: var(--l5r4-color-ring-air);
       }
+    }
 
-      &.ring-rank-air {
-        span {
-          background-color: rgb(var(--air-ring-color), 0.1);
-          border-color: rgb(var(--air-ring-color));
-        }
+    &.-water {
+      .l5r4-ring-rank-face {
+        background-color: var(--l5r4-color-ring-water-tint);
+        border-color: var(--l5r4-color-ring-water);
       }
+    }
 
-      &.ring-rank-water {
-        span {
-          background-color: rgb(var(--water-ring-color), 0.1);
-          border-color: rgb(var(--water-ring-color));
-        }
-      }
+    &.-void {
+      cursor: pointer;
 
-      &.ring-rank-void {
-        span {
-          background-color: rgb(var(--void-ring-color), 0.1);
-          border-color: rgb(var(--void-ring-color));
-        }
-      }
+      @include rank-arrows;
 
-      span {
-        align-items: center;
-        border: 2px solid transparent;
-        border-radius: 50%;
-        box-shadow: 0 0 2px 1px rgb(0 0 0 / 50%);
-        display: flex;
-        inset: -1px;
-        justify-content: center;
+      // The face is the rank control's value <button>: `color` through `padding` undo core's button face, and
+      // `line-height` restores the face's after `font` resets it
+      .l5r4-ring-rank-face {
+        background-color: var(--l5r4-color-ring-void-tint);
+        border-color: var(--l5r4-color-ring-void);
+        color: inherit;
+        cursor: inherit;
+        font: inherit;
+        height: auto;
         line-height: 1;
-        position: absolute;
-        z-index: 1;
+        min-height: 0;
+        padding: 0;
+
+        // The disc's raised shadow would replace the glow of core's focus ring (foundations/states.md)
+        &:focus-visible {
+          box-shadow: var(--l5r4-state-focus-shadow);
+        }
       }
     }
 
-    .ring-roll {
+    .l5r4-ring-rank-face {
+      align-items: center;
+      border: var(--l5r4-border-width-thick) solid transparent;
+      border-radius: var(--l5r4-radius-round);
+      box-shadow: var(--l5r4-shadow-raised);
+      display: flex;
+      inset: -1px;
+      justify-content: center;
+      line-height: 1;
+      position: absolute;
+      z-index: var(--l5r4-layer-raised);
+    }
+  }
+
+  // A <button> laid out as the inline link it replaced: block keeps the medallion's line box, the rest undoes core's
+  // button face
+  .l5r4-ring-roll {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    position: relative;
+
+    // Hover reads the state token (foundations/states.md rule 1, ring-trait-block.md K8); the image keeps its drop
+    // shadow
+    &:hover .l5r4-ring-image {
+      filter: var(--l5r4-shadow-drop) var(--l5r4-state-hover-filter);
+    }
+
+    .l5r4-ring-image {
+      border-radius: var(--l5r4-radius-round);
+      filter: var(--l5r4-shadow-drop);
+      height: var(--l5r4-size-medallion);
+      position: relative;
+      transition: filter var(--l5r4-duration-fast) var(--l5r4-easing-standard);
+      width: var(--l5r4-size-medallion);
+    }
+  }
+
+  .l5r4-trait {
+    height: var(--l5r4-size-trait-rank);
+  }
+
+  .l5r4-void-points {
+    column-gap: var(--l5r4-space-8);
+  }
+
+  .l5r4-trait,
+  .l5r4-void-points {
+    align-self: center;
+    display: grid;
+    grid-template-areas: "fill roll rank";
+    grid-template-columns: 1fr min-content var(--l5r4-size-trait-rank);
+    margin: 0;
+    place-items: center right;
+    width: 100%;
+
+    .l5r4-button.-roll {
+      border-radius: 0;
+      cursor: pointer;
+      grid-area: roll;
+      height: 100%;
+      overflow: hidden;
       position: relative;
 
-      &:hover img {
-        transform: scale(1.1);
-      }
-
-      img {
-        border-radius: 50%;
-        filter: drop-shadow(0 0 3px rgb(0 0 0 / 50%));
-        height: 96px;
-        position: relative;
-        transition: all 150ms ease-out;
-        width: 96px;
-      }
-    }
-
-    .trait {
-      height: 28px;
-    }
-
-    .void-points {
-      column-gap: 0.5rem;
-    }
-
-    .trait,
-    .void-points {
-      align-self: center;
-      display: grid;
-      grid-template-areas: "fill roll rank";
-      grid-template-columns: 1fr min-content 28px;
-      margin: 0;
-      place-items: center right;
-      width: 100%;
-
-      .trait-roll {
-        border-radius: 0;
-        cursor: pointer;
-        grid-area: roll;
-        height: 100%;
-        overflow: hidden;
-        position: relative;
-        transition: all 150ms ease-out;
-
-        .mas {
-          align-items: center;
-          color: var(--color-text-primary);
-          display: flex;
-          font-weight: bold;
-          height: 100%;
-          justify-content: center;
-          padding: 0 0.5rem;
-          pointer-events: none;
-          position: absolute;
-          text-align: center;
-          width: 100%;
-        }
-
-        span:not(.mas) {
-          align-items: center;
-          background: #000;
-          border: none;
-          border-radius: 0;
-          color: #fff;
-          cursor: pointer;
-          display: flex;
-          font-weight: bold;
-          height: 100%;
-          justify-content: center;
-          mask: url("../assets/animation/urban-sprite.webp");
-          mask-position: 100% 0;
-          mask-size: 3000% 100%;
-          padding: 0 0.5rem;
-          width: 100%;
-
-          &:hover {
-            animation: mask-reverse-urban 0.5s steps(29) forwards;
-          }
-        }
-      }
-
-      .trait-rank {
+      .l5r4-button-under {
         align-items: center;
+        color: var(--l5r4-color-text);
+        display: flex;
+        font-weight: bold;
+        height: 100%;
+        justify-content: center;
+        padding: 0 var(--l5r4-space-8);
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        width: 100%;
+      }
+
+      // A <button>: `font` and `min-height` undo core's button face. Each Trait's Ring sets the background
+      .l5r4-button-face {
+        align-items: center;
+        border: none;
+        border-radius: 0;
+        color: var(--l5r4-color-ring-text);
         cursor: pointer;
         display: flex;
-        font-family: var(--font-h3);
-        font-size: 22px;
-        font-weight: 600;
-        grid-area: rank;
-        height: 28px;
+        font: inherit;
+        font-weight: bold;
+        height: 100%;
         justify-content: center;
-        position: relative;
-        width: 28px;
+        mask: url("../assets/animation/urban-sprite.webp");
+        mask-position: 100% 0;
+        mask-size: 3000% 100%;
+        min-height: 0;
+        padding: 0 var(--l5r4-space-8);
+        width: 100%;
 
-        &:hover {
-          .trait-increase,
-          .trait-decrease {
-            opacity: 1;
-          }
-
-          .trait-increase {
-            top: -16px;
-          }
-
-          .trait-decrease {
-            bottom: -16px;
-          }
-        }
-
-        .trait-increase,
-        .trait-decrease {
-          align-items: center;
-          background-color: inherit;
-          border: 1px solid black;
-          border-color: inherit;
-          color: inherit;
-          display: flex;
-          font-size: 10px;
-          height: 16px;
-          justify-content: center;
-          left: -2px;
-          opacity: 0;
-          position: absolute;
-          right: -1px;
-          transition:
-            opacity 150ms ease-out,
-            top 150ms ease-out,
-            bottom 150ms ease-out;
-          z-index: 11;
-        }
-
-        .trait-increase {
-          top: 0;
-        }
-
-        .trait-decrease {
-          bottom: 0;
-        }
-      }
-
-      .void-points-amount {
-        align-items: center;
-        background-color: var(--table-header-bg-color);
-        border-radius: 50%;
-        color: var(--color-text-primary);
-        cursor: pointer;
-        display: inline-flex;
-        font-family: var(--font-h3);
-        font-size: 22px;
-        font-weight: 600;
-        grid-area: rank;
-        height: 24px;
-        justify-content: center;
-        padding: 0;
-        text-align: center;
-        transition: all 150ms ease-out;
-        width: 24px;
-        z-index: 10;
-
-        &:hover {
-          filter: brightness(1.1);
-        }
-
-        &:active {
-          filter: brightness(0.95);
-          transform: scale(0.98);
+        // Disabled on a sheet the viewer cannot edit: no sprite, and the button rule's disabled opacity
+        // (components/_button.scss)
+        &:hover:not(:disabled) {
+          animation: mask-reverse-urban var(--l5r4-duration-sprite) steps($urban-sprite-steps)
+            forwards;
         }
       }
     }
 
-    .trait-reflex,
-    .trait-awarness,
-    .trait-agility,
-    .trait-intelligence {
-      grid-template-areas: "rank roll fill";
-      grid-template-columns: 28px min-content 1fr;
-      justify-items: start;
-
-      .trait-rank {
-        .trait-increase,
-        .trait-decrease {
-          left: -1px;
-          right: -2px;
-        }
-      }
-    }
-
-    .trait-willpower,
-    .trait-intelligence,
-    .trait-perception,
-    .trait-awarness {
-      margin-block-start: 8px;
-    }
-
-    .trait-stamina,
-    .trait-willpower {
-      border-inline-end: 32px solid rgb(var(--earth-ring-color));
-
-      .trait-rank {
-        background-color: rgb(var(--earth-ring-color), 0.9);
-        border: 1px solid rgb(var(--earth-ring-color));
-        color: #fff;
-      }
-
-      .trait-roll {
-        border: 1px solid rgb(var(--earth-ring-color));
-
-        span:not(.mas) {
-          background: rgb(var(--earth-ring-color));
-        }
-      }
-    }
-
-    .trait-strength,
-    .trait-perception {
-      border-inline-end: 32px solid rgb(var(--water-ring-color));
-
-      .trait-rank {
-        background-color: rgb(var(--water-ring-color), 0.9);
-        border: 1px solid rgb(var(--water-ring-color));
-        color: #fff;
-      }
-
-      .trait-roll {
-        border: 1px solid rgb(var(--water-ring-color));
-
-        span:not(.mas) {
-          background: rgb(var(--water-ring-color));
-        }
-      }
-    }
-
-    .trait-agility,
-    .trait-intelligence {
-      border-inline-start: 32px solid rgb(var(--fire-ring-color));
-
-      .trait-rank {
-        background-color: rgb(var(--fire-ring-color), 0.9);
-        border: 1px solid rgb(var(--fire-ring-color));
-        color: #fff;
-      }
-
-      .trait-roll {
-        border: 1px solid rgb(var(--fire-ring-color));
-
-        span:not(.mas) {
-          background: rgb(var(--fire-ring-color));
-        }
-      }
-    }
-
-    .trait-reflex,
-    .trait-awarness {
-      border-inline-start: 32px solid rgb(var(--air-ring-color));
-
-      .trait-rank {
-        background-color: rgb(var(--air-ring-color), 0.9);
-        border: 1px solid rgb(var(--air-ring-color));
-        color: #fff;
-      }
-
-      .trait-roll {
-        border: 1px solid rgb(var(--air-ring-color));
-
-        span:not(.mas) {
-          background: rgb(var(--air-ring-color));
-        }
-      }
-    }
-
-    .trait-willpower,
-    .trait-perception {
-      align-self: start;
-    }
-
-    // Earth Ring Positioning
-    .ring-name-earth {
-      align-self: end;
-      grid-column: 5/8;
-      grid-row: 1/2;
-    }
-
-    .earth-ring {
-      grid-column: 5/8;
-      grid-row: 2/4;
-
-      .earth-ring-img {
-        border: none;
-        content: $earth-ring-img;
-      }
-    }
-
-    .ring-rank-earth {
-      grid-column: 6/8;
-      grid-row: 3/4;
-      place-self: end end;
-    }
-
-    .trait-stamina {
-      grid-column: 1/6;
-      grid-row: 2/3;
-    }
-
-    .trait-willpower {
-      grid-column: 1/6;
-      grid-row: 3/4;
-    }
-
-    // Air Ring Positioning
-    .ring-name-air {
-      align-self: end;
-      grid-column: 10/13;
-      grid-row: 1/2;
-    }
-
-    .air-ring {
-      grid-column: 10/13;
-      grid-row: 2/4;
-
-      .air-ring-img {
-        border: none;
-        content: $air-ring-img;
-      }
-    }
-
-    .ring-rank-air {
-      grid-column: 10/11;
-      grid-row: 3/4;
-      place-self: end start;
-    }
-
-    .trait-reflex {
-      grid-column: 12/18;
-      grid-row: 2/3;
-    }
-
-    .trait-awarness {
-      align-self: start;
-      grid-column: 12/18;
-      grid-row: 3/4;
-    }
-
-    // Water Ring Positioning
-    .ring-name-water {
-      grid-column: 4/7;
-      grid-row: 7/8;
-    }
-
-    .water-ring {
-      grid-column: 4/7;
-      grid-row: 5/7;
-
-      .water-ring-img {
-        border: none;
-        content: $water-ring-img;
-      }
-    }
-
-    .ring-rank-water {
-      grid-column: 6/7;
-      grid-row: 5/6;
-      justify-self: end;
-      margin-inline-end: -12px;
-    }
-
-    .trait-strength {
-      grid-column: 1/5;
-      grid-row: 5/6;
-    }
-
-    .trait-perception {
-      grid-column: 1/5;
-      grid-row: 6/7;
-    }
-
-    // Fire Ring Positioning
-    .ring-name-fire {
-      grid-column: 11/14;
-      grid-row: 7/8;
-    }
-
-    .fire-ring {
-      grid-column: 11/14;
-      grid-row: 5/7;
-
-      .fire-ring-img {
-        border: none;
-        content: $fire-ring-img;
-      }
-    }
-
-    .ring-rank-fire {
-      grid-column: 11/12;
-      grid-row: 5/6;
-      justify-self: start;
-      margin-inline-start: -12px;
-    }
-
-    .trait-agility {
-      grid-column: 13/17;
-      grid-row: 5/6;
-    }
-
-    .trait-intelligence {
-      align-self: start;
-      grid-column: 13/17;
-      grid-row: 6/7;
-    }
-
-    // Void Ring Positioning
-    .ring-name-void {
-      grid-column: 7/11;
-      grid-row: 8/9;
-    }
-
-    .ring-rank-void {
-      align-self: start;
-      grid-column: 8/10;
-      grid-row: 6/7;
-      margin-block-start: -12px;
-      text-align: center;
-    }
-
-    .void-ring {
-      grid-column: 6/12;
-      grid-row: 6/8;
-
-      .void-ring-img {
-        border: none;
-        content: $void-ring-img;
-      }
-    }
-
-    .void-points {
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      grid-column: 1/18;
-      grid-row: 10/11;
-      margin-block-start: 4px;
-      width: max-content;
-    }
-
-    .void-points-name {
-      margin: 0;
-    }
-
-    .void-points-dots {
+    .l5r4-rank-control.-trait {
       align-items: center;
       cursor: pointer;
       display: flex;
-      gap: 2px;
+      font-family: var(--l5r4-font-number);
+      font-size: var(--l5r4-font-size-rank);
+      font-weight: bold;
+      grid-area: rank;
+      height: var(--l5r4-size-trait-rank);
+      justify-content: center;
+      position: relative;
+      width: var(--l5r4-size-trait-rank);
+
+      @include rank-arrows;
+
+      // The value <button> fills the control, so a press anywhere off the arrows reaches it; everything else undoes
+      // core's button face
+      .l5r4-rank-control-value {
+        background: none;
+        border: none;
+        border-radius: 0;
+        color: inherit;
+        cursor: inherit;
+        font: inherit;
+        height: 100%;
+        min-height: 0;
+        padding: 0;
+        width: 100%;
+      }
+    }
+  }
+
+  .l5r4-trait.-air.-reflexes,
+  .l5r4-trait.-air.-awareness,
+  .l5r4-trait.-fire.-agility,
+  .l5r4-trait.-fire.-intelligence {
+    grid-template-areas: "rank roll fill";
+    grid-template-columns: var(--l5r4-size-trait-rank) min-content 1fr;
+    justify-items: start;
+
+    .l5r4-rank-control.-trait {
+      .l5r4-rank-control-arrow.-up,
+      .l5r4-rank-control-arrow.-down {
+        left: -1px;
+        right: -2px;
+      }
+    }
+  }
+
+  .l5r4-trait.-earth.-willpower,
+  .l5r4-trait.-fire.-intelligence,
+  .l5r4-trait.-water.-perception,
+  .l5r4-trait.-air.-awareness {
+    margin-block-start: var(--l5r4-space-8);
+  }
+
+  .l5r4-trait.-earth.-stamina,
+  .l5r4-trait.-earth.-willpower {
+    border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-earth);
+
+    .l5r4-rank-control.-trait {
+      background-color: var(--l5r4-color-ring-earth-fill);
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-earth);
+      color: var(--l5r4-color-ring-text);
     }
 
-    .void-dot {
-      border: 2px solid #666;
-      border-radius: 50%;
-      height: 12px;
-      width: 12px;
+    .l5r4-button.-roll {
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-earth);
+
+      .l5r4-button-face {
+        background: var(--l5r4-color-ring-earth);
+      }
+    }
+  }
+
+  .l5r4-trait.-water.-strength,
+  .l5r4-trait.-water.-perception {
+    border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-water);
+
+    .l5r4-rank-control.-trait {
+      background-color: var(--l5r4-color-ring-water-fill);
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-water);
+      color: var(--l5r4-color-ring-text);
+    }
+
+    .l5r4-button.-roll {
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-water);
+
+      .l5r4-button-face {
+        background: var(--l5r4-color-ring-water);
+      }
+    }
+  }
+
+  .l5r4-trait.-fire.-agility,
+  .l5r4-trait.-fire.-intelligence {
+    border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-fire);
+
+    .l5r4-rank-control.-trait {
+      background-color: var(--l5r4-color-ring-fire-fill);
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-fire);
+      color: var(--l5r4-color-ring-text);
+    }
+
+    .l5r4-button.-roll {
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-fire);
+
+      .l5r4-button-face {
+        background: var(--l5r4-color-ring-fire);
+      }
+    }
+  }
+
+  .l5r4-trait.-air.-reflexes,
+  .l5r4-trait.-air.-awareness {
+    border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-air);
+
+    .l5r4-rank-control.-trait {
+      background-color: var(--l5r4-color-ring-air-fill);
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-air);
+      color: var(--l5r4-color-ring-text);
+    }
+
+    .l5r4-button.-roll {
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-air);
+
+      .l5r4-button-face {
+        background: var(--l5r4-color-ring-air);
+      }
+    }
+  }
+
+  .l5r4-trait.-earth.-willpower,
+  .l5r4-trait.-water.-perception {
+    align-self: start;
+  }
+
+  // Earth Ring Positioning
+  .l5r4-ring-name.-earth {
+    align-self: end;
+    grid-column: 5/8;
+    grid-row: 1/2;
+  }
+
+  .l5r4-ring.-earth {
+    grid-column: 5/8;
+    grid-row: 2/4;
+
+    .l5r4-ring-image {
+      border: none;
+      content: $earth-ring-img;
+    }
+  }
+
+  .l5r4-ring-rank.-earth {
+    grid-column: 6/8;
+    grid-row: 3/4;
+    place-self: end end;
+  }
+
+  .l5r4-trait.-earth.-stamina {
+    grid-column: 1/6;
+    grid-row: 2/3;
+  }
+
+  .l5r4-trait.-earth.-willpower {
+    grid-column: 1/6;
+    grid-row: 3/4;
+  }
+
+  // Air Ring Positioning
+  .l5r4-ring-name.-air {
+    align-self: end;
+    grid-column: 10/13;
+    grid-row: 1/2;
+  }
+
+  .l5r4-ring.-air {
+    grid-column: 10/13;
+    grid-row: 2/4;
+
+    .l5r4-ring-image {
+      border: none;
+      content: $air-ring-img;
+    }
+  }
+
+  .l5r4-ring-rank.-air {
+    grid-column: 10/11;
+    grid-row: 3/4;
+    place-self: end start;
+  }
+
+  .l5r4-trait.-air.-reflexes {
+    grid-column: 12/18;
+    grid-row: 2/3;
+  }
+
+  .l5r4-trait.-air.-awareness {
+    align-self: start;
+    grid-column: 12/18;
+    grid-row: 3/4;
+  }
+
+  // Water Ring Positioning
+  .l5r4-ring-name.-water {
+    grid-column: 4/7;
+    grid-row: 7/8;
+  }
+
+  .l5r4-ring.-water {
+    grid-column: 4/7;
+    grid-row: 5/7;
+
+    .l5r4-ring-image {
+      border: none;
+      content: $water-ring-img;
+    }
+  }
+
+  .l5r4-ring-rank.-water {
+    grid-column: 6/7;
+    grid-row: 5/6;
+    justify-self: end;
+    margin-inline-end: calc(-1 * var(--l5r4-space-12));
+  }
+
+  .l5r4-trait.-water.-strength {
+    grid-column: 1/5;
+    grid-row: 5/6;
+  }
+
+  .l5r4-trait.-water.-perception {
+    grid-column: 1/5;
+    grid-row: 6/7;
+  }
+
+  // Fire Ring Positioning
+  .l5r4-ring-name.-fire {
+    grid-column: 11/14;
+    grid-row: 7/8;
+  }
+
+  .l5r4-ring.-fire {
+    grid-column: 11/14;
+    grid-row: 5/7;
+
+    .l5r4-ring-image {
+      border: none;
+      content: $fire-ring-img;
+    }
+  }
+
+  .l5r4-ring-rank.-fire {
+    grid-column: 11/12;
+    grid-row: 5/6;
+    justify-self: start;
+    margin-inline-start: calc(-1 * var(--l5r4-space-12));
+  }
+
+  .l5r4-trait.-fire.-agility {
+    grid-column: 13/17;
+    grid-row: 5/6;
+  }
+
+  .l5r4-trait.-fire.-intelligence {
+    align-self: start;
+    grid-column: 13/17;
+    grid-row: 6/7;
+  }
+
+  // Void Ring Positioning
+  .l5r4-ring-name.-void {
+    grid-column: 7/11;
+    grid-row: 8/9;
+  }
+
+  .l5r4-ring-rank.-void {
+    align-self: start;
+    grid-column: 8/10;
+    grid-row: 6/7;
+    margin-block-start: calc(-1 * var(--l5r4-space-12));
+    text-align: center;
+  }
+
+  .l5r4-ring.-void {
+    grid-column: 6/12;
+    grid-row: 6/8;
+
+    .l5r4-ring-image {
+      border: none;
+      content: $void-ring-img;
+    }
+  }
+
+  .l5r4-void-points {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--l5r4-space-4);
+    grid-column: 1 / -1;
+    grid-row: 10/11;
+    margin-block-start: var(--l5r4-space-4);
+    width: max-content;
+  }
+
+  .l5r4-void-points-label {
+    margin: 0;
+  }
+
+  // A <button>: everything past `gap` undoes core's button face
+  .l5r4-void-points-dots {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    gap: var(--l5r4-space-4);
+    height: auto;
+    min-height: 0;
+    padding: 0;
+  }
+
+  // Core stops pointer events on a button's children; each dot keeps its own hover
+  .l5r4-void-point {
+    border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);
+    border-radius: var(--l5r4-radius-round);
+    height: var(--l5r4-size-void-point);
+    pointer-events: auto;
+    width: var(--l5r4-size-void-point);
+
+    // Hover reads the state token (foundations/states.md rule 1, void-point-dots.md V2)
+    &:hover {
+      border-color: var(--l5r4-color-void-point-hover);
+      filter: var(--l5r4-state-hover-filter);
+    }
+
+    &.is-filled {
+      background-color: var(--l5r4-color-void-point);
 
       &:hover {
-        border-color: #888;
-        transform: scale(1.2);
-      }
-
-      &.-filled {
-        background-color: #666;
-
-        &:hover {
-          background-color: #888;
-        }
+        background-color: var(--l5r4-color-void-point-hover);
       }
     }
   }

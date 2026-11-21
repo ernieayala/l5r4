@@ -1,0 +1,250 @@
+{
+  "name": "clans",
+  "label": "Clans",
+  "documentType": "Item",
+  "types": [
+    "clan"
+  ],
+  "pages": [
+    [
+      55,
+      74
+    ],
+    [
+      211,
+      230
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Badger",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 215,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Bat",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 216,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Boar",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 217,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Crab",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 56,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Crane",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 58,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Dragon",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 60,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Dragonfly",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 218,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Falcon",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 218,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Fox",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 219,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Hare",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 220,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Imperial",
+      "type": "clan",
+      "folder": "Imperial",
+      "page": 227,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Lion",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 62,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Mantis",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 64,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Monkey",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 221,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Oriole",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 222,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Ox",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 223,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Phoenix",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 66,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Scorpion",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 68,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Snake",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Sparrow",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Spider",
+      "type": "clan",
+      "folder": "Spider",
+      "page": 211,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Tortoise",
+      "type": "clan",
+      "folder": "Minor Clans",
+      "page": 225,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    },
+    {
+      "name": "Unicorn",
+      "type": "clan",
+      "folder": "Great Clans",
+      "page": 70,
+      "coverage": "full",
+      "system": {
+        "rules": []
+      }
+    }
+  ]
+}

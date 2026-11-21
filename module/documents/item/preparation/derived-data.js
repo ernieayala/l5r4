@@ -1,84 +1,19 @@
 /**
- * Item Derived Data Preparation
- *
- * Computes roll formulas and derived statistics for L5R4 items during Foundry's
- * data preparation lifecycle. Called from Item.prepareDerivedData() hook.
- *
- * Handles:
- * - Skill roll formulas: Computes (Skill Rank)k0 for standalone skill items
- * - Bow damage formulas: Calculates bow Strength + arrow DR per L5R4 equipment rules
- *
- * Game Mechanics:
- * - Skill rolls use only rank until paired with traits during actual rolls
- * - Bow damage = min(bow Str, actor Str) + arrow modifiers (Willow Leaf 2k2, etc.)
- * - Arrow types modify damage (Willow Leaf 2k2, Armor Piercing 1k1, Flesh Cutter 2k3)
- *
- * Foundry Integration:
- * - Called during prepareDerivedData phase of Foundry v13 DataModel lifecycle
- * - Modifies item.system properties in-place
- * - Safe error handling prevents data preparation failures
- *
- * API: Item (Foundry v13), DataModel.prepareDerivedData
+ * @module documents/item/preparation/derived-data
+ * @description What L5R4Item's `prepareDerivedData` does: a Skill's rank as its share of a roll ((rank)k0, the
+ * Trait joins at roll time) and a weapon's damage formula with its owner's Strength. A calculation that throws
+ * leaves safe fallback values and a warning, so preparation goes on.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { calculateSkillFormula } from "./skill-formulas.js";
-import { calculateBowDamage } from "./bow-damage.js";
-import { calculateMeleeDamage } from "./melee-damage.js";
+import { getSkillFormula } from "./skill-formulas.js";
+import { getBowDamage } from "./bow-damage.js";
+import { getMeleeDamage } from "./melee-damage.js";
 
 /**
- * Safely applies a dice formula calculation to an item's system data.
- *
- * Wraps calculator functions in error handling to prevent data preparation failures.
- * On success, merges calculated properties into system data. On failure, applies
- * safe fallback values and logs a warning.
- *
- * @param {Object} sys - The item's system data object (item.system)
- * @param {Function} calculator - Function that computes dice formula properties
- * @param {Object} fallback - Safe default values if calculation fails
- * @param {string} errorMsg - Error message for console warning
- * @param {Item} item - The item being prepared (for error logging context)
- */
-function applyDiceFormula(sys, calculator, fallback, errorMsg, item) {
-  try {
-    const result = calculator();
-    Object.assign(sys, result);
-  } catch (err) {
-    Object.assign(sys, fallback);
-    console.warn(`${SYS_ID}`, errorMsg, { err, item });
-  }
-}
-
-/**
- * Prepares derived data for L5R4 items during Foundry's data preparation lifecycle.
- *
- * Called from Item.prepareDerivedData() hook. Computes roll formulas and statistics
- * that depend on item properties or actor state. Modifies item.system in-place.
- *
- * Item Type Handling:
- * - **Skills:** Computes roll formula as (Skill Rank)k0. When combined with traits
- *   during actual rolls, this becomes (Skill + Trait)k(Trait) per core rules.
- * - **Weapons (Bows):** Calculates damage as min(bow Str, actor Str) + arrow DR.
- *   Uses arrow modifiers from game data (e.g., Willow Leaf +2r/+2k).
- * - **Weapons (Melee):** Calculates damage as (weapon DR + actor Str)k(Keep).
- *   Adds actor's Strength to rolled dice per Combat rules.
- *
- * Game Rules:
- * - Skill rolls: Standalone skills show only their rank contribution until paired
- *   with traits at roll time per Skills and Rolls rules
- * - Bow damage: Follows Equipment rules where bow Strength is added to arrow DR,
- *   limited by actor's Strength (weaker archers can't fully draw strong bows)
- * - Arrow types modify damage: Willow Leaf 2k2, Armor Piercing 1k1, Flesh Cutter 2k3
- * - Melee damage: Follows Combat rules where actor Strength is added to weapon DR
- *   (e.g., Katana 3k2 + Strength 3 = 6k2)
- *
- * Foundry Integration:
- * - Runs during prepareDerivedData phase of Foundry v13 DataModel lifecycle
- * - Called after prepareBaseData but before sheets render
- * - Safe error handling with fallbacks prevents data preparation failures
- * - Results stored in item.system for sheet rendering and dice rolls
- *
+ * Prepare an item's derived data: a Skill's `roll`, `keep`, and `rollFormula` from its rank, then a
+ * weapon's damage (prepareWeaponDamage). Changes `item.system` in place.
  * @param {Item} item - The L5R4 item being prepared (requires item.system and item.type)
  */
 export function prepareItemDerivedData(item) {
@@ -88,25 +23,43 @@ export function prepareItemDerivedData(item) {
   if (type === "skill") {
     // Ensure rank is non-negative integer for formula calculation
     const rank = Math.max(0, parseInt(sys.rank) || 0);
-    applyDiceFormula(
-      sys,
-      () => calculateSkillFormula(sys),
+    applyDiceFormula(sys, () => getSkillFormula(sys), {
       // Fallback: Safe {rank}k0 formula if calculation fails
-      { rollDice: rank, rollKeep: 0, rollFormula: `${rank}k0` },
-      "Failed to compute skill roll formula",
+      fallback: { roll: rank, keep: 0, rollFormula: `${rank}k0` },
+      errorMsg: "Failed to compute skill roll formula",
       item
-    );
+    });
   }
+
+  prepareWeaponDamage(item);
+}
+
+/**
+ * Computes a weapon's damage formula with its owner's Strength (bows: the lower of bow and owner Strength).
+ *
+ * Item preparation runs inside Actor#prepareEmbeddedDocuments, before the owner's "initial" Active Effect phase
+ * [src: client/documents/actor.mjs:471-474], so the Strength read here leaves out effect bonuses. The owner's derived
+ * preparation calls this again once effects apply (module/documents/actor/calculations/item-enrichment-system.js), so a
+ * Strength raised by an Active Effect reaches weapon damage (issue #29).
+ * game-rules/32_attack_and_defense.md, p.82
+ * game-rules/74_weapons.md, p.199
+ * @param {Item} item - A weapon Item; any other type is left unchanged
+ */
+export function prepareWeaponDamage(item) {
+  const sys = item.system ?? {};
+  const type = item.type;
 
   if (type === "weapon" && sys.isBow) {
     applyDiceFormula(
       sys,
       // Actor reference needed to get actor's Strength for bow damage limit
-      () => calculateBowDamage(sys, item.actor),
-      // Fallback: Default 0k0 prevents undefined values in damage rolls
-      { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
-      "Failed to compute bow damage formula",
-      item
+      () => getBowDamage(sys, item.actor),
+      {
+        // Fallback: Default 0k0 prevents undefined values in damage rolls
+        fallback: { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
+        errorMsg: "Failed to compute bow damage formula",
+        item
+      }
     );
   }
 
@@ -114,15 +67,37 @@ export function prepareItemDerivedData(item) {
     applyDiceFormula(
       sys,
       // Actor reference needed to get actor's Strength for melee damage
-      () => calculateMeleeDamage(sys, item.actor),
-      // Fallback: Use base weapon DR without Strength if calculation fails
+      () => getMeleeDamage(sys, item.actor),
       {
-        derivedDamageRoll: toInt(sys.damageRoll),
-        derivedDamageKeep: toInt(sys.damageKeep),
-        derivedDamageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
-      },
-      "Failed to compute melee damage formula",
-      item
+        // Fallback: Use base weapon DR without Strength if calculation fails
+        fallback: {
+          derivedDamageRoll: toInt(sys.damageRoll),
+          derivedDamageKeep: toInt(sys.damageKeep),
+          derivedDamageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
+        },
+        errorMsg: "Failed to compute melee damage formula",
+        item
+      }
     );
+  }
+}
+
+/**
+ * Merge a dice formula calculation into an item's system data, or the fallback values with a warning when the
+ * calculation throws, so one bad item never stops data preparation.
+ * @param {object} sys - The item's system data object (item.system)
+ * @param {Function} calculator - Function that computes dice formula properties
+ * @param {object} options
+ * @param {object} options.fallback - Safe default values if calculation fails
+ * @param {string} options.errorMsg - Error message for console warning
+ * @param {Item} options.item - The item being prepared (for error logging context)
+ */
+function applyDiceFormula(sys, calculator, { fallback, errorMsg, item }) {
+  try {
+    const result = calculator();
+    Object.assign(sys, result);
+  } catch (err) {
+    Object.assign(sys, fallback);
+    console.warn(`${SYS_ID}`, errorMsg, { err, item });
   }
 }

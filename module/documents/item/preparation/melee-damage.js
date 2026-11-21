@@ -1,58 +1,36 @@
 /**
- * Melee Weapon Damage Calculator
- *
- * Calculates melee weapon damage formulas for L5R4 weapons based on Combat rules.
- * Implements the core melee damage mechanic: character
- * Strength adds to weapon's rolled dice.
- *
- * Core L5R4 Melee Rules
- * - "[book text removed; Core Rulebook p.82]."
- * - Example: Katana (3k2) + Strength 3 = 6k2 damage
- * - Final formula: weaponRoll + actorStrength, k = weaponKeep
- *
- * Foundry VTT Integration:
- * - Called during Item.prepareDerivedData for melee weapons
- * - Optional actor parameter enables character-specific damage calculation
- * - Returns structured data for roll formula construction
- *
  * @module documents/item/preparation/melee-damage
+ * @description A melee weapon's damage formula: the weapon's rolled dice plus the wielder's Strength, keeping the
+ * weapon's kept dice (a Katana 3k2 with Strength 3 is 6k2). A thrown weapon that adds no Strength keeps its own
+ * dice.
+ * game-rules/32_attack_and_defense.md, p.82
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * @typedef {Object} MeleeDamageResult
+ * @typedef {object} MeleeDamageResult
  * @property {number} derivedDamageRoll - Total rolled dice including Strength (XkY formula X value)
  * @property {number} derivedDamageKeep - Total kept dice (XkY formula Y value)
  * @property {string} derivedDamageFormula - Complete damage formula string (e.g., "6k2")
  */
 
 /**
- * Calculate melee weapon damage formula based on L5R4 combat rules.
- *
- * Implements Combat rules: "[book text removed; Core Rulebook p.82]."
- *
- * Calculation Steps:
- * 1. Get weapon's base damage roll and keep values
- * 2. Add actor's Strength to rolled dice
- * 3. Keep value remains unchanged
- * 4. Return calculated (weapon DR + Strength)k(Keep) formula
- *
- * Example:
- * - Weapon: Katana 3k2
- * - Actor Strength: 3
- * - Result: 6k2 (3 + 3 = 6 rolled dice, 2 kept dice)
- *
- * @param {Object} sys - Item system data for the weapon
+ * A melee weapon's damage: (the weapon's rolled dice + the wielder's Strength)k(the weapon's kept dice). Strength
+ * adds only with an actor and when the weapon's `addsStrength` is set.
+ * game-rules/32_attack_and_defense.md, p.82
+ * @param {object} sys - Item system data for the weapon
  * @param {number} sys.damageRoll - Weapon's base rolled dice (e.g., 3 for katana)
  * @param {number} sys.damageKeep - Weapon's kept dice (e.g., 2 for katana)
  * @param {L5R4Actor|null} [actor=null] - Optional actor wielding the weapon (for Strength)
  * @returns {MeleeDamageResult} Damage roll components for formula construction
  */
-export function calculateMeleeDamage(sys, actor = null) {
+export function getMeleeDamage(sys, actor = null) {
   const weaponRoll = toInt(sys.damageRoll);
   const weaponKeep = toInt(sys.damageKeep);
-  const actorStr = actor ? toInt(actor.system?.traits?.str) : 0;
+  // Thrown weapons such as shuriken and tsubute add no Strength
+  // game-rules/74_weapons.md, p.200, 202
+  const actorStr = actor && sys.addsStrength ? toInt(actor.system?.traits?.str) : 0;
 
   // Add actor Strength to rolled dice
   // Store in separate 'derived' properties to preserve original field values

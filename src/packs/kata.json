@@ -1,0 +1,590 @@
+{
+  "name": "kata",
+  "label": "Kata",
+  "documentType": "Item",
+  "types": [
+    "kata"
+  ],
+  "pages": [
+    [
+      259,
+      260
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Balance the Elements Style",
+      "type": "kata",
+      "folder": "Void",
+      "page": 259,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Void 3; Mirumoto Bushi School or Shiba Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:void",
+                  3
+                ]
+              },
+              {
+                "or": [
+                  "school:mirumoto bushi school",
+                  "school:shiba bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Option: the Initiative Roll swaps Reflexes for the Void Ring."
+      }
+    },
+    {
+      "name": "Breath of Wind Style",
+      "type": "kata",
+      "folder": "Air",
+      "page": 259,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Air 3; Kakita Bushi School or Bayushi Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  3
+                ]
+              },
+              {
+                "or": [
+                  "school:kakita bushi school",
+                  "school:bayushi bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "+2 Initiative each Reactions Stage, cumulative; all of it is lost once the kata ends."
+      }
+    },
+    {
+      "name": "Disappearing World Style",
+      "type": "kata",
+      "folder": "Fire",
+      "page": 259,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 4; Akodo Bushi School or Kakita Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:akodo bushi school",
+                  "school:kakita bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Name one foe. Once per Turn, damage against it may swap Strength for Agility."
+      }
+    },
+    {
+      "name": "Hidden Blade Style",
+      "type": "kata",
+      "folder": "Air",
+      "page": 259,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Air 4; Bayushi Bushi School or Yoritomo Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:bayushi bushi school",
+                  "school:yoritomo bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Disarm hits deal full weapon damage, not 2k1; Raises (Feint too) cannot add to that damage."
+      }
+    },
+    {
+      "name": "Indomitable Warrior Style",
+      "type": "kata",
+      "folder": "Earth",
+      "page": 260,
+      "coverage": "full",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Earth 4; Daigotsu Bushi School, Hida Bushi School, Ichiro Bushi School, or Moto Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:daigotsu bushi school",
+                  "school:hida bushi school",
+                  "school:ichiro bushi school",
+                  "school:moto bushi school"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Wounds",
+            "penalty": "0 - @rings.earth"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Iron Forest Style",
+      "type": "kata",
+      "folder": "Air",
+      "page": 260,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Air 4; Daidoji Iron Warrior, Heichi Bushi School, or Shiba Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:daidoji iron warrior",
+                  "school:heichi bushi school",
+                  "school:shiba bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Spear or polearm attacks may swap Agility for the Air Ring."
+      }
+    },
+    {
+      "name": "Iron in the Mountains Style",
+      "type": "kata",
+      "folder": "Earth",
+      "page": 260,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Earth 3; Daidoji Iron Warrior or Hida Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  3
+                ]
+              },
+              {
+                "or": [
+                  "school:daidoji iron warrior",
+                  "school:hida bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Defense Stance may add the Earth Ring to Armor TN where it would add Air."
+      }
+    },
+    {
+      "name": "Reckless Abandon Style",
+      "type": "kata",
+      "folder": "Fire",
+      "page": 260,
+      "coverage": "full",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 4; Daigotsu Bushi School, Matsu Berserker School, or Usagi Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:daigotsu bushi school",
+                  "school:matsu berserker school",
+                  "school:usagi bushi school"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@rings.fire",
+            "predicate": [
+              "status:fullAttackStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Spinning Blades Style",
+      "type": "kata",
+      "folder": "Fire",
+      "page": 260,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 5; Mirumoto Bushi School or Yoritomo Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  5
+                ]
+              },
+              {
+                "or": [
+                  "school:mirumoto bushi school",
+                  "school:yoritomo bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "A weapon in each hand: once per Turn, Extra Attack costs 3 Raises, off-hand strikes second; no Raises add damage."
+      }
+    },
+    {
+      "name": "Strength in Arms Style",
+      "type": "kata",
+      "folder": "Water",
+      "page": 260,
+      "coverage": "partial",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Water 4; Hida Bushi School, Ichiro Bushi School, or Moto Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:water",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:hida bushi school",
+                  "school:ichiro bushi school",
+                  "school:moto bushi school"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Substitute",
+            "selector": "attack",
+            "replace": "trait:agi",
+            "with": "trait:str",
+            "predicate": [
+              "weapon:skill:heavy weapons"
+            ]
+          }
+        ],
+        "specialRules": "Once per Turn."
+      }
+    },
+    {
+      "name": "Strength of Purity Style",
+      "type": "kata",
+      "folder": "Void",
+      "page": 260,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Void 4; Akodo Bushi School, Kakita Bushi School, Matsu Berserker School, or Utaku Battle Maiden",
+            "requires": [
+              {
+                "gte": [
+                  "ring:void",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:akodo bushi school",
+                  "school:kakita bushi school",
+                  "school:matsu berserker school",
+                  "school:utaku battle maiden"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Once per Turn, a damage roll may roll Honor Rank dice in place of Strength + DR; kept dice stay the DR's."
+      }
+    },
+    {
+      "name": "Striking as Air",
+      "type": "kata",
+      "folder": "Air",
+      "page": 259,
+      "coverage": "full",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Air 3",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@rings.air",
+            "predicate": [
+              "status:defenseStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Striking as Earth",
+      "type": "kata",
+      "folder": "Earth",
+      "page": 259,
+      "coverage": "full",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Earth 3",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Reduction",
+            "value": "@rings.earth",
+            "predicate": [
+              "status:fullDefenseStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Striking as Fire",
+      "type": "kata",
+      "folder": "Fire",
+      "page": 259,
+      "coverage": "partial",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 3",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "total": "@rings.fire",
+            "optional": true,
+            "label": "Striking as Fire",
+            "predicate": [
+              "status:fullAttackStance"
+            ]
+          }
+        ],
+        "specialRules": "Usable on only one attack roll per Round."
+      }
+    },
+    {
+      "name": "Striking as Void",
+      "type": "kata",
+      "folder": "Void",
+      "page": 259,
+      "coverage": "full",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Void 3",
+            "requires": [
+              {
+                "gte": [
+                  "ring:void",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@rings.void.rank",
+            "predicate": [
+              "status:centerStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Striking as Water",
+      "type": "kata",
+      "folder": "Water",
+      "page": 259,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Water 4",
+            "requires": [
+              {
+                "gte": [
+                  "ring:water",
+                  4
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Attack Stance: an extra 5' of movement, taken as a Free Action."
+      }
+    },
+    {
+      "name": "Veiled Menace Style",
+      "type": "kata",
+      "folder": "Air",
+      "page": 260,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Air 4; Bayushi Bushi School, Hiruma Bushi School, Tsuruchi Archer School, or Yoritomo Bushi School",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  4
+                ]
+              },
+              {
+                "or": [
+                  "school:bayushi bushi school",
+                  "school:hiruma bushi school",
+                  "school:tsuruchi archer school",
+                  "school:yoritomo bushi school"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Once per Turn, Stealth rank adds to Armor TN against one attack."
+      }
+    }
+  ]
+}
