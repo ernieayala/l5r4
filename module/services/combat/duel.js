@@ -140,7 +140,9 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
   } else if (stage === "strike") {
     request.tn = toInt(opponent.system.armorTn.current);
     request.weapon = duelWeaponOf(actor);
-    request.prepare = async () => ({ freeRaises });
+    // Granted before the dialog, so the striker may spend them on the TN
+    // game-rules/28_raises.md, p.79
+    request.freeRaises = freeRaises;
   }
   return rollCheck(request);
 }

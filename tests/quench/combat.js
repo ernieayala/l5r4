@@ -913,6 +913,54 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // The Focus winner's Free Raises are offered in the Strike dialog, where one may lower the TN (#119)
+        // game-rules/28_raises.md, p.79
+        it(
+          "should offer the Focus winner's Free Raises in the Strike dialog",
+          clean(async function () {
+            this.timeout(15_000);
+            const master = track(
+              await createTestPC({
+                name: "Combat iaijutsu striker",
+                system: { traits: { awa: 5, ref: 3 } }
+              })
+            );
+            await master.createEmbeddedDocuments("Item", [createSkillData("Iaijutsu", 7, "ref")]);
+            const target = await defender();
+            const card = await startDuel(master, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              for (const stage of ["assessment", "focus"]) {
+                await click(card, "[data-flow-action='roll'][data-duelist='0']");
+                await waitFor(() => state().rolls[stage][0] !== null);
+                await click(card, "[data-flow-action='roll'][data-duelist='1']");
+                await waitFor(() => state().stage !== stage);
+              }
+            } finally {
+              stop();
+            }
+            // 11k4 of nines + 5 (41) against 3k2 (18): a margin of 23 is 3 Free Raises
+            assert.equal(state().freeRaises, 3);
+            let offered = null;
+            Hooks.once("renderDialogV2", app => {
+              const field = app.element.querySelector("[name='freeRaisesToTn']");
+              offered = field ? Number(field.max) : 0;
+              if (field) {
+                field.value = String(offered);
+              }
+              app.element.querySelector('[data-action="ok"]').click();
+            });
+            await click(card, "[data-flow-action='roll'][data-duelist='0']");
+            await waitFor(() => state().rolls.strike[0] !== null);
+            assert.equal(offered, 3, "the dialog offers the 3 Free Raises");
+            const strike = game.messages.contents.findLast(
+              m => m.type === "roll" && m.system.actorUuid === master.uuid
+            );
+            assert.equal(strike.system.tn.freeRaisesToTN, 3, "spent on the TN");
+          })
+        );
+
         // A Technique's Focus-roll bonus reaches the Focus roll only (#118)
         // game-rules/51_crane_schools.md, p.109
         it(

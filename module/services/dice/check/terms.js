@@ -211,7 +211,8 @@ function buildCheckModifiers(check) {
 }
 
 /**
- * The Raises a roll allows, Unskilled or not; RaiseRule rules move the Void Ring cap and may require Raises.
+ * The Raises a roll allows, Unskilled or not; RaiseRule rules move the Void Ring cap and may require Raises. The
+ * Free Raises offered are those of rules and those the caller grants, so either kind may lower the TN.
  * game-rules/28_raises.md, p.79
  * game-rules/30_skill_rolls_expanded.md, p.80
  * @param {object} check - From buildCheck
@@ -220,14 +221,14 @@ function buildCheckModifiers(check) {
  * @returns {{allowed: boolean, max: number, min: number, free: number}}
  */
 function getRaiseLimits(check, { unskilled }) {
-  const { isDamage, voidState, ctx } = check;
+  const { isDamage, voidState, ctx, request } = check;
   const allowed = !isDamage && !unskilled;
   const max = allowed ? Math.max(0, getMaxRaises(voidState.ring, unskilled) + ctx.raises.cap) : 0;
   return {
     allowed,
     max,
     min: Math.min(Math.max(0, ctx.raises.minimum), max),
-    free: allowed ? ctx.freeRaises : 0
+    free: allowed ? ctx.freeRaises + toInt(request.freeRaises) : 0
   };
 }
 
