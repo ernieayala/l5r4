@@ -19,7 +19,11 @@
  * @see https://github.com/Ethaks/FVTT-Quench
  */
 
-import { revealChatPopupsAtOnce, withDiceSoundMuted } from "./helpers.js";
+import {
+  revealChatPopupsAtOnce,
+  withDiceSoundMuted,
+  withPostedMessagesDeleted
+} from "./helpers.js";
 import { registerActorTests } from "./documents/actor.js";
 import { registerActorWoundsTests } from "./documents/actor-wounds.js";
 import { registerActorXpTests } from "./documents/actor-xp.js";
@@ -118,7 +122,7 @@ import { registerChangeOriginTests } from "./workflows/change-origin.js";
  */
 export async function registerQuenchTests(quench) {
   revealChatPopupsAtOnce();
-  const api = withDiceSoundMuted(quench);
+  const api = withPostedMessagesDeleted(withDiceSoundMuted(quench));
   registerSmokeTests(api);
   registerDeprecationsTests(api);
   registerDataModelsTests(api);

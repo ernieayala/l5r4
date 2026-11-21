@@ -63,29 +63,16 @@ export function autoAnswerRolls() {
 
 /**
  * For a batch whose actions roll as a side effect (taking the Full Defense Stance): answer each roll dialog with its
- * defaults while the batch runs, and delete the messages it posts afterwards.
+ * defaults while the batch runs. The messages it posts are deleted with every batch's (withPostedMessagesDeleted).
  * game-rules/36_stances.md, p.84
  * @param {{before: Function, after: Function}} context  The batch's Quench context
  */
 export function guardRolls({ before, after }) {
   let stop;
-  let hook;
-  const posted = [];
   before(() => {
     stop = autoAnswerRolls();
-    hook = Hooks.on("createChatMessage", message => posted.push(message));
   });
-  after(async function () {
-    this.timeout(30_000);
-    stop();
-    Hooks.off("createChatMessage", hook);
-    await settleChatNotifications();
-    for (const message of posted) {
-      if (game.messages.has(message.id)) {
-        await message.delete();
-      }
-    }
-  });
+  after(() => stop());
 }
 
 /** The socket id `withAnotherClient` stamps changes with: no client has it. */
@@ -304,6 +291,44 @@ export function withDiceSoundMuted(quench) {
             fn(context);
             context.after(() => {
               CONFIG.sounds.dice = diceSound;
+            });
+          },
+          options
+        )
+    }
+  });
+}
+
+/**
+ * The Quench API with each batch tidy in chat: the messages this client posts from the batch's first hook to its
+ * last are deleted when it ends, so a run leaves the world's chat log as it found it, as the batches already leave
+ * its actors and items (#126). Another user's messages stay.
+ * @param {object} quench - The Quench API object
+ * @returns {object} The same API, whose `registerBatch` deletes the messages the batch posts
+ */
+export function withPostedMessagesDeleted(quench) {
+  return Object.create(quench, {
+    registerBatch: {
+      value: (key, fn, options) =>
+        quench.registerBatch(
+          key,
+          context => {
+            const posted = [];
+            let hook;
+            context.before(() => {
+              hook = Hooks.on("createChatMessage", message => {
+                if (message.author?.id === game.user.id) {
+                  posted.push(message);
+                }
+              });
+            });
+            fn(context);
+            context.after(async function () {
+              this.timeout(30_000);
+              Hooks.off("createChatMessage", hook);
+              await settleChatNotifications();
+              const ids = posted.map(message => message.id).filter(id => game.messages.has(id));
+              await ChatMessage.implementation.deleteDocuments(ids);
             });
           },
           options

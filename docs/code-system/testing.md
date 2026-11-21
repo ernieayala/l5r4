@@ -146,7 +146,7 @@ Not conforming (modeled): `describe("the book's examples (Core Rulebook p.77)")`
 | A document's name starts with the feature in the batch's display name: `"Rule engine: shugenja"` | review |
 | A test that touches the world runs inside `cleanTest` (`tests/quench/helpers.js`), which fails it on a console error or warning, an error notification, or an unhandled rejection | review |
 | Every document a test creates is tracked and deleted in `afterEach` or `after`, never at the end of the test body | review |
-| Chat messages are deleted after `settleChatNotifications()` (`tests/quench/helpers.js`) | review |
+| Chat messages are deleted after `settleChatNotifications()` (`tests/quench/helpers.js`); `withPostedMessagesDeleted` (`tests/quench/helpers.js`) deletes every message a batch posts when the batch ends | review |
 | Roll dialogs are answered through `answerCheckDialog`, `autoAnswerRolls`, or `guardRolls` (`tests/quench/helpers.js`), not a per-file copy | review |
 | A full Quench run leaves no world document it made | review |
 | A new test fails without the change it covers (CLAUDE.md **Testing and the Gate**) | review |
