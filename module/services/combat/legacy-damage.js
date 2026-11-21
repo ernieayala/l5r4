@@ -11,7 +11,6 @@
  */
 import { T, F } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
-import { hideUnusable } from "../../utils/dom.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /**
@@ -23,19 +22,15 @@ export function bindLegacyDamageCard(message, html) {
   if (message.type === "roll") {
     return;
   }
-  // Reduce with Void is shown only to the damaged actor's owner (#112); Apply Wounds acts on the token selected at
-  // the click, so its check stays at the click
-  hideUnusable(html, "[data-action='reduce-wounds-void']", button =>
-    Boolean(game.actors.get(button.dataset.actorId)?.isOwner)
-  );
+  // Both buttons act on the token selected at the click, not on the card's data-actor-id (the attacker), so
+  // whether the user may press them is checked at the click (validateSelectedActor)
   // renderChatMessageHTML passes an HTMLElement, not jQuery
   bindDebouncedClick(html.querySelector("[data-action='apply-wounds']"), event =>
     applyWoundsToToken(parseCardDamage(event.currentTarget))
   );
-  bindDebouncedClick(html.querySelector("[data-action='reduce-wounds-void']"), event => {
-    const button = event.currentTarget;
-    return applyWoundsWithVoid(parseCardDamage(button), button.dataset.actorId);
-  });
+  bindDebouncedClick(html.querySelector("[data-action='reduce-wounds-void']"), event =>
+    applyWoundsWithVoid(parseCardDamage(event.currentTarget))
+  );
 }
 
 /**
@@ -153,10 +148,9 @@ async function applyWoundsToToken(damage) {
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/73_armor.md, p.198
  * @param {number} damage - Original damage amount
- * @param {string} _actorId - ID of actor who can spend void
  * @returns {Promise<void>}
  */
-async function applyWoundsWithVoid(damage, _actorId) {
+async function applyWoundsWithVoid(damage) {
   const targetActor = validateSelectedActor();
   if (!targetActor) {
     return;
