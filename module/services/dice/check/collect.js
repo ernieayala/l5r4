@@ -88,8 +88,9 @@ export function buildCheckSelectors({ kind, skill, trait, ring, skillData }) {
  * The roll options a check's predicates test: the actor's, `check:<kind>`; with a weapon `weapon:size:<size>`
  * (Prone forbids large weapons), `weapon:skill:<skill>`, `weapon:name:<name>`, and `weapon:keyword:<keyword>` for
  * each of its comma-separated keywords, in lower case, so a Weapon Skill's Mastery Abilities reach the damage of its
- * own weapons and a Technique its Samurai weapons; and with a target, `target` plus the target's options prefixed
- * `target:`.
+ * own weapons and a Technique its Samurai weapons; with a target, `target` plus the target's options prefixed
+ * `target:`; and the options the caller adds, so a duel's Focus roll can be told from its other Iaijutsu rolls.
+ * game-rules/39_iaijutsu_dueling.md, p.87
  * game-rules/41_conditional_effects.md, p.89
  * game-rules/50_crab_schools.md, p.106
  * game-rules/60_bugei_skills.md, p.140-143
@@ -98,10 +99,11 @@ export function buildCheckSelectors({ kind, skill, trait, ring, skillData }) {
  * @param {object} [options]
  * @param {Actor|null} [options.target=null]
  * @param {Item|null} [options.weapon=null]
+ * @param {string[]} [options.extra=[]] - The caller's roll options
  * @returns {Set<string>}
  */
-export function buildCheckOptions(actor, kind, { target = null, weapon = null } = {}) {
-  const options = new Set(actor.rollOptions);
+export function buildCheckOptions(actor, kind, { target = null, weapon = null, extra = [] } = {}) {
+  const options = new Set([...actor.rollOptions, ...extra]);
   options.add(`check:${kind}`);
   if (weapon) {
     options.add(`weapon:size:${weapon.system.size}`);
@@ -135,10 +137,11 @@ export function buildCheckOptions(actor, kind, { target = null, weapon = null } 
  * @param {string} [spec.ring]
  * @param {Actor|null} [spec.target]
  * @param {Item|null} [spec.weapon] - The weapon of an attack or damage roll: its own rules apply
+ * @param {string[]} [spec.options] - Roll options the caller adds (a duel stage)
  * @returns {CheckContext}
  */
-export function getCheckContext(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
-  const spec = { kind, skill, trait, ring, target, weapon };
+export function getCheckContext(actor, { kind, target = null, weapon = null, ...check }) {
+  const spec = { ...check, kind, target, weapon };
   const { entriesOf, selectors } = buildRuleQuery(actor, spec);
   return {
     modifiers: getCheckModifiers(actor, spec, { entriesOf, selectors }),
@@ -180,7 +183,7 @@ function buildRuleQuery(actor, spec) {
     ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
     : null;
   const selectors = buildCheckSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
-  const options = buildCheckOptions(actor, kind, { target, weapon });
+  const options = buildCheckOptions(actor, kind, { target, weapon, extra: spec.options });
   const entriesOf = bagKind =>
     getBagEntries(actor.ruleBag, bagKind, { selectors, options, weaponId: weapon?.id ?? null });
   return { entriesOf, selectors };

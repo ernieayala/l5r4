@@ -33,9 +33,9 @@ export function buildCheck(request) {
   const isDamage = kind === "damage";
   const { autoTn, targetData } = getTargets(actor, kind === "attack" ? "attack" : null);
   const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
-  const { skill, trait, ring } = request;
+  const { skill, trait, ring, options } = request;
   const weapon = request.weapon ?? null;
-  const ctx = getCheckContext(actor, { kind, skill, trait, ring, target, weapon });
+  const ctx = getCheckContext(actor, { kind, skill, trait, ring, target, weapon, options });
   // An Unskilled Roll in a Skill an UnskilledAs rule covers counts as that many ranks, so it is not Unskilled
   // game-rules/30_skill_rolls_expanded.md, p.80
   const countsAs = request.unskilled ? ctx.unskilledAs : 0;

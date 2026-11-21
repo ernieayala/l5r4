@@ -775,6 +775,34 @@ export function registerPacksTests(quench) {
           })
         );
 
+        // A Technique's Focus-roll bonus is offered on a duel's Focus roll only (#118)
+        // game-rules/51_crane_schools.md, p.109
+        // game-rules/84_advanced_schools_and_alternate_paths.md, p.247
+        it(
+          "should offer The Way of the Crane's and Mirumoto's Strength's Focus bonus on the Focus roll only",
+          clean(async function () {
+            this.timeout(30_000);
+            for (const [name, label] of [
+              ["The Way of the Crane", "Focus roll, Center Stance this Round or the last"],
+              [
+                "Mirumoto's Strength",
+                "Mirumoto's Strength: Focus roll in an iaijutsu duel, won Assessment or not"
+              ]
+            ]) {
+              const { actor } = await holding("techniques", name);
+              const offered = stage =>
+                getCheckContext(actor, {
+                  kind: stage === "strike" ? "attack" : "skill",
+                  skill: "iaijutsu",
+                  options: [`duel:${stage}`]
+                }).modifiers.some(m => m.label === label);
+              assert.isFalse(offered("assessment"), `${name}: Assessment`);
+              assert.isTrue(offered("focus"), `${name}: Focus`);
+              assert.isFalse(offered("strike"), `${name}: Strike`);
+            }
+          })
+        );
+
         it("should stop grant work queued for a character deleted meanwhile, and report no grant error", async function () {
           this.timeout(30_000);
           const actor = await createTestPC({ name: "Compendium packs: Deleted" });

@@ -913,6 +913,54 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // A Technique's Focus-roll bonus reaches the Focus roll only (#118)
+        // game-rules/51_crane_schools.md, p.109
+        it(
+          "should give a rule on duel:focus to the Focus roll and not to Assessment",
+          clean(async function () {
+            this.timeout(15_000);
+            const { actor } = await attacker();
+            await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Combat focus technique",
+                type: "technique",
+                system: {
+                  rules: [
+                    {
+                      key: "RollModifier",
+                      selector: "skill:iaijutsu",
+                      roll: 1,
+                      keep: 1,
+                      predicate: ["duel:focus"],
+                      label: "Combat focus bonus"
+                    }
+                  ]
+                }
+              }
+            ]);
+            const target = await defender();
+            const card = await startDuel(actor, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const labelsOf = () =>
+              game.messages.contents
+                .findLast(m => m.type === "roll" && m.system.actorUuid === actor.uuid)
+                .system.modifiers.map(m => m.label);
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.assessment[0] !== null);
+              assert.notInclude(labelsOf(), "Combat focus bonus", "Assessment");
+              await click(card, "[data-flow-action='roll'][data-duelist='1']");
+              await waitFor(() => state().stage === "focus");
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.focus[0] !== null);
+              assert.include(labelsOf(), "Combat focus bonus", "Focus");
+            } finally {
+              stop();
+            }
+          })
+        );
+
         // game-rules/41_conditional_effects.md, p.89
         it("should keep a Dazed character from fighting a duel", async () => {
           const { actor } = await attacker();

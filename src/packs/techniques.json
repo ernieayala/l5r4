@@ -1965,6 +1965,7 @@
             "roll": 1,
             "keep": 1,
             "optional": true,
+            "predicate": ["duel:focus"],
             "label": "Mirumoto's Strength: Focus roll in an iaijutsu duel, won Assessment or not"
           }
         ],
@@ -4751,6 +4752,7 @@
             "keep": 1,
             "total": "@school.rank",
             "optional": true,
+            "predicate": ["duel:focus"],
             "label": "Focus roll, Center Stance this Round or the last"
           }
         ],

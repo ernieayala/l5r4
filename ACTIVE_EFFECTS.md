@@ -137,6 +137,7 @@ A predicate is a list of conditions, all of which must hold:
 | `"target"`, `"target:status:mounted"` | On attack rules: the attack has a target, and the target has that status |
 | `"check:attack"` | The roll is of that kind: `skill`, `trait`, `ring`, `spell`, `maho`, `attack`, `damage`, or `roll` |
 | `"weapon:size:large"`, `"weapon:skill:kenjutsu"`, `"weapon:name:katana"`, `"weapon:keyword:samurai"` | On a weapon's attack or damage: its size, its Skill, its name, and each of its keywords (lower case). A Weapon Skill's rule reaches its own weapons' damage this way |
+| `"duel:focus"` | The roll is that stage of an iaijutsu duel: `duel:assessment`, `duel:focus`, or `duel:strike` |
 | any `RollOption` | That option is on |
 | `{ "not": ... }` | The condition inside does not hold |
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |

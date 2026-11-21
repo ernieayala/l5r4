@@ -131,6 +131,8 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
       name: actor.name
     }),
     target: opponent,
+    // A Technique's Focus-roll bonus predicates on the stage
+    options: [`duel:${stage}`],
     modifiers: buildStageModifiers(actor, { stage, focusBonus })
   };
   if (stage === "assessment") {

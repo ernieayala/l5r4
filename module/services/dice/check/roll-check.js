@@ -62,6 +62,7 @@ import {
  * @property {CheckModifierInput[]} [modifiers=[]] Extra modifiers from the caller (Increased Damage, Raises)
  * @property {Item} [weapon]             Weapon of an attack or damage roll: its own rules apply
  * @property {Actor|null} [target]       The target; without it, the user's single target for an attack
+ * @property {string[]} [options=[]]     Roll options the caller adds for predicates (a duel stage: `duel:focus`)
  * @property {{label: string, roll: number, keep: number, bonus?: number, explode?: number|null}} [damage]
  *   An attack's damage pool, stored on its message for the damage button
  * @property {string} [attackOf]         The attack message a damage roll belongs to
