@@ -2,426 +2,230 @@
 
 🇺🇸 🇪🇸 🇫🇷 🇧🇷 🇩🇪 🇷🇺
 
-A Foundry VTT system for Legend of the Five Rings 4th Edition. It does the Roll & Keep math, tracks Wounds, Void Points, XP, and spell slots, and applies stances and conditions. You and your GM keep the choices the rules give you.
-
 [![Foundry v14](https://img.shields.io/badge/Foundry-v14-informational)](https://foundryvtt.com/) [![Version 4.0.0](https://img.shields.io/badge/Version-4.0.0-blue)](https://github.com/ernieayala/l5r4/releases) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
+
+Play Legend of the Five Rings 4th Edition in Foundry VTT without doing the bookkeeping by hand.
+
+L5R asks a lot of arithmetic from a table. You count dice, cap them at ten, add Raises to the TN, track Wounds by rank, and remember which stance someone took last Round. This system does that work. You still decide when to spend a Void Point, how many Raises to call, and which stance to take. The system shows you the numbers and leaves those calls to you.
 
 **Questions?** Discord: **@erniez**
 
 ---
 
-## Table of Contents
+## Contents
 
-- [Installation](#installation)
-- [What's Included](#whats-included)
-  - [Core Mechanics](#core-mechanics)
-  - [Combat](#combat)
-  - [Equipment & Items](#equipment--items)
-  - [Rules & Effects](#rules--effects)
-  - [Visual Effects & Animations](#visual-effects--animations)
-  - [Dialogs & Tools](#dialogs--tools)
-  - [Table Tools](#table-tools)
-  - [Compendium Packs](#compendium-packs)
-  - [Long Rest & Healing](#long-rest--healing)
-- [System Settings](#system-settings)
-- [Recommended Modules](#recommended-modules)
-- [Contributing](#contributing)
-- [License & Legal](#license--legal)
-- [Support](#support)
+- [New in 4.0](#new-in-40)
+- [Install](#install)
+- [How a Roll Works](#how-a-roll-works)
+- [Your Character](#your-character)
+- [In a Fight](#in-a-fight)
+- [Magic](#magic)
+- [Between Scenes](#between-scenes)
+- [Running the Game](#running-the-game)
+- [Settings](#settings)
+- [Optional Modules](#optional-modules)
+- [Help and Legal](#help-and-legal)
 
 ---
 
-## Installation
+## New in 4.0
 
-**Requires Foundry VTT 14 (14.370 or later).** On Foundry 13, install version 3.2.1 from its manifest URL:
+4.0.0 moves the system to Foundry 14 and automates most of the Core Rulebook's mechanics.
+
+- **One roll dialog** for Skills, Traits, Rings, spells, attacks, damage, and Initiative. It shows each modifier and where it came from.
+- **Damage that lands.** The attack card rolls damage and applies it to the target's Wounds after Reduction. Undo reverses it.
+- **Maneuvers, duels, and grapples.** Spend Raises on Called Shot, Disarm, Feint, and the rest. Iaijutsu duels and grapples run as chat cards.
+- **Effects that end on time.** Stances, conditions, and Fear expire at the right Turn, Round, or encounter end, and the system removes them.
+- **Rules on items.** An Advantage, School, or piece of armor carries its own bonuses, so dropping it on a sheet applies them.
+- **Compendium packs** for the Core Rulebook: Clans, Schools, Skills, Advantages, spells, weapons, creatures, and more, with a browser to search them.
+- **Table tools** for the GM: roll links in journals, request cards that each player rolls, and an effect panel.
+
+The [Changelog](CHANGELOG.MD) lists every change.
+
+---
+
+## Install
+
+**You need Foundry VTT 14 (14.370 or later).**
+
+### New install
+
+1. In Foundry, open **Game Systems** → **Install System**
+2. Search for "Legend of the Five Rings 4e Enhanced", or paste this manifest URL:
+   ```
+   https://github.com/ernieayala/l5r4/releases/latest/download/system.json
+   ```
+3. Click **Install**, then create a world with the system
+
+### Upgrading from 3.2.1
+
+1. Back up your world
+2. Update Foundry to 14.370 or later, then update the system to 4.0.0
+3. Unlock any world compendiums of Actors or Items you want converted. Locked compendiums stay as they were
+4. Open the world as a GM. The system converts the world once, on that first load
+5. Check each character's XP total, Insight Rank, and each NPC's Wounds and Initiative. 4.0.0 counts them by the book, so some numbers move
+
+### Staying on Foundry 13
+
+4.0.0 won't install on Foundry 13. Use 3.2.1 there:
 
 ```
 https://github.com/ernieayala/l5r4/releases/download/v3.2.1/system.json
 ```
 
-### Upgrading from 3.2.1
+### Coming from the old l5r4 system
 
-1. Back up your world, then update Foundry to 14.370 or later and the system to 4.0.0
-2. Unlock the world compendiums of Actors and Items you want converted
-3. Open the world as a GM: the system converts the world's data once, on that first load
-4. Check XP totals, Insight Rank, and NPC Wounds and Initiative. 4.0.0 calculates them by the book, so the numbers can change
-
-The [Changelog](CHANGELOG.MD) lists what the upgrade converts and what changed.
-
-### Fresh Install
-
-1. In Foundry VTT, open **Game Systems** → **Install System**
-2. Search for "Legend of the Five Rings 4e Enhanced", or paste the manifest URL:
-   ```
-   https://github.com/ernieayala/l5r4/releases/latest/download/system.json
-   ```
-3. Click **Install**
-4. Create a world with the system
-
-### Migrating from the Old L5R4 System
-
-If you come from the original [l5r4 system v12](https://gitlab.com/team-l5r4/l5r4) or a 1.x version, you need the migrator module. The system ID changed from `l5r4` to `l5r4-enhanced`, so Foundry treats the two as different systems.
-
-**Migration Tool:** install this module in your old world and your new one:
+If your world uses the original [l5r4 system](https://gitlab.com/team-l5r4/l5r4) or a 1.x version, Foundry sees it as a different system, because the system ID changed from `l5r4` to `l5r4-enhanced`. You move your data across with the migrator module:
 
 ```
 https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ```
 
-**Steps:**
-
-1. Export the old world's data (the module detects its schema)
-2. Create a new world with l5r4-enhanced
-3. Import the data; the module converts it
+1. Install the module in the old world and export its data
+2. Create a new world with this system
+3. Install the module there and import the data
 4. Check your actors, items, scenes, and journals
 
-**Problems?** See the [Migration Guide](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md) for each step and its troubleshooting.
+The [Migration Guide](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md) covers each step and its troubleshooting.
 
 ---
 
-## What's Included
+## How a Roll Works
 
-### Core Mechanics
+L5R rolls are written XkY: roll X ten-sided dice, keep the Y highest. A 10 rolls again and adds to that die. A Skill roll uses your Skill rank plus a Trait, keeping the Trait, so Courtier 3 with Awareness 3 rolls 6k3.
 
-**Roll & Keep Dice**
+Click any Skill, Trait, Ring, weapon, or spell on your sheet and the roll dialog opens with the pool already built. Each modifier sits on its own line with its source, such as your Wound penalty or a stance bonus, and a box to leave it off if the GM rules it doesn't apply. Before you roll, you choose:
 
-- XkY rolls: roll X dice and keep the Y highest; a 10 rolls again and adds to its die
-- Raises: +5 TN each, up to your Void Ring
-- Free Raises from Skills, Techniques, and Advantages, each lowering the TN by 5
-- Emphases re-roll 1s once
-- Unskilled rolls: no exploding dice, no Raises
-- Ten Dice Rule, with the optional Little Truths variant
+- **Raises.** Each one adds 5 to the TN for a better result. You can call up to your Void Ring in Raises.
+- **Free Raises** from your Skills, Techniques, or Advantages. They give the benefit without raising the TN.
+- **A Void Point** for +1k1.
+- **An Emphasis**, which re-rolls dice showing 1.
+- Any situational bonus or penalty the GM calls for.
 
-**Roll Dialog**
+The system enforces the dice limits for you. No roll goes past 10 dice rolled or kept; extra dice turn into kept dice, then into flat bonuses, as the Ten Dice Rule says. An unskilled roll gets no exploding dice and no Raises.
 
-- Skill, Trait, Ring, spell, attack, damage, and Initiative rolls share one dialog
-- It lists each modifier with its source and a box to leave it off
-- Choose Raises, Free Raises, a Void Point (+1k1), an Emphasis, and situational modifiers before you roll
-- An attack starts at its target's Armor TN
+**Shortcuts:**
+
 - Shift-click a roll to skip the dialog and take the defaults
-- Right-click a roll in chat for a Contested Roll or "Re-roll, keep the better"
-
-**Characters**
-
-- Eight Traits; each Ring but Void is the lower of its two Traits
-- Void Points up to your Void Ring
-- Honor, Glory, Status, and Shadowlands Taint
-- Insight Rank calculated from your Rings and Skill ranks, or typed in by the GM
-
-**XP**
-
-- Prices Traits, the Void Ring, Skills, Emphases, Advantages, kata, kiho, and memorized spells as the book does
-- Family and School bonuses count as free ranks
-- Disadvantages give up to 10 XP; the GM sets the cap
-- The XP Manager lists each gain and purchase with its date
-
-**Ledger & Taint**
-
-- The Ledger records each Honor, Glory, Status, and Taint change with its reason
-- Taint penalties apply at Taint Ranks 3 and 4; Embracing the Taint is a choice in the roll dialog
-- Lost characters add their Taint Rank to physical Trait rolls and have no Void Points
-
-**Wealth**
-
-- Koku, bu, and zeni, with conversion between them
-- A calculator-style Wealth Manager: add or remove by denomination, convert up or down
-
-### Combat
-
-**Initiative & Movement**
-
-- Initiative rolls (Insight Rank + Reflexes)k(Reflexes), plus modifiers; an NPC with no stored pool counts as Insight Rank 1
-- A Void Point gives +10 to one Initiative roll
-- Movement: Water Ring × 5 feet on a Free Action, × 10 on a Simple Action, × 20 at most
-
-**Five Stances**
-
-- Attack
-- Full Attack: +2k1 on melee attacks, -10 Armor TN
-- Defense: Armor TN + Air Ring + Defense rank
-- Full Defense: roll Defense / Reflexes at each Turn start; half the total, rounded up, adds to Armor TN
-- Center: next Round, +10 Initiative and +1k1 plus your Void Ring on one roll you choose
-
-**Maneuvers & Duels**
-
-- Spend Raises on Called Shot, Disarm, Extra Attack, Feint, Increased Damage, and Knockdown
-- Guard from the token controls: Guarding gives -5 Armor TN, Guarded +10
-- Iaijutsu duels and grapples run as chat-card flows
-
-**Mounted Combat**
-
-- Toggle Mounted from the token's status menu or the Condition Manager
-- +1k0 on attacks against unmounted targets
-- The sheet warns before Full Attack while mounted, unless you have Horsemanship 3
-
-**Damage & Wounds**
-
-- The attack card rolls damage from the weapon, Strength, arrow, and Raises, and applies it to the target after Reduction
-- "Reduce with Void" takes 10 Wounds off; Undo reverses the damage
-- Eight Wound Ranks; each one past Healthy adds its penalty to your TNs
-- Healthy holds Earth × 5 Wounds; the later ranks use the campaign's multiplier (×2 by default)
-- Invulnerable and Spirit creatures take damage by their own rules
-
-**Fear**
-
-- NPCs carry a Fear Rank
-- Resist with a Willpower roll plus Honor Rank against TN 5 + 5 × Fear Rank
-- Failing gives Feared: -Xk0 on every roll until the encounter ends
-- Test several controlled tokens at once
-
-### Equipment & Items
-
-**Weapons**
-
-- Melee, ranged, and thrown weapons, each with its Skill
-- Custom explosion thresholds
-- Click a weapon to attack; its chat card carries the damage button
-- Bows use their Strength rating and arrow type, with a minimum Strength, mounted and on-foot TNs, and shots into melee
-
-**Armor**
-
-- Armor TN bonus and Reduction while worn
-- Equipped toggle
-
-**Skills**
-
-- Several Emphases per Skill
-- Mastery Abilities apply once the rank reaches them, where the system can automate them
-- School Skills
-- Roll, keep, and total bonuses
-
-**Advantages, Disadvantages, Kata, Kiho, Tattoos**
-
-- XP costs tracked, Clan discounts included
-- Advantages and Disadvantages ask their choices when added and check the book's limits (one Ancestor, matched sets, Large or Small)
-- Kata, kiho, and tattoos work while you activate them with the play button on the sheet: one kata and one tattoo at a time, one kiho of each type but Martial
-
-**Clans, Families, Schools**
-
-- A Family or School gives its Trait bonus as a free rank
-- A School grants its Skills and each Technique as its School Rank arrives; a shugenja School also gives Sense, Commune, and Summon
-- Dropping a second School asks whether to replace the first or add it beside it
-
-**Spells**
-
-- Spell Casting Rolls: Ring + School Rank, keep Ring, against TN 5 + 5 × Mastery Level
-- Affinity and Deficiency move the School Rank by 1
-- Casting above your School Rank needs the GM's leave
-- Optional spell slots per Ring, and a memorization toggle
-- Concentration asks for a Willpower roll after a heavy hit
-
-### Rules & Effects
-
-**Rules**
-
-- Items and Active Effects carry rules (`system.rules`): Trait bonuses, roll modifiers, Armor TN, Reduction, Free Raises, conditions, choices, granted items, and XP prices
-- Edit them on an item's Rules tab, as forms or as JSON
-- The [Rules and Active Effects Guide](ACTIVE_EFFECTS.md) covers each rule key
-
-**Conditions & Durations**
-
-- Stances and conditions are status effects that carry their rules: Blinded, Dazed, Fatigued, Prone, Stunned, and the rest
-- Effects end at the start or end of a Turn, a Round end, the end of a combat or encounter, or a game time; the system then deletes them
-- Dazed and Stunned roll their saves in the Reactions stage
-- The Condition Manager toggles them from one window
-
-### Visual Effects & Animations
-
-**JB2A Integration** _(requires the Sequencer and JB2A modules)_
-
-- Stance animations for Full Attack, Full Defense, and Center
-- Projectiles for ranged attacks, strike effects for melee
-- Condition markers on affected tokens
-- Works with the free and the Patreon JB2A collections
-- Without the modules, the system runs with no animations
-
-**Setup**
-
-1. Install the [Sequencer](https://foundryvtt.com/packages/sequencer) module
-2. Install [JB2A - Jules & Ben's Animated Assets](https://foundryvtt.com/packages/jb2a_patreon)
-3. Activate both in your world; the animations play from then on
-
-### Dialogs & Tools
-
-**XP Manager**
-
-- Each XP gain and purchase, with its date
-- Sort by type, cost, or note
-- A Recalculate button rebuilds the totals from the character
-
-**Wealth Manager**
-
-- Calculator layout for koku, bu, and zeni
-- Add or remove by denomination
-- Convert between denominations
-- Refuses a change that would leave you short
-
-**Emphasis Manager**
-
-- Buy several Emphases per Skill, at 2 XP each
-- Choose a trained Emphasis in the roll dialog to re-roll 1s
-
-**Wound Config**
-
-- Edit Wound thresholds per character
-- Formula or manual modes
-- NPCs set how many Wound Ranks they use
-
-**Armor Config**
-
-- Edit Armor TN and Reduction
-- Choose whether armor stacks
-
-**Combat Config**
-
-- Initiative modifiers
-- Movement multiplier and modifier
-
-**Condition Manager**
-
-- Toggle each condition from one window
-- Shows which conditions are on
-
-**NPC Attack Editor**
-
-- Edit attack and damage values
-- Choose the action type
-
-### Table Tools
-
-**Text links** (in journals, item descriptions, and chat)
-
-- `@Check[skill=Kenjutsu|trait=agi|tn=20]`, `@Check[trait=ref]`, `@Check[ring=water|tn=15]`: opens the roll dialog for your selected token or character, filled in and still editable
-- `@Damage[3k2]`: rolls damage you apply to the selected tokens
-- `@Condition[dazed]`: applies a condition to the targeted tokens (else the selected ones)
-- `@Fear[2]`: a Fear test for the targeted tokens (else the selected ones)
-- Add `{label}` for your own text, as in `@Check[trait=ref]{Dodge}`; a link with a mistake shows what is wrong
-- The GM's Check links have a second button that posts a request card: each player rolls it with their own character
-
-**Effect panel** (the hourglass in the token controls)
-
-- The selected token's effects, or your character's: icon, source, and how long each lasts
-- Open an effect's source, or remove an effect you own
-
-**Hotbar macros**
-
-- Drag a Skill, weapon, spell, kata, kiho, Trait, or Ring from a sheet to the hotbar to roll it from there
-
-**Floating numbers**
-
-- Changes to Wounds and Void Points float over the token, as "+7 Wounds" or "−1 Void Points"
-
-### Compendium Packs
-
-**Packs** (in the "L5R4 Core Rulebook" compendium folder)
-
-- Clans, Families, Schools (Advanced Schools included), Techniques (Alternate and Ronin Paths included), Skills, Advantages (Ancestors included), Disadvantages, Spells (maho included), Kata, Kiho, Tattoos, Weapons, Armor, and Equipment from the Core Rulebook, poisons included
-- Creatures (GM only): the book's animals and monsters as NPCs with their attacks, Wound levels, Fear, Taint, Skills, and special abilities such as Invulnerability, Spirit, Swift, and jade-limited Reduction
-- Each entry carries the book's numbers and its page ("Core Rulebook p.204"). The packs leave out the book's text, so keep your copy handy
-- An entry's sheet and chat card list what its rules do; a mechanic the system does not automate gets a one-line summary
-
-**Compendium Browser** (the Browse button in the Compendium sidebar)
-
-- The system and world compendiums you can see, in tabs, with filters and a name search
-- Drag an entry to a sheet, or click Add to give it to your selected token or your character; prerequisites and choices come up as for a drop
-- The GM imports creatures with Import
-
-### Long Rest & Healing
-
-**Rest Button** (on character sheets)
-
-- Heals (Stamina × 2) + Insight Rank Wounds
-- Restores Void Points to your Void Ring, unless you are Fasting
-- Refills your spell slots
-- Removes Fatigued
-- Posts a chat card with the result
+- Right-click a roll in chat for a **Contested Roll** or **Re-roll, keep the better**
+- Drag a Skill, weapon, spell, kata, kiho, Trait, or Ring to the hotbar to roll it from there
 
 ---
 
-## System Settings
+## Your Character
 
-**House Rules** (World)
+**Traits and Rings.** You raise your eight Traits. Each Ring except Void equals the lower of its two Traits, so the sheet updates your Rings, Wounds, Armor TN, and Initiative when a Trait changes. Void Points refill up to your Void Ring.
 
-- Apply Little Truths exception: a pool the Ten Dice Rule converted gets +2 (default: off)
-- Optional rule: Honor Roll (default: off); the GM starts each session with the New session token control
+**Building from the packs.** Drag a Clan, Family, and School onto your sheet. The Family and School give their Trait bonus as a free rank. The School grants its Skills, and each Technique arrives when your School Rank reaches it. Advantages and Disadvantages ask for any choice they need when you add them, and they check the book's limits, such as one Ancestor.
 
-Each character sets armor stacking in its Armor Config window (default: off, highest armor only).
+**XP.** The XP Manager prices each purchase the way the book does: Traits, the Void Ring, Skills, Emphases, Advantages, kata, kiho, and spells. Family and School bonuses count as free ranks, and Disadvantages give up to 10 XP (the GM can change that cap). Each gain and purchase goes in a dated log. If the totals look wrong, the Recalculate button rebuilds them from the character.
 
-**Display** (Client)
+**Insight Rank** comes from your Rings and Skill ranks. A GM can switch it to a typed-in value.
 
-- Floating Wound and Void numbers over tokens (default: on)
+**Honor, Glory, Status, and Taint.** The Ledger records each change with its reason, so you can see later why your Glory dropped. Shadowlands Taint applies its penalties at Taint Ranks 3 and 4. A character who embraces the Taint makes that choice in the roll dialog.
 
-**Migration** (World)
-
-- Run migrations on startup (default: on)
-- Force migration on startup: reruns every migration on the next load, then turns itself off
+**Wealth.** The Wealth Manager holds koku, bu, and zeni, converts between them, and refuses to take away more than you have.
 
 ---
 
-## Recommended Modules
+## In a Fight
 
-**Dice Visuals**
+**Initiative.** Each character rolls (Insight Rank + Reflexes)k(Reflexes) once, at the start of the skirmish. A Void Point adds +10 to that roll.
 
-- [Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice): 3D dice for Roll & Keep
+**Stances.** Each one is a status effect on your token:
 
-**Visual Effects** _(optional, for combat animations)_
+| Stance | What it does |
+|--------|--------------|
+| Attack | No change |
+| Full Attack | +2k1 on melee attacks, -10 Armor TN |
+| Defense | Adds your Air Ring and Defense rank to your Armor TN |
+| Full Defense | Roll Defense / Reflexes at each Turn start; half the total, rounded up, adds to your Armor TN |
+| Center | Next Round: +10 Initiative, and +1k1 plus your Void Ring on one roll you choose |
 
-- [Sequencer](https://foundryvtt.com/packages/sequencer): animation framework
-- [JB2A - Jules & Ben's Animated Assets](https://foundryvtt.com/packages/jb2a_patreon): visual effects library
+**Attacking.** Click a weapon. The dialog starts the TN at your target's Armor TN, so you see what you need before you roll. Spend Raises on a maneuver: Called Shot, Disarm, Extra Attack, Feint, Increased Damage, or Knockdown. The attack's chat card then rolls damage from the weapon, your Strength, any arrow, and your Raises.
 
-**Development** _(for contributors)_
+**Taking damage.** The damage card applies to the target after Reduction. Your Wound Rank moves down from Healthy, and each rank past Healthy adds its penalty to the TN of every roll you make. **Reduce with Void** on the result card spends one of your Void Points to take 10 Wounds off. **Undo** reverses the damage and returns any Void Point spent on it.
 
-- [Quench](https://foundryvtt.com/packages/quench): integration test runner
+**Guard.** Set it from the token controls. The guard takes -5 Armor TN; the guarded character gets +10.
 
----
+**Duels and grapples.** Iaijutsu duels and grapples walk both sides through each step on chat cards.
 
-## Contributing
+**Mounted.** Toggle Mounted from the token's status menu. You get +1k0 on attacks against targets on foot, and the sheet warns you before Full Attack while mounted unless you have Horsemanship 3.
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers:
+**Fear.** Select the characters' tokens and press the Fear button on the NPC's sheet. Each character rolls Willpower plus Honor Rank against TN 5 + 5 × Fear Rank. A failure gives Feared, a penalty on every roll that lasts until the encounter ends.
 
-- Development setup
-- Architecture guidelines
-- Code standards
-- Testing requirements
-
-**Ways to Contribute:**
-
-- Bug fixes
-- Features
-- Translations (6 languages)
-- Documentation
-
-Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4).
+**Conditions** like Dazed, Stunned, Prone, and Fatigued carry their penalties and end when their duration runs out. Dazed and Stunned roll their saves in the Reactions stage.
 
 ---
 
-## License & Legal
+## Magic
 
-**System Code:** MIT License. See [LICENSE](LICENSE).
+A Spell Casting roll is Ring + School Rank, keep Ring, against TN 5 + 5 × the spell's Mastery Level. Affinity and Deficiency move your School Rank by 1 for that roll. The book forbids casting a spell above your School Rank. A player who tries gets told so; a GM who tries gets asked whether to cast it anyway.
 
-**L5R Content:** This is an unofficial fan project, not affiliated with or endorsed by Fantasy Flight Games, Edge Studio, or Asmodee. Legend of the Five Rings and L5R are trademarks of Fantasy Flight Games.
-
-**Rulebook Required:** You need the L5R 4th Edition rulebooks to play. This system ships no rulebook text.
-
-**Foundry VTT:** Made under the [Foundry VTT Limited License Agreement](https://foundryvtt.com/article/license/).
+Spell slots per Ring are optional: tick **Use spell slot** in the roll dialog to spend one. A rest refills them. A shugenja School also gives you Sense, Commune, and Summon. When a caster takes a heavy hit while concentrating, the system asks for a Willpower roll.
 
 ---
 
-## Support
+## Between Scenes
 
-**Get Help:**
+**Rest.** The Rest button on a character sheet covers one night. It heals (Stamina × 2) + Insight Rank Wounds, refills Void Points and spell slots, and removes Fatigued. A Fasting character gets no Void Points back. A chat card shows the result.
 
-- Discord: **@erniez**
-- [GitHub Issues](https://github.com/ernieayala/l5r4/issues): bug reports
-
-**Support the Project:**
-
-- ⭐ Star the repository
-- 🐛 Report bugs
-- 💬 Share feedback
-- 🌐 Submit translations
-- 🔧 Contribute code
+**Kata, kiho, and tattoos** work while you switch them on with the play button on the sheet. You can have one kata and one tattoo active at a time, and one kiho of each type except Martial.
 
 ---
 
-**Links:** [Releases](https://github.com/ernieayala/l5r4/releases) | [Issues](https://github.com/ernieayala/l5r4/issues)
+## Running the Game
+
+**Compendium packs.** The "L5R4 Core Rulebook" folder holds Clans, Families, Schools, Techniques, Skills, Advantages, Disadvantages, spells, kata, kiho, tattoos, weapons, armor, equipment, and creatures. Each entry has the book's numbers, its rules, and its page. The packs carry no rulebook text, so keep your book nearby.
+
+**Compendium Browser.** Press Browse in the Compendium sidebar to search every pack you can see, with filters. Drag an entry to a sheet, or click Add to give it to your selected token. The GM imports creatures from here.
+
+**Roll links.** Type these in a journal, item description, or chat:
+
+| Link | What it does |
+|------|--------------|
+| `@Check[skill=Kenjutsu\|trait=agi\|tn=20]` | Opens the roll dialog, filled in, for your selected token or your character |
+| `@Damage[3k2]` | Rolls damage to apply to the selected tokens |
+| `@Condition[dazed]` | Applies a condition to the targeted tokens, or the selected ones |
+| `@Fear[2]` | Calls a Fear test for the targeted tokens, or the selected ones |
+
+Add `{label}` for your own text, as in `@Check[trait=ref]{Dodge}`. A Check link the GM posts gets a second button that sends a request card, and each player rolls it with their own character.
+
+**Effect panel.** The hourglass in the token controls lists the selected token's effects, where each came from, and how long it lasts.
+
+**Creatures** from the pack come with their attacks, Wound levels, Fear, Taint, and special rules such as Invulnerability and Spirit, which change how they take damage.
+
+**Homebrew.** Every item and Active Effect has a Rules tab where you give it bonuses: Trait changes, roll modifiers, Armor TN, Reduction, Free Raises, conditions, and more. The [Rules and Active Effects Guide](ACTIVE_EFFECTS.md) explains each rule.
+
+---
+
+## Settings
+
+| Setting | Default | What it does |
+|---------|---------|--------------|
+| Apply Little Truths exception | Off | A pool the Ten Dice Rule cut down gets +2 |
+| Optional rule: Honor Roll | Off | The GM starts each session with the New session token control |
+| Floating Wound and Void numbers | On | Shows Wound and Void Point changes over tokens (per player) |
+| Run migrations on startup | On | Converts older world data when the GM loads the world |
+| Force migration on startup | Off | Reruns every migration on the next load, then turns itself off |
+
+Each character chooses whether its armor stacks in its Armor Config window. By default only the best armor counts.
+
+---
+
+## Optional Modules
+
+- [Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice) rolls 3D dice for each roll.
+- [Sequencer](https://foundryvtt.com/packages/sequencer) and [JB2A](https://foundryvtt.com/packages/jb2a_patreon) together add animations: stance effects, projectiles for ranged attacks, strikes for melee, and markers on conditioned tokens. Both the free and Patreon JB2A collections work. Without these modules, you play with no animations.
+
+---
+
+## Help and Legal
+
+**Help:** Discord **@erniez**, or open a [GitHub issue](https://github.com/ernieayala/l5r4/issues) for bugs. Translations and fixes are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) explains how.
+
+**License:** the system code is MIT. See [LICENSE](LICENSE).
+
+**You need the book.** This system ships no rulebook text. You need the L5R 4th Edition Core Rulebook to play.
+
+This is an unofficial fan project, not affiliated with or endorsed by Fantasy Flight Games, Edge Studio, or Asmodee. Legend of the Five Rings and L5R are trademarks of Fantasy Flight Games. Made under the [Foundry VTT Limited License Agreement](https://foundryvtt.com/article/license/).
