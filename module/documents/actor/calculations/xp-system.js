@@ -1,126 +1,31 @@
 /**
- * @module xp-system
- * @description Manages L5R4 experience point (XP) tracking and calculations.
- *
- * L5R4 XP System:
- * - Characters earn XP to improve traits, skills, and abilities
- * - Traits cost increases with rank (4×rank for most traits)
- * - Void Ring costs 6×rank
- * - Skills use triangular number formula: rank×(rank+1)/2
- * - Advantages/Kata/Kiho have fixed costs
- * - Spells cost their Mastery Level when memorized
- *
- * XP Sources:
- * - Base XP (starting 40 for new characters)
- * - Disadvantages (capped, typically 10 XP max)
- * - Manual adjustments (GM awards, session XP)
- *
- * Architecture:
- * - Calculates total XP earned and spent
- * - Tracks XP breakdown by category
- * - Handles free trait bonuses from character creation
- * - Applies trait discounts from advantages/disadvantages
- * - Calculates Insight Rank from Insight total
- *
- * Foundry Integration:
- * - Reads from actor flags for XP tracking
- * - Modifies sys._xp with calculated values
- * - Tracks retroactive free bonus application
+ * @module documents/actor/calculations/xp-system
+ * @description A PC's XP and Insight Rank. The XP arithmetic is module/utils/xp-ledger.js: this module gathers what
+ * it prices from the actor (stored ranks, Skills, items, the 3.2.1 XP flags) and its Cost rules (roadmap/STAGE-11),
+ * and keeps the legacy free-rank flag current when a Trait is raised.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import {
-  calculateXpStepCostForTrait,
-  getCreationFreeBonus
+  getCreationFreeBonus,
+  getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
+import {
+  getCostPricer,
+  getKihoLimits,
+  getXpEntries,
+  getXpTotals
+} from "../../../utils/xp-ledger.js";
 
 /**
- * Calculates XP cost to raise a trait from one rank to another.
- *
- * @param {number} oldRank - Starting trait rank
- * @param {number} newRank - Target trait rank
- * @param {number} freeEff - Free bonus points available (from character creation)
- * @param {number} disc - Discount modifier (from advantages/disadvantages)
- * @returns {number} Total XP cost
- *
- * @description
- * Sums XP cost for each rank increase:
- * - Standard trait cost: 4×rank (modified by discounts)
- * - Free bonuses reduce cost at specific ranks
- * - Discounts apply to each step
- */
-function calculateTraitXpCost(oldRank, newRank, freeEff, disc) {
-  let totalXP = 0;
-  // Sum cost for each rank increase
-  for (let r = oldRank + 1; r <= newRank; r++) {
-    totalXP += calculateXpStepCostForTrait(r, freeEff, disc);
-  }
-  return totalXP;
-}
-
-/**
- * Calculates XP cost to raise Void Ring from one rank to another.
- *
- * @param {number} oldRank - Starting Void rank
- * @param {number} newRank - Target Void rank
- * @param {number} disc - Discount modifier
- * @returns {number} Total XP cost
- *
- * @description
- * Void Ring has special cost formula:
- * - Base cost: 6×rank per step
- * - More expensive than regular traits (4×rank)
- * - Discounts can apply from advantages
- * - Minimum cost per step is 0
- */
-function calculateVoidXpCost(oldRank, newRank, disc) {
-  let totalXP = 0;
-  // Sum cost for each Void rank increase
-  for (let r = oldRank + 1; r <= newRank; r++) {
-    const step = 6 * r + disc; // Void costs 6×rank
-    totalXP += Math.max(0, step);
-  }
-  return totalXP;
-}
-
-/**
- * Type guard to check if an item matches expected type.
- *
- * @param {Item} item - The item to check
- * @param {string} expectedType - Expected item type
- * @returns {boolean} True if item matches type
- */
-function isItemOfType(item, expectedType) {
-  return item && typeof item.type === "string" && item.type === expectedType;
-}
-
-/**
- * Calculates Insight Rank from total Insight points.
- *
+ * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25
+ * points.
  * @param {number} insight - Total Insight points
  * @returns {number} Insight Rank (1-10+)
- *
- * @description
- * L5R4 Insight Rank thresholds:
- * - Rank 1: 0-149 Insight
- * - Rank 2: 150-174 Insight
- * - Rank 3: 175-199 Insight
- * - Rank 4: 200-224 Insight
- * - Rank 5: 225-249 Insight
- * - Rank 6+: Every 25 Insight above 225
- *
- * Insight Rank determines:
- * - School Rank (techniques available)
- * - Character power level
- * - Mastery abilities
- *
- * @example
- * calculateInsightRank(180); // Returns 3
- * calculateInsightRank(250); // Returns 6
  */
-export function calculateInsightRank(insight) {
+export function getInsightRank(insight) {
   // Thresholds for Ranks 2-5
   const t = [150, 175, 200, 225];
   let rank = 1;
@@ -141,227 +46,47 @@ export function calculateInsightRank(insight) {
 }
 
 /**
- * Prepares PC experience point tracking and calculations.
- *
+ * Price a PC's XP and store `sys._xp`: total, spent, available, the breakdown by category, and the itemized
+ * entries.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * game-rules/63_advantages_and_disadvantages.md, p.145
  * @param {Actor} actor - The PC actor
- * @param {Object} sys - Actor's system data
- *
- * @description
- * Calculates complete XP accounting:
- *
- * XP Earned:
- * - Base XP (default 40 for new characters)
- * - Disadvantages (capped, typically 10 XP max)
- * - Manual adjustments (GM awards, session XP)
- *
- * XP Spent:
- * - Traits: 4×rank per step (with discounts/free bonuses)
- * - Void: 6×rank per step
- * - Skills: Triangular number formula
- * - Emphases: 2 XP each
- * - Advantages/Kata/Kiho: Fixed costs
- * - Spells: Mastery Level (when memorized)
- *
- * Stores results in sys._xp with total/spent/available breakdown.
+ * @param {object} sys - Actor's system data
  */
 export function preparePcExperience(actor, sys) {
-  const flags = actor.flags?.[SYS_ID] ?? {};
-
-  // Base XP: Starting character points (default 40)
-  const xpBase = Number.isFinite(+flags.xpBase) ? Number(flags.xpBase) : 40;
-
-  // Manual XP: GM awards, session XP, etc.
-  const xpManual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
-  const manualSum = xpManual.reduce((a, e) => a + toInt(e?.delta), 0);
-
-  // Calculate XP from disadvantages
-  let disadvGranted = 0;
-  for (const it of actor.items) {
-    if (!isItemOfType(it, "disadvantage")) {
-      continue;
-    }
-    disadvGranted += Math.max(0, toInt(it.system?.cost));
-  }
-
-  // Apply disadvantage cap (default 10 XP max)
-  const configuredCap = Number.isFinite(+flags.disadvantageCap)
-    ? Number(flags.disadvantageCap)
-    : 10;
-  const disadvCap = Math.min(configuredCap, disadvGranted);
-
-  // Get trait discounts and free bonuses from flags
-  const traitDiscounts = actor.flags?.[SYS_ID]?.traitDiscounts ?? {};
-  const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
-
-  // Calculate XP spent on traits
-  let traitsXP = 0;
-  for (const k of Object.keys(sys.traits ?? {})) {
-    const baseCur = toInt(actor._source?.system?.traits?.[k] ?? sys.traits[k]);
-    const freeBase = toInt(freeTraitBase?.[k] ?? 0);
-
-    // Free bonus from character creation (e.g., clan/family bonuses)
-    const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
-    const disc = toInt(traitDiscounts?.[k] ?? 0);
-
-    // Baseline: Starting rank 2 + any free increases
-    const baseline = 2 + freeBase;
-
-    // Calculate XP cost for ranks above baseline
-    if (baseCur > baseline) {
-      traitsXP += calculateTraitXpCost(baseline, baseCur, freeEff, disc);
-    }
-  }
-
-  // Calculate XP spent on Void Ring (special handling)
-  // Void Ring can be stored in multiple formats due to data model evolution
-  // Try _source first (original data), then prepared data, with multiple fallback paths
-  const voidBaseCur = toInt(
-    actor._source?.system?.rings?.void?.rank ??
-      actor._source?.system?.rings?.void?.value ??
-      actor._source?.system?.rings?.void ??
-      sys?.rings?.void?.rank ??
-      sys?.rings?.void?.value ??
-      sys?.rings?.void ??
-      0
-  );
-  const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
-  const voidBaseline = 2 + voidFreeBase; // Starting Void rank 2
-  const voidDisc = toInt(traitDiscounts?.void ?? 0);
-
-  // Void costs 6×rank (more expensive than regular traits)
-  const voidXP =
-    voidBaseCur > voidBaseline ? calculateVoidXpCost(voidBaseline, voidBaseCur, voidDisc) : 0;
-
-  // Calculate XP spent on skills and emphases
-  let skillsXP = 0;
-  for (const it of actor.items) {
-    if (!isItemOfType(it, "skill")) {
-      continue;
-    }
-    const r = toInt(it.system?.rank);
-    const freeRanks = Math.max(0, toInt(it.system?.freeRanks ?? 0));
-
-    // Skill cost: Triangular number formula
-    // Rank 1=1 XP, Rank 2=3 XP, Rank 3=6 XP, Rank 4=10 XP, etc.
-    // Formula: rank×(rank+1)/2
-    if (r > freeRanks) {
-      skillsXP += (r * (r + 1)) / 2 - (freeRanks * (freeRanks + 1)) / 2;
-    }
-
-    // Emphasis cost: 2 XP each (after free emphases)
-    const trainedEmphases = Array.isArray(it.system?.trainedEmphases)
-      ? it.system.trainedEmphases
-      : [];
-    if (trainedEmphases.length > 0) {
-      const freeEmphasis = Math.max(0, toInt(it.system?.freeEmphasis ?? 0));
-      const paidEmphases = Math.max(0, trainedEmphases.length - freeEmphasis);
-
-      skillsXP += 2 * paidEmphases;
-    }
-  }
-
-  // Calculate XP spent on advantages, kata, kiho, and spells
-  let advantagesXP = 0;
-  let kataXP = 0;
-  let kihoXP = 0;
-  let spellsXP = 0;
-  for (const it of actor.items) {
-    if (isItemOfType(it, "advantage")) {
-      // Advantages have fixed XP costs
-      advantagesXP += toInt(it.system?.cost);
-    } else if (isItemOfType(it, "kata")) {
-      // Kata (martial techniques) have fixed costs
-      kataXP += toInt(it.system?.cost);
-    } else if (isItemOfType(it, "kiho")) {
-      // Kiho (mystical abilities) have fixed costs
-      kihoXP += toInt(it.system?.cost);
-    } else if (isItemOfType(it, "spell")) {
-      // Spells cost their Mastery Level when memorized
-      if (it.system?.memorized === true) {
-        spellsXP += toInt(it.system?.mastery);
-      }
-    }
-  }
-
-  // Calculate totals
-  const total = xpBase + disadvCap + manualSum;
-  const spent = traitsXP + voidXP + skillsXP + advantagesXP + kataXP + kihoXP + spellsXP;
-  const available = total - spent;
-
-  // Store XP tracking data for UI display
-  sys._xp = {
-    total,
-    spent,
-    available,
-    breakdown: {
-      base: xpBase,
-      manual: manualSum,
-      disadvantagesGranted: disadvCap,
-      traits: traitsXP,
-      void: voidXP,
-      skills: skillsXP,
-      advantages: advantagesXP,
-      kata: kataXP,
-      kiho: kihoXP,
-      spells: spellsXP
-    }
-  };
+  const build = xpBuildOf(actor);
+  const price = getCostPricer({
+    costs: actor.ruleBag.costs,
+    options: actor.rollOptions,
+    rollData: actor.getRollData(),
+    report: (source, message) =>
+      console.warn(`${SYS_ID} | Cost rule on "${source}" (${actor.name}) skipped: ${message}`)
+  });
+  const entries = getXpEntries(build, price);
+  // The entries stay on the prepared data for the XP manager's history (module/services/xp/calculator.js)
+  sys._xp = { ...getXpTotals(build, entries), entries, kiho: kihoLimitsOf(actor) };
 }
 
 /**
- * Tracks XP expenditure and applies free bonuses during actor updates.
- *
+ * Mark the free ranks a legacy Family or School bonus gives when an update raises a Trait or the Void Ring, and
+ * reset the retroactive XP version so the XP history is rebuilt. A legacy bonus (`system.trait`/`bonus`) is not
+ * applied to the Trait, so the player stores it as ranks: the raises to ranks 3 up to 2 + the bonus are free, and
+ * `xpFreeTraitBase` counts them. A TraitAdjust rule bonus adds on top of the stored rank and never marks a free
+ * rank. Only a PC is tracked.
+ * game-rules/48_character_creation_expanded.md, p.102-103
  * @param {Actor} actor - The PC actor being updated
- * @param {Object} changed - Object containing changed properties
- *
- * @description
- * Monitors trait increases to apply free bonuses:
- * - When a trait reaches rank 3 for the first time
- * - If character has unused free bonus from creation
- * - Automatically applies free bonus to save XP
- *
- * Free Bonus System:
- * - Characters get free +1 to certain traits at creation
- * - If not used during creation, can apply when raising to rank 3
- * - Tracked in xpFreeTraitBase flag
- * - Retroactive version flag prevents double-application
- *
- * Only runs for PC actors during updates.
+ * @param {object} changed - Object containing changed properties
  */
-export function trackXpExpenditure(actor, changed) {
+export function updateXpFlags(actor, changed) {
   try {
     if (actor.type !== "pc") {
       return;
     }
 
-    const oldSys = actor._source?.system ?? actor.system;
+    const raised = raisedTraitsOf(actor, changed);
     const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
-
-    // Check for trait increases
-    if (changed?.system?.traits) {
-      for (const [k, v] of Object.entries(changed.system.traits)) {
-        const newBase = toInt(v);
-        const oldBase = toInt(oldSys?.traits?.[k]);
-        if (!Number.isFinite(newBase) || newBase <= oldBase) {
-          continue;
-        }
-
-        const freeBase = toInt(freeTraitBase?.[k] ?? 0);
-        const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
-
-        // Apply free bonus when reaching rank 3 (if available)
-        for (let r = oldBase + 1; r <= newBase; r++) {
-          if (freeBase === 0 && freeEff > 0 && r === 3) {
-            // Mark free bonus as used
-            foundry.utils.setProperty(
-              changed,
-              `flags.${SYS_ID}.xpFreeTraitBase.${k}`,
-              (freeTraitBase?.[k] ?? 0) + 1
-            );
-            break;
-          }
-        }
-      }
+    for (const raise of raised) {
+      updateFreeTraitBase(actor, changed, { ...raise, freeTraitBase });
     }
 
     // Reset retroactive version to recalculate XP
@@ -370,5 +95,177 @@ export function trackXpExpenditure(actor, changed) {
     }
   } catch (err) {
     logError("Free bonus tracking failed", err);
+  }
+}
+
+/**
+ * The XP-relevant parts of a PC (module/utils/xp-ledger.js, XpBuild): stored ranks, the flags 3.2.1 kept (starting
+ * XP, awards, the Disadvantage cap, Trait discounts, legacy free ranks), Skills, and priced items.
+ * @param {Actor} actor
+ * @returns {import("../../../utils/xp-ledger.js").XpBuild}
+ */
+function xpBuildOf(actor) {
+  const flags = actor.flags?.[SYS_ID] ?? {};
+  const xpManual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
+  const items = xpItemsOf(actor);
+
+  return {
+    base: Number.isFinite(+flags.xpBase) ? Number(flags.xpBase) : 40,
+    manual: xpManual.reduce((sum, e) => sum + toInt(e?.delta), 0),
+    disadvantageCap: Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10,
+    ...xpRanksOf(actor, flags),
+    skills: xpSkillsOf(actor),
+    items
+  };
+}
+
+/**
+ * The Traits and the Void Ring as XP prices them: each stored rank with its legacy free ranks, its Family and School
+ * bonus, and its discount.
+ * @param {Actor} actor
+ * @param {object} flags - The actor's system flags
+ * @returns {{traits: import("../../../utils/xp-ledger.js").XpTrait[], void: object}}
+ */
+function xpRanksOf(actor, flags) {
+  const traitDiscounts = flags.traitDiscounts ?? {};
+  const freeTraitBase = flags.xpFreeTraitBase ?? {};
+  const stored = actor._source.system;
+  return {
+    traits: Object.keys(stored.traits).map(key => ({
+      key,
+      stored: toInt(stored.traits[key]),
+      freeBase: toInt(freeTraitBase[key] ?? 0),
+      bonus: toInt(getCreationFreeBonus(actor, key)),
+      discount: toInt(traitDiscounts[key] ?? 0)
+    })),
+    void: {
+      stored: toInt(stored.rings.void.rank),
+      freeBase: toInt(freeTraitBase.void ?? 0),
+      bonus: toInt(getCreationFreeBonus(actor, "void")),
+      discount: toInt(traitDiscounts.void ?? 0)
+    }
+  };
+}
+
+/**
+ * The Skills as XP prices them.
+ * @param {Actor} actor
+ * @returns {import("../../../utils/xp-ledger.js").XpSkill[]}
+ */
+function xpSkillsOf(actor) {
+  return actor.items
+    .filter(item => item.type === "skill")
+    .map(item => ({
+      name: item.name,
+      type: item.system.type,
+      rank: toInt(item.system.rank),
+      freeRanks: toInt(item.system.freeRanks),
+      emphases: item.system.trainedEmphases.filter(Boolean),
+      freeEmphasis: toInt(item.system.freeEmphasis)
+    }));
+}
+
+/**
+ * The priced items: Advantages and Disadvantages at their cost; a kata, a kiho, and a memorized spell at their
+ * Mastery Level (#43), and a kiho the Monk School gives at 0 (Stage 18 decision 19).
+ * game-rules/66_magic_and_spell_casting.md, p.164
+ * game-rules/80_brotherhood_of_shinsei.md, p.231
+ * game-rules/86_kata.md, p.259
+ * @param {Actor} actor
+ * @returns {import("../../../utils/xp-ledger.js").XpItem[]}
+ */
+function xpItemsOf(actor) {
+  const items = [];
+  for (const item of actor.items) {
+    if (["advantage", "disadvantage"].includes(item.type)) {
+      items.push({ id: item.id, type: item.type, name: item.name, cost: toInt(item.system.cost) });
+    } else if (
+      ["kata", "kiho"].includes(item.type) ||
+      (item.type === "spell" && item.system.memorized === true)
+    ) {
+      const free = item.type === "kiho" && item.system.schoolKiho;
+      items.push({
+        id: item.id,
+        type: item.type,
+        name: item.name,
+        cost: free ? 0 : toInt(item.system.mastery)
+      });
+    }
+  }
+  return items;
+}
+
+/**
+ * The character's kiho against what its Monk Schools allow, for the XP manager's warning; null with no Monk School.
+ * game-rules/80_brotherhood_of_shinsei.md, p.231
+ * @param {Actor} actor
+ * @returns {ReturnType<typeof getKihoLimits>}
+ */
+function kihoLimitsOf(actor) {
+  const schools = actor.items
+    .filter(item => item.type === "school")
+    .map(item => ({ kiho: toInt(item.system.kiho), rank: item.system.schoolRank }));
+  const kiho = actor.items
+    .filter(item => item.type === "kiho")
+    .map(item => ({ schoolKiho: item.system.schoolKiho }));
+  return getKihoLimits(schools, kiho);
+}
+
+/**
+ * The Traits, and the Void Ring, that an update raises or sets: each key with its new and its stored value. A Family
+ * or School can raise the Void Ring as well.
+ * game-rules/48_character_creation_expanded.md, p.102
+ * @param {Actor} actor
+ * @param {object} changed - The update's changed data
+ * @returns {{key: string, value: *, old: *}[]}
+ */
+function raisedTraitsOf(actor, changed) {
+  const oldSys = actor._source.system;
+  const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => ({
+    key,
+    value,
+    old: oldSys.traits[key]
+  }));
+  if (changed?.system?.rings?.void?.rank !== undefined) {
+    raised.push({
+      key: "void",
+      value: changed.system.rings.void.rank,
+      old: oldSys.rings.void.rank
+    });
+  }
+  return raised;
+}
+
+/**
+ * Mark in `changed` the legacy free ranks one raised Trait reaches. Only the legacy fields are a stored rank: a
+ * TraitAdjust rule adds on top of the stored rank, so every stored rank is bought and costs its multiple of the new
+ * rank with the bonus. The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family
+ * and a School raising the same Trait give two.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * @param {Actor} actor
+ * @param {object} changed - The update's changed data, extended in place
+ * @param {object} raise
+ * @param {string} raise.key - The Trait key, or "void"
+ * @param {*} raise.value - The new value
+ * @param {*} raise.old - The stored value
+ * @param {Record<string, number>} raise.freeTraitBase - The free ranks already marked, by key
+ */
+function updateFreeTraitBase(actor, changed, { key, value, old, freeTraitBase }) {
+  const newBase = toInt(value);
+  const oldBase = toInt(old);
+  if (!Number.isFinite(newBase) || newBase <= oldBase) {
+    return;
+  }
+  const legacyBonus = toInt(getCreationFreeBonusSources(actor, key).legacy);
+  const freeBase = toInt(freeTraitBase[key] ?? 0);
+
+  let free = freeBase;
+  for (let r = oldBase + 1; r <= newBase; r++) {
+    if (free < legacyBonus && r === 3 + free) {
+      free++;
+    }
+  }
+  if (free !== freeBase) {
+    foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${key}`, free);
   }
 }

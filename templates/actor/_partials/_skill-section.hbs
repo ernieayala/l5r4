@@ -1,0 +1,14 @@
+<section class="l5r4-section flexcol -gap-sm">
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="skills" label="l5r4.ui.sheets.skills" collapsed=collapsedSections.skills create=true expand=true}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="skills" type="skill" columns=@root.sortColumns.skills sort=@root.sortState.skills}}
+  <section class="l5r4-item-row-list -skill">
+    {{#each skills as |skill id|}}
+      {{> "systems/l5r4-enhanced/templates/cards/skill.hbs"
+          name=skill.name
+          type=skill.type
+          system=skill.system
+          inSheet=true
+          docId=skill.id}}
+    {{/each}}
+  </section>
+</section>

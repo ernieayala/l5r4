@@ -1,19 +1,11 @@
 /**
- * Void Points Handler
- *
- * Manages adjustment and UI updates for character Void Points in the L5R4 system.
- * Void Points represent moments of enlightened insight that characters can spend to
- * enhance rolls or activate abilities. Each character has Void Points equal to their
- * Void Ring rank, which refresh daily after rest.
- *
- * Foundry APIs: Actor#update, querySelector, classList
- * Requires: Foundry v13+
- *
- * @module VoidPointsHandler
+ * @module sheets/handlers/void-points-handler
+ * @description Adjusts a character's current Void Points from the sheet's void dots and repaints the dots. A
+ * character has Void Points equal to the Void Ring rank, spent to improve rolls and regained with rest.
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
 
 /**
  * Handles Void Point adjustments and visual representation updates.
@@ -24,7 +16,7 @@ import { clamp } from "../../utils/type-coercion.js";
  *
  * Usage pattern:
  * - Called from sheet event handlers when void dot is clicked
- * - Provides both state management (adjust) and rendering (paint)
+ * - Provides both state management (updateVoidPoints) and rendering (updateVoidDots)
  *
  * @class VoidPointsHandler
  */
@@ -39,26 +31,27 @@ export class VoidPointsHandler {
    * Game Rules: Characters have Void Points equal to their Void Ring (max 10 in rules,
    * but clamped to 9 here). Void Points refresh daily after rest.
    *
-   * @param {Object} context - Sheet context containing actor and element references
+   * @param {object} context - Sheet context containing actor and element references
    * @param {L5R4Actor} context.actor - The actor document to update
    * @param {HTMLElement} context.element - Root sheet element for UI updates
    * @param {Event} [event] - Optional DOM event to prevent default behavior
    * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
    * @returns {Promise<void>}
-   * @async
    */
-  static async adjust(context, event, delta) {
+  static async updateVoidPoints(context, event, delta) {
     event?.preventDefault?.();
 
-    const cur = this._getVoidValue(context.actor);
-    const next = clamp(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
+    // The stored value, not the prepared one, so an Active Effect on Void Points is never written into
+    // storage (B6)
+    const cur = context.actor._source.system.rings.void.value;
+    const next = getClamped(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
     if (next === cur) {
       return;
     }
 
     try {
       // diff:true minimizes update payload, render:false prevents automatic sheet redraw
-      // since we manually update the UI via paint() below
+      // since we manually update the UI via updateVoidDots() below
       await context.actor.update(
         { "system.rings.void.value": next },
         { diff: true, render: false }
@@ -66,45 +59,41 @@ export class VoidPointsHandler {
 
       // CRITICAL: After update, actor.system has been refreshed by prepareDerivedData
       // Now paint the UI with the updated actor data
-      this.paint(context.element, context.actor);
+      this.updateVoidDots(context.element, context.actor);
     } catch (err) {
       console.warn(`${SYS_ID} VoidPointsHandler: failed to update void points`, { err });
     }
   }
 
   /**
-   * Updates the visual representation of Void Points in the character sheet.
-   *
-   * Finds all void dot elements and toggles their filled state based on the actor's
-   * current Void Point value. Dots with index <= current value are marked as filled.
-   *
-   * Foundry Pattern: Uses standard DOM querySelector and classList manipulation.
-   * Compatible with Foundry v13 Application v2 architecture.
+   * Repaints the Void Point dots after a change saved without a render, as the template paints them
+   * (templates/actor/_partials/_void-points.hbs): dots up to the count filled, and the count in the button's
+   * tooltip and name.
    *
    * @param {HTMLElement} root - Root element to query for void point dots
    * @param {L5R4Actor} actor - Actor document containing current Void Point data
    * @returns {void}
-   * @static
    */
-  static paint(root, actor) {
-    // querySelector used here to find specific UI component container by class
-    // Alternative would require data-attribute on container, but class selector is
-    // semantically correct for styling-related component queries
-    // Additionally, using querySelector for void dots UI allows for easy styling
-    // and layout changes without modifying the underlying JavaScript code.
-    const node = root?.querySelector?.(".void-points-dots");
+  static updateVoidDots(root, actor) {
+    const node = root?.querySelector?.("[data-action='adjust-void-points']");
     if (!node) {
       return;
     }
 
-    const cur = this._getVoidValue(actor);
-    // querySelectorAll used to find all dot elements within the container
-    // Data attributes used for dot index values (data-idx)
-    node.querySelectorAll(".void-dot").forEach(d => {
+    const cur = this.#getVoidPoints(actor);
+    node.querySelectorAll("[data-idx]").forEach(d => {
       const idx = Number(d.getAttribute("data-idx") || "0") || 0;
-      d.classList.toggle("-filled", idx <= cur);
+      d.classList.toggle("is-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
+    // The prepared maximum, which Taint Level 4 lowers below the Void Ring
+    // game-rules/89_shadowlands_taint.md, p.278
+    const label = game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsValue", {
+      current: cur,
+      max: actor.system.rings.void.max
+    });
+    node.dataset.tooltip = label;
+    node.setAttribute("aria-label", label);
   }
 
   /**
@@ -115,10 +104,8 @@ export class VoidPointsHandler {
    *
    * @param {L5R4Actor} actor - Actor document to read Void Points from
    * @returns {number} Current Void Point value (0 if data is missing/invalid)
-   * @private
-   * @static
    */
-  static _getVoidValue(actor) {
+  static #getVoidPoints(actor) {
     return Number(actor.system?.rings?.void?.value ?? 0) || 0;
   }
 }

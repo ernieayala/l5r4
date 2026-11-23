@@ -1,65 +1,29 @@
 /**
- * L5R4 PC Character Sheet (Application v2)
- *
- * Primary character sheet for player characters in the Legend of the Five Rings 4th Edition
- * system. Extends BaseActorSheet to provide PC-specific UI, event handling, and context
- * preparation for character management.
- *
- * **Architecture:**
- * Uses handler delegation pattern where UI interactions route to specialized handler classes:
- * - PcAdjustmentHandler: Void Ring, spell slots, rank/points adjustments
- * - PcTraitHandler: Trait rank adjustments with Shift+Click safety
- * - BioItemHandler: Clan/family/school item drag-drop and linking
- * - AppLauncherHandler: XP Manager and Wound Configuration dialogs
- * - StanceHandler: Stance changes (Attack, Defense, Full Attack, Full Defense, Center)
- * - PcContextBuilder: Sorted item lists with roll formulas and mastery abilities
- *
- * **Game Mechanics Implemented:**
- * - Ring Rolls: XkX formula where X = Ring rank (raw ability checks)
- * - Skill Rolls: (Skill + Trait)k(Trait) via RollHandler in base class
- * - Weapon Attacks: (Skill + Agility)k(Agility) vs Armor TN (Reflexes × 5 + 5 + armor)
- * - Weapon Damage: (Weapon DR + Strength)k(Keep) with exploding d10s
- * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (Fire Ring stance)
- * - Void Points: Equal to Void Ring, spent for +1k1 roll bonus or damage reduction
- * - Void Ring Advancement: Unique ring with no traits, costs 6×next rank XP
- * - Mastery Abilities: Displayed at skill ranks 3, 5, 7 per core rules
- *
- * **Foundry Integration:**
- * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
- * - Uses HandlebarsApplicationMixin with PARTS configuration
- * - Overrides _renderHTML for limited/full template selection
- * - Implements event delegation via data-action attributes
- * - Limited view rendering for non-owner players (pc-limited.hbs template)
- * - Integrates with enhanceItemSheetData for unified item context
- *
- * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, TextEditor.enrichHTML
- * **Requires:** Foundry v13+
- *
- * @extends {BaseActorSheet}
+ * @module sheets/pc-sheet
+ * @description The player character sheet. On top of BaseActorSheet it routes the PC's actions to the handlers
+ * (PcAdjustmentHandler for spell slots and rank tracks; PcTraitHandler for Traits; TraitHandler for the Void Ring;
+ * AppLauncherHandler for the configuration windows; StanceHandler; PcRollHandler and RollHandler; PcActionsHandler;
+ * RestHandler), builds the sorted item lists and
+ * Mastery Abilities through PcContextBuilder, enriches the notes with TextEditor.enrichHTML, and shows a limited view
+ * (pc-limited.hbs) to a player who does not own the character.
  */
-
-// Config
 import { SYS_ID } from "../config/constants.js";
-import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
-import { PC_SORT_KEYS } from "../config/sort-keys.js";
-
-// Utils
 import { on } from "../utils/dom.js";
-
-// Documents
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
-
-// Local
+import { F } from "../utils/localization.js";
+import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
+import { effectsOf } from "../services/effects/apply.js";
+import { openLedgerDialog } from "../services/ledger.js";
+import { activeItemIdsOf, updateActivation } from "../services/effects/activation.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
-import { BioItemHandler } from "./handlers/bio-item-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
-import { PcContextBuilder } from "./handlers/pc-context-builder.js";
+import { PcContextBuilder } from "./pc-context-builder.js";
 import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
+import { TraitHandler } from "./handlers/trait-handler.js";
 
 const { TextEditor } = foundry.applications.ux;
 
@@ -84,426 +48,88 @@ const { TextEditor } = foundry.applications.ux;
  * Limited template: `templates/actor/pc-limited.hbs`
  *
  * @class
+ * @augments {BaseActorSheet}
  */
 export default class L5R4PcSheet extends BaseActorSheet {
   /**
-   * Tracks bound root element for extra event listeners.
+   * PC-specific options, merged over BaseActorSheet's by ApplicationV2: the "pc" class and an 870px width for the
+   * PC columns.
    *
-   * Used to prevent duplicate binding of non-delegated event listeners
-   * (image edit click, context menus) during re-renders.
-   *
-   * @type {HTMLElement|null}
-   * @private
+   * @type {object}
    */
-  _boundExtraRoot = null;
+  static DEFAULT_OPTIONS = {
+    classes: ["pc"],
+    position: { width: 870 }
+  };
 
   /**
    * Application v2 part configuration.
    *
-   * Defines sheet structure for Foundry v13 Application v2 architecture.
    * Single-part sheet with scrollable content area and auto-submit forms.
    *
-   * **Foundry v13 Pattern:**
-   * Static PARTS object replaces deprecated _getPartTemplates().
-   *
-   * @static
-   * @type {Object}
+   * @type {object}
    */
   static PARTS = {
     form: {
       root: true,
       classes: ["flexcol"],
       template: `systems/${SYS_ID}/templates/actor/pc.hbs`,
-      scrollable: [".scrollable-content"],
-      submitOnChange: true,
-      submitOnClose: true
+      scrollable: [".scrollable-content"]
     }
   };
 
   /**
-   * Routes click events to appropriate action handlers.
+   * The PC sheet's click actions: the shared ones (BaseActorSheet.CLICK_ACTIONS) and the PC's own, the Ring and
+   * weapon damage rolls, rank points and spell slots, Traits with the family bonus, the Void Point uses, the PC's
+   * windows, item activation, and the GM's recalculation and Insight Rank mode.
    *
-   * Implements Application v2 event delegation pattern by dispatching data-action
-   * values to specialized handler methods or handler classes. Supports all PC-specific
-   * interactions including:
-   * - Bio item linking (clan, family, school)
-   * - Item CRUD operations (create, edit, delete, expand)
-   * - Roll actions (ring, skill, trait, weapon, weapon attack)
-   * - Adjustments (Void Ring, spell slots, rank points, traits, Void Points)
-   * - App launchers (XP Manager, Wound Config)
-   * - UI toggles (section expand/collapse, inline editing, sorting)
-   * - Stance changes
-   *
-   * **Implementation Note:**
-   * Some actions delegate to base class methods (inherited from BaseActorSheet),
-   * others to specialized PC handler classes (PcAdjustmentHandler, BioItemHandler, etc.).
-   *
-   * @param {string} action - The data-action attribute value from clicked element
-   * @param {Event} event - The click event
-   * @param {HTMLElement} element - The clicked element with data-action attribute
-   * @protected
-   * @override
+   * @type {Readonly<Record<string, function(L5R4PcSheet, Event, HTMLElement): unknown>>}
    */
-  _onAction(action, event, element) {
-    switch (action) {
-      case "apply-healing":
-        return PcActionsHandler.handleApplyHealing(this._getHandlerContext(), event, element);
-      case "clan-link":
-        return BioItemHandler.openLinked(this.actor, "clan");
-      case "family-open":
-        return BioItemHandler.openLinked(this.actor, "family");
-      case "inline-edit":
-        return this._onInlineItemEdit(event, element);
-      case "item-chat":
-        return this._onItemHeaderToChat(event, element);
-      case "item-create":
-        return this._onItemCreate(event, element);
-      case "item-delete":
-        return this._onItemDelete(event, element);
-      case "item-edit":
-        return this._onItemEdit(event, element);
-      case "item-expand":
-        return this._onItemExpand(event, element);
-      case "item-sort-by":
-        return this._onUnifiedSortClick(event, element);
-      case "ring-rank-void":
-        return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
-      case "roll-ring":
-        return PcRollHandler.handleRingRoll(this._getHandlerContext(), event, element);
-      case "roll-skill":
-        return this._onSkillRoll(event, element);
-      case "roll-trait":
-        return this._onTraitRoll(event, element);
-      case "roll-weapon":
-        return PcRollHandler.handleWeaponRoll(this._getHandlerContext(), event, element);
-      case "roll-weapon-attack":
-        return this._onWeaponAttackRoll(event, element);
-      case "cast-spell":
-        return PcRollHandler.handleCastSpell(this._getHandlerContext(), event, element);
-      case "rp-step":
-        return PcAdjustmentHandler.adjustRankPoints(
-          this._getHandlerContext(),
-          event,
-          element,
-          +0.1
-        );
-      case "school-link":
-        return BioItemHandler.openLinked(this.actor, "school");
-      case "section-expand":
-        return PcAdjustmentHandler.toggleSection(this._getHandlerContext(), event, element);
-      case "spell-slot":
-        return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
-      case "trait-rank":
-        return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
-      case "trait-increase":
-        return PcTraitHandler.increase(this._getHandlerContext(), event, element);
-      case "trait-decrease":
-        return PcTraitHandler.decrease(this._getHandlerContext(), event, element);
-      case "void-points-dots":
-        return this._onVoidPointsAdjust(event, element, +1);
-      case "toggle-armor-void":
-        return PcActionsHandler.handleToggleArmorVoid(this._getHandlerContext(), event, element);
-      case "toggle-initiative-void":
-        return PcActionsHandler.handleToggleInitiativeVoid(
-          this._getHandlerContext(),
-          event,
-          element
-        );
-      case "toggle-movement-type":
-        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
-      case "condition-manager":
-        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
-      case "combat-config":
-        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
-      case "armor-config":
-        return AppLauncherHandler.openArmorConfig(this._getHandlerContext(), event, element);
-      case "wound-config":
-        return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
-      case "xp-modal":
-        return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
-      case "open-wealth-manager":
-        return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
-      case "recalc-sheet":
-        return this._onRecalcSheet(event, element);
-      case "toggle-rank-mode":
-        return this._onToggleRankMode(event, element);
-    }
-  }
+  static CLICK_ACTIONS = Object.freeze({
+    ...super.CLICK_ACTIONS,
+    "roll-ring": (sheet, event, element) =>
+      PcRollHandler.rollClickedRing(sheet._getHandlerContext(), event, element),
+    "roll-weapon-damage": (sheet, event, element) =>
+      PcRollHandler.rollWeaponDamage(sheet._getHandlerContext(), event, element),
+    "adjust-rank-points": (sheet, event, element) =>
+      PcAdjustmentHandler.updateRankPoints(sheet._getHandlerContext(), event, element, +0.1),
+    "adjust-spell-slot": (sheet, event, element) =>
+      PcAdjustmentHandler.updateSpellSlot(sheet._getHandlerContext(), event, element, +1),
+    "adjust-trait": (sheet, event, element) =>
+      PcTraitHandler.updateTraitRank(sheet._getHandlerContext(), event, element, +1),
+    "increase-trait": (sheet, event, element) =>
+      PcTraitHandler.updateTraitRankUp(sheet._getHandlerContext(), event, element),
+    "decrease-trait": (sheet, event, element) =>
+      PcTraitHandler.updateTraitRankDown(sheet._getHandlerContext(), event, element),
+    "toggle-armor-void": (sheet, event, element) =>
+      PcActionsHandler.updateArmorVoid(sheet._getHandlerContext(), event, element),
+    "toggle-initiative-void": (sheet, event, element) =>
+      PcActionsHandler.updateInitiativeVoid(sheet._getHandlerContext(), event, element),
+    "open-armor-config": (sheet, event, element) =>
+      AppLauncherHandler.openArmorConfig(sheet._getHandlerContext(), event, element),
+    "open-xp-manager": (sheet, event, element) =>
+      AppLauncherHandler.openXpManager(sheet._getHandlerContext(), event, element),
+    "open-wealth-manager": (sheet, event, element) =>
+      AppLauncherHandler.openWealthManager(sheet._getHandlerContext(), event, element),
+    "open-ledger": sheet => openLedgerDialog(sheet.actor),
+    "toggle-activation": (sheet, _event, element) => {
+      const item = sheet.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
+      return item ? updateActivation(sheet.actor, item) : undefined;
+    },
+    "recalculate-sheet": (sheet, event, element) => sheet._onRecalcSheet(event, element),
+    "toggle-rank-mode": (sheet, event, element) =>
+      PcActionsHandler.updateRankMode(sheet._getHandlerContext(), event, element)
+  });
 
   /**
-   * Routes right-click events to appropriate action handlers.
+   * Tracks bound root element for extra event listeners.
    *
-   * Implements Application v2 contextmenu event delegation for modifier-based actions.
-   * Right-click (or context menu) triggers decrement operations for adjustable values:
-   * - Void Ring rank (-1)
-   * - Spell slots (-1)
-   * - Rank/points (-0.1)
-   * - Trait ranks (-1)
-   * - Void Points (-1)
+   * Used to prevent duplicate binding of non-delegated event listeners
+   * (image edit click) during re-renders.
    *
-   * **User Interaction Pattern:**
-   * Right-click typically decrements values, while left-click increments.
-   * All context actions still respect safety mechanisms (Shift+Click requirements).
-   *
-   * @param {string} action - The data-action attribute value from right-clicked element
-   * @param {Event} event - The contextmenu event
-   * @param {HTMLElement} element - The right-clicked element
-   * @protected
-   * @override
+   * @type {HTMLElement|null}
    */
-  _onActionContext(action, event, element) {
-    switch (action) {
-      case "ring-rank-void":
-        return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, -1);
-      case "rp-step":
-        return PcAdjustmentHandler.adjustRankPoints(
-          this._getHandlerContext(),
-          event,
-          element,
-          -0.1
-        );
-      case "spell-slot":
-        return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, -1);
-      case "trait-rank":
-        return PcTraitHandler.adjust(this._getHandlerContext(), event, element, -1);
-      case "void-points-dots":
-        return this._onVoidPointsAdjust(event, element, -1);
-    }
-  }
-
-  /**
-   * Routes change events to appropriate action handlers.
-   *
-   * Implements Application v2 change event delegation for form field updates.
-   * Handles:
-   * - Inline item editing (skills, weapons, armor, etc.)
-   * - Stance changes (dropdown selection)
-   *
-   * **Auto-Submit Behavior:**
-   * Sheet has submitOnChange:true, so form changes trigger automatic actor updates.
-   * Handlers provide additional processing or validation before submission.
-   *
-   * @param {string} action - The data-action attribute value from changed element
-   * @param {Event} event - The change event
-   * @param {HTMLElement} element - The form element that changed
-   * @protected
-   * @override
-   */
-  _onActionChange(action, event, element) {
-    if (action === "inline-edit") {
-      return this._onInlineItemEdit(event, element);
-    }
-    if (action === "change-stance") {
-      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
-    }
-  }
-
-  /**
-   * Handles drop events with special bio item (clan/family/school) routing.
-   *
-   * **Game Rules Context:**
-   * Bio items are special Item types that define character identity:
-   * - **Clan**: Determines starting family options and clan-specific abilities
-   * - **Family**: Grants +1 to a specific trait (e.g., Mirumoto → Agility +1)
-   * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
-   *
-   * Characters can only have one of each bio item type at a time. Dropping a new
-   * bio item replaces the existing one (e.g., dropping Crane Clan removes Dragon Clan).
-   *
-   * **Implementation:**
-   * Bio items route to BioItemHandler for replacement logic and trait recalculation.
-   * All other item types delegate to base class for standard item creation.
-   *
-   * @param {DragEvent} event - Drop event from Foundry drag-drop system
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   * @override
-   */
-  async _onDrop(event) {
-    const ev = event?.originalEvent ?? event;
-    if (!ev?.dataTransfer) {
-      return super._onDrop(event);
-    }
-
-    const data = foundry.applications.ux.TextEditor.getDragEventData(ev);
-    if (!data || data.type !== "Item") {
-      return super._onDrop(event);
-    }
-
-    const itemDoc = await fromUuid(data.uuid ?? "");
-    if (!itemDoc) {
-      return super._onDrop(event);
-    }
-
-    const type = String(itemDoc.type);
-    const BIO_TYPES = new Set(["clan", "family", "school"]);
-    if (!BIO_TYPES.has(type)) {
-      return super._onDropItem(event, data);
-    }
-
-    return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
-  }
-
-  /**
-   * Toggles Insight Rank calculation mode between automatic and manual.
-   *
-   * **GM-Only Feature:**
-   * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
-   * - Automatic: Rank calculated from Insight Points (default)
-   * - Manual: GM directly inputs rank value
-   *
-   * **What It Does:**
-   * 1. Checks for GM permission (non-GMs ignored)
-   * 2. Checks for Shift key (safety mechanism)
-   * 3. Toggles actor.system.insight.autoCalculate flag
-   * 4. Re-renders sheet to show input field or calculated value
-   *
-   * **Use Cases:**
-   * - Special NPCs with non-standard rank progression
-   * - Testing specific rank values
-   * - Temporary rank adjustments for story purposes
-   *
-   * @param {Event} event - Click event on rank label
-   * @param {HTMLElement} _element - Rank label element (unused)
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _onToggleRankMode(event, _element) {
-    event?.preventDefault?.();
-
-    // Only GMs can toggle rank mode
-    if (!game.user.isGM) {
-      return;
-    }
-
-    // Require Shift key to prevent accidental triggers
-    if (!event?.shiftKey) {
-      return;
-    }
-
-    // Toggle autoCalculate flag (default true if undefined)
-    const current = this.actor.system.insight?.autoCalculate ?? true;
-    await this.actor.update({
-      "system.insight.autoCalculate": !current
-    });
-
-    // Notify user of mode change
-    const mode = !current ? "automatic" : "manual";
-    ui.notifications?.info(`Insight Rank calculation set to ${mode} for ${this.actor.name}`);
-  }
-
-  /**
-   * Handles manual sheet recalculation for testing purposes.
-   *
-   * **Testing Tool:**
-   * Shift+Click on the character name label triggers a full actor data preparation
-   * cycle and sheet re-render. Useful for debugging data preparation issues or
-   * verifying that derived values update correctly.
-   *
-   * **What It Does:**
-   * 1. Checks for Shift key (safety mechanism)
-   * 2. Calls actor.prepareData() to recalculate all derived values
-   * 3. Re-renders the sheet to display updated values
-   * 4. Shows notification confirming recalculation
-   *
-   * **Use Cases:**
-   * - Testing trait/ring calculations after rest
-   * - Verifying wound threshold updates
-   * - Debugging derived data issues
-   * - Forcing refresh after manual data edits
-   *
-   * @param {Event} event - Click event on name label
-   * @param {HTMLElement} _element - Name label element (unused)
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _onRecalcSheet(event, _element) {
-    event?.preventDefault?.();
-
-    // Require Shift key to prevent accidental triggers
-    if (!event?.shiftKey) {
-      return;
-    }
-
-    // Force full data preparation
-    this.actor.prepareData();
-
-    // Re-render sheet to show updated values
-    this.render(false);
-
-    // Notify user
-    ui.notifications?.info(`Sheet recalculated for ${this.actor.name}`);
-  }
-
-  /**
-   * Renders the sheet's HTML with limited/full view logic.
-   *
-   * Selects between full character sheet (pc.hbs) and limited view (pc-limited.hbs)
-   * based on ownership and GM status. Limited view shows only basic info for
-   * non-owner players (respects Foundry's limited permission level).
-   *
-   * **Foundry Pattern:**
-   * Custom _renderHTML implementation for Application v2 to support conditional
-   * template selection. Returns object with named part keys matching PARTS config.
-   *
-   * @param {Object} context - Template context from _prepareContext
-   * @param {Object} _options - Render options (unused)
-   * @returns {Promise<Object>} Object with 'form' property containing rendered HTML element
-   * @protected
-   * @async
-   * @override
-   */
-  async _renderHTML(context, _options) {
-    const isLimited = !game.user.isGM && this.actor.limited;
-    const path = isLimited ? TEMPLATE("actor/pc-limited.hbs") : TEMPLATE("actor/pc.hbs");
-    const html = await foundry.applications.handlebars.renderTemplate(path, context);
-    const host = document.createElement("div");
-    host.innerHTML = html;
-    // querySelector used here for template host parsing (temporary DOM, not live application)
-    // This is a Foundry v13 pattern for extracting form element from rendered template string
-    const form = host.querySelector("form") || host.firstElementChild || host;
-    return { form };
-  }
-
-  /* ---------------------------------- */
-  /* Options / Tabs                      */
-  /* ---------------------------------- */
-
-  /**
-   * Default configuration options for PC sheet.
-   *
-   * Extends BaseActorSheet options with PC-specific settings:
-   * - Width: 870px (wider than base to accommodate PC-specific columns)
-   * - Classes: Adds "pc" class for styling specificity
-   * - Form: Auto-submit on change and close for seamless editing
-   *
-   * **Foundry v13 Pattern:**
-   * Static DEFAULT_OPTIONS replaces deprecated defaultOptions() getter.
-   *
-   * @static
-   * @type {Object}
-   */
-  static DEFAULT_OPTIONS = {
-    ...BaseActorSheet.DEFAULT_OPTIONS,
-    classes: [
-      ...(BaseActorSheet.DEFAULT_OPTIONS.classes ?? []).filter(
-        c => c !== "pc" && c !== "npc" && c !== "l5r4"
-      ),
-      "l5r4",
-      "pc"
-    ],
-    position: { ...(BaseActorSheet.DEFAULT_OPTIONS.position ?? {}), width: 870 },
-    form: {
-      ...(BaseActorSheet.DEFAULT_OPTIONS.form ?? {}),
-      submitOnChange: true,
-      submitOnClose: true
-    }
-  };
-
-  /* ---------------------------------- */
-  /* Data Prep                           */
-  /* ---------------------------------- */
+  #boundExtraRoot = null;
 
   /**
    * Prepares template context data for PC sheet rendering.
@@ -527,15 +153,214 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * system (Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, etc.). These feed into
    * skill and weapon roll formulas calculated by PcContextBuilder.
    *
-   * @param {Object} _options - Render options from Application v2 (unused)
-   * @returns {Promise<Object>} Template context with all sheet data
-   * @protected
-   * @async
+   * @param {object} _options - Render options from Application v2 (unused)
+   * @returns {Promise<object>} Template context with all sheet data
    * @override
    */
   async _prepareContext(_options) {
     const base = await super._prepareContext(_options);
     const actorObj = this.document;
+    const { system, enrichedNotes } = await this.#prepareNotes(actorObj);
+
+    const all = actorObj.items.contents ?? actorObj.items;
+    const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
+
+    const context = {
+      ...base,
+      actor: this.actor,
+      system,
+      ...buildBioFields(all),
+      editable: this.isEditable,
+      // The Insight Rank's computed or typed switch shows to a GM only
+      isGM: game.user.isGM,
+      enriched: { notes: enrichedNotes },
+      ...buildStatusFields(actorObj),
+      // Lazy getter: Defers expensive sorting until template accesses property
+      get advDisList() {
+        return PcContextBuilder.buildAdvDisList(
+          actorObj,
+          sortedItems.advantages,
+          sortedItems.disadvantages
+        );
+      },
+      ...sortedItems,
+      masteries: PcContextBuilder.buildMasteryList(sortedItems.skills)
+    };
+
+    prepareItemSheetOptions(context);
+    context.config.stances = STANCES;
+    return context;
+  }
+
+  /**
+   * Routes right-click events to appropriate action handlers.
+   *
+   * Implements Application v2 contextmenu event delegation for modifier-based actions.
+   * Right-click (or context menu) triggers decrement operations for adjustable values:
+   * - Void Ring rank (-1)
+   * - Spell slots (-1)
+   * - Rank/points (-0.1)
+   * - Trait ranks (-1)
+   * - Void Points (-1)
+   *
+   * **User Interaction Pattern:**
+   * Right-click decrements values; left-click increments.
+   * All context actions still respect safety mechanisms (Shift+Click requirements).
+   *
+   * @param {string} action - The data-action attribute value from right-clicked element
+   * @param {Event} event - The contextmenu event
+   * @param {HTMLElement} element - The right-clicked element
+   * @override
+   */
+  _onActionContext(action, event, element) {
+    switch (action) {
+      case "adjust-void-ring":
+        return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
+      case "adjust-rank-points":
+        return PcAdjustmentHandler.updateRankPoints(
+          this._getHandlerContext(),
+          event,
+          element,
+          -0.1
+        );
+      case "adjust-spell-slot":
+        return PcAdjustmentHandler.updateSpellSlot(this._getHandlerContext(), event, element, -1);
+      case "adjust-trait":
+        return PcTraitHandler.updateTraitRank(this._getHandlerContext(), event, element, -1);
+      case "adjust-void-points":
+        return this._onVoidPointsAdjust(event, element, -1);
+    }
+  }
+
+  /**
+   * Routes change events to appropriate action handlers.
+   *
+   * Implements Application v2 change event delegation for form field updates.
+   * Handles:
+   * - Inline item editing (skills, weapons, armor, etc.)
+   * - Stance changes (dropdown selection)
+   *
+   * **Auto-Submit Behavior:**
+   * Sheet has submitOnChange:true, so form changes trigger automatic actor updates.
+   * Handlers provide additional processing or validation before submission.
+   *
+   * @param {string} action - The data-action attribute value from changed element
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The form element that changed
+   * @override
+   */
+  _onActionChange(action, event, element) {
+    switch (action) {
+      case "update-item-field":
+        return this._onInlineItemEdit(event, element);
+      case "apply-stance":
+        return StanceHandler.applyStance(this._getHandlerContext(), event, element);
+    }
+  }
+
+  /**
+   * Handles manual sheet recalculation for testing purposes.
+   *
+   * The recalculate button after the Name field triggers a full actor data preparation
+   * cycle and sheet re-render. Useful for debugging data preparation issues or
+   * verifying that derived values update correctly.
+   *
+   * **What It Does:**
+   * 1. Calls actor.reset() to rebuild data from storage and recalculate derived values once
+   *    (a bare prepareData() on a prepared actor would apply its Active Effects a second time)
+   * 2. Re-renders the sheet to display updated values
+   * 3. Shows notification confirming recalculation
+   *
+   * **Use Cases:**
+   * - Testing trait/ring calculations after rest
+   * - Verifying wound threshold updates
+   * - Debugging derived data issues
+   * - Forcing refresh after manual data edits.
+   *
+   * @param {Event} event - Click event on the recalculate button
+   * @param {HTMLElement} _element - The recalculate button (unused)
+   * @returns {Promise<void>}
+   */
+  async _onRecalcSheet(event, _element) {
+    event?.preventDefault?.();
+
+    // Rebuild from source and prepare once [src: client/documents/abstract/client-document.mjs:60-67]
+    this.actor.reset();
+
+    // Re-render sheet to show updated values
+    this.render(false);
+
+    // Notify user
+    ui.notifications?.info(F("l5r4.ui.sheets.recalculated", { name: this.actor.name }));
+  }
+
+  /**
+   * Renders the sheet's HTML with limited/full view logic.
+   *
+   * Selects between full character sheet (pc.hbs) and limited view (pc-limited.hbs)
+   * based on ownership and GM status. Limited view shows only basic info for
+   * non-owner players (respects Foundry's limited permission level).
+   *
+   * **Foundry Pattern:**
+   * Custom _renderHTML implementation for Application v2 to support conditional
+   * template selection. Returns object with named part keys matching PARTS config.
+   *
+   * @param {object} context - Template context from _prepareContext
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Object with 'form' property containing rendered HTML element
+   * @override
+   */
+  async _renderHTML(context, _options) {
+    const isLimited = !game.user.isGM && this.actor.limited;
+    const path = isLimited
+      ? `systems/${SYS_ID}/templates/actor/pc-limited.hbs`
+      : `systems/${SYS_ID}/templates/actor/pc.hbs`;
+    const html = await foundry.applications.handlebars.renderTemplate(path, context);
+    // Both templates render one <form> root
+    const form = foundry.utils.parseHTML(html);
+    return { form };
+  }
+
+  /**
+   * Post-render lifecycle hook for DOM manipulation and event binding.
+   *
+   * Binds the image edit click handler (non-delegated).
+   *
+   * **Guard Logic:**
+   * Tracks #boundExtraRoot to prevent duplicate event binding on re-renders.
+   * Only binds events if actor is owned by current user.
+   *
+   * @param {object} context - Template context from _prepareContext
+   * @param {object} options - Render options from Application v2
+   * @returns {Promise<void>}
+   * @override
+   */
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    const root = this.element;
+
+    // Guard: Only bind non-delegated events once per root element
+    if (this.#boundExtraRoot === root) {
+      return;
+    }
+    this.#boundExtraRoot = root;
+    if (!this.actor.isOwner) {
+      return;
+    }
+
+    on(root, "click", {
+      selector: "[data-edit='img']",
+      handler: ev => this._onEditImage(ev, ev.currentTarget)
+    });
+  }
+
+  /**
+   * The sheet's copy of the system data, its notes as a string, and the notes enriched with core's links, `@UUID`
+   * references, and inline rolls; secrets show to a user who can edit the character.
+   * @param {Actor} actorObj
+   * @returns {Promise<{system: object, enrichedNotes: string}>}
+   */
+  async #prepareNotes(actorObj) {
     const system = foundry.utils.deepClone(actorObj.system ?? {});
     if (typeof system.notes !== "string") {
       system.notes = String(system.notes ?? "");
@@ -546,120 +371,41 @@ export default class L5R4PcSheet extends BaseActorSheet {
       documents: true,
       links: true
     });
-
-    const all = actorObj.items.contents ?? actorObj.items;
-    const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
-    const {
-      skills,
-      spells,
-      advantages,
-      disadvantages,
-      items,
-      katas,
-      kihos,
-      tattoos,
-      techniques,
-      armors,
-      weapons,
-      bows
-    } = sortedItems;
-
-    const masteries = PcContextBuilder.buildMasteryList(skills);
-    const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
-    const bioItems = PcContextBuilder.extractBioItems(all);
-    const { currentStance, mountedStatus } = PcContextBuilder.extractStanceAndMounted(actorObj);
-    const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
-
-    const context = {
-      ...base,
-      actor: this.actor,
-      system,
-      bioClan: bioItems.clan,
-      bioFamily: bioItems.family,
-      bioSchool: bioItems.school,
-      editable: this.isEditable,
-      enriched: { notes: enrichedNotes },
-      traitsEff,
-      currentStance,
-      mountedStatus,
-      collapsedSections,
-      // Lazy getter: Defers expensive sorting until template accesses property
-      get advDisList() {
-        return PcContextBuilder.buildAdvDisList(actorObj, advantages, disadvantages);
-      },
-      armors,
-      bows,
-      advantages,
-      disadvantages,
-      items,
-      katas,
-      kihos,
-      skills,
-      spells,
-      tattoos,
-      techniques,
-      weapons,
-      masteries
-    };
-
-    enhanceItemSheetData(context);
-    context.config.stances = STANCES;
-    return context;
+    return { system, enrichedNotes };
   }
+}
 
-  /**
-   * Post-render lifecycle hook for DOM manipulation and event binding.
-   *
-   * Performs PC-specific rendering tasks:
-   * 1. Paints Void Points dots based on current/max values
-   * 2. Binds image edit click handler (non-delegated)
-   * 3. Sets up item context menus
-   *
-   * **Guard Logic:**
-   * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
-   * Only binds events if actor is owned by current user.
-   *
-   * @param {Object} context - Template context from _prepareContext
-   * @param {Object} options - Render options from Application v2
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   * @override
-   */
-  async _onRender(context, options) {
-    await super._onRender(context, options);
-    const root = this.element;
-    if (!this._preparedOnce) {
-      this.actor?.prepareData();
-      this._preparedOnce = true;
-    }
+/**
+ * The character's Clan, Family, and School items, for the Bio rows. Each School comes with the School Skills its
+ * Techniques wait for, which a second School keeps in `flags.l5r4-enhanced.waitingFor`
+ * (module/documents/item/lifecycle/second-school.js).
+ * @param {Item[]} all - The character's items
+ * @returns {{bioClan: Item|null, bioFamily: Item|null, bioSchools: Array<{item: Item, waitingFor: string[]}>}}
+ */
+function buildBioFields(all) {
+  const bioItems = PcContextBuilder.getBioItems(all);
+  return {
+    bioClan: bioItems.clan,
+    bioFamily: bioItems.family,
+    bioSchools: bioItems.schools.map(item => ({
+      item,
+      waitingFor: item.getFlag(SYS_ID, "waitingFor") ?? []
+    }))
+  };
+}
 
-    this._paintVoidPointsDots(root);
-
-    // Guard: Only bind non-delegated events once per root element
-    if (this._boundExtraRoot === root) {
-      return;
-    }
-    this._boundExtraRoot = root;
-    if (!this.actor.isOwner) {
-      return;
-    }
-
-    on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
-  }
-
-  /**
-   * Returns allowed sort column keys for a given item list scope.
-   *
-   * Delegates to PC_SORT_KEYS configuration for sortable columns.
-   * See config/sort-keys.js for complete list of supported columns by type.
-   *
-   * @param {string} scope - Sort scope identifier matching item type or list name
-   * @returns {string[]} Array of allowed sort column keys
-   * @protected
-   * @override
-   */
-  _getAllowedSortKeys(scope) {
-    return PC_SORT_KEYS[scope] ?? ["name"];
-  }
+/**
+ * The character's state the sheet shows: effective Traits, stance, Void for Armor TN, the activated items, and the
+ * collapsed sections.
+ * @param {Actor} actorObj
+ * @returns {object}
+ */
+function buildStatusFields(actorObj) {
+  return {
+    traitsEff: PcContextBuilder.getEffectiveTraits(actorObj),
+    currentStance: PcContextBuilder.getStance(actorObj),
+    voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
+    activeItemIds: activeItemIdsOf(actorObj),
+    collapsedSections: PcContextBuilder.getCollapsedSections(actorObj.id)
+  };
 }

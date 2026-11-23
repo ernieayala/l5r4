@@ -1,0 +1,35 @@
+/**
+ * Chat Messages
+ * The shell every L5R4 chat card shares, and the posted item card. Each rule sits under a fixed chat-card class
+ * (docs/code-system/naming.md, Fixed names); the posted item card's `item` root also roots every sheet item row, so its
+ * rules alone keep core's message wrapper as their scope. Each card with a page of its own has its own file
+ * (patterns/chat-cards.md rule 6)
+ */
+
+.message-content {
+  .item {
+    h4,
+    h5 {
+      margin: 0;
+    }
+
+    h5 {
+      border-block-end: var(--sidebar-separator);
+      font-size: var(--l5r4-font-size-label);
+      margin-block-start: var(--l5r4-space-8);
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+// A note line reads as the card's commentary, in every card that has one
+.l5r4-roll,
+.l5r4-flow-card,
+.l5r4-damage-result {
+  .check-note {
+    font-style: italic;
+  }
+}

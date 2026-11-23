@@ -1,32 +1,17 @@
 /**
- * Application Launcher Handler
- *
- * Delegates actor sheet actions to launch specialized applications (Wound Config, XP Manager).
- * Implements singleton window management to prevent duplicate application instances per actor.
- *
- * Foundry VTT Integration:
- * - Uses Foundry v13+ Application v2 singleton pattern via ui.windows registry
- * - Integrates with event delegation system (receives context, event, element from sheets)
- * - Leverages bringToTop() for window focus management
- * - Uses foundry.utils.mergeObject pattern in target applications
- *
- * Responsibilities:
- * - Check for existing application instances before creating new ones
- * - Create and render new application instances when none exist
- * - Focus existing instances if already open (prevent duplicates)
- * - Handle errors gracefully with console warnings and user notifications
- *
  * @module sheets/handlers/app-launcher-handler
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Application v2 Documentation}
+ * @description Opens the actor's configuration windows (armor, combat, conditions, wounds, XP, wealth) from sheet
+ * actions, one window per actor: an open window for the same actor is focused through the ui.windows registry
+ * instead of opening a second one. A failure logs a warning and shows the user a notification.
  * @see module:apps/wound-config for wound mechanics configuration UI
  * @see module:apps/xp-manager for XP tracking and advancement UI
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import ArmorConfigApplication from "../../apps/armor-config.js";
 import CombatConfigApplication from "../../apps/combat-config.js";
-import ConditionManager from "../../apps/condition-manager.js";
+import ConditionManagerApplication from "../../apps/condition-manager.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
 import XpManagerApplication from "../../apps/xp-manager.js";
 import WealthManagerApplication from "../../apps/wealth-manager.js";
@@ -48,10 +33,10 @@ export class AppLauncherHandler {
    * Opens the Armor Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose armor configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -76,7 +61,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error("Failed to open Armor Configuration");
+      ui.notifications?.error(T("l5r4.apps.armorConfig.errors.openFailed"));
     }
   }
 
@@ -84,10 +69,10 @@ export class AppLauncherHandler {
    * Opens the Combat Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose combat configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -115,7 +100,7 @@ export class AppLauncherHandler {
           actorId: context.actor.id
         }
       );
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.combatConfigFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.combatConfig.errors.openFailed"));
     }
   }
 
@@ -123,27 +108,27 @@ export class AppLauncherHandler {
    * Opens the Condition Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose conditions to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
-   * @see ConditionManager for condition management implementation
+   * @see ConditionManagerApplication for condition management implementation
    */
   static async openConditionManager(context, event, _element) {
     event?.preventDefault?.();
 
     try {
       const existingApp = Object.values(ui.windows).find(
-        app => app instanceof ConditionManager && app.actor.id === context.actor.id
+        app => app instanceof ConditionManagerApplication && app.actor.id === context.actor.id
       );
 
       if (existingApp) {
         existingApp.render(true); // Re-render to refresh checkbox state
       } else {
-        const conditionManager = new ConditionManager(context.actor);
+        const conditionManager = new ConditionManagerApplication(context.actor);
         await conditionManager.render(true);
       }
     } catch (err) {
@@ -151,7 +136,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.conditionManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.conditionManager.errors.openFailed"));
     }
   }
 
@@ -159,10 +144,10 @@ export class AppLauncherHandler {
    * Opens the Wound Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose wound configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -190,7 +175,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.woundConfig.errors.openFailed"));
     }
   }
 
@@ -198,10 +183,10 @@ export class AppLauncherHandler {
    * Opens the XP Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose XP to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -229,7 +214,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.xpManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.xpManager.errors.openFailed"));
     }
   }
 
@@ -237,10 +222,10 @@ export class AppLauncherHandler {
    * Opens the Wealth Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose wealth to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -268,7 +253,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.wealthManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.wealthManager.errors.openFailed"));
     }
   }
 }

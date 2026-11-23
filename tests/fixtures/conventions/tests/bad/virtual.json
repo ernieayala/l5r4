@@ -1,0 +1,12 @@
+{
+  "files": {
+    "tests/quench/services/stance.js": "export function registerStanceTests(quench) {\n  const id = `${SYS_ID}.services.stance`;\n  quench.registerBatch(id, () => {}, { displayName: \"L5R4: Stances\" });\n}\n",
+    "tests/quench/index.js": "export function registerQuenchTests(quench) {\n  quench.registerBatch(`${SYS_ID}.documents.actor`, () => {}, { displayName: \"L5R4: Actor\" });\n}\n",
+    "tests/quench/workflows/armor-tn-calculation.js": "export function register(quench) {\n  quench.registerBatch(\n    `${SYS_ID}.workflows.armorTNCalculation`,\n    context => {\n      const { describe, it } = context;\n      describe(\"Armor TN Calculation\", () => {\n        it(\"should add the armor bonus\", () => {});\n      });\n    },\n    { displayName: \"L5R4: Armor TN Calculation Tests (Stage 10)\" }\n  );\n}\n",
+    "tests/quench/rolls/wound-penalty.js": "export function registerWoundPenaltyTests(quench) {\n  quench.registerBatch(\"l5r4-enhanced.rolls.wound-penalty\", () => {});\n}\n",
+    "tests/quench/services/rest.js": "export function registerRestTests(quench) {\n  quench.registerBatch(`${SYS_ID}.services.rest`, () => {}, { displayName: \"L5R4: Rest & Healing\" });\n}\n",
+    "module/utils/check.js": "export function buildPool() {}\n",
+    "tests/unit/utils/check.test.js": "import { describe, it } from \"vitest\";\n\ndescribe(\"the book's examples (Core Rulebook p.77)\", () => {\n  it(\"12k4 becomes 10k5\", () => {});\n  it(\"should turn twelve rolled and four kept into ten rolled and five kept, by the Ten Dice Rule that the book prints\", () => {});\n  it(\"should add a Void Point as one rolled and one kept (p.78)\", () => {});\n  it(\"should keep the regression fixed\", () => {});\n  it(\"should roll\", () => {});\n  it(\"should roll\", () => {});\n  it.only(\"should run alone\", () => {});\n  it(`should use a template literal`, () => {});\n});\n",
+    "tests/unit/utils/insight-rank.test.js": "import { describe, it } from \"vitest\";\n\ndescribe(\"Insight Rank\", () => {\n  it(\"should start at rank 1\", () => {});\n});\n"
+  }
+}

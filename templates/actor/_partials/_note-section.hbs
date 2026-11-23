@@ -1,0 +1,20 @@
+{{!-- The Notes section of the PC and NPC sheets: the notes editor, or the enriched notes on a sheet the viewer
+cannot edit (patterns/sheets.md rule 6). Parameters: system, actor, enriched, editable. --}}
+<section class="l5r4-section flexcol -gap-sm">
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" label="l5r4.ui.sheets.notes"}}
+  <div class="l5r4-section-body">
+    {{#if editable}}
+      <prose-mirror
+        name="system.notes"
+        value="{{ system.notes }}"
+        document-uuid="{{ actor.uuid }}"
+        compact>
+        {{{ enriched.notes }}}
+      </prose-mirror>
+    {{else}}
+      <div class="editor editor-content">
+        {{{ enriched.notes }}}
+      </div>
+    {{/if}}
+  </div>
+</section>

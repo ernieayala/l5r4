@@ -1,0 +1,26 @@
+{
+  "files": {
+    "module/data/item/SkillData.js": "export default class SkillData {}\n",
+    "module/services/Dice/roll.js": "",
+    "module/services/xp/xp-calculator.js": "",
+    "module/sheets/handlers/roll-router.js": "",
+    "module/documents/actor/calculations/fear.js": "",
+    "module/services/family-bonus-service.js": "",
+    "module/sheets/mixins/keyboard-behavior.js": "",
+    "tools/packSources.js": "",
+    "scripts/prepare-release.mjs": "",
+    "templates/apps/EffectPanel.hbs": "",
+    "templates/widgets/thing.hbs": "",
+    "templates/actor/_partials/expand.hbs": "",
+    "templates/dialogs/ledger.hbs": "",
+    "templates/chat/check-card.hbs": "",
+    "templates/actor/_partials/_skills-section.hbs": "",
+    "scss/_chat.scss": "",
+    "tests/quench/services/fear.test.js": "",
+    "tests/unit/utils/insightRank.test.js": "",
+    "module/data/index.js": "",
+    "module/services/combat/rolls.js": "export { rollDamage } from \"./damage.js\";\n",
+    "module/documents/item/constants/item-types.js": ""
+  },
+  "dirs": ["tests/integration/actors"]
+}

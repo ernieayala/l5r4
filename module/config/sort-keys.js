@@ -1,81 +1,104 @@
 /**
- * @file Sort key configurations for character sheet item lists
  * @module config/sort-keys
- *
- * Defines the available sort fields for different item types on character sheets.
- * Used by sheet sorting controls to determine which columns can be sorted.
- *
- * Architectural Decision: Centralized sort key definitions ensure consistent
- * sorting behavior across PC and NPC sheets and enable dynamic sort UI generation.
+ * @description The column heads of each item list's sort header (components/sort-header.md), and the sort keys
+ * they give each list. One value feeds both the header partial (templates/actor/_partials/_sort-header.hbs) and the
+ * sort code that checks a clicked or stored key, so a header never offers a key the sort refuses.
  */
 
 /**
- * Sort key configurations for PC (Player Character) sheets.
- * Each property maps an item collection to its sortable fields.
- * Fields appear in the order they should be presented in sort controls.
+ * The column heads of each list, in column order, keyed by the list's sort scope (its `data-scope`). A head with a
+ * `key` sorts the list by it and renders as a button; a head with only a `label` does not sort; a head with
+ * neither is the spacer over the row controls column. `label` is an i18n key. No two heads share a key
+ * (sort-header.md H4).
  *
- * @type {Object<string, Array<string>>}
- * @constant
- * @property {Array<string>} armors - Armor sort fields: name, bonus, reduction, equipped
- * @property {Array<string>} weapons - Weapon sort fields: name, damage, size
- * @property {Array<string>} items - General item sort fields: name
- * @property {Array<string>} skills - Skill sort fields: name, rank, trait, roll, emphasis
- * @property {Array<string>} spells - Spell sort fields: name, ring, mastery, range, aoe, duration
- * @property {Array<string>} techniques - Technique sort fields: name
- * @property {Array<string>} technique - Single technique sort fields: name
- * @property {Array<string>} katas - Kata sort fields: name, ring, mastery
- * @property {Array<string>} kihos - Kiho sort fields: name, ring, mastery, type
- * @property {Array<string>} tattoos - Tattoo sort fields: name
- * @property {Array<string>} advantages - Advantage sort fields: name, type, cost
- * @property {Array<string>} disadvantages - Disadvantage sort fields: name, type, cost
- * @property {Array<string>} advDis - Combined advantages/disadvantages sort fields: name, type, cost, item
- *
- * @example
- * // Generate sort dropdown options for skills:
- * // PC_SORT_KEYS.skills.forEach(key => {
- * //   html += `<option value="${key}">${game.i18n.localize(`l5r4.sort.${key}`)}</option>`;
- * // });
- *
- * @example
- * // Sort items by configured key:
- * // const sortKey = PC_SORT_KEYS.weapons[0]; // "name"
- * // items.sort((a, b) => a[sortKey].localeCompare(b[sortKey]));
+ * @type {Readonly<Record<string, ReadonlyArray<{key?: string, label?: string}>>>}
  */
-export const PC_SORT_KEYS = {
-  armors: ["name", "bonus", "reduction", "equipped"],
-  weapons: ["name", "damage", "size"],
-  items: ["name"],
-  skills: ["name", "rank", "trait", "roll", "emphasis"],
-  spells: ["name", "ring", "mastery", "range", "aoe", "duration"],
-  techniques: ["name"],
-  technique: ["name"],
-  katas: ["name", "ring", "mastery"],
-  kihos: ["name", "ring", "mastery", "type"],
-  tattoos: ["name"],
-  advantages: ["name", "type", "cost"],
-  disadvantages: ["name", "type", "cost"],
-  advDis: ["name", "type", "cost", "item"]
-};
+export const SORT_COLUMNS = Object.freeze({
+  skills: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "rank", label: "l5r4.ui.common.rank" },
+    { key: "trait", label: "l5r4.character.skills.properties.trait" },
+    { key: "roll", label: "l5r4.ui.common.roll" },
+    { key: "emphasis", label: "l5r4.character.skills.properties.emphasis" },
+    {}
+  ]),
+  weapons: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "attack", label: "l5r4.ui.mechanics.combat.attack" },
+    { key: "damage", label: "l5r4.ui.common.damage" },
+    {}
+  ]),
+  armors: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "bonus", label: "l5r4.ui.common.bonus" },
+    { key: "reduction", label: "l5r4.equipment.armor.reduction" },
+    { key: "equipped", label: "l5r4.equipment.armor.equipped" },
+    {}
+  ]),
+  items: Object.freeze([{ key: "name", label: "l5r4.ui.common.name" }]),
+  spells: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "ring", label: "l5r4.ui.common.ring" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
+    { label: "l5r4.magic.spells.cast" },
+    {}
+  ]),
+  techniques: Object.freeze([{ key: "name", label: "l5r4.ui.common.name" }]),
+  katas: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "ring", label: "l5r4.ui.common.ring" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
+    {}
+  ]),
+  kihos: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "ring", label: "l5r4.ui.common.ring" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
+    { key: "type", label: "l5r4.ui.common.type" },
+    {}
+  ]),
+  tattoos: Object.freeze([{ key: "name", label: "l5r4.ui.common.name" }]),
+  advantages: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "type", label: "l5r4.ui.common.type" },
+    { key: "cost", label: "l5r4.ui.common.cost" }
+  ]),
+  disadvantages: Object.freeze([
+    { key: "name", label: "l5r4.ui.common.name" },
+    { key: "type", label: "l5r4.ui.common.type" },
+    { key: "cost", label: "l5r4.ui.common.cost" }
+  ]),
+  npcAttacks: Object.freeze([
+    { label: "l5r4.ui.common.name" },
+    { label: "l5r4.ui.mechanics.combat.attack" },
+    { label: "l5r4.ui.common.damage" },
+    { label: "l5r4.ui.common.action" },
+    { label: "l5r4.ui.common.type" },
+    {}
+  ]),
+  xpLedger: Object.freeze([
+    { label: "l5r4.ui.common.xp" },
+    { label: "l5r4.character.experience.note" },
+    {}
+  ]),
+  "xp-purchases": Object.freeze([
+    { key: "note", label: "l5r4.character.experience.reason" },
+    { key: "cost", label: "l5r4.character.experience.xpAmount" },
+    { key: "type", label: "l5r4.ui.common.type" }
+  ])
+});
 
 /**
- * Sort key configurations for NPC (Non-Player Character) sheets.
- * Simplified compared to PC sheets, focusing on essential fields.
- * Each property maps an item collection to its sortable fields.
+ * The sort keys each list accepts: its heads' keys, each once, in column order. The first is the default sort. A
+ * list whose heads do not sort (NPC attacks, the XP ledger) accepts none.
  *
- * @type {Object<string, Array<string>>}
- * @constant
- * @property {Array<string>} weapons - Weapon sort fields: name, damage, size
- * @property {Array<string>} items - General item sort fields: name
- * @property {Array<string>} skills - Skill sort fields: name, rank, trait (no roll or emphasis)
- * @property {Array<string>} spells - Spell sort fields: name, ring, mastery (no range, aoe, duration)
- *
- * @example
- * // Check if field is sortable for NPC weapons:
- * // const isSortable = NPC_SORT_KEYS.weapons.includes(fieldName);
+ * @type {Readonly<Record<string, ReadonlyArray<string>>>}
  */
-export const NPC_SORT_KEYS = {
-  weapons: ["name", "damage", "size"],
-  items: ["name"],
-  skills: ["name", "rank", "trait"],
-  spells: ["name", "ring", "mastery"]
-};
+export const SORT_KEYS = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SORT_COLUMNS).map(([scope, columns]) => [
+      scope,
+      Object.freeze([...new Set(columns.filter(column => column.key).map(column => column.key))])
+    ])
+  )
+);

@@ -1,66 +1,86 @@
 /**
- * @file PC Actor Data Preparation
  * @module documents/actor/preparation/pc-preparation
- *
- * Handles derived data calculation for PC actors in the L5R4 system.
- * Coordinates trait/ring calculations, initiative, armor TN, wounds, insight,
- * and healing rates in the correct dependency order.
- *
- * Key responsibilities:
- * - Calculate PC initiative (Insight Rank + Reflexes formula)
- * - Calculate armor TN from base + equipped armor items
- * - Process wound thresholds using Earth Ring formulas
- * - Calculate insight points and rank from rings/skills
- * - Calculate healing rates from Stamina
- * - Apply stance and condition effects
- *
- * Architecture: Pure calculation functions that mutate sys object in place.
- * Foundry API: Uses actor.items collection and actor flags for armor stacking.
- *
- * PC-specific differences from NPCs:
- * - Initiative uses Insight Rank + Reflexes (not custom values)
- * - Armor TN calculated from base (5*Ref+5) + equipped armor
- * - Wound thresholds calculated from Earth Ring formulas
- * - Insight calculated from rings and skill ranks
- * - Healing rate calculated from Stamina + Insight Rank
+ * @description Prepares a PC's derived data in dependency order: Traits and Rings, Insight, the rules that need
+ * them, Armor TN from its base (Reflexes × 5 + 5) and the equipped armor with its rules, movement, Wound Ranks from
+ * the Earth Ring, Initiative (Insight Rank + Reflexes), healing, the owned items' formulas, and XP. Modifies the
+ * actor's system data in place; reads the actor's items and its armor-stacking flag.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-
-import { toInt } from "../../../utils/type-coercion.js";
-import { logError } from "../../../utils/error-logging.js";
-
-import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
-
 import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
-  DEFAULT_WOUND_THRESHOLDS
+  DEFAULT_WOUND_THRESHOLDS,
+  RIDING_ARMOR_MOUNTED_BONUS
 } from "../../../config/game-mechanics.js";
-import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
-import { applyConditionEffects } from "../calculations/condition-effects.js";
-import { enrichActorItems } from "../calculations/item-enrichment.js";
+import { TRAIT_KEYS } from "../../../config/reference-data.js";
+import { toInt } from "../../../utils/type-coercion.js";
+import { logError } from "../../../utils/error-logging.js";
+import { getInitiativePool } from "../../../utils/initiative.js";
+import { getMasteryInsight } from "../../../utils/insight.js";
+import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
+import {
+  prepareTraitsAndRings,
+  prepareMovement,
+  ringsOf
+} from "../calculations/shared-traits-rings-system.js";
+import { getWoundThreshold, prepareHealRate } from "../calculations/wound-system.js";
+import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
+import { getInsightRank, preparePcExperience } from "../calculations/xp-system.js";
+import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Prepares derived data for PC actors.
  *
  * Calculates all derived values for PCs including traits, initiative, armor TN,
- * wounds, insight, and healing rates. Executes calculations in dependency order.
- * PC calculations differ significantly from NPCs (see file header).
+ * wounds, insight, healing rates, and XP. Executes calculations in dependency order.
+ * PC calculations differ from NPCs (see file header).
  *
  * @param {Actor} actor - The PC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
- * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
- * @param {Function} calculateInsightRankFn - Callback to calculate insight rank from points
  *
  * @returns {void} Mutates sys object in place
- *
- * @example
- * // Called from Actor.prepareData()
- * preparePcData(this, this.system, finalizeWoundPenalties, calculateInsightRank);
  */
-export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateInsightRankFn) {
-  // Extract school name from equipped school item
+export function preparePcData(actor, sys) {
+  prepareSchoolName(actor, sys);
+
+  // Calculate base traits and rings first (required for all subsequent calculations)
+  prepareTraitsAndRings(sys);
+
+  // Insight needs only Rings and Skill ranks; it comes before the rules so predicates can test Insight and School
+  // Rank
+  // game-rules/49_improving_your_character.md, p.104
+  prepareInsight(actor, sys, getInsightRank);
+
+  // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
+  applyDerivedRules(actor, sys);
+
+  preparePcArmorTn(actor, sys);
+
+  // Calculate movement rates (depends on traits)
+  prepareMovement(sys);
+
+  preparePcWoundLevels(actor, sys);
+
+  // Apply wound penalties to traits/rings
+  actor._finalizeWoundPenalties(sys, WOUND_LEVEL_ORDER);
+
+  preparePcInitiative(sys);
+
+  prepareHealRate(sys, toInt(sys.insight.rank));
+
+  // Enrich embedded items with calculated data
+  prepareItemFormulas(actor);
+
+  preparePcExperience(actor, sys);
+}
+
+/**
+ * Set `sys.school` to the name of the actor's School item, or empty without one.
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data
+ */
+function prepareSchoolName(actor, sys) {
   // Defensive: Handle both v10 (items.contents) and v11 (items) API
   try {
     const schoolItem = (actor.items?.contents ?? actor.items).find(i => i.type === "school");
@@ -72,36 +92,44 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
     });
     sys.school = sys.school ?? "";
   }
+}
 
-  // Calculate base traits and rings first (required for all subsequent calculations)
-  prepareTraitsAndRings(sys);
-
-  // Helper to access effective trait values (after all modifiers)
-  const tEff = sys._derived?.traitsEff || {};
-  const TR = k => toInt(tEff[k]);
-
-  // Calculate PC initiative using standard formula: (Insight Rank + Reflexes)k(Reflexes)
-  // This differs from NPCs which can have custom initiative values
-  sys.initiative = sys.initiative || {};
-  sys.initiative.roll = toInt(sys.insight?.rank) + TR("ref") + toInt(sys.initiative.rollMod);
-  sys.initiative.keep = TR("ref") + toInt(sys.initiative.keepMod);
-
-  // Calculate PC armor TN from base formula + equipped armor
-  // Base TN = Reflexes × 5 + 5 (L5R4 core rules)
+/**
+ * Prepare the PC's Armor TN from its base, Reflexes × 5 + 5, the equipped armor's bonus and Reduction, and the
+ * ArmorTN rules on its effects (stances, conditions, Void Points). The highest armor counts unless the actor allows
+ * armor stacking (a house rule).
+ * game-rules/32_attack_and_defense.md, p.82
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data, after the effective Traits are known
+ */
+function preparePcArmorTn(actor, sys) {
   sys.armorTn = sys.armorTn || {};
-  const ref = TR("ref");
-  const baseTN = 5 * ref + 5;
-  const modTN = toInt(sys.armorTn.mod);
+  const baseTn = 5 * effectiveTraitOf(sys, "ref") + 5;
+  const modTn = toInt(sys.armorTn.mod);
+  const { bonusTn, reduction } = getEquippedArmor(actor);
 
+  sys.armorTn.base = baseTn;
+  sys.armorTn.bonus = bonusTn;
+
+  const reductionMod = toInt(sys.armorTn.reductionMod);
+  sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
+
+  // Stances, conditions, and Void Points change the Armor TN through ArmorTN rules on their effects
+  applyArmorRules(actor, sys, { base: baseTn, armor: bonusTn, other: modTn });
+}
+
+/**
+ * The equipped armor's Armor TN bonus and Reduction: the highest of each by default (RAW), or every piece added
+ * together when the actor allows armor stacking (a house rule).
+ * @param {Actor} actor
+ * @returns {{bonusTn: number, reduction: number}}
+ */
+function getEquippedArmor(actor) {
   // Check if armor stacking is allowed (optional house rule)
   const allowStack = actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
-
-  let bonusTN = 0;
+  let bonusTn = 0;
   let reduction = 0;
-
-  // Aggregate bonuses from all equipped armor items
-  // Default behavior: Use highest bonus (RAW)
-  // Optional behavior: Stack all bonuses (house rule)
+  const mounted = actor.statuses.has("mounted");
   for (const it of actor.items) {
     if (!it || typeof it.type !== "string" || it.type !== "armor") {
       continue;
@@ -110,41 +138,30 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
     if (!a?.equipped) {
       continue;
     }
-    const b = toInt(a.bonus);
+    // Riding armor's +4 is +12 on horseback: 8 more than its entered bonus while mounted
+    // game-rules/73_armor.md, p.198
+    const b =
+      toInt(a.bonus) + (mounted && a.armorType === "riding" ? RIDING_ARMOR_MOUNTED_BONUS : 0);
     const r = toInt(a.reduction);
     if (allowStack) {
-      bonusTN += b;
+      bonusTn += b;
       reduction += r;
     } else {
-      bonusTN = Math.max(bonusTN, b);
+      bonusTn = Math.max(bonusTn, b);
       reduction = Math.max(reduction, r);
     }
   }
+  return { bonusTn, reduction };
+}
 
-  sys.armorTn.base = baseTN;
-  sys.armorTn.bonus = bonusTN;
-
-  const reductionMod = toInt(sys.armorTn.reductionMod);
-  sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
-
-  // Add Void Point bonus if active (+10 TN for spending Void Point)
-  const voidTnBonus = sys.armorTn.useVoid ? 10 : 0;
-  sys.armorTn.current = baseTN + modTN + bonusTN + voidTnBonus;
-
-  // Apply stance effects (must happen after traits/armor are calculated)
-  applyStanceAutomation(actor, sys);
-
-  // Apply condition effects (must happen after stance)
-  applyConditionEffects(actor, sys);
-
-  // Calculate movement rates (depends on traits)
-  prepareMovement(sys);
-
-  // Calculate PC wound thresholds using Earth Ring formulas (L5R4 core rules)
-  // Healthy: Earth × 5 + modifier
-  // Other levels: Earth × multiplier + previous threshold + modifier
-  // Cumulative thresholds (each level adds to previous)
-  const order = WOUND_LEVEL_ORDER;
+/**
+ * Prepare the PC's Wound Ranks: each threshold from the Earth Ring, each rank's on top of the one before it, and
+ * each rank's base penalty; the default thresholds when that fails.
+ * game-rules/33_wounds.md, p.82
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data, after the Rings are known
+ */
+function preparePcWoundLevels(actor, sys) {
   try {
     const earth = toInt(sys.rings.earth) || 1;
     const mult = toInt(sys.woundsMultiplier) || 2;
@@ -152,18 +169,12 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
     sys.woundLevels = sys.woundLevels || {};
     let prev = 0;
-    for (const key of order) {
+    for (const key of WOUND_LEVEL_ORDER) {
       const lvl =
         sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
-      if (key === "healthy") {
-        lvl.value = 5 * earth + add;
-      } else {
-        lvl.value = earth * mult + prev + add;
-      }
-      // Reset base per-level penalty (issue #32): without this, every PC wound level
-      // had penalty=0, so calculateWoundPenalties would compute the same penaltyEff
-      // for every row from the modifier alone — including Healthy, which should
-      // always be 0 regardless of modifier.
+      lvl.value = getWoundThreshold(key, { earth, mult, add, prev });
+      // Each wound level starts from its base penalty (issue #32), so prepareWoundPenalties gives every row its
+      // own penalty plus the modifier, and Healthy stays 0 whatever the modifier.
       lvl.penalty = DEFAULT_WOUND_PENALTIES[key] ?? 0;
       prev = lvl.value;
     }
@@ -182,29 +193,62 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
       };
     }
   }
+}
 
-  // Apply wound penalties to traits/rings
-  finalizeWoundPenaltiesFn(sys, order);
+/**
+ * Initiative pool: Insight Rank + Reflexes, keep Reflexes. Calculated once the Insight Rank is final.
+ * game-rules/31_combat_round.md, p.81
+ * @param {object} sys - Prepared system data
+ */
+function preparePcInitiative(sys) {
+  sys.initiative = sys.initiative || {};
+  Object.assign(
+    sys.initiative,
+    getInitiativePool({
+      insightRank: toInt(sys.insight.rank),
+      reflexes: effectiveTraitOf(sys, "ref"),
+      rollMod: toInt(sys.initiative.rollMod),
+      keepMod: toInt(sys.initiative.keepMod)
+    })
+  );
+}
 
-  // Calculate Insight Points from rings and skills (L5R4 core rules)
-  // Formula: (Sum of Rings × 10) + (Sum of Skill Ranks × 1)
-  const ringsTotal =
-    toInt(sys.rings.air) +
-    toInt(sys.rings.earth) +
-    toInt(sys.rings.fire) +
-    toInt(sys.rings.water) +
-    toInt(sys.rings?.void?.rank);
+/**
+ * An effective Trait, after all modifiers.
+ * @param {object} sys - Prepared system data, after the effective Traits are known
+ * @param {string} key - Trait key
+ * @returns {number}
+ */
+function effectiveTraitOf(sys, key) {
+  return toInt((sys._derived?.traitsEff || {})[key]);
+}
 
-  let skillTotal = 0;
-  for (const it of actor.items) {
-    if (!it || typeof it.type !== "string" || it.type !== "skill") {
-      continue;
-    }
-    skillTotal += toInt(it.system?.rank);
-  }
+/**
+ * Calculate Insight points and, unless the GM sets it by hand, Insight Rank: the Rings times ten plus every Skill
+ * rank, plus what Courtier and Etiquette Mastery Abilities add. The Rings come from the stored ranks plus the Family
+ * and School TraitAdjust bonuses, so an effect that raises a Trait for a while (a kata, a spell) never changes the
+ * Insight Rank.
+ * game-rules/49_improving_your_character.md, p.104
+ * game-rules/59_high_skills.md, p.135-136
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data
+ * @param {Function} calculateInsightRankFn - Insight Rank from points
+ */
+function prepareInsight(actor, sys, calculateInsightRankFn) {
+  const stored = actor._source.system;
+  const ownedTraitOf = key =>
+    toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
+  const rings = ringsOf(Object.fromEntries(TRAIT_KEYS.map(key => [key, ownedTraitOf(key)])));
+  const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
+  const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
+
+  const skills = actor.items
+    .filter(it => it.type === "skill")
+    .map(it => ({ name: it.name, rank: toInt(it._source.system.rank) }));
+  const skillTotal = skills.reduce((sum, skill) => sum + skill.rank, 0);
 
   sys.insight = sys.insight || {};
-  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
+  sys.insight.points = ringsTotal * 10 + skillTotal + getMasteryInsight(skills);
 
   // Default to auto-calculate insight rank from points
   if (sys.insight.autoCalculate === undefined) {
@@ -215,18 +259,4 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   if (sys.insight.autoCalculate) {
     sys.insight.rank = calculateInsightRankFn(sys.insight.points);
   }
-
-  // Calculate healing rate (L5R4 core rules)
-  // Formula: (Stamina × 2) + Insight Rank + modifiers
-  const baseStamina = TR("sta");
-  const healingStaminaMod = toInt(sys.wounds?.healingStaminaMod);
-  const healingStamina = baseStamina + healingStaminaMod;
-
-  sys._derived = sys._derived || {};
-  sys._derived.healingStamina = healingStamina;
-
-  sys.wounds.healRate = healingStamina * 2 + toInt(sys.insight?.rank) + toInt(sys.wounds?.mod);
-
-  // Enrich embedded items with calculated data
-  enrichActorItems(actor);
 }

@@ -1,0 +1,19 @@
+{{!-- The amount and denomination of one way to change the wealth manager's money; the button that applies them
+follows in the group. Parameters: field (add or remove: the prefix of the fields module/apps/wealth-manager.js
+reads). --}}
+<div class="form-group l5r4-wealth-manager-amount">
+  <label>{{localize "l5r4.apps.wealthManager.amount"}}</label>
+  <div class="form-fields">
+    <input type="number" data-field="{{field}}-amount" name="{{field}}-amount" step="1" value="1" min="0" />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.apps.wealthManager.denomination"}}</label>
+  <div class="form-fields">
+    <select data-field="{{field}}-denomination" name="{{field}}-denomination">
+      <option value="koku">{{localize "l5r4.world.wealth.koku"}}</option>
+      <option value="bu">{{localize "l5r4.world.wealth.bu"}}</option>
+      <option value="zeni">{{localize "l5r4.world.wealth.zeni"}}</option>
+    </select>
+  </div>
+</div>

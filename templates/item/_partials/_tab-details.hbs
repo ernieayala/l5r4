@@ -1,25 +1,25 @@
-<section class="tab {{#if (eq currentTab "details")}}active{{/if}}" data-tab="details" data-application-part="details">
+<section class="l5r4-section tab {{#if (eq currentTab "details")}}active{{/if}}" role="tabpanel" data-tab="details" data-application-part="details">
   {{!-- Type-specific property fields --}}
   {{> (concat "systems/" SYS_ID "/templates/item/_type-details/" item.type ".hbs") }}
   
   {{!-- Economics fields for physical items --}}
   {{#if (or (or (eq item.type "weapon") (eq item.type "armor")) (eq item.type "commonItem"))}}
     <div class="form-group">
-      <label>{{localize "l5r4.equipment.keywords"}}</label>
+      <label>{{localize "l5r4.equipment.general.keywords"}}</label>
       <div class="form-fields">
-        <input name="system.keywords" type="text" value="{{system.keywords}}" placeholder="{{localize 'l5r4.equipment.keywordsPlaceholder'}}" />
+        <input name="system.keywords" type="text" value="{{system.keywords}}" placeholder="{{localize 'l5r4.equipment.general.keywordsPlaceholder'}}" />
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "l5r4.equipment.nemuranai"}}</label>
+      <label>{{localize "l5r4.equipment.general.nemuranai"}}</label>
       <div class="form-fields">
         <input name="system.nemuranai" type="checkbox" {{checked system.nemuranai}} data-type="Boolean" />
       </div>
     </div>
 
     <fieldset>
-      <legend>{{localize "l5r4.equipment.price"}}</legend>
+      <legend>{{localize "l5r4.equipment.general.price"}}</legend>
       <div class="form-group">
         <label>{{localize "l5r4.world.wealth.koku"}}</label>
         <input name="system.price.koku" type="number" value="{{system.price.koku}}" data-type="Number" min="0" />

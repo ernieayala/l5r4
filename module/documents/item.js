@@ -14,28 +14,27 @@
  * - Delegates lifecycle hooks to specialized modules (item-creation, item-updates)
  * - Uses preparation modules for data calculation (base-data, derived-data)
  * - Chat card rendering for rolling items to chat
- * - Sheet data enhancement for item sheet display
- *
- * @requires Foundry VTT v11+
  */
 
-import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "./item/constants/item-types.js";
-import { handleItemPreCreate, handleItemOnCreate } from "./item/lifecycle/item-creation.js";
-import { handleItemPreUpdate } from "./item/lifecycle/item-updates.js";
+import { SYS_ID } from "../config/constants.js";
+import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "../config/item-types.js";
+import { isOwnChange } from "../utils/change-origin.js";
+import { onItemPreCreate, onItemCreate } from "./item/lifecycle/item-creation.js";
+import { updateGrantRecords, applyGrants, deleteGrantedItems } from "./item/lifecycle/grants.js";
+import { onItemPreUpdate } from "./item/lifecycle/item-updates.js";
 import { prepareItemBaseData } from "./item/preparation/base-data.js";
 import { prepareItemDerivedData } from "./item/preparation/derived-data.js";
 import { renderItemChatCard } from "./item/integration/chat-cards.js";
-import { enhanceItemSheetData } from "./item/integration/sheet-data.js";
 
 /**
  * Item document for L5R4 Enhanced system.
  * Implements L5R4 item types and chat card rendering.
  */
 export default class L5R4Item extends Item {
-  /** @type {Object<string, string>} Map of item types to chat card template paths */
+  /** @type {Record<string, string>} Map of item types to chat card template paths */
   static CHAT_CARD_TEMPLATES = CHAT_CARD_TEMPLATES;
 
-  /** @type {Object<string, string>} Map of item types to default icon paths */
+  /** @type {Record<string, string>} Map of item types to default icon paths */
   static DEFAULT_ICONS = DEFAULT_ICONS;
 
   /**
@@ -50,12 +49,13 @@ export default class L5R4Item extends Item {
    */
   async _preCreate(data, options, userId) {
     await super._preCreate(data, options, userId);
-    handleItemPreCreate(this, data);
+    onItemPreCreate(this, data);
   }
 
   /**
-   * Handle post-creation tasks.
-   * Performs additional setup after item is created in database.
+   * After an owned item is created, grant what has come due (module/documents/item/lifecycle/grants.js) and mark the
+   * owner's XP history for rebuilding (item-creation.js). Only the client that created it does either: every client
+   * receives the creation, and a second client's XP write would run its own grants alongside this one's.
    *
    * @param {object} data - Created item data
    * @param {object} options - Creation options
@@ -65,7 +65,48 @@ export default class L5R4Item extends Item {
    */
   async _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
-    await handleItemOnCreate(this, data);
+    if (!isOwnChange(options, game.socket.id) || !this.actor) {
+      return;
+    }
+    applyGrants(this.actor);
+    await onItemCreate(this, data);
+  }
+
+  /**
+   * After an owned item changes (its rules, a choice, a Skill rank that moves Insight Rank, a School Rank), grant
+   * whatever has come due (module/documents/item/lifecycle/grants.js). Only the client that sent the change does it.
+   * @override
+   */
+  _onUpdate(changed, options, userId) {
+    super._onUpdate(changed, options, userId);
+    if (isOwnChange(options, game.socket.id) && this.actor) {
+      applyGrants(this.actor);
+    }
+  }
+
+  /**
+   * A deleted giver takes back what it granted; a deleted granted item is noted on its giver, so it is not granted
+   * again (roadmap/STAGE-11 decision 7); an active kata or kiho ends.
+   * @override
+   */
+  _onDelete(options, userId) {
+    super._onDelete(options, userId);
+    if (!isOwnChange(options, game.socket.id) || !this.actor) {
+      return;
+    }
+    if (this.getFlag(SYS_ID, "grants")?.length) {
+      deleteGrantedItems(this.actor, this);
+    }
+    if (this.getFlag(SYS_ID, "grantedBy")) {
+      updateGrantRecords(this.actor, this);
+    }
+    // An activated kata or kiho ends with its item (module/services/effects/activation.js)
+    const activations = this.actor.effects
+      .filter(effect => effect.getFlag(SYS_ID, "activatedFrom") === this.id)
+      .map(effect => effect.id);
+    if (activations.length) {
+      this.actor.deleteEmbeddedDocuments("ActiveEffect", activations);
+    }
   }
 
   /**
@@ -80,7 +121,7 @@ export default class L5R4Item extends Item {
    */
   async _preUpdate(changes, options, userId) {
     await super._preUpdate(changes, options, userId);
-    await handleItemPreUpdate(this, changes);
+    await onItemPreUpdate(this, changes);
   }
 
   /**
@@ -117,18 +158,5 @@ export default class L5R4Item extends Item {
    */
   async roll() {
     return renderItemChatCard(this);
-  }
-
-  /**
-   * Enhance item sheet data.
-   * Adds computed values and formatting for sheet display.
-   *
-   * @param {object} options - Sheet rendering options
-   * @returns {Promise<object>} Enhanced sheet data
-   * @override
-   */
-  async getData(options) {
-    const data = await super.getData(options);
-    return enhanceItemSheetData(data);
   }
 }

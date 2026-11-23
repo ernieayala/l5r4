@@ -1,17 +1,7 @@
-<section class="flexcol -gap-sm">
-  <div class="flexrow -gap-sm section-title{{#if collapsedSections.advantages}} is-collapsed{{/if}}" data-scope="advantages">
-    <h4 class="title">{{localize "l5r4.ui.sheets.advantages"}}</h4>
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
-  </div>
-  <section class="item-list -advantage -header" data-scope="advantages">
-    <div class="item">
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</a>
-    </div>
-  </section>
-  <section class="item-list -advantage">
+<section class="l5r4-section flexcol -gap-sm">
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="advantages" label="l5r4.ui.sheets.advantages" collapsed=collapsedSections.advantages create=true expand=true}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="advantages" type="advantage" columns=@root.sortColumns.advantages sort=@root.sortState.advantages}}
+  <section class="l5r4-item-row-list -advantage">
     {{#each advantages as |item id|}}
       {{> "systems/l5r4-enhanced/templates/cards/advantage-disadvantage.hbs"
           system=item.system

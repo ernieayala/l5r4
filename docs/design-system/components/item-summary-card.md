@@ -1,0 +1,93 @@
+# Item summary card
+
+What an item posts to chat from a sheet's post-to-chat control: the item's card in its chat form, then the item summary, the one line per rule saying what the item's rules do and the book page the item cites. The summary's two parts, the rule lines and the citation, also show on the item sheet and the NPC sheet. It is a variant of the [chat card](chat-card.md) without a `chat-card` root.
+
+| Item | Detail |
+| --- | --- |
+| Templates | The item card: `templates/cards/<subtype>.hbs`, its `{{#unless inSheet}}` branch (fixed file names, chosen by `CHAT_CARD_TEMPLATES` (`module/config/item-types.js`)). Each text section: `templates/cards/_partials/_text-section.hbs` (`label`, `text`), included at the line's start so the stored HTML keeps its bytes. The summary: `templates/chat/item-summary.hbs`, `CHAT_TEMPLATES.itemSummary` |
+| Posted by | `renderItemChatCard` (`module/documents/item/integration/chat-cards.js`): the card's HTML and the summary's HTML joined, with the subtype label as flavor, in the chat log's message mode |
+| Summary data | `summaryOf` (`module/documents/summary.js`): `{ lines, citation }`, both localized |
+| Also shown | Rule lines: `l5r4-rule-lines` (`templates/item/_partials/_tab-description.hbs`). Citation: `l5r4-citation` in `templates/item/_partials/_tab-description.hbs`, `templates/item/_partials/_header.hbs`, and `templates/actor/_partials/_stats-npc.hbs` |
+| SCSS | The summary in `scss/components/_item-summary-card.scss`; the item card headings in the `.item` `h5` rules under `.message-content` (`scss/components/_chat-card.scss`). The target puts both in `scss/components/_item-summary-card.scss`, named for this page and styling the fixed block `l5r4-item-summary` and the posted item card's headings |
+| Quench | `l5r4-enhanced.packs`, `l5r4-enhanced.sheets-and-apps` |
+
+## Anatomy
+
+Every class on a posted item card is a fixed name ([naming.md](../../code-system/naming.md#fixed-names)).
+
+| Part | Markup | Shows |
+| --- | --- | --- |
+| Flavor | Core's message flavor | `[<subtype label>]` from `TYPES.Item.<subtype>`, in `renderItemChatCard` (`module/documents/item/integration/chat-cards.js`) |
+| Card root | `div.item.-<subtype>` (`-expandable` when it has text), `data-item-id`, `data-document-id` | One item |
+| Name | `h4.title.flexrow.-gap-sm` | The item's name |
+| Fields | `<p><strong>{{localize label}}:</strong> value</p>`, one per field | The subtype's fields |
+| Text sections | `h5.l5r4-item-summary-heading`, then `<p>` with the item's rich text. Cards posted before the class hold a bare `h5`; the heading's style reads the element, never the class | Rules summary, Mastery Abilities, description: the item's own fields |
+| Summary root | `div.l5r4-item-summary`, rendered only with lines or a citation | A thin line above, then the parts below |
+| Rule lines | `ul.l5r4-rule-lines`, one `li` each | What each rule does, in the system's words |
+| Citation | `p.l5r4-citation` | The source book and printed page, `l5r4.ui.ruleSummary.citation` ("{book} p.{page}") |
+
+## Variants
+
+| Variant | Shows |
+| --- | --- |
+| Item with rules | Card, then rule lines |
+| Compendium entry | Card, rule lines, and the citation; pack entries carry no book text, so the citation points the reader to the page (`roadmap/STAGE-15-COMPENDIUM-PACKS.md` **Content policy**) |
+| Item with neither | The card alone; `{{#if (or lines.length citation)}}` (`templates/chat/item-summary.hbs`) renders nothing |
+| On the item sheet | Rule lines under the "What it does" heading (`l5r4.ui.ruleSummary.heading`) in the description tab; the citation in the header, and in the description tab when the sheet is not editable and the item has no description |
+| On the NPC sheet | The creature's citation under its name |
+
+## States
+
+None. The card is posted once and never changes. The item's own text is what the item held when posted.
+
+## Parameters
+
+`templates/chat/item-summary.hbs`:
+
+| Name       | Type           | Meaning                                  |
+| ---------- | -------------- | ---------------------------------------- |
+| `lines`    | string[]       | One localized sentence per rule          |
+| `citation` | string or null | Localized "source p.N", or null for none |
+
+The item card's context is the item document itself (`R(templatePath, item)`), with `inSheet` unset.
+
+## Tokens
+
+| Token | Property | Part |
+| --- | --- | --- |
+| `--l5r4-font-size-label` | `font-size` | `h5`, in `.message-content` (`scss/components/_chat-card.scss`) |
+| `--l5r4-space-8` | `margin-block-start` | `h5`, in `.message-content` (`scss/components/_chat-card.scss`) |
+| `--sidebar-separator` | `border-block-end` | `h5`: a divider, core's whole value (frames.md rule 2) |
+| `--l5r4-border-width-thin`, `--l5r4-color-line-muted` | `border-block-start` | Summary root, `.l5r4-item-summary` (`scss/components/_item-summary-card.scss`) |
+| `--l5r4-space-4` | `margin-block-start`, `padding-block-start` | Summary root, `.l5r4-item-summary` (`scss/components/_item-summary-card.scss`) |
+| `--l5r4-space-indent` | `padding-inline-start` | Rule lines, `.l5r4-rule-lines` (`scss/components/_item-summary-card.scss`); the code has a `--l5r4-space-4` margin and `--l5r4-space-16` padding |
+| `--l5r4-space-4`, `--l5r4-space-8` | `margin-block` | Rule lines, `.l5r4-rule-lines` (`scss/components/_item-summary-card.scss`) |
+| `--l5r4-font-size-meta` | `font-size` | Citation, `.l5r4-citation` (`scss/components/_item-summary-card.scss`), italic |
+
+## Keyboard and screen reader
+
+The posted card has no controls. Headings are `h4` for the name and `h5` for each section, in order. Rule lines are a list, so a reader hears their count. The citation is a paragraph after them.
+
+## Long text
+
+Names, field values, and rule lines wrap. Rich text keeps its own markup inside core's message width.
+
+## Rules
+
+| # | Rule | Enforced by | Conforming | Non-conforming |
+| --- | --- | --- | --- | --- |
+| IS1 | The rule lines and the citation are each one partial, included by the chat summary and by every sheet that shows them | `tests/conventions/templates.test.js` (markup used twice is a registered partial) | `templates/chat/_partials/_rule-lines.hbs` (target) and `templates/chat/_partials/_citation.hbs` (target), included by `item-summary.hbs`, `_tab-description.hbs`, `_header.hbs`, `_stats-npc.hbs` | `<p class="l5r4-citation">{{summary.citation}}</p>` written out in four templates (`templates/item/_partials/_tab-description.hbs`, `templates/item/_partials/_header.hbs`, `templates/actor/_partials/_stats-npc.hbs`, `templates/chat/item-summary.hbs`) |
+| IS2 | The summary renders nothing when it has nothing | Review | `{{#if (or lines.length citation)}}` (`templates/chat/item-summary.hbs`) | An empty bordered block under every card (modeled) |
+| IS3 | Lines and citation are localized phrases built in code from the rules; no book text | Review (CLAUDE.md **Licensed material**) | `buildRulesSummary(…).map(formatPhrase)` in `summaryOf` (`module/documents/summary.js`) | A pack entry's description holding the book's wording (modeled) |
+| IS4 | Borders use logical sides and token colors | Stylelint `property-disallowed-list`, `tests/conventions/styles.test.js` | `border-block-start: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);` | `border-top: 1px solid var(--color-border-light-tertiary);` (modeled) |
+| IS5 | Posted item card classes stay as they are | `tests/conventions/templates.test.js` (exempt list) | The root's `item` and `-{{type}}` classes (`templates/cards/skill.hbs`) | Renaming the chat branch's root to `l5r4-item-card` (modeled) |
+| IS6 | A field label's colon comes from the template after `{{localize}}`, never from the value | Review | `<strong>{{localize "l5r4.ui.common.ring"}}:</strong>` (`templates/cards/spell.hbs`) | A key whose value is "Ring:" (modeled) |
+
+The flavor `[<subtype label>]` takes its brackets from `l5r4.ui.sheets.itemFlavor` (`lang/en.json`), which `renderItemChatCard` (`module/documents/item/integration/chat-cards.js`) fills; whether the brackets stay is a copy review item.
+
+## Do and don't
+
+| Do                                     | Don't                                     |
+| -------------------------------------- | ----------------------------------------- |
+| Cite the printed page for pack content | Paste the book's text into a description  |
+| Keep the summary after the card        | Mix rule lines into the card's own fields |

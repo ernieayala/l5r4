@@ -1,0 +1,10 @@
+// Core's message wrapper scoping anything but the named `.item` sits under no system block
+.message-content {
+  .item {
+    display: block;
+  }
+
+  .other {
+    display: block;
+  }
+}

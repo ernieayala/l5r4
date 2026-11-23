@@ -1,0 +1,39 @@
+/**
+ * Check Dialog
+ * The roll pipeline dialog: one row per modifier, with its toggle, label, and value
+ */
+
+.l5r4-check-dialog {
+  .l5r4-check-dialog-pool {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .l5r4-check-dialog-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap-tight);
+  }
+
+  .l5r4-check-dialog-modifier {
+    align-items: center;
+    display: flex;
+    gap: var(--l5r4-space-gap);
+  }
+
+  .l5r4-check-dialog-modifier-label {
+    flex: 1;
+  }
+
+  .l5r4-check-dialog-modifier-value {
+    font-family: var(--l5r4-font-code);
+  }
+
+  // A warning line (foundations/states.md rule 7): the icon in the warning color, the words in the text color
+  .l5r4-check-dialog-warning {
+    color: var(--l5r4-color-text);
+  }
+
+  .l5r4-check-dialog-warning-icon {
+    color: var(--l5r4-color-warning);
+  }
+}

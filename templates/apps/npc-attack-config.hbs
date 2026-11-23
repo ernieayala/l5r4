@@ -1,42 +1,42 @@
-<div>
+<div class="l5r4-npc-attack-config-body">
   <h3>{{localize "l5r4.ui.mechanics.combat.attack"}} {{attackNum}}</h3>
   <div class="standard-form">
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.name"}}</label>
       <div class="form-fields">
-        <input name="{{attackKey}}.name" type="text" value="{{attack.name}}" placeholder="{{localize "l5r4.ui.mechanics.combat.attack"}} {{attackNum}}" data-dtype="String" />
+        <input name="{{attackKey}}.name" type="text" value="{{attack.name}}" placeholder="{{localize "l5r4.ui.mechanics.combat.attack"}} {{attackNum}}" data-type="String" />
       </div>
     </div>
     
     <div class="form-group">
       <label>{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}</label>
       <div class="form-fields">
-        <input name="{{attackKey}}.roll" type="number" value="{{attack.roll}}" data-dtype="Number" />
+        <input name="{{attackKey}}.roll" type="number" value="{{attack.roll}}" data-type="Number" />
         <span class="flex0">k</span>
-        <input name="{{attackKey}}.keep" type="number" value="{{attack.keep}}" data-dtype="Number" />
+        <input name="{{attackKey}}.keep" type="number" value="{{attack.keep}}" data-type="Number" />
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "l5r4.ui.mechanics.combat.attack"}} {{localize "l5r4.ui.common.mod"}}</label>
+      <label>{{localize "l5r4.apps.npcAttackConfig.attackModifier"}}</label>
       <div class="form-fields">
-        <input name="{{attackKey}}.modifier" type="number" value="{{attack.modifier}}" data-dtype="Number" />
+        <input name="{{attackKey}}.modifier" type="number" value="{{attack.modifier}}" data-type="Number" />
       </div>
     </div>
 
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.damage"}}</label>
       <div class="form-fields">
-        <input name="{{damageKey}}.roll" type="number" value="{{damage.roll}}" data-dtype="Number" />
+        <input name="{{damageKey}}.roll" type="number" value="{{damage.roll}}" data-type="Number" />
         <span class="flex0">k</span>
-        <input name="{{damageKey}}.keep" type="number" value="{{damage.keep}}" data-dtype="Number" />
+        <input name="{{damageKey}}.keep" type="number" value="{{damage.keep}}" data-type="Number" />
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "l5r4.ui.common.damage"}} {{localize "l5r4.ui.common.mod"}}</label>
+      <label>{{localize "l5r4.apps.npcAttackConfig.damageModifier"}}</label>
       <div class="form-fields">
-        <input name="{{damageKey}}.modifier" type="number" value="{{damage.modifier}}" data-dtype="Number" />
+        <input name="{{damageKey}}.modifier" type="number" value="{{damage.modifier}}" data-type="Number" />
       </div>
     </div>
     
@@ -52,13 +52,13 @@
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.type"}}</label>
       <div class="form-fields">
-          <input name="{{damageKey}}.type" type="text" value="{{damage.type}}" data-dtype="String" />
+          <input name="{{damageKey}}.type" type="text" value="{{damage.type}}" data-type="String" />
       </div>
     </div>
 
     <footer class="flexrow">
-      <button type="button" data-action="save" class="button">
-        <i class="fas fa-save"></i> {{localize "l5r4.ui.common.save"}}
+      <button type="button" data-action="save-attack" class="button">
+        <i class="fa-solid fa-floppy-disk" inert></i> {{localize "l5r4.ui.common.save"}}
       </button>
     </footer>
   </div>

@@ -1,14 +1,14 @@
-<div class="emphasis-manager-container">
-  <p>{{localize "l5r4.ui.emphasisManager.help"}}</p>
-  <button type="button" data-action="addCustom">
-    <i class="fa-solid fa-plus"></i>
-    {{localize "l5r4.ui.emphasisManager.addCustom"}}
+<div class="l5r4-emphasis-manager-body">
+  <p>{{localize "l5r4.apps.emphasisManager.hint"}}</p>
+  <button type="button" data-action="add-emphasis">
+    <i class="fa-solid fa-plus" inert></i>
+    {{localize "l5r4.apps.emphasisManager.addCustom"}}
   </button>
-  <div class="emphasis-list-container">
+  <div class="l5r4-emphasis-manager-list">
     {{#if emphasisList.length}}
       <ul>
         {{#each emphasisList}}
-          <li class="{{#if this.custom}}custom-emphasis{{/if}}">
+          <li class="{{#if this.custom}}l5r4-emphasis-manager-item -custom{{/if}}">
             <label>
               <input 
                 type="checkbox" 
@@ -18,28 +18,30 @@
               />
               <span>{{this.name}}</span>
               {{#if this.custom}}
-                <span>({{localize "l5r4.ui.emphasisManager.custom"}})</span>
+                <span>({{localize "l5r4.apps.emphasisManager.custom"}})</span>
               {{/if}}
             </label>
             {{#if this.custom}}
-              <div class="flexrow -gap-sm">
-                <button 
+              <div class="l5r4-inline-control flexrow -gap-sm">
+                <button
                   type="button" 
                   class="button inline-control icon" 
-                  data-action="editCustom" 
+                  data-action="edit-emphasis" 
                   data-emphasis-name="{{this.name}}"
                   data-tooltip="{{localize 'l5r4.ui.common.edit'}}"
+                  aria-label="{{localize "l5r4.ui.common.edit"}}"
                 >
-                  <i class="fa-solid fa-edit"></i>
+                  <i class="fa-solid fa-pen-to-square" inert></i>
                 </button>
                 <button 
                   type="button" 
                   class="button inline-control icon" 
-                  data-action="deleteCustom" 
+                  data-action="delete-emphasis" 
                   data-emphasis-name="{{this.name}}"
                   data-tooltip="{{localize 'l5r4.ui.common.delete'}}"
+                  aria-label="{{localize "l5r4.ui.common.delete"}}"
                 >
-                  <i class="fa-solid fa-trash"></i>
+                  <i class="fa-solid fa-trash" inert></i>
                 </button>
               </div>
             {{/if}}
@@ -47,12 +49,12 @@
         {{/each}}
       </ul>
     {{else}}
-      <p>{{localize "l5r4.ui.emphasisManager.noEmphases"}}</p>
+      <p>{{localize "l5r4.apps.emphasisManager.noEmphases"}}</p>
     {{/if}}
   </div>
-  <footer class="flexrow -gap-sm">
+  <footer class="l5r4-emphasis-manager-footer flexrow -gap-sm">
     <button type="submit">
-      <i class="fa-solid fa-save"></i>
+      <i class="fa-solid fa-floppy-disk" inert></i>
       {{localize "l5r4.ui.common.save"}}
     </button>
     <button type="button" data-action="close">

@@ -1,0 +1,60 @@
+/**
+ * Effect Panel
+ * The effect panel window (module/apps/effect-panel.js)
+ */
+
+.l5r4-effect-panel {
+  .l5r4-effect-panel-actor {
+    margin: 0 0 var(--l5r4-space-gap);
+  }
+
+  .l5r4-effect-panel-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap-tight);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .l5r4-effect-panel-row {
+    align-items: center;
+    display: flex;
+    gap: var(--l5r4-space-gap);
+  }
+
+  .l5r4-effect-panel-icon {
+    border: none;
+    flex: 0 0 var(--l5r4-size-item-icon);
+    height: var(--l5r4-size-item-icon);
+    width: var(--l5r4-size-item-icon);
+  }
+
+  .l5r4-effect-panel-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .l5r4-effect-panel-name {
+    font-weight: bold;
+  }
+
+  .l5r4-effect-panel-source,
+  .l5r4-effect-panel-lasts {
+    font-size: var(--l5r4-font-size-meta);
+  }
+
+  .l5r4-effect-panel-button {
+    flex: 0 0 auto;
+    line-height: 1;
+    padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);
+    width: auto;
+  }
+
+  .l5r4-effect-panel-empty {
+    font-style: italic;
+    margin: 0;
+  }
+}

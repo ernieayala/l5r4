@@ -1,0 +1,6218 @@
+{
+  "name": "schools",
+  "label": "Schools",
+  "documentType": "Item",
+  "types": [
+    "school"
+  ],
+  "pages": [
+    [
+      105,
+      132
+    ],
+    [
+      211,
+      235
+    ],
+    [
+      245,
+      257
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Agasha Shugenja School",
+      "type": "school",
+      "folder": "Phoenix",
+      "page": 125,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "craft",
+            "prompt": "One Craft Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Craft: Armorsmithing]",
+                "label": "Craft: Armorsmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Blacksmithing]",
+                "label": "Craft: Blacksmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Bowyer]",
+                "label": "Craft: Bowyer"
+              },
+              {
+                "value": "@entry[skills/Craft: Brewing]",
+                "label": "Craft: Brewing"
+              },
+              {
+                "value": "@entry[skills/Craft: Carpentry]",
+                "label": "Craft: Carpentry"
+              },
+              {
+                "value": "@entry[skills/Craft: Cartography]",
+                "label": "Craft: Cartography"
+              },
+              {
+                "value": "@entry[skills/Craft: Cobbling]",
+                "label": "Craft: Cobbling"
+              },
+              {
+                "value": "@entry[skills/Craft: Cooking]",
+                "label": "Craft: Cooking"
+              },
+              {
+                "value": "@entry[skills/Craft: Farming]",
+                "label": "Craft: Farming"
+              },
+              {
+                "value": "@entry[skills/Craft: Fishing]",
+                "label": "Craft: Fishing"
+              },
+              {
+                "value": "@entry[skills/Craft: Masonry]",
+                "label": "Craft: Masonry"
+              },
+              {
+                "value": "@entry[skills/Craft: Mining]",
+                "label": "Craft: Mining"
+              },
+              {
+                "value": "@entry[skills/Craft: Pottery]",
+                "label": "Craft: Pottery"
+              },
+              {
+                "value": "@entry[skills/Craft: Shipbuilding]",
+                "label": "Craft: Shipbuilding"
+              },
+              {
+                "value": "@entry[skills/Craft: Tailoring]",
+                "label": "Craft: Tailoring"
+              },
+              {
+                "value": "@entry[skills/Craft: Weaponsmithing]",
+                "label": "Craft: Weaponsmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Weaving]",
+                "label": "Craft: Weaving"
+              },
+              {
+                "value": "@entry[skills/Craft: Poison]",
+                "label": "Craft: Poison"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:craft}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Elements of All Things]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: pick 3 Fire, 2 Earth, 1 Air.",
+        "shugenja": true
+      }
+    },
+    {
+      "name": "Akodo Bushi School",
+      "type": "school",
+      "folder": "Lion",
+      "page": 117,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]",
+            "emphasis": "Mass Combat"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more Bugei or High Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Lion]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strength of Purity]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strength of My Ancestors]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Triumph Before Battle]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Akodo's Final Lesson]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Asahina Shugenja School",
+      "type": "school",
+      "folder": "Crane",
+      "page": 110,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "artisan",
+            "prompt": "One Artisan Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Artisan: Bonsai]",
+                "label": "Artisan: Bonsai"
+              },
+              {
+                "value": "@entry[skills/Artisan: Gardening]",
+                "label": "Artisan: Gardening"
+              },
+              {
+                "value": "@entry[skills/Artisan: Ikebana]",
+                "label": "Artisan: Ikebana"
+              },
+              {
+                "value": "@entry[skills/Artisan: Origami]",
+                "label": "Artisan: Origami"
+              },
+              {
+                "value": "@entry[skills/Artisan: Painting]",
+                "label": "Artisan: Painting"
+              },
+              {
+                "value": "@entry[skills/Artisan: Poetry]",
+                "label": "Artisan: Poetry"
+              },
+              {
+                "value": "@entry[skills/Artisan: Sculpture]",
+                "label": "Artisan: Sculpture"
+              },
+              {
+                "value": "@entry[skills/Artisan: Tattooing]",
+                "label": "Artisan: Tattooing"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:artisan}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Soul's Grace]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed. Spells: pick 3 Air, 2 Water, 1 Earth."
+      }
+    },
+    {
+      "name": "Asako Loremaster School",
+      "type": "school",
+      "folder": "Phoenix",
+      "page": 125,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]",
+            "emphasis": "Courtesy"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Fortunes"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "Lore: History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "Lore: War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Temple of the Soul]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/From the Ashes]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Voice of the Universe]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Invincible Mind]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wisdom of the Ages]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Bayushi Bushi School",
+      "type": "school",
+      "folder": "Scorpion",
+      "page": 126,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Manipulation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Scorpion]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Pincers and Tail]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike at the Tail]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike From Above, Strike From Below]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Pincers Hold, the Tail Strikes]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Bayushi Courtier School",
+      "type": "school",
+      "folder": "Scorpion",
+      "page": 127,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Gossip"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Deceit"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Temptation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Weakness Is My Strength]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Shallow Waters]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Secrets Are Birthmarks]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Scrutiny's Sweet Sting]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/No More Masks]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Chuda Shugenja School",
+      "type": "school",
+      "folder": "Spider",
+      "page": 213,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Maho]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Blood Like Water]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 0.5. Outfit as printed. Spells: 3 maho of one element, 2 maho of another, 1 of any element not Deficient."
+      }
+    },
+    {
+      "name": "Chuda Shugenja School (Original)",
+      "type": "school",
+      "folder": "Snake",
+      "page": 224,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Maho]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/To Punish the Wicked]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: 3 Earth, 2 Fire, 1 Water."
+      }
+    },
+    {
+      "name": "Daidoji Iron Warrior",
+      "type": "school",
+      "folder": "Crane",
+      "page": 111,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Force of Honor]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Shield of Faith]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike Beneath the Veil]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Vigilance of Mind]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/To Tread on the Sword]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Daigotsu Bushi School",
+      "type": "school",
+      "folder": "Spider",
+      "page": 212,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei-low",
+            "prompt": "One more Bugei or Low Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "low"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei-low}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Spider]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Aura of Blood]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Ashura's Wing]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Devouring Wrath]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Inhuman Assault]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 1.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Daigotsu Courtier School",
+      "type": "school",
+      "folder": "Spider",
+      "page": 213,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Acting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Manipulation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Deceit"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Temptation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Insidious Whispers]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Cracks in the Wall]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Darkness Cannot Be Trapped]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Touch of Sin]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Embrace of Darkness]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 1.0. Outfit as printed."
+      }
+    },
+    {
+      "name": "Defender of the Wall",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 247,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Earth 4, Strength 5, Lore: Shadowlands 5, Heavy Weapons 4, Defense 4",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "trait:str",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:defense",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:heavy weapons",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: shadowlands",
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Flames of Purity]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Hida's Strength]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Crab Are the Wall]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Doji Courtier School",
+      "type": "school",
+      "folder": "Crane",
+      "page": 110,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Manipulation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]",
+            "emphasis": "Courtesy"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Perform: Storytelling]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Tea Ceremony]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "art",
+            "prompt": "One Artisan or Perform Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Artisan: Bonsai]",
+                "label": "Artisan: Bonsai"
+              },
+              {
+                "value": "@entry[skills/Artisan: Gardening]",
+                "label": "Artisan: Gardening"
+              },
+              {
+                "value": "@entry[skills/Artisan: Ikebana]",
+                "label": "Artisan: Ikebana"
+              },
+              {
+                "value": "@entry[skills/Artisan: Origami]",
+                "label": "Artisan: Origami"
+              },
+              {
+                "value": "@entry[skills/Artisan: Painting]",
+                "label": "Artisan: Painting"
+              },
+              {
+                "value": "@entry[skills/Artisan: Poetry]",
+                "label": "Artisan: Poetry"
+              },
+              {
+                "value": "@entry[skills/Artisan: Sculpture]",
+                "label": "Artisan: Sculpture"
+              },
+              {
+                "value": "@entry[skills/Artisan: Tattooing]",
+                "label": "Artisan: Tattooing"
+              },
+              {
+                "value": "@entry[skills/Perform: Biwa]",
+                "label": "Perform: Biwa"
+              },
+              {
+                "value": "@entry[skills/Perform: Dance]",
+                "label": "Perform: Dance"
+              },
+              {
+                "value": "@entry[skills/Perform: Drums]",
+                "label": "Perform: Drums"
+              },
+              {
+                "value": "@entry[skills/Perform: Flute]",
+                "label": "Perform: Flute"
+              },
+              {
+                "value": "@entry[skills/Perform: Oratory]",
+                "label": "Perform: Oratory"
+              },
+              {
+                "value": "@entry[skills/Perform: Puppeteer]",
+                "label": "Perform: Puppeteer"
+              },
+              {
+                "value": "@entry[skills/Perform: Samisen]",
+                "label": "Perform: Samisen"
+              },
+              {
+                "value": "@entry[skills/Perform: Song]",
+                "label": "Perform: Song"
+              },
+              {
+                "value": "@entry[skills/Perform: Storytelling]",
+                "label": "Perform: Storytelling"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:art}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Soul of Honor]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Speaking in Silence]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Perfect Gift]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Voice of Honor]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Gift of the Lady]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Elemental Guard",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 249,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "A chosen Ring at 6, Spellcraft 6, Lore: Theology 6; casts Mastery Level 4 spells of it",
+            "requires": [
+              {
+                "or": [
+                  {
+                    "gte": [
+                      "ring:air",
+                      6
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "ring:earth",
+                      6
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "ring:fire",
+                      6
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "ring:water",
+                      6
+                    ]
+                  }
+                ]
+              },
+              {
+                "gte": [
+                  "skill:spellcraft",
+                  6
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: theology",
+                  6
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Name of the Elements]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Touch of the Elements]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Shape of the Elements]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Pick one Element as the focus; entry also needs Mastery Level 4 spells of that Element castable.",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Four Temples Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 231,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 3,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Shintao"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Soul of Civility]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Devotion: Shintao. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "Heichi Bushi School",
+      "type": "school",
+      "folder": "Boar",
+      "page": 218,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spears]",
+            "emphasis": "Mai Chong"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei",
+            "prompt": "One more Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Charge of the Boar]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Strength of Opposition]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Speed of the Boar]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Anger of the Boar]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Beyond the Mountains]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.0. Outfit as printed."
+      }
+    },
+    {
+      "name": "Hida Bushi School",
+      "type": "school",
+      "folder": "Crab",
+      "page": 106,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Heavy Weapons]",
+            "emphasis": "Tetsubo"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei",
+            "prompt": "One more Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Crab]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Mountain Does Not Move]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Two Pincers, One Mind]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Devastating Blow]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Mountain Does Not Fall]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Hiruma Bushi School",
+      "type": "school",
+      "folder": "Crab",
+      "page": 108,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Torch's Flame Flickers]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wolf's Little Lesson]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Hummingbird Wings]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Shark Smells Blood]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Daylight Wastes No Movement]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Ichiro Bushi School",
+      "type": "school",
+      "folder": "Badger",
+      "page": 215,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Heavy Weapons]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Transcend the Mountain]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strength of the Badger]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Crushing Blow]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Crashing Stones]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Return the Strike]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Ide Emissary School",
+      "type": "school",
+      "folder": "Unicorn",
+      "page": 131,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]",
+            "emphasis": "Conversation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Honesty"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One High or Perform Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Heart Speaks]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Piercing the Veils]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Heart Listens]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Answering the Heart]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Immovable Hand of Peace]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Ikoma Bard School",
+      "type": "school",
+      "folder": "Lion",
+      "page": 118,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]",
+            "emphasis": "Lion Clan"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Perform: Storytelling]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Honesty"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei",
+            "prompt": "One more Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Herald of Glory]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Heart of the Lion]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Voice of the Ancestors]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Strength of Tradition]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Every Lion Is Your Brother]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Isawa Shugenja School",
+      "type": "school",
+      "folder": "Phoenix",
+      "page": 124,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Medicine]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "Lore: History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "Lore: War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Isawa's Gift]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: 3 of one element, 2 of a second, 1 of a third, 1 of a fourth.",
+        "shugenja": true
+      }
+    },
+    {
+      "name": "Iuchi Shugenja School",
+      "type": "school",
+      "folder": "Unicorn",
+      "page": 131,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Spirit of the Wind]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed. Spells: pick 3 Water, 2 Earth, 1 Air.",
+        "shugenja": true
+      }
+    },
+    {
+      "name": "Kakita Bushi School",
+      "type": "school",
+      "folder": "Crane",
+      "page": 109,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]",
+            "emphasis": "Focus"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Tea Ceremony]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more Bugei or High Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Crane]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Speed of Lightning]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/First and Last Strike]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/One Strike, Two Cuts]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike with No Thought]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Kasuga Smuggler School",
+      "type": "school",
+      "folder": "Tortoise",
+      "page": 225,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]",
+            "emphasis": "Notice"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Underworld]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Deceit"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more High, Merchant, or Low Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "merch",
+              "low"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Way of the Tortoise]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Shell of the Tortoise]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Eyes of the Emperor]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Hand in Hand]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Tortoise Smiles]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 2.0. Outfit as printed."
+      }
+    },
+    {
+      "name": "Kenshinzen",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 247,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 4, Void 4, Meditation 5, Lore: Bushido 4, Iaijutsu 5; beat a Kenshinzen in a fair duel",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "ring:void",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:iaijutsu",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: bushido",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:meditation",
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Drawing the Void]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Kakita's Strength]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/A Single Moment]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Entry also needs a fair win in a legal iaijutsu duel over a current Kenshinzen (to the death or not).",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Kitsu Shugenja School",
+      "type": "school",
+      "folder": "Lion",
+      "page": 118,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Eyes of the Ancestors]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed. Spells: pick 3 Water, 2 Air, 1 Earth."
+      }
+    },
+    {
+      "name": "Kitsuki Investigator School",
+      "type": "school",
+      "folder": "Dragon",
+      "page": 114,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]",
+            "emphasis": "Courtesy"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]",
+            "emphasis": "Interrogation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "Lore: History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "Lore: War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Kitsuki's Method]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wisdom the Wind Brings]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Know the Rhythm of the Heart]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Finding the Path]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Eyes Betray the Heart]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Kitsune Shugenja School",
+      "type": "school",
+      "folder": "Fox",
+      "page": 220,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Medicine]",
+            "emphasis": "Herbalism"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Essence of Chikushudo]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: 3 Earth, 2 Water, 1 Fire."
+      }
+    },
+    {
+      "name": "Komori Shugenja School",
+      "type": "school",
+      "folder": "Bat",
+      "page": 217,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Tea Ceremony]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Kami's Whispers]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Lore: Ancestors is not in the pack. Spells: 3 Air, 2 Water, 1 Fire."
+      }
+    },
+    {
+      "name": "Kuni Shugenja School",
+      "type": "school",
+      "folder": "Crab",
+      "page": 107,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shadowlands]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "weapon",
+            "prompt": "One Weapon Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Chain Weapons]",
+                "label": "Chain Weapons"
+              },
+              {
+                "value": "@entry[skills/Heavy Weapons]",
+                "label": "Heavy Weapons"
+              },
+              {
+                "value": "@entry[skills/Kenjutsu]",
+                "label": "Kenjutsu"
+              },
+              {
+                "value": "@entry[skills/Knives]",
+                "label": "Knives"
+              },
+              {
+                "value": "@entry[skills/Kyujutsu]",
+                "label": "Kyujutsu"
+              },
+              {
+                "value": "@entry[skills/Ninjutsu]",
+                "label": "Ninjutsu"
+              },
+              {
+                "value": "@entry[skills/Polearms]",
+                "label": "Polearms"
+              },
+              {
+                "value": "@entry[skills/Spears]",
+                "label": "Spears"
+              },
+              {
+                "value": "@entry[skills/Staves]",
+                "label": "Staves"
+              },
+              {
+                "value": "@entry[skills/War Fan]",
+                "label": "War Fan"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:weapon}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Gaze Into Shadow]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed. Spells: pick 3 Earth, 2 Fire, 1 Water."
+      }
+    },
+    {
+      "name": "Matsu Berserker School",
+      "type": "school",
+      "folder": "Lion",
+      "page": 119,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei1",
+            "prompt": "First extra Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei2",
+            "prompt": "Second extra Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Lion's Roar]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Matsu's Fury]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Lion's Charge]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Matsu's Courage]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Lion's Victory]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Mirumoto Bushi School",
+      "type": "school",
+      "folder": "Dragon",
+      "page": 113,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Shugenja]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more Bugei or High Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Way of the Dragon]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Calm in Midst of Thunder]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strong and Swift]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Furious Retaliation]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Heart of the Dragon]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Miya Herald School",
+      "type": "school",
+      "folder": "Imperial",
+      "page": 230,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Rhetoric"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]",
+            "emphasis": "Courtesy"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Heraldry]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Voice of the Emperor]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Eyes of the Emperor]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Hand of the Emperor]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Blessings of the Emperor]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Glory of the Emperor]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Morito Bushi School",
+      "type": "school",
+      "folder": "Ox",
+      "page": 223,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]",
+            "emphasis": "Tracking"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Underworld]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Legacy of the Four Winds]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Wind Blows Many Ways]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Thunder and Fury]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Blade Upon the Wind]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Fast and Furious]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed. Lore: Kolat is not in the pack."
+      }
+    },
+    {
+      "name": "Moshi Shugenja School",
+      "type": "school",
+      "folder": "Mantis",
+      "page": 121,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Divination]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "first",
+            "prompt": "One High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:first}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "second",
+            "prompt": "A second High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:second}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Favor of the Sun]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: pick 3 Air and 3 Fire.",
+        "shugenja": true
+      }
+    },
+    {
+      "name": "Moto Bushi School",
+      "type": "school",
+      "folder": "Unicorn",
+      "page": 130,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Scimitar"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei",
+            "prompt": "One Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Unicorn]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Shinsei's Smile]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Desert Wind Strike]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Charge of Madness]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Moto Cannot Yield]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Obsidian Warrior",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 250,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Reflexes 5, Agility 5, Earth 4, Lore: Shourido 4, Intimidation 5, Iaijutsu 5; survived a skirmish with a sensei",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "trait:agi",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:ref",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:iaijutsu",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:intimidation",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: shourido",
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Darkness Is My Light]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Power of Impurity]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/My Strength Has No Limits]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Entry also needs surviving a skirmish against an Obsidian Warrior sensei. Lore: Shourido is not in the Skills pack.",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Order of Heroes Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 232,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 3,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Destiny's Hand]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Devotion: Shintao. Pick the Lore: Theology Emphasis. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "Order of the Spider Monks",
+      "type": "school",
+      "folder": "Spider",
+      "page": 215,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Polearms]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Dark Path]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Drawing in the Strike]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Speed of Darkness]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Guarded by Chi]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Darkness Unleashed]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 1.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Otomo Courtier School",
+      "type": "school",
+      "folder": "Imperial",
+      "page": 229,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]",
+            "emphasis": "Manipulation"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]",
+            "emphasis": "Control"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Voice of Heaven]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Destiny Has No Secrets]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/My Master's Voice]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Emperor's Protection]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Virtues of Command]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Scorpion Instigator",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 249,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Perception 3, Intelligence 5, Awareness 5, Stealth 4, Sincerity 5, Etiquette 5, Courtier 6, Blackmail (4 people), Dark Secret",
+            "requires": [
+              {
+                "gte": [
+                  "trait:awa",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:int",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:per",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:courtier",
+                  6
+                ]
+              },
+              {
+                "gte": [
+                  "skill:etiquette",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:sincerity",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:stealth",
+                  4
+                ]
+              },
+              "item:advantage:blackmail",
+              "item:disadvantage:dark secret"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Depths of Dishonor]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Sheath Your Lies in Truth]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Pull the String]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Blackmail must cover four or more people; the Dark Secret is told to the sensei on entry.",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Seppun Guardsman School",
+      "type": "school",
+      "folder": "Imperial",
+      "page": 228,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Never in Darkness]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Clouds Part]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Sun's Light Reveals]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Speed of Heaven]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Heaven Never Falls]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Seppun Shugenja School",
+      "type": "school",
+      "folder": "Imperial",
+      "page": 229,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]",
+            "emphasis": "Notice"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/In Defense of the Throne]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed. Spells: 3 Fire, 2 Earth, 1 Air."
+      }
+    },
+    {
+      "name": "Shiba Bushi School",
+      "type": "school",
+      "folder": "Phoenix",
+      "page": 123,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]",
+            "emphasis": "Void Recovery"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spears]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One Bugei or High Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Phoenix]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Dancing With the Elements]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/One With the Void]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Move With the World]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Touch of the Void]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Shosuro Infiltrator School",
+      "type": "school",
+      "folder": "Scorpion",
+      "page": 129,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Acting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Ninjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]",
+            "emphasis": "Sneaking",
+            "skillRank": 2
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Path of Shadows]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike From Darkness]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Steel Within Silk]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Whisper of Steel]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Final Silence]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 1.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Shrine of the Seven Thunders Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 232,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 3,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Shintao"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Walk with the Prophet]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Devotion: Shintao. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "Soshi Shugenja School",
+      "type": "school",
+      "folder": "Scorpion",
+      "page": 127,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Kami's Whisper]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed. Spells: pick 3 Air, 2 Fire, 1 Water.",
+        "shugenja": true
+      }
+    },
+    {
+      "name": "Storm Riders",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 248,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Water 5, Fire 3, Air 3, Lore: Theology 3, Spellcraft 3, Sailing 3, Lore: the Sea 5, Elemental Blessing (Water)",
+            "requires": [
+              {
+                "gte": [
+                  "ring:air",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "ring:fire",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "ring:water",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: the sea",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:sailing",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:spellcraft",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: theology",
+                  3
+                ]
+              },
+              "elemental-blessing:water"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strength of Suitengu]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Raging Ocean]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Child of Osano-wo]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Suzume Bushi School",
+      "type": "school",
+      "folder": "Sparrow",
+      "page": 225,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]",
+            "emphasis": "Katana"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Perform: Storytelling]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/All Things in Time]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Purity of Chi]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wisdom Is the Greatest Weapon]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Quiet Spirit, Steady Blade]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Slow and Deadly]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Swordmasters",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 247,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Fire 4, Void 4, Lore: Theology 4, Kenjutsu 5, Iaijutsu 5",
+            "requires": [
+              {
+                "gte": [
+                  "ring:fire",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "ring:void",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:iaijutsu",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:kenjutsu",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: theology",
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Silence of Two Strikes]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Mirumoto's Strength]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Harmony and Precision]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Tamori Shugenja School",
+      "type": "school",
+      "folder": "Dragon",
+      "page": 113,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]",
+            "emphasis": "Cipher"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Divination]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Medicine]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Flesh of the Elements]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: pick 3 Earth, 2 Fire, 1 Water."
+      }
+    },
+    {
+      "name": "Temple of Kaimetsu-uo Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 232,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 3,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Fortunes"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-3",
+            "prompt": "A third Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-3}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Path of Purity]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Devotion: Fortunist. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "Temple of Osano-wo Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 233,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 3,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Fortunes"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei-1",
+            "prompt": "One Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "bugei-2",
+            "prompt": "Another Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:bugei-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Hand of Thunder]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Devotion: Fortunist. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "Temples of the Thousand Fortunes Monk",
+      "type": "school",
+      "folder": "Brotherhood",
+      "page": 233,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "kiho": 4,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Theology]",
+            "emphasis": "Fortunes"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Thousand Forms]",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Devotion: Fortunist. Monk: Void 3, three kiho, monk outfit (p.231)."
+      }
+    },
+    {
+      "name": "The Lion's Pride",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 248,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Agility 5, Strength 5, Battle 5, Weapon Skills: four at 3, Honor Rank 6, female Matsu",
+            "requires": [
+              {
+                "gte": [
+                  "trait:agi",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:str",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:battle",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "honor-rank",
+                  6
+                ]
+              },
+              "family:matsu"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Fury of Matsu]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Paragon of Honor]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Matsu's Technique]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Entry also needs four Weapon Skills of 3 or more and a woman of the Matsu family.",
+        "rank": 1
+      }
+    },
+    {
+      "name": "The White Guard",
+      "type": "school",
+      "folder": "Advanced Schools",
+      "page": 250,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Strength 4, Agility 5, Earth 5, Lore: Theology 5, Horsemanship 5; devoted to the Lords of Death",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:agi",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "trait:str",
+                  4
+                ]
+              },
+              {
+                "gte": [
+                  "skill:horsemanship",
+                  5
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: theology",
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Pale Face of Death]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Moto's Strength]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Fury of Heaven]",
+            "rank": 3
+          }
+        ],
+        "specialRules": "Entry also needs devotion to the Lords of Death, unless the campaign is set before 1160.",
+        "rank": 1
+      }
+    },
+    {
+      "name": "Togashi Tattooed Order",
+      "type": "school",
+      "folder": "Dragon",
+      "page": 114,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "void",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Artisan: Tattooing]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "One Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "Lore: History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "Lore: War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:lore}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "nonlow",
+            "prompt": "One more non-Low Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei",
+              "merch"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:nonlow}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Blood of the Kami]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Body of Stone]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Blessing of the Kami]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Will of Stone]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Touch of the Kami]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Printed as Craft: Tattooing."
+      }
+    },
+    {
+      "name": "Toku Bushi School",
+      "type": "school",
+      "folder": "Monkey",
+      "page": 221,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]",
+            "emphasis": "Search"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: History]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Toku's Lesson]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Strength of One Man]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Courage Above All]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Forge Your Own Fate]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Fortune Favors the Mortal Man]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Tonbo Shugenja School",
+      "type": "school",
+      "folder": "Dragonfly",
+      "page": 218,
+      "coverage": "partial",
+      "system": {
+        "shugenja": true,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Calligraphy]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Meditation]",
+            "emphasis": "Void Recovery"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spellcraft]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high",
+            "prompt": "One more High Skill",
+            "list": "skills",
+            "filter": [
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Guided by Fate]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Sense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Commune]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[spells/Summon]"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Spells: 3 Water, 2 Air, 1 Earth."
+      }
+    },
+    {
+      "name": "Toritaka Bushi School",
+      "type": "school",
+      "folder": "Falcon",
+      "page": 219,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Animal Handling]",
+            "emphasis": "Falcons"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Spirit Realms]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spears]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Falcon's Eyes]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Falcon Takes Flight]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Falcon's Wings]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Vigilant and Strong]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Claws of the Falcon]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 5.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Tsi Smith School",
+      "type": "school",
+      "folder": "Oriole",
+      "page": 222,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "artisan",
+            "prompt": "One Artisan Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Artisan: Bonsai]",
+                "label": "Bonsai"
+              },
+              {
+                "value": "@entry[skills/Artisan: Gardening]",
+                "label": "Gardening"
+              },
+              {
+                "value": "@entry[skills/Artisan: Ikebana]",
+                "label": "Ikebana"
+              },
+              {
+                "value": "@entry[skills/Artisan: Origami]",
+                "label": "Origami"
+              },
+              {
+                "value": "@entry[skills/Artisan: Painting]",
+                "label": "Painting"
+              },
+              {
+                "value": "@entry[skills/Artisan: Poetry]",
+                "label": "Poetry"
+              },
+              {
+                "value": "@entry[skills/Artisan: Sculpture]",
+                "label": "Sculpture"
+              },
+              {
+                "value": "@entry[skills/Artisan: Tattooing]",
+                "label": "Tattooing"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:artisan}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "craft",
+            "prompt": "One Craft Skill, at rank 2",
+            "options": [
+              {
+                "value": "@entry[skills/Craft: Armorsmithing]",
+                "label": "Armorsmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Blacksmithing]",
+                "label": "Blacksmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Bowyer]",
+                "label": "Bowyer"
+              },
+              {
+                "value": "@entry[skills/Craft: Brewing]",
+                "label": "Brewing"
+              },
+              {
+                "value": "@entry[skills/Craft: Carpentry]",
+                "label": "Carpentry"
+              },
+              {
+                "value": "@entry[skills/Craft: Cartography]",
+                "label": "Cartography"
+              },
+              {
+                "value": "@entry[skills/Craft: Cobbling]",
+                "label": "Cobbling"
+              },
+              {
+                "value": "@entry[skills/Craft: Cooking]",
+                "label": "Cooking"
+              },
+              {
+                "value": "@entry[skills/Craft: Farming]",
+                "label": "Farming"
+              },
+              {
+                "value": "@entry[skills/Craft: Fishing]",
+                "label": "Fishing"
+              },
+              {
+                "value": "@entry[skills/Craft: Masonry]",
+                "label": "Masonry"
+              },
+              {
+                "value": "@entry[skills/Craft: Mining]",
+                "label": "Mining"
+              },
+              {
+                "value": "@entry[skills/Craft: Pottery]",
+                "label": "Pottery"
+              },
+              {
+                "value": "@entry[skills/Craft: Shipbuilding]",
+                "label": "Shipbuilding"
+              },
+              {
+                "value": "@entry[skills/Craft: Tailoring]",
+                "label": "Tailoring"
+              },
+              {
+                "value": "@entry[skills/Craft: Weaponsmithing]",
+                "label": "Weaponsmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Weaving]",
+                "label": "Weaving"
+              },
+              {
+                "value": "@entry[skills/Craft: Poison]",
+                "label": "Poison"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:craft}",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "weapon",
+            "prompt": "One Weapon Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Chain Weapons]",
+                "label": "Chain Weapons"
+              },
+              {
+                "value": "@entry[skills/Heavy Weapons]",
+                "label": "Heavy Weapons"
+              },
+              {
+                "value": "@entry[skills/Kenjutsu]",
+                "label": "Kenjutsu"
+              },
+              {
+                "value": "@entry[skills/Knives]",
+                "label": "Knives"
+              },
+              {
+                "value": "@entry[skills/Kyujutsu]",
+                "label": "Kyujutsu"
+              },
+              {
+                "value": "@entry[skills/Ninjutsu]",
+                "label": "Ninjutsu"
+              },
+              {
+                "value": "@entry[skills/Polearms]",
+                "label": "Polearms"
+              },
+              {
+                "value": "@entry[skills/Spears]",
+                "label": "Spears"
+              },
+              {
+                "value": "@entry[skills/Staves]",
+                "label": "Staves"
+              },
+              {
+                "value": "@entry[skills/War Fan]",
+                "label": "War Fan"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:weapon}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One more High, Bugei, or Merchant Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei",
+              "merch"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Tools of the Fortunes]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Tsi Xing Guo's Blessing]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/A Crafter's Dedication]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Exhaustive Knowledge]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Star-Filled Steel]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. Uses the Basic Crafting rules (p.258)."
+      }
+    },
+    {
+      "name": "Tsuruchi Archer School",
+      "type": "school",
+      "folder": "Mantis",
+      "page": 122,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]",
+            "emphasis": "Yumi",
+            "skillRank": 2
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One Bugei or High Skill",
+            "list": "skills",
+            "filter": [
+              "bugei",
+              "high"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Always Be Ready]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Arrow Knows the Way]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Wasp's Sting]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Flight of No-Mind]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Tsuruchi's Eye]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Usagi Bushi School",
+      "type": "school",
+      "folder": "Hare",
+      "page": 221,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]",
+            "emphasis": "Running"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Lore: Maho]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "high-bugei",
+            "prompt": "One more High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:high-bugei}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Speed of the Hare]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Leap of the Hare]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Swift as Lightning]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Kick of the Hare]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Reichin's Style]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 4.0. Outfit as printed. Lore: Kolat may replace Lore: Maho after the Clan War."
+      }
+    },
+    {
+      "name": "Utaku Battle Maiden",
+      "type": "school",
+      "folder": "Unicorn",
+      "page": 132,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]",
+            "skillRank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "extra",
+            "prompt": "One High or Bugei Skill",
+            "list": "skills",
+            "filter": [
+              "high",
+              "bugei"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:extra}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Riding in Harmony]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Void of War]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Sensing the Breeze]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wind Never Stops]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Otaku's Blessing]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 6.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Yasuki Courtier School",
+      "type": "school",
+      "folder": "Crab",
+      "page": 107,
+      "coverage": "partial",
+      "system": {
+        "shugenja": false,
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]",
+            "emphasis": "Appraisal"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]",
+            "emphasis": "Deceit"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "merchant",
+            "prompt": "One more Merchant Skill",
+            "list": "skills",
+            "filter": [
+              "merch"
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:merchant}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Carp]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Do As We Say]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Treasures of the Carp]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Wiles of the Carp]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/What Is Yours Is Mine]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Yoritomo Bushi School",
+      "type": "school",
+      "folder": "Mantis",
+      "page": 120,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]",
+            "emphasis": "Improvised Weapons"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Knives]",
+            "emphasis": "Kama"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sailing]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Way of the Mantis]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Voice of the Storm]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strike of the Mantis]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/The Rolling Wave]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Hand of Osano-wo]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Yoritomo Courtier School",
+      "type": "school",
+      "folder": "Mantis",
+      "page": 121,
+      "coverage": "partial",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Commerce]",
+            "emphasis": "Appraisal"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Courtier]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Intimidation]",
+            "emphasis": "Control"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Sincerity]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "merchantOrLore",
+            "prompt": "One Merchant or Lore Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Animal Handling]",
+                "label": "Animal Handling"
+              },
+              {
+                "value": "@entry[skills/Commerce]",
+                "label": "Commerce"
+              },
+              {
+                "value": "@entry[skills/Engineering]",
+                "label": "Engineering"
+              },
+              {
+                "value": "@entry[skills/Sailing]",
+                "label": "Sailing"
+              },
+              {
+                "value": "@entry[skills/Craft: Blacksmithing]",
+                "label": "Craft: Blacksmithing"
+              },
+              {
+                "value": "@entry[skills/Craft: Brewing]",
+                "label": "Craft: Brewing"
+              },
+              {
+                "value": "@entry[skills/Craft: Carpentry]",
+                "label": "Craft: Carpentry"
+              },
+              {
+                "value": "@entry[skills/Craft: Cartography]",
+                "label": "Craft: Cartography"
+              },
+              {
+                "value": "@entry[skills/Craft: Cobbling]",
+                "label": "Craft: Cobbling"
+              },
+              {
+                "value": "@entry[skills/Craft: Cooking]",
+                "label": "Craft: Cooking"
+              },
+              {
+                "value": "@entry[skills/Craft: Farming]",
+                "label": "Craft: Farming"
+              },
+              {
+                "value": "@entry[skills/Craft: Fishing]",
+                "label": "Craft: Fishing"
+              },
+              {
+                "value": "@entry[skills/Craft: Masonry]",
+                "label": "Craft: Masonry"
+              },
+              {
+                "value": "@entry[skills/Craft: Mining]",
+                "label": "Craft: Mining"
+              },
+              {
+                "value": "@entry[skills/Craft: Pottery]",
+                "label": "Craft: Pottery"
+              },
+              {
+                "value": "@entry[skills/Craft: Shipbuilding]",
+                "label": "Craft: Shipbuilding"
+              },
+              {
+                "value": "@entry[skills/Craft: Tailoring]",
+                "label": "Craft: Tailoring"
+              },
+              {
+                "value": "@entry[skills/Craft: Weaving]",
+                "label": "Craft: Weaving"
+              },
+              {
+                "value": "@entry[skills/Lore: Architecture]",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "@entry[skills/Lore: Bushido]",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "@entry[skills/Lore: Elements]",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "@entry[skills/Lore: Ghosts]",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "@entry[skills/Lore: Heraldry]",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "@entry[skills/Lore: History]",
+                "label": "Lore: History"
+              },
+              {
+                "value": "@entry[skills/Lore: Nature]",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "@entry[skills/Lore: Omens]",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "@entry[skills/Lore: Shugenja]",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "@entry[skills/Lore: Spirit Realms]",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "@entry[skills/Lore: Theology]",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "@entry[skills/Lore: War]",
+                "label": "Lore: War"
+              },
+              {
+                "value": "@entry[skills/Lore: Anatomy]",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "@entry[skills/Lore: Maho]",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "@entry[skills/Lore: Shadowlands]",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "@entry[skills/Lore: Underworld]",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:merchantOrLore}"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Duty Before Honor]",
+            "rank": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Storm Heart]",
+            "rank": 2
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Command the Winds]",
+            "rank": 3
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Will of the Storm]",
+            "rank": 4
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[techniques/Strength in All Things]",
+            "rank": 5
+          }
+        ],
+        "specialRules": "Starting Honor 2.5. Outfit as printed."
+      }
+    }
+  ]
+}

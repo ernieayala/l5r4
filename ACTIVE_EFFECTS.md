@@ -1,548 +1,578 @@
-# Active Effects Guide
+# Rules and Active Effects Guide
 
-Active Effects let you modify character stats dynamically. This system uses them heavily for bonuses from Family, School, Advantages, Disadvantages, Techniques, Kata, and Kiho items.
+Items and Active Effects carry their mechanics in two ways:
 
----
+- **Rules** (`system.rules`): entries such as "+1k0 on Kenjutsu rolls" or "+1 Strength" that the system's rule engine reads. Rules can depend on the situation (a stance, a condition, a Ring value) and can use formulas such as "Air Ring plus Defense rank".
+- **Active Effect changes**: Foundry's own changes, which add to, multiply, or replace one value on the character.
 
-## How They Work
-
-When you add an item with Active Effects to a character, those effects automatically transfer to the character and modify their stats. Want a Family to grant +1 Strength? Create an Active Effect on the Family item that adds 1 to `system.traits.str`.
-
-**Key Points:**
-- Effects live on items, not directly on actors
-- Effects transfer when items are added to characters
-- Effects can add, subtract, multiply, override, or upgrade values
-- Use dot notation for nested properties (e.g., `system.traits.str`)
+Use a rule when the system has a rule key for what you need; use an Active Effect change for any other value on the character.
 
 ---
 
-## Creating an Active Effect
+## Rules
 
-1. Open the item sheet (Family, School, Advantage, etc.)
-2. Go to the **Active Effects** tab
-3. Click **Create Effect**
-4. Set the effect name and configure changes
+### Adding a rule
 
-**Each effect can have multiple changes.** Each change needs:
-- **Attribute Key:** The stat you're modifying (see below for all keys)
-- **Change Mode:** How to apply the change (Add, Multiply, Override, etc.)
-- **Effect Value:** The number or value to apply
+1. Open the item sheet (Family, School, Advantage, Technique, Kata, ...) or an Active Effect's sheet.
+2. Go to the **Rules** tab.
+3. Pick a rule key at the bottom and click **Add rule**. The rule appears as a form with one field per setting; fill them in. Each field saves as you leave it on an item sheet, and with **Save** on an effect sheet.
 
----
+A rule the system cannot use shows its error in red above its fields until it is fixed. The trash icon removes a rule.
 
-## Change Modes
+**Edit as JSON** shows every rule as one JSON list, for copying rules between items or writing many at once:
 
-| Mode | What It Does | Example |
-|------|--------------|---------|
-| **Add** | Adds to existing value | +1 Strength |
-| **Multiply** | Multiplies existing value | ×2 damage |
-| **Override** | Replaces value entirely | Set Armor TN to 25 |
-| **Upgrade** | Uses higher of old/new value | Take best of two bonuses |
-| **Downgrade** | Uses lower of old/new value | Take worst of two penalties |
+```json
+[
+  { "key": "RollModifier", "selector": "skill:kenjutsu", "roll": 1 },
+  { "key": "ArmorTN", "value": 5 }
+]
+```
 
-**Most common:** Add mode. Use it for trait bonuses, skill bonuses, initiative modifiers, etc.
+Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
 
----
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
-## Actor Attribute Keys
+### Fields every rule has
 
-### Traits
+| Field       | Meaning                                             | Default  |
+| ----------- | --------------------------------------------------- | -------- |
+| `key`       | The rule key (table below)                          | required |
+| `label`     | Text shown for the rule; the item's name when blank | `""`     |
+| `priority`  | Order among rules; lower runs first                 | `100`    |
+| `predicate` | When the rule applies (see **Predicates**)          | always   |
 
-These are the eight core traits. All use Add mode for bonuses.
+### Rule keys
 
-| Attribute Key | Trait | Example Effect |
-|---------------|-------|----------------|
-| `system.traits.sta` | Stamina | +1 from Crab Family |
-| `system.traits.wil` | Willpower | +1 from Phoenix Family |
-| `system.traits.str` | Strength | +1 from Hida Family |
-| `system.traits.per` | Perception | +1 from Kitsuki Family |
-| `system.traits.ref` | Reflexes | +1 from Shosuro Family |
-| `system.traits.awa` | Awareness | +1 from Doji Family |
-| `system.traits.agi` | Agility | +1 from Kakita Family |
-| `system.traits.int` | Intelligence | +1 from Asahina Family |
+Values marked _n/f_ take a number or a formula (see **Formulas**).
 
-**Example:** A Family grants +1 Strength
-- Attribute Key: `system.traits.str`
-- Change Mode: Add
-- Effect Value: `1`
+| Key | Fields | What it does |
+| --- | --- | --- |
+| `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` _n/f_ | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
+| `RollModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
+| `ArmorTN` | `value` _n/f_, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
+| `Reduction` | `value` _n/f_, `except` | Adds to Reduction. `except` lists damage sources it does not stop, as `["jade"]` |
+| `DamageSource` | `selector` (default `damage`), `tags`, `ignoreReduction` _n/f_ | Marks the selected damage rolls with sources (`jade`, `crystal`, `obsidian`, `spell`, `nemuranai`, or your own) and lets them ignore that much Reduction |
+| `Invulnerability` | `harmedBy`, `only` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian, spell, nemuranai) deals one Wound after Reduction (p.319). With `only`, it covers damage from those sources alone |
+| `Spirit` | `harmedBy` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian) is halved after Reduction, rounding down (p.320) |
+| `Wounds` | `perRank` _n/f_, `penalty` _n/f_ | Adds Wounds to every Wound Rank, and adds to every Wound Rank's TN penalty |
+| `Initiative` | `roll`, `keep`, `total` _n/f_ | Adds to Initiative |
+| `RollOption` | `option`, `toggleable`, `value` | Turns on a roll option other rules' predicates can test. With `"toggleable": true` it is on only while `"value"` is `true`, for situations the system cannot see (higher ground, a target within reach) |
+| `TNModifier` | `selector`, `value` _n/f_, `type` | A TN change on the selected rolls |
+| `FreeRaise` | `selector`, `value` _n/f_ | Free Raises on the selected rolls |
+| `DiceRule` | `selector`, `explode` (2-10), `rerollOnes` | Dice explode on `explode` or higher; `rerollOnes` re-rolls 1s once |
+| `Substitute` | `selector`, `replace`, `with` | Offers, in the roll dialog, one Trait in place of another, as `"replace": "trait:agi", "with": "trait:ref"`; off until the roller turns it on |
+| `Note` | `selector`, `text` | Text on the card of the selected rolls |
+| `Movement` | `water` _n/f_ | Water Ring ranks for movement only |
+| `ApplyCondition` | `selector`, `condition`, `level` | A successful selected roll with a target shows a button that puts the status `condition` (at `level`, for a Fear Rank) on the target |
+| `ConditionImmunity` | `condition` | The character cannot gain that status |
+| `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
+| `Resource` | `slug`, `max` _n/f_, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
+| `OpponentModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
+| `RaiseRule` | `selector`, `maneuver`, `cost` _n/f_, `cap` _n/f_, `minimum` _n/f_ | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
+| `UnskilledAs` | `selector`, `rank` _n/f_ | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
+| `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`), `range` | Names on the card of the selected rolls the action they take (p.85); with `range` (`"melee"` or `"ranged"`) only on attacks of that range. The system shows it and does not enforce it |
+| `Cost` | `selector`, `value` _n/f_ | The XP price of what the selector names (see **XP prices**) |
+| `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` _n/f_ | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
+| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
+| `ChoiceSet` | `flag`, `prompt`, `options` or `list`, `filter`, `selection` | A choice asked when the item is added; the item's other rules use the answer as `{choice:<flag>}` (see **Character options**) |
+| `GrantItem` | `uuid`, `rank`, `skillRank`, `emphasis` | An item given with this one: a School's Skills and Techniques (see **Character options**) |
 
-### Rings
+### Selectors
 
-**Void Ring only.** The elemental rings (Air, Earth, Fire, Water) auto-calculate from trait pairs and can't be modified directly.
+| Selector | Rolls |
+| --- | --- |
+| `any` | Every roll |
+| `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
+| `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
+| `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
+| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
+| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant`, `low` |
+| `skill-tag:social` | Rolls of Skills marked **Social Skill** on their Details tab (p.134) |
+| `skill-tag:school` | Rolls of School Skills |
+| `attack` | Every attack roll, with or without a Skill |
+| `damage` | Every damage roll |
+| `spell` | Every Spell Casting Roll, maho included |
+| `maho` | Maho casting rolls |
 
-| Attribute Key | Ring | Example Effect |
-|---------------|------|----------------|
-| `system.rings.void.rank` | Void Ring Rank | +1 from rare technique |
-| `system.rings.void.value` | Current Void Points | +1 bonus Void Point |
+### The roll dialog
 
-**Note:** Modifying `rank` changes maximum Void Points. Modifying `value` gives temporary extra points that don't restore on rest.
+Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off (an `optional` one starts off), and offers: the TN (an attack starts at a single target's Armor TN; the target's changes against one attack range, such as Prone against melee, are listed with the TN), Raises up to the Void Ring (p.79; a `RaiseRule` moves the cap and may require some), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage; a note warns when one was already spent this Round in combat, and the choice stays yours), an Emphasis from the Skill's trained Emphases (p.133), Embracing the Taint for +1k1 and a point of Taint on a roll with a physical Trait (Taint Level 1 or more and not Lost, p.279), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80), unless an `UnskilledAs` rule covers its Skill. A penalty that leaves more kept dice than rolled dice cuts the kept dice (p.89).
 
-### Character Attributes
+Each roll posts a card holding everything it rolled with. A successful roll with a target shows a button for each condition an `ApplyCondition` rule offers. With the optional Honor Roll on, a failed Skill, Trait, Ring, or Spell Casting roll shows an **Honor Roll** button (see **The ledger and the Honor Roll**). Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
 
-| Attribute Key | What It Is | Example Effect |
-|---------------|------------|----------------|
-| `system.honor.rank` | Honor Rank | +1 from advantage |
-| `system.honor.points` | Honor Points | +5 from technique |
-| `system.glory.rank` | Glory Rank | +1 from school |
-| `system.glory.points` | Glory Points | +3 from status |
-| `system.status.rank` | Status Rank | +1 from advantage |
-| `system.status.points` | Status Points | +2 from family |
-| `system.shadowTaint.rank` | Shadow Taint Rank | +1 from maho |
-| `system.shadowTaint.points` | Shadow Taint Points | +5 from curse |
+### Formulas
 
-### Combat & Defense
+A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`.
 
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.initiative.rollMod` | Initiative roll dice | +1k0 from advantage |
-| `system.initiative.keepMod` | Initiative keep dice | +0k1 from kata |
-| `system.initiative.totalMod` | Initiative flat bonus | +3 from technique |
-| `system.armorTn.mod` | Armor TN modifier | +5 from advantage |
+| Path | Value |
+| --- | --- |
+| `@rings.air`, `@rings.earth`, `@rings.fire`, `@rings.water` | Ring values |
+| `@rings.void.rank` | Void Ring |
+| `@traits.ref` (and the other Trait keys) | Traits |
+| `@skills.<skill>.rank` | A Skill's rank; the skill name in lower case with spaces as `_`, as `@skills.tea_ceremony.rank`. A Skill the character lacks counts as 0 |
+| `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
+| `@insight.rank` | Insight Rank |
+| `@school.rank` | School Rank: the highest of the character's Schools, 0 with none |
+| `@level` | On an Active Effect: its level, such as a Fear Rank |
+| `@cost` | In a `Cost` rule: the price before it |
+| `@points` | In a `Ledger` rule: the size of the change before it |
 
-**For NPCs only:**
-- `system.armor.armorTn` - Base Armor TN (override)
-- `system.armor.reduction` - Damage Reduction (override)
+A Family or School Trait bonus counts toward XP costs only as a plain number.
 
-**For PCs:** Armor TN and reduction come from equipped armor items. Use `system.armorTn.mod` to modify PC Armor TN via effects.
+### Predicates
 
-**Example:** Advantage grants +5 Armor TN
-- Attribute Key: `system.armorTn.mod`
-- Change Mode: Add
-- Effect Value: `5`
+A predicate is a list of conditions, all of which must hold:
 
-### Wounds & Health
+| Condition | Holds when |
+| --- | --- |
+| `"status:prone"` | The character has that status. Stances are statuses: `status:defenseStance`, `status:fullAttackStance`, ... |
+| `"ring:fire:3"`, `"trait:ref:4"` | That Ring or Trait has that value |
+| `"wound:nicked"` | The character is at that Wound Rank |
+| `"armor:worn"` | The character wears armor |
+| `"skill:kenjutsu:3"` | That Skill has that rank (the name in lower case) |
+| `"clan:crane"`, `"family:kakita"`, `"school:kakita bushi"` | The character's Clan, Family, or School item has that name (lower case) |
+| `"item:advantage:allies"` | The character has an item of that type and name: `advantage`, `disadvantage`, `technique`, `kata`, `kiho`, `tattoo`, `spell` |
+| `"honor-rank:5"`, `"glory-rank:2"`, `"status-rank:1"`, `"taint-rank:0"` | That track's rank |
+| `"insight:2"`, `"school-rank:2"` | Insight Rank and School Rank |
+| `"target"`, `"target:status:mounted"` | On attack rules: the attack has a target, and the target has that status |
+| `"check:attack"` | The roll is of that kind: `skill`, `trait`, `ring`, `spell`, `maho`, `attack`, `damage`, or `roll` |
+| `"weapon:size:large"`, `"weapon:skill:kenjutsu"`, `"weapon:name:katana"`, `"weapon:keyword:samurai"` | On a weapon's attack or damage: its size, its Skill, its name, and each of its keywords (lower case). A Weapon Skill's rule reaches its own weapons' damage this way |
+| `"duel:focus"` | The roll is that stage of an iaijutsu duel: `duel:assessment`, `duel:focus`, or `duel:strike` |
+| any `RollOption` | That option is on |
+| `{ "not": ... }` | The condition inside does not hold |
+| `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
+| `{ "gte": ["ring:fire", 3] }` | The Ring, Trait, Skill, or rank is at least 3, as `{ "gte": ["skill:kenjutsu", 3] }`; also `gt`, `lte`, `lt`, `eq` |
 
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.wounds.mod` | Wound threshold modifier | +10 more wounds |
-| `system.woundsMultiplier` | Wound level multiplier | ×3 instead of ×2 |
-| `system.woundsMod` | Wound threshold additive | +5 to all levels |
-| `system.woundsPenaltyMod` | Wound penalty reduction | -2 less penalty |
-| `system.suffered` | Current damage | +15 direct damage |
+**Example:** +1k0 on attacks while in Full Attack Stance against a prone target
 
-**Wound Calculation:** Each wound level threshold = (Earth Ring × multiplier) + mod
+```json
+[
+  {
+    "key": "RollModifier",
+    "selector": "attack",
+    "roll": 1,
+    "predicate": ["status:fullAttackStance", "target:status:prone"]
+  }
+]
+```
 
-**Example:** Advantage gives tougher wound levels
-- Attribute Key: `system.woundsMultiplier`
-- Change Mode: Override
-- Effect Value: `3`
+### Stacking
 
-### Experience & Advancement
+Rules add up. Give rules a `type` to stop them stacking: of rules sharing a type, only the largest bonus and the largest penalty apply.
 
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.xp` | Total XP | +50 bonus XP |
-| `system.insight.points` | Insight Points | +10 from technique |
-| `system.insight.rank` | Insight Rank | +1 from advantage |
+```json
+[
+  { "key": "ArmorTN", "value": 3, "type": "spell" },
+  { "key": "ArmorTN", "value": 5, "type": "spell" }
+]
+```
 
-**Warning:** Modifying XP or Insight manually can break XP Manager calculations. Only use if you know what you're doing.
+gives +5, not +8.
 
-### Spell Slots
+### Rules the system provides
 
-Optional spell slot system for tracking daily magic. One pool per element.
+Every stance and condition is a status effect carrying its rules (see **Status effects**). Besides those:
 
-| Attribute Key | Element | Example Effect |
-|---------------|---------|----------------|
-| `system.spellSlots.air` | Air Spell Slots | +2 extra Air slots |
-| `system.spellSlots.earth` | Earth Spell Slots | +2 extra Earth slots |
-| `system.spellSlots.fire` | Fire Spell Slots | +2 extra Fire slots |
-| `system.spellSlots.water` | Water Spell Slots | +2 extra Water slots |
-| `system.spellSlots.void` | Void Spell Slots | +1 extra Void slot |
+| Where                                                        | Rule                           |
+| ------------------------------------------------------------ | ------------------------------ |
+| A skill's Roll, Keep, and Total bonus fields (Modifiers tab) | A `RollModifier` on that skill |
 
-**Note:** Spell slots default to ring values. Effects add to that base.
-
-### Wealth
-
-| Attribute Key | Currency | Example Effect |
-|---------------|----------|----------------|
-| `system.wealth.koku` | Koku (gold) | +10 starting wealth |
-| `system.wealth.bu` | Bu (silver) | +5 stipend |
-| `system.wealth.zeni` | Zeni (copper) | +50 allowance |
-
-**Warning:** Modifying wealth via effects bypasses the Wealth Manager. Use for starting wealth or stipends only.
-
----
-
-## Item Attribute Keys
-
-These modify specific items on the character. Useful for School bonuses to skills or weapon enhancements.
-
-### Skills
-
-Target embedded skill items with these keys. You'll need to identify the specific skill by name or use conditional effects.
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.rank` | Skill Rank | +1 rank from technique |
-| `system.rollBonus` | Roll Dice Bonus | +1k0 from school |
-| `system.keepBonus` | Keep Dice Bonus | +0k1 from advantage |
-| `system.totalBonus` | Flat Total Bonus | +2 from kata |
-| `system.insightBonus` | Insight Contribution | +5 insight from mastery |
-
-**Example:** School grants +1k0 to Kenjutsu
-- Target: Embedded Kenjutsu skill item
-- Attribute Key: `system.rollBonus`
-- Change Mode: Add
-- Effect Value: `1`
-
-**Note:** These affect skills already on the character. They won't create new skills.
-
-### Weapons
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.damageRoll` | Damage Roll Dice | +1 to damage roll |
-| `system.damageKeep` | Damage Keep Dice | +1 to damage keep |
-| `system.explodesOn` | Explosion Threshold | 9+ instead of 10 |
-
-### Armor
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.bonus` | Armor TN Bonus | +1 to armor bonus |
-| `system.reduction` | Damage Reduction | +1 to reduction |
-
-### Spells
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.mastery` | Mastery Level | +1 effective mastery |
-
-### Advantages/Disadvantages
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.cost` | XP Cost | Modify cost value |
-| `system.freeRaises` | Free Raises Granted | +1 free raise |
-
-**Note:** Both advantages and disadvantages use positive cost values. The system handles granting XP for disadvantages automatically.
-
-### All Item Types
-
-Every item type has access to:
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.freeRaises` | Free Raises | +1 free raise for related rolls |
-
-**Free Raises** reduce TN by 5 each without counting toward Void Ring maximum. Set this field directly on items (not via Active Effects).
+A world made with 3.2.1 is updated when it first loads: a Family or School Trait effect becomes a `TraitAdjust` rule, a Master of Blood advantage gets `{ "key": "RollOption", "option": "master-of-blood" }`, and stance and condition effects get their rules, and a Fear effect its Rank as its level. An advantage you name Master of Blood later needs that rule added by hand.
 
 ---
 
-## Common Patterns
+## Character options
 
-### Family Trait Bonus
+The system's compendium packs hold the Core Rulebook's Clans, Families, Schools, Techniques, Skills, Advantages, and Disadvantages with their rules; anything else you build as items with rules. These rules make them behave on the character. The examples below are made up for this guide.
 
-**Goal:** Family grants +1 to one trait
+### What happens when an item is dropped on a character
 
-**Setup:**
-1. Open Family item
-2. Active Effects tab → Create Effect
-3. Name: "Family Trait Bonus"
-4. Add change:
-   - Attribute Key: `system.traits.str` (or whatever trait)
-   - Change Mode: Add
-   - Effect Value: `1`
+1. **Prerequisites.** Each `Prerequisite` rule's `requires` is tested against the character. A player cannot add an item whose prerequisites they do not meet; a GM is asked whether to add it anyway.
+2. **Choices.** Each `ChoiceSet` without a `selection` asks its question, and the answer is stored in the rule. Closing the question cancels the drop.
+3. **Grants.** Each `GrantItem` rule whose School Rank has been reached gives its item.
 
-### School Skill Bonus
+An item added another way (a macro, an import) skips the questions: its choices stay open, and the rules that use them wait, until you fill in the `selection` on the Rules tab.
 
-**Goal:** School grants +1k0 to all school skills
+### A School
 
-**Setup:**
-You'll need to create separate effects for each school skill, or use a macro/module to apply conditional effects.
+The "Quill Courtier School" gives +1 Awareness, three Skills at rank 1, one more Skill of the player's choice, and a Technique at each School Rank:
 
-**Manual method:**
-1. Open School item
-2. Active Effects tab → Create Effect
-3. Name: "Kenjutsu School Bonus"
-4. Add change:
-   - Attribute Key: (target embedded Kenjutsu skill)
-   - Change Mode: Add
-   - Effect Value: `1`
-5. Repeat for each school skill
+```json
+[
+  { "key": "TraitAdjust", "trait": "awa", "value": 1 },
+  { "key": "GrantItem", "uuid": "Item.<Courtier skill id>" },
+  { "key": "GrantItem", "uuid": "Item.<Etiquette skill id>" },
+  { "key": "GrantItem", "uuid": "Item.<Calligraphy skill id>", "emphasis": "Cipher" },
+  {
+    "key": "ChoiceSet",
+    "flag": "extra",
+    "prompt": "One more High Skill",
+    "list": "skills",
+    "filter": ["high"]
+  },
+  { "key": "GrantItem", "uuid": "{choice:extra}" },
+  { "key": "GrantItem", "uuid": "Item.<Rank 1 Technique id>", "rank": 1 },
+  { "key": "GrantItem", "uuid": "Item.<Rank 2 Technique id>", "rank": 2 }
+]
+```
 
-### Armor TN Modifier
+Copy an item's UUID with the passport icon in its sheet header, and paste it into the rule's `uuid` field. A granted Skill comes at rank 1 for free and counts as a School Skill (p.102); `emphasis` gives it a free Emphasis. If the character already has that Skill, it becomes a School Skill with the free rank instead of a second copy.
 
-**Goal:** Advantage grants +5 Armor TN
+Techniques with a `rank` wait for the School Rank, which follows Insight Rank (p.104). When it rises, the next Technique is added and a chat message says so. A character with Multiple Schools sets each School's rank on its Details tab.
 
-**Setup:**
-1. Open Advantage item
-2. Active Effects tab → Create Effect
-3. Name: "Armor TN Bonus"
-4. Add change:
-   - Attribute Key: `system.armorTn.mod`
-   - Change Mode: Add
-   - Effect Value: `5`
+Dropping a School on a character who already has one asks whether it replaces that School or is added beside it, for an Advanced School (pp.245-247) or the Multiple Schools Advantage (p.151). The pack's Advanced Schools start at rank 1, set on their Details tab as the character advances in them. A Technique a School grants does not ask its own choices; fill in its ChoiceSet's `selection` on its Rules tab.
 
-### Initiative Bonus
+Removing the School takes back what it gave. A granted Skill with ranks or Emphases bought on top stays, without its free rank. Deleting a granted item yourself keeps it from being granted again.
 
-**Goal:** Kata grants +1k0 to initiative
+### Choices
 
-**Setup:**
-1. Open Kata item
-2. Active Effects tab → Create Effect
-3. Name: "Initiative Bonus"
-4. Add change:
-   - Attribute Key: `system.initiative.rollMod`
-   - Change Mode: Add
-   - Effect Value: `1`
+A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`). Every other rule on the item can use the answer as `{choice:<flag>}`:
 
-### Void Point Bonus
+```json
+[
+  {
+    "key": "ChoiceSet",
+    "flag": "weapon",
+    "prompt": "Favored weapon Skill",
+    "options": [
+      { "value": "kenjutsu", "label": "Kenjutsu" },
+      { "value": "kyujutsu", "label": "Kyujutsu" }
+    ]
+  },
+  { "key": "FreeRaise", "selector": "skill:{choice:weapon}", "value": 1 }
+]
+```
 
-**Goal:** Technique grants +1 maximum Void Points
+A choice can fill a field with fixed values too, as a Trait: `{ "key": "TraitAdjust", "trait": "{choice:trait}", "value": -1 }` with a ChoiceSet of `"list": "traits"`. The Rules tab checks such a rule as it reads once the choice is made, and keeps the `{choice:...}` text when the sheet is saved.
 
-**Setup:**
-1. Open Technique item
-2. Active Effects tab → Create Effect
-3. Name: "Void Bonus"
-4. Add change:
-   - Attribute Key: `system.rings.void.rank`
-   - Change Mode: Add
-   - Effect Value: `1`
+### Prerequisites
 
-### Wound Level Enhancement
+```json
+[
+  {
+    "key": "Prerequisite",
+    "label": "Kenjutsu 3 and an Air Ring of 3",
+    "requires": [{ "gte": ["skill:kenjutsu", 3] }, { "gte": ["ring:air", 3] }]
+  }
+]
+```
 
-**Goal:** Advantage makes character tougher (×3 Earth instead of ×2)
+### XP prices
 
-**Setup:**
-1. Open Advantage item
-2. Active Effects tab → Create Effect
-3. Name: "Tough"
-4. Add change:
-   - Attribute Key: `system.woundsMultiplier`
-   - Change Mode: Override
-   - Effect Value: `3`
+The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four times the new rank, Family and School bonuses included; the Void Ring six times; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an Advantage its cost; a kata or kiho its Mastery Level (pp.231, 259), and a monk's School Kiho nothing; Disadvantages give up to 10. A `Cost` rule sets a new price with a formula over the base price `@cost`:
+
+| `selector`                           | Prices                                                  |
+| ------------------------------------ | ------------------------------------------------------- |
+| `trait:<trait>`, `ring:void`         | Each rank of that Trait or the Void Ring                |
+| `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type      |
+| `emphasis`                           | Each Emphasis                                           |
+| `item:<type>`                        | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
+| `self`                               | The item carrying the rule                              |
+
+An Advantage that costs 1 less for a Crane character:
+
+```json
+[{ "key": "Cost", "selector": "self", "value": "@cost - 1", "predicate": ["clan:crane"] }]
+```
+
+Kiho at one and a half times their price, rounded up: `{ "key": "Cost", "selector": "item:kiho", "value": "ceil(@cost * 1.5)" }`. A price never drops below 0.
+
+A monk's kiho from the Monk School are free (p.231): tick **School Kiho** on the kiho's Details tab. A Monk School's **Starting kiho** (Details tab) is how many it gives at Rank 1, three for the Brotherhood Schools and four for the Temples of the Thousand Fortunes; each later School Rank gives two more. Other kiho are bonus kiho at their Mastery Level, one per Rank of all Monk Schools together. The XP Manager counts both and warns past either limit.
+
+### Kata and kiho
+
+A kata's or kiho's rules apply while it is active, not while it is owned (pp.259, 261). The play button on its row of the character sheet activates it: the system makes an Active Effect carrying its rules. A second kata ends the first; a kiho ends another of its type, except Martial kiho. The stop button, or deleting the effect, ends it. A tattoo works the same way (p.115): one at a time, and its effect lasts twice the School Rank in Rounds. A tattoo marked **Always active** on its Details tab, such as the Mantis, applies while it is owned instead.
+
+### The ledger and the Honor Roll
+
+**Ledger** under the ranks on the character sheet records a gain or loss of Honor, Glory, Status, or Taint with its reason, and lists the latest changes. Ten points make a rank (p.90). The character's `Ledger` rules size each change by its `@points`: an oath that doubles Honor losses is `{ "key": "Ledger", "track": "honor", "direction": "loss", "value": "@points * 2" }`; a value of `0` ignores those changes. Shift-clicking a rank is a correction outside the ledger.
+
+The optional **Honor Roll** (p.92) is a world setting. Once per session, a failed Skill, Trait, Ring, or Spell Casting roll offers an **Honor Roll** button: the roll is made again at the same TN with Honor Rank in rolled and kept dice; failing it costs a Rank of Honor through the ledger. The GM's **New session** token control starts a session and gives everyone their Honor Roll back.
+
+### Shadowlands Taint
+
+The system tracks what a Taint Rank does on its own (pp.277-279): at Level 3, -1k0 on Social Skill rolls; from Level 4, -2k0 on them instead, one Void Point fewer when Void Points refill, and -2k2 on the Honor Roll. Mark a Skill as a **Social Skill** on its Details tab for the penalty to reach it. Embracing the Taint is a choice in the roll dialog; each point it costs goes into the ledger. Exposure and growth rolls stay the GM's.
+
+### Moving items between worlds
+
+Right-click an Item folder in the sidebar:
+
+- **Export items with rules** saves the folder's items, its subfolders included, with their rules and Active Effects, to one JSON file.
+- **Import items with rules** reads such a file into a new folder inside the one you clicked. A rule that named an item from the same file names its imported copy, so a School's grants keep working.
+
+---
+
+## Common patterns
+
+### Family Trait bonus
+
+```json
+[{ "key": "TraitAdjust", "trait": "str", "value": 1 }]
+```
+
+The bonus is free, and every rank you buy afterward costs XP at the Trait's new rank with the bonus included (Core Rulebook p.103): with a Family +1, raising Strength from 3 to 4 costs 16 XP.
+
+### School Void bonus
+
+```json
+[{ "key": "TraitAdjust", "trait": "void", "value": 1 }]
+```
+
+### School skill bonus
+
+One rule per school skill:
+
+```json
+[
+  { "key": "RollModifier", "selector": "skill:kenjutsu", "roll": 1 },
+  { "key": "RollModifier", "selector": "skill:iaijutsu", "roll": 1 }
+]
+```
+
+### Armor TN, Initiative, and toughness
+
+```json
+[
+  { "key": "ArmorTN", "value": 5 },
+  { "key": "Initiative", "roll": 1 },
+  { "key": "Wounds", "perRank": 3 }
+]
+```
 
 ### Free Raises
 
-**Goal:** Advantage grants 1 free raise to skill rolls
-
-**Setup:**
-This one doesn't use Active Effects. Instead:
-1. Open Advantage item
-2. **Modifiers** tab
-3. Set **Free Raises** field to `1`
-4. The system automatically includes these in roll dialogs
-
-**Note:** Free Raises are per-item, not per-roll-type. An advantage with 1 Free Raise applies to all rolls when calculating total free raises available.
+A `FreeRaise` rule gives Free Raises to the rolls its selector names. A Free Raise counts as a Raise without adding 5 to the TN and does not count toward the Void Ring limit on Raises (Core Rulebook p.79). A world from 3.2.1 that set an item's old Free Raises field gets a `FreeRaise` rule on every roll in its place; narrow its selector on the Rules tab.
 
 ---
 
-## Multiple Changes in One Effect
+## Active Effects
 
-A single Active Effect can have multiple changes. This is useful for complex bonuses.
+When you add an item with Active Effects to a character, the effects that apply to the actor change the character's values.
 
-**Example:** School technique that grants +1 Reflexes and +5 Armor TN
+**Key points:**
 
-1. Open Technique item
-2. Active Effects tab → Create Effect
-3. Name: "Doji Technique"
-4. Add first change:
-   - Attribute Key: `system.traits.ref`
-   - Change Mode: Add
-   - Effect Value: `1`
-5. Add second change:
-   - Attribute Key: `system.armorTn.mod`
-   - Change Mode: Add
-   - Effect Value: `5`
+- Effects live on items, which pass them to the character that owns them
+- Effects change the character only. A change aimed at an item's own fields (a skill's rank, a weapon's damage) does nothing
+- Effects can add, subtract, multiply, override, upgrade, or downgrade values
+- Use dot notation for nested properties (e.g., `system.traits.str`)
 
-Both changes apply when the technique is on the character.
+### Creating an Active Effect
+
+1. Open the item sheet
+2. Go to the **Active Effects** tab
+3. Click **New**
+4. Set the effect name, then add changes on the **Changes** tab with the **+** button
+
+**Each effect can have multiple changes.** Each change needs:
+
+- **Attribute Key:** The value you're modifying (see below for all keys)
+- **Type:** How to apply the change (Add, Multiply, Override, etc.)
+- **Value:** The number or value to apply
+- **Priority:** The order among changes to the same key (lower applies first); leave the default
+
+### Change types
+
+| Type          | Stored as   | What It Does                  | Example                     |
+| ------------- | ----------- | ----------------------------- | --------------------------- |
+| **Add**       | `add`       | Adds to existing value        | +1 Strength                 |
+| **Subtract**  | `subtract`  | Subtracts from existing value | -1 Reflexes                 |
+| **Multiply**  | `multiply`  | Multiplies existing value     | ×3 wound multiplier         |
+| **Override**  | `override`  | Replaces the value            | Set NPC Armor TN to 25      |
+| **Upgrade**   | `upgrade`   | Uses higher of old/new value  | Take best of two bonuses    |
+| **Downgrade** | `downgrade` | Uses lower of old/new value   | Take worst of two penalties |
+
+### Phases
+
+Each change applies in a phase: **Initial** or **Final**. The effect sheet does not show the phase: every change added there is Initial.
+
+- **Initial** applies before the system calculates Rings, Wound levels, Armor TN, Initiative, Insight, and weapon damage, so everything calculated from a Trait sees a Trait change.
+- **Final** applies after those calculations. A Final change to a Trait shows on the sheet but never reaches a Ring, Armor TN, or damage roll. A change gets the Final phase only when a macro or module creates it with `phase: "final"`.
+
+A Trait change on a Family or School effect raises the Trait but is not counted as a creation bonus for XP; use a `TraitAdjust` rule for that.
+
+### Actor attribute keys
+
+#### Traits
+
+| Attribute Key       | Trait        |
+| ------------------- | ------------ |
+| `system.traits.sta` | Stamina      |
+| `system.traits.wil` | Willpower    |
+| `system.traits.str` | Strength     |
+| `system.traits.per` | Perception   |
+| `system.traits.ref` | Reflexes     |
+| `system.traits.awa` | Awareness    |
+| `system.traits.agi` | Agility      |
+| `system.traits.int` | Intelligence |
+
+#### Rings
+
+**Void Ring only.** The elemental rings (Air, Earth, Fire, Water) are calculated from their Traits; change a Trait to change its Ring.
+
+| Attribute Key             | Ring                |
+| ------------------------- | ------------------- |
+| `system.rings.void.rank`  | Void Ring Rank      |
+| `system.rings.void.value` | Current Void Points |
+
+Modifying `rank` changes maximum Void Points. Modifying `value` gives temporary extra points that don't restore on rest.
+
+#### Character attributes
+
+| Attribute Key                                          | What It Is        |
+| ------------------------------------------------------ | ----------------- |
+| `system.honor.rank`, `system.honor.points`             | Honor             |
+| `system.glory.rank`, `system.glory.points`             | Glory             |
+| `system.status.rank`, `system.status.points`           | Status            |
+| `system.shadowTaint.rank`, `system.shadowTaint.points` | Shadowlands Taint |
+
+#### Combat and defense
+
+| Attribute Key                | What It Affects          |
+| ---------------------------- | ------------------------ |
+| `system.initiative.rollMod`  | Initiative roll dice     |
+| `system.initiative.keepMod`  | Initiative keep dice     |
+| `system.initiative.totalMod` | Initiative flat bonus    |
+| `system.armorTn.mod`         | PC Armor TN modifier     |
+| `system.armor.armorTn`       | NPC Armor TN (override)  |
+| `system.armor.reduction`     | NPC Reduction (override) |
+
+PC Armor TN and Reduction come from worn armor items.
+
+#### Wounds
+
+| Attribute Key             | What It Affects                           |
+| ------------------------- | ----------------------------------------- |
+| `system.wounds.mod`       | Wound threshold modifier                  |
+| `system.woundsMultiplier` | Wound level multiplier (×3 instead of ×2) |
+| `system.woundsMod`        | Wounds added to every level               |
+| `system.woundsPenaltyMod` | Added to every level's TN penalty         |
+| `system.suffered`         | Current damage                            |
+
+#### Insight
+
+| Attribute Key         | What It Affects                                              |
+| --------------------- | ------------------------------------------------------------ |
+| `system.insight.rank` | Insight Rank, when the sheet's automatic Insight Rank is off |
+
+Insight points and, with automatic Insight Rank on, the Insight Rank are calculated from Rings and Skills after effects apply, so an effect on them changes nothing. XP comes from the XP Manager, not from an effect.
+
+#### Spell slots
+
+| Attribute Key                                                 | Element                 |
+| ------------------------------------------------------------- | ----------------------- |
+| `system.spellSlots.air`, `.earth`, `.fire`, `.water`, `.void` | Spell slots per element |
+
+#### Wealth
+
+| Attribute Key                        | Currency       |
+| ------------------------------------ | -------------- |
+| `system.wealth.koku`, `.bu`, `.zeni` | Koku, bu, zeni |
+
+Modifying wealth through effects bypasses the Wealth Manager.
+
+#### Skill and Ring bonuses
+
+| Attribute Key | What It Affects |
+| --- | --- |
+| `system.bonuses.skill.<skill name>.roll`, `.keep`, `.total` | Rolls of that Skill (the skill's name in lower case) |
+| `system.bonuses.trait.<trait>.roll`, `.keep`, `.total` | Rolls of that Trait |
+| `system.bonuses.ring.<ring>.roll`, `.keep`, `.total` | Rolls of that Ring and spells of its element |
+
+A `RollModifier` rule does the same with a predicate and a formula.
+
+### Duration
+
+**Duration:** a value and a unit (seconds, rounds, turns, or a game-time unit), and an event that ends it, set on the effect's Duration tab. An effect that runs out is deleted.
+
+- **No value and no event** (default): the effect lasts as long as the item is on the character
+- **Rounds/Turns:** combat effects. The event says when they end: the start or end of a Turn (counted from the combatant whose Turn it was when the effect began), the start or end of a Round (the end is the Reactions stage, p.82), the start or end of the combat, or **End of the encounter**
+- **Minutes, hours, days:** they end when the GM advances world time; while world time stands still, nothing ends
+- **End of the encounter:** ends when the combat the effect began in ends, or when the GM clicks **End encounter** in the token controls
+
+### Effect level and group
+
+An effect made by the system can carry two more values, which a macro sets through `system`:
+
+- `system.level`: how strong the effect is, read by its rules as `@level` (a Fear Rank, days of Fatigue)
+- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; an activated kata is `"kata"` (one at a time, p.259), an activated tattoo `"tattoo"` (p.115), and an activated kiho `"kiho-<type>"` except a Martial one (p.261)
 
 ---
 
-## Conditional Effects
+## Status effects
 
-Foundry's Active Effects can be conditional based on various factors. This system doesn't currently have built-in conditional effects, but you can use macros or other modules to enable/disable effects dynamically.
+**Status effects** are the stances and conditions shown on tokens. Apply them from the token's status menu, the Condition Manager, or the stance control on the sheet. Each carries its rules; an effect a macro makes with only a status id (`{ statuses: ["prone"] }`) gets them too.
 
-**Example Use Cases:**
-- Stance-based bonuses (already handled by stance system)
-- Time-of-day bonuses
-- Situational advantages
-- Environmental effects
+| Status | What it does (Core Rulebook) |
+| --- | --- |
+| Attack Stance | Nothing to calculate (p.84) |
+| Full Attack Stance | +2k1 to attacks, Armor TN -10 (p.84) |
+| Defense Stance | Armor TN + Air Ring + Defense rank (p.84) |
+| Full Defense Stance | Taking it rolls Defense / Reflexes; half the total, rounded up, adds to Armor TN until your next Turn, when you are asked to roll again (p.84) |
+| Center Stance | The next Round: +10 Initiative, and +1k1 plus the Void Ring offered (unticked) on the roll you choose during your Turn (p.84) |
+| Blinded | -3k3 ranged and -1k1 melee attacks; base Armor TN Reflexes + 5; Water Ring 2 lower for movement (p.89) |
+| Dazed | -3k0 to every roll; an Earth Ring roll at TN 20 in the Reactions stage ends it, the TN 5 lower after each failure, down to 5 (p.89) |
+| Stunned | Armor TN 5 plus armor; an Earth Ring roll at TN 20 in the Reactions stage ends it, and a failure ends it after the next Round (p.89) |
+| Grappled | Armor TN 5 plus armor (p.89) |
+| Prone | -10 Armor TN against melee attacks; -2k0 to attacks (p.89). Put on automatically at Down or Out and taken off when you rise above Down |
+| Fatigued, Fasting | +5 TN per level on Skill rolls, physical Trait rolls, and Spell Casting Rolls (p.89) |
+| Feared | -Xk0 to every roll, X its level (the Fear Rank), until the encounter ends (p.90) |
+| Guarded, Guarding | Armor TN +10 / -5 until the guard's next Turn (p.88) |
+| Mounted | +1k0 on attacks against an unmounted target (p.89) |
+| Concentration | Started by casting a spell whose Duration is Concentration; taking more Wounds than your Earth Ring in one hit asks for a Willpower roll at TN 20 + 5 per Mastery Level, and failing ends it (p.166) |
 
-**Implementation:** Use macros to toggle effect enabled/disabled state, or use a module like Dynamic Active Effects (DAE).
-
----
-
-## Effect Duration & Timing
-
-**Duration:**
-- **Unlimited** (default): Effect lasts as long as item is on character
-- **Turns/Rounds:** Set in combat for temporary effects
-- **Seconds:** Real-time duration
-
-**Timing:**
-Most effects are passive and always active. For temporary combat effects (like spell buffs or debuffs), set a duration in rounds.
-
----
-
-## Status Effects vs Active Effects
-
-**Status Effects** are the icons that appear on tokens (Blinded, Stunned, Prone, etc.). They're built into Foundry and this system provides L5R-specific ones.
-
-**Active Effects** are the underlying mechanic that modifies stats. Status effects can have Active Effects attached.
-
-**Example:** The Blinded condition is a status effect. It has an Active Effect that reduces Water Ring by 2 (for movement calculation).
-
-**To apply status effects:**
-- Right-click token → **Toggle Condition**
-- Use Condition Manager dialog
-- Apply via macros or automation
+The sheet warns when a condition rules out the stance you pick (Dazed, Prone, Fatigued, Mounted) and still lets you take it. Spending a Void Point on Armor TN gives +10 until the end of the Round (p.78).
 
 ---
 
 ## Troubleshooting
 
-### Effect Not Working
+### A rule does nothing
 
-**Check:**
-1. Is the effect enabled? (toggle on effect)
-2. Is the effect set to transfer? (should be on for item effects)
-3. Is the attribute key correct? (check spelling and dot notation)
-4. Is the change mode appropriate? (usually Add)
-5. Is the item equipped/owned by the character?
+1. Is the rule in the item's **Rules** tab, and was it saved (no error when you left the field)?
+2. Does the Rules tab show an error over the rule, or the browser console (F12) a warning naming the item? It says which field is wrong.
+3. Does the predicate hold? Remove it to check.
+4. Is the item armor that is not worn, or a kata or kiho that is not active?
+5. Is a roll modifier switched off in the roll dialog, or is a `Substitute` left off?
+6. Does the rule use a `{choice:...}` that was never answered? Fill in the ChoiceSet's `selection`.
 
-**Common mistakes:**
-- Wrong attribute key (typos, wrong path)
-- Effect not set to transfer to actor
-- Effect disabled
-- Wrong change mode (Override when you meant Add)
+### An effect does nothing
 
-### Effect Stacking
+1. Is **Effect Suspended** off? (Details tab)
+2. Is **Apply Effect to Actor** on? (Details tab; needed for item effects)
+3. Is the attribute key spelled right?
+4. Is the change type right? (usually Add) A change made by a macro or module with `phase: "final"` never reaches values calculated from it.
 
-Multiple effects to the same attribute will stack if they all use Add mode. If you want effects to NOT stack, use Upgrade or Downgrade modes, or use different attribute keys.
+### Derived values
 
-**Example:** Two advantages both give +5 Armor TN using Add mode = +10 total.
-
-### Derived Values
-
-Some values are calculated and can't be modified directly:
-- Elemental rings (calculated from trait pairs)
-- Armor TN base (calculated from Reflexes × 5 + 5 + armor + modifiers)
-- Initiative base (calculated from Insight Rank + Reflexes)
-
-**For these, modify the components or use the `.mod` fields:**
-- Can't modify Air Ring directly → modify Reflexes or Awareness instead
-- Can't modify base Armor TN → use `system.armorTn.mod` to add bonus
-- Can't modify base Initiative → use `system.initiative.rollMod` or `.totalMod`
-
-### XP Manager Conflicts
-
-Active Effects that modify XP, Insight Points, or Insight Rank can confuse the XP Manager. The manager expects to calculate these from character state. If you must modify them via effects, click "Recalculate Purchase XP" in XP Manager after changes.
+Rings, base Armor TN (Reflexes × 5 + 5), and base Initiative (Insight Rank + Reflexes) are calculated; an effect on them is overwritten. Change the Trait, or use an `ArmorTN` or `Initiative` rule (or `system.armorTn.mod`, `system.initiative.rollMod`).
 
 ---
 
-## Advanced: Macro Integration
+## Macro example
 
-You can create macros to apply temporary Active Effects or toggle effects on/off.
-
-**Example Macro:** Apply "Blessed" buff for 5 rounds
+Apply a 5-round buff with a rule and an effect change:
 
 ```javascript
 const token = canvas.tokens.controlled[0];
 if (!token) return ui.notifications.warn("Select a token");
 
-const effectData = {
-  label: "Blessed",
-  icon: "icons/magic/holy/angel-winged-humanoid-blue.webp",
-  duration: { rounds: 5 },
-  changes: [
-    { key: "system.armorTn.mod", mode: 2, value: 5 },
-    { key: "system.initiative.totalMod", mode: 2, value: 3 }
-  ]
-};
-
-await token.actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-ui.notifications.info("Blessed buff applied!");
-```
-
-This creates a temporary effect that lasts 5 rounds and grants +5 Armor TN and +3 Initiative.
-
----
-
-## Reference: All Actor Attribute Keys
-
-Quick reference of all available keys for copy-paste convenience.
-
-### Traits
-```
-system.traits.sta
-system.traits.wil
-system.traits.str
-system.traits.per
-system.traits.ref
-system.traits.awa
-system.traits.agi
-system.traits.int
-```
-
-### Rings
-```
-system.rings.void.rank
-system.rings.void.value
-```
-
-### Character Stats
-```
-system.honor.rank
-system.honor.points
-system.glory.rank
-system.glory.points
-system.status.rank
-system.status.points
-system.shadowTaint.rank
-system.shadowTaint.points
-```
-
-### Combat
-```
-system.initiative.rollMod
-system.initiative.keepMod
-system.initiative.totalMod
-system.armorTn.mod
-system.armor.armorTn        (NPC only)
-system.armor.reduction      (NPC only)
-```
-
-### Wounds
-```
-system.wounds.mod
-system.woundsMultiplier
-system.woundsMod
-system.woundsPenaltyMod
-system.suffered
-```
-
-### Advancement
-```
-system.xp
-system.insight.points
-system.insight.rank
-```
-
-### Spell Slots
-```
-system.spellSlots.air
-system.spellSlots.earth
-system.spellSlots.fire
-system.spellSlots.water
-system.spellSlots.void
-```
-
-### Wealth
-```
-system.wealth.koku
-system.wealth.bu
-system.wealth.zeni
+await token.actor.createEmbeddedDocuments("ActiveEffect", [
+  {
+    name: "Blessed",
+    img: "icons/magic/holy/angel-winged-humanoid-blue.webp",
+    duration: { value: 5, units: "rounds" },
+    system: {
+      rules: [{ key: "ArmorTN", value: 5 }],
+      changes: [{ key: "system.initiative.totalMod", type: "add", value: 3 }]
+    }
+  }
+]);
 ```
 
 ---
 
 ## Questions?
 
-**Need help with Active Effects?**
 - Discord: **@erniez**
 - [GitHub Discussions](https://github.com/ernieayala/l5r4/discussions)
-
-**Found a bug?**
-- [GitHub Issues](https://github.com/ernieayala/l5r4/issues)
+- Bugs: [GitHub Issues](https://github.com/ernieayala/l5r4/issues)

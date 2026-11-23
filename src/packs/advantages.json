@@ -1,0 +1,5171 @@
+{
+  "name": "advantages",
+  "label": "Advantages",
+  "documentType": "Item",
+  "types": [
+    "advantage"
+  ],
+  "pages": [
+    [
+      145,
+      155
+    ],
+    [
+      241,
+      244
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Absolute Direction",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 146,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 1,
+        "rules": [],
+        "specialRules": "Always knows where north lies; fails once over a day's travel into the Shadowlands."
+      }
+    },
+    {
+      "name": "Agasha Kitsuki",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 11,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Dragon Clan",
+            "requires": [
+              "clan:dragon"
+            ]
+          },
+          {
+            "key": "Substitute",
+            "selector": "trait:awa",
+            "replace": "trait:awa",
+            "with": "trait:per",
+            "label": "Kitsuki: Perception for Awareness"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Kitsuki: Void Point spent to spot a lie (+1k1 more)",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Akodo",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 12,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lion Clan",
+            "requires": [
+              "clan:lion"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:athletics",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:battle",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:defense",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:horsemanship",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:hunting",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:jiujutsu",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:chain weapons",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:heavy weapons",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:kenjutsu",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:knives",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:kyujutsu",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:ninjutsu",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:polearms",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:spears",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:staves",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:war fan",
+            "roll": 1,
+            "label": "Akodo: Bugei Skills"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "+1k1 on Mass Battle Table rolls. +1 Void Point in a skirmish beside another Lion bushi, gone at its end."
+      }
+    },
+    {
+      "name": "Allies",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 146,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:crane"
+            ]
+          }
+        ],
+        "specialRules": "Price is Influence (1/2/4) plus Devotion (1/2/4); set the item's cost to that sum."
+      }
+    },
+    {
+      "name": "Asako",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Phoenix Clan",
+            "requires": [
+              "clan:phoenix"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": 1,
+            "optional": true,
+            "label": "Asako: Social roll against an Ally"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Each Ally Advantage: Devotion +1 free. If an Ally betrays you, gain Driven (destroy that person) at no cost."
+      }
+    },
+    {
+      "name": "Balance",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 146,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "optional": true,
+            "label": "Resisting Intimidation or Temptation with Honor Rank added",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Bayushi",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 12,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Scorpion Clan",
+            "requires": [
+              "clan:scorpion"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 1,
+            "predicate": [
+              {
+                "or": [
+                  "school:bayushi bushi",
+                  "school:bayushi courtier"
+                ]
+              }
+            ],
+            "label": "Bayushi: School Skills"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "predicate": [
+              {
+                "or": [
+                  "school:bayushi bushi",
+                  "school:bayushi courtier"
+                ]
+              }
+            ],
+            "label": "Bayushi: Void Point spent (+1k1 more)"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Kharmic Tie partners may spend each other's Void Points; if one dies, the other gains Momoku for free."
+      }
+    },
+    {
+      "name": "Blackmail",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 146,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:scorpion"
+            ]
+          }
+        ],
+        "specialRules": "Price equals the victim's Status Rank; set the item's cost to it."
+      }
+    },
+    {
+      "name": "Bland",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 146,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "May add 10 to the TN of rolls others make to gauge your Honor or recognize you by Glory."
+      }
+    },
+    {
+      "name": "Blissful Betrothal",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 146,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Gentry, Social Position, Wealth, and Kharmic Tie to the betrothed cost 2 less each, never under 1."
+      }
+    },
+    {
+      "name": "Blood of Osano-wo",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 147,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:crab",
+                  "clan:mantis"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Ignores natural weather; damage from spells of natural forces drops by 1k1."
+      }
+    },
+    {
+      "name": "Chosen by the Oracles",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 147,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "ring",
+            "prompt": "Ring the Oracle favors",
+            "list": "rings"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "ring:{choice:ring}",
+            "roll": 1,
+            "keep": 1,
+            "predicate": [
+              "check:ring"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Clear Thinker",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 147,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "optional": true,
+            "label": "Contested Roll against someone trying to confuse or manipulate you",
+            "predicate": [
+              {
+                "not": "check:damage"
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:dragon"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Crab Hands",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 147,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:chain weapons",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:heavy weapons",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:kenjutsu",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:knives",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:kyujutsu",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:ninjutsu",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:polearms",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:spears",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:staves",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:war fan",
+            "rank": 1
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:crab"
+            ]
+          }
+        ],
+        "specialRules": "Bushi pay 2. Also counts for any other Weapon Skill, such as a gaijin weapon's own."
+      }
+    },
+    {
+      "name": "Crafty",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 147,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "UnskilledAs",
+            "selector": "skill-type:low",
+            "rank": 1
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:scorpion",
+                  "clan:spider"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Ninja pay 2."
+      }
+    },
+    {
+      "name": "Dangerous Beauty",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 147,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:temptation",
+            "roll": 1,
+            "optional": true,
+            "label": "Aimed at someone of the opposite sex"
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:scorpion"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Daredevil",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 147,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:athletics",
+            "roll": 2,
+            "optional": true,
+            "label": "A Void Point is spent on this roll (makes it +3k1 in all)"
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:mantis"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Dark Paragon",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 147,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "precept",
+            "prompt": "Precept of Shourido",
+            "options": [
+              {
+                "value": "control",
+                "label": "Control"
+              },
+              {
+                "value": "determination",
+                "label": "Determination"
+              },
+              {
+                "value": "insight",
+                "label": "Insight"
+              },
+              {
+                "value": "knowledge",
+                "label": "Knowledge"
+              },
+              {
+                "value": "perfection",
+                "label": "Perfection"
+              },
+              {
+                "value": "strength",
+                "label": "Strength"
+              },
+              {
+                "value": "will",
+                "label": "Will"
+              }
+            ]
+          },
+          {
+            "key": "Prerequisite",
+            "label": "Not with Paragon or the Consumed Disadvantage",
+            "requires": [
+              {
+                "not": "item:advantage:paragon"
+              },
+              {
+                "not": "item:disadvantage:consumed"
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:spider"
+            ]
+          }
+        ],
+        "specialRules": "Once a session, give up 5 Honor points (or a Void Point if short) for your precept's re-roll or effect."
+      }
+    },
+    {
+      "name": "Darling of the Court",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 148,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "+1 Status Rank at one named court while it sits; courtiers pay 1; once per court."
+      }
+    },
+    {
+      "name": "Different School",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 148,
+      "coverage": "full",
+      "system": {
+        "type": "social",
+        "cost": 5,
+        "rules": [],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Doji",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Crane Clan",
+            "requires": [
+              "clan:crane"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:courtier",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:acting",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: biwa",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: dance",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: drums",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: flute",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: oratory",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: puppeteer",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: samisen",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: song",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: storytelling",
+            "roll": 1
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Elemental Blessing",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 148,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "ring",
+            "prompt": "Ring whose Traits cost less",
+            "options": [
+              {
+                "value": "air",
+                "label": "Air (Reflexes, Awareness)"
+              },
+              {
+                "value": "earth",
+                "label": "Earth (Stamina, Willpower)"
+              },
+              {
+                "value": "fire",
+                "label": "Fire (Agility, Intelligence)"
+              },
+              {
+                "value": "water",
+                "label": "Water (Strength, Perception)"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "elemental-blessing:{choice:ring}"
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:ref",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:air"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:awa",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:air"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:sta",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:earth"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:wil",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:earth"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:agi",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:fire"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:int",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:fire"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:str",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:water"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "trait:per",
+            "value": "@cost - 1",
+            "predicate": [
+              "elemental-blessing:water"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:phoenix"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Enlightened",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 148,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "ring:void",
+            "value": "@cost - 2"
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:dragon"
+            ]
+          }
+        ],
+        "specialRules": "Monks pay 5."
+      }
+    },
+    {
+      "name": "Fame",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 148,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "+1 Glory Rank."
+      }
+    },
+    {
+      "name": "Forbidden Knowledge",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 148,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 5,
+        "rules": [],
+        "specialRules": "Agree a banned subject with the GM; the usual ones give a rank in its Lore (or Craft) and a perk."
+      }
+    },
+    {
+      "name": "Friend of the Brotherhood",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 149,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:dragon"
+            ]
+          }
+        ],
+        "specialRules": "Kiho cost what a Brotherhood monk pays. For shugenja and non-Brotherhood monk Schools only."
+      }
+    },
+    {
+      "name": "Friend of the Elements",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 149,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "ring",
+            "prompt": "Ring whose spirits aid you",
+            "options": [
+              {
+                "value": "air",
+                "label": "Air (Reflexes, Awareness)"
+              },
+              {
+                "value": "earth",
+                "label": "Earth (Stamina, Willpower)"
+              },
+              {
+                "value": "fire",
+                "label": "Fire (Agility, Intelligence)"
+              },
+              {
+                "value": "water",
+                "label": "Water (Strength, Perception)"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "friend-of-the-elements:{choice:ring}"
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:ref",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:air"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:awa",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:air"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:sta",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:earth"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:wil",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:earth"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:agi",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:fire"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:int",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:fire"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:str",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:water"
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "trait:per",
+            "value": 1,
+            "predicate": [
+              "check:trait",
+              "friend-of-the-elements:water"
+            ]
+          }
+        ],
+        "specialRules": "Shugenja pay 3."
+      }
+    },
+    {
+      "name": "Friendly Kami",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 149,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "element",
+            "prompt": "Element of the friendly kami",
+            "options": [
+              {
+                "value": "air",
+                "label": "Air"
+              },
+              {
+                "value": "earth",
+                "label": "Earth"
+              },
+              {
+                "value": "fire",
+                "label": "Fire"
+              },
+              {
+                "value": "water",
+                "label": "Water"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "ring:{choice:element}",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "predicate": [
+              "check:spell"
+            ],
+            "label": "Casting Sense, Commune, or Summon"
+          }
+        ],
+        "specialRules": "Shugenja only; never for an Element you are Deficient in."
+      }
+    },
+    {
+      "name": "Gaijin Gear",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 149,
+      "coverage": "partial",
+      "system": {
+        "type": "material",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:mantis",
+                  "clan:unicorn"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "One foreign item; a weapon uses a similar Rokugani weapon's stats with a Weapon Skill of its own."
+      }
+    },
+    {
+      "name": "Gentry",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 149,
+      "coverage": "partial",
+      "system": {
+        "type": "material",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 2, 1)",
+            "predicate": [
+              "item:advantage:blissful betrothal"
+            ]
+          }
+        ],
+        "specialRules": "Set cost by holding: village 8, large village 15, unique 18, town 20, city 25, province 30; may be pooled."
+      }
+    },
+    {
+      "name": "Great Destiny",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 150,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [],
+        "specialRules": "Once a session, Wounds that would kill you leave you with 1 Wound to spare instead."
+      }
+    },
+    {
+      "name": "Great Potential",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 150,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 5,
+        "rules": [],
+        "specialRules": "Pick a Skill: its rolls may declare Raises up to its rank, or up to the Void Ring if that is higher."
+      }
+    },
+    {
+      "name": "Gusai",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Mantis Clan",
+            "requires": [
+              "clan:mantis"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:stealth",
+            "roll": 3,
+            "keep": 3,
+            "optional": true,
+            "label": "Gusai: hiding a weapon you carry"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sleight of hand",
+            "roll": 3,
+            "keep": 3,
+            "optional": true,
+            "label": "Gusai: hiding a weapon you carry"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Hands of Stone",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 150,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "keep": 1,
+            "optional": true,
+            "label": "Damage of an unarmed attack"
+          }
+        ],
+        "specialRules": "Monks pay 5."
+      }
+    },
+    {
+      "name": "Heart of Vengeance",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 150,
+      "coverage": "full",
+      "system": {
+        "type": "social",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Contested Roll against a member of your hated Clan or faction",
+            "predicate": [
+              {
+                "not": "check:damage"
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:spider"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Hero of the People",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 150,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Commoners recognize you from your Glory at a TN 10 lower."
+      }
+    },
+    {
+      "name": "Hida",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 14,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Crab Clan",
+            "requires": [
+              "clan:crab"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1
+          },
+          {
+            "key": "DamageSource",
+            "selector": "damage",
+            "tags": [],
+            "ignoreReduction": 4
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Crab allies fighting beside you in a skirmish get 1 bonus Void Point, gone when it ends unspent."
+      }
+    },
+    {
+      "name": "Hida Atarasi",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 244,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 7,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Spider Clan (others at the GM's leave)",
+            "requires": [
+              "clan:spider"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": "@shadowTaint.rank",
+            "optional": true,
+            "label": "Atarasi: Taint Rank in rolled dice"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": "@shadowTaint.rank",
+            "optional": true,
+            "label": "Atarasi: Taint Rank in rolled dice"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": "@rings.earth",
+            "optional": true,
+            "label": "Atarasi: Earth in rolled dice"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": "@rings.earth",
+            "optional": true,
+            "label": "Atarasi: Earth in rolled dice"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Each skirmish round, pay a Void Point or take 1 Taint to use one bonus on that round's attacks and damage."
+      }
+    },
+    {
+      "name": "Higher Purpose",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 150,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "+1 XP for any session where both you and the GM see real progress toward your lifelong goal."
+      }
+    },
+    {
+      "name": "Ikoma",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 9,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lion Clan",
+            "requires": [
+              "clan:lion"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:int",
+            "roll": 1,
+            "label": "Ikoma: Intelligence"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 2,
+            "optional": true,
+            "label": "Ikoma: unarmed (Jiujutsu) damage"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Imperial Spouse",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 150,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Dealing with a member of an Imperial family"
+          }
+        ],
+        "specialRules": "+0.5 Status Rank."
+      }
+    },
+    {
+      "name": "Inari's Blessing",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 150,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Going without food never stops you regaining Void Points; its other penalties still apply."
+      }
+    },
+    {
+      "name": "Inheritance",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 150,
+      "coverage": "partial",
+      "system": {
+        "type": "material",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Using your heirloom, outside a skirmish"
+          }
+        ],
+        "specialRules": "An heirloom item on top of School gear; a finer heirloom may cost more by agreement."
+      }
+    },
+    {
+      "name": "Inner Gift",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 151,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 7,
+        "rules": [],
+        "specialRules": "A gift agreed with the GM, e.g. animal rapport, +1k1 Courtier to read moods, +1k0 Initiative, omens."
+      }
+    },
+    {
+      "name": "Irreproachable",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 151,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "optional": true,
+            "label": "Contested Roll against Temptation",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Imperial characters pay 1."
+      }
+    },
+    {
+      "name": "Ishiken-do",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 151,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 2, 1)",
+            "predicate": [
+              "clan:phoenix"
+            ]
+          }
+        ],
+        "specialRules": "Shugenja only; lets you cast Void spells, which nobody without it can."
+      }
+    },
+    {
+      "name": "Kaimetsu-Uo",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 9,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Mantis Clan",
+            "requires": [
+              "clan:mantis"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:wil",
+            "roll": 1,
+            "keep": 1,
+            "label": "Kaimetsu-Uo: Willpower"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:jiujutsu",
+            "roll": 3,
+            "optional": true,
+            "label": "Kaimetsu-Uo: Improvised Weapon Emphasis"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Kaimetsu-Uo: improvised weapon damage"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Untick the Willpower bonus on a roll to resist provocation; it does not apply there."
+      }
+    },
+    {
+      "name": "Kakita",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "none",
+      "system": {
+        "type": "ancestor",
+        "cost": 12,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Crane Clan",
+            "requires": [
+              "clan:crane"
+            ]
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Void Point: re-roll an Iaijutsu or Artisan roll at +1k1, keep the higher. The Matsu family count as Sworn Enemies."
+      }
+    },
+    {
+      "name": "Kharmic Tie",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 151,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Fighting for or guarding your bonded person"
+          }
+        ],
+        "specialRules": "1 to 5 points; each point is one use per session of the bonus. Blissful Betrothal: 2 less, min 1."
+      }
+    },
+    {
+      "name": "Kuni",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Crab Clan",
+            "requires": [
+              "clan:crab"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "spell",
+            "keep": "@rings.earth",
+            "optional": true,
+            "label": "Kuni: Void Point for Earth in kept dice"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Spell bonus: once per session, paid with a Void Point. Rolls against gaining Taint: roll twice, use the better."
+      }
+    },
+    {
+      "name": "Kuni Yori",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 244,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Spider Clan (others at the GM's leave)",
+            "requires": [
+              "clan:spider"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 1,
+            "optional": true,
+            "label": "Kuni Yori: Sincerity with Deceit"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "maho",
+            "roll": 1,
+            "label": "Kuni Yori: maho"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Every maho spell you cast adds 1 Taint point beyond the usual."
+      }
+    },
+    {
+      "name": "Languages",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 151,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 1,
+        "rules": [],
+        "specialRules": "Each point buys one foreign human tongue; a non-human tongue costs 3 and gives comprehension with bare-bones speech."
+      }
+    },
+    {
+      "name": "Large",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 151,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with the Small Disadvantage",
+            "requires": [
+              {
+                "not": "item:disadvantage:small"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "predicate": [
+              "weapon:size:large",
+              {
+                "not": "weapon:skill:kyujutsu"
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:crab"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Leadership",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 151,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:lion"
+            ]
+          }
+        ],
+        "specialRules": "Once a Round at Reactions, one ally gains School Rank + 1k1 Initiative until the next Reactions; one use per ally."
+      }
+    },
+    {
+      "name": "Luck",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 151,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Ranks 1-3 (3/6/9 XP). Per session, rank times: roll again and take the better (card menu: Re-roll, keep the better)."
+      }
+    },
+    {
+      "name": "Magic Resistance",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 151,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "Ranks 1-3 (2/4/6 XP). Elemental spells aimed at you: +3 casting TN per rank. No effect on maho or foreign magic."
+      }
+    },
+    {
+      "name": "Mirumoto",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 242,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 9,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Dragon Clan",
+            "requires": [
+              "clan:dragon"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:agi",
+            "roll": 1,
+            "keep": 1,
+            "predicate": [
+              {
+                "not": "check:trait"
+              }
+            ],
+            "label": "Mirumoto: Agility Skill rolls"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 2,
+            "optional": true,
+            "predicate": [
+              "school:mirumoto bushi"
+            ],
+            "label": "Mirumoto: Agility roll with a Mirumoto Bushi School Skill (+3k1 in all)"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Moto",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 244,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 10,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Unicorn Clan",
+            "requires": [
+              "clan:unicorn"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 2,
+            "keep": 2,
+            "optional": true,
+            "label": "Moto: resisting restraint or mental sway",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "A spell that would hold your body in place has its casting TN raised by 5 x your Willpower."
+      }
+    },
+    {
+      "name": "Multiple Schools",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 151,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 10,
+        "rules": [],
+        "specialRules": "In play only. The old School stops; at the next Insight Rank a new one starts at Rank 1. Never bushi with shugenja."
+      }
+    },
+    {
+      "name": "Paragon",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 152,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 7,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Not with Dark Paragon or the Failure of Bushido Disadvantage",
+            "requires": [
+              {
+                "not": "item:advantage:dark paragon"
+              },
+              {
+                "not": "item:disadvantage:failure of bushido"
+              }
+            ]
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "virtue",
+            "prompt": "Virtue of Bushido",
+            "options": [
+              {
+                "value": "compassion",
+                "label": "Compassion"
+              },
+              {
+                "value": "courage",
+                "label": "Courage"
+              },
+              {
+                "value": "courtesy",
+                "label": "Courtesy"
+              },
+              {
+                "value": "duty",
+                "label": "Duty"
+              },
+              {
+                "value": "honesty",
+                "label": "Honesty"
+              },
+              {
+                "value": "honor",
+                "label": "Honor"
+              },
+              {
+                "value": "sincerity",
+                "label": "Sincerity"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "paragon:{choice:virtue}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Compassion: Void Point spent aiding someone below you in the Celestial Order",
+            "predicate": [
+              "paragon:compassion",
+              {
+                "not": "check:damage"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Courage: resisting Intimidation or a Fear effect",
+            "predicate": [
+              "paragon:courage",
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": 2,
+            "optional": true,
+            "label": "Courtesy: avoiding embarrassment or a breach of etiquette",
+            "predicate": [
+              "paragon:courtesy"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Honesty: an honest Sincerity roll, Emphasis or not",
+            "predicate": [
+              "paragon:honesty"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "total": "@honor.rank",
+            "optional": true,
+            "label": "Honor: resisting Temptation or Intimidation, on top of the usual Honor bonus",
+            "predicate": [
+              "paragon:honor",
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 2,
+            "optional": true,
+            "label": "Sincerity: a Contested Roll",
+            "predicate": [
+              "paragon:sincerity"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:lion"
+            ]
+          }
+        ],
+        "specialRules": "+1 Honor on each Honor gain for the chosen virtue. Duty: a Void Point wipes out a Skill or spell roll's TN penalties."
+      }
+    },
+    {
+      "name": "Perceived Honor",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 152,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 2,
+        "rules": [],
+        "specialRules": "2 XP per rank. Anyone judging your Honor sees it one rank higher per rank of this Advantage."
+      }
+    },
+    {
+      "name": "Precise Memory",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 152,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "trait:int",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Recalling something word for word or detail for detail",
+            "predicate": [
+              "check:trait"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Prodigy",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 152,
+      "coverage": "full",
+      "system": {
+        "type": "physical",
+        "cost": 12,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 1
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Quick",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 152,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 6,
+        "rules": [],
+        "specialRules": "Not first to act in a Round: at Reactions, add Reflexes to your Initiative Score for the rest of the fight. Ninja pay 5."
+      }
+    },
+    {
+      "name": "Quick Healer",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 152,
+      "coverage": "none",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Wound recovery treats Stamina as 2 higher."
+      }
+    },
+    {
+      "name": "Read Lips",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 152,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [],
+        "specialRules": "Understand unheard speech with a Perception roll, TN 15 + 5 per 20 feet of distance. Courtiers pay 3."
+      }
+    },
+    {
+      "name": "Sacred Weapon",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 152,
+      "coverage": "partial",
+      "system": {
+        "type": "material",
+        "cost": 0,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:crab"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 5,
+            "predicate": [
+              "clan:crane"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 3,
+            "predicate": [
+              "clan:dragon"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:lion"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:mantis"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:phoenix"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 5,
+            "predicate": [
+              "clan:scorpion"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:spider"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": 6,
+            "predicate": [
+              "clan:unicorn"
+            ]
+          }
+        ],
+        "specialRules": "Your Clan's signature weapon (p.153); give it its damage and special quality as a weapon item."
+      }
+    },
+    {
+      "name": "Sacrosanct",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 153,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Honor Rank 6",
+            "requires": [
+              {
+                "gte": [
+                  "honor-rank",
+                  6
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "While Honor stays at 6+, foes of Honor Rank 5+ never strike you first, save in a duel you accept. Imperial: 3."
+      }
+    },
+    {
+      "name": "Sage",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 153,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: architecture",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: bushido",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: elements",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: ghosts",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: heraldry",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: history",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: nature",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: omens",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: shugenja",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: spirit realms",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: theology",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: war",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: anatomy",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: maho",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: shadowlands",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:lore: underworld",
+            "rank": 1
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:phoenix"
+            ]
+          }
+        ],
+        "specialRules": "Shugenja pay 3. Reaches Lore Skills beyond the ones listed in these rules."
+      }
+    },
+    {
+      "name": "Sensation",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 153,
+      "coverage": "partial",
+      "system": {
+        "type": "social",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: biwa",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: dance",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: drums",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: flute",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: oratory",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: puppeteer",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: samisen",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: song",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:perform: storytelling",
+            "rank": 1
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:acting",
+            "rank": 1
+          }
+        ],
+        "specialRules": "Reaches Perform Skills beyond the ones listed in these rules."
+      }
+    },
+    {
+      "name": "Servant",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 153,
+      "coverage": "none",
+      "system": {
+        "type": "material",
+        "cost": 5,
+        "rules": [],
+        "specialRules": "Up to 2 per Status Rank. Traits 2, one Skill 3; +3 XP per added rank or Emphasis; -2 XP for some servant/Clan pairs."
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Benten)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 153,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "keep": 1,
+            "optional": true,
+            "label": "Persuading, not coercing"
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:crane"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Bishamon)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 153,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:str",
+            "roll": 1,
+            "predicate": [
+              "check:trait"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:crab",
+                  "clan:lion"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Three declared Raises (no Free Raises) that succeed for Increased Damage count as four."
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Daikoku)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:commerce",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:mantis"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Ebisu)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Dealing with commoners outside the samurai caste"
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:unicorn"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Fukurokujin)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "lore",
+            "prompt": "Lore Skill",
+            "options": [
+              {
+                "value": "lore: architecture",
+                "label": "Lore: Architecture"
+              },
+              {
+                "value": "lore: bushido",
+                "label": "Lore: Bushido"
+              },
+              {
+                "value": "lore: elements",
+                "label": "Lore: Elements"
+              },
+              {
+                "value": "lore: ghosts",
+                "label": "Lore: Ghosts"
+              },
+              {
+                "value": "lore: heraldry",
+                "label": "Lore: Heraldry"
+              },
+              {
+                "value": "lore: history",
+                "label": "Lore: History"
+              },
+              {
+                "value": "lore: nature",
+                "label": "Lore: Nature"
+              },
+              {
+                "value": "lore: omens",
+                "label": "Lore: Omens"
+              },
+              {
+                "value": "lore: shugenja",
+                "label": "Lore: Shugenja"
+              },
+              {
+                "value": "lore: spirit realms",
+                "label": "Lore: Spirit Realms"
+              },
+              {
+                "value": "lore: theology",
+                "label": "Lore: Theology"
+              },
+              {
+                "value": "lore: war",
+                "label": "Lore: War"
+              },
+              {
+                "value": "lore: anatomy",
+                "label": "Lore: Anatomy"
+              },
+              {
+                "value": "lore: maho",
+                "label": "Lore: Maho"
+              },
+              {
+                "value": "lore: shadowlands",
+                "label": "Lore: Shadowlands"
+              },
+              {
+                "value": "lore: underworld",
+                "label": "Lore: Underworld"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:{choice:lore}",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:dragon",
+                  "clan:phoenix"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Hotei)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (jurojin)"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Anything that would drain your Void Points must first win a Contested Void Roll; if already contested, you get +10."
+      }
+    },
+    {
+      "name": "Seven Fortunes' Blessing (Jurojin)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "full",
+      "system": {
+        "type": "spiritual",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Blessing of the Seven Fortunes",
+            "requires": [
+              {
+                "not": "item:advantage:seven fortunes' blessing (benten)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (bishamon)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (daikoku)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (ebisu)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (fukurokujin)"
+              },
+              {
+                "not": "item:advantage:seven fortunes' blessing (hotei)"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 2,
+            "optional": true,
+            "label": "Resisting a disease or poison",
+            "predicate": [
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:scorpion"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Shiba",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 243,
+      "coverage": "partial",
+      "system": {
+        "type": "ancestor",
+        "cost": 9,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Phoenix Clan",
+            "requires": [
+              "clan:phoenix"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:int",
+            "roll": 1,
+            "keep": 1,
+            "label": "Shiba: Intelligence"
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@traits.int",
+            "label": "Shiba: Intelligence to Armor TN"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": "+1 Void Point in a skirmish entered beside an Isawa; it is lost if still unspent when the skirmish ends."
+      }
+    },
+    {
+      "name": "Shinjo",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 244,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Unicorn Clan",
+            "requires": [
+              "clan:unicorn"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:investigation",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Shinjo: studying the new or strange"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": 1,
+            "keep": 1,
+            "label": "Shinjo: Etiquette"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Shinjo: Sincerity with Honesty"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shosuro"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Shosuro",
+      "type": "advantage",
+      "folder": "Ancestors",
+      "page": 244,
+      "coverage": "full",
+      "system": {
+        "type": "ancestor",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Scorpion Clan",
+            "requires": [
+              "clan:scorpion"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:stealth",
+            "roll": 3,
+            "keep": 1,
+            "label": "Shosuro: Stealth"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:acting",
+            "roll": 3,
+            "keep": 1,
+            "label": "Shosuro: Acting"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 3,
+            "keep": 1,
+            "optional": true,
+            "label": "Shosuro: Sincerity with Deceit"
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Ancestor",
+            "requires": [
+              {
+                "not": "item:advantage:agasha kitsuki"
+              },
+              {
+                "not": "item:advantage:akodo"
+              },
+              {
+                "not": "item:advantage:asako"
+              },
+              {
+                "not": "item:advantage:bayushi"
+              },
+              {
+                "not": "item:advantage:doji"
+              },
+              {
+                "not": "item:advantage:gusai"
+              },
+              {
+                "not": "item:advantage:hida"
+              },
+              {
+                "not": "item:advantage:hida atarasi"
+              },
+              {
+                "not": "item:advantage:ikoma"
+              },
+              {
+                "not": "item:advantage:kaimetsu-uo"
+              },
+              {
+                "not": "item:advantage:kakita"
+              },
+              {
+                "not": "item:advantage:kuni"
+              },
+              {
+                "not": "item:advantage:kuni yori"
+              },
+              {
+                "not": "item:advantage:mirumoto"
+              },
+              {
+                "not": "item:advantage:moto"
+              },
+              {
+                "not": "item:advantage:shiba"
+              },
+              {
+                "not": "item:advantage:shinjo"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Silent",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:stealth",
+            "roll": 1
+          }
+        ],
+        "specialRules": "Ninja pay 2."
+      }
+    },
+    {
+      "name": "Social Position",
+      "type": "advantage",
+      "folder": "Social",
+      "page": 154,
+      "coverage": "none",
+      "system": {
+        "type": "social",
+        "cost": 6,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 2, 1)",
+            "predicate": [
+              "item:advantage:blissful betrothal"
+            ]
+          }
+        ],
+        "specialRules": "Status Rank +1."
+      }
+    },
+    {
+      "name": "Soul of Artistry",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "kind",
+            "prompt": "Skill group",
+            "options": [
+              {
+                "value": "artisan",
+                "label": "Artisan Skills"
+              },
+              {
+                "value": "craft",
+                "label": "Craft Skills"
+              }
+            ]
+          },
+          {
+            "key": "RollOption",
+            "option": "soul-of-artistry:{choice:kind}"
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: bonsai",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: gardening",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: ikebana",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: origami",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: painting",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: poetry",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: sculpture",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:artisan: tattooing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:calligraphy",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:artisan"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: armorsmithing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: blacksmithing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: bowyer",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: brewing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: carpentry",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: cartography",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: cobbling",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: cooking",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: farming",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: fishing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: masonry",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: mining",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: pottery",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: shipbuilding",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: tailoring",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: weaponsmithing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: weaving",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:craft: poison",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:engineering",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "UnskilledAs",
+            "selector": "skill:sailing",
+            "rank": 1,
+            "predicate": [
+              "soul-of-artistry:craft"
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:crane"
+            ]
+          }
+        ],
+        "specialRules": "Courtiers pay 3. Reaches Skills of the chosen group beyond the ones listed in these rules."
+      }
+    },
+    {
+      "name": "Strength of the Earth",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "Wounds",
+            "penalty": -3
+          }
+        ],
+        "specialRules": "Bushi pay 2."
+      }
+    },
+    {
+      "name": "Tactician",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 4,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:lion"
+            ]
+          }
+        ],
+        "specialRules": "Move a Mass Battle Table result up or down by 5. Bushi pay 3."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Chikushudo)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:animal handling",
+            "roll": 1,
+            "keep": 1
+          }
+        ],
+        "specialRules": "Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Gaki-do)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          }
+        ],
+        "specialRules": "An attack that slays a foe heals you 5 Wounds at once. Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Jigoku)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Shadowlands Taint",
+            "requires": [
+              {
+                "or": [
+                  {
+                    "gt": [
+                      "taint-rank",
+                      0
+                    ]
+                  },
+                  "item:disadvantage:shadowlands taint"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "total": "@shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:sta",
+            "total": "@shadowTaint.rank",
+            "predicate": [
+              {
+                "not": {
+                  "or": [
+                    "check:attack",
+                    "check:damage"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:str",
+            "total": "@shadowTaint.rank",
+            "predicate": [
+              {
+                "not": {
+                  "or": [
+                    "check:attack",
+                    "check:damage"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:ref",
+            "total": "@shadowTaint.rank",
+            "predicate": [
+              {
+                "not": {
+                  "or": [
+                    "check:attack",
+                    "check:damage"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "trait:agi",
+            "total": "@shadowTaint.rank",
+            "predicate": [
+              {
+                "not": {
+                  "or": [
+                    "check:attack",
+                    "check:damage"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "specialRules": "Needs Shadowlands Taint. A Lost character adds double the Taint Rank instead. Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Maigo no Musha)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "Ledger",
+            "track": "glory",
+            "direction": "gain",
+            "value": "@points + min(1, max(0, ceil(@points - 3)))"
+          }
+        ],
+        "specialRules": "Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Meido)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 2,
+            "optional": true,
+            "label": "Contested Roll against social manipulation, such as Courtier",
+            "predicate": [
+              {
+                "or": [
+                  "check:skill",
+                  "check:trait"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Sakkaku)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Deceit"
+          }
+        ],
+        "specialRules": "Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Tengoku)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "ring:earth",
+            "roll": 2,
+            "optional": true,
+            "label": "Resisting Shadowlands Taint",
+            "predicate": [
+              "check:ring"
+            ]
+          }
+        ],
+        "specialRules": "Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Toshigoku)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 154,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 8,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          }
+        ],
+        "specialRules": "A Move Action taken to close in for an attack covers 5 more feet. Shugenja pay 1 less."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Yomi)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 155,
+      "coverage": "partial",
+      "system": {
+        "type": "spiritual",
+        "cost": 7,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yume-do)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 1,
+            "optional": true,
+            "label": "Your chosen School Skill"
+          }
+        ],
+        "specialRules": "Tick the bonus only on the one School Skill picked at purchase. Shugenja pay 1 less."
+      }
+    },
+    {
+      "name": "Touch of the Spirit Realms (Yume-do)",
+      "type": "advantage",
+      "folder": "Spiritual",
+      "page": 155,
+      "coverage": "none",
+      "system": {
+        "type": "spiritual",
+        "cost": 5,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "One Touch of the Spirit Realms, not with Cursed by the Realm",
+            "requires": [
+              {
+                "not": "item:advantage:touch of the spirit realms (chikushudo)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (gaki-do)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (jigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (maigo no musha)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (meido)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (sakkaku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (tengoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (toshigoku)"
+              },
+              {
+                "not": "item:advantage:touch of the spirit realms (yomi)"
+              },
+              {
+                "not": "item:disadvantage:cursed by the realm"
+              }
+            ]
+          }
+        ],
+        "specialRules": "Four hours of rest refill all spent Void Points. Shugenja pay 4."
+      }
+    },
+    {
+      "name": "Virtuous",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 155,
+      "coverage": "none",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [],
+        "specialRules": "Starting Honor is one rank above the School's value."
+      }
+    },
+    {
+      "name": "Voice",
+      "type": "advantage",
+      "folder": "Physical",
+      "page": 155,
+      "coverage": "partial",
+      "system": {
+        "type": "physical",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: song",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: oratory",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:perform: storytelling",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Told aloud"
+          }
+        ],
+        "specialRules": "Any other Perform roll that relies on your voice gets the same +1k1."
+      }
+    },
+    {
+      "name": "Wary",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 155,
+      "coverage": "full",
+      "system": {
+        "type": "mental",
+        "cost": 3,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:investigation",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Spotting an ambush (Notice against Stealth)"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Way of the Land",
+      "type": "advantage",
+      "folder": "Mental",
+      "page": 155,
+      "coverage": "partial",
+      "system": {
+        "type": "mental",
+        "cost": 2,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              "clan:unicorn"
+            ]
+          }
+        ],
+        "specialRules": "Pick a region; inside it you never get lost and know where its supplies and resources lie."
+      }
+    },
+    {
+      "name": "Wealthy",
+      "type": "advantage",
+      "folder": "Material",
+      "page": 155,
+      "coverage": "partial",
+      "system": {
+        "type": "material",
+        "cost": 1,
+        "rules": [
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 1, 1)",
+            "predicate": [
+              {
+                "or": [
+                  "clan:crane",
+                  "clan:unicorn"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Cost",
+            "selector": "self",
+            "value": "max(@cost - 2, 1)",
+            "predicate": [
+              "item:advantage:blissful betrothal"
+            ]
+          }
+        ],
+        "specialRules": "1 XP per rank; each rank adds 2 koku to the starting outfit. Imperial characters pay 1 less in total."
+      }
+    }
+  ]
+}

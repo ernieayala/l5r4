@@ -4,10 +4,7 @@
 
 A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, character progression, combat, spellcasting, and everything else you need to run games in Rokugan.
 
-[![Foundry v13](https://img.shields.io/badge/Foundry-v13-informational)](https://foundryvtt.com/)
-[![Version 3.2.1](https://img.shields.io/badge/Version-3.2.1-blue)](https://github.com/ernieayala/l5r4/releases)
-[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
+[![Foundry v14](https://img.shields.io/badge/Foundry-v14-informational)](https://foundryvtt.com/) [![Version 4.0.0](https://img.shields.io/badge/Version-4.0.0-blue)](https://github.com/ernieayala/l5r4/releases) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
 
 **Questions?** Discord: **@erniez**
 
@@ -34,6 +31,21 @@ A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, cha
 
 ## Installation
 
+**Requires Foundry VTT 14 (14.370 or later).** On Foundry 13, use version 3.2.1 instead, from its manifest URL:
+
+```
+https://github.com/ernieayala/l5r4/releases/download/v3.2.1/system.json
+```
+
+### Upgrading from 3.2.1
+
+1. Back up your world, then update Foundry to 14.370 or later and the system to 4.0.0
+2. Unlock any world compendiums of Actors or Items you want converted
+3. Open the world as a GM: the world's data converts once, on that first load
+4. Check XP totals, Insight Rank, and NPC Wounds and Initiative, which follow the book more closely now
+
+See the [Changelog](CHANGELOG.MD) for what changed.
+
 ### Fresh Install
 
 1. Open Foundry VTT → **Game Systems** → **Install System**
@@ -49,11 +61,13 @@ A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, cha
 If you're coming from the original [l5r4 system v12](https://gitlab.com/team-l5r4/l5r4) or any 1.x version, you'll need to migrate. The system ID changed from `l5r4` to `l5r4-enhanced`, which means Foundry treats it as a completely different system.
 
 **Migration Tool:** Install this module in both your old and new worlds:
+
 ```
 https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ```
 
 **Steps:**
+
 1. Export data from old world (the module auto-detects your schema)
 2. Create new world with l5r4-enhanced
 3. Import data (auto-converts to new format)
@@ -68,6 +82,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Core Mechanics
 
 **Roll & Keep Dice**
+
 - Full XkY notation with exploding 10s
 - Raises (declared before rolling, +5 TN each)
 - Free Raises (from advantages/techniques, reduce TN without penalty)
@@ -76,12 +91,14 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Ten Dice Rule with optional Little Truths variant
 
 **Characters**
+
 - Eight traits that auto-calculate five rings
 - Void Points with tracking
 - Honor, Glory, Status, Shadow Taint
 - Insight Rank (auto-calculated from skills and rings)
 
 **XP System**
+
 - Tracks everything: traits, skills, emphases, advantages, disadvantages, kata, kiho
 - Auto-calculates costs (triangular for skills, progressive for traits)
 - School skills
@@ -89,6 +106,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - XP Manager shows full audit trail
 
 **Wealth**
+
 - Koku, Bu, Zeni with proper conversion
 - Calculator-style manager modal
 - Add/remove by denomination
@@ -97,11 +115,13 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Combat
 
 **Initiative & Movement**
+
 - Initiative = Insight Rank + Reflexes + modifiers
 - Movement = Water Ring × 5 feet per action
 - Void Point spending option on initiative rolls
 
 **Five Stances**
+
 - Attack (baseline)
 - Full Attack (+2k1 attack, -10 Armor TN)
 - Defense (+Air Ring to Armor TN, +Defense Skill if present)
@@ -109,11 +129,13 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Center
 
 **Mounted Combat**
+
 - Toggle mounted status via Active Effects
 - +1k0 attack bonus vs unmounted opponents
 - Works with all stances
 
 **Damage & Wounds**
+
 - One-click damage application from chat cards
 - Automatic armor reduction
 - Void Point reduction option (-10 damage)
@@ -121,10 +143,12 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Wound thresholds = Earth Ring × multiplier (default 2)
 
 **Guard Maneuver**
+
 - Guarding status (-5 Armor TN while protecting)
 - Guarded status (+10 Armor TN while protected)
 
 **Fear System**
+
 - NPC Fear Rank (1-10) with auto TN calculation
 - Resistance: Willpower + Honor Rank vs Fear TN
 - Failure applies -XkY penalty via Active Effects
@@ -133,33 +157,40 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Equipment & Items
 
 **Weapons**
+
 - Melee and ranged with associated skills
 - Custom explosion thresholds
 - Click to attack, rolls appear in chat with damage buttons
 - Bows use strength rating + arrow types
 
 **Armor**
+
 - TN bonus and damage reduction
 - Equipped toggle
 
 **Skills**
+
 - Multiple emphases per skill
 - Mastery abilities at ranks 3, 5, 7
 - School skill flag for XP discount
 - Roll/keep/total bonuses
 
 **Advantages, Disadvantages, Kata, Kiho**
+
 - XP costs tracked automatically
 - Active Effects for stat modifications
 
 **Families, Schools, Clans**
+
 - Family grants +1 trait via Active Effects
 
 **Techniques**
+
 - Shugenja techniques track affinity/deficiency
 - All use Active Effects for bonuses
 
 **Spells**
+
 - Ring-based magic (Air, Earth, Fire, Water, Void)
 - Mastery levels 1-9
 - Optional spell slots per ring
@@ -168,19 +199,22 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Automation & Effects
 
 **Active Effects**
+
 - Modify any actor attribute (traits, rings, Armor TN, initiative, etc.)
 - Transfer from Family, School, Advantages, Disadvantages, Techniques, Kata, Kiho
 - Effects apply when items are added to characters
 - See [Active Effects Guide](ACTIVE_EFFECTS.md) for full documentation
 
 **Conditions**
+
 - Full status effect library (Blinded, Dazed, Fatigued, Prone, Stunned, etc.)
 - Condition Manager dialog for quick toggling
 - Automatic penalties (Blinded reduces Water Ring for movement)
 
 ### Visual Effects & Animations
 
-**JB2A Integration** *(requires Sequencer + JB2A modules)*
+**JB2A Integration** _(requires Sequencer + JB2A modules)_
+
 - Stance animations when entering Full Attack, Full Defense, or Center
 - Attack projectiles for ranged weapons
 - Melee weapon strike effects
@@ -189,6 +223,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Graceful degradation if modules not installed
 
 **Setup**
+
 1. Install [Sequencer](https://foundryvtt.com/packages/sequencer) module
 2. Install [JB2A - Jules & Ben's Animated Assets](https://foundryvtt.com/packages/jb2a_patreon)
 3. Animations activate automatically
@@ -196,46 +231,98 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Dialogs & Tools
 
 **XP Manager**
+
 - View all XP gains and expenditures
 - Sort by type, cost, or note
 - Recalculate button rebuilds from character state
 - Timestamped audit trail
 
 **Wealth Manager**
+
 - Calculator UI for currency management
 - Add/remove by denomination
 - Convert between koku/bu/zeni
 - Prevents invalid operations
 
 **Emphasis Manager**
+
 - Purchase multiple emphases per skill
 - Each emphasis costs 2 XP
-- Checkbox in roll dialog to use emphasis
+- Choose a trained emphasis in the roll dialog to re-roll 1s
 
 **Wound Config**
+
 - Edit wound thresholds per character
 - Formula or manual modes
 - Active wound level count (NPCs)
 
 **Armor Config**
+
 - Edit armor TN and reduction
 - Configure stacking rules
 
 **Combat Config**
+
 - Initiative modifiers
 - Movement adjustments
 
 **Condition Manager**
+
 - Toggle all conditions from one dialog
 - Visual status indicators
 
 **NPC Attack Editor**
+
 - Edit attack and damage values
 - Action type selection
+
+### Table Tools
+
+**Text links** (in journals, item descriptions, and chat)
+
+- `@Check[skill=Kenjutsu|trait=agi|tn=20]`, `@Check[trait=ref]`, `@Check[ring=water|tn=15]`: opens the roll dialog for your selected token or character, filled in and still editable
+- `@Damage[3k2]`: rolls damage you apply to the selected tokens
+- `@Condition[dazed]`: applies a condition to the targeted tokens (else the selected ones)
+- `@Fear[2]`: a Fear test for the targeted tokens (else the selected ones)
+- Add `{label}` for your own text, as in `@Check[trait=ref]{Dodge}`; a link with a mistake shows what is wrong
+- The GM's Check links have a second button that posts a request card: each player rolls it with their own character
+
+**Effect panel** (the hourglass in the token controls)
+
+- The selected token's effects, or your character's: icon, source, and how long each lasts
+- Open an effect's source, or remove an effect you own
+
+**Hotbar macros**
+
+- Drag a skill, weapon, spell, kata, kiho, Trait, or Ring from a sheet to the hotbar to roll it from there
+
+**Floating numbers**
+
+- Changes to Wounds and Void Points float over the token, as "+7 Wounds" or "−1 Void Points"
+
+### Compendium Packs
+
+**Packs** (in the "L5R4 Core Rulebook" compendium folder)
+
+- Clans, Families, Schools (Advanced Schools included), Techniques (Alternate and Ronin Paths included), Skills, Advantages (Ancestors included), Disadvantages, Spells (maho included), Kata, Kiho, Tattoos, Weapons, Armor, and Equipment from the Core Rulebook, poisons included
+- Creatures (GM only): the book's animals and monsters as NPCs with their attacks, Wound levels, Fear, Taint, Skills, and special abilities such as Invulnerability, Spirit, Swift, and jade-limited Reduction
+- Kata, kiho, and tattoos work while activated with the play button on the character sheet: one kata, one tattoo, and one kiho of each type but Martial at a time; a tattoo lasts twice the School Rank in Rounds, and an always-active tattoo such as the Mantis works while owned
+- A School gives its Trait bonus, its Skills with their Emphases, and each Technique as its School Rank arrives; a shugenja School also gives Sense, Commune, and Summon. Dropping a second School asks whether to replace the first or add it beside it
+- A Skill's Mastery Abilities apply on their own once its rank reaches them, where the system can automate them
+- Advantages and Disadvantages ask their choices when added, check the book's limits (one Ancestor, matched sets, Large or Small), and price Clan discounts in the XP totals
+- Each entry carries the book's numbers and its page ("Core Rulebook p.204"); the book's text is not included, so keep your copy handy
+- What an entry's rules do is listed on its sheet and chat card; a mechanic the system does not automate has a one-line summary
+
+**Compendium Browser** (the Browse button in the Compendium sidebar)
+
+- Every system and world compendium you can see, in tabs, with filters and a name search
+- Drag an entry to a sheet, or click Add to give it to your selected token or your character; prerequisites and choices are asked as for a drop
+- The GM imports creatures with Import
 
 ### Long Rest & Healing
 
 **Rest Button** (on character sheets)
+
 - Heals (Stamina × 2) + Insight Rank wounds
 - Restores Void Points to Void Ring rank
 - Refills all spell slots to ring values
@@ -247,10 +334,18 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ## System Settings
 
 **House Rules** (World)
-- Little Truths Ten Dice Rule (excess dice grant +2, default: off)
-- Allow Armor Stacking (default: off, highest only)
+
+- Apply Little Truths exception (a pool the Ten Dice Rule converted gets +2, default: off)
+- Optional rule: Honor Roll (default: off; the GM starts each session with the New session token control)
+
+Armor stacking is set per character in the Armor Config window (default: off, highest armor only).
+
+**Display** (Client)
+
+- Floating Wound and Void numbers over tokens (default: on)
 
 **Migration** (World)
+
 - Auto-run migrations on version updates (default: on)
 - Force migration (use with caution)
 
@@ -259,13 +354,16 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ## Recommended Modules
 
 **Dice Visuals**
+
 - [Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice) - 3D dice animations for Roll & Keep
 
-**Visual Effects** *(optional, enables combat animations)*
+**Visual Effects** _(optional, enables combat animations)_
+
 - [Sequencer](https://foundryvtt.com/packages/sequencer) - Animation framework
 - [JB2A - Jules & Ben's Animated Assets](https://foundryvtt.com/packages/jb2a_patreon) - Visual effects library
 
-**Development** *(for contributors)*
+**Development** _(for contributors)_
+
 - [Quench](https://foundryvtt.com/packages/quench) - Integration test runner
 
 ---
@@ -273,12 +371,14 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ## Contributing
 
 Want to help? Check out [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
 - Development setup
 - Architecture guidelines
 - Code standards
 - Testing requirements
 
 **Ways to Contribute:**
+
 - Bug fixes
 - Feature implementations
 - Translations (6 languages supported)
@@ -303,10 +403,12 @@ Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4).
 ## Support
 
 **Get Help:**
+
 - Discord: **@erniez**
 - [GitHub Issues](https://github.com/ernieayala/l5r4/issues) - Bug reports
 
 **Support the Project:**
+
 - ⭐ Star the repository
 - 🐛 Report bugs
 - 💬 Share feedback

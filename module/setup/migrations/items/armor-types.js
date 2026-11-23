@@ -1,10 +1,7 @@
 /**
- * Armor Type Field Migration
- * Ensures armor items have the armorType field for penalty calculations.
- *
  * @module setup/migrations/items/armor-types
+ * @description Ensures armor items have the armorType field for penalty calculations.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**

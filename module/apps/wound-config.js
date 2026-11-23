@@ -1,46 +1,21 @@
 /**
- * Wound Configuration Application
- *
- * Provides a form interface for configuring actor wound tracking including wound
- * calculation mode, multipliers, modifiers, and NPC wound level settings.
- *
- * Key Responsibilities:
- * - **Wound Mode Selection**: Toggle between manual and formula-based wound calculation
- * - **Multiplier Configuration**: Set wound multiplier for formula-based calculation
- * - **Modifier Management**: Configure wound and penalty modifiers
- * - **NPC Wound Levels**: Set number of wound levels for NPC actors
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Implements debounced updates for real-time field changes
- * - Validates field values before applying updates
- *
- * Architectural Notes:
- * - **Uses DebouncedFieldMixin**: Real-time numeric updates with validation for multipliers/modifiers
- * - **Custom validation**: Overrides _validateFieldValue() to enforce wound calculation constraints
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **closeOnSubmit: false**: Keeps dialog open for multiple adjustments during character setup
- *
  * @module apps/wound-config
+ * @description A form window for one actor's wound tracking: manual or formula Wounds, the Earth multiplier, the
+ * Wound and penalty modifiers, and an NPC's number of Wound Ranks. DebouncedFieldMixin saves each field as it
+ * changes, and `_validateFieldValue` rejects a value outside the allowed range first; the window stays open after
+ * submit so the user can make several adjustments.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../config/game-mechanics.js";
-
-// Utils imports
-import { T } from "../utils/localization.js";
+import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-
-// Mixins
-import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+import { DebouncedFieldMixin, toFieldValue } from "../mixins/debounced-field-mixin.js";
 
 /**
  * Valid wound calculation modes.
  * @constant {string[]}
  */
-const VALID_WOUND_MODES = ["manual", "formula"];
+const VALID_WOUND_MODES = Object.freeze(["manual", "formula"]);
 
 /**
  * Minimum allowed wound multiplier for formula-based calculation.
@@ -66,24 +41,24 @@ const MIN_NPC_WOUND_LEVELS = 1;
  */
 const MAX_NPC_WOUND_LEVELS = 8;
 
+/**
+ * The wound configuration window for one actor.
+ */
 export default class WoundConfigApplication extends DebouncedFieldMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
     id: "wound-config-{id}",
-    classes: ["l5r4", "wound-config-app"],
+    classes: ["l5r4", "l5r4-wound-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.woundConfig.title",
-      icon: "fas fa-cog",
+      icon: "fa-solid fa-gear",
       resizable: true
     },
     position: {
       width: 500,
       height: 400
-    },
-    actions: {
-      "wound-mode-change": WoundConfigApplication.prototype._onWoundModeChange
     },
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,
@@ -124,8 +99,9 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.woundConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return F("l5r4.apps.woundConfig.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**
@@ -134,7 +110,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with wound configuration data
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -156,7 +132,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
         wounds: sys.wounds ?? {},
         visibleManualWoundLevels: sys.visibleManualWoundLevels ?? {},
         config: {
-          npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+          npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
         }
       };
 
@@ -174,7 +150,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -188,7 +163,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       wounds: {},
       visibleManualWoundLevels: {},
       config: {
-        npcNumberWoundLvls: { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 }
+        npcNumberWoundLevels: { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 }
       }
     };
   }
@@ -196,52 +171,16 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
   // _onRender is provided by DebouncedFieldMixin
 
   /**
-   * Handle wound mode change action.
-   * Switches between manual and formula-based wound calculation modes.
-   *
-   * @param {Event} event - The change event
-   * @param {HTMLElement} element - The select element with new mode value
-   * @private
-   */
-  async _onWoundModeChange(event, element) {
-    const newMode = element.value;
-
-    if (newMode === this.actor?.system?.woundMode) {
-      return;
-    }
-
-    try {
-      await this.actor.update({ "system.woundMode": newMode });
-      if (this.rendered) {
-        this.render();
-      }
-    } catch (err) {
-      logError("Failed to update wound mode", err, {
-        newMode,
-        actorId: this.actor.id
-      });
-      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
-    }
-  }
-
-  /**
    * Handle field change events with validation notification.
    * Overrides DebouncedFieldMixin to add user notification on validation failure.
    *
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The form field element that changed
-   * @private
+   * @override
    */
   async _onFieldChange(event, element) {
     const field = element.name;
-
-    // Type coercion (inherited from mixin logic)
-    const value =
-      element.type === "checkbox"
-        ? element.checked
-        : element.type === "number" || element.dataset.type === "Number"
-          ? parseInt(element.value, 10) || 0
-          : element.value;
+    const value = toFieldValue(element);
 
     if (!field) {
       console.warn(`${SYS_ID}`, "Field change event with no field name");
@@ -255,7 +194,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       return;
     }
 
-    this._updateDebounced(field, validatedValue);
+    this.updateDebounced(field, validatedValue);
   }
 
   /**
@@ -266,51 +205,29 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @param {string} field - The field name being validated
    * @param {*} value - The value to validate
    * @returns {*|null} Validated value or null if invalid
-   * @protected
+   * @override
    */
   _validateFieldValue(field, value) {
     switch (field) {
       case "woundMode":
-        if (!VALID_WOUND_MODES.includes(value)) {
-          console.warn(`${SYS_ID}`, `Invalid woundMode: ${value}. Must be "manual" or "formula".`);
-          return null;
-        }
-        return value;
+        return validateWoundMode(value);
 
-      case "woundsMultiplier": {
-        const mult = Number(value);
-        if (!Number.isInteger(mult) || mult < MIN_WOUND_MULTIPLIER || mult > MAX_WOUND_MULTIPLIER) {
-          console.warn(
-            `${SYS_ID}`,
-            `Invalid woundsMultiplier: ${value}. Must be integer ${MIN_WOUND_MULTIPLIER}-${MAX_WOUND_MULTIPLIER}.`
-          );
-          return null;
-        }
-        return mult;
-      }
+      case "woundsMultiplier":
+        return validateWholeNumber(field, value, {
+          min: MIN_WOUND_MULTIPLIER,
+          max: MAX_WOUND_MULTIPLIER
+        });
 
-      case "nrWoundLvls": {
-        const lvl = Number(value);
-        if (!Number.isInteger(lvl) || lvl < MIN_NPC_WOUND_LEVELS || lvl > MAX_NPC_WOUND_LEVELS) {
-          console.warn(
-            `${SYS_ID}`,
-            `Invalid nrWoundLvls: ${value}. Must be integer ${MIN_NPC_WOUND_LEVELS}-${MAX_NPC_WOUND_LEVELS}.`
-          );
-          return null;
-        }
-        return lvl;
-      }
+      case "nrWoundLvls":
+        return validateWholeNumber(field, value, {
+          min: MIN_NPC_WOUND_LEVELS,
+          max: MAX_NPC_WOUND_LEVELS
+        });
 
       case "woundsMod":
       case "woundsPenaltyMod":
-      case "wounds.mod": {
-        const mod = Number(value);
-        if (!Number.isFinite(mod)) {
-          console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
-          return null;
-        }
-        return Math.floor(mod);
-      }
+      case "wounds.mod":
+        return validateModifier(field, value);
 
       default:
         return value;
@@ -319,11 +236,11 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
 
   /**
    * Update actor with new wound configuration value.
-   * Validates field value before updating, prevents updates after application close.
+   * Validates field value before updating, prevents updates after application close. The wound mode decides which
+   * fields the window shows, so a new mode renders it again.
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
-   * @private
    */
   async _updateActor(field, value) {
     try {
@@ -340,6 +257,9 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       const updateData = { [`system.${field}`]: value };
 
       await this.actor.update(updateData);
+      if (field === "woundMode" && this.rendered) {
+        this.render();
+      }
     } catch (err) {
       logError("Failed to update wound configuration", err, {
         field,
@@ -357,7 +277,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @param {Event} event - The submit event
    * @param {HTMLFormElement} _form - The form element (unused)
    * @param {FormData} _formData - The form data (unused)
-   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {
@@ -366,4 +285,50 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
   }
 
   // close() method is provided by DebouncedFieldMixin
+}
+
+/**
+ * A wound mode from the form: "manual" or "formula".
+ * @param {*} value
+ * @returns {string|null} The mode, or null when it is neither
+ */
+function validateWoundMode(value) {
+  if (!VALID_WOUND_MODES.includes(value)) {
+    console.warn(`${SYS_ID}`, `Invalid woundMode: ${value}. Must be "manual" or "formula".`);
+    return null;
+  }
+  return value;
+}
+
+/**
+ * A whole number from the form within its field's range.
+ * @param {string} field - The field name, for the warning
+ * @param {*} value
+ * @param {object} range
+ * @param {number} range.min - The least value allowed
+ * @param {number} range.max - The greatest value allowed
+ * @returns {number|null} The number, or null when it is not a whole number in range
+ */
+function validateWholeNumber(field, value, { min, max }) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be integer ${min}-${max}.`);
+    return null;
+  }
+  return number;
+}
+
+/**
+ * A Wound or penalty modifier from the form, rounded down.
+ * @param {string} field - The field name, for the warning
+ * @param {*} value
+ * @returns {number|null} The modifier, or null when it is not a finite number
+ */
+function validateModifier(field, value) {
+  const mod = Number(value);
+  if (!Number.isFinite(mod)) {
+    console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
+    return null;
+  }
+  return Math.floor(mod);
 }

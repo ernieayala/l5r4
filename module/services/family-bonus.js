@@ -1,0 +1,186 @@
+/**
+ * @module services/family-bonus
+ * @description Reads a character's family Trait bonus: each family grants +1 to one Trait (Hida Strength, Yasuki
+ * Awareness), so that Trait starts at 3 instead of 2 (Character Creation Step 2, Family Selection). The family Item,
+ * found through the actor's flags, carries the bonus as a TraitAdjust rule in `system.rules`; the rule engine applies
+ * it to the Trait, and this service reads it back, one Trait or all eight, for the Trait arrows.
+ */
+
+import { SYS_ID } from "../config/constants.js";
+import { getTraitAdjustTotal } from "../utils/rule-engine.js";
+
+/**
+ * Service for managing family trait bonuses applied to L5R4 actors.
+ *
+ * Families in L5R4 grant a +1 bonus to a single Trait during character creation.
+ * This service reads these bonuses from the TraitAdjust rules of the actor's assigned family Item.
+ */
+export class FamilyBonusService {
+  /**
+   * Valid L5R4 trait keys.
+   * Maps to the eight Traits organized into four Rings (Earth, Air, Fire, Water):
+   * - Earth: sta (Stamina), wil (Willpower)
+   * - Air: ref (Reflexes), awa (Awareness)
+   * - Fire: agi (Agility), int (Intelligence)
+   * - Water: str (Strength), per (Perception)
+   * @type {string[]}
+   */
+  static VALID_TRAIT_KEYS = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
+
+  /**
+   * Creates a zero-initialized map for all trait bonuses.
+   * Used as the default/fallback when no family item exists.
+   * @returns {Record<string, number>} Map of trait keys to zero values
+   */
+  static #buildZeroMap() {
+    const map = {};
+    for (const key of this.VALID_TRAIT_KEYS) {
+      map[key] = 0;
+    }
+    return map;
+  }
+
+  /**
+   * Gets the family bonus for a specific trait.
+   *
+   * Sums the numeric TraitAdjust rules for the trait on the actor's family Item; a negative total counts as 0.
+   *
+   * @param {L5R4Actor} actor - The actor to check for family bonuses
+   * @param {string} traitKey - The trait key (e.g., "str", "agi", "int")
+   * @returns {number} Total family bonus for the trait (0 if none or error)
+   */
+  static getBonus(actor, traitKey) {
+    try {
+      if (!actor || !traitKey) {
+        return 0;
+      }
+
+      if (!this.VALID_TRAIT_KEYS.includes(traitKey)) {
+        console.warn(`${SYS_ID} FamilyBonusService: Invalid trait key`, {
+          actorId: actor?.id,
+          traitKey,
+          validKeys: this.VALID_TRAIT_KEYS
+        });
+        return 0;
+      }
+
+      const familyItem = this.getFamilyItem(actor);
+      if (!familyItem) {
+        return 0;
+      }
+
+      // A negative total would be a penalty, not a family bonus
+      return Math.max(0, getTraitAdjustTotal(familyItem.system.rules, traitKey));
+    } catch (err) {
+      console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus for trait`, {
+        actorId: actor?.id,
+        traitKey,
+        err
+      });
+      return 0;
+    }
+  }
+
+  /**
+   * Gets a complete map of all trait bonuses from the actor's family.
+   *
+   * Returns an object with all eight trait keys mapped to their family bonuses, read as in getBonus().
+   *
+   * This is more efficient than calling getBonus() multiple times when you need
+   * bonuses for multiple traits.
+   *
+   * @param {L5R4Actor} actor - The actor to retrieve family bonuses for
+   * @returns {Record<string, number>} Map of trait keys to their bonus values (0 if none)
+   */
+  static getBonusMap(actor) {
+    try {
+      const familyItem = this.getFamilyItem(actor);
+      if (!familyItem) {
+        return this.#buildZeroMap();
+      }
+
+      const bonusMap = this.#buildZeroMap();
+      for (const traitKey of this.VALID_TRAIT_KEYS) {
+        bonusMap[traitKey] = Math.max(0, getTraitAdjustTotal(familyItem.system.rules, traitKey));
+      }
+      return bonusMap;
+    } catch (err) {
+      console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus map`, {
+        actorId: actor?.id,
+        err
+      });
+      return this.#buildZeroMap();
+    }
+  }
+
+  /**
+   * Retrieves the family Item associated with an actor.
+   *
+   * Reads the family Item UUID from actor flags (flags.l5r4.familyItemUuid) and
+   * resolves it using Foundry's fromUuidSync. Validates that the item exists and
+   * has type "family".
+   *
+   * Requires Foundry v13+ (uses fromUuidSync).
+   *
+   * @param {L5R4Actor} actor - The actor to retrieve the family item for
+   * @returns {Item|null} The family Item, or null if not found/invalid
+   */
+  static getFamilyItem(actor) {
+    try {
+      if (!actor) {
+        return null;
+      }
+
+      const uuid = actor.getFlag?.(SYS_ID, "familyItemUuid");
+      if (!uuid) {
+        return null;
+      }
+
+      if (typeof globalThis.fromUuidSync !== "function") {
+        console.warn(`${SYS_ID} FamilyBonusService: fromUuidSync not available`);
+        return null;
+      }
+
+      const item = globalThis.fromUuidSync(uuid);
+
+      if (!item || item.type !== "family") {
+        return null;
+      }
+
+      return item;
+    } catch (err) {
+      console.warn(`${SYS_ID} FamilyBonusService: Failed to get family item`, {
+        actorId: actor?.id,
+        err
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Checks whether an actor has a valid family assigned.
+   *
+   * @param {L5R4Actor} actor - The actor to check
+   * @returns {boolean} True if actor has a valid family Item
+   */
+  static hasValidFamily(actor) {
+    return this.getFamilyItem(actor) !== null;
+  }
+
+  /**
+   * Gets the display name of the actor's family.
+   *
+   * Reads from actor flags (flags.l5r4.familyName) for display purposes.
+   * The name sits in a flag apart from the family Item, so reading it needs no item lookup.
+   *
+   * @param {L5R4Actor} actor - The actor to retrieve the family name for
+   * @returns {string|null} The family name, or null if not set or error
+   */
+  static getFamilyName(actor) {
+    try {
+      return actor.getFlag?.(SYS_ID, "familyName") ?? null;
+    } catch {
+      return null;
+    }
+  }
+}

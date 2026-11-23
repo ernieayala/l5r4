@@ -12,31 +12,29 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Delegates type-specific logic to preparation modules (pc-preparation, npc-preparation)
+ * - Type-specific derived data: prepareDerivedData() runs the PC's or the NPC's preparation
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
- *
- * @requires Foundry VTT v11+
  */
 
-import { SYS_ID } from "../config/constants.js";
-import { iconPath } from "../config/icons.js";
-import { toInt } from "../utils/type-coercion.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
+import { isOwnChange } from "../utils/change-origin.js";
+import { toInt } from "../utils/type-coercion.js";
+import { rollDataKey } from "../utils/rule-values.js";
+import { getHighestSchoolRank } from "../utils/mechanics.js";
 import {
-  calculateWoundPenalties,
-  initializeWoundState,
-  findCurrentWoundLevel,
-  determineCurrentWoundLevel
+  prepareWoundPenalties,
+  prepareWoundState,
+  prepareCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
-import {
-  calculateInsightRank,
-  preparePcExperience,
-  trackXpExpenditure
-} from "./actor/calculations/xp-system.js";
-import { prepareFear } from "./actor/calculations/fear-system.js";
+import { onActorPreCreate } from "./actor/creation.js";
+import { prepareCurrentWoundLevelByMode } from "./actor/calculations/npc-wound-system.js";
+import { updateXpFlags } from "./actor/calculations/xp-system.js";
 import { preparePcData } from "./actor/preparation/pc-preparation.js";
 import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
+import { applyGrants } from "./item/lifecycle/grants.js";
+import { applyInitialRules } from "./actor/rules.js";
+import { prepareWoundRollOption } from "./actor/roll-options.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -58,76 +56,13 @@ export default class L5R4Actor extends Actor {
    */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
-
-    if (this.type === "pc") {
-      this.prototypeToken.updateSource({
-        bar1: { attribute: "wounds" },
-        bar2: { attribute: "suffered" },
-        displayName: CONST.TOKEN_DISPLAY_MODES.ALWAYS,
-        displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        disposition: CONST.TOKEN_DISPOSITIONS.FRIENDLY,
-        name: this.name,
-        vision: true,
-        actorLink: true
-      });
-
-      if (!data.img) {
-        this.updateSource({ img: iconPath("pc.webp") });
-      }
-
-      // Initialize XP tracking flags for character advancement
-      // These flags persist character creation choices and XP expenditure history
-      const providedFlags = data.flags?.[SYS_ID] ?? {};
-      const updates = {};
-
-      if (providedFlags.xpManual === undefined) {
-        updates[`flags.${SYS_ID}.xpManual`] = [];
-      }
-      if (providedFlags.xpSpent === undefined) {
-        updates[`flags.${SYS_ID}.xpSpent`] = [];
-      }
-      if (providedFlags.xpBase === undefined) {
-        updates[`flags.${SYS_ID}.xpBase`] = 40;
-      }
-      if (providedFlags.xpFreeTraitBase === undefined) {
-        updates[`flags.${SYS_ID}.xpFreeTraitBase`] = {};
-      }
-      if (providedFlags.traitDiscounts === undefined) {
-        updates[`flags.${SYS_ID}.traitDiscounts`] = {};
-      }
-
-      if (Object.keys(updates).length > 0) {
-        this.updateSource(updates);
-      }
-    } else {
-      this.prototypeToken.updateSource({
-        bar1: { attribute: "wounds" },
-        bar2: { attribute: "suffered" },
-        displayName: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER,
-        disposition: CONST.TOKEN_DISPOSITIONS.HOSTILE
-      });
-
-      const updates = {};
-
-      if (!data.img) {
-        updates.img = iconPath("npc.webp");
-      }
-
-      if (!data.system?.woundMode) {
-        updates["system.woundMode"] = "manual";
-      }
-
-      if (Object.keys(updates).length > 0) {
-        this.updateSource(updates);
-      }
-    }
+    onActorPreCreate(this, data);
   }
 
   /**
    * Initialize base actor data structures.
-   * Ensures all required system properties exist and propagates trait values from source.
-   * Called before Active Effects are applied.
+   * Ensures all required system properties exist; `_initialize` has already built the system data from the stored
+   * data. Called before Active Effects are applied.
    *
    * @returns {void}
    * @override
@@ -136,18 +71,6 @@ export default class L5R4Actor extends Actor {
     super.prepareBaseData();
 
     const sys = this.system ?? {};
-
-    // Propagate trait values from source to ensure they're available before Active Effects
-    // This prevents traits from being overwritten by effect application
-    if (this._source?.system?.traits) {
-      sys.traits = sys.traits ?? {};
-      const sourceTr = this._source.system.traits;
-      for (const key of ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]) {
-        if (sourceTr[key] !== undefined) {
-          sys.traits[key] = sourceTr[key];
-        }
-      }
-    }
 
     sys.initiative = sys.initiative ?? {};
     sys.armorTn = sys.armorTn ?? {};
@@ -161,6 +84,33 @@ export default class L5R4Actor extends Actor {
       sys.manualWoundLevels = sys.manualWoundLevels ?? {};
       sys.armor = sys.armor ?? {};
     }
+  }
+
+  /**
+   * Apply Active Effect changes for a phase; after the "initial" phase, collect `system.rules` and apply
+   * TraitAdjust (module/documents/actor/rules.js).
+   *
+   * @param {string} phase
+   * @returns {void}
+   * @override
+   */
+  applyActiveEffects(phase) {
+    super.applyActiveEffects(phase);
+    if (phase === "initial") {
+      applyInitialRules(this);
+    }
+  }
+
+  /**
+   * Run the subtype's preparation (pc-preparation, npc-preparation). Core calls this after the "initial" Active Effect
+   * phase and the system model's own `prepareDerivedData`, and before the "final" phase
+   * [src: client/documents/abstract/client-document.mjs:313-320] [src: client/documents/actor.mjs:428-474].
+   * @returns {void}
+   * @override
+   */
+  prepareDerivedData() {
+    super.prepareDerivedData();
+    (this.type === "pc" ? preparePcData : prepareNpcData)(this, this.system);
   }
 
   /**
@@ -189,6 +139,17 @@ export default class L5R4Actor extends Actor {
       Object.assign(data, this.system.bonuses);
     }
 
+    // Skill ranks for rule formulas, e.g. @skills.defense.rank (module/utils/rule-values.js)
+    data.skills = {};
+    for (const item of this.items) {
+      if (item.type === "skill") {
+        data.skills[rollDataKey(item.name)] = { rank: item.system.rank };
+      }
+    }
+
+    // The School Rank a Technique scales with, as @school.rank
+    data.school = { rank: getHighestSchoolRank(this) };
+
     return data;
   }
 
@@ -204,58 +165,21 @@ export default class L5R4Actor extends Actor {
    */
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
-    trackXpExpenditure(this, changed, options);
+    updateXpFlags(this, changed, options);
   }
 
   /**
-   * Calculate derived actor data.
-   * Delegates to type-specific preparation modules for PC/NPC logic.
-   * Called after Active Effects are applied.
-   *
-   * @returns {void}
+   * A change that raises Insight Rank (a Trait, the Void Ring) can bring a School's next Technique due
+   * (roadmap/STAGE-11 decision 2), and one that lowers the Void Point maximum (the Taint Rank, the Void Ring) takes
+   * the Void Points held down to it. Only the client that sent the change acts on it.
    * @override
    */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-
-    const sys = this.system ?? {};
-
-    if (this.type === "pc") {
-      this._preparePc(sys);
-      preparePcExperience(this, sys);
-    } else if (this.type === "npc") {
-      this._prepareNpc(sys);
-      prepareFear(sys);
+  _onUpdate(changed, options, userId) {
+    super._onUpdate(changed, options, userId);
+    if (isOwnChange(options, game.socket.id)) {
+      applyGrants(this);
+      updateVoidPointsToMax(this, changed);
     }
-  }
-
-  /**
-   * Prepare PC-specific derived data.
-   * Delegates to pc-preparation module with wound and insight calculation callbacks.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _preparePc(sys) {
-    preparePcData(
-      this,
-      sys,
-      this._finalizeWoundPenalties.bind(this),
-      this._calculateInsightRank.bind(this)
-    );
-  }
-
-  /**
-   * Prepare NPC-specific derived data.
-   * Delegates to npc-preparation module with wound calculation callback.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _prepareNpc(sys) {
-    prepareNpcData(this, sys, this._finalizeWoundPenalties.bind(this));
   }
 
   /**
@@ -267,45 +191,32 @@ export default class L5R4Actor extends Actor {
    * @param {string[]} order - Ordered wound level keys
    * @param {string} [woundMode] - Optional wound mode override for NPCs
    * @returns {object} Current wound level object with penalty value
-   * @private
    */
   _finalizeWoundPenalties(sys, order, woundMode) {
-    initializeWoundState(sys, sys.suffered);
+    prepareWoundState(sys, sys.suffered);
 
     // Cap suffered wounds at Out threshold to prevent overflow
     const outMax = toInt(sys.woundLevels?.out?.value) || 0;
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
     const current = woundMode
-      ? determineCurrentWoundLevel(sys, order, sCapped, woundMode)
-      : findCurrentWoundLevel(sys, order, sCapped);
+      ? prepareCurrentWoundLevelByMode(sys, order, { sCapped, woundMode })
+      : prepareCurrentWoundLevel(sys, order, sCapped);
 
     // Apply wound penalty modifiers from effects and conditions
     sys.woundsPenaltyMod = toInt(sys.woundsPenaltyMod);
-    calculateWoundPenalties(sys);
+    prepareWoundPenalties(sys);
 
     if (!woundMode) {
       sys.currentWoundLevel = current;
     }
+    prepareWoundRollOption(this, sys, current);
 
-    // Calculate effective penalty (base penalty + modifiers, minimum 0)
-    const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
-    sys.woundPenalty = curEffPenalty;
-    sys.wounds.penalty = curEffPenalty;
+    // The current rank's effective penalty, as prepareWoundPenalties set it on every rank (#102)
+    sys.woundPenalty = current.penaltyEff;
+    sys.wounds.penalty = current.penaltyEff;
 
     return current;
-  }
-
-  /**
-   * Calculate insight rank from insight points.
-   * Uses L5R4 insight rank progression table.
-   *
-   * @param {number} insight - Total insight points
-   * @returns {number} Insight rank (1-10+)
-   * @private
-   */
-  _calculateInsightRank(insight) {
-    return calculateInsightRank(insight);
   }
 
   /**
@@ -316,4 +227,24 @@ export default class L5R4Actor extends Actor {
   hasFear() {
     return this.system?.fear?.active ?? false;
   }
+}
+
+/**
+ * Take the Void Points held down to the maximum a change to the Taint Rank or the Void Ring lowered: Taint Level 4
+ * costs one, and a Lost character has none. A change to anything else leaves the count as the player or GM set it.
+ * game-rules/89_shadowlands_taint.md, p.278-279
+ * @param {L5R4Actor} actor - The updated actor, prepared with the change
+ * @param {object} changed - The update's changes
+ * @returns {Promise<void>|undefined}
+ */
+function updateVoidPointsToMax(actor, changed) {
+  const touched = ["system.shadowTaint.rank", "system.rings.void.rank"].some(path =>
+    foundry.utils.hasProperty(changed, path)
+  );
+  const max = toInt(actor.system.rings.void.max);
+  // The stored value, not the prepared one, so an Active Effect on Void Points is never written into storage (B6)
+  if (!touched || actor._source.system.rings.void.value <= max) {
+    return undefined;
+  }
+  return actor.update({ "system.rings.void.value": max });
 }

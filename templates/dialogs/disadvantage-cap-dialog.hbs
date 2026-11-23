@@ -1,6 +1,5 @@
-<form>
-  <div class="form-group">
-    <label>{{localize "l5r4.character.experience.disadvantageCapLabel"}}</label>
-    <input type="number" data-field="disadvantage-cap" name="disadvantage-cap" value="{{currentCap}}" min="0" step="1" />
-  </div>
-</form>
+{{!-- The Disadvantage XP cap prompt (module/services/xp/disadvantage-cap.js, askDisadvantageCap). currentCap: the cap the character has --}}
+<div class="l5r4-disadvantage-cap-dialog form-group">
+  <label for="l5r4-disadvantage-cap">{{localize "l5r4.character.experience.disadvantageCapLabel"}}</label>
+  <input type="number" id="l5r4-disadvantage-cap" data-field="disadvantage-cap" name="disadvantageCap" value="{{currentCap}}" min="0" step="1" />
+</div>

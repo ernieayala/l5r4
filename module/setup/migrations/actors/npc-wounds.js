@@ -1,13 +1,9 @@
 /**
- * Legacy NPC Wound System Migration
- * Migrates legacy NPC wound structures to current schema with manual/formula modes.
- *
  * @module setup/migrations/actors/npc-wounds
+ * @description Migrates legacy NPC wound structures to the current schema with manual and formula modes.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
-import L5R4Actor from "../../../documents/actor.js";
-import { normalizeWoundLevelData } from "../utils/helpers.js";
+import { migrateWoundLevelData } from "../utils/helpers.js";
 
 /**
  * Migrates legacy NPC wound system to current schema with manual/formula modes.
@@ -28,12 +24,10 @@ import { normalizeWoundLevelData } from "../utils/helpers.js";
  * - Sets woundsPenaltyMod: 0 (no modifier to standard wound penalties)
  * - Migrates armor_tn → armorTn (camelCase normalization)
  * - Converts string nrWoundLvls → number
- * - Normalizes wound penalties to positive absolute values (TN increases)
- * - Transforms wound_lvl/woundLevels → manualWoundLevels structure
+ * - Normalizes manualWoundLevels penalties to positive absolute values (TN increases)
  *
- * Uses actor._source to access raw pre-derived data, necessary because wound calculations
- * in prepareDerivedData may have already transformed the values. This ensures migration
- * reads the actual stored data, not computed values.
+ * Legacy wound_lvl / woundLevels become manualWoundLevels earlier, in NpcData.migrateData
+ * (module/data/migrate-source.js), because the schema drops those keys when the actor loads.
  *
  * @param {Document[]} docs - Array of Actor documents to scan for NPCs
  * @param {string} label - Migration context label for console logging
@@ -51,90 +45,7 @@ export async function migrateLegacyNpcWounds(docs, label) {
 
   for (const actor of npcActors) {
     try {
-      const updates = {};
-      let needsUpdate = false;
-
-      if (!actor.system.woundMode) {
-        updates["system.woundMode"] = "manual";
-        needsUpdate = true;
-      }
-
-      if (actor.system.woundsMultiplier === undefined) {
-        updates["system.woundsMultiplier"] = 2;
-        needsUpdate = true;
-      }
-
-      if (actor.system.woundsPenaltyMod === undefined) {
-        updates["system.woundsPenaltyMod"] = 0;
-        needsUpdate = true;
-      }
-
-      const legacyArmorTn = actor.system.armor?.armor_tn;
-      const currentArmorTn = actor.system.armor?.armorTn;
-
-      const armorTnValue =
-        legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
-
-      if (armorTnValue !== undefined && armorTnValue !== null) {
-        updates["system.armor.armorTn"] = armorTnValue;
-        needsUpdate = true;
-      }
-
-      if (typeof actor.system.nrWoundLvls === "string") {
-        updates["system.nrWoundLvls"] = parseInt(actor.system.nrWoundLvls) || 1;
-        needsUpdate = true;
-      }
-
-      if (actor.system.woundLevels) {
-        const woundLevels = foundry.utils.deepClone(actor.system.woundLevels);
-
-        if (normalizeWoundLevelData(woundLevels)) {
-          updates["system.woundLevels"] = woundLevels;
-          needsUpdate = true;
-        }
-      }
-
-      // Access raw source data (pre-derivation) to read actual stored values, not calculated ones
-      const rawSource = actor._source?.system || actor.system;
-      const legacyWoundData = rawSource.wound_lvl;
-      const rawWoundLevels = rawSource.woundLevels;
-
-      // Transform legacy wound_lvl or woundLevels into current manualWoundLevels structure
-      if (legacyWoundData || !rawSource.manualWoundLevels) {
-        const sourceData = legacyWoundData || rawWoundLevels;
-
-        if (sourceData) {
-          const manualWoundLevels = {};
-          const order = L5R4Actor.WOUND_LEVEL_ORDER;
-
-          for (const key of order) {
-            const woundLevel = sourceData[key];
-            const value = woundLevel ? parseInt(woundLevel.value) || 0 : 0;
-            const penalty = woundLevel ? Math.abs(parseInt(woundLevel.penalty) || 0) : 0;
-
-            manualWoundLevels[key] = {
-              value: value,
-              penalty: penalty,
-              active: value > 0
-            };
-          }
-
-          updates["system.manualWoundLevels"] = manualWoundLevels;
-          needsUpdate = true;
-        }
-      }
-
-      if (actor.system.manualWoundLevels) {
-        const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
-
-        if (normalizeWoundLevelData(manualWoundLevels)) {
-          updates["system.manualWoundLevels"] = manualWoundLevels;
-          needsUpdate = true;
-        }
-      }
-
-      if (needsUpdate) {
-        await actor.update(updates, { diff: true, render: false });
+      if (await migrateNpcActorWounds(actor)) {
         migratedCount++;
       }
     } catch (err) {
@@ -151,4 +62,74 @@ export async function migrateLegacyNpcWounds(docs, label) {
       `${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`
     );
   }
+}
+
+/**
+ * Migrate one NPC's wound data: its missing wound settings and its legacy wound values.
+ * @param {Actor} actor - An NPC
+ * @returns {Promise<boolean>} Whether the actor was updated
+ */
+async function migrateNpcActorWounds(actor) {
+  const updates = {
+    ...buildWoundSettingDefaults(actor.system),
+    ...buildLegacyWoundValues(actor.system)
+  };
+  if (Object.keys(updates).length === 0) {
+    return false;
+  }
+  await actor.update(updates, { diff: true, render: false });
+  return true;
+}
+
+/**
+ * The wound settings an NPC lacks, at their defaults: manual mode, the ×2 Earth multiplier, no penalty modifier.
+ * @param {object} system - The NPC's system data
+ * @returns {object} Update entries; empty when every setting is present
+ */
+function buildWoundSettingDefaults(system) {
+  const updates = {};
+  if (!system.woundMode) {
+    updates["system.woundMode"] = "manual";
+  }
+  if (system.woundsMultiplier === undefined) {
+    updates["system.woundsMultiplier"] = 2;
+  }
+  if (system.woundsPenaltyMod === undefined) {
+    updates["system.woundsPenaltyMod"] = 0;
+  }
+  return updates;
+}
+
+/**
+ * Legacy wound values in their current shape: the Armor TN under `armorTn`, a numeric `nrWoundLvls`, and manual
+ * Wound Rank penalties as positive numbers.
+ * @param {object} system - The NPC's system data
+ * @returns {object} Update entries; empty when nothing needs normalizing
+ */
+function buildLegacyWoundValues(system) {
+  const updates = {};
+  const legacyArmorTn = system.armor?.armor_tn;
+  const currentArmorTn = system.armor?.armorTn;
+
+  const armorTnValue =
+    legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
+
+  if (armorTnValue !== undefined && armorTnValue !== null) {
+    updates["system.armor.armorTn"] = armorTnValue;
+  }
+
+  if (typeof system.nrWoundLvls === "string") {
+    updates["system.nrWoundLvls"] = parseInt(system.nrWoundLvls) || 1;
+  }
+
+  // Legacy wound_lvl / woundLevels become manualWoundLevels in NpcData.migrateData, on raw source before the
+  // schema drops those keys (module/data/migrate-source.js migrateNpcSource).
+  if (system.manualWoundLevels) {
+    const manualWoundLevels = foundry.utils.deepClone(system.manualWoundLevels);
+
+    if (migrateWoundLevelData(manualWoundLevels)) {
+      updates["system.manualWoundLevels"] = manualWoundLevels;
+    }
+  }
+  return updates;
 }

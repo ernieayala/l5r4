@@ -1,102 +1,35 @@
 /**
- * Item Active Effects Handler
- *
- * Manages CRUD operations for ActiveEffects embedded on Item documents in Foundry VTT.
- * Implements event delegation pattern for Item sheets using Application v2 architecture.
- *
- * ActiveEffects in Foundry VTT modify document properties through attribute changes.
- * When embedded on Items with transfer:true, effects apply to the owning Actor.
- * This is commonly used for equipped armor, weapons with special properties, or
- * advantages/disadvantages that modify character statistics.
- *
- * Responsibilities:
- * - Bind delegated event listeners for effect UI actions (.effect-create, .effect-edit, etc.)
- * - Create new ActiveEffect documents with sensible defaults
- * - Open Foundry's ActiveEffectConfig sheet for editing
- * - Toggle effect enabled/disabled state
- * - Delete effects with race condition protection
- *
- * Requires Foundry VTT v13+ for foundry.applications.sheets.ActiveEffectConfig API.
- *
  * @module sheets/handlers/item-effects-handler
- * @see {@link https://foundryvtt.com/api/v13/classes/client.ActiveEffect.html|ActiveEffect}
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
+ * @description Creates, opens, toggles, and deletes the ActiveEffects embedded on an Item, for the Item sheet's
+ * create-effect, edit-effect, toggle-effect, and delete-effect actions. An effect created with transfer: true applies
+ * to the Item's owning Actor; editing opens foundry.applications.sheets.ActiveEffectConfig, and a busy flag keeps a
+ * double click from deleting twice.
  */
-import { on } from "../../utils/dom.js";
 
 /**
  * Static handler class for Item ActiveEffect operations.
  *
- * All methods are static and receive a context object containing the Item document
- * and sheet root element. This pattern supports event delegation in Application v2
- * where handlers are invoked from delegated events on the sheet root.
- *
- * Typical usage in Item sheet _onRender:
- * ItemEffectsHandler.bind({ item: this.document, element: this.element });
+ * All methods are static and receive a context object containing the Item document. The Item sheet's
+ * DEFAULT_OPTIONS.actions call them with the clicked control.
  */
 export class ItemEffectsHandler {
-  /**
-   * Bind delegated event listeners for ActiveEffect UI actions.
-   *
-   * Attaches click handlers to the sheet root element for:
-   * - .effect-create: Create new effect and open config sheet
-   * - .effect-edit: Open existing effect config sheet
-   * - .effect-toggle: Toggle effect disabled state
-   * - .effect-delete: Delete effect with confirmation
-   *
-   * Idempotent: Uses data-effects-bound flag to prevent duplicate bindings.
-   * Safe to call multiple times (e.g., during sheet re-renders).
-   *
-   * @param {Object} context - Sheet context object
-   * @param {Item} context.item - The Item document containing effects
-   * @param {HTMLElement} context.element - Sheet root element for event delegation
-   * @returns {void}
-   */
-  static bind(context) {
-    const { item, element: root } = context;
-    if (!root || !item) {
-      return;
-    }
-
-    if (root.dataset.effectsBound === "1") {
-      return;
-    }
-    root.dataset.effectsBound = "1";
-
-    on(root, ".effect-create", "click", async ev => {
-      await this.create(context, ev, ev.target);
-    });
-
-    on(root, ".effect-edit", "click", (ev, el) => {
-      this.edit(context, ev, el);
-    });
-
-    on(root, ".effect-toggle", "click", async (ev, el) => {
-      await this.toggle(context, ev, el);
-    });
-
-    on(root, ".effect-delete", "click", async (ev, el) => {
-      await this.remove(context, ev, el);
-    });
-  }
-
   /**
    * Create a new ActiveEffect on the Item and open its configuration sheet.
    *
    * Creates an effect with these defaults:
    * - name: Localized "New" string
-   * - icon: Foundry's default aura.svg
+   * - img: Foundry's default aura.svg
    * - disabled: false (effect is active)
    * - transfer: true (effect applies to owning Actor when Item is owned)
-   * - changes: [] (empty attribute modifications array)
+   * - system.changes: [] (empty attribute modifications array)
    *
    * Automatically opens Foundry's ActiveEffectConfig sheet for immediate editing.
    * If creation fails, displays error notification and logs to console.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document to add the effect to
-   * @param {Event} event - Click event from .effect-create button
-   * @param {HTMLElement} targetElement - Button that triggered the event
+   * @param {Event} event - Click event from the create-effect button
+   * @param {HTMLElement} _targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
   static async create(context, event, _targetElement) {
@@ -111,10 +44,10 @@ export class ItemEffectsHandler {
       const [eff] = await item.createEmbeddedDocuments("ActiveEffect", [
         {
           name: game.i18n.localize("l5r4.ui.common.new"),
-          icon: "icons/svg/aura.svg",
+          img: "icons/svg/aura.svg",
           disabled: false,
           transfer: true,
-          changes: []
+          system: { changes: [] }
         }
       ]);
 
@@ -136,13 +69,13 @@ export class ItemEffectsHandler {
    *
    * Silently fails if element lacks data-effect-id or effect is not found.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-edit button
+   * @param {Event} event - Click event from the edit-effect button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {void}
    */
-  static edit(context, event, targetElement) {
+  static openEffectSheet(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
@@ -168,13 +101,13 @@ export class ItemEffectsHandler {
    *
    * If update fails, displays error notification and logs to console.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-toggle button
+   * @param {Event} event - Click event from the toggle-effect button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
-  static async toggle(context, event, targetElement) {
+  static async updateEffectDisabled(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
@@ -207,15 +140,15 @@ export class ItemEffectsHandler {
    * Error handling:
    * - Silently ignores "does not exist" errors (effect already deleted elsewhere)
    * - Logs other errors to console and shows user notification
-   * - Always clears busy flag to prevent UI lockup
+   * - Always clears busy flag to prevent UI lockup.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
-   * @param {Event} event - Click event from .effect-delete button
+   * @param {Event} event - Click event from the delete-effect button
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
-  static async remove(context, event, targetElement) {
+  static async deleteEffect(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
@@ -236,6 +169,21 @@ export class ItemEffectsHandler {
     wrap.dataset.busy = "1";
 
     try {
+      await this.#deleteItemEffect(item, id);
+    } finally {
+      // Always clear busy flag to prevent UI lockup
+      delete wrap.dataset.busy;
+    }
+  }
+
+  /**
+   * Delete one of the Item's effects; one already gone is skipped, and any other failure is logged and shown.
+   * @param {Item} item
+   * @param {string} id - The effect's id
+   * @returns {Promise<void>}
+   */
+  static async #deleteItemEffect(item, id) {
+    try {
       const eff = item.effects.get(id);
       if (!eff) {
         return;
@@ -250,9 +198,6 @@ export class ItemEffectsHandler {
 
       console.error("L5R4 ItemEffectsHandler: Failed to delete effect", err);
       ui.notifications?.error(err.message ?? game.i18n.localize("l5r4.system.errors.deleteEffect"));
-    } finally {
-      // Always clear busy flag to prevent UI lockup
-      delete wrap.dataset.busy;
     }
   }
 }

@@ -1,0 +1,21 @@
+/**
+ * Utility Classes
+ * Reusable single-purpose utility classes for spacing and layout. Each gap reads one step of the space scale
+ * (docs/design-system/foundations/space-and-size.md, Gap utilities)
+ */
+
+.-gap-xs {
+  gap: var(--l5r4-space-4);
+}
+
+.-gap-sm {
+  gap: var(--l5r4-space-4);
+}
+
+.-gap-md {
+  gap: var(--l5r4-space-8);
+}
+
+.-gap-lg {
+  gap: var(--l5r4-space-12);
+}

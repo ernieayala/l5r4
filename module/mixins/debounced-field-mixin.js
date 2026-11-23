@@ -1,45 +1,12 @@
 /**
- * Debounced Field Mixin
- *
- * Provides debounced field change handling for ApplicationV2 forms with real-time updates.
- * Prevents excessive actor updates during rapid user input by debouncing field changes.
- *
- * Key Features:
- * - Automatic debounced update setup in constructor
- * - Field change listener attachment in _onRender
- * - Type coercion for checkbox and number fields
- * - Flush pending updates on close
- * - Optional field validation hook
- *
- * Usage:
- * ```javascript
- * import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
- *
- * export default class MyApp extends DebouncedFieldMixin(
- *   foundry.applications.api.HandlebarsApplicationMixin(
- *     foundry.applications.api.ApplicationV2
- *   )
- * ) {
- *   // Implement required method
- *   async _updateActor(field, value) {
- *     await this.actor.update({ [`system.${field}`]: value });
- *   }
- *
- *   // Optional: Add validation
- *   _validateFieldValue(field, value) {
- *     if (field === "myField" && value < 0) return null;
- *     return value;
- *   }
- * }
- * ```
- *
  * @module mixins/debounced-field-mixin
+ * @description Debounced field saving for ApplicationV2 forms that update an actor while the user types, so rapid
+ * input makes one update instead of many. The class calls `_initializeDebouncing()` in its constructor after
+ * `super()` and implements `_updateActor(field, value)`; it may override `_validateFieldValue(field, value)`, which
+ * returns null to reject a value. The mixin listens for `change` on every `[data-action="update-field"]` field in
+ * `_onRender`, coerces checkbox and number values, and flushes a pending update on close.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-
-// Utils imports
 import { toInt } from "../utils/type-coercion.js";
 
 /**
@@ -53,10 +20,10 @@ export const DEBOUNCE_DELAY_MS = 300;
  * Mixin that adds debounced field change handling to ApplicationV2 classes.
  *
  * Classes using this mixin must implement:
- * - `_updateActor(field, value)` - Method to update the actor with new field value
+ * - `_updateActor(field, value)` - Method to update the actor with new field value.
  *
  * Classes can optionally implement:
- * - `_validateFieldValue(field, value)` - Method to validate field values before update
+ * - `_validateFieldValue(field, value)` - Method to validate field values before update.
  *
  * @param {class} Base - The base class to extend
  * @returns {class} Extended class with debounced field functionality
@@ -68,18 +35,15 @@ export function DebouncedFieldMixin(Base) {
      * Waits DEBOUNCE_DELAY_MS after last change before executing update.
      *
      * @type {Function}
-     * @private
      */
-    _updateDebounced;
+    updateDebounced;
 
     /**
      * Initialize debounced update function.
      * Must be called in subclass constructor after super().
-     *
-     * @protected
      */
     _initializeDebouncing() {
-      this._updateDebounced = foundry.utils.debounce(
+      this.updateDebounced = foundry.utils.debounce(
         this._updateActor.bind(this),
         DEBOUNCE_DELAY_MS
       );
@@ -91,23 +55,11 @@ export function DebouncedFieldMixin(Base) {
      *
      * @param {object} context - Render context
      * @param {object} options - Render options
-     * @protected
+     * @override
      */
     _onRender(context, options) {
       super._onRender?.(context, options);
-
-      if (!this.element) {
-        console.warn(`${SYS_ID}`, `${this.constructor.name} _onRender: No element`);
-        return;
-      }
-
-      // Attach change listeners to all fields with data-action="field-change"
-      const fields = this.element.querySelectorAll('[data-action="field-change"]');
-      fields.forEach(field => {
-        field.addEventListener("change", event => {
-          this._onFieldChange(event, event.target);
-        });
-      });
+      bindFieldChanges(this);
     }
 
     /**
@@ -116,35 +68,9 @@ export function DebouncedFieldMixin(Base) {
      *
      * @param {Event} event - The change event
      * @param {HTMLElement} element - The form field element that changed
-     * @private
      */
     async _onFieldChange(event, element) {
-      const field = element.name;
-
-      // Type coercion based on field type
-      const value =
-        element.type === "checkbox"
-          ? element.checked
-          : element.type === "number" || element.dataset.type === "Number"
-            ? toInt(element.value, 0)
-            : element.value;
-
-      if (!field) {
-        console.warn(`${SYS_ID}`, "Field change with no field name");
-        return;
-      }
-
-      // Optional validation hook - subclasses can implement this
-      if (typeof this._validateFieldValue === "function") {
-        const validatedValue = this._validateFieldValue(field, value);
-        if (validatedValue === null) {
-          // Validation failed - subclass should handle notification
-          return;
-        }
-        this._updateDebounced(field, validatedValue);
-      } else {
-        this._updateDebounced(field, value);
-      }
+      updateFieldValue(this, element);
     }
 
     /**
@@ -154,7 +80,6 @@ export function DebouncedFieldMixin(Base) {
      * @param {string} _field - The field name to update
      * @param {*} _value - The new value for the field
      * @abstract
-     * @protected
      */
     async _updateActor(_field, _value) {
       throw new Error(`${this.constructor.name} must implement _updateActor(field, value)`);
@@ -167,7 +92,6 @@ export function DebouncedFieldMixin(Base) {
      * @param {string} field - The field name being validated
      * @param {*} value - The value to validate
      * @returns {*|null} Validated value or null if invalid
-     * @protected
      */
     _validateFieldValue(field, value) {
       // Default: no validation, return value as-is
@@ -182,10 +106,73 @@ export function DebouncedFieldMixin(Base) {
      * @returns {Promise<void>}
      */
     async close(options = {}) {
-      if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
-        await this._updateDebounced.flush();
+      if (this.updateDebounced && typeof this.updateDebounced.flush === "function") {
+        await this.updateDebounced.flush();
       }
       return super.close(options);
     }
   };
+}
+
+/**
+ * A form field's value by its type: a checkbox's checked state, a number field's integer, or the text. A field
+ * reading "-0" (or "-0.5") saves 0, never -0.
+ * @param {HTMLInputElement} element - The form field
+ * @returns {boolean|number|string} The value to save
+ */
+export function toFieldValue(element) {
+  if (element.type === "checkbox") {
+    return element.checked;
+  }
+  if (element.type === "number" || element.dataset.type === "Number") {
+    // -0 is falsy, so it becomes 0
+    return toInt(element.value, 0) || 0;
+  }
+  return element.value;
+}
+
+/**
+ * Listen for `change` on every `[data-action="update-field"]` field of the rendered window.
+ * @param {ApplicationV2} app - A window with the mixin
+ */
+function bindFieldChanges(app) {
+  if (!app.element) {
+    console.warn(`${SYS_ID}`, `${app.constructor.name} _onRender: No element`);
+    return;
+  }
+
+  // Attach change listeners to all fields with data-action="update-field"
+  const fields = app.element.querySelectorAll('[data-action="update-field"]');
+  fields.forEach(field => {
+    field.addEventListener("change", event => {
+      app._onFieldChange(event, event.target);
+    });
+  });
+}
+
+/**
+ * Queue the debounced update of a changed field with its coerced value, once the window's validation accepts it.
+ * @param {ApplicationV2} app - A window with the mixin
+ * @param {HTMLElement} element - The form field element that changed
+ */
+function updateFieldValue(app, element) {
+  const field = element.name;
+  const value = toFieldValue(element);
+
+  if (!field) {
+    console.warn(`${SYS_ID}`, "Field change with no field name");
+    return;
+  }
+
+  // Optional validation hook - subclasses can implement this
+  if (typeof app._validateFieldValue === "function") {
+    const validatedValue = app._validateFieldValue(field, value);
+    if (validatedValue === null) {
+      // Validation failed - subclass should handle notification
+      return;
+    }
+    app.updateDebounced(field, validatedValue);
+  } else {
+    app.updateDebounced(field, value);
+  }
 }

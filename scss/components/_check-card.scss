@@ -1,0 +1,32 @@
+/**
+ * Check Card
+ * The check card (components/check-card.md) and the dice row inside it (components/dice-row.md, DR5): core fades a
+ * dropped or re-rolled die, and the system strikes its number through, so it differs from a kept die by more than
+ * color. Rules sit under the card's fixed roots, which cards posted before them carry too
+ */
+
+// The card's column: label, the modifiers that applied, the roll, the TN line, notes, buttons
+.l5r4-roll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+
+  .l5r4-damage-button,
+  .l5r4-check-damage {
+    width: 100%;
+  }
+
+  .check-applied {
+    font-size: var(--l5r4-font-size-meta);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.l5r4-check {
+  .roll.discarded,
+  .roll.rerolled {
+    text-decoration: line-through;
+  }
+}

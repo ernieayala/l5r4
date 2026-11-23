@@ -1,0 +1,77 @@
+/**
+ * Rules Editor
+ * The rules editor on item and Active Effect sheets (module/sheets/rules-editor.js)
+ */
+
+.l5r4-rules-editor {
+  .l5r4-rules-editor-toolbar {
+    align-items: center;
+
+    .hint {
+      flex: 1;
+      margin: 0;
+    }
+
+    .l5r4-rules-editor-mode {
+      flex: 0 0 auto;
+    }
+  }
+
+  .l5r4-rules-editor-json {
+    font-family: var(--l5r4-font-code);
+    min-height: 16rem;
+    resize: vertical;
+    width: 100%;
+  }
+
+  .l5r4-rules-editor-card {
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);
+    border-radius: var(--l5r4-radius-sm);
+    margin: 0;
+    padding: var(--l5r4-space-card);
+
+    legend {
+      align-items: center;
+      display: flex;
+      font-weight: bold;
+      gap: var(--l5r4-space-8);
+      padding: 0 var(--l5r4-space-4);
+    }
+  }
+
+  // An icon that reads as the link it replaces: core's button look undone, its focus ring kept
+  .l5r4-rules-editor-delete {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: inline;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .l5r4-rules-editor-error {
+    color: var(--l5r4-color-danger);
+    font-size: var(--l5r4-font-size-meta);
+    margin: 0 0 var(--l5r4-space-4);
+  }
+
+  // The Empty state (foundations/states.md): one italic line where the cards would be
+  .l5r4-rules-editor-empty {
+    font-style: italic;
+    margin: 0;
+  }
+
+  .l5r4-rules-editor-field textarea {
+    font-family: var(--l5r4-font-code);
+    min-height: 2.5rem;
+    resize: vertical;
+  }
+
+  .l5r4-rules-editor-add select {
+    flex: 1;
+  }
+}

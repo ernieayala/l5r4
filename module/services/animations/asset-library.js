@@ -1,33 +1,18 @@
 /**
- * JB2A Asset Library for L5R4 Stances and Conditions
- *
- * Maps L5R4 stance and condition IDs to JB2A animation asset paths.
- * Provides fallback behavior when JB2A is not installed.
- *
- * Key Responsibilities:
- * - Map stance IDs to appropriate JB2A visual effects
- * - Map condition IDs to appropriate JB2A visual effects
- * - Provide animation configuration (scale, duration, opacity, etc.)
- * - Support both free and paid JB2A versions with fallbacks
- *
- * JB2A Integration:
- * - Free version: Limited asset library (shields, basic effects)
- * - Paid version: Full asset library (all effects)
- * - Fallback: No animation if asset not found
- *
- * Animation Design Philosophy:
- * - Stances: Persistent auras/fields representing combat posture
- * - Conditions: Visual indicators of status effects
- * - Subtle and non-intrusive (avoid blocking gameplay)
- * - Color-coded by Ring association or effect type
- *
  * @module services/animations/asset-library
- * @requires Foundry VTT v13+
+ * @description Maps stance and condition ids to JB2A animation assets and their settings (scale, duration, opacity),
+ * and reports whether JB2A and Sequencer are active (module/hooks/register-all.js wires the animation hooks only when
+ * both are). The free and Patreon JB2A collections both work; an id with no
+ * asset plays no animation. Stances show persistent auras for the combat posture, conditions show subtle status
+ * markers that do not block play, colored by Ring or effect type.
  * @see {@link https://library.jb2a.com/|JB2A Asset Library}
  */
 
+/** Module ids of the JB2A collections: the free one and the Patreon one. */
+const JB2A_MODULE_IDS = Object.freeze(["JB2A_DnD5e", "jb2a_patreon"]);
+
 /**
- * @typedef {Object} AnimationConfig
+ * @typedef {object} AnimationConfig
  * @property {string} file - JB2A asset path (e.g., "jb2a.shield.01.intro.blue")
  * @property {number} [scale=1.0] - Scale multiplier for the effect
  * @property {number} [opacity=0.8] - Opacity (0.0-1.0)
@@ -49,7 +34,7 @@
  * - Full Defense: Earth (unmoving, solid) - Green/brown barrier
  * - Center: Void (focused energy) - Purple/void energy
  *
- * @constant {Object.<string, AnimationConfig>}
+ * @constant {Record<string, AnimationConfig>}
  */
 export const STANCE_ANIMATIONS = Object.freeze({
   fullAttackStance: {
@@ -109,7 +94,7 @@ export const STANCE_ANIMATIONS = Object.freeze({
  * - Prone: Ground marker
  * - Stunned: Impact/stun stars
  *
- * @constant {Object.<string, AnimationConfig>}
+ * @constant {Record<string, AnimationConfig>}
  */
 export const CONDITION_ANIMATIONS = Object.freeze({
   concentration: {
@@ -224,12 +209,12 @@ export function getConditionAnimation(conditionId) {
 }
 
 /**
- * Check if JB2A module is installed and active.
+ * Check if a JB2A collection, free or Patreon, is installed and active.
  *
  * @returns {boolean} True if JB2A is available
  */
-export function isJB2AAvailable() {
-  return game.modules.get("JB2A_DnD5e")?.active ?? false;
+export function isJb2aAvailable() {
+  return JB2A_MODULE_IDS.some(id => game.modules.get(id)?.active);
 }
 
 /**
@@ -239,4 +224,40 @@ export function isJB2AAvailable() {
  */
 export function isSequencerAvailable() {
   return game.modules.get("sequencer")?.active ?? false;
+}
+
+/**
+ * Whether this client's user asked for less motion. Read when an animation would start, so a change to the setting
+ * applies to the next one; under it the token's status icon and the chat card carry the state (motion.md rule 5).
+ * @returns {boolean}
+ */
+export function isMotionReduced() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Whether Sequencer and JB2A are both active, so the animation hooks are wired. Each missing module is named in a
+ * console warning, and the system runs without animations.
+ *
+ * @returns {boolean} True when both modules are active
+ */
+export function hasAnimationModules() {
+  const hasSequencer = isSequencerAvailable();
+  const hasJb2a = isJb2aAvailable();
+
+  if (!hasSequencer) {
+    console.warn(
+      "L5R4 | Sequencer module not found. Visual animations disabled. " +
+        "Install Sequencer from: https://foundryvtt.com/packages/sequencer"
+    );
+  }
+
+  if (!hasJb2a) {
+    console.warn(
+      "L5R4 | JB2A module not found. Visual animations disabled. " +
+        "Install JB2A (free) from: https://foundryvtt.com/packages/JB2A_DnD5e"
+    );
+  }
+
+  return hasSequencer && hasJb2a;
 }

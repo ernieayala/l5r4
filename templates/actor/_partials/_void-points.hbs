@@ -1,0 +1,24 @@
+{{!-- The actor's Void Points as nine dots under the Void Ring (void-point-dots.md), filled up to the count; after a
+change saved without a render, VoidPointsHandler.updateVoidDots repaints them. Parameters: value
+(system.rings.void.value), max (system.rings.void.max, the Void Ring less what Taint takes). --}}
+<div class="l5r4-void-points">
+  <button
+    type="button"
+    class="l5r4-void-points-dots"
+    data-action="adjust-void-points"
+    data-value="{{value}}"
+    data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidPointsValue" current=value max=max}}"
+    aria-label="{{localize "l5r4.ui.mechanics.rings.voidPointsValue" current=value max=max}}"
+  >
+    <span class="l5r4-void-point{{#if (gte value 1)}} is-filled{{/if}}" data-idx="1" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 2)}} is-filled{{/if}}" data-idx="2" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 3)}} is-filled{{/if}}" data-idx="3" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 4)}} is-filled{{/if}}" data-idx="4" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 5)}} is-filled{{/if}}" data-idx="5" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 6)}} is-filled{{/if}}" data-idx="6" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 7)}} is-filled{{/if}}" data-idx="7" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 8)}} is-filled{{/if}}" data-idx="8" inert></span>
+    <span class="l5r4-void-point{{#if (gte value 9)}} is-filled{{/if}}" data-idx="9" inert></span>
+  </button>
+  <p class="l5r4-void-points-label">{{localize "l5r4.ui.mechanics.rings.voidPoints"}}</p>
+</div>

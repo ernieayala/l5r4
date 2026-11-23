@@ -1,47 +1,27 @@
 /**
- * Combat Configuration Application
- *
- * Provides a form interface for configuring actor combat-related values including
- * initiative modifiers and movement settings.
- *
- * Key Responsibilities:
- * - **Initiative Configuration**: Manage initiative roll/keep/total modifiers
- * - **Movement Configuration**: Manage movement multiplier and modifier values
- * - **Real-time Updates**: Apply changes immediately with debounced updates
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Implements debounced updates for real-time field changes
- *
- * Architectural Notes:
- * - **Uses DebouncedFieldMixin**: Real-time numeric updates for initiative/movement tweaks
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **closeOnSubmit: false**: Keeps dialog open for adjustments during combat setup
- *
  * @module apps/combat-config
+ * @description A form window for one actor's combat values: the initiative roll, keep, and total modifiers and the
+ * movement multiplier and modifier. DebouncedFieldMixin saves each field as it changes; the window stays open after
+ * submit so the user can tweak values during combat setup.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-
-// Utils imports
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-
-// Mixins
 import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
 
+/**
+ * The combat configuration window for one actor.
+ */
 export default class CombatConfigApplication extends DebouncedFieldMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
     id: "combat-config-{id}",
-    classes: ["l5r4", "combat-config-app"],
+    classes: ["l5r4", "l5r4-combat-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.combatConfig.title",
-      icon: "fas fa-cog",
+      icon: "fa-solid fa-gear",
       resizable: true
     },
     position: {
@@ -88,17 +68,19 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.combatConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+    return F("l5r4.apps.combatConfig.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**
-   * Prepare context data for rendering the combat configuration form.
-   * Retrieves initiative and movement values from actor system data.
+   * Prepare context data for rendering the combat configuration form. The form edits the stored values
+   * (`source`): the prepared ones already hold rule modifiers and an NPC's formula, and writing them back would
+   * count those twice (#30).
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with actor and system data
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -109,7 +91,7 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
     try {
       return {
         actor: this.actor,
-        system: this.actor?.system ?? {}
+        source: this.actor._source.system
       };
     } catch (err) {
       logError("Failed to prepare combat config context", err, {
@@ -124,13 +106,12 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
       actor: this.actor,
-      system: {
-        initiative: { rollMod: 0, keepMod: 0, totalMod: 0 },
+      source: {
+        initiative: { roll: 0, keep: 0, rollMod: 0, keepMod: 0, totalMod: 0 },
         movement: { multiplier: 1, modifier: 0 }
       }
     };
@@ -145,7 +126,6 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
-   * @private
    */
   async _updateActor(field, value) {
     try {
@@ -178,7 +158,6 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
    * @param {Event} event - The submit event
    * @param {HTMLFormElement} _form - The form element (unused)
    * @param {FormData} _formData - The form data (unused)
-   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {

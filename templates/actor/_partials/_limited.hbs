@@ -1,0 +1,8 @@
+{{!-- The Limited view of a PC or NPC: the name as a heading and the portrait, nothing from system
+(patterns/sheets.md rule 5). Parameters: actor. --}}
+<div class="l5r4-limited flexcol -gap-lg">
+  <h1 class="l5r4-limited-name flex0">{{actor.name}}</h1>
+  <div class="flexcol flex1">
+    <img class="l5r4-portrait" src="{{actor.img}}" data-edit="img" data-actor-image alt="{{actor.name}}" data-tooltip="{{actor.name}}" />
+  </div>
+</div>

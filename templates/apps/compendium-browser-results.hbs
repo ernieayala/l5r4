@@ -1,0 +1,33 @@
+<section class="l5r4-compendium-browser-results-part">
+  {{!-- A screen reader hears the new count after each filter or search change --}}
+  <p class="l5r4-compendium-browser-count" aria-live="polite">{{localize "l5r4.apps.compendiumBrowser.count" count=count}}</p>
+  {{#if rows.length}}
+  <ul class="l5r4-compendium-browser-results">
+    {{#each rows}}
+      <li class="l5r4-compendium-browser-row" draggable="true" data-uuid="{{uuid}}" data-id="{{id}}" data-pack="{{pack}}"
+        data-document-name="{{../documentName}}">
+        <img class="l5r4-compendium-browser-icon" src="{{img}}" alt="" />
+        <div class="l5r4-compendium-browser-text">
+          <button type="button" class="l5r4-compendium-browser-name" data-action="open-entry">{{name}}</button>
+          <span class="l5r4-compendium-browser-details">
+            {{typeLabel}}{{#if numbers}} · {{numbers}}{{/if}}{{#if folderName}} · {{folderName}}{{/if}}
+          </span>
+          <span class="l5r4-compendium-browser-source">{{#if citation}}{{citation}} · {{/if}}{{packTitle}}</span>
+        </div>
+        {{#if ../canAdd}}
+          <button type="button" class="l5r4-compendium-browser-button" data-action="add-entry">
+            <i class="fa-solid fa-plus" inert></i> {{localize "l5r4.apps.compendiumBrowser.add"}}
+          </button>
+        {{/if}}
+        {{#if ../canImport}}
+          <button type="button" class="l5r4-compendium-browser-button" data-action="import-entry">
+            <i class="fa-solid fa-download" inert></i> {{localize "l5r4.apps.compendiumBrowser.import"}}
+          </button>
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+  {{else}}
+    <p class="l5r4-compendium-browser-empty">{{localize "l5r4.apps.compendiumBrowser.none"}}</p>
+  {{/if}}
+</section>

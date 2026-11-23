@@ -1,27 +1,27 @@
-<section class="standard-form">
-  <div class="flexcol -gap-sm">
-    <h3>{{localize "l5r4.ui.common.init"}}</h3>
+<section class="l5r4-combat-config-body standard-form">
+  <div class="l5r4-combat-config-group flexcol -gap-sm">
+    <h3>{{localize "l5r4.ui.common.initiative"}}</h3>
     {{#if (eq actor.type "npc")}}
       <div class="form-group">
-        <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}}</label>
-        <div class="form-fields flexrow -gap-xs">
-          <input type="number" name="initiative.roll" value="{{system.initiative.roll}}" data-action="field-change" data-type="Number" />
-          <input type="number" name="initiative.keep" value="{{system.initiative.keep}}" data-action="field-change" data-type="Number" />
+        <label>{{localize "l5r4.apps.combatConfig.pool"}}</label>
+        <div class="l5r4-combat-config-pool form-fields flexrow -gap-xs">
+          <input type="number" name="initiative.roll" value="{{source.initiative.roll}}" data-action="update-field" data-type="Number" />
+          <input type="number" name="initiative.keep" value="{{source.initiative.keep}}" data-action="update-field" data-type="Number" />
         </div>
-      </div>
-    {{else}}
-      <div class="form-group">
-        <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</label>
-        <div class="form-fields flexrow -gap-xs">
-          <input type="number" name="initiative.rollMod" value="{{system.initiative.rollMod}}" data-action="field-change" data-type="Number" />
-          <input type="number" name="initiative.keepMod" value="{{system.initiative.keepMod}}" data-action="field-change" data-type="Number" />
-        </div>
+        <p class="hint">{{localize "l5r4.ui.combat.npcInitiative"}}</p>
       </div>
     {{/if}}
     <div class="form-group">
-      <label>{{localize "l5r4.ui.common.mod"}}</label>
+      <label>{{localize "l5r4.apps.combatConfig.poolBonus"}}</label>
+      <div class="l5r4-combat-config-pool form-fields flexrow -gap-xs">
+        <input type="number" name="initiative.rollMod" value="{{source.initiative.rollMod}}" data-action="update-field" data-type="Number" />
+        <input type="number" name="initiative.keepMod" value="{{source.initiative.keepMod}}" data-action="update-field" data-type="Number" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.modifier"}}</label>
       <div class="form-fields">
-        <input type="number" name="initiative.totalMod" value="{{system.initiative.totalMod}}" data-action="field-change" data-type="Number" />
+        <input type="number" name="initiative.totalMod" value="{{source.initiative.totalMod}}" data-action="update-field" data-type="Number" />
       </div>
     </div>
 
@@ -29,13 +29,13 @@
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.multi"}}</label>
       <div class="form-fields">
-        <input type="number" name="movement.multiplier" value="{{system.movement.multiplier}}" data-action="field-change" data-type="Number" />
+        <input type="number" name="movement.multiplier" value="{{source.movement.multiplier}}" data-action="update-field" data-type="Number" />
       </div>
     </div>
     <div class="form-group">
-      <label>{{localize "l5r4.ui.common.mod"}}</label>
+      <label>{{localize "l5r4.ui.common.modifier"}}</label>
       <div class="form-fields">
-        <input type="number" name="movement.modifier" value="{{system.movement.modifier}}" data-action="field-change" data-type="Number" />
+        <input type="number" name="movement.modifier" value="{{source.movement.modifier}}" data-action="update-field" data-type="Number" />
       </div>
     </div>
   </div>

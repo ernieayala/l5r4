@@ -1,146 +1,11 @@
 /**
- * Icon Path Migration
- * Updates legacy PNG icon paths to new WebP assets.
- *
  * @module setup/migrations/icons/icon-paths
+ * @description Updates legacy PNG icon paths to new WebP assets on world actors and items and on actors' embedded
+ * items; compendium packs are pack-icon-paths.js.
  */
-
-import { SYS_ID, PATHS } from "../../../config/constants.js";
-import { ICON_MIGRATION_MAP } from "./icon-map.js";
-import { DEFAULT_ICONS } from "../../../documents/item/constants/item-types.js";
-
-/**
- * Directory listing cache to avoid repeated FilePicker API calls.
- *
- * Caches directory contents during icon migration to improve performance when checking
- * for file existence. Populated lazily as directories are accessed.
- *
- * @type {Map<string, Set<string>>}
- */
-const dirCache = new Map();
-
-/**
- * Lists files in a directory with caching for performance.
- *
- * Uses Foundry's FilePicker API to browse directory contents, extracting just the
- * filenames. Results are cached to avoid redundant API calls during bulk migrations.
- * Handles API differences between Foundry versions via optional chaining.
- *
- * Foundry VTT Integration:
- * - foundry.applications?.apps?.FilePicker?.implementation handles v13+ structure
- * - Falls back to global FilePicker for earlier versions
- * - browse("data", path) reads from Foundry's Data directory
- *
- * @param {string} dirPath - Directory path to list (relative to Foundry Data)
- * @returns {Promise<Set<string>>} Set of filenames in the directory
- */
-async function listDir(dirPath) {
-  if (dirCache.has(dirPath)) {
-    return dirCache.get(dirPath);
-  }
-  try {
-    const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
-    const res = await FP.browse("data", dirPath);
-    const files = new Set(
-      (res.files ?? []).map(f => {
-        const i = f.lastIndexOf("/");
-        return i >= 0 ? f.slice(i + 1) : f;
-      })
-    );
-    dirCache.set(dirPath, files);
-    return files;
-  } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to browse directory", { dirPath, err });
-    const empty = new Set();
-    dirCache.set(dirPath, empty);
-    return empty;
-  }
-}
-
-/**
- * Computes new icon path from legacy path using migration map.
- *
- * Checks if an image path references a legacy icon and returns the new path if the
- * target file exists. Only returns a path if the new icon file actually exists on disk,
- * preventing broken image references.
- *
- * @param {string} img - Current image path to evaluate
- * @returns {Promise<string|null>} New icon path if migration needed and file exists, null otherwise
- */
-async function computeNewIconPath(img) {
-  if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) {
-    return null;
-  }
-  const prefix = PATHS.icons + "/";
-  const file = img.slice(prefix.length);
-  const rel = ICON_MIGRATION_MAP[file];
-  if (!rel) {
-    return null;
-  }
-  const targetPath = prefix + rel;
-  const lastSlash = targetPath.lastIndexOf("/");
-  const dir = targetPath.slice(0, lastSlash);
-  const base = targetPath.slice(lastSlash + 1);
-  const files = await listDir(dir);
-  return files.has(base) ? targetPath : null;
-}
-
-/**
- * Determines updated icon path for a document, with special bow handling.
- *
- * Checks standard icon migration map and applies special logic for weapon items with
- * isBow flag to ensure they use the bow icon. Also assigns type-appropriate default
- * icons to items that don't have proper system icons (e.g., Foundry defaults or
- * unmapped legacy icons).
- *
- * Migration Strategy:
- * 1. Try to migrate via ICON_MIGRATION_MAP (old PNG → new WebP)
- * 2. For items without system icons, assign type-appropriate default icon
- * 3. Special case: weapon.isBow=true gets bow icon
- *
- * @param {Document} doc - Document to evaluate for icon update
- * @param {string} docType - Document type ("Actor" or "Item")
- * @returns {Promise<string|null>} New icon path if update needed, null otherwise
- */
-async function getUpdatedIconPath(doc, docType) {
-  let nextImg = await computeNewIconPath(doc.img);
-
-  // Special handling for Items: assign type-appropriate default icons
-  if (docType === "Item") {
-    // Check if item is using bow weapon type
-    const isBow = doc.type === "weapon" && doc.system?.isBow;
-    const iconType = isBow ? "bow" : doc.type;
-
-    // If no migration found via map, check if item needs default icon assignment
-    if (!nextImg) {
-      const currentImg = doc.img;
-      const hasSystemIcon =
-        typeof currentImg === "string" && currentImg.startsWith(PATHS.icons + "/");
-      const isFoundryDefault =
-        !currentImg || currentImg === "icons/svg/item-bag.svg" || currentImg.includes("mystery");
-
-      // Assign type-appropriate default icon if:
-      // - Using Foundry default icon, OR
-      // - Not using a system icon (might be old path or external icon)
-      if (isFoundryDefault || !hasSystemIcon) {
-        const defaultIcon = DEFAULT_ICONS[iconType];
-        if (defaultIcon && currentImg !== defaultIcon) {
-          nextImg = defaultIcon;
-        }
-      }
-    }
-
-    // Ensure bow weapons use bow icon
-    if (isBow) {
-      const bowIcon = DEFAULT_ICONS.bow;
-      if (bowIcon && doc.img !== bowIcon && nextImg !== bowIcon) {
-        nextImg = bowIcon;
-      }
-    }
-  }
-
-  return nextImg;
-}
+import { SYS_ID } from "../../../config/constants.js";
+import { pluralKeyOf } from "../../../utils/localization.js";
+import { buildTokenIconUpdate, getMappedIconPath, getUpdatedIconPath } from "./icon-lookup.js";
 
 /**
  * Migrates legacy PNG icon paths to new WebP assets for world documents.
@@ -149,17 +14,15 @@ async function getUpdatedIconPath(doc, docType) {
  * prototype token images for actors. Only runs if GM and migration setting enabled.
  * Displays notification with count of updated documents when complete.
  *
- * Idempotency: Icon migration is called from runMigrations() which filters out already-migrated
+ * Idempotency: Icon migration is called from migrateWorld() which filters out already-migrated
  * documents, so this function only processes documents that haven't been migrated yet. This
  * prevents overwriting custom icons when forceMigration is triggered.
  *
- * This is a world-only migration (compendiums handled separately by migrateCompendiumIconPaths).
+ * World-only migration (compendiums are handled by migrateCompendiumIconPaths).
  *
  * @returns {Promise<void>}
- * @async
- * @export
  */
-export async function runIconPathMigration() {
+export async function migrateIconPaths() {
   if (!game.user?.isGM) {
     return;
   }
@@ -168,49 +31,13 @@ export async function runIconPathMigration() {
     return;
   }
 
-  let changed = 0;
-
-  for (const a of game.actors.contents) {
-    const updates = {};
-
-    const nextImg = await computeNewIconPath(a.img);
-    if (nextImg && nextImg !== a.img) {
-      updates.img = nextImg;
-    }
-
-    const tokenImg = a.prototypeToken?.texture?.src;
-    if (tokenImg) {
-      const nextToken = await computeNewIconPath(tokenImg);
-      if (nextToken && nextToken !== tokenImg) {
-        updates["prototypeToken.texture.src"] = nextToken;
-      }
-    }
-
-    if (Object.keys(updates).length > 0) {
-      try {
-        await a.update(updates, { diff: true, render: false });
-        changed++;
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err });
-      }
-    }
-  }
-
-  for (const i of game.items.contents) {
-    const nextImg = await getUpdatedIconPath(i, "Item");
-
-    if (nextImg && nextImg !== i.img) {
-      try {
-        await i.update({ img: nextImg }, { diff: true, render: false });
-        changed++;
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err });
-      }
-    }
-  }
+  const changed = (await migrateWorldActorIcons()) + (await migrateWorldItemIcons());
 
   ui.notifications?.info(
-    game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed })
+    game.i18n.localize(
+      pluralKeyOf(game.i18n, changed, category => `l5r4.system.migration.iconsUpdated.${category}`),
+      { count: changed }
+    )
   );
 }
 
@@ -223,8 +50,6 @@ export async function runIconPathMigration() {
  * @param {Document[]} docs - Array of Item documents (embedded items from actor.items.contents)
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
- * @async
- * @export
  */
 export async function migrateEmbeddedItemIcons(docs, label) {
   const itemDocs = docs.filter(doc => doc.documentName === "Item");
@@ -257,81 +82,50 @@ export async function migrateEmbeddedItemIcons(docs, label) {
 }
 
 /**
- * Migrates legacy PNG icon paths to new WebP assets in compendium packs.
- *
- * Updates actor and item icons within unlocked compendium packs. Skips locked packs to
- * avoid permission errors. Displays notification with count of updated documents when
- * complete. Runs separately from world migration to handle compendium-specific loading.
- *
- * Foundry VTT Integration:
- * - Respects pack.metadata.locked status (skips locked compendia)
- * - Loads compendium documents via pack.getDocuments()
- * - Updates both document icons and actor prototype token images
- *
- * @returns {Promise<void>}
- * @async
+ * Migrate each world actor's icon and prototype token image.
+ * @returns {Promise<number>} How many actors were updated
  */
-export async function migrateCompendiumIconPaths() {
+async function migrateWorldActorIcons() {
   let changed = 0;
-  const packs = game.packs?.contents ?? [];
-  for (const pack of packs) {
-    const docName = pack.documentName ?? pack.metadata?.type ?? pack.metadata?.documentName;
-    if (docName !== "Actor" && docName !== "Item") {
-      continue;
+  for (const a of game.actors.contents) {
+    const updates = {};
+
+    const nextImg = await getMappedIconPath(a.img);
+    if (nextImg && nextImg !== a.img) {
+      updates.img = nextImg;
     }
 
-    const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
-    if (isLocked) {
-      continue;
-    }
+    Object.assign(updates, await buildTokenIconUpdate(a));
 
-    let docs = [];
-    try {
-      docs = await pack.getDocuments();
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to load compendium documents", {
-        collection: pack.collection,
-        err
-      });
-      continue;
-    }
-
-    for (const doc of docs) {
-      const nextImg = await getUpdatedIconPath(doc, docName);
-      const updates = {};
-
-      if (nextImg && nextImg !== doc.img) {
-        updates.img = nextImg;
-      }
-
-      if (docName === "Actor") {
-        const tokenImg = doc.prototypeToken?.texture?.src;
-        if (tokenImg) {
-          const nextToken = await computeNewIconPath(tokenImg);
-          if (nextToken && nextToken !== tokenImg) {
-            updates["prototypeToken.texture.src"] = nextToken;
-          }
-        }
-      }
-
-      if (Object.keys(updates).length > 0) {
-        try {
-          await doc.update(updates, { diff: true, render: false });
-          changed++;
-        } catch (err) {
-          console.warn(`${SYS_ID}`, "Failed to update compendium doc img", {
-            id: doc.id,
-            collection: pack.collection,
-            err
-          });
-        }
+    if (Object.keys(updates).length > 0) {
+      try {
+        await a.update(updates, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err });
       }
     }
   }
+  return changed;
+}
 
-  if (changed > 0) {
-    ui.notifications?.info(
-      game.i18n.format("l5r4.system.migration.compendiumIconsUpdated", { count: changed })
-    );
+/**
+ * Migrate each world item's icon.
+ * @returns {Promise<number>} How many items were updated
+ */
+async function migrateWorldItemIcons() {
+  let changed = 0;
+  for (const i of game.items.contents) {
+    const nextImg = await getUpdatedIconPath(i, "Item");
+
+    if (nextImg && nextImg !== i.img) {
+      try {
+        await i.update({ img: nextImg }, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err });
+      }
+    }
   }
+  return changed;
 }

@@ -1,0 +1,37 @@
+<section class="l5r4-compendium-browser-controls">
+  <nav class="l5r4-tabs -filter" aria-label="{{localize "l5r4.apps.compendiumBrowser.title"}}">
+    {{#each tabs}}
+      <button type="button" class="l5r4-tabs-tab{{#if active}} active{{/if}}" data-action="select-tab"
+        data-tab="{{id}}" aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+    {{/each}}
+  </nav>
+
+  <div class="l5r4-compendium-browser-filters">
+    <label class="l5r4-compendium-browser-filter l5r4-compendium-browser-search">
+      <span>{{localize "l5r4.apps.compendiumBrowser.search"}}</span>
+      <input type="search" name="search" value="{{search}}" data-browser-search autocomplete="off" />
+    </label>
+    {{#each filters}}
+      <label class="l5r4-compendium-browser-filter">
+        <span>{{label}}</span>
+        {{#if options}}
+          <select name="filter-{{id}}" data-browser-filter="{{id}}">
+            <option value="">{{localize "l5r4.ui.common.all"}}</option>
+            {{#each options}}
+              <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        {{else if (eq kind "bool")}}
+          <select name="filter-{{id}}" data-browser-filter="{{id}}">
+            <option value="">{{localize "l5r4.ui.common.all"}}</option>
+            <option value="true" {{#if (eq value "true")}}selected{{/if}}>{{localize "l5r4.apps.compendiumBrowser.yes"}}</option>
+            <option value="false" {{#if (eq value "false")}}selected{{/if}}>{{localize "l5r4.apps.compendiumBrowser.no"}}</option>
+          </select>
+        {{else}}
+          <input type="text" name="filter-{{id}}" value="{{value}}" data-browser-filter="{{id}}" />
+        {{/if}}
+      </label>
+    {{/each}}
+    <button type="button" class="l5r4-compendium-browser-clear" data-action="clear-filters">{{localize "l5r4.apps.compendiumBrowser.clear"}}</button>
+  </div>
+</section>

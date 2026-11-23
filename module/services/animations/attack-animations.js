@@ -1,29 +1,11 @@
 /**
- * Attack Animation System
- *
- * Handles visual animations for weapon attacks, particularly ranged attacks with bows.
- * Plays projectile animations from attacker to target using Sequencer and JB2A.
- *
- * Key Responsibilities:
- * - Detect bow attacks
- * - Calculate distance between attacker and target
- * - Select appropriate arrow animation based on distance
- * - Play projectile animation from source to target
- *
- * Distance Ranges (JB2A arrow variants):
- * - 05ft: Close range
- * - 15ft: Short range
- * - 30ft: Medium range
- * - 60ft: Long range
- * - 90ft: Extreme range
- *
  * @module services/animations/attack-animations
- * @requires Foundry VTT v13+
- * @requires Sequencer module
- * @requires JB2A module
+ * @description Plays weapon attack animations with Sequencer and JB2A: a katana slash toward the target for a melee
+ * attack, and for a bow an arrow from attacker to target, picking the JB2A arrow variant (5, 15, 30, 60, or 90 feet)
+ * that covers the distance between the tokens.
  */
 
-import { isJB2AAvailable, isSequencerAvailable } from "./asset-library.js";
+import { isJb2aAvailable, isMotionReduced, isSequencerAvailable } from "./asset-library.js";
 
 /**
  * Arrow animation base path for physical white arrows.
@@ -39,7 +21,7 @@ const ARROW_BASE_PATH = "jb2a.arrow.physical.white.01";
  *
  * @constant {number[]}
  */
-const ARROW_DISTANCES = [5, 15, 30, 60, 90];
+const ARROW_DISTANCES = Object.freeze([5, 15, 30, 60, 90]);
 
 /**
  * Katana melee attack animation variants.
@@ -47,71 +29,12 @@ const ARROW_DISTANCES = [5, 15, 30, 60, 90];
  *
  * @constant {string[]}
  */
-const KATANA_VARIANTS = [
+const KATANA_VARIANTS = Object.freeze([
   "jb2a.melee_attack.04.katana.01.0",
   "jb2a.melee_attack.04.katana.01.1",
   "jb2a.melee_attack.04.katana.01.2",
   "jb2a.melee_attack.04.katana.01.3"
-];
-
-/**
- * Calculate grid distance between two tokens.
- *
- * Uses Foundry's grid system to calculate distance in feet/units.
- * Handles both gridded and gridless scenes.
- *
- * @param {Token} sourceToken - The attacking token
- * @param {Token} targetToken - The target token
- * @returns {number} Distance in grid units (feet)
- */
-function calculateDistance(sourceToken, targetToken) {
-  if (!sourceToken || !targetToken) {
-    return 0;
-  }
-
-  // Get token centers
-  const source = {
-    x: sourceToken.x + sourceToken.width / 2,
-    y: sourceToken.y + sourceToken.height / 2
-  };
-
-  const target = {
-    x: targetToken.x + targetToken.width / 2,
-    y: targetToken.y + targetToken.height / 2
-  };
-
-  // Calculate distance using Foundry's measurement system
-  const ray = new foundry.canvas.geometry.Ray(source, target);
-  const distance = canvas.grid.measurePath([{ ray }])[0];
-
-  return Math.round(distance);
-}
-
-/**
- * Select appropriate arrow animation variant based on distance.
- *
- * Chooses the closest matching distance variant from available options.
- * If distance exceeds all variants, uses the longest (90ft).
- *
- * @param {number} distance - Actual distance in feet
- * @returns {string} Full JB2A arrow animation path
- */
-function selectArrowAnimation(distance) {
-  // Find the closest distance variant that's >= actual distance
-  let selectedDistance = ARROW_DISTANCES[ARROW_DISTANCES.length - 1]; // Default to 90ft
-
-  for (const variant of ARROW_DISTANCES) {
-    if (distance <= variant) {
-      selectedDistance = variant;
-      break;
-    }
-  }
-
-  // Format distance with leading zero (5 -> 05)
-  const formattedDistance = String(selectedDistance).padStart(2, "0");
-
-  return `${ARROW_BASE_PATH}.${formattedDistance}ft`;
-}
+]);
 
 /**
  * Play melee attack animation from attacker toward target.
@@ -129,13 +52,10 @@ function selectArrowAnimation(distance) {
  * @param {Token} attackerToken - The token making the attack
  * @param {Token} targetToken - The token being attacked
  * @returns {Promise<void>}
- *
- * @example
- * await playMeleeAttack(attackerToken, targetToken);
  */
-export async function playMeleeAttack(attackerToken, targetToken) {
+export async function startMeleeAnimation(attackerToken, targetToken) {
   // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJB2AAvailable()) {
+  if (!isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
 
@@ -183,13 +103,10 @@ export async function playMeleeAttack(attackerToken, targetToken) {
  * @param {Token} attackerToken - The token making the attack
  * @param {Token} targetToken - The token being attacked
  * @returns {Promise<void>}
- *
- * @example
- * await playArrowAttack(attackerToken, targetToken);
  */
-export async function playArrowAttack(attackerToken, targetToken) {
+export async function startArrowAnimation(attackerToken, targetToken) {
   // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJB2AAvailable()) {
+  if (!isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
 
@@ -201,8 +118,8 @@ export async function playArrowAttack(attackerToken, targetToken) {
 
   try {
     // Calculate distance and select appropriate animation
-    const distance = calculateDistance(attackerToken, targetToken);
-    const arrowPath = selectArrowAnimation(distance);
+    const distance = getTokenDistance(attackerToken, targetToken);
+    const arrowPath = getArrowAnimation(distance);
 
     // Create and play Sequencer animation
     const sequence = new Sequence();
@@ -264,8 +181,9 @@ export function isBowWeapon(weapon) {
  * @param {Item} weapon - The weapon being used
  * @returns {Promise<void>}
  */
-export async function handleAttackRoll(attacker, target, weapon) {
-  if (!weapon) {
+export async function startAttackAnimation(attacker, target, weapon) {
+  // A user who asked for less motion reads the hit from the chat card (motion.md rule 5)
+  if (!weapon || isMotionReduced()) {
     return;
   }
 
@@ -284,9 +202,68 @@ export async function handleAttackRoll(attacker, target, weapon) {
   // Check weapon type and play appropriate animation
   if (isBowWeapon(weapon)) {
     // Ranged attack: Play arrow animation
-    await playArrowAttack(attackerToken, targetToken);
+    await startArrowAnimation(attackerToken, targetToken);
   } else if (weapon.type === "weapon") {
     // Melee attack: Play katana slash animation
-    await playMeleeAttack(attackerToken, targetToken);
+    await startMeleeAnimation(attackerToken, targetToken);
   }
+}
+
+/**
+ * Calculate grid distance between two tokens.
+ *
+ * Uses Foundry's grid system to calculate distance in feet/units.
+ * Handles both gridded and gridless scenes.
+ *
+ * @param {Token} sourceToken - The attacking token
+ * @param {Token} targetToken - The target token
+ * @returns {number} Distance in grid units (feet)
+ */
+function getTokenDistance(sourceToken, targetToken) {
+  if (!sourceToken || !targetToken) {
+    return 0;
+  }
+
+  // Get token centers
+  const source = {
+    x: sourceToken.x + sourceToken.width / 2,
+    y: sourceToken.y + sourceToken.height / 2
+  };
+
+  const target = {
+    x: targetToken.x + targetToken.width / 2,
+    y: targetToken.y + targetToken.height / 2
+  };
+
+  // Calculate distance using Foundry's measurement system
+  const ray = new foundry.canvas.geometry.Ray(source, target);
+  const distance = canvas.grid.measurePath([{ ray }])[0];
+
+  return Math.round(distance);
+}
+
+/**
+ * Select appropriate arrow animation variant based on distance.
+ *
+ * Chooses the closest matching distance variant from available options.
+ * If distance exceeds all variants, uses the longest (90ft).
+ *
+ * @param {number} distance - Actual distance in feet
+ * @returns {string} Full JB2A arrow animation path
+ */
+function getArrowAnimation(distance) {
+  // Find the closest distance variant that's >= actual distance
+  let selectedDistance = ARROW_DISTANCES[ARROW_DISTANCES.length - 1]; // Default to 90ft
+
+  for (const variant of ARROW_DISTANCES) {
+    if (distance <= variant) {
+      selectedDistance = variant;
+      break;
+    }
+  }
+
+  // Format distance with leading zero (5 -> 05)
+  const formattedDistance = String(selectedDistance).padStart(2, "0");
+
+  return `${ARROW_BASE_PATH}.${formattedDistance}ft`;
 }

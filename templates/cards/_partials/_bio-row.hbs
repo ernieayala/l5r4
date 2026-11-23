@@ -1,0 +1,19 @@
+{{!-- A Clan, Family, or School card (item-row.md, Bio variant): the same row in the Bio section and in chat, where
+it posts as its name. Parameters: the item card context (name, system, docId, inSheet), and for a School on a sheet
+waitingFor (the School Skills its Techniques wait for, roadmap/STAGE-18 decision 11). --}}
+<div class="item l5r4-item-row -bio{{#if (or system.description waitingFor.length)}} -expandable{{/if}}"
+  data-item-id="{{coalesce docId this.id _id}}"
+  data-document-id="{{coalesce docId this.id _id}}">
+  <h4 class="flexrow -gap-sm title">{{name}}</h4>
+  {{#if inSheet}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description waitingFor.length)}}
+    {{#if waitingFor.length}}
+      <div class="l5r4-item-row-details">
+        <p>{{localize "l5r4.ui.grants.waitingRow" skills=(join waitingFor ", ")}}</p>
+        {{> "systems/l5r4-enhanced/templates/cards/_partials/_detail-text.hbs" description=system.description}}
+      </div>
+    {{else}}
+      {{> "systems/l5r4-enhanced/templates/cards/_partials/_details.hbs" description=system.description}}
+    {{/if}}
+  {{/if}}
+</div>

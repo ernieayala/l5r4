@@ -1,6 +1,16 @@
-<div class="controls flexrow -gap-xs">
-    <a class="button inline-control icon" data-action="item-edit" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-    <a class="button inline-control icon" data-action="item-delete" title="{{localize "l5r4.ui.common.delete"}}"><i class="fas fa-trash"></i></a>
-    <a class="button inline-control icon" data-action="item-chat" title="{{localize "l5r4.ui.hints.postToChat"}}"><i class="fas fa-comment"></i></a>
-    <a class="button inline-control icon expandable" data-action="item-expand"><i class="fas fa-chevron-down"></i></a>
+{{!-- A row's control cluster (inline-control.md), shown on hover and focus. An item row: edit, remove, post to chat,
+and expand when it has details. An NPC attack row: edit and remove; it is never posted and has no details.
+Parameters: expandable (the item row has details), attackKey (the NPC attack's key, attack1 to attack3). --}}
+<div class="l5r4-inline-control -reveal flexrow -gap-xs">
+  {{#if attackKey}}
+    <button type="button" class="inline-control icon" data-action="edit-attack" data-attack-key="{{attackKey}}" data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></button>
+    <button type="button" class="inline-control icon" data-action="delete-attack" data-attack-key="{{attackKey}}" data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></button>
+  {{else}}
+    <button type="button" class="inline-control icon" data-action="edit-item" data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></button>
+    <button type="button" class="inline-control icon" data-action="delete-item" data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></button>
+    <button type="button" class="inline-control icon" data-action="post-item" data-tooltip="{{localize "l5r4.ui.hints.postToChat"}}" aria-label="{{localize "l5r4.ui.hints.postToChat"}}"><i class="fa-solid fa-comment" inert></i></button>
+    {{#if expandable}}
+      <button type="button" class="inline-control icon l5r4-expand-control" data-action="expand-item" aria-expanded="false" data-tooltip="{{localize "l5r4.ui.common.expand"}}" aria-label="{{localize "l5r4.ui.common.expand"}}"><i class="fa-solid fa-angle-down" inert></i></button>
+    {{/if}}
+  {{/if}}
 </div>

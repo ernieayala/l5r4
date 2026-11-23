@@ -1,0 +1,70 @@
+/**
+ * Button
+ * The roll button: a label under a brush-stroke face whose sprite plays on hover (components/button.md)
+ * Animation technique credit: Yugam (https://codepen.io/pizza3)
+ */
+
+@use "../base/variables" as *;
+
+// The urban sprite's pass, played by the roll face here and by the Trait roll (features/_traits-rings.scss)
+@keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+  }
+
+  to {
+    mask-position: 0 0;
+  }
+}
+
+.l5r4-button.-roll {
+  border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
+  border-radius: 0;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  position: relative;
+
+  // The face's mask (and this wrapper's overflow) clip the face's own focus ring, so the wrapper draws it
+  &:has(.l5r4-button-face:focus-visible) {
+    box-shadow: var(--l5r4-state-focus-shadow);
+    outline: var(--l5r4-state-focus-outline);
+  }
+
+  .l5r4-button-under {
+    align-items: center;
+    color: var(--l5r4-color-text);
+    display: flex;
+    font-weight: bold;
+    height: 100%;
+    justify-content: center;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+  }
+
+  // The face is a <button>; this rule overrides core's button look with the sprite. Core disables it on a sheet the
+  // viewer cannot edit, where it takes the disabled look and no sprite (foundations/states.md, Disabled)
+  .l5r4-button-face {
+    background: var(--l5r4-color-action);
+    border: none;
+    border-radius: 0;
+    color: var(--l5r4-color-action-text);
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: bold;
+    height: 100%;
+    mask: url("../assets/animation/urban-sprite.webp");
+    mask-position: 100% 0;
+    mask-size: 3000% 100%;
+    width: 100%;
+
+    &:hover:not(:disabled) {
+      animation: mask-reverse-urban var(--l5r4-duration-sprite) steps($urban-sprite-steps) forwards;
+    }
+
+    &:disabled {
+      opacity: var(--l5r4-state-disabled-opacity);
+    }
+  }
+}

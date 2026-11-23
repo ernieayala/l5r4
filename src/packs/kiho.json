@@ -1,0 +1,686 @@
+{
+  "name": "kiho",
+  "label": "Kiho",
+  "documentType": "Item",
+  "types": [
+    "kiho"
+  ],
+  "pages": [
+    [
+      261,
+      267
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Air Fist",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "partial",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "type": "internal",
+        "rules": [
+          {
+            "key": "Initiative",
+            "total": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "0 - @rings.air",
+            "predicate": ["weapon:skill:jiujutsu"]
+          }
+        ],
+        "specialRules": "Making any attack other than an unarmed one cancels it. Lasts one day at most."
+      }
+    },
+    {
+      "name": "As the Breakers",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 5,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Atemi on a foe yet to act this Round: it loses a Simple Action. Once per foe per skirmish."
+      }
+    },
+    {
+      "name": "Banish All Shadows",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Atemi. For Void Ring Rounds the target ignores its costliest Disadvantage, not a Spiritual or Social one."
+      }
+    },
+    {
+      "name": "Breaking Blow",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Unarmed strikes deal full damage to non-metal objects, harmless to you. GM sets object toughness. Fire Ring minutes."
+      }
+    },
+    {
+      "name": "Buoyed by the Kami",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Walk on water as basic terrain while you make a Simple Move Action every Round; up to 5 minutes, then reactivate."
+      }
+    },
+    {
+      "name": "Channel the Fire Dragon",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 6,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "Heat and cold damage to you, fire spells and kiho included, is 2k2 less. Lasts one day."
+      }
+    },
+    {
+      "name": "Chi Protection",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi on another, Void Point only. They heal Water Ring Wounds now and each of your Turns for Insight Rank Rounds."
+      }
+    },
+    {
+      "name": "Cleansing Spirit",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "full",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "type": "internal",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": "floor(@rings.earth / 2)",
+            "optional": true,
+            "label": "Resisting poison or disease",
+            "predicate": [
+              {
+                "or": [
+                  "check:trait",
+                  "check:ring"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Dance of the Flames",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 6,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Unarmed attacks are Simple Actions. It ends in any Round you fail to attack a foe unarmed."
+      }
+    },
+    {
+      "name": "Death Touch",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 266,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 7,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Atemi 3 Rounds running + a Void Point. Rings -1/hour (Insight max). A Ring at 0: lose 3 Contested Void by 5+ and die."
+      }
+    },
+    {
+      "name": "Destiny's Strike",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "When a foe's melee attack hits, counter with one unarmed attack: your Turn, or Free if taken; ignores its Wound penalty."
+      }
+    },
+    {
+      "name": "Earth Needs No Eyes",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "Sense ground movers within Insight x 50 feet for Earth Ring minutes. On as a skirmish starts: no ambush by land foes."
+      }
+    },
+    {
+      "name": "Earthen Fist",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 3,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "Defense or Full Defense only. After a foe's melee miss, Disarm them next Turn with no Raises, any stance; ends. One day."
+      }
+    },
+    {
+      "name": "Eight Directions Awareness",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 266,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 5,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Sense all living things and anything deliberately hidden within Void Ring x 10 feet."
+      }
+    },
+    {
+      "name": "Embrace the Stone",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "partial",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "type": "mystic",
+        "rules": [
+          {
+            "key": "Reduction",
+            "value": "2 * @rings.earth"
+          }
+        ],
+        "specialRules": "Lasts Earth Ring Rounds."
+      }
+    },
+    {
+      "name": "Falling Star Strike",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 7,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi; Void Point only, 2 Raises. Hit adds FirekFire damage; win a Contested Fire Roll: target Blind for Fire hours."
+      }
+    },
+    {
+      "name": "Fire's Fleeting Speed",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Each Move Action covers 5 feet more. Lasts Fire Ring Rounds."
+      }
+    },
+    {
+      "name": "Flame Fist",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 3,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi. Target's TNs on all actions rise by 3 x Fire Ring for Fire Ring Rounds."
+      }
+    },
+    {
+      "name": "Flee the Darkness",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 6,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "For Air Ring Rounds: gain no Taint and ignore Taint you have. A deliberate Tainting act ends it and Taints you."
+      }
+    },
+    {
+      "name": "Freezing the Lifeblood",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 7,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi. Target is Stunned and cannot move by itself for Insight Rank Rounds."
+      }
+    },
+    {
+      "name": "Grasp the Earth Dragon",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "partial",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "type": "internal",
+        "rules": [
+          {
+            "key": "Wounds",
+            "penalty": "0 - @rings.earth"
+          }
+        ],
+        "specialRules": "Simple Actions stay allowed at Down. Lasts Earth Ring Rounds."
+      }
+    },
+    {
+      "name": "Harmony of the Mind",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Contested Air Roll vs. a seen target reveals a Ring, top Skill, or costliest Spiritual pick; +1 per Raise. Air Ring/day."
+      }
+    },
+    {
+      "name": "Partaking the Waves",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "partial",
+      "system": {
+        "ring": "water",
+        "mastery": 6,
+        "type": "internal",
+        "rules": [
+          {
+            "key": "Reduction",
+            "value": "@rings.water"
+          }
+        ],
+        "specialRules": "Lasts twice Water Ring Rounds."
+      }
+    },
+    {
+      "name": "Rest, My Brother",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi: unarmed damage + Taint Rank unkept dice. A once-pure target loses Taint benefits and madness for Earth Rounds."
+      }
+    },
+    {
+      "name": "Ride the Water Dragon",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 3,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Heal Water Ring Wounds in each Reactions Stage for Insight Rank Rounds."
+      }
+    },
+    {
+      "name": "Riding the Clouds",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "One leap as a Simple Move Action, up to Air Ring x 10 feet; spent after that leap."
+      }
+    },
+    {
+      "name": "Root the Mountain",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 263,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 5,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "Knockdown on you takes 2 more Raises; forced movement also needs a Contested Earth Roll. A Move Action ends it."
+      }
+    },
+    {
+      "name": "Silent Solace",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 266,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 5,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Atemi. For Void Ring Rounds the target spends two spell slots per spell cast."
+      }
+    },
+    {
+      "name": "Slap the Wave",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 7,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Void Point only. All in your front arc within Water x 5 feet win a Contested Water Roll or are Dazed."
+      }
+    },
+    {
+      "name": "Song of the World",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 266,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Win a Contested Void Roll vs. a foe within 50 feet: its Initiative drops 5 and yours rises 5."
+      }
+    },
+    {
+      "name": "Soul of the Four Winds",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "full",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "type": "internal",
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": "@insight.rank + @rings.air"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Speed of the Mountains",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Atemi. Target's Water counts 2 lower for Move distance for twice Earth Ring Rounds."
+      }
+    },
+    {
+      "name": "Spin the Kharmic Wheel",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 266,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 8,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "Atemi; uses all your Void Points. Target swaps a Social, Spiritual, or Mental Disadvantage for one of equal value."
+      }
+    },
+    {
+      "name": "Stain Upon the Soul",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 3,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi. Target's TNs rise as if at Air Ring Wound Ranks for Insight + Air Rounds; no stacking; real Wounds supersede."
+      }
+    },
+    {
+      "name": "Steal the Air Dragon",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 263,
+      "coverage": "partial",
+      "system": {
+        "ring": "air",
+        "mastery": 7,
+        "type": "karmic",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:stealth",
+            "roll": "@rings.air",
+            "keep": "@rings.air"
+          }
+        ],
+        "specialRules": "Lasts Insight Rank minutes."
+      }
+    },
+    {
+      "name": "The Body Is an Anvil",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 4,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Anyone touching you, or hit by or hitting you unarmed, takes Fire Ring Wounds. Lasts twice Fire Ring Rounds."
+      }
+    },
+    {
+      "name": "The Great Silence",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 262,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 4,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Atemi. The struck target cannot speak for Air Ring Rounds."
+      }
+    },
+    {
+      "name": "To the Last Breath",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 267,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 3,
+        "type": "karmic",
+        "rules": [],
+        "specialRules": "One chosen person within 20 feet receives one Void Point when their next Turn comes; at most twice a day per person."
+      }
+    },
+    {
+      "name": "Touch the Void Dragon",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 267,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "The Ring the terrain favors, and its Traits, count one Rank higher."
+      }
+    },
+    {
+      "name": "Unbalance the Mind",
+      "type": "kiho",
+      "folder": "Fire",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "fire",
+        "mastery": 5,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Atemi. The struck target is Dazed."
+      }
+    },
+    {
+      "name": "Void Fist",
+      "type": "kiho",
+      "folder": "Void",
+      "page": 267,
+      "coverage": "none",
+      "system": {
+        "ring": "void",
+        "mastery": 4,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Atemi; needs a Raise. Hit on a foe with Void Points deals no damage; you regain 2 Void Points."
+      }
+    },
+    {
+      "name": "Waves in All Things",
+      "type": "kiho",
+      "folder": "Water",
+      "page": 265,
+      "coverage": "none",
+      "system": {
+        "ring": "water",
+        "mastery": 4,
+        "type": "mystic",
+        "rules": [],
+        "specialRules": "Strike water or earth to hit one foe touching it within Water x 10 feet unarmed. Obvious; reveals you if hidden."
+      }
+    },
+    {
+      "name": "Way of the Earth",
+      "type": "kiho",
+      "folder": "Earth",
+      "page": 264,
+      "coverage": "none",
+      "system": {
+        "ring": "earth",
+        "mastery": 4,
+        "type": "martial",
+        "rules": [],
+        "specialRules": "Each Reactions Stage, anyone in a Grapple with you takes Earth Ring Wounds, win or lose. Lasts Earth Ring minutes."
+      }
+    },
+    {
+      "name": "Way of the Willow",
+      "type": "kiho",
+      "folder": "Air",
+      "page": 263,
+      "coverage": "none",
+      "system": {
+        "ring": "air",
+        "mastery": 5,
+        "type": "internal",
+        "rules": [],
+        "specialRules": "Once, before your Turn: Void Point as a foe declares melee on you to move off or strike unarmed first. Expires in a day."
+      }
+    }
+  ]
+}

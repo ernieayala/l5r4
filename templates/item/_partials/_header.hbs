@@ -1,8 +1,17 @@
-<header class="flexrow -gap-md sheet-header">
-  <img class="flex0 profile" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
-  <div class="header-fields">
-    <h1 class="document-name">
-      <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}"/>
+<header class="flexrow -gap-md l5r4-item-header">
+  <img class="flex0 l5r4-item-header-image" src="{{item.img}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" alt="{{item.name}}"/>
+  <div class="l5r4-item-header-fields">
+    <h1 class="l5r4-item-header-name">
+      <input
+        type="text"
+        name="name"
+        value="{{item.name}}"
+        placeholder="{{localize "l5r4.ui.common.name"}}"
+        aria-label="{{localize "l5r4.ui.common.name"}}"
+      />
     </h1>
+    {{#if summary.citation}}
+      <p class="l5r4-citation" data-citation>{{summary.citation}}</p>
+    {{/if}}
   </div>
 </header>

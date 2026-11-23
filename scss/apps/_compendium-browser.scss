@@ -1,0 +1,145 @@
+/**
+ * Compendium Browser
+ * The compendium browser window (module/apps/compendium-browser.js)
+ */
+
+.l5r4-compendium-browser {
+  .window-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap);
+    overflow: hidden;
+  }
+
+  .l5r4-compendium-browser-controls {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap);
+  }
+
+  .l5r4-compendium-browser-results-part {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap-tight);
+    min-height: 0;
+  }
+
+  .l5r4-tabs.-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--l5r4-space-gap-tight);
+  }
+
+  .l5r4-tabs-tab {
+    flex: 0 0 auto;
+    padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);
+    width: auto;
+
+    // Selected (states.md): bold with the selected outline in place of core's active ring, so focus shows its own
+    &.active {
+      box-shadow: none;
+      font-weight: bold;
+      outline: var(--l5r4-state-selected-outline);
+
+      &:focus-visible {
+        box-shadow: var(--l5r4-state-focus-shadow);
+      }
+    }
+  }
+
+  .l5r4-compendium-browser-filters {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--l5r4-space-gap);
+  }
+
+  .l5r4-compendium-browser-filter {
+    display: flex;
+    flex: 0 1 9rem;
+    flex-direction: column;
+    font-size: var(--l5r4-font-size-meta);
+    gap: var(--l5r4-space-gap-tight);
+  }
+
+  .l5r4-compendium-browser-search {
+    flex-basis: 14rem;
+  }
+
+  .l5r4-compendium-browser-clear {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .l5r4-compendium-browser-count {
+    font-size: var(--l5r4-font-size-meta);
+    margin: 0;
+  }
+
+  .l5r4-compendium-browser-results {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--l5r4-space-gap-tight);
+    list-style: none;
+    margin: 0;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .l5r4-compendium-browser-row {
+    align-items: center;
+    cursor: grab;
+    display: flex;
+    gap: var(--l5r4-space-gap);
+  }
+
+  .l5r4-compendium-browser-icon {
+    border: none;
+    flex: 0 0 var(--l5r4-size-item-icon);
+    height: var(--l5r4-size-item-icon);
+    width: var(--l5r4-size-item-icon);
+  }
+
+  .l5r4-compendium-browser-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  // A button that reads as the row's bold name: core's button look undone, its focus ring kept
+  .l5r4-compendium-browser-name {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
+    font-weight: bold;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
+  }
+
+  .l5r4-compendium-browser-details,
+  .l5r4-compendium-browser-source {
+    font-size: var(--l5r4-font-size-meta);
+  }
+
+  .l5r4-compendium-browser-button {
+    flex: 0 0 auto;
+    padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);
+    width: auto;
+  }
+
+  // The Empty state (foundations/states.md): one italic line in the list's place
+  .l5r4-compendium-browser-empty {
+    font-style: italic;
+    margin: 0;
+  }
+}

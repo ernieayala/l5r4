@@ -1,17 +1,15 @@
 /**
- * Embedded Item Migration
- * Migrates all embedded items within actor documents.
- *
  * @module setup/migrations/actors/embedded-items
+ * @description Runs every item migration step on the items embedded in an actor.
  */
-
-import { applySchemaMapToDocs } from "../schema/schema-apply.js";
+import { applySchemaMapToDocs } from "../schema/apply.js";
 import { migrateBowsToWeapons } from "../items/bow-to-weapon.js";
 import { migrateSkillDefaults } from "../items/skill-defaults.js";
 import { migrateEmphasisStringToArray } from "../items/emphasis.js";
 import { migrateArmorTypes } from "../items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "../items/free-raises.js";
-import { normalizeItems } from "../items/normalize.js";
+import { migrateWeaponSizes } from "../items/normalize.js";
+import { migrateItemRules } from "../items/item-rules.js";
 import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
 
 /**
@@ -19,26 +17,35 @@ import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
  *
  * Applies all item-type migrations to embedded items (skills, equipment, weapons, etc.)
  * owned by an actor. Processes schema remapping, bow→weapon conversions, skill defaults,
- * icon updates, and data normalization in sequence.
+ * icon updates, data normalization, and item mechanics into rules in sequence.
  *
  * @param {Actor} actor - Actor document containing embedded items to migrate
  * @param {string} labelPrefix - Context prefix for logging (e.g., "actor", "compendium-actor")
  * @returns {Promise<void>}
  */
 export async function migrateActorEmbeddedItems(actor, labelPrefix) {
-  if (actor.items.size === 0) {
+  await migrateEmbeddedItems(actor.items.contents, `${labelPrefix}:${actor.id}`);
+}
+
+/**
+ * Applies every item-type migration to a list of an actor's items.
+ *
+ * @param {Item[]} items - Embedded items to migrate
+ * @param {string} label - Context label for logging
+ * @returns {Promise<void>}
+ */
+export async function migrateEmbeddedItems(items, label) {
+  if (items.length === 0) {
     return;
   }
 
-  await applySchemaMapToDocs(actor.items.contents, `${labelPrefix}-items:${actor.id}`);
-  await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
-  await migrateSkillDefaults(actor.items.contents, `${labelPrefix}-skill-defaults:${actor.id}`);
-  await migrateEmphasisStringToArray(
-    actor.items.contents,
-    `${labelPrefix}-emphasis-migration:${actor.id}`
-  );
-  await migrateArmorTypes(actor.items.contents, `${labelPrefix}-armor-types:${actor.id}`);
-  await migrateFreeRaisesDefaults(actor.items.contents, `${labelPrefix}-free-raises:${actor.id}`);
-  await migrateEmbeddedItemIcons(actor.items.contents, `${labelPrefix}-icon-migration:${actor.id}`);
-  await normalizeItems(actor.items.contents, `${labelPrefix}-items-norm:${actor.id}`);
+  await applySchemaMapToDocs(items, `${label}-items`);
+  await migrateBowsToWeapons(items, `${label}-bow-migration`);
+  await migrateSkillDefaults(items, `${label}-skill-defaults`);
+  await migrateEmphasisStringToArray(items, `${label}-emphasis-migration`);
+  await migrateArmorTypes(items, `${label}-armor-types`);
+  await migrateFreeRaisesDefaults(items, `${label}-free-raises`);
+  await migrateEmbeddedItemIcons(items, `${label}-icon-migration`);
+  await migrateWeaponSizes(items, `${label}-items-norm`);
+  await migrateItemRules(items, `${label}-item-rules`);
 }

@@ -1,0 +1,26 @@
+<fieldset class="l5r4-check-dialog-group">
+  <legend>{{localize "l5r4.magic.maho.casting"}}</legend>
+  <p class="l5r4-check-dialog-warning" role="note">
+    <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
+    <strong>{{localize "l5r4.magic.maho.warningTitle"}}</strong><br />
+    {{localize "l5r4.magic.maho.bloodRequired"}}: <strong>{{bloodCost}}</strong>
+    {{localize "l5r4.ui.mechanics.wounds.label"}}<br />
+    {{localize "l5r4.magic.maho.additionalBloodBonus"}}
+  </p>
+  <div class="form-group">
+    <label for="{{formId}}-blood-source">{{localize "l5r4.magic.maho.bloodSource.label"}}</label>
+    <select id="{{formId}}-blood-source" name="bloodSource">
+      <option value="self">{{localize "l5r4.magic.maho.bloodSource.self"}}</option>
+      <option value="other">{{localize "l5r4.magic.maho.bloodSource.other"}}</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="{{formId}}-additional-blood">{{localize "l5r4.magic.maho.additionalBlood"}}</label>
+    <input type="number" id="{{formId}}-additional-blood" name="additionalBlood" min="0" value="0" step="{{bloodCost}}" />
+  </div>
+  <div class="form-group">
+    <label for="{{formId}}-blood-raises">{{localize "l5r4.magic.maho.bloodRaisesToTn"}}</label>
+    <input type="number" id="{{formId}}-blood-raises" name="bloodRaisesToTn" min="0" value="0" />
+    <p class="hint">{{localize "l5r4.magic.maho.bloodRaisesToTnHint"}}</p>
+  </div>
+</fieldset>

@@ -1,57 +1,39 @@
-<div class="item -{{type}}{{#if (or system.description system.specialRules)}} -expandable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if (or system.description system.specialRules system.range system.aoe system.duration)}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}"
   data-document-type="Item"
   draggable="{{@root.editable}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    <div class="spell-ring">{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
-    <div class="spell-mastery">{{system.mastery}}</div>
-    <div class="spell-cast">
-      <div class="button-mask-container">
-        <span class="mas">{{system.castFormula}}</span>
-        <a class="button" data-action="cast-spell" title="{{localize "l5r4.ui.mechanics.rolls.spellCasting"}}">{{system.castFormula}}</a>
-      </div>
+    <div class="l5r4-item-row-cell">{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
+    <div class="l5r4-item-row-cell">{{system.mastery}}</div>
+    <div class="l5r4-item-row-cell">
+      {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="cast-spell" pool=system.castFormula tooltip=(localize "l5r4.ui.mechanics.rolls.spellCasting")}}
     </div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
-    {{#if (or system.description system.specialRules system.aoe system.duration)}}
-      <div class="expanded-text">
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs" expandable=(or system.description system.specialRules system.range system.aoe system.duration)}}
+    {{#if (or system.description system.specialRules system.range system.aoe system.duration)}}
+      <div class="l5r4-item-row-details">
         {{#if system.range}}
-          <div class="spell-range">{{system.range}}</div>
+          <div>{{system.range}}</div>
         {{/if}}
         {{#if system.aoe}}
-          <p><strong>{{localize "l5r4.magic.spells.aoe"}}:</strong> {{system.aoe}}</p>
+          <p><strong>{{localize "l5r4.magic.spells.areaOfEffect"}}:</strong> {{system.aoe}}</p>
         {{/if}}
         {{#if system.duration}}
           <p><strong>{{localize "l5r4.magic.spells.duration"}}:</strong> {{system.duration}}</p>
         {{/if}}
-        {{#if system.specialRules}}
-          <p>{{{system.specialRules}}}</p>
-        {{/if}}
-        {{#if system.description}}
-          <p>{{{system.description}}}</p>
-        {{/if}}
+        {{> "systems/l5r4-enhanced/templates/cards/_partials/_detail-text.hbs" rules=system.specialRules description=system.description}}
       </div>
     {{/if}}
   {{/if}}
   {{#unless inSheet}}
     <p><strong>{{localize "l5r4.ui.common.ring"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</p>
-    <p><strong>{{localize "l5r4.ui.common.mastery"}}:</strong> {{system.mastery}}</p>
+    <p><strong>{{localize "l5r4.ui.sheets.mastery"}}:</strong> {{system.mastery}}</p>
     <p><strong>{{localize "l5r4.magic.spells.range"}}:</strong> {{system.range}}</p>
-    <p><strong>{{localize "l5r4.magic.spells.aoe"}}:</strong> {{system.aoe}}</p>
+    <p><strong>{{localize "l5r4.magic.spells.areaOfEffect"}}:</strong> {{system.aoe}}</p>
     <p><strong>{{localize "l5r4.magic.spells.duration"}}:</strong> {{system.duration}}</p>
     <p><strong>{{localize "l5r4.magic.spells.raises"}}:</strong> {{system.raises}}</p>
-    {{#if system.specialRules}}
-      <h5>{{localize "l5r4.ui.sheets.rulesSummary"}}</h5>
-      <p>
-        {{{system.specialRules}}}
-      </p>
-    {{/if}}
-    {{#if system.description}}
-      <h5>{{localize "l5r4.ui.sheets.description"}}</h5>
-      <p>
-        {{{system.description}}}
-      </p>
-    {{/if}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.rulesSummary" text=system.specialRules}}
+{{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.description" text=system.description}}
   {{/unless}}
 </div>

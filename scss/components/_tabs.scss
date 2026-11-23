@@ -1,0 +1,31 @@
+/**
+ * Tabs
+ * The sheet tab bar (components/tabs.md). Each tab is a <button>: these rules undo core's button face and the
+ * browser's button text rendering, so the tab keeps core's `nav.tabs [data-tab]` look. The compendium browser's filter tabs sit in apps/_compendium-browser.scss
+ */
+
+.l5r4-tabs.-sheet {
+  .l5r4-tabs-tab {
+    background: none;
+    border: none;
+    border-radius: 0;
+    display: block;
+    font: inherit;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    text-rendering: inherit;
+
+    // Core's `button.active` draws the focus ring on the selected tab; the sheet tab shows core's active tab look
+    // alone, and the ring on focus (foundations/states.md)
+    &.active {
+      box-shadow: none;
+      outline: none;
+
+      &:focus-visible {
+        box-shadow: var(--l5r4-state-focus-shadow);
+        outline: var(--l5r4-state-focus-outline);
+      }
+    }
+  }
+}

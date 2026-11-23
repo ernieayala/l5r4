@@ -1,0 +1,687 @@
+{
+  "name": "weapons",
+  "label": "Weapons",
+  "documentType": "Item",
+  "types": ["weapon"],
+  "pages": [[198, 205]],
+  "entries": [
+    {
+      "name": "Dai-kyu",
+      "type": "weapon",
+      "folder": "Bows",
+      "page": 200,
+      "coverage": "full",
+      "system": {
+        "isBow": true,
+        "size": "large",
+        "str": 4,
+        "minStrength": 3,
+        "range": 500,
+        "tnOnFoot": 10,
+        "associatedSkill": "Kyujutsu",
+        "fallbackTrait": "ref",
+        "price": { "koku": 25, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Han-kyu",
+      "type": "weapon",
+      "folder": "Bows",
+      "page": 200,
+      "coverage": "full",
+      "system": {
+        "isBow": true,
+        "size": "small",
+        "str": 1,
+        "range": 100,
+        "tnMounted": 10,
+        "associatedSkill": "Kyujutsu",
+        "fallbackTrait": "ref",
+        "price": { "koku": 6, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Yumi",
+      "type": "weapon",
+      "folder": "Bows",
+      "page": 200,
+      "coverage": "full",
+      "system": {
+        "isBow": true,
+        "size": "large",
+        "str": 3,
+        "range": 250,
+        "tnMounted": 10,
+        "associatedSkill": "Kyujutsu",
+        "fallbackTrait": "ref",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Kusarigama",
+      "type": "weapon",
+      "folder": "Chain Weapons",
+      "page": 200,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 2,
+        "size": "large",
+        "associatedSkill": "Chain Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 5, "bu": 0, "zeni": 0 },
+        "specialRules": "The weighted end strikes for DR 0k1."
+      }
+    },
+    {
+      "name": "Kyoketsu-shogi",
+      "type": "weapon",
+      "folder": "Chain Weapons",
+      "page": 200,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 1,
+        "size": "large",
+        "associatedSkill": "Chain Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 9, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Manrikikusari",
+      "type": "weapon",
+      "folder": "Chain Weapons",
+      "page": 200,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "large",
+        "associatedSkill": "Chain Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 3, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Dai Tsuchi",
+      "type": "weapon",
+      "folder": "Heavy Weapons",
+      "page": 201,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 5,
+        "damageKeep": 2,
+        "size": "large",
+        "associatedSkill": "Heavy Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 15, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Masakari",
+      "type": "weapon",
+      "folder": "Heavy Weapons",
+      "page": 201,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 3,
+        "size": "medium",
+        "associatedSkill": "Heavy Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 8, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Ono",
+      "type": "weapon",
+      "folder": "Heavy Weapons",
+      "page": 201,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 4,
+        "size": "large",
+        "associatedSkill": "Heavy Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Tetsubo",
+      "type": "weapon",
+      "folder": "Heavy Weapons",
+      "page": 201,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 3,
+        "size": "large",
+        "associatedSkill": "Heavy Weapons",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Aiguchi",
+      "type": "weapon",
+      "folder": "Knives",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "associatedSkill": "Knives",
+        "fallbackTrait": "agi",
+        "price": { "koku": 1, "bu": 0, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "Tanto",
+      "type": "weapon",
+      "folder": "Knives",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "associatedSkill": "Knives",
+        "fallbackTrait": "agi",
+        "price": { "koku": 1, "bu": 0, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "Jitte",
+      "type": "weapon",
+      "folder": "Knives",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "associatedSkill": "Knives",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 5, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "Sai",
+      "type": "weapon",
+      "folder": "Knives",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "associatedSkill": "Knives",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 5, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "Kama",
+      "type": "weapon",
+      "folder": "Knives",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 2,
+        "size": "small",
+        "keywords": "Peasant",
+        "associatedSkill": "Knives",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 5, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "Blowgun",
+      "type": "weapon",
+      "folder": "Ninjutsu Weapons",
+      "page": 201,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 0,
+        "size": "medium",
+        "addsStrength": false,
+        "associatedSkill": "Ninjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 0, "zeni": 8 },
+        "specialRules": "Deals 1 Wound (1k1 at Ninjutsu 3, 2k1 at 7); the target's armor bonus counts 3 times; Free Action reload; 50'."
+      }
+    },
+    {
+      "name": "Shuriken",
+      "type": "weapon",
+      "folder": "Ninjutsu Weapons",
+      "page": 202,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "addsStrength": false,
+        "explodes": false,
+        "associatedSkill": "Ninjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 2, "zeni": 0 },
+        "specialRules": "Thrown, up to 25'."
+      }
+    },
+    {
+      "name": "Tsubute",
+      "type": "weapon",
+      "folder": "Ninjutsu Weapons",
+      "page": 202,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "small",
+        "addsStrength": false,
+        "explodes": false,
+        "associatedSkill": "Ninjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 1, "zeni": 0 },
+        "specialRules": "Thrown, up to 30'."
+      }
+    },
+    {
+      "name": "Bisento",
+      "type": "weapon",
+      "folder": "Polearms",
+      "page": 202,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 3,
+        "size": "large",
+        "associatedSkill": "Polearms",
+        "fallbackTrait": "agi",
+        "price": { "koku": 12, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Nagamaki",
+      "type": "weapon",
+      "folder": "Polearms",
+      "page": 202,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 3,
+        "size": "large",
+        "associatedSkill": "Polearms",
+        "fallbackTrait": "agi",
+        "price": { "koku": 8, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Naginata",
+      "type": "weapon",
+      "folder": "Polearms",
+      "page": 202,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 2,
+        "size": "large",
+        "keywords": "Samurai",
+        "associatedSkill": "Polearms",
+        "fallbackTrait": "agi",
+        "price": { "koku": 10, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Sasumata",
+      "type": "weapon",
+      "folder": "Polearms",
+      "page": 202,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 2,
+        "size": "large",
+        "associatedSkill": "Polearms",
+        "fallbackTrait": "agi",
+        "price": { "koku": 6, "bu": 0, "zeni": 0 },
+        "specialRules": "Can start a grapple and keep one going."
+      }
+    },
+    {
+      "name": "Sodegarami",
+      "type": "weapon",
+      "folder": "Polearms",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "large",
+        "associatedSkill": "Polearms",
+        "fallbackTrait": "agi",
+        "price": { "koku": 6, "bu": 0, "zeni": 0 },
+        "specialRules": "Can start a grapple and keep one going."
+      }
+    },
+    {
+      "name": "Kumade",
+      "type": "weapon",
+      "folder": "Spears",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 1,
+        "size": "large",
+        "keywords": "Peasant",
+        "associatedSkill": "Spears",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 3, "zeni": 0 },
+        "specialRules": "Breaks after one attack deals over 25 Wounds."
+      }
+    },
+    {
+      "name": "Mai Chong",
+      "type": "weapon",
+      "folder": "Spears",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 3,
+        "size": "large",
+        "associatedSkill": "Spears",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 },
+        "specialRules": "Thrown, up to 25'."
+      }
+    },
+    {
+      "name": "Lance",
+      "type": "weapon",
+      "folder": "Spears",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 4,
+        "size": "large",
+        "associatedSkill": "Spears",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 },
+        "specialRules": "3k4 only mounted right after a Move Action, else 1k2. No Move: attack TN +5 mounted, +10 on foot. Breaks over 30 Wounds."
+      }
+    },
+    {
+      "name": "Nage-yari",
+      "type": "weapon",
+      "folder": "Spears",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 2,
+        "size": "medium",
+        "associatedSkill": "Spears",
+        "fallbackTrait": "agi",
+        "price": { "koku": 3, "bu": 0, "zeni": 0 },
+        "specialRules": "Thrown, up to 50'."
+      }
+    },
+    {
+      "name": "Yari",
+      "type": "weapon",
+      "folder": "Spears",
+      "page": 203,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 2,
+        "size": "large",
+        "associatedSkill": "Spears",
+        "fallbackTrait": "agi",
+        "price": { "koku": 5, "bu": 0, "zeni": 0 },
+        "specialRules": "Thrown, up to 30', for DR 1k2."
+      }
+    },
+    {
+      "name": "Bo",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 2,
+        "size": "large",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 2, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Jo",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 2,
+        "size": "medium",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 1, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Machi-kanshisha",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 2,
+        "size": "medium",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Nunchaku",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 2,
+        "size": "small",
+        "keywords": "Peasant",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 3, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Sang Kauw (Crescent Blade)",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 1,
+        "damageKeep": 2,
+        "size": "medium",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 10, "bu": 0, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Sang Kauw (Shield)",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 1,
+        "size": "medium",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 10, "bu": 0, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Tonfa",
+      "type": "weapon",
+      "folder": "Staves",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 3,
+        "size": "medium",
+        "keywords": "Peasant",
+        "associatedSkill": "Staves",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 5, "zeni": 0 },
+        "specialRules": "The armor part of the target's Armor TN counts twice against it."
+      }
+    },
+    {
+      "name": "Katana",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 2,
+        "size": "medium",
+        "keywords": "Samurai",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "specialRules": "One Void Point may add +1k1 to a damage roll with it, once per roll."
+      }
+    },
+    {
+      "name": "Ninja-to",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 204,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 2,
+        "size": "medium",
+        "keywords": "Ninja",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 5, "bu": 0, "zeni": 0 },
+        "specialRules": "Hidden as a small weapon. Breaks after one attack deals over 40 Wounds."
+      }
+    },
+    {
+      "name": "No-dachi",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 205,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 3,
+        "damageKeep": 3,
+        "size": "large",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 30, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Parangu",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 205,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 2,
+        "size": "medium",
+        "keywords": "Peasant",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 0, "bu": 10, "zeni": 0 },
+        "specialRules": "Breaks after one attack deals over 30 Wounds."
+      }
+    },
+    {
+      "name": "Scimitar",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 205,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 3,
+        "size": "medium",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 20, "bu": 0, "zeni": 0 }
+      }
+    },
+    {
+      "name": "Wakizashi",
+      "type": "weapon",
+      "folder": "Swords",
+      "page": 205,
+      "coverage": "partial",
+      "system": {
+        "damageRoll": 2,
+        "damageKeep": 2,
+        "size": "medium",
+        "keywords": "Samurai",
+        "associatedSkill": "Kenjutsu",
+        "fallbackTrait": "agi",
+        "price": { "koku": 15, "bu": 0, "zeni": 0 },
+        "specialRules": "May be thrown with Athletics, up to 20'."
+      }
+    },
+    {
+      "name": "War Fan",
+      "type": "weapon",
+      "folder": "War Fans",
+      "page": 205,
+      "coverage": "full",
+      "system": {
+        "damageRoll": 0,
+        "damageKeep": 1,
+        "size": "small",
+        "associatedSkill": "War Fan",
+        "fallbackTrait": "agi",
+        "price": { "koku": 5, "bu": 0, "zeni": 0 }
+      }
+    }
+  ]
+}

@@ -1,25 +1,26 @@
 /**
  * L5R4 Enhanced System - Main SCSS Entry Point
  * Modular CSS architecture organized by concern:
- * - base/        → Variables, resets, and foundational styles
- * - utilities/   → Single-purpose utility classes
+ * - base/        → Variables, resets, and utility classes
  * - layout/      → Grid and flexbox layout patterns
  * - components/  → Reusable UI components
  * - features/    → Domain-specific feature modules
  * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
- * - chat/        → Chat message styling
+ * - sheets/      → Rules for one sheet as a whole
+ * A few partials sit outside their folder's group: the cascade keeps the order the stylesheet had.
  */
 
 // Base Styles
 @use "./base/variables";
 @use "./base/reset";
+@use "./base/utilities";
 
-// Utilities
-@use "./utilities";
-
-// Chat
-@use "./chat";
+// Chat cards and the check dialog
+@use "./components/chat-card";
+@use "./components/check-card";
+@use "./components/damage-result";
+@use "./components/flow-card";
+@use "./components/check-dialog";
 
 // Layout
 @use "./layout/actor-layout";
@@ -27,26 +28,34 @@
 @use "./layout/item-layout";
 
 // Components
-@use "./components/forms";
-@use "./components/buttons";
-@use "./components/grids";
-@use "./components/sections";
-@use "./components/item-lists";
-@use "./components/animations";
+@use "./components/form-field";
+@use "./components/button";
+@use "./components/grid";
+@use "./components/section";
+@use "./components/item-row";
+@use "./components/rank-control";
+@use "./components/rules-editor";
+@use "./components/ledger-dialog";
+@use "./components/inline-control";
+@use "./apps/effect-panel";
+@use "./components/inline-link";
+@use "./components/request-card";
+@use "./apps/compendium-browser";
+@use "./components/item-summary-card";
+@use "./components/tabs";
 
 // Features
 @use "./features/pc-info";
 @use "./features/traits-rings";
 @use "./features/ranks";
-@use "./features/wounds";
-@use "./features/initiative";
-@use "./features/armor";
+@use "./features/wound-track";
 
 // Apps
 @use "./apps/wound-config";
 @use "./apps/xp-manager";
 @use "./apps/emphasis-manager";
+@use "./apps/design-gallery";
 
-// Sheets (minimal overrides)
+// Sheets
 @use "./sheets/actor-sheet";
 @use "./sheets/item-sheet";

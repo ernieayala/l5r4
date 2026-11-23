@@ -14,8 +14,6 @@
  * All arrays are frozen to prevent runtime modification.
  */
 
-const freeze = Object.freeze;
-
 /**
  * Canonical trait key order for L5R4 system.
  *
@@ -29,9 +27,9 @@ const freeze = Object.freeze;
  * This order is used for iteration in actor data preparation and UI display.
  *
  * @constant {ReadonlyArray<string>}
- * @see module:documents/actor/calculations/shared-traits-rings for trait calculation
+ * @see module:documents/actor/calculations/shared-traits-rings-system for trait calculation
  */
-export const TRAIT_KEYS = freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
+export const TRAIT_KEYS = Object.freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
 
 /**
  * Maximum character length for custom skill emphasis names.
@@ -61,18 +59,8 @@ export const MIN_EMPHASIS_LENGTH = 1;
  *
  * @type {ReadonlyArray<string>}
  * @constant
- *
- * @example
- * // Check if emphasis is official
- * const isOfficial = OFFICIAL_EMPHASES.includes("Katana"); // true
- *
- * @example
- * // Provide autocomplete suggestions
- * const suggestions = OFFICIAL_EMPHASES.filter(e =>
- *   e.toLowerCase().startsWith(userInput.toLowerCase())
- * );
  */
-export const OFFICIAL_EMPHASES = freeze([
+export const OFFICIAL_EMPHASES = Object.freeze([
   "Aiguchi",
   "Ambush",
   "Appraisal",

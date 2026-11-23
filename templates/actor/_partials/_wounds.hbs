@@ -1,38 +1,42 @@
-<section class="wounds">
-  <div class="flexrow -gap-sm section-title">
-    <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.wounds"}}</h4>
-    <a
+<section class="l5r4-section">
+  {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" label="l5r4.ui.mechanics.wounds.label" compact=true}}
+    <button
+      type="button"
       class="button inline-control icon"
       data-action="apply-healing"
-      title="{{localize 'l5r4.ui.mechanics.wounds.applyHealingTitle'}}"
+      data-tooltip="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}"
+      aria-label="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}"
     >
-      <i class="fas fa-bed"></i>
-    </a>
-    <a
+      <i class="fa-solid fa-bed" inert></i>
+    </button>
+    <button
+      type="button"
       class="button inline-control icon"
-      data-action="wound-config"
-      title="{{localize 'l5r4.ui.mechanics.wounds.woundConfiguration'}}"
+      data-action="open-wound-config"
+      data-tooltip="{{localize "l5r4.apps.woundConfig.title"}}"
+      aria-label="{{localize "l5r4.apps.woundConfig.title"}}"
     >
-      <i class="fas fa-cog"></i>
-    </a>
-  </div>
-  <div class="grid">
-    <span>{{localize "l5r4.ui.mechanics.wounds.woundsSuffered"}}</span>
-    <div class="flexrow"><input
+      <i class="fa-solid fa-gear" inert></i>
+    </button>
+  {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
+  <div class="l5r4-grid">
+    <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.suffered"}}</span>
+    <div class="flexrow l5r4-grid-value"><input
         type="number"
         name="system.suffered"
         value="{{system.suffered}}"
         data-type="Number"
+        aria-label="{{localize "l5r4.ui.mechanics.wounds.suffered"}}"
       /></div>
 
     {{#if (eq actor.type "pc")}}
-      <span title="(Stamina × 2) + Insight Rank + Modifier = ({{system.traits.sta}} × 2) + {{system.insight.rank}} + {{system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
-      <div class="flexrow">{{system.wounds.healRate}}</div>
+      <span class="l5r4-grid-label" data-tooltip="{{localize "l5r4.ui.mechanics.wounds.healRateBreakdown" sta=system.traits.sta rank=system.insight.rank mod=system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
+      <div class="flexrow l5r4-grid-value">{{system.wounds.healRate}}</div>
     {{/if}}
 
     {{#if (and (eq actor.type "npc") (eq system.woundMode "manual"))}}
-      <span>{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</span>
-      <div class="flexrow"><input
+      <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</span>
+      <div class="flexrow l5r4-grid-value"><input
           type="number"
           value="{{system.wounds.max}}"
           data-type="Number"
@@ -40,35 +44,11 @@
         /></div>
     {{/if}}
 
-    <div class="wound-grid">
-      <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
-      <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
-      <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
-      <span>{{localize "l5r4.ui.common.current"}}</span>
-      {{#if (eq actor.type "npc")}}
-        {{#each system.visibleWoundLevels as |lvl name|}}
-          <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-          <div>{{penaltyEff}}</div>
-          <div>{{value}}</div>
-          <div>
-            {{#if current}}
-              <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
-            {{/if}}
-          </div>
-        {{/each}}
-      {{else}}
-        {{#each system.woundLevels as |lvl name|}}
-          <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
-          <div>{{penaltyEff}}</div>
-          <div>{{value}}</div>
-          <div>
-            {{#if current}}
-              <input type="checkbox" disabled {{checked current}} data-type="Boolean" />
-            {{/if}}
-          </div>
-        {{/each}}
-      {{/if}}
-    </div>
+    {{#if (eq actor.type "npc")}}
+      {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=system.visibleWoundLevels editable=false}}
+    {{else}}
+      {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=system.woundLevels editable=false}}
+    {{/if}}
   </div>
 
 </section>

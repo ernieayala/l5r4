@@ -1,0 +1,10 @@
+{
+  "files": {
+    "tests/quench/index.js": "import { registerFearTests } from \"./services/fear.js\";\n\nexport function registerQuenchTests(quench) {\n  registerFearTests(quench);\n}\n",
+    "tests/quench/helpers.js": "export function cleanTest() {}\n\nexport function withSetup(quench) {\n  return Object.create(quench, {\n    registerBatch: { value: (key, fn, options) => quench.registerBatch(key, context => fn(context), options) }\n  });\n}\n",
+    "tests/quench/services/fear.js": "export function registerFearTests(quench) {\n  quench.registerBatch(\n    `${SYS_ID}.services.fear`,\n    context => {\n      const { describe, it } = context;\n      describe(\"Fear Rank and the Fear test\", () => {\n        it(\"should raise the TN by 5 for each Fear Rank\", () => {});\n      });\n    },\n    { displayName: \"L5R4: Fear and Void Points\" }\n  );\n}\n",
+    "tests/quench/smoke.js": "export function registerSmokeTests(quench) {\n  quench.registerBatch(`${SYS_ID}.smoke`, () => {}, { displayName: \"L5R4: Smoke\" });\n}\n",
+    "module/utils/check.js": "export function buildPool() {}\n",
+    "tests/unit/utils/check.test.js": "import { describe, expect, it } from \"vitest\";\nimport { buildPool } from \"../../../module/utils/check.js\";\n\ndescribe(\"buildPool\", () => {\n  it(\"should roll Skill plus Trait and keep the Trait\", () => {\n    expect(buildPool).toBeTypeOf(\"function\");\n  });\n});\n\ndescribe(\"Book example: the Ten Dice Rule (p.77)\", () => {\n  it(\"should turn 12k4 into 10k5\", () => {});\n});\n"
+  }
+}

@@ -1,0 +1,104 @@
+import { readFile, access } from "node:fs/promises";
+import { beforeAll, describe, expect, it } from "vitest";
+
+const root = new URL("../", import.meta.url);
+const readJson = async path => JSON.parse(await readFile(new URL(path, root), "utf8"));
+const lookup = (object, path) => path.split(".").reduce((node, key) => node?.[key], object);
+
+let manifest;
+let lang;
+let pkg;
+let DATA_MODELS;
+let CORE_TYPE_DATA_MODELS;
+
+beforeAll(async () => {
+  // The data model classes extend Foundry's base models when their modules load; outside Foundry bare classes stand
+  // in for them. Nothing here builds a model, only reads which classes are registered.
+  globalThis.foundry = {
+    abstract: { DataModel: class {}, TypeDataModel: class {} },
+    data: { ActiveEffectTypeDataModel: class {} }
+  };
+  ({ DATA_MODELS, CORE_TYPE_DATA_MODELS } = await import("../module/data/models.js"));
+  manifest = await readJson("system.json");
+  lang = await readJson("lang/en.json");
+  pkg = await readJson("package.json");
+});
+
+/** Every [documentName, subtype] pair declared in system.json. */
+const declaredSubtypes = () =>
+  Object.entries(manifest.documentTypes).flatMap(([documentName, types]) =>
+    Object.keys(types).map(type => [documentName, type])
+  );
+
+describe("The system.json manifest for Foundry v14", () => {
+  it("should declare itself a system", () => {
+    expect(manifest.type).toBe("system");
+  });
+
+  it("should require Foundry 14.370 and stop at 14", () => {
+    expect(manifest.compatibility).toEqual({
+      minimum: "14.370",
+      verified: "14.370",
+      maximum: "14"
+    });
+  });
+
+  it("should load only the stylesheet that build:css writes, in the system cascade layer", () => {
+    const output = pkg.scripts["build:css"].split(/\s+/).at(-1);
+    expect(manifest.styles).toEqual([{ src: output, layer: "system" }]);
+  });
+
+  it("should point every language at a JSON file that parses", async () => {
+    for (const { path } of manifest.languages) {
+      await expect(access(new URL(path, root))).resolves.toBeUndefined();
+      await expect(readJson(path)).resolves.toBeTypeOf("object");
+    }
+  });
+
+  it("should recommend the modules the animations need, Sequencer and JB2A", () => {
+    const recommended = manifest.relationships.recommends.map(({ id, type }) => `${type}:${id}`);
+    expect(recommended).toEqual(["module:sequencer", "module:JB2A_DnD5e"]);
+  });
+
+  it("should give every declared subtype a display name in lang/en.json", () => {
+    for (const [documentName, type] of declaredSubtypes()) {
+      const key = `TYPES.${documentName}.${type}`;
+      expect(lookup(lang, key), key).toBeTypeOf("string");
+    }
+  });
+});
+
+describe("The system.json manifest and the registered data models", () => {
+  it("should give every declared subtype a data model", () => {
+    for (const [documentName, type] of declaredSubtypes()) {
+      expect(DATA_MODELS[documentName]?.[type], `${documentName}.${type}`).toBeTypeOf("function");
+    }
+  });
+
+  it("should declare every registered data model in documentTypes", () => {
+    for (const [documentName, models] of Object.entries(DATA_MODELS)) {
+      for (const type of Object.keys(models)) {
+        expect(
+          manifest.documentTypes[documentName]?.[type],
+          `${documentName}.${type}`
+        ).toBeDefined();
+      }
+    }
+  });
+
+  it("should give core's base ActiveEffect type a model and leave it out of documentTypes", () => {
+    expect(CORE_TYPE_DATA_MODELS.ActiveEffect?.base).toBeTypeOf("function");
+    for (const [documentName, models] of Object.entries(CORE_TYPE_DATA_MODELS)) {
+      for (const type of Object.keys(models)) {
+        expect(
+          manifest.documentTypes[documentName]?.[type],
+          `${documentName}.${type}`
+        ).toBeUndefined();
+      }
+    }
+  });
+
+  it("should ship no template.json, whose subtypes the data models replace", async () => {
+    await expect(access(new URL("template.json", root))).rejects.toThrow();
+  });
+});

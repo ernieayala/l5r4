@@ -1,25 +1,25 @@
-<section class="tab {{#if (eq currentTab "effects")}}active{{/if}}" data-tab="effects" data-application-part="effects">
+<section class="l5r4-section tab {{#if (eq currentTab "effects")}}active{{/if}}" role="tabpanel" data-tab="effects" data-application-part="effects">
   {{!-- Active Effects Management --}}
-  <div class="effects">
+  <div>
     {{#if editable}}
-      <button type="button" class="effect-create">
-        <i class="fas fa-plus"></i> {{localize "l5r4.ui.common.new"}}
+      <button type="button" data-action="create-effect">
+        <i class="fa-solid fa-plus" inert></i> {{localize "l5r4.ui.common.new"}}
       </button>
     {{/if}}
 
-    <ol class="effects-list">
+    <ol class="l5r4-effect-list">
       {{#each effects as |e|}}
-        <li class="flexrow -gap-sm effect" data-effect-id="{{e.id}}">
-          <div class="flex1 effect-name">
+        <li class="flexrow -gap-sm l5r4-effect-list-row" data-effect-id="{{e.id}}">
+          <div class="flex1 l5r4-effect-list-name">
             {{#if e.label}}{{e.label}}{{else}}{{e.name}}{{/if}}
             {{#if e.disabled}}<em>({{localize "l5r4.ui.common.disabled"}})</em>{{/if}}
           </div>
-          <div class="flexrow -gap-md flex0 effect-controls">
-            <a class="effect-edit" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-            <a class="effect-toggle">
-              <i class="fas {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
-            </a>
-            <a class="effect-delete" title="{{localize "l5r4.ui.common.delete"}}"><i class="fas fa-trash"></i></a>
+          <div class="flexrow -gap-md flex0 l5r4-inline-control">
+            <button type="button" class="l5r4-effect-list-button" data-action="edit-effect" data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></button>
+            <button type="button" class="l5r4-effect-list-button" data-action="toggle-effect" aria-pressed="{{#if e.disabled}}false{{else}}true{{/if}}" data-tooltip="{{localize "l5r4.ui.common.toggle"}}" aria-label="{{localize "l5r4.ui.common.toggle"}}">
+              <i class="fa-solid {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}" inert></i>
+            </button>
+            <button type="button" class="l5r4-effect-list-button" data-action="delete-effect" data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></button>
           </div>
         </li>
       {{/each}}
