@@ -17,7 +17,6 @@ import {
   SAVE_EVENTS,
   SAVE_FAILURES
 } from "../../config/rule-keys.js";
-import { USE_PERIODS } from "../../utils/effects.js";
 import { selectorField, typeField, valueField } from "../fields.js";
 import RuleData from "./rule-data.js";
 
@@ -321,8 +320,9 @@ export class PeriodicSaveRule extends RuleData {
 }
 
 /**
- * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The slug "void" raises the
- * once-per-Round Void Point limit (STAGE-09 decision 6).
+ * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The one resource the system counts is
+ * the Void Points a Round allows (STAGE-09 decision 6), so the slug is "void" and the period "round"; any other is
+ * flagged rather than kept as a rule that does nothing (Ernie's ruling, #174).
  * game-rules/25_rings_and_traits.md, p.78
  */
 export class ResourceRule extends RuleData {
@@ -331,9 +331,9 @@ export class ResourceRule extends RuleData {
     const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
-      slug: new StringField({ required: true, blank: false }),
+      slug: new StringField({ required: true, initial: "void", choices: ["void"] }),
       max: valueField(1),
-      per: new StringField({ required: true, initial: "round", choices: USE_PERIODS })
+      per: new StringField({ required: true, initial: "round", choices: ["round"] })
     };
   }
 }

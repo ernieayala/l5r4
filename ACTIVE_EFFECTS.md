@@ -30,7 +30,7 @@ A rule the system cannot use shows its error in red above its fields until it is
 
 Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
 
-Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's roll rules (the ones a roll reads, such as `RollModifier` and `TNModifier`) apply only to rolls made with that weapon: its attacks and its damage. Its other rules apply while it is on the character. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
 ### Fields every rule has
 
@@ -66,7 +66,7 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | `ApplyCondition` | `selector`, `condition`, `level` | A successful selected roll with a target shows a button that puts the status `condition` (at `level`, for a Fear Rank) on the target |
 | `ConditionImmunity` | `condition` | The character cannot gain that status |
 | `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
-| `Resource` | `slug`, `max` _n/f_, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
+| `Resource` | `slug`, `max` _n/f_, `per` | `max` more Void Points a character may spend each Round. The only slug is `void` and the only `per` is `round`; any other is flagged and skipped |
 | `OpponentModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
 | `RaiseRule` | `selector`, `maneuver`, `cost` _n/f_, `cap` _n/f_, `minimum` _n/f_ | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
 | `UnskilledAs` | `selector`, `rank` _n/f_ | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
@@ -267,7 +267,7 @@ The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four
 | `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type      |
 | `emphasis`                           | Each Emphasis                                           |
 | `item:<type>`                        | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
-| `self`                               | The item carrying the rule                              |
+| `self`                               | The item carrying the rule, whether or not it is active or worn; on an effect, nothing |
 
 An Advantage that costs 1 less for a Crane character:
 

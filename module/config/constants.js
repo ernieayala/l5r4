@@ -13,6 +13,13 @@
 export const SYS_ID = "l5r4-enhanced";
 
 /**
+ * The item types that are weapons: `weapon`, and the legacy `bow` type a world migration turns into one, still valid
+ * in `system.json`.
+ * @type {ReadonlyArray<string>}
+ */
+export const WEAPON_TYPES = Object.freeze(["weapon", "bow"]);
+
+/**
  * Root path to system directory within Foundry's systems folder, `systems/l5r4-enhanced`.
  * Used as base for all asset and template paths.
  * @type {string}

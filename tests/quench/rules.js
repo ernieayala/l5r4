@@ -942,6 +942,58 @@ export function registerRulesTests(quench) {
           await item.delete();
         });
       });
+
+      // #174: what a rule applies to
+      describe("Rule scope", () => {
+        it("should apply a legacy bow's roll rules only to rolls made with it", async () => {
+          const actor = track(await createTestPC({ name: "Rules: archer" }));
+          const [bow] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Rules: old bow",
+              type: "bow",
+              system: { rules: [{ key: "FreeRaise", selector: "attack", value: 1 }] }
+            }
+          ]);
+          assert.equal(getCheckContext(actor, { kind: "attack" }).freeRaises, 0, "another attack");
+          assert.equal(getCheckContext(actor, { kind: "attack", weapon: bow }).freeRaises, 1);
+        });
+
+        it("should price a kata by its own `self` Cost rule while it is not in use", async () => {
+          const actor = track(await createTestPC({ name: "Rules: kata buyer" }));
+          await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Rules: cheap kata",
+              type: "kata",
+              system: {
+                ring: "air",
+                mastery: 3,
+                rules: [{ key: "Cost", selector: "self", value: "@cost - 1" }]
+              }
+            }
+          ]);
+          const entry = actor.system._xp.entries.find(e => e.name === "Rules: cheap kata");
+          assert.equal(entry?.delta, 2, "Mastery 3, less 1");
+        });
+
+        it("should keep an effect's `self` Cost rule from pricing Trait ranks", async () => {
+          const actor = track(
+            await createTestPC({ name: "Rules: free ranks", system: { traits: { ref: 3 } } })
+          );
+          const before = actor.system._xp.spent;
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Rules: stray self cost",
+              system: { rules: [{ key: "Cost", selector: "self", value: "@cost * 0" }] }
+            }
+          ]);
+          assert.equal(actor.system._xp.spent, before, "no rank becomes free");
+        });
+
+        it("should flag a Resource for anything but the Round's Void Points", () => {
+          assert.throws(() => createRule({ key: "Resource", slug: "focus" }), /slug/);
+          assert.throws(() => createRule({ key: "Resource", slug: "void", per: "day" }), /per/);
+        });
+      });
     },
     { displayName: "L5R4: Rule engine" }
   );

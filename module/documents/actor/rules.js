@@ -13,7 +13,7 @@
  * The roll options themselves are module/documents/actor/roll-options.js.
  */
 
-import { SYS_ID } from "../../config/constants.js";
+import { SYS_ID, WEAPON_TYPES } from "../../config/constants.js";
 import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
@@ -147,7 +147,9 @@ function onRuleProblem(actor, source, message) {
 
 /**
  * The rule sources of the items whose rules are active, a choice not yet made waiting for it. A second School's
- * TraitAdjust is the creation bonus of the School a character starts in, so it gives none (Ernie's ruling, #156).
+ * TraitAdjust is the creation bonus of the School a character starts in, so it gives none (Ernie's ruling, #156). An
+ * item whose rules are not active (a kata, kiho, or tattoo not in use, armor not worn) still prices itself: its
+ * `self` Cost rules count, since a price does not wait for the item to be used (#174).
  * game-rules/48_character_creation_expanded.md, p.102
  * game-rules/49_improving_your_character.md, p.105
  * @param {Actor} actor
@@ -156,25 +158,35 @@ function onRuleProblem(actor, source, message) {
 function itemRuleSourcesOf(actor) {
   const sources = [];
   for (const item of actor.items) {
-    if (item.system.rulesActive) {
-      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
-      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
-      const secondSchool = isSecondSchool(item);
-      sources.push(
-        ...applyChoices(item.system.ownedRules)
-          .filter(rule => !(secondSchool && rule?.key === "TraitAdjust"))
-          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
-          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
-          .map(rule => ({
-            rule,
-            source: item.name,
-            itemId: item.id,
-            ...extra
-          }))
-      );
-    }
+    // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries); a legacy bow is a
+    // weapon too (#174). Its other rules apply while it is carried (Ernie's ruling, #174)
+    const extra = WEAPON_TYPES.includes(item.type) ? { weaponId: item.id } : {};
+    const active = item.system.rulesActive;
+    const secondSchool = isSecondSchool(item);
+    sources.push(
+      ...applyChoices(item.system.ownedRules)
+        .filter(rule => active || isSelfCost(rule))
+        .filter(rule => !(secondSchool && rule?.key === "TraitAdjust"))
+        // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
+        .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
+        .map(rule => ({
+          rule,
+          source: item.name,
+          itemId: item.id,
+          ...extra
+        }))
+    );
   }
   return sources;
+}
+
+/**
+ * Whether a rule prices the item that carries it.
+ * @param {object} rule
+ * @returns {boolean}
+ */
+function isSelfCost(rule) {
+  return rule?.key === "Cost" && rule.selector === "self";
 }
 
 /**

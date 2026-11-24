@@ -247,6 +247,13 @@ describe("getCostPricer", () => {
     expect(entries.map(e => e.delta)).toEqual([1, 4]);
   });
 
+  // #174: an effect's `self` rule carries no item id, and a Trait's or Skill's price passes none
+  it("should never price a Trait or Skill rank with a `self` rule that names no item", () => {
+    const price = pricer({ self: [cost("self", "@cost * 0")] });
+    expect(price(["trait:ref"], 16)).toBe(16);
+    expect(price(["skill:kenjutsu"], 3, null)).toBe(3);
+  });
+
   it("should reach Skills by name or type, and Emphases", () => {
     const price = pricer({
       "skill-type:high": [cost("skill-type:high", "@cost - 1")],

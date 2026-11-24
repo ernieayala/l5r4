@@ -87,8 +87,10 @@ export function getCostPricer({ costs, options, rollData, report = () => {} }) {
   return (selectors, base, itemId = null) => {
     const rules = [
       ...getBagEntries(bag, "costs", { selectors, options }),
+      // `self` is the item carrying the rule: a price with no item (a Trait, a Skill rank) or a rule with none (an
+      // effect's) never matches it (#174)
       ...getBagEntries(bag, "costs", { selectors: ["self"], options }).filter(
-        rule => rule.itemId === itemId
+        rule => Boolean(rule.itemId) && rule.itemId === itemId
       )
     ];
     let price = base;
