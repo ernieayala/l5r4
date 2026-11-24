@@ -2,9 +2,9 @@
  * @module services/dice/check/roll-check
  * @description L5R4Check: the one roll pipeline (roadmap/STAGE-08-ROLL-PIPELINE.md). A check names what it rolls;
  * the pipeline gathers its modifiers (collect.js), offers every choice the rules leave to the roller in one dialog
- * (AUTOMATION.md §4), settles the terms those choices set (terms.js), spends a Void Point, builds the pool with the
- * Ten Dice Rule last, rolls, compares with the TN, and posts a `roll` ChatMessage holding the whole context
- * (message-data.js).
+ * (dialog.js, AUTOMATION.md §4), settles the terms those choices set (terms.js), spends its Void Points, builds the
+ * pool with the Ten Dice Rule last, rolls, compares with the TN, and posts a `roll` ChatMessage holding the whole
+ * context (message-data.js).
  *
  * The rules it applies: Roll & Keep, the Ten Dice Rule and exploding dice, Void Points (never on damage), Raises and
  * Free Raises, Unskilled Rolls, wound penalties on the TN (roadmap/STAGE-08 decision 2), Emphases, and Embracing
@@ -20,17 +20,15 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { buildPool, getCheckResult, getPoolFormula } from "../../../utils/check.js";
 import { askGmAllow } from "../../gm-allow.js";
-import { askPrompt } from "../../dialog.js";
 import { spendVoidPoint } from "../resources/void-points.js";
 import { applyTrackChange } from "../../ledger.js";
 import { renderCheckCard } from "./card.js";
-import { bindManeuverCost } from "./maneuver-cost.js";
+import { askCheckChoices } from "./dialog.js";
 import {
   formatLabelWithSuffix,
   buildCheckLabel,
@@ -38,13 +36,7 @@ import {
   buildTnModifiers,
   getCheckTn
 } from "./message-data.js";
-import {
-  buildCheck,
-  buildChosenTerms,
-  buildDialogContext,
-  buildPreparedTerms,
-  getManeuverPayment
-} from "./terms.js";
+import { buildCheck, buildChosenTerms, buildPreparedTerms, getManeuverPayment } from "./terms.js";
 
 /**
  * What a caller asks the pipeline to roll.
@@ -177,32 +169,23 @@ async function canWieldWeapon({ actor, kind, weapon }) {
 }
 
 /**
- * Show the check dialog with the check's terms.
- * @param {object} check - From buildCheck
- * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
- */
-function askCheckChoices(check) {
-  const bind = check.kind === "attack" ? form => bindManeuverCost(form, check, formDataOf) : null;
-  return askChoices(check.request, buildDialogContext(check), bind);
-}
-
-/**
- * Spend the check's Void Points: one on the roll, one on the Skill's rank; each Void Point use is its own point.
+ * Spend the check's Void Points: one on the roll, one on the Skill's rank; each Void Point use is its own point, and
+ * all of them are taken together or none is.
  * game-rules/25_rings_and_traits.md, p.78
  * @param {Actor} actor
  * @param {object} terms - The chosen terms
- * @returns {Promise<boolean>} False, after a warning, when a point cannot be spent
+ * @returns {Promise<boolean>} False, after a warning, when the points cannot be spent
  */
 async function spendCheckVoidPoints(actor, terms) {
   const count = Number(terms.voidPoint) + Number(terms.voidSkill);
-  for (let i = 0; i < count; i++) {
-    const spent = await spendVoidPoint(actor);
-    if (!spent.success) {
-      ui.notifications?.warn(spent.message);
-      return false;
-    }
+  if (!count) {
+    return true;
   }
-  return true;
+  const spent = await spendVoidPoint(actor, count);
+  if (!spent.success) {
+    ui.notifications?.warn(spent.message);
+  }
+  return spent.success;
 }
 
 /**
@@ -273,45 +256,4 @@ async function deleteConsumedEffects(applied) {
   for (const uuid of consumed) {
     await (await fromUuid(uuid))?.delete();
   }
-}
-
-/**
- * Read the dialog's form into choices.
- * @param {HTMLFormElement} form
- * @returns {object}
- */
-function formDataOf(form) {
-  return foundry.utils.expandObject(new foundry.applications.ux.FormDataExtended(form).object);
-}
-
-/**
- * Show the check dialog.
- * @param {CheckRequest} request
- * @param {object} context - Dialog template context
- * @param {function(HTMLFormElement): void|null} bind - Wires the rendered form's live parts (an attack's maneuvers)
- * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
- */
-async function askChoices(request, context, bind) {
-  // Each field's label points at its control by id; the ids are unique to this dialog
-  const formId = foundry.utils.randomID();
-  const extras = request.extras
-    ? await foundry.applications.handlebars.renderTemplate(request.extras.template, {
-        ...request.extras.data,
-        formId
-      })
-    : "";
-  const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.check, {
-    ...context,
-    formId,
-    extras
-  });
-  return askPrompt({
-    window: { title: request.label },
-    position: { width: 420 },
-    content,
-    ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => formDataOf(button.form) },
-    render: bind ? (_event, dialog) => bind(dialog.element.querySelector("form")) : undefined,
-    rejectClose: false,
-    modal: true
-  });
 }

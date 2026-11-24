@@ -2,7 +2,8 @@
  * @module services/dice/rolls/maho-cast-roll
  * @description Blood magic through the roll pipeline (module/services/dice/check/roll-check.js):
  * - Casting Roll: (Insight Rank + Ring)k(Ring) against TN 5 + 5 × Mastery Level
- * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result
+ * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result; given back when the check stops
+ *   before rolling
  * - One Free Raise per additional full blood cost paid
  * - Taint on a successful cast: Mastery Level - 1, at least 1
  * - Master of Blood (its RollOption): 1 Wound less, Taint reduced by the Earth Ring, at least 1
@@ -34,6 +35,8 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
   // Master of Blood: the item carries a RollOption rule with this option
   const masterOfBlood = actor.rollOptions.has("master-of-blood");
   const bloodCost = masterOfBlood ? Math.max(mastery * 2 - 1, 1) : mastery * 2;
+  // The Wounds the blood cost took, given back when the check stops before the roll
+  const paid = { wounds: 0 };
 
   return rollCheck({
     actor,
@@ -47,7 +50,8 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
       template: DIALOG_TEMPLATES.checkMaho,
       data: { bloodCost }
     },
-    prepare: choices => spendBloodCost(actor, choices, { bloodCost }),
+    prepare: choices => spendBloodCost(actor, choices, { bloodCost, paid }),
+    cancel: () => applyBloodRefund(actor, paid),
     beforePost: ({ success }) => applyMahoTaint(actor, { success, mastery, masterOfBlood })
   });
 }
@@ -60,10 +64,11 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
  * game-rules/88_maho.md, p.267-268
  * @param {L5R4Actor} actor - The caster
  * @param {object} choices - The roll dialog's choices
- * @param {{bloodCost: number}} cost - The spell's blood cost in Wounds
+ * @param {{bloodCost: number, paid: {wounds: number}}} cost - The spell's blood cost in Wounds, and where the Wounds
+ *   taken are recorded for a refund
  * @returns {Promise<{freeRaises: number, freeRaisesToTn: number, labelSuffix: string}>} rollCheck's `prepare` result
  */
-async function spendBloodCost(actor, choices, { bloodCost }) {
+async function spendBloodCost(actor, choices, { bloodCost, paid }) {
   // Dialog input: whole numbers, never negative, and no more Free Raises on the TN than the blood buys
   const additional = Math.max(0, toInt(choices.additionalBlood));
   const total = bloodCost + additional;
@@ -71,17 +76,31 @@ async function spendBloodCost(actor, choices, { bloodCost }) {
   const freeRaisesToTn = Math.min(Math.max(0, toInt(choices.bloodRaisesToTn)), freeRaises);
   if (choices.bloodSource !== "other") {
     // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
-    const suffered = Math.min(
-      actor._source.system.suffered + total,
-      toInt(actor.system.wounds.max)
-    );
+    const before = actor._source.system.suffered;
+    const suffered = Math.min(before + total, toInt(actor.system.wounds.max));
     await actor.update({ "system.suffered": suffered });
+    paid.wounds = suffered - before;
   }
   return {
     freeRaises,
     freeRaisesToTn,
     labelSuffix: F("l5r4.magic.maho.bloodSuffix", { total })
   };
+}
+
+/**
+ * Give back the Wounds the blood cost took when the cast stops before its roll (a Void Point could not be spent).
+ * @param {L5R4Actor} actor - The caster
+ * @param {{wounds: number}} paid - The Wounds the blood cost took
+ * @returns {Promise<void>}
+ */
+async function applyBloodRefund(actor, paid) {
+  if (!paid.wounds) {
+    return;
+  }
+  const suffered = Math.max(0, actor._source.system.suffered - paid.wounds);
+  paid.wounds = 0;
+  await actor.update({ "system.suffered": suffered });
 }
 
 /**

@@ -7,7 +7,7 @@
  * game-rules/25_rings_and_traits.md, p.78
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../../effects/uses.js";
 
 /**
@@ -96,52 +96,44 @@ export function getRollActor(providedActor) {
  * Uses defensive fallback to 0 if data structure is missing.
  * Coerces to number to handle string values from form inputs.
  *
+ * Each Void Point use takes its own point, so a roll that spends two needs both.
+ * game-rules/25_rings_and_traits.md, p.78
+ *
  * @param {L5R4Actor|null} actor - Actor to check for Void Point availability
+ * @param {number} [count=1] - Void Points the roll needs
  * @returns {ValidationResult} Validation result with status, current pool, and error message
  */
-export function validateVoidPoints(actor) {
-  // Validation 1: Actor must exist (getRollActor may return null)
+export function validateVoidPoints(actor, count = 1) {
+  // getRollActor may return null
   if (!actor) {
-    return {
-      valid: false,
-      current: 0,
-      message: T("l5r4.ui.notifications.noActorForVoid")
-    };
+    return { valid: false, current: 0, message: T("l5r4.ui.notifications.noActorForVoid") };
   }
-
-  // Validation 2: Void Point pool must be > 0
   // Defensive: handle missing data structure, coerce to number, fallback to 0
-  const curVoid = Number(actor.system?.rings?.void?.value ?? 0) || 0;
-  if (curVoid <= 0) {
-    return {
-      valid: false,
-      current: 0,
-      message: T("l5r4.ui.mechanics.rings.voidPointsEmpty")
-    };
+  const current = Math.max(0, Number(actor.system?.rings?.void?.value ?? 0) || 0);
+  if (current >= count) {
+    return { valid: true, current, message: null };
   }
-
-  return {
-    valid: true,
-    current: curVoid,
-    message: null
-  };
+  return { valid: false, current, message: formatVoidShortage(actor, current, count) };
 }
 
 /**
- * Spend a Void Point and return its +1k1: one more die rolled and one more kept, so a 3k2 roll becomes 4k3.
+ * Spend Void Points, one per use, and return the +1k1 one gives: one more die rolled and one more kept, so a 3k2 roll
+ * becomes 4k3.
  *
  * The actor resolves through getRollActor, so the parameter may be left out. Inside the actor's lock the pool is
- * checked, then decremented by 1 through `actor.update` with `diff: true`. The one-per-round limit is the callers'
- * to enforce, as are the techniques and spells that lift it.
+ * checked for every point the roll needs, then all of them are taken in one `actor.update` with `diff: true`, so a
+ * roll never takes one point and stops for want of the next. The one-per-round limit is the callers' to enforce, as
+ * are the techniques and spells that lift it.
  *
- * A failed spend returns `success: false`, zero bonuses, and a localized message, which callers show through
- * `ui.notifications.warn`, instead of throwing.
+ * A failed spend takes nothing and returns `success: false`, zero bonuses, and a localized message, which callers show
+ * through `ui.notifications.warn`, instead of throwing.
  * game-rules/25_rings_and_traits.md, p.78
  *
  * @param {L5R4Actor} [actor] - Actor to spend Void Point from (optional; uses resolution chain)
+ * @param {number} [count=1] - Void Points to spend together
  * @returns {Promise<VoidSpendResult>} Result with success status, bonuses, and optional error
  */
-export async function spendVoidPoint(actor) {
+export async function spendVoidPoint(actor, count = 1) {
   // Step 1: Resolve actor using fallback chain (supports optional actor)
   const resolvedActor = getRollActor(actor);
 
@@ -153,21 +145,21 @@ export async function spendVoidPoint(actor) {
   // Step 2: Execute spending with exclusive lock to prevent race conditions
   return updateUnderLock(resolvedActor.id, async () => {
     // Step 3: Validate Void Point availability (inside lock)
-    const validation = validateVoidPoints(resolvedActor);
+    const validation = validateVoidPoints(resolvedActor, count);
 
-    // Step 4: Early return if validation failed (no Void available)
+    // Step 4: Early return if validation failed (not enough Void Points)
     if (!validation.valid) {
       return buildVoidRefusal(validation.message);
     }
 
-    warnVoidLimit(resolvedActor);
+    warnVoidLimit(resolvedActor, count);
 
-    // Step 5: Spend Void Point - decrement pool by 1. Availability was checked on the prepared pool; the write
-    // starts from the stored value, so an Active Effect on Void Points is never written into storage (B6).
+    // Step 5: Spend the Void Points in one write. Availability was checked on the prepared pool; the write starts
+    // from the stored value, so an Active Effect on Void Points is never written into storage (B6).
     await resolvedActor.update(
       {
-        "system.rings.void.value": resolvedActor._source.system.rings.void.value - 1,
-        ...buildVoidUseUpdate(resolvedActor)
+        "system.rings.void.value": resolvedActor._source.system.rings.void.value - count,
+        ...buildVoidUseUpdate(resolvedActor, count)
       },
       { diff: true }
     );
@@ -180,6 +172,20 @@ export async function spendVoidPoint(actor) {
       message: null
     };
   });
+}
+
+/**
+ * Why a roll cannot take its Void Points: none left, or fewer than it needs.
+ * @param {L5R4Actor} actor - The roller
+ * @param {number} current - Void Points left
+ * @param {number} needed - Void Points the roll needs
+ * @returns {string}
+ */
+function formatVoidShortage(actor, current, needed) {
+  if (current === 0) {
+    return T("l5r4.ui.mechanics.rings.voidPointsEmpty");
+  }
+  return F("l5r4.ui.mechanics.rings.voidPointsShort", { needed, name: actor.name, current });
 }
 
 /**

@@ -375,6 +375,56 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
+      // #138: each Void Point use takes its own point, and a roll takes all of them or none
+      // game-rules/25_rings_and_traits.md, p.78
+      describe("Several Void Points in one spend", () => {
+        let actor;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Void Points: several",
+            system: { rings: { void: { value: 1, rank: 2 } } }
+          });
+        });
+
+        afterEach(async () => {
+          await actor?.delete();
+          actor = null;
+        });
+
+        it("should take nothing when two are needed and one is left", async () => {
+          const result = await spendVoidPoint(actor, 2);
+          assert.isFalse(result.success);
+          assert.equal(
+            result.message,
+            game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsShort", {
+              needed: 2,
+              name: actor.name,
+              current: 1
+            })
+          );
+          assert.equal(actor._source.system.rings.void.value, 1, "the point stays");
+        });
+
+        it("should take both in one update when two are left", async () => {
+          await actor.update({ "system.rings.void.value": 2 });
+          let updates = 0;
+          const hook = Hooks.on("updateActor", doc => {
+            if (doc === actor) {
+              updates++;
+            }
+          });
+          try {
+            const result = await spendVoidPoint(actor, 2);
+            assert.isTrue(result.success);
+          } finally {
+            Hooks.off("updateActor", hook);
+          }
+          assert.equal(actor._source.system.rings.void.value, 0);
+          assert.equal(updates, 1, "one write");
+        });
+      });
+
       describe("Edge cases: Void Point validation", () => {
         let actor;
 

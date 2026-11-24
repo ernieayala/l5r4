@@ -6,9 +6,9 @@ The one dialog every roll opens before it rolls: the pool, each modifier with a 
 | --- | --- |
 | Template | `templates/dialogs/check-dialog.hbs`, `DIALOG_TEMPLATES.check` |
 | Extras | `templates/dialogs/check-extras/ring.hbs`, `spell.hbs`, `maho.hbs`, `slot.hbs` (`DIALOG_TEMPLATES.checkRing`, `checkSpell`, `checkMaho`, `checkSlot`), rendered by the caller and inserted as `{{{extras}}}` |
-| Opened by | `askChoices` (`module/services/dice/check/roll-check.js`): width 420, modal, title the roll's label, one button `l5r4.ui.common.roll`; closing returns null and nothing rolls |
-| Live parts | An attack's maneuvers: `bindManeuverCost` (`module/services/dice/check/maneuver-cost.js`), from the same terms the roll settles |
-| Read by | `formDataOf` (`module/services/dice/check/roll-check.js`), then every value coerced and bounded as user input (`buildChosenTerms` (`module/services/dice/check/terms.js`)) |
+| Opened by | `askChoices` (`module/services/dice/check/dialog.js`): width 420, modal, title the roll's label, one button `l5r4.ui.common.roll`; closing returns null and nothing rolls |
+| Live parts | The Void Point uses: `bindVoidUses` (`module/services/dice/check/dialog.js`). An attack's maneuvers: `bindManeuverCost` (`module/services/dice/check/maneuver-cost.js`), from the same terms the roll settles |
+| Read by | `formDataOf` (`module/services/dice/check/dialog.js`), then every value coerced and bounded as user input (`buildChosenTerms` (`module/services/dice/check/terms.js`)) |
 | SCSS | `scss/components/_check-dialog.scss`, styling `.l5r4-check-dialog` |
 | Quench | `l5r4-enhanced.roll-pipeline` |
 
@@ -103,7 +103,7 @@ T5 in typography.md asks for tabular figures in the pool and the modifier values
 | Contract | Detail |
 | --- | --- |
 | Focus | Tab walks the fields in template order, then the Roll button. Core's `DialogV2` owns submit and close; a close returns null, so nothing rolls |
-| Names | A modifier's `<label>` wraps its checkbox, so the row is its name. A `form-group` field's `<label>` carries `for`, and its control an `id` built from `formId`, which `askChoices` (`module/services/dice/check/roll-check.js`) makes once per open dialog and gives the extras too |
+| Names | A modifier's `<label>` wraps its checkbox, so the row is its name. A `form-group` field's `<label>` carries `for`, and its control an `id` built from `formId`, which `askChoices` (`module/services/dice/check/dialog.js`) makes once per open dialog and gives the extras too |
 | Groups | Each `<fieldset>` has a `<legend>`, so a reader hears the group before its toggles |
 | Disabled | A disabled toggle carries its reason in `data-tooltip` |
 | Warnings | A warning line has `role="note"` and an `inert` icon |
@@ -124,6 +124,7 @@ Modifier labels take the row's free space and wrap (`.l5r4-check-dialog-modifier
 | CD6 | A disabled toggle says why | Review (states.md rule 5) | `data-tooltip="{{localize "l5r4.ui.check.noVoidPoints"}}"` while disabled, on `name="void"` (`templates/dialogs/check-dialog.hbs`) | `{{disabled (not voidPoints)}}` alone (modeled) |
 | CD7 | The dialog's styles live in its own file under `.l5r4-check-dialog` | `tests/conventions/styles.test.js` (one component per file) | `scss/components/_check-dialog.scss` | The dialog's rules at the end of the chat card stylesheet (modeled) |
 | CD8 | Every field has an accessible name | Quench `l5r4-enhanced.design-gallery`, review | The TN's `<label for="{{formId}}-tn">` beside `name="tn"` (`templates/dialogs/check-dialog.hbs`) | A `<label>` with no `for` beside its control (modeled) |
+| CD9 | The roller can't choose more Void Point uses than they have points; the roll takes them all or none | Quench `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.services.void-points` | With one point, ticking `name="void"` disables `name="voidSkill"` with `l5r4.ui.check.voidPointsChosen` (`bindVoidUses`, `module/services/dice/check/dialog.js`); `spendVoidPoint(actor, count)` checks every point first (`module/services/dice/resources/void-points.js`) | Spending the points one at a time and stopping after the first, the point gone and no roll (modeled) |
 
 ## Do and don't
 
