@@ -296,6 +296,44 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #146: the Dog's "12: +10; 24: Dead", as the creatures pack stores it
+        // game-rules/99_creatures.md, p.318, 320
+        it(
+          "should kill a creature at the total its own Wound list names, and not one Wound later",
+          clean(async () => {
+            const { actor } = await attacker();
+            const dog = track(
+              await createTestNPC({
+                name: "Combat dog",
+                system: {
+                  woundMode: "manual",
+                  manualWoundLevels: {
+                    healthy: { value: 11, penalty: 0, active: true },
+                    nicked: { value: 23, penalty: 10, active: true },
+                    out: { value: 24, penalty: 0, active: true }
+                  }
+                }
+              })
+            );
+            const damageOf = async bonus =>
+              rollCheck({
+                actor,
+                kind: "damage",
+                label: "Bite",
+                base: { roll: 2, keep: 2, bonus },
+                target: dog,
+                askForOptions: false
+              });
+            await applyDamage(await damageOf(5), [dog]);
+            assert.equal(dog._source.system.suffered, 23, "18 + 5");
+            assert.isFalse(dog.statuses.has("dead"), "alive at 23");
+            await dog.update({ "system.suffered": 0 });
+            await applyDamage(await damageOf(6), [dog]);
+            assert.equal(dog._source.system.suffered, 24, "18 + 6");
+            assert.isTrue(dog.statuses.has("dead"), "dead at 24");
+          })
+        );
+
         // A control the user cannot use is not shown (#108)
         it(
           "should show Undo on a result card only to the roller's owner and a GM",

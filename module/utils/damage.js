@@ -159,12 +159,30 @@ export function canReduceWithVoid(result, voidPoints) {
 }
 
 /**
- * Whether Wounds past the Out Wound Rank kill (STAGE-10 decision 4).
+ * The Wounds that kill. With Wound Ranks from the Earth Ring, Out is a rank the character survives and Wounds past it
+ * kill (STAGE-10 decision 4). A creature's own Wound list instead names the total that kills it, which the list
+ * stores as its last rank (#146).
  * game-rules/33_wounds.md, p.82
- * @param {number} suffered - Wounds suffered
+ * game-rules/99_creatures.md, p.318
  * @param {number} out - The Out Wound Rank's threshold
+ * @param {boolean} ownWoundList - Whether the Wound Ranks are a creature's own list
+ * @returns {number} The Wounds that kill, or 0 with no Out threshold
+ */
+export function getDeathThreshold(out, ownWoundList) {
+  if (out <= 0) {
+    return 0;
+  }
+  return ownWoundList ? out : out + 1;
+}
+
+/**
+ * Whether the Wounds suffered kill.
+ * game-rules/33_wounds.md, p.82
+ * game-rules/99_creatures.md, p.318
+ * @param {number} suffered - Wounds suffered
+ * @param {number} deathThreshold - The Wounds that kill (getDeathThreshold)
  * @returns {boolean}
  */
-export function isDead(suffered, out) {
-  return out > 0 && suffered > out;
+export function isDead(suffered, deathThreshold) {
+  return deathThreshold > 0 && suffered >= deathThreshold;
 }
