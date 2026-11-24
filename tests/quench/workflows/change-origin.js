@@ -178,9 +178,15 @@ export function registerChangeOriginTests(quench) {
           clean(async function () {
             this.timeout(10_000);
             const actor = track(await createTestPC({ name: "Changes from another client: query" }));
+            const guard = track(await createTestPC({ name: "Changes from another client: guard" }));
+            // The query needs a proof the GM's client can check (#162): a guard the requester owns
             const query = () =>
               CONFIG.queries[APPLY_EFFECT_QUERY](
-                { actorUuid: actor.uuid, id: "dazed" },
+                {
+                  actorUuid: actor.uuid,
+                  id: "guarded",
+                  options: { proof: { kind: "guard", protectorUuid: guard.uuid } }
+                },
                 { user: game.user }
               );
             const settled = promise =>
@@ -192,13 +198,13 @@ export function registerChangeOriginTests(quench) {
             try {
               assert.isFalse(isAnsweringGmClient(), "another GM client started first");
               assert.isFalse(await settled(query()), "this client does not answer");
-              assert.isFalse(actor.statuses.has("dazed"), "nor does the work");
+              assert.isFalse(actor.statuses.has("guarded"), "nor does the work");
             } finally {
               onGmClientMessage({ ...earlier, type: "bye" });
             }
             assert.isTrue(isAnsweringGmClient(), "the other one left");
             assert.isTrue(await settled(query()), "this client answers");
-            assert.isTrue(actor.statuses.has("dazed"));
+            assert.isTrue(actor.statuses.has("guarded"));
           })
         );
 
