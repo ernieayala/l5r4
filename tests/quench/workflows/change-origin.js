@@ -171,7 +171,7 @@ export function registerChangeOriginTests(quench) {
 
       // #82: core sends a GM query to every client of the GM user, so only one of them answers
       describe("GM clients", () => {
-        const earlier = { id: "quench-earlier-gm-client", startedAt: 0, userId: game.user.id };
+        const earlier = { id: "quench-earlier-gm-client", startedAt: 0 };
 
         it(
           "should leave a GM query to the GM client that started first, and answer once it leaves",
@@ -194,13 +194,13 @@ export function registerChangeOriginTests(quench) {
                 promise.then(() => true),
                 new Promise(resolve => setTimeout(() => resolve(false), 500))
               ]);
-            onGmClientMessage({ ...earlier, type: "hello" });
+            onGmClientMessage({ ...earlier, type: "hello" }, game.user.id);
             try {
               assert.isFalse(isAnsweringGmClient(), "another GM client started first");
               assert.isFalse(await settled(query()), "this client does not answer");
               assert.isFalse(actor.statuses.has("guarded"), "nor does the work");
             } finally {
-              onGmClientMessage({ ...earlier, type: "bye" });
+              onGmClientMessage({ ...earlier, type: "bye" }, game.user.id);
             }
             assert.isTrue(isAnsweringGmClient(), "the other one left");
             assert.isTrue(await settled(query()), "this client answers");
@@ -250,6 +250,23 @@ export function registerChangeOriginTests(quench) {
             game.i18n.localize("l5r4.ui.requests.failed", { reason: "Quench failure" })
           ]);
         });
+
+        // #163: the sender is the user the server names, never one the payload claims
+        it(
+          "should ignore a player's message claiming to be an earlier GM client",
+          clean(async function () {
+            const player = game.users.find(user => !user.isGM);
+            if (!player) {
+              this.skip();
+            }
+            onGmClientMessage({ ...earlier, type: "hello", userId: game.user.id }, player.id);
+            try {
+              assert.isTrue(isAnsweringGmClient(), "this client still answers");
+            } finally {
+              onGmClientMessage({ ...earlier, type: "bye" }, game.user.id);
+            }
+          })
+        );
       });
 
       // game-rules/36_stances.md, p.84

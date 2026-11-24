@@ -94,15 +94,22 @@ export function registerGmClient() {
 
 /**
  * A message on the system socket from another GM client. The payload comes from another client, so it is checked: a
- * message that is not from a GM client, or names this client, changes nothing. A newcomer's "hello" is answered, so
- * it learns of this client at once.
- * @param {{type: string, id: string, startedAt: number, userId: string}} message
+ * message whose sender is not a GM user, or that names this client, changes nothing. The sender is the user id the
+ * server adds to every relayed message [src: dist/server/sockets.mjs, handleCustomSocket], never a field of the
+ * payload, which any client could write (#163). A newcomer's "hello" is answered, so it learns of this client at once.
+ * @param {{type: string, id: string, startedAt: number}} message
+ * @param {string} senderId - The id of the user whose client sent it, from the server
  */
-export function onGmClientMessage(message) {
-  const { type, id, userId } = message ?? {};
+export function onGmClientMessage(message, senderId) {
+  const { type, id } = message ?? {};
   const started = Number(message?.startedAt);
   const known = ["hello", "here", "bye"].includes(type);
-  if (!known || typeof id !== "string" || id === game.socket.id || !game.users.get(userId)?.isGM) {
+  if (
+    !known ||
+    typeof id !== "string" ||
+    id === game.socket.id ||
+    !game.users.get(senderId)?.isGM
+  ) {
     return;
   }
   if (type === "bye") {
@@ -134,9 +141,10 @@ function formatRefusal(name, err) {
 }
 
 /**
- * Tell the other GM clients about this one.
+ * Tell the other GM clients about this one. Only GM users receive it, so no player learns the GM clients' socket ids.
  * @param {"hello"|"here"|"bye"} type
  */
 function emitGmClientMessage(type) {
-  game.socket.emit(CHANNEL, { type, id: game.socket.id, startedAt, userId: game.user.id });
+  const recipients = game.users.filter(user => user.isGM).map(user => user.id);
+  game.socket.emit(CHANNEL, { type, id: game.socket.id, startedAt }, { recipients });
 }
