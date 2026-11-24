@@ -554,7 +554,9 @@ export function registerCombatTests(quench) {
         it(
           "should stop the roll for maneuvers the Raises cannot pay for",
           clean(async () => {
-            const { actor, katana } = await attacker();
+            // Void 3, so Disarm (3) is within the cap and offered; 1 declared Raise does not pay for it. The values are
+            // set without input events, so the dialog's live check does not disable Roll and the pipeline's check runs
+            const { actor, katana } = await attacker([], 3);
             const target = await defender();
             const before = game.messages.size;
             const none = await attack(actor, katana, target, {
@@ -652,6 +654,74 @@ export function registerCombatTests(quench) {
               "maneuver.fourLegged": true
             });
             assert.isNull(short);
+          })
+        );
+
+        // #135: the dialog shows the cost, raises the Raises to cover it, and never closes on a roll it cannot pay
+        // game-rules/28_raises.md, p.79
+        // game-rules/38_maneuvers.md, p.86
+        it(
+          "should keep the maneuvers' cost, payment, and TN live in the attack dialog",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const opened = new Promise(resolve => Hooks.once("renderDialogV2", resolve));
+            const rolled = rollCheck({
+              actor,
+              kind: "attack",
+              label: "Attack",
+              base: { roll: 6, keep: 4 },
+              skill: "kenjutsu",
+              trait: "agi",
+              weapon: katana,
+              target,
+              tn: 20
+            });
+            const app = await opened;
+            const form = app.element.querySelector("form");
+            const set = (name, value) => {
+              const field = form.elements.namedItem(name);
+              field.value = String(value);
+              field.dispatchEvent(new Event("change", { bubbles: true }));
+            };
+            const line = form.querySelector("[data-maneuver-cost]");
+            const roll = form.querySelector("[data-action='ok']");
+            const option = value =>
+              form.querySelector(`[name="maneuver.calledShot"] option[value="${value}"]`);
+            assert.isTrue(line.hidden, "no maneuver, no cost line");
+            assert.isTrue(option("3").disabled, "a head shot (3) is over the Void Ring 2 cap");
+            assert.include(option("3").title, "3");
+            assert.isFalse(option("2").disabled);
+
+            set("maneuver.calledShot", 2);
+            assert.equal(form.elements.namedItem("raises").value, "2", "Raises cover the hand");
+            assert.isFalse(line.hidden);
+            assert.equal(
+              line.textContent,
+              F("l5r4.ui.combat.maneuverCost", {
+                cost: 2,
+                free: 0,
+                raises: 2,
+                tn: 20 + 2 * 5 + actor.system.woundPenalty
+              })
+            );
+            const feint = form.elements.namedItem("maneuver.feint");
+            assert.isTrue(feint.disabled, "a Feint on top costs 4, over the cap");
+            assert.isFalse(roll.disabled);
+
+            set("raises", 1);
+            assert.isTrue(roll.disabled, "1 Raise does not pay for 2");
+            assert.isFalse(form.querySelector("[data-maneuver-short]").hidden);
+            assert.equal(
+              form.elements.namedItem("raises").value,
+              "1",
+              "the roller's own Raises stay"
+            );
+
+            set("raises", 2);
+            roll.click();
+            const message = await rolled;
+            assert.equal(message.system.maneuvers.calledShot, 2);
           })
         );
 
