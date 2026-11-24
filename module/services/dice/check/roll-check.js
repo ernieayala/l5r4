@@ -24,18 +24,19 @@ import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { getStackedModifiers } from "../../../utils/modifier-stacking.js";
-import { buildPool, getCheckResult, getPoolFormula, getTn } from "../../../utils/check.js";
+import { buildPool, getCheckResult, getPoolFormula } from "../../../utils/check.js";
 import { askGmAllow } from "../../gm-allow.js";
 import { askPrompt } from "../../dialog.js";
 import { spendVoidPoint } from "../resources/void-points.js";
 import { applyTrackChange } from "../../ledger.js";
 import { renderCheckCard } from "./card.js";
+import { bindManeuverCost } from "./maneuver-cost.js";
 import {
   formatLabelWithSuffix,
   buildCheckLabel,
   buildCheckSystem,
-  buildTnModifiers
+  buildTnModifiers,
+  getCheckTn
 } from "./message-data.js";
 import {
   buildCheck,
@@ -181,7 +182,8 @@ async function canWieldWeapon({ actor, kind, weapon }) {
  * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
  */
 function askCheckChoices(check) {
-  return askChoices(check.request, buildDialogContext(check));
+  const bind = check.kind === "attack" ? form => bindManeuverCost(form, check, formDataOf) : null;
+  return askChoices(check.request, buildDialogContext(check), bind);
 }
 
 /**
@@ -243,18 +245,7 @@ async function rollCheckPool(check, terms) {
 async function postCheck(check, terms, { pool, roll }) {
   const { request, actor } = check;
   const tnModifiers = buildTnModifiers(check, terms);
-  const tn = check.isDamage
-    ? null
-    : getTn({
-        base: terms.tnBase,
-        raises: terms.raises,
-        freeRaisesToTn: terms.freeRaisesToTn,
-        woundPenalty: terms.applyWound ? check.woundPenalty : 0,
-        // TN changes of one type do not stack, as on the sheet (module/utils/modifier-stacking.js)
-        modifiers: [
-          getStackedModifiers(tnModifiers.map(m => ({ total: m.value, type: m.type }))).total
-        ]
-      });
+  const tn = getCheckTn(check, terms, tnModifiers);
   const outcome = getCheckResult(roll.total, tn);
   let label = buildCheckLabel(request.label, terms);
   if (request.beforePost) {
@@ -297,9 +288,10 @@ function formDataOf(form) {
  * Show the check dialog.
  * @param {CheckRequest} request
  * @param {object} context - Dialog template context
+ * @param {function(HTMLFormElement): void|null} bind - Wires the rendered form's live parts (an attack's maneuvers)
  * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
  */
-async function askChoices(request, context) {
+async function askChoices(request, context, bind) {
   // Each field's label points at its control by id; the ids are unique to this dialog
   const formId = foundry.utils.randomID();
   const extras = request.extras
@@ -318,6 +310,7 @@ async function askChoices(request, context) {
     position: { width: 420 },
     content,
     ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => formDataOf(button.form) },
+    render: bind ? (_event, dialog) => bind(dialog.element.querySelector("form")) : undefined,
     rejectClose: false,
     modal: true
   });

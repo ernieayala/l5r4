@@ -896,6 +896,8 @@
         "knockdown": "Knockdown (2 Raises, 4 against 4 or more legs)",
         "knockdownNote": "Knockdown: roll Contested Strength; the attacker winning knocks the target Prone.",
         "knockedDown": "{name} is knocked Prone.",
+        "maneuverCost": "The maneuvers cost {cost} Raises: {free} from Free Raises, {raises} from declared Raises. TN {tn}.",
+        "maneuverOverCap": "With this, the maneuvers cost {cost} Raises; this roll can pay at most {max} Raises and {free} Free Raises",
         "maneuvers": "Maneuvers",
         "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
         "multipleTargets": "Several targets: set the TN by hand",

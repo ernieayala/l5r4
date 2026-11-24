@@ -11,6 +11,8 @@
 
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { getStackedModifiers } from "../../../utils/modifier-stacking.js";
+import { getTn } from "../../../utils/check.js";
 
 /**
  * The TN changes the roll keeps: a change for the other attack range drops out, as a modifier does; an attack
@@ -38,6 +40,30 @@ export function buildTnModifiers(check, terms) {
     });
   }
   return tnModifiers;
+}
+
+/**
+ * The TN a check rolls against: the TN chosen, each declared Raise, the Free Raises spent on it, the wound penalty
+ * when applied, and the TN changes, which do not stack within one type, as on the sheet
+ * (module/utils/modifier-stacking.js). The check dialog shows it live; the posted card records it. Null on damage.
+ * game-rules/28_raises.md, p.79
+ * game-rules/33_wounds.md, p.82
+ * @param {object} check - From buildCheck
+ * @param {object} terms - The chosen and prepared terms, with the maneuvers
+ * @param {object[]} tnModifiers - From buildTnModifiers
+ * @returns {number|null}
+ */
+export function getCheckTn(check, terms, tnModifiers) {
+  if (check.isDamage) {
+    return null;
+  }
+  return getTn({
+    base: terms.tnBase,
+    raises: terms.raises,
+    freeRaisesToTn: terms.freeRaisesToTn,
+    woundPenalty: terms.applyWound ? check.woundPenalty : 0,
+    modifiers: [getStackedModifiers(tnModifiers.map(m => ({ total: m.value, type: m.type }))).total]
+  });
 }
 
 /**
