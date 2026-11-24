@@ -244,6 +244,14 @@ export const STATUS_EFFECTS = Object.freeze([
 ]);
 
 /**
+ * Statuses an actor can hold once per origin: a Concentration per spell held, a Guard per protector. Every other
+ * status is held once, so applying it again updates the one held (applyEffect, #177).
+ * game-rules/38_maneuvers.md, p.86
+ * game-rules/67_universal_spells.md, p.166
+ */
+export const PER_ORIGIN_STATUSES = Object.freeze(["concentration", "guarded"]);
+
+/**
  * Effects the system creates that the token HUD does not offer: Center Stance's bonus the next Round, the Full
  * Defense roll's Armor TN bonus, and a Void Point spent on Armor TN. Same shape as STATUS_EFFECTS, built by the
  * services that create them.

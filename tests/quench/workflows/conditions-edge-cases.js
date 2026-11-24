@@ -8,13 +8,14 @@
  *
  * **What Can Break:**
  * - Stunned and Blinded Armor TN overrides
- * - Fatigued applied twice
+ * - Fatigued applied twice; Dazed, Fear, and Concentration applied again (#177)
  * - Condition removal recalculation
  * - Several conditions at once
  * - Conditions persisting across preparations
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
+import { applyEffect, effectsOf } from "../../../module/services/effects/apply.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { checkEffects } from "../helpers.js";
 
@@ -123,6 +124,49 @@ export function registerConditionsEdgeCaseTests(quench) {
 
           assert.isFalse(actor.statuses.has("fatigued"), "Fatigued removed");
           assert.equal(checkEffects(actor, "skill").tn, 0, "No TN penalty");
+        });
+      });
+
+      // #177: applyEffect, the path of condition links, card buttons, Fear, and the GM's queries
+      describe("A condition applied again", () => {
+        let actor;
+
+        beforeEach(async () => {
+          actor = await createTestPC({ name: "Conditions edge cases: applied again" });
+        });
+
+        afterEach(async () => {
+          await actor?.delete();
+          actor = null;
+        });
+
+        it("should hold one Dazed for two, at one -3k0", async () => {
+          await applyEffect(actor, "dazed");
+          await applyEffect(actor, "dazed", { origin: actor.uuid });
+          assert.lengthOf(effectsOf(actor, "dazed"), 1);
+          assert.equal(checkEffects(actor, "skill").roll, -3);
+        });
+
+        // Ernie's ruling (#177): the higher Fear replaces the lower
+        // game-rules/42_fear.md, p.90
+        it("should keep the higher Fear, whichever order the Fears land in", async () => {
+          await applyEffect(actor, "feared", { level: 2, name: "Fear 2" });
+          await applyEffect(actor, "feared", { level: 3, name: "Fear 3" });
+          await applyEffect(actor, "feared", { level: 1, name: "Fear 1" });
+          const [fear, ...more] = effectsOf(actor, "feared");
+          assert.isEmpty(more, "one Feared effect");
+          assert.equal(fear.system.level, 3);
+          assert.equal(fear.name, "Fear 3");
+          assert.equal(checkEffects(actor, "skill").roll, -3, "not -6k0");
+        });
+
+        // game-rules/67_universal_spells.md, p.166
+        it("should hold a Concentration per spell, and one for the same spell", async () => {
+          const [spellA, spellB] = [1, 2].map(() => `Item.${foundry.utils.randomID()}`);
+          await applyEffect(actor, "concentration", { origin: spellA });
+          await applyEffect(actor, "concentration", { origin: spellA });
+          await applyEffect(actor, "concentration", { origin: spellB });
+          assert.lengthOf(effectsOf(actor, "concentration"), 2);
         });
       });
 
