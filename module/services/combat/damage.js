@@ -13,7 +13,13 @@ import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { canReduceWithVoid, isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
+import {
+  canReduceWithVoid,
+  getDeathThreshold,
+  isDead,
+  getVoidReduction,
+  getWoundsTaken
+} from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { updateCheckCardUse } from "../dice/check/card.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
@@ -80,6 +86,18 @@ function defensesOf(actor) {
 }
 
 /**
+ * The Wounds that kill an actor: an NPC whose Wound Ranks the GM enters (manual mode) has a creature's own Wound list,
+ * whose last rank is the total that kills it; Wound Ranks from the Earth Ring kill past Out.
+ * game-rules/99_creatures.md, p.318
+ * @param {Actor} actor
+ * @returns {number}
+ */
+function deathThresholdOf(actor) {
+  const ownWoundList = actor.type === "npc" && actor.system.woundMode === "manual";
+  return getDeathThreshold(toInt(actor.system.woundLevels?.out?.value), ownWoundList);
+}
+
+/**
  * Apply a damage roll to one actor and post the result card. Runs where the actor can be changed.
  * @param {ChatMessage} damageMessage
  * @param {Actor} actor
@@ -96,8 +114,7 @@ async function applyToActor(damageMessage, actor) {
   // The stored value, so an Active Effect on Wounds is never written into storage (B6)
   await actor.update({ "system.suffered": toInt(actor._source.system.suffered) + result.wounds });
   const killed =
-    !actor.statuses.has("dead") &&
-    isDead(toInt(actor.system.suffered), toInt(actor.system.woundLevels?.out?.value));
+    !actor.statuses.has("dead") && isDead(toInt(actor.system.suffered), deathThresholdOf(actor));
   if (killed) {
     await actor.toggleStatusEffect("dead", { active: true, overlay: true });
   }
@@ -213,9 +230,8 @@ async function spendVoidPointOnDamage(card) {
     "system.suffered": Math.max(0, stored.suffered - getVoidReduction(result.wounds)),
     ...buildVoidUseUpdate(actor)
   });
-  // Back within Out, the Void Point saves the life this damage took, as Undo would (#117)
-  const out = toInt(actor.system.woundLevels?.out?.value);
-  const saved = result.killed && !isDead(toInt(actor.system.suffered), out);
+  // Back below the Wounds that kill, the Void Point saves the life this damage took, as Undo would (#117)
+  const saved = result.killed && !isDead(toInt(actor.system.suffered), deathThresholdOf(actor));
   if (saved) {
     await actor.toggleStatusEffect("dead", { active: false });
   }

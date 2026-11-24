@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getRaiseAllocation,
   getFeintBonus,
+  getDeathThreshold,
   isDead,
   getManeuverCost,
   canReduceWithVoid,
@@ -168,7 +169,7 @@ describe("getWoundsTaken", () => {
   });
 });
 
-describe("The getVoidReduction and isDead helpers", () => {
+describe("The getVoidReduction, getDeathThreshold and isDead helpers", () => {
   // game-rules/25_rings_and_traits.md, p.78
   it("should take back 10 Wounds for a Void Point, never more than were taken", () => {
     expect(getVoidReduction(14)).toBe(10);
@@ -185,8 +186,25 @@ describe("The getVoidReduction and isDead helpers", () => {
   });
 
   // game-rules/33_wounds.md, p.82
-  it("should kill at Wounds past Out", () => {
-    expect(isDead(38, 38)).toBe(false);
-    expect(isDead(39, 38)).toBe(true);
+  it("should kill at Wounds past Out with Wound Ranks from the Earth Ring", () => {
+    const dies = getDeathThreshold(38, false);
+    expect(dies).toBe(39);
+    expect(isDead(38, dies)).toBe(false);
+    expect(isDead(39, dies)).toBe(true);
+  });
+
+  // #146: the Dog's "12: +10; 24: Dead", stored as Healthy 11, Nicked 23, Out 24
+  // game-rules/99_creatures.md, p.318, 320
+  it("should kill a creature at the total its own Wound list names", () => {
+    const dies = getDeathThreshold(24, true);
+    expect(dies).toBe(24);
+    expect(isDead(23, dies)).toBe(false);
+    expect(isDead(24, dies)).toBe(true);
+  });
+
+  it("should kill no one without an Out threshold", () => {
+    expect(getDeathThreshold(0, true)).toBe(0);
+    expect(getDeathThreshold(0, false)).toBe(0);
+    expect(isDead(5, 0)).toBe(false);
   });
 });
