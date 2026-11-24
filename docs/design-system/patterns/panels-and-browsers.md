@@ -21,7 +21,7 @@ The system's own ApplicationV2 windows that are not sheets or dialogs: the effec
 | XP manager | `module/apps/xp-manager.js` | The XP control in the PC header, `data-action="open-xp-manager"` (`templates/actor/_partials/_stats.hbs`) | XP spent of total and its breakdown, manual XP entries, purchases | Actions |
 | Wealth manager | `module/apps/wealth-manager.js` | The wealth control in the Items section title, `data-action="open-wealth-manager"` (`templates/actor/_partials/_item-section.hbs`) | Koku, bu, and zeni; add, remove, and convert | Actions |
 | Emphasis manager | `module/apps/emphasis-manager.js` | The Skill item's Details, `data-action="open-emphasis-manager"` (`templates/item/_type-details/skill.hbs`) | The Skill's Emphases as checkboxes; custom Emphases with edit and remove | Submit (`closeOnSubmit`) |
-| Wound configuration | `module/apps/wound-config.js` | The gear in the Wound track, `data-action="open-wound-config"` (`templates/actor/_partials/_wounds.hbs`) | Wound mode, multipliers, and modifiers | Live (`DebouncedFieldMixin`) |
+| Wound configuration | `module/apps/wound-config.js` | The gear in the Wound track, `data-action="open-wound-config"` (`templates/actor/_partials/_wounds.hbs`) | Wound mode, multipliers, and modifiers | Live (`FieldSaveMixin`) |
 | Armor configuration | `module/apps/armor-config.js` | The gear in the Armor TN block, `data-action="open-armor-config"` (`templates/actor/_partials/_armor.hbs`) | Armor TN and Reduction modifiers, armor stacking | Live |
 | Combat configuration | `module/apps/combat-config.js` | The gear in the Initiative block, `data-action="open-combat-config"` (`templates/actor/_partials/_combat.hbs`) | Initiative and movement modifiers | Live |
 | Condition manager | `module/apps/condition-manager.js` | The Initiative block, `data-action="open-condition-manager"` (`templates/actor/_partials/_combat.hbs`) | Every condition as one checkbox group, `multi-checkbox` (`templates/apps/condition-manager.hbs`) | Live |
@@ -122,7 +122,7 @@ A window saves in one of three ways and shows it:
 
 | Model | Windows | The user sees |
 | --- | --- | --- |
-| Live | Wound, Armor, and combat configuration; condition manager | No Save button. A field saves when it changes: `module/mixins/debounced-field-mixin.js`, or the condition manager's own listener, `ConditionManagerApplication#_onCheckboxChange` (`module/apps/condition-manager.js`); the sheet behind it updates |
+| Live | Wound, Armor, and combat configuration; condition manager | No Save button. A field saves when it changes: `module/mixins/field-save-mixin.js`, or the condition manager's own listener, `ConditionManagerApplication#_onCheckboxChange` (`module/apps/condition-manager.js`); the sheet behind it updates |
 | Submit | Emphasis manager, NPC attack configuration | A footer with the submit button and Cancel; the window closes on save |
 | Actions | XP manager, wealth manager, effect panel, compendium browser | Each button acts at once and the window redraws; no footer |
 

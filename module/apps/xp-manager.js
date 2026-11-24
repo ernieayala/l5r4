@@ -2,7 +2,7 @@
  * @module apps/xp-manager
  * @description A window over one character's experience points: manual XP entries with notes, the XP spent on
  * purchases (rebuilt from the actor's items when their version changes), sorting with the saved sort preference, and
- * the Disadvantage XP cap. It uses no DebouncedFieldMixin and no form submission: each button (add, delete, sort,
+ * the Disadvantage XP cap. It uses no FieldSaveMixin and no form submission: each button (add, delete, sort,
  * recalculate) is one action that writes the actor's flags. Manual XP and the cap are the GM's: a player's window
  * shows them without their controls, and their actions do nothing for a player.
  */

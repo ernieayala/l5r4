@@ -1,7 +1,7 @@
 /**
  * @module apps/emphasis-manager
  * @description A form window that picks a skill item's available Emphases from the official list and the world's
- * custom Emphases, and adds, renames, and deletes the custom ones in a world setting. It uses no DebouncedFieldMixin:
+ * custom Emphases, and adds, renames, and deletes the custom ones in a world setting. It uses no FieldSaveMixin:
  * the checkboxes save together on submit, and the window closes then. The constructor takes `options.item` rather
  * than a positional actor, because it works on a skill Item.
  */

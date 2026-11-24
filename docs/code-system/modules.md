@@ -36,7 +36,7 @@ Imports come in layer order, lowest layer first, then the file's own folder. A g
 | 3 Data | `module/data/` | `import { createRule } from "../../data/rules/rule-models.js";` (`module/documents/actor/rules.js`) |
 | 4 Documents | `module/documents/` | `import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js`) |
 | 5 Services | `module/services/` | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage-roll.js`) |
-| 6 Mixins | `module/mixins/` | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js`) |
+| 6 Mixins | `module/mixins/` | `import { FieldSaveMixin } from "../mixins/field-save-mixin.js";` (`module/apps/armor-config.js`) |
 | 7 Apps | `module/apps/` | `import EffectPanelApplication from "../apps/effect-panel.js";` (`module/hooks/register-all.js`) |
 | 8 Sheets | `module/sheets/` | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js`) |
 | 9 Setup | `module/setup/` | `import { migrateWorld } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js`) |
@@ -174,4 +174,4 @@ A mixin is a function that takes a class and returns a subclass. Every mixin liv
 
 | Conforming | Non-conforming |
 | --- | --- |
-| `module/mixins/debounced-field-mixin.js`, `module/mixins/keyboard-behavior-mixin.js` | A mixin in a layer's own `mixins/` folder (modeled) |
+| `module/mixins/field-save-mixin.js`, `module/mixins/keyboard-behavior-mixin.js` | A mixin in a layer's own `mixins/` folder (modeled) |

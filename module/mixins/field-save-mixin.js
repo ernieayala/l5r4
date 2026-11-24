@@ -1,23 +1,16 @@
 /**
- * @module mixins/debounced-field-mixin
- * @description Debounced field saving for ApplicationV2 forms that update an actor while the user types, so rapid
- * input makes one update instead of many. The class calls `_initializeDebouncing()` in its constructor after
- * `super()` and implements `_updateActor(field, value)`; it may override `_validateFieldValue(field, value)`, which
- * returns null to reject a value. The mixin listens for `change` on every `[data-action="update-field"]` field in
- * `_onRender`, coerces checkbox and number values, and flushes a pending update on close.
+ * @module mixins/field-save-mixin
+ * @description Field-by-field saving for ApplicationV2 forms that update an actor as the user edits. The class
+ * implements `_updateActor(field, value)` and may override `_validateFieldValue(field, value)`, which returns null to
+ * reject a value. The mixin listens for `change` on every `[data-action="update-field"]` field in `_onRender`,
+ * coerces checkbox and number values, and saves at once: a `change` fires once per edit, on Enter or when the field
+ * loses focus, so nothing waits that closing the window or a second edit could lose (#137).
  */
 import { SYS_ID } from "../config/constants.js";
 import { toInt } from "../utils/type-coercion.js";
 
 /**
- * Debounce delay in milliseconds for field change updates.
- * Prevents excessive actor updates during rapid user input.
- * @constant {number}
- */
-export const DEBOUNCE_DELAY_MS = 300;
-
-/**
- * Mixin that adds debounced field change handling to ApplicationV2 classes.
+ * Mixin that saves each changed form field of an ApplicationV2 window.
  *
  * Classes using this mixin must implement:
  * - `_updateActor(field, value)` - Method to update the actor with new field value.
@@ -26,29 +19,10 @@ export const DEBOUNCE_DELAY_MS = 300;
  * - `_validateFieldValue(field, value)` - Method to validate field values before update.
  *
  * @param {class} Base - The base class to extend
- * @returns {class} Extended class with debounced field functionality
+ * @returns {class} Extended class that saves its fields as they change
  */
-export function DebouncedFieldMixin(Base) {
+export function FieldSaveMixin(Base) {
   return class extends Base {
-    /**
-     * Debounced update function to prevent excessive actor updates during rapid field changes.
-     * Waits DEBOUNCE_DELAY_MS after last change before executing update.
-     *
-     * @type {Function}
-     */
-    updateDebounced;
-
-    /**
-     * Initialize debounced update function.
-     * Must be called in subclass constructor after super().
-     */
-    _initializeDebouncing() {
-      this.updateDebounced = foundry.utils.debounce(
-        this._updateActor.bind(this),
-        DEBOUNCE_DELAY_MS
-      );
-    }
-
     /**
      * Foundry lifecycle hook called after rendering.
      * Attaches change event listeners to form fields for real-time updates.
@@ -64,13 +38,14 @@ export function DebouncedFieldMixin(Base) {
 
     /**
      * Handle field change events with type coercion.
-     * Converts checkbox values to boolean, number fields to integers, and triggers debounced update.
+     * Converts checkbox values to boolean and number fields to integers, then saves the field.
      *
      * @param {Event} event - The change event
      * @param {HTMLElement} element - The form field element that changed
+     * @returns {Promise<void>}
      */
     async _onFieldChange(event, element) {
-      updateFieldValue(this, element);
+      await updateFieldValue(this, element);
     }
 
     /**
@@ -96,20 +71,6 @@ export function DebouncedFieldMixin(Base) {
     _validateFieldValue(field, value) {
       // Default: no validation, return value as-is
       return value;
-    }
-
-    /**
-     * Close the application and flush any pending debounced updates.
-     * Ensures all field changes are saved before window closes.
-     *
-     * @param {object} [options={}] - Close options
-     * @returns {Promise<void>}
-     */
-    async close(options = {}) {
-      if (this.updateDebounced && typeof this.updateDebounced.flush === "function") {
-        await this.updateDebounced.flush();
-      }
-      return super.close(options);
     }
   };
 }
@@ -151,28 +112,22 @@ function bindFieldChanges(app) {
 }
 
 /**
- * Queue the debounced update of a changed field with its coerced value, once the window's validation accepts it.
+ * Save a changed field with its coerced value, once the window's validation accepts it.
  * @param {ApplicationV2} app - A window with the mixin
  * @param {HTMLElement} element - The form field element that changed
+ * @returns {Promise<void>}
  */
-function updateFieldValue(app, element) {
+async function updateFieldValue(app, element) {
   const field = element.name;
-  const value = toFieldValue(element);
-
   if (!field) {
     console.warn(`${SYS_ID}`, "Field change with no field name");
     return;
   }
 
-  // Optional validation hook - subclasses can implement this
-  if (typeof app._validateFieldValue === "function") {
-    const validatedValue = app._validateFieldValue(field, value);
-    if (validatedValue === null) {
-      // Validation failed - subclass should handle notification
-      return;
-    }
-    app.updateDebounced(field, validatedValue);
-  } else {
-    app.updateDebounced(field, value);
+  const value = app._validateFieldValue(field, toFieldValue(element));
+  // Validation failed - the subclass says why
+  if (value === null) {
+    return;
   }
+  await app._updateActor(field, value);
 }

@@ -25,7 +25,7 @@ Game concepts inside a name take their stem from [glossary.md](glossary.md) (Arm
 | Folder | Lowercase kebab-case | `module/services/dice/resources/` | `module/services/Dice/` (modeled) | `names.test.js` |
 | Redundant name | A file name does not start with its folder's name | `module/services/xp/calculator.js` | `xp-calculator.js` in `module/services/xp/` (modeled) | `names.test.js` |
 | Role suffix | `-handler.js` for action routers in `module/sheets/handlers/`; `-system.js` for files in `module/documents/actor/calculations/`. Services take the plain feature name | `module/sheets/handlers/roll-handler.js`, `module/services/combat/grapple.js` | A service file ending in `-service.js` or `-manager.js` (modeled) | `names.test.js` |
-| Mixin file | `module/mixins/<name>-mixin.js`, exporting `<Name>Mixin` ([modules.md](modules.md) decides the location) | `module/mixins/debounced-field-mixin.js` | A mixin in `module/sheets/mixins/` (modeled) | `names.test.js` |
+| Mixin file | `module/mixins/<name>-mixin.js`, exporting `<Name>Mixin` ([modules.md](modules.md) decides the location) | `module/mixins/field-save-mixin.js` | A mixin in `module/sheets/mixins/` (modeled) | `names.test.js` |
 | Tool or script | `tools/<name>.mjs` (ES module); `scripts/<name>.js` (CommonJS) | `tools/pack-sources.mjs`, `scripts/prepare-release.js` | `tools/packSources.js` (modeled) | `names.test.js` |
 | Empty folder | None |  | A folder with no files (modeled) | `names.test.js` |
 

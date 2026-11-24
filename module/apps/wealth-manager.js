@@ -1,7 +1,7 @@
 /**
  * @module apps/wealth-manager
  * @description A window that adds, removes, and converts an actor's koku, bu, and zeni (10 zeni to 1 bu, 5 bu to 1
- * koku). It uses no DebouncedFieldMixin and no form submission: each button is one transaction that updates the
+ * koku). It uses no FieldSaveMixin and no form submission: each button is one transaction that updates the
  * actor's wealth at once.
  */
 import { SYS_ID } from "../config/constants.js";
