@@ -803,6 +803,7 @@
         "totalModifier": "Total modifier",
         "unskilled": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
         "void": "Spend a Void Point (+1k1)",
+        "voidPointsChosen": "Each use takes its own Void Point, and all {points} are chosen",
         "voidSkill": "Spend a Void Point: Skill Rank 1",
         "voidSkillHint": "With no ranks in the Skill, a Void Point lets this roll count as Rank 1: one more die, dice explode, and Raises apply (p.78). Without it, the Raises above are ignored.",
         "weaponTn": "{weapon} ({where})",
@@ -1100,6 +1101,7 @@
           "voidInitBoost": "Use Void",
           "voidPoints": "Void Points",
           "voidPointsEmpty": "Void Points: 0",
+          "voidPointsShort": "The roll needs {needed} Void Points; {name} has {current}",
           "voidPointsValue": "Void Points: {current}/{max} (click: +1, right-click: -1)",
           "voidTnBoost": "Use Void",
           "water": "Water"

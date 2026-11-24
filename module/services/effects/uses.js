@@ -70,35 +70,38 @@ export function voidSpentOf(actor) {
 }
 
 /**
- * Whether spending one more Void Point this Round passes the limit, for the warning.
+ * Whether spending more Void Points this Round passes the limit, for the warning.
  * @param {Actor} actor
+ * @param {number} [count=1] - Void Points about to be spent
  * @returns {boolean}
  */
-export function isVoidOverLimit(actor) {
-  return voidSpentOf(actor) >= voidLimitOf(actor);
+export function isVoidOverLimit(actor, count = 1) {
+  return voidSpentOf(actor) + count > voidLimitOf(actor);
 }
 
 /**
- * The actor update that records one Void Point spent, merged into the update that spends it, so both land in
- * one write. Outside combat nothing is counted.
+ * The actor update that records Void Points spent, merged into the update that spends them, so both land in one
+ * write. Outside combat nothing is counted.
  * @param {Actor} actor
+ * @param {number} [count=1] - Void Points spent in this update
  * @returns {object}
  */
-export function buildVoidUseUpdate(actor) {
+export function buildVoidUseUpdate(actor, count = 1) {
   const key = currentPeriodOf(actor, "round");
   if (key === null) {
     return {};
   }
-  return { [`flags.${SYS_ID}.uses.void`]: { key, count: voidSpentOf(actor) + 1 } };
+  return { [`flags.${SYS_ID}.uses.void`]: { key, count: voidSpentOf(actor) + count } };
 }
 
 /**
- * Warn when a Void Point spent now passes the Round's limit; the spending goes ahead.
+ * Warn when Void Points spent now pass the Round's limit; the spending goes ahead.
  * game-rules/25_rings_and_traits.md, p.78
  * @param {Actor} actor
+ * @param {number} [count=1] - Void Points about to be spent
  */
-export function warnVoidLimit(actor) {
-  if (isVoidOverLimit(actor)) {
+export function warnVoidLimit(actor, count = 1) {
+  if (isVoidOverLimit(actor, count)) {
     ui.notifications?.warn(game.i18n.localize("l5r4.ui.effects.voidLimit", { name: actor.name }));
   }
 }

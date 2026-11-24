@@ -308,6 +308,108 @@ export function registerRollPipelineTests(quench) {
           })
         );
 
+        /** An Unskilled Jiujutsu roll for an actor with one Void Point; `answer` runs on its dialog. */
+        const rollUnskilledWithOneVoid = async answer => {
+          const { actor } = await swordsman();
+          await actor.update({ "system.rings.void.value": 1 });
+          Hooks.once("renderDialogV2", app => answer(app, actor));
+          const { result, warnings } = await withWarnings(() =>
+            rollSkill({
+              actor,
+              skillName: "Jiujutsu",
+              skillTrait: "agi",
+              traitRank: 3,
+              skillRank: 0
+            })
+          );
+          if (result) {
+            keep(result);
+          }
+          return { actor, result, warnings };
+        };
+
+        // #138: each Void Point use takes its own point
+        // game-rules/25_rings_and_traits.md, p.78
+        it(
+          "should disable the other Void use once a roller's only Void Point is chosen",
+          clean(async () => {
+            let states;
+            await rollUnskilledWithOneVoid(app => {
+              const use = name => app.element.querySelector(`[name="${name}"]`);
+              use("void").checked = true;
+              use("void").dispatchEvent(new Event("change"));
+              states = {
+                chosen: use("voidSkill").disabled,
+                tooltip: use("voidSkill").dataset.tooltip
+              };
+              use("void").checked = false;
+              use("void").dispatchEvent(new Event("change"));
+              states.released = use("voidSkill").disabled;
+              app.close();
+            });
+            assert.isTrue(states.chosen, "disabled while the point is chosen");
+            assert.equal(
+              states.tooltip,
+              game.i18n.localize("l5r4.ui.check.voidPointsChosen", { points: 1 })
+            );
+            assert.isFalse(states.released, "enabled again once the point is free");
+          })
+        );
+
+        // game-rules/25_rings_and_traits.md, p.78
+        it(
+          "should take no Void Point and roll nothing when the roll needs two and one is left",
+          clean(async () => {
+            const { actor, result, warnings } = await rollUnskilledWithOneVoid(app => {
+              // Both ticked past the dialog's guard, as a stale form would send them
+              for (const name of ["void", "voidSkill"]) {
+                app.element.querySelector(`[name="${name}"]`).checked = true;
+              }
+              app.element.querySelector('[data-action="ok"]').click();
+            });
+            assert.isNull(result, "no roll");
+            assert.equal(actor._source.system.rings.void.value, 1, "the point stays");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsShort", {
+                needed: 2,
+                name: actor.name,
+                current: 1
+              })
+            ]);
+          })
+        );
+
+        // game-rules/88_maho.md, p.267-268
+        it(
+          "should give the blood cost back when a maho cast stops before its roll",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.rings.void.value": 1, "system.suffered": 0 });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Maho", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const answered = new Promise(resolve =>
+              Hooks.once("renderDialogV2", async app => {
+                app.element.querySelector("[name=void]").checked = true;
+                // The Void Point is gone before the roll spends it, so its spend fails after the blood is paid
+                await actor.update({ "system.rings.void.value": 0 });
+                app.element.querySelector('[data-action="ok"]').click();
+                resolve();
+              })
+            );
+            const { result } = await withWarnings(async () => {
+              const cast = rollMahoCast({ actor, spell });
+              await answered;
+              return cast;
+            });
+            if (result) {
+              keep(result);
+            }
+            assert.isNull(result, "no cast");
+            assert.equal(actor._source.system.suffered, 0, "the blood Wounds are given back");
+          })
+        );
+
         it(
           "should refuse a spell of an unknown Ring, naming the Ring",
           clean(async () => {

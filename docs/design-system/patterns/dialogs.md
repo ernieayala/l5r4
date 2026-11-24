@@ -7,7 +7,7 @@ How the system asks the user something and waits: the check dialog with its modi
 | API | `askPrompt`, `askConfirm`, `askButtons`, `openDialog` (`module/services/dialog.js`), which call core's `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, and the constructor (`resources/app/client/applications/api/dialog.mjs:346-405`) with the `l5r4-dialog` class added |
 | Templates | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `confirm-dialog.hbs`, `choice-dialog.hbs`, `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs` |
 | Paths | `DIALOG_TEMPLATES` (`module/config/templates.js`) |
-| Callers | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/roll-check.js`), `askChoice` (`module/services/purchase.js`), `askSchool` (`module/services/purchase.js`), `askGmAllow` (`module/services/gm-allow.js`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
+| Callers | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/dialog.js`), `askChoice` (`module/services/purchase.js`), `askSchool` (`module/services/purchase.js`), `askGmAllow` (`module/services/gm-allow.js`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
 | SCSS | `.l5r4-dialog` (`scss/layout/_dialog-layout.scss`); `.l5r4-check-dialog` (`scss/components/_check-dialog.scss`); `scss/components/_ledger-dialog.scss` |
 | Tokens | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity` |
 | Components | Check dialog, ledger dialog, form field, button |
@@ -19,7 +19,7 @@ Core wraps the content in `div.dialog-content` inside `form.dialog-form` and ren
 
 | # | Part | Owner | Detail |
 | --- | --- | --- | --- |
-| 1 | Title | System | `window.title`: what is being decided. The check dialog uses the roll's label: `askChoices` (`module/services/dice/check/roll-check.js`) |
+| 1 | Title | System | `window.title`: what is being decided. The check dialog uses the roll's label: `askChoices` (`module/services/dice/check/dialog.js`) |
 | 2 | Content | System | A template from `templates/dialogs/`, rendered to a string; core cleans the string (`client/applications/api/dialog.mjs:192`) |
 | 3 | Buttons | System | `buttons`, or the `ok`, `yes`, `no` options of the helpers. Each has an `action`, a `label` key, and an optional `icon` |
 | 4 | Frame | Core | The window, its close control, the footer layout, the focus ring |
@@ -38,7 +38,7 @@ A window that stays open while the user works (the XP manager, the wealth manage
 
 ## The check dialog
 
-One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide and modal: `askChoices` (`module/services/dice/check/roll-check.js`). Its rows appear only when they apply. Each row names its element or field in `check-dialog.hbs`.
+One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide and modal: `askChoices` (`module/services/dice/check/dialog.js`). Its rows appear only when they apply. Each row names its element or field in `check-dialog.hbs`.
 
 | Row | Control | Shown when |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide an
 | Raises | Number input bounded by the allowed minimum and maximum (`name="raises"`) | Raises are allowed |
 | Free Raises to the TN | Number input up to the Free Raises held (`name="freeRaisesToTn"`) | The roller holds Free Raises |
 | Unskilled hint | One line (`l5r4.ui.check.unskilled`) | An Unskilled Roll |
-| Void Point | Checkbox, the Void Points left in its label; disabled at none (`name="void"`, `name="voidSkill"`) | A Void Point may be spent |
+| Void Point | Checkbox, the Void Points left in its label; disabled at none (`name="void"`, `name="voidSkill"`). Each use takes its own point, so once every point is chosen the other use disables and says why (`bindVoidUses`, `module/services/dice/check/dialog.js`) | A Void Point may be spent |
 | Embrace Taint | Checkbox (`name="embraceTaint"`) | The rules allow it |
 | Emphasis | Select (`name="emphasis"`) | The Skill has Emphases |
 | Attack | Ranged checkbox and the maneuvers fieldset (`name="isRanged"`, a `l5r4-check-dialog-group`) | An attack |
@@ -58,7 +58,7 @@ One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide an
 | Keep fewer | Number input (`name="keep"`) | Always |
 | Extras | Spell casting, spell slot, maho (`templates/dialogs/check-extras/`) | The request passes `extras` |
 
-The one button is "Roll", the `ok` button of `askChoices` (`module/services/dice/check/roll-check.js`). Closing the dialog cancels the roll.
+The one button is "Roll", the `ok` button of `askChoices` (`module/services/dice/check/dialog.js`). Closing the dialog cancels the roll.
 
 ## Rules
 
@@ -66,7 +66,7 @@ The one button is "Roll", the `ok` button of `askChoices` (`module/services/dice
 
 A dialog's content is a template in `templates/dialogs/`, named `<name>-dialog.hbs`, rendered with `foundry.applications.handlebars.renderTemplate` and listed in `DIALOG_TEMPLATES`. No dialog content is an HTML string built in JavaScript, and none uses the global `Dialog`. The template has no `<form>` of its own: core's form wraps it, and a nested form breaks the submit. A confirmation shares one template, `templates/dialogs/confirm-dialog.hbs`, with two parameters, `question` and `consequence`, each already localized. Enforced by ESLint `no-restricted-syntax` (no HTML strings; `DialogV2` content is a template; no global `Dialog`), `tests/conventions/names.test.js` (the `-dialog.hbs` suffix), and `tests/conventions/templates.test.js` (`dialog-form`: no `<form>` in `templates/dialogs/`).
 
-Conforming, `askChoices` (`module/services/dice/check/roll-check.js`): `renderTemplate(DIALOG_TEMPLATES.check, ...)` passed as `content`. Conforming, `askDisadvantageCap` in `module/services/xp/disadvantage-cap.js`: `R(DIALOG_TEMPLATES.disadvantageCap, { currentCap })` passed as `content`, the template with no `<form>` and its label linked to the field by `for`; the XP manager's `#onChangeDisadvantageCap` (`module/apps/xp-manager.js`) calls it and stores the answer.
+Conforming, `askChoices` (`module/services/dice/check/dialog.js`): `renderTemplate(DIALOG_TEMPLATES.check, ...)` passed as `content`. Conforming, `askDisadvantageCap` in `module/services/xp/disadvantage-cap.js`: `R(DIALOG_TEMPLATES.disadvantageCap, { currentCap })` passed as `content`, the template with no `<form>` and its label linked to the field by `for`; the XP manager's `#onChangeDisadvantageCap` (`module/apps/xp-manager.js`) calls it and stores the answer.
 
 Conforming, `l5r4-unified-item-create-dialog` (`templates/dialogs/unified-item-create-dialog.hbs`): a `<div>` root in core's form. `askEmphasisName` (`module/apps/emphasis-manager.js`) renders `DIALOG_TEMPLATES.customEmphasis` (`module/config/templates.js`).
 
@@ -144,7 +144,7 @@ Non-conforming, modeled: a prompt with a free-text field for a choice the rules 
 
 A dialog taller than the window scrolls its fields inside the window, starts scrolled to the top, and keeps its footer buttons in view. Core caps a window at the viewport and hides `.window-content`'s overflow, so the scroll goes on `.dialog-content`, never on `.window-content` (which would scroll the buttons away with the fields) and never on the page. Every dialog opens through `module/services/dialog.js`, which adds the `l5r4-dialog` class that `scss/layout/_dialog-layout.scss` styles. Enforced by ESLint `no-restricted-syntax` (no `DialogV2` outside `module/services/dialog.js`) and the Quench dialog batch (`tests/quench/dialogs.js`), which opens a check dialog in a short window.
 
-Conforming, `askChoices` (`module/services/dice/check/roll-check.js`): `askPrompt({ ... })`, so an attack's maneuvers, TN, Raises and Void Point scroll above a Roll button that stays in view.
+Conforming, `askChoices` (`module/services/dice/check/dialog.js`): `askPrompt({ ... })`, so an attack's maneuvers, TN, Raises and Void Point scroll above a Roll button that stays in view.
 
 Non-conforming, modeled: `foundry.applications.api.DialogV2.prompt({ ... })` from a service: the dialog gets no `l5r4-dialog` class and clips the fields that don't fit.
 
@@ -156,7 +156,7 @@ Non-conforming, modeled: `foundry.applications.api.DialogV2.prompt({ ... })` fro
 | Default button | The one Enter presses; core autofocuses it | `client/applications/api/dialog.mjs:228` |
 | Disabled option | The control at core's disabled look with its reason in `data-tooltip` | `foundations/states.md`, Disabled |
 | Submitting | Core disables every footer button until the callback returns | `client/applications/api/dialog.mjs:266-275` |
-| Closed | Resolves `null` (`rejectClose: false`); the caller treats it as cancel and changes nothing | `client/applications/api/dialog.mjs:405`; `askChoices` (`module/services/dice/check/roll-check.js`) |
+| Closed | Resolves `null` (`rejectClose: false`); the caller treats it as cancel and changes nothing | `client/applications/api/dialog.mjs:405`; `askChoices` (`module/services/dice/check/dialog.js`) |
 | Invalid input | The field's own `min`, `max`, and `step`; a value past them is user input the caller validates (`docs/code-system/foundry-patterns.md`, Forms) | `name="raises"` and `name="freeRaisesToTn"` in `templates/dialogs/check-dialog.hbs` |
 
 ## Keyboard and screen reader

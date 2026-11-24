@@ -94,7 +94,7 @@ A pure read with no answer (a roll with no TN) returns `null` too; that is a val
 | Utils shape | `validateAttackRaises` (`module/utils/validators.js`) returns `{ valid, error }` with an i18n key in `error` | `validateEmphasisName` (`module/utils/validators.js`): `error` holds English text, not a key; `parseDamage` (`module/utils/link-syntax.js`): `{ ok: false, error: "l5r4.ui.links.errors.pool" }` uses `ok` |
 | Warn, then `null` | `getSlotToSpend` (`module/services/dice/check/spell-slots.js`) warns and returns `null` | `spendVoidPoint` (`module/services/dice/resources/void-points.js`) returns `{ success, rollBonus, keepBonus, message }` and leaves the warning to its caller |
 | GM side throws | `applyDamageAction` (`module/services/combat/damage.js`) throws on a request it refuses | none found |
-| Dismissed prompt | `askChoices` (`module/services/dice/check/roll-check.js`): `DialogV2.prompt` with `rejectClose: false` | none found |
+| Dismissed prompt | `askChoices` (`module/services/dice/check/dialog.js`): `DialogV2.prompt` with `rejectClose: false` | none found |
 
 ## Async code
 
