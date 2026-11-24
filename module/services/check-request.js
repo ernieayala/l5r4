@@ -6,6 +6,7 @@
  */
 
 import { CHAT_TEMPLATES } from "../config/templates.js";
+import { hideUnusable } from "../utils/dom.js";
 import { T } from "../utils/localization.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { getRollActor } from "./dice/resources/void-points.js";
@@ -45,7 +46,8 @@ export async function postCheckRequest(spec) {
 
 /**
  * Wire a request card's Roll button: the clicking user rolls with their own character (their controlled token,
- * else their assigned character). The card's stored request is read back through its data model.
+ * else their assigned character). The card's stored request is read back through its data model. A request card is
+ * the GM's, so one a player posted shows no button (#162).
  * @param {ChatMessage} message
  * @param {HTMLElement} html
  */
@@ -53,6 +55,7 @@ export function bindCheckRequestCard(message, html) {
   if (message.type !== "checkRequest") {
     return;
   }
+  hideUnusable(html, "[data-action='check-request-roll']", () => Boolean(message.author?.isGM));
   html
     .querySelector("[data-action='check-request-roll']")
     ?.addEventListener("click", async event => {
