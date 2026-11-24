@@ -30,13 +30,13 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 | Button | Action | Shown when | Runs |
 | --- | --- | --- | --- |
 | Roll Contested Strength | `combat-contest` | A hit with a target and Knockdown or Disarm | `rollContest` (`module/services/combat/contest.js`) |
-| Start grapple with {target} | `grapple-start` | A hit with a target and the Grapple maneuver; disabled once started, saying so | `startGrapple` (`module/services/combat/grapple-start.js`) |
-| Apply to {target}; "Apply to {target} again" once applied | `damage-apply-target` | A damage roll with a target | `applyDamage` (`module/services/combat/damage.js`) |
+| Start grapple with {target} | `grapple-start` | A hit with a target and the Grapple maneuver; while the grapple it started runs, a press says so and starts none | `startGrapple` (`module/services/combat/grapple-start.js`) |
+| Apply to {target} | `damage-apply-target` | A damage roll with a target | `applyDamage` (`module/services/combat/damage.js`) |
 | Apply to selected | `damage-apply-selected` | Every damage roll | `applyDamage` (`module/services/combat/damage.js`) |
-| {effect} on {target} | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition; disabled once applied, saying the effect is on the target | `applyConditionFromMessage` (`module/services/dice/check/chat-actions.js`) |
-| Damage roll ({weapon}); "Roll damage again ({weapon})" once rolled | `check-damage` | A hit that is not a grapple | `rollDamageFromMessage` (`module/services/dice/check/chat-actions.js`); Shift+click skips the dialog |
+| {effect} on {target} | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition; pressing again refreshes the condition the target holds | `applyConditionFromMessage` (`module/services/dice/check/chat-actions.js`) |
+| Damage roll ({weapon}) | `check-damage` | A hit that is not a grapple | `rollDamageFromMessage` (`module/services/dice/check/chat-actions.js`); Shift+click skips the dialog |
 
-A card shows what its buttons started (#140): "Damage rolled" on a hit, one "Applied to {name}: {wounds} Wounds" note per actor a damage roll was applied to (gone when its result is undone), and the disabled buttons above. The state is `flags.l5r4-enhanced.used` on the card's own message; `updateCheckCardUse` (`module/services/dice/check/card.js`) records it and renders the card again in one update.
+A card records what its buttons did as note lines, and its buttons stay as they were, as PF2e's damage buttons do (#223): "Damage rolled" on a hit, one "Applied to {name}: {wounds} Wounds" note per actor a damage roll was applied to (gone when its result is undone), "{effect} is on {target}" per applied condition, and "The grapple has started". The state is `flags.l5r4-enhanced.used` on the card's own message; `updateCheckCardUse` (`module/services/dice/check/card.js`) records it and renders the card again in one update.
 | Honor Roll | `honor-roll` | A failed Skill, Trait, Ring, or spell roll with the Honor Roll setting on (`game-rules/43_honor.md, p.92`) | `rollHonor` (`module/services/dice/check/honor-roll.js`) |
 
 ## Variants

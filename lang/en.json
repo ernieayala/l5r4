@@ -771,7 +771,6 @@
         "contestTie": "Tie: roll again.",
         "contestWinner": "{name} wins.",
         "damageLabel": "Damage for {weapon}",
-        "damageRollAgain": "Roll damage again ({pool})",
         "damageRolled": "Damage rolled",
         "damageRollPool": "Damage roll ({pool})",
         "effectsFor": "Active effects ({key})",
@@ -815,7 +814,6 @@
         "appliedTo": "Applied to {name}: {wounds} Wounds",
         "applySelected": "Apply to selected",
         "applyTo": "Apply to {target}",
-        "applyToAgain": "Apply to {target} again",
         "arrowArmor": {
           "armor": "Armor Piercing arrow ignores armor",
           "flesh": "Flesh Cutter arrow doubles armor"

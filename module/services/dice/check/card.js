@@ -142,8 +142,9 @@ export function formatModifier({ roll = 0, keep = 0, total = 0 }) {
 }
 
 /**
- * What the card shows of its use: that the hit's damage was rolled, whom a damage roll was applied to and whether to
- * its own target, which offered conditions are on the target, and that the grapple started.
+ * What the card shows of its use, as record lines: that the hit's damage was rolled, whom a damage roll was applied
+ * to, which offered conditions were applied, and that the grapple started. The buttons stay as they are, so each can
+ * be pressed again, as PF2e's damage buttons can (#223).
  * @param {object} system - RollMessageData source
  * @param {CardUse} used
  * @returns {object} Template context
@@ -155,7 +156,6 @@ function buildUseContext(system, used) {
     appliedNotes: applied.map(a =>
       F("l5r4.ui.combat.appliedTo", { name: a.name, wounds: a.wounds })
     ),
-    targetApplied: applied.some(a => a.uuid === system.target?.uuid),
     conditions: (system.conditions ?? []).map((condition, index) => ({
       ...condition,
       applied: (used.conditions ?? []).includes(index)
