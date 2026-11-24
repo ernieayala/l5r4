@@ -9,6 +9,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { F, T, pluralKeyOf } from "../utils/localization.js";
 import { parseTransfer, buildRemappedRules, buildTransferPayload } from "../utils/item-transfer.js";
+import { askPrompt } from "./dialog.js";
 
 /**
  * The export file's content for the items in a folder and its subfolders, ids kept so rules can be rewritten on
@@ -154,7 +155,7 @@ async function askItemImport(parent) {
     "templates/apps/import-data.hbs",
     { hint1: T("l5r4.ui.transfer.importHint"), hint2: "" }
   );
-  const file = await foundry.applications.api.DialogV2.prompt({
+  const file = await askPrompt({
     window: { title: T("l5r4.ui.transfer.import") },
     position: { width: 400 },
     content,

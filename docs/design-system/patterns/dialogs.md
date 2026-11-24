@@ -1,21 +1,21 @@
 # Dialogs
 
-How the system asks the user something and waits: the check dialog with its modifier toggles, choice prompts, pickers with a route that needs no drag, and confirmations, destructive ones included. Every dialog is core's `foundry.applications.api.DialogV2` (CLAUDE.md **Foundry Integration**); the system writes its content and buttons, and core draws the window, the footer, and the keyboard handling.
+How the system asks the user something and waits: the check dialog with its modifier toggles, choice prompts, pickers with a route that needs no drag, and confirmations, destructive ones included. Every dialog is core's `foundry.applications.api.DialogV2` (CLAUDE.md **Foundry Integration**), opened through `module/services/dialog.js`; the system writes its content and buttons, and core draws the window, the footer, and the keyboard handling.
 
 | Item | Detail |
 | --- | --- |
-| API | `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, `DialogV2.input` (`resources/app/client/applications/api/dialog.mjs:346-405`) |
+| API | `askPrompt`, `askConfirm`, `askButtons`, `openDialog` (`module/services/dialog.js`), which call core's `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, and the constructor (`resources/app/client/applications/api/dialog.mjs:346-405`) with the `l5r4-dialog` class added |
 | Templates | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `confirm-dialog.hbs`, `choice-dialog.hbs`, `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs` |
 | Paths | `DIALOG_TEMPLATES` (`module/config/templates.js`) |
 | Callers | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/roll-check.js`), `askChoice` (`module/services/purchase.js`), `askSchool` (`module/services/purchase.js`), `askGmAllow` (`module/services/gm-allow.js`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
-| SCSS | `.l5r4-check-dialog` (`scss/components/_check-dialog.scss`); `scss/components/_ledger-dialog.scss` |
+| SCSS | `.l5r4-dialog` (`scss/layout/_dialog-layout.scss`); `.l5r4-check-dialog` (`scss/components/_check-dialog.scss`); `scss/components/_ledger-dialog.scss` |
 | Tokens | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity` |
 | Components | Check dialog, ledger dialog, form field, button |
-| Checks | ESLint `no-restricted-syntax` (no global `Dialog`, no HTML strings), `tests/conventions/templates.test.js`, `tests/conventions/names.test.js`, `tests/lang.test.js`; "review" where no tool can judge |
+| Checks | ESLint `no-restricted-syntax` (no global `Dialog`, no HTML strings, no `DialogV2` outside `module/services/dialog.js`), the Quench dialog batch (`tests/quench/dialogs.js`), `tests/conventions/templates.test.js`, `tests/conventions/names.test.js`, `tests/lang.test.js`; "review" where no tool can judge |
 
 ## Anatomy
 
-Core wraps the content in `form.dialog-form` and renders the buttons in a `footer.form-footer` (`client/applications/api/dialog.mjs:205-215`).
+Core wraps the content in `div.dialog-content` inside `form.dialog-form` and renders the buttons in a `footer.form-footer` (`client/applications/api/dialog.mjs:205-215`).
 
 | # | Part | Owner | Detail |
 | --- | --- | --- | --- |
@@ -140,6 +140,14 @@ Conforming, `askChoice` (`module/services/purchase.js`): `DIALOG_TEMPLATES.choic
 
 Non-conforming, modeled: a prompt with a free-text field for a choice the rules restrict to a list.
 
+### 8. The fields scroll, the buttons stay in view
+
+A dialog taller than the window scrolls its fields inside the window, starts scrolled to the top, and keeps its footer buttons in view. Core caps a window at the viewport and hides `.window-content`'s overflow, so the scroll goes on `.dialog-content`, never on `.window-content` (which would scroll the buttons away with the fields) and never on the page. Every dialog opens through `module/services/dialog.js`, which adds the `l5r4-dialog` class that `scss/layout/_dialog-layout.scss` styles. Enforced by ESLint `no-restricted-syntax` (no `DialogV2` outside `module/services/dialog.js`) and the Quench dialog batch (`tests/quench/dialogs.js`), which opens a check dialog in a short window.
+
+Conforming, `askChoices` (`module/services/dice/check/roll-check.js`): `askPrompt({ ... })`, so an attack's maneuvers, TN, Raises and Void Point scroll above a Roll button that stays in view.
+
+Non-conforming, modeled: `foundry.applications.api.DialogV2.prompt({ ... })` from a service: the dialog gets no `l5r4-dialog` class and clips the fields that don't fit.
+
 ## States
 
 | State | Look | Source |
@@ -169,7 +177,7 @@ Non-conforming, modeled: a prompt with a free-text field for a choice the rules 
 | Title | One line in core's title bar; a title that names an item and a choice stays under 420 px |
 | Modifier labels | Wrap inside their row; the value stays at the row's end: `.l5r4-check-dialog-modifier` (`scss/components/_check-dialog.scss`) |
 | Question text | Wraps; a long list of names (the Schools in `askSchool`) wraps in the sentence |
-| Dialog height | Grows with its rows; the rows that do not apply are left out, so a short roll gives a short dialog |
+| Dialog height | Grows with its rows; the rows that do not apply are left out, so a short roll gives a short dialog. Past the window's height the fields scroll and the buttons stay in view (rule 8) |
 
 ## Do and don't
 

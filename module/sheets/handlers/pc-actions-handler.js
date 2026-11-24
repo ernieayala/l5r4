@@ -9,6 +9,7 @@ import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
 import { buildVoidUseUpdate, startedCombatOf, warnVoidLimit } from "../../services/effects/uses.js";
+import { askConfirm } from "../../services/dialog.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -65,7 +66,7 @@ export class PcActionsHandler {
     }
 
     // Confirm with dialog
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
+    const confirmed = await askConfirm({
       window: { title: T("l5r4.ui.effects.voidArmorTitle") },
       content: await R(DIALOG_TEMPLATES.confirm, {
         question: T("l5r4.ui.effects.voidArmorQuestion")

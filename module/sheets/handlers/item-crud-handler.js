@@ -10,6 +10,7 @@ import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { toInt } from "../../utils/type-coercion.js";
 import * as Chat from "../../services/chat.js";
 import { updateSectionCollapsed } from "../../services/section-state.js";
+import { askConfirm } from "../../services/dialog.js";
 
 /**
  * Static utility class for handling item CRUD operations on actor sheets.
@@ -59,7 +60,7 @@ export class ItemCrudHandler {
    */
   static async #askItemRemoval(item) {
     // No is the default button [src: client/applications/api/dialog.mjs:346-354]; closing the dialog resolves null
-    return foundry.applications.api.DialogV2.confirm({
+    return askConfirm({
       window: { title: "l5r4.ui.dialogs.deleteItem.title" },
       content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
         question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name }),

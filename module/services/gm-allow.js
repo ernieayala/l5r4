@@ -6,6 +6,7 @@
 
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
+import { askConfirm } from "./dialog.js";
 
 /**
  * Refuse a forbidden roll for a player, or ask the GM to allow it.
@@ -20,7 +21,7 @@ export async function askGmAllow({ title, reason, ask }) {
     ui.notifications?.warn(reason);
     return false;
   }
-  return foundry.applications.api.DialogV2.confirm({
+  return askConfirm({
     window: { title },
     content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
       question: reason,

@@ -7,6 +7,7 @@
 
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { onFearClick } from "../../services/fear.js";
+import { askConfirm } from "../../services/dialog.js";
 import NpcAttackConfigApplication from "../../apps/npc-attack-config.js";
 
 /**
@@ -99,7 +100,7 @@ export class NpcActionsHandler {
         game.i18n.localize("l5r4.ui.mechanics.combat.attackSlot", {
           slot: attackKey.replace("attack", "")
         });
-      const confirmed = await foundry.applications.api.DialogV2.confirm({
+      const confirmed = await askConfirm({
         window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
         content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
           question: game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name }),

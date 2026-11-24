@@ -14,7 +14,7 @@
       ]
     ],
     "selector-class-pattern": [
-      "^(l5r4(-[a-z0-9]+)*|-[a-z0-9]+(-[a-z0-9]+)*|-commonItem|is-[a-z0-9]+(-[a-z0-9]+)*|fa-[a-z0-9-]+|flexrow|flexcol|flex0|flex1|flex2|flex3|form-group|form-fields|standard-form|hint|active|theme-light|theme-dark|window-content|scrollable|draggable|button|inline-control|icon|tabs|sheet-tabs|tab|editor|editor-content|chat-message|message-content|roll|discarded|rerolled|chat-card|card-content|dice-flavor|check-note|check-applied|check-free-raises|check-conditions|damage-actions|flow-actions|healing-card|weapon|item|title|apply-wounds-btn|reduce-wounds-btn)$",
+      "^(l5r4(-[a-z0-9]+)*|-[a-z0-9]+(-[a-z0-9]+)*|-commonItem|is-[a-z0-9]+(-[a-z0-9]+)*|fa-[a-z0-9-]+|flexrow|flexcol|flex0|flex1|flex2|flex3|form-group|form-fields|standard-form|hint|active|theme-light|theme-dark|window-content|dialog-form|dialog-content|form-footer|scrollable|draggable|button|inline-control|icon|tabs|sheet-tabs|tab|editor|editor-content|chat-message|message-content|roll|discarded|rerolled|chat-card|card-content|dice-flavor|check-note|check-applied|check-free-raises|check-conditions|damage-actions|flow-actions|healing-card|weapon|item|title|apply-wounds-btn|reduce-wounds-btn)$",
       {
         "message": "A system class is l5r4-<block>[-<element>], a -<variant>, or an is-<state>; core and fixed chat-card classes keep their names (docs/code-system/naming.md)"
       }

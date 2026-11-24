@@ -8,13 +8,14 @@
 import { SYS_ID } from "../config/constants.js";
 import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../config/templates.js";
 import { R, T } from "../utils/localization.js";
+import { askConfirm } from "./dialog.js";
 
 /**
  * Start a new game session after the GM confirms, and say so in chat.
  * @returns {Promise<void>}
  */
 export async function startNewSession() {
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await askConfirm({
     window: { title: T("l5r4.ui.session.new") },
     content: await R(DIALOG_TEMPLATES.confirm, { question: T("l5r4.ui.session.confirm") }),
     yes: { label: T("l5r4.ui.session.start") },

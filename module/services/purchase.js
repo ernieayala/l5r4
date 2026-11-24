@@ -20,6 +20,7 @@ import {
   isKihoMasteryMet,
   buildRulesWithSelections
 } from "../utils/purchase.js";
+import { askButtons, askConfirm, askPrompt } from "./dialog.js";
 
 /**
  * Item types a new one replaces the old of (character creation Steps 1-3); a School asks first (askSchool).
@@ -164,7 +165,7 @@ async function canAddItem(actor, data, rules) {
     ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
     return false;
   }
-  const bypass = await foundry.applications.api.DialogV2.confirm({
+  const bypass = await askConfirm({
     window: { title: T("l5r4.ui.purchase.unmetTitle") },
     content: await R(DIALOG_TEMPLATES.confirm, {
       question: F("l5r4.ui.purchase.unmet", { name: data.name, list }),
@@ -280,7 +281,7 @@ async function askChoice(itemName, choice, granted) {
     return null;
   }
   const prompt = choice.prompt || T("l5r4.ui.purchase.choose");
-  return foundry.applications.api.DialogV2.prompt({
+  return askPrompt({
     window: { title: F("l5r4.ui.purchase.choiceTitle", { item: itemName, prompt }) },
     content: await R(DIALOG_TEMPLATES.choice, {
       formId: foundry.utils.randomID(),
@@ -327,7 +328,7 @@ function buildBioLinks(type, item) {
  * @returns {Promise<"replace"|"add"|null>} null when the dialog is closed
  */
 async function askSchool(actor, name, schools) {
-  return foundry.applications.api.DialogV2.wait({
+  return askButtons({
     window: { title: T("l5r4.ui.purchase.schoolTitle") },
     content: await R(DIALOG_TEMPLATES.confirm, {
       question: F("l5r4.ui.purchase.schoolQuestion", {
