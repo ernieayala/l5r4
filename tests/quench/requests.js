@@ -335,8 +335,22 @@ export function registerRequestsTests(quench) {
               })
             );
             await strength.setFlag(SYS_ID, "contest", { attackId: attack.id, side: "target" });
-            const rolls = contestRollsOf(attack);
-            assert.notExists(rolls.target, "the attacker's roll does not count for the target");
+            assert.notExists(
+              contestRollsOf(attack).target,
+              "the attacker's roll does not count for the target"
+            );
+            const own = track(
+              await rollCheck({
+                actor: target,
+                kind: "trait",
+                label: "Requests Strength",
+                base: { roll: 2, keep: 2 },
+                trait: "str",
+                askForOptions: false
+              })
+            );
+            await own.setFlag(SYS_ID, "contest", { attackId: attack.id, side: "target" });
+            assert.equal(contestRollsOf(attack).target?.id, own.id, "the target's own roll counts");
           })
         );
       });
