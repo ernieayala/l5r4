@@ -29,7 +29,7 @@ export async function startGrapple(attack) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return null;
   }
-  if (attack.getFlag(SYS_ID, "used")?.grapple) {
+  if (isGrappleRunning(attack)) {
     ui.notifications?.info(T("l5r4.ui.combat.grappleStarted"));
     return null;
   }
@@ -61,8 +61,7 @@ async function applyGrappleStart({ messageId }, user) {
   if (!attacker.testUserPermission(user, "OWNER")) {
     throw new Error("l5r4.ui.requests.notYourSide");
   }
-  // A hit starts one grapple; its card then says so (#140)
-  if (attack.getFlag(SYS_ID, "used")?.grapple) {
+  if (isGrappleRunning(attack)) {
     throw new Error("l5r4.ui.combat.grappleStarted");
   }
   for (const actor of [attacker, target]) {
@@ -73,6 +72,18 @@ async function applyGrappleStart({ messageId }, user) {
   const card = await startFlow("grapple", buildGrappleState(attack, attacker, target), attacker);
   await updateCheckCardUse(attack, { grapple: card.id });
   return card.id;
+}
+
+/**
+ * Whether the grapple a hit started is still running: a hit holds one grapple at a time (#140), and once that one has
+ * ended (or its card was deleted) the hit can start another, so a grapple ended by mistake can be begun again (#223).
+ * @param {ChatMessage} attack - The attack message
+ * @returns {boolean}
+ */
+function isGrappleRunning(attack) {
+  const cardId = attack.getFlag(SYS_ID, "used")?.grapple;
+  const flow = cardId ? game.messages.get(cardId)?.getFlag(SYS_ID, "flow") : null;
+  return Boolean(flow && !flow.state.over);
 }
 
 /**

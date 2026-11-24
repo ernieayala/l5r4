@@ -117,7 +117,8 @@ export async function postContestedRoll(message, opponent) {
 /**
  * Put a condition the roll's ApplyCondition rules offer on its target. The roll must have succeeded; the condition
  * comes from the stored context by index, never from the card. A target the user does not own gets it through the
- * active GM. The card then marks the condition applied, so the same click does not stack a second one (#140).
+ * active GM. The card records that it was applied. Pressing again applies it again, which refreshes the one the
+ * target holds rather than stacking a second (#177), so a condition removed by mistake can be put back (#223).
  * @param {ChatMessage} message - A `roll` message
  * @param {number} index - Index into `system.conditions`
  * @returns {Promise<void>}
@@ -126,7 +127,7 @@ export async function applyConditionFromMessage(message, index) {
   const entry = message.system.conditions[index];
   const target = message.system.target.uuid ? await fromUuid(message.system.target.uuid) : null;
   const applied = message.getFlag(SYS_ID, "used")?.conditions ?? [];
-  if (!entry || !target || message.system.outcome.success !== true || applied.includes(index)) {
+  if (!entry || !target || message.system.outcome.success !== true) {
     return;
   }
   if (!canAct(rollActor(message))) {
@@ -137,7 +138,9 @@ export async function applyConditionFromMessage(message, index) {
     // The roll the GM's client checks before it puts the condition on a target the user does not own (#162)
     proof: { kind: "roll", messageId: message.id, index }
   });
-  await updateCheckCardUse(message, { conditions: [...applied, index] });
+  if (!applied.includes(index)) {
+    await updateCheckCardUse(message, { conditions: [...applied, index] });
+  }
 }
 
 /**

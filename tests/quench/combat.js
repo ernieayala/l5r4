@@ -223,9 +223,9 @@ export function registerCombatTests(quench) {
           })
         );
 
-        // #140: a card shows what its buttons started
+        // #140, #223: a card records what its buttons did; the buttons stay as they were, like PF2e's damage buttons
         it(
-          "should list on a damage card whom it was applied to, offer applying again, and drop the line on Undo",
+          "should list on a damage card whom it was applied to, keep its buttons, and drop the line on Undo",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender({ armor: { bonus: 1, reduction: 3 } });
@@ -236,18 +236,21 @@ export function registerCombatTests(quench) {
             const applied = F("l5r4.ui.combat.appliedTo", { name: target.name, wounds: 15 });
             const card = () => game.messages.get(damage.id);
             assert.isTrue(await waitFor(() => card().content.includes(applied)), "listed");
-            assert.include(
-              card().content,
-              F("l5r4.ui.combat.applyToAgain", { target: target.name }),
-              "the target's button says it applies again"
+            const html = await card().renderHTML();
+            const button = html.querySelector("[data-action='damage-apply-target']");
+            assert.equal(
+              button.textContent.trim(),
+              F("l5r4.ui.combat.applyTo", { target: target.name }),
+              "the button keeps its label"
             );
+            assert.isFalse(button.disabled);
             await click(resultOf(damage), "[data-action='damage-undo']");
             assert.isTrue(await waitFor(() => !card().content.includes(applied)), "gone on Undo");
           })
         );
 
         it(
-          "should say on a hit's card that its damage was rolled",
+          "should say on a hit's card that its damage was rolled, and keep the button",
           clean(async () => {
             const { actor, katana } = await attacker();
             const hit = await attack(actor, katana, await defender());
@@ -256,13 +259,13 @@ export function registerCombatTests(quench) {
             assert.include(card.content, T("l5r4.ui.check.damageRolled"));
             assert.include(
               card.content,
-              F("l5r4.ui.check.damageRollAgain", { pool: hit.system.damage.label })
+              F("l5r4.ui.check.damageRollPool", { pool: hit.system.damage.label })
             );
           })
         );
 
         it(
-          "should apply an offered condition once, then disable its button",
+          "should note an applied condition and apply it again on a second press, holding one",
           clean(async () => {
             const { actor, katana } = await attacker([
               { key: "ApplyCondition", selector: "attack", condition: "dazed" }
@@ -271,28 +274,40 @@ export function registerCombatTests(quench) {
             const hit = await attack(actor, katana, target);
             assert.lengthOf(hit.system.conditions, 1, "Dazed is offered");
             await applyConditionFromMessage(hit, 0);
+            const html = await game.messages.get(hit.id).renderHTML();
+            assert.isFalse(html.querySelector("[data-action='apply-condition']").disabled);
+            assert.include(
+              html.textContent,
+              F("l5r4.ui.effects.appliedTo", {
+                effect: hit.system.conditions[0].label,
+                target: target.name
+              })
+            );
+            // Removed by mistake, then put back from the card
+            await target.deleteEmbeddedDocuments(
+              "ActiveEffect",
+              target.effects.filter(e => e.statuses.has("dazed")).map(e => e.id)
+            );
             await applyConditionFromMessage(game.messages.get(hit.id), 0);
             assert.lengthOf(
               target.effects.filter(e => e.statuses.has("dazed")),
               1,
-              "a second click adds none"
+              "back, once"
             );
-            const html = await game.messages.get(hit.id).renderHTML();
-            assert.isTrue(html.querySelector("[data-action='apply-condition']").disabled);
           })
         );
 
         it(
-          "should start one grapple from a hit",
+          "should start one grapple from a hit at a time, and another once it has ended",
           clean(async () => {
             const { actor } = await attacker();
             const hit = await grappleAttack(actor, await defender());
             const first = await startGrapple(hit);
-            const second = await startGrapple(game.messages.get(hit.id));
             assert.exists(first);
-            assert.isNull(second, "the second click starts none");
-            const html = await game.messages.get(hit.id).renderHTML();
-            assert.isTrue(html.querySelector("[data-action='grapple-start']").disabled);
+            assert.isNull(await startGrapple(game.messages.get(hit.id)), "none while it runs");
+            const flow = first.getFlag(SYS_ID, "flow");
+            await first.setFlag(SYS_ID, "flow", { ...flow, state: { ...flow.state, over: true } });
+            assert.exists(await startGrapple(game.messages.get(hit.id)), "a new one once it ended");
           })
         );
 

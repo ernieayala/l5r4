@@ -33,12 +33,8 @@
     <button type="button" data-action="combat-contest">{{localize "l5r4.ui.combat.contestStrength"}}</button>
   {{/if}}
   {{#if grappleButton}}
-    <button
-      type="button"
-      data-action="grapple-start"
-      {{disabled grappleStarted}}
-      {{#if grappleStarted}}data-tooltip="{{localize "l5r4.ui.combat.grappleStarted"}}"{{/if}}
-    >
+    {{#if grappleStarted}}<div class="check-note">{{localize "l5r4.ui.combat.grappleStarted"}}</div>{{/if}}
+    <button type="button" data-action="grapple-start">
       {{localize "l5r4.ui.combat.grappleStart" target=target.name}}
     </button>
   {{/if}}
@@ -47,11 +43,7 @@
     <div class="damage-actions flexrow -gap-sm">
       {{#if applyTarget}}
         <button type="button" data-action="damage-apply-target">
-          {{#if targetApplied}}
-            {{localize "l5r4.ui.combat.applyToAgain" target=applyTarget}}
-          {{else}}
-            {{localize "l5r4.ui.combat.applyTo" target=applyTarget}}
-          {{/if}}
+          {{localize "l5r4.ui.combat.applyTo" target=applyTarget}}
         </button>
       {{/if}}
       <button type="button" data-action="damage-apply-selected">
@@ -60,15 +52,14 @@
     </div>
   {{/if}}
   {{#if (and (eq outcome.success true) conditions.length)}}
+    {{#each conditions}}
+      {{#if applied}}
+        <div class="check-note">{{localize "l5r4.ui.effects.appliedTo" effect=label target=../target.name}}</div>
+      {{/if}}
+    {{/each}}
     <div class="check-conditions flexrow -gap-sm">
       {{#each conditions}}
-        <button
-          type="button"
-          data-action="apply-condition"
-          data-index="{{@index}}"
-          {{disabled applied}}
-          {{#if applied}}data-tooltip="{{localize "l5r4.ui.effects.appliedTo" effect=label target=../target.name}}"{{/if}}
-        >
+        <button type="button" data-action="apply-condition" data-index="{{@index}}">
           {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
         </button>
       {{/each}}
@@ -77,11 +68,7 @@
   {{#if damageButton}}
     {{#if damageRolled}}<div class="check-note">{{localize "l5r4.ui.check.damageRolled"}}</div>{{/if}}
     <button type="button" class="l5r4-check-damage" data-action="check-damage">
-      {{#if damageRolled}}
-        {{localize "l5r4.ui.check.damageRollAgain" pool=damageButton}}
-      {{else}}
-        {{localize "l5r4.ui.check.damageRollPool" pool=damageButton}}
-      {{/if}}
+      {{localize "l5r4.ui.check.damageRollPool" pool=damageButton}}
     </button>
   {{/if}}
   {{#if honorRoll}}
