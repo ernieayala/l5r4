@@ -249,6 +249,28 @@ registerFlow("grapple", {
   },
 
   /**
+   * The GM's Redo (#164): the control rolls in play are cleared, to be rolled again.
+   * @param {object} state
+   * @returns {object}
+   */
+  redo(state) {
+    state.rolls = [null, null];
+    return state;
+  },
+
+  /**
+   * The GM's End (#164): the grapple ends and both sides lose Grappled, a side whose actor is gone skipped.
+   * @param {object} state
+   * @returns {Promise<object>}
+   */
+  async end(state) {
+    await endGrapple(sidesOf(state).filter(Boolean));
+    state.log.push(T("l5r4.ui.combat.grapple.endedByGm"));
+    state.over = true;
+    return state;
+  },
+
+  /**
    * The card's HTML.
    * @param {object} state
    * @returns {Promise<string>}
@@ -277,7 +299,8 @@ registerFlow("grapple", {
         ? T("l5r4.ui.combat.grapple.over")
         : F("l5r4.ui.combat.grapple.inControl", { name: names[state.control] }),
       lines: state.log.slice(-6),
-      buttons
+      buttons,
+      gm: { redo: !state.over, end: !state.over }
     });
   }
 });

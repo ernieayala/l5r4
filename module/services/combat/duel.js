@@ -312,6 +312,29 @@ registerFlow("duel", {
   },
 
   /**
+   * The GM's Redo (#164): clear the stage in play, or after the duel ends, reopen its last stage. A concession is
+   * taken back.
+   * @param {object} state
+   * @returns {object}
+   */
+  redo(state) {
+    state.stage = state.stage === "done" ? lastStageOf(state) : state.stage;
+    state.rolls[state.stage] = [null, null];
+    state.conceded = null;
+    return state;
+  },
+
+  /**
+   * The GM's End (#164): the duel is over where it stands.
+   * @param {object} state
+   * @returns {Promise<object>}
+   */
+  async end(state) {
+    state.stage = "done";
+    return state;
+  },
+
+  /**
    * The card's HTML.
    * @param {object} state
    * @returns {Promise<string>}
@@ -325,10 +348,35 @@ registerFlow("duel", {
           ? T("l5r4.ui.combat.duel.done")
           : T(`l5r4.ui.combat.duel.${state.stage}`),
       lines: buildDuelLines(state, duelists),
-      buttons: buildDuelButtons(state, duelists)
+      buttons: buildDuelButtons(state, duelists),
+      gm: { redo: true, end: state.stage !== "done" }
     });
   }
 });
+
+/**
+ * The stage a finished duel ended in: the strike once Focus settled, Focus once Assessment settled, else Assessment.
+ * @param {object} state
+ * @returns {string}
+ */
+function lastStageOf(state) {
+  const isSettled = stage => state.rolls[stage].every(roll => roll !== null);
+  if (isSettled("focus")) {
+    return "strike";
+  }
+  return isSettled("assessment") ? "focus" : "assessment";
+}
+
+/**
+ * Whether a duelist is out of the fight: Dead, or at the Out Wound Rank. Such a duelist does not strike; the second
+ * strike happens only while the duelist still stands (#164).
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ * @param {Actor|null} actor
+ * @returns {boolean}
+ */
+function isOutOfFight(actor) {
+  return Boolean(actor?.statuses.has("dead") || actor?.system.woundLevels?.out?.current);
+}
 
 /**
  * Each duelist as the card shows it: name, and whether they may roll this stage or concede. In the strike, the
@@ -345,11 +393,13 @@ function buildDuelists(state) {
       (state.firstStrike === null ||
         state.firstStrike === i ||
         state.rolls.strike[state.firstStrike] !== null);
+    const standing = !isOutOfFight(actor);
     return {
       index: i,
       name: actor?.name ?? "?",
-      canRoll: state.stage !== "done" && !rolled && (state.stage !== "strike" || strikesNow),
-      canConcede: canConcede(state, i)
+      canRoll:
+        state.stage !== "done" && !rolled && (state.stage !== "strike" || (strikesNow && standing)),
+      canConcede: standing && canConcede(state, i)
     };
   });
 }

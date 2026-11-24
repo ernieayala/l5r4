@@ -2,10 +2,13 @@
  * @module services/combat/flow
  * @description Chat cards that run a multi-step combat flow (an iaijutsu duel, a grapple). The card's state lives in
  * its flags; only the active GM makes and changes it, so a player's step goes to the GM as a query, the step checks
- * the requesting user and the roll it records (getFreshRoll), and the GM re-renders the card.
+ * the requesting user and the roll it records (getFreshRoll), and the GM re-renders the card. A card's steps run one
+ * at a time, each reading the card fresh, so two steps sent together are both kept (#164). The GM can always correct a
+ * card: Redo clears the step in play and End stops the flow, even when a participant is gone (#164, #223).
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
@@ -22,14 +25,25 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
  *   button only to that actor's owners (#112)
  * @property {function(object, {card: ChatMessage, data: object, user: User}): Promise<object>} step  On the GM:
  *   check the user, return the new state
+ * @property {function(object): object} redo  On the GM: the state with the step in play cleared
+ * @property {function(object): Promise<object>} end  On the GM: the state ended, its statuses cleared
  * @property {function(object): Promise<string>} render  The card's HTML for a state
  */
+
+/** The GM's own corrections a flow card offers, which any flow handles through `redo` and `end`. */
+const GM_ACTIONS = Object.freeze(["redo", "end"]);
 
 /**
  * Registered flows by name.
  * @type {Map<string, Flow>}
  */
 const flows = new Map();
+
+/**
+ * Each card's steps in progress on this GM client, by card id: the next step waits for the one before (#164).
+ * @type {Map<string, Promise<void>>}
+ */
+const stepQueues = new Map();
 
 /**
  * The parts of a check request for a Skill Roll with a Trait or the Void Ring: the pool, the selectors, the
@@ -114,13 +128,25 @@ export function bindFlowCards(message, html) {
   hideUnusable(html, "[data-flow-action]", button =>
     Boolean(handler.actorOf(flow.state, button.dataset)?.isOwner)
   );
+  hideUnusable(html, "[data-flow-gm]", () => game.user.isGM);
   for (const button of html.querySelectorAll("[data-flow-action]")) {
     button.addEventListener("click", async event => {
       event.preventDefault();
+      // No roll is made that no GM could record (#164)
+      if (!game.user.isGM && !game.users.activeGM) {
+        ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
+        return;
+      }
       const step = await handler.click(message, flow.state, event.currentTarget.dataset);
       if (step) {
         await requestStep(message, step);
       }
+    });
+  }
+  for (const button of html.querySelectorAll("[data-flow-gm]")) {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      requestStep(message, { action: event.currentTarget.dataset.flowGm });
     });
   }
 }
@@ -155,12 +181,32 @@ export function registerFlowQueries() {
 }
 
 /**
- * Run one step on the GM: the flow updates the state, and the card re-renders.
+ * Run one step on the GM after the card's earlier steps, so each reads the state the one before wrote (#164).
  * @param {{messageId: string, data: object}} request
  * @param {User} user - The requesting user
  * @returns {Promise<void>}
  */
-async function applyFlowStep({ messageId, data }, user) {
+function applyFlowStep(request, user) {
+  const id = String(request.messageId);
+  const run = (stepQueues.get(id) ?? Promise.resolve()).then(() => updateFlowCard(request, user));
+  const settled = run.catch(() => {});
+  stepQueues.set(id, settled);
+  settled.then(() => {
+    if (stepQueues.get(id) === settled) {
+      stepQueues.delete(id);
+    }
+  });
+  return run;
+}
+
+/**
+ * Run one step on the GM: the flow updates the state read fresh from the card, and the card re-renders. Redo and End
+ * are the GM's own.
+ * @param {{messageId: string, data: object}} request
+ * @param {User} user - The requesting user
+ * @returns {Promise<void>}
+ */
+async function updateFlowCard({ messageId, data }, user) {
   const card = game.messages.get(String(messageId));
   // A flow card is the GM's client's: a player's own message carrying a flow could hold any state (#162)
   const flow = card?.author?.isGM ? card.getFlag(SYS_ID, "flow") : null;
@@ -168,9 +214,18 @@ async function applyFlowStep({ messageId, data }, user) {
   if (!handler) {
     throw new Error("l5r4.ui.requests.notFlowCard");
   }
-  const state = await handler.step(foundry.utils.deepClone(flow.state), { card, data, user });
+  const state = foundry.utils.deepClone(flow.state);
+  let next;
+  if (GM_ACTIONS.includes(data?.action)) {
+    if (!user.isGM) {
+      throw new Error("l5r4.ui.requests.gmCorrects");
+    }
+    next = data.action === "redo" ? handler.redo(state) : await handler.end(state);
+  } else {
+    next = await handler.step(state, { card, data, user });
+  }
   await card.update({
-    content: await handler.render(state),
-    [`flags.${SYS_ID}.flow.state`]: state
+    content: await handler.render(next),
+    [`flags.${SYS_ID}.flow.state`]: next
   });
 }

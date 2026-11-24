@@ -3,6 +3,7 @@ import { CHAT_TEMPLATES } from "../../module/config/templates.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { startDuel } from "../../module/services/combat/duel.js";
+import { startFlow } from "../../module/services/combat/flow.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications, withGmAnswer } from "./helpers.js";
@@ -312,6 +313,101 @@ export function registerRequestsTests(quench) {
               "l5r4.ui.requests.notDuelistRoll",
               "the slot is filled"
             );
+          })
+        );
+
+        // #164: a card's steps run one at a time, so two sent together are both kept
+        it(
+          "should keep both duelists' rolls sent at the same moment",
+          clean(async () => {
+            const [first, second] = [await playersCharacter(), await playersCharacter()];
+            const card = track(await startDuel(first, second));
+            const [a, b] = [await assessment(first), await assessment(second)];
+            const gmStep = data =>
+              CONFIG.queries[`${SYS_ID}.flow`]({ messageId: card.id, data }, { user: game.user });
+            await Promise.all([
+              gmStep({ action: "roll", duelist: 0, rollId: a.id }),
+              gmStep({ action: "roll", duelist: 1, rollId: b.id })
+            ]);
+            assert.equal(card.getFlag(SYS_ID, "flow").state.stage, "focus", "both recorded");
+          })
+        );
+
+        // #164, #223: the GM corrects a card; a player cannot
+        it(
+          "should let the GM redo a duel step and end a grapple whose side is gone",
+          clean(async () => {
+            const duelist = await playersCharacter();
+            const other = track(await createTestPC({ name: "Requests: redo duelist" }));
+            const card = track(await startDuel(duelist, other));
+            const roll = await assessment(duelist);
+            await askStep(card, { action: "roll", duelist: 0, rollId: roll.id });
+            assert.equal(
+              await refusalOf(askStep(card, { action: "redo" })),
+              "l5r4.ui.requests.gmCorrects"
+            );
+            await CONFIG.queries[`${SYS_ID}.flow`](
+              { messageId: card.id, data: { action: "redo" } },
+              { user: game.user }
+            );
+            assert.isNull(card.getFlag(SYS_ID, "flow").state.rolls.assessment[0], "cleared");
+
+            const grappler = track(await createTestPC({ name: "Requests: grappler" }));
+            const gone = await createTestPC({ name: "Requests: gone" });
+            for (const actor of [grappler, gone]) {
+              await applyEffect(actor, "grappled");
+            }
+            const state = {
+              sides: [grappler.uuid, gone.uuid],
+              skill: "jiujutsu",
+              weapon: null,
+              control: 0,
+              rolls: [null, null],
+              log: [],
+              over: false
+            };
+            const grapple = track(await startFlow("grapple", state, grappler));
+            await gone.delete();
+            await CONFIG.queries[`${SYS_ID}.flow`](
+              { messageId: grapple.id, data: { action: "end" } },
+              { user: game.user }
+            );
+            assert.isTrue(grapple.getFlag(SYS_ID, "flow").state.over, "ended");
+            assert.isFalse(grappler.statuses.has("grappled"), "the survivor is free");
+          })
+        );
+
+        // #164: the second strike only while the duelist stands
+        // game-rules/39_iaijutsu_dueling.md, p.87
+        it(
+          "should offer no strike to a duelist who is Dead",
+          clean(async () => {
+            const duelist = await playersCharacter();
+            const other = track(await createTestPC({ name: "Requests: fallen duelist" }));
+            const card = track(await startDuel(duelist, other));
+            const flow = card.getFlag(SYS_ID, "flow");
+            await card.setFlag(SYS_ID, "flow", {
+              ...flow,
+              state: { ...flow.state, stage: "strike", firstStrike: null }
+            });
+            await other.toggleStatusEffect("dead", { active: true });
+            const roll = track(
+              await rollCheck({
+                actor: other,
+                kind: "attack",
+                label: "Requests strike",
+                base: { roll: 2, keep: 2 },
+                target: duelist,
+                askForOptions: false
+              })
+            );
+            const refusal = await refusalOf(
+              CONFIG.queries[`${SYS_ID}.flow`](
+                { messageId: card.id, data: { action: "roll", duelist: 1, rollId: roll.id } },
+                { user: game.user }
+              )
+            );
+            assert.equal(refusal, "l5r4.ui.requests.notDuelistRoll");
           })
         );
       });
