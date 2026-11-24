@@ -1,22 +1,405 @@
 {
   "l5r4": {
     "apps": {
+      "armorConfig": {
+        "errors": {
+          "openFailed": "Error al abrir la configuración de armadura",
+          "updateFailed": "Error al actualizar la configuración de armadura"
+        },
+        "title": "Configuración de armadura",
+        "titleFor": "Configuración de armadura: {name}"
+      },
+      "combatConfig": {
+        "errors": {
+          "openFailed": "Error al abrir la configuración de combate",
+          "updateFailed": "Error al actualizar la configuración de combate"
+        },
+        "pool": "Tirar/conservar",
+        "poolBonus": "Bonificación de tirar/conservar",
+        "title": "Configuración de combate",
+        "titleFor": "Configuración de combate: {name}"
+      },
+      "compendiumBrowser": {
+        "add": "Agregar",
+        "clear": "Borrar filtros",
+        "count": "Entradas: {count}",
+        "filters": {
+          "advantageType": "Clase",
+          "armorType": "Tipo de armadura",
+          "cost": "Costo",
+          "folder": "Grupo",
+          "keyword": "Palabra clave",
+          "kihoType": "Tipo de kiho",
+          "maho": "Maho",
+          "mastery": "Nivel de Maestría",
+          "page": "Página",
+          "ring": "Anillo",
+          "size": "Tamaño",
+          "skillType": "Tipo de Habilidad",
+          "trait": "Atributo",
+          "type": "Tipo"
+        },
+        "import": "Importar",
+        "no": "No",
+        "noActor": "Selecciona una ficha o asigna un personaje al que agregar objetos",
+        "none": "Nada coincide.",
+        "numbers": {
+          "armor": "ND de Armadura +{bonus}, Reducción {reduction}",
+          "spell": "{ring}, Nivel de Maestría {mastery}",
+          "weapon": "Daño {pool}"
+        },
+        "open": "Explorar",
+        "search": "Nombre",
+        "tabs": {
+          "advantages": "Ventajas y Desventajas",
+          "clans": "Clanes y familias",
+          "creatures": "Criaturas",
+          "equipment": "Equipamiento",
+          "kata": "Kata",
+          "kiho": "Kiho y tatuajes",
+          "schools": "Escuelas y Técnicas",
+          "skills": "Habilidades",
+          "spells": "Hechizos"
+        },
+        "title": "Explorador de compendios",
+        "yes": "Sí"
+      },
       "conditionManager": {
         "errors": {
-          "openFailed": "Error al abrir el Administrador de Condiciones"
-        }
+          "openFailed": "Error al abrir el Administrador de Condiciones",
+          "updateFailed": "Error al actualizar el administrador de condiciones"
+        },
+        "title": "Administrador de condiciones",
+        "titleFor": "Administrador de condiciones: {name}"
+      },
+      "designGallery": {
+        "color": {
+          "core": "Paleta del núcleo",
+          "domain": "Roles del dominio",
+          "palette": "Primitivas de la paleta",
+          "role": "Tokens de rol"
+        },
+        "components": {
+          "armorTnBlock": "Bloque de ND de Armadura",
+          "button": "Botón",
+          "chatCard": "Tarjeta de chat",
+          "checkCard": "Tarjeta de tirada",
+          "checkDialog": "Diálogo de tirada",
+          "compendiumBrowser": "Explorador de compendios",
+          "damageResult": "Resultado de daño",
+          "diceRow": "Fila de dados",
+          "effectPanel": "Panel de efectos",
+          "effectPrompt": "Aviso de efecto",
+          "expandControl": "Control de expansión",
+          "fearBlock": "Bloque de Miedo",
+          "floatingNumber": "Número flotante",
+          "flowCard": "Tarjeta de secuencia",
+          "formField": "Campo de formulario",
+          "grid": "Cuadrícula",
+          "iconButton": "Botón de icono",
+          "initiativeBlock": "Bloque de Iniciativa",
+          "inlineControl": "Control en línea",
+          "inlineLink": "Enlace en línea",
+          "itemHeader": "Encabezado de objeto",
+          "itemRow": "Fila de objeto",
+          "itemSummaryCard": "Tarjeta de resumen de objeto",
+          "ledgerDialog": "Diálogo del registro",
+          "rankControl": "Control de rango",
+          "requestCard": "Tarjeta de petición",
+          "ringTraitBlock": "Bloque de Anillos y Atributos",
+          "rulesEditor": "Editor de reglas",
+          "section": "Sección",
+          "sortHeader": "Encabezado ordenable",
+          "spellSlots": "Espacios de hechizo",
+          "tabs": "Pestañas",
+          "voidPointDots": "Marcadores de Puntos de Vacío",
+          "woundTrack": "Registro de Heridas"
+        },
+        "entry": {
+          "none": "Ninguno",
+          "page": "Página",
+          "seeAlso": "También se muestra en",
+          "styles": "Hojas de estilo",
+          "templates": "Plantillas"
+        },
+        "foundations": {
+          "below": "{ratio} contra {against}: por debajo de {minimum}",
+          "builtOn": "Basado en {core}",
+          "color": "Color",
+          "contrast": "Contraste",
+          "frames": "Marcos, movimiento, capas y estados",
+          "frameSample": "Aa",
+          "icons": "Iconos",
+          "meets": "{ratio} contra {against}: cumple {minimum}",
+          "noRatio": "Sin relación",
+          "notDefined": "No definido",
+          "ratio": "{ratio} contra {against}",
+          "sample": "Muestra",
+          "space": "Espacio y tamaño",
+          "swatch": "Muestra de color",
+          "token": "Token",
+          "typeSample": "Puntos de Vacío 10k10",
+          "typography": "Tipografía",
+          "value": "Valor"
+        },
+        "gmOnly": "Solo un DJ puede abrir la galería de diseño",
+        "icons": {
+          "activation": "Iniciar o terminar una activación",
+          "add": "Agregar o crear",
+          "applyHealing": "Aplicar curación (descanso)",
+          "brokenLink": "Enlace roto",
+          "conditionLink": "Enlace de condición",
+          "configure": "Abrir una ventana de configuración",
+          "configureAttack": "Configurar un ataque de PNJ",
+          "contested": "Tirada Enfrentada",
+          "convertCoin": "Convertir a una moneda mayor o menor",
+          "currentWoundLevel": "Nivel de Heridas actual",
+          "damageLink": "Enlace de daño",
+          "delete": "Quitar un documento o una entrada",
+          "edit": "Editar",
+          "endEncounter": "Terminar el encuentro",
+          "expand": "Expandir o contraer una sección o fila",
+          "fearLink": "Enlace de Miedo",
+          "guard": "Proteger",
+          "importEntry": "Importar una entrada de compendio al mundo",
+          "invalid": "No válido",
+          "loading": "Cargando",
+          "locked": "Bloqueado",
+          "manageEmphases": "Administrar Énfasis",
+          "newSession": "Iniciar una nueva sesión",
+          "openBrowser": "Abrir el explorador de compendios",
+          "openConditionManager": "Abrir el administrador de condiciones",
+          "openEffectPanel": "Abrir el panel de efectos",
+          "openLedger": "Abrir el registro de Honor, Gloria y Estatus",
+          "openSource": "Abrir el documento de origen",
+          "openWealthManager": "Abrir el administrador de riqueza",
+          "openXpManager": "Abrir el administrador de EXP",
+          "postRequest": "Publicar una tarjeta de petición (DJ)",
+          "postToChat": "Publicar en el chat",
+          "recalculate": "Recalcular",
+          "reroll": "Repetir la tirada y quedarse con la mejor",
+          "rollCheck": "Hacer una tirada",
+          "rules": "Reglas",
+          "save": "Guardar",
+          "sorted": "Dirección de la columna ordenada",
+          "startDuel": "Iniciar un duelo",
+          "step": "Subir o bajar un rango",
+          "subtract": "Restar una cantidad",
+          "toggleEffect": "Activar o desactivar un efecto",
+          "transferFolder": "Exportar o importar un archivo de carpeta",
+          "warning": "Advertencia"
+        },
+        "notes": {
+          "canvas": "Los números flotantes se dibujan en el lienzo, que no lee ninguna plantilla ni hoja de estilo, así que la galería no tiene nada que mostrar. Sus colores están en la sección de color.",
+          "chatFrame": "El marco es el mensaje de chat del núcleo; el encabezado del mensaje con el hablante y la hora solo se agrega en el registro del chat.",
+          "dialogFrame": "El contenido del diálogo tal como lo abre la tirada. El núcleo agrega el marco de la ventana y los botones; el patrón de diálogos abre uno.",
+          "dialogPattern": "El diálogo de tirada en el marco de diálogo del núcleo. Su botón solo lo cierra.",
+          "editor": "Las notas muestran su forma de solo lectura: el editor necesita un documento en el que guardar.",
+          "expandRoll": "Pulsa una fila de dados para mostrar sus dados, como en el registro del chat.",
+          "invalidWarningLocked": "Ninguna plantilla tiene todavía un campo no válido, con advertencia o bloqueado: esos estados son objetivos del sistema de diseño.",
+          "loading": "Ningún control muestra todavía un estado de carga.",
+          "pseudoStates": "Pasar por encima, enfocar y pulsar: usa el puntero o el teclado sobre la muestra.",
+          "readOnly": "Una hoja que el espectador no puede editar desactiva sus controles al mostrarse, así que las muestras enseñan la forma editable.",
+          "reveal": "Los controles de fila están ocultos hasta que el puntero pasa sobre la fila.",
+          "surface": "Las relaciones se miden en el tema de la ventana. La superficie es el fondo de ventana del núcleo, así que su valor de referencia de color.md la sustituye.",
+          "woundConfig": "El registro editable está en la ventana de configuración de Heridas, que necesita un actor para abrirse."
+        },
+        "patterns": {
+          "chatCard": "Tarjeta de chat: un ataque y el daño que causó",
+          "dialog": "Diálogo: el diálogo de tirada",
+          "limitedView": "Hoja: la vista Limitada",
+          "openDialog": "Abrir el diálogo de muestra",
+          "panelRow": "Fila de panel: un efecto en el panel de efectos",
+          "sheetSection": "Sección de hoja: la barra lateral del PJ"
+        },
+        "sample": {
+          "description": "Texto de muestra para la fila de detalles. Es lo bastante largo como para pasar a una segunda línea con el ancho de la hoja.",
+          "effectName": "Efecto de muestra",
+          "longName": "Un nombre de muestra lo bastante largo como para pasar a una segunda línea en su columna",
+          "modifier": "Modificador de muestra",
+          "modifierOff": "Modificador de muestra, desactivado",
+          "note": "Una nota de muestra que agregan las reglas de la tirada.",
+          "npcName": "Criatura de muestra",
+          "pcName": "Samurái de muestra",
+          "reason": "Razón de muestra",
+          "ruleError": "Error de muestra: este valor debe ser un número.",
+          "substitute": "Sustitución de muestra",
+          "tattooEffect": "Texto de efecto de muestra",
+          "tnChanges": "Cambio de ND de muestra +5",
+          "tnChangesNote": "(Cambio de ND de muestra +5)"
+        },
+        "samples": {
+          "activationOff": "Activación desactivada",
+          "activationOn": "Activación activada",
+          "addItem": "Agregar objeto",
+          "advantageFields": "Tipo y costo de Ventaja",
+          "advantageRows": "Ventajas",
+          "armorBlock": "Armadura",
+          "armorRows": "Armadura",
+          "attackHit": "Ataque que acierta, con sus botones siguientes",
+          "bio": "Sección de biografía",
+          "bioEmpty": "Sección de biografía sin Clan, Familia ni Escuela",
+          "bioRow": "Fila de biografía en su lista",
+          "brokenLink": "Enlace roto",
+          "browserControls": "Pestañas y filtros",
+          "browserEmpty": "Sin entradas",
+          "browserRows": "Entradas",
+          "checkLink": "Enlace de tirada",
+          "checkLinkGm": "Enlace de tirada, como lo ve el DJ",
+          "combatBlock": "Combate",
+          "conditionLink": "Enlace de condición",
+          "coreButton": "Botón del núcleo",
+          "coreFields": "Campos del núcleo, uno desactivado",
+          "damage": "Tirada de daño con botones Aplicar",
+          "damageLink": "Enlace de daño",
+          "disadvantageRows": "Desventajas",
+          "duel": "Duelo en curso",
+          "effects": "Efectos, uno que el usuario puede quitar",
+          "effectsTab": "Pestaña de efectos: uno activado, uno desactivado",
+          "emphasisRoll": "Énfasis: un 1 repetido",
+          "emptyList": "Sección de objetos sin objetos",
+          "everyPart": "Todas las partes, con los extras de la Tirada de Anillo",
+          "expandSection": "Control de expansión de sección",
+          "failureHonorRoll": "Fracaso, con la Tirada de Honor",
+          "fearLink": "Enlace de Miedo",
+          "flowOver": "Secuencia terminada",
+          "formView": "Vista de formulario, una regla no válida",
+          "fullDefense": "Tirada de Defensa Total",
+          "grapple": "Presa con el control",
+          "gridWithFullRow": "Cuadrícula con una fila de ancho completo",
+          "healingCard": "Tarjeta de curación",
+          "healthy": "Saludable",
+          "honorTrack": "Registro de Rango de Honor",
+          "itemRows": "Objetos",
+          "jsonView": "Vista JSON",
+          "kataRows": "Kata: uno activo, uno no",
+          "kihoRows": "Kiho",
+          "lastRank": "Último Nivel de Heridas",
+          "limitedName": "Nombre y retrato",
+          "listCollapsed": "Sección de lista, contraída",
+          "listOpen": "Sección de lista, abierta",
+          "masteryFields": "Anillo y Nivel de Maestría",
+          "middleRank": "Nivel de Heridas intermedio",
+          "modifierFields": "Campos de modificador",
+          "noActor": "Sin actor",
+          "noEffects": "Actor sin efectos",
+          "noEntries": "Sin entradas",
+          "notesSection": "Sección de notas",
+          "noVoidRing": "Anillo de Vacío 0: sin interruptor de Vacío",
+          "npcHeader": "Encabezado de PNJ",
+          "npcManual": "PNJ con registro manual",
+          "npcTrack": "Registro de PNJ",
+          "npcValues": "Valores de PNJ",
+          "oneRing": "Un Anillo: Tierra 1",
+          "oneSlot": "Un espacio de hechizo: Agua 0",
+          "oneTrait": "Un Atributo: Resistencia 1",
+          "onItemSheet": "En la hoja de objeto",
+          "pcHeader": "Encabezado de PJ, rangos 1 a 10",
+          "pcVoidOff": "PJ, Vacío desactivado",
+          "pcVoidOn": "PJ, Vacío activado",
+          "plainHeader": "Encabezado que no ordena",
+          "plainLongName": "Sin cita, nombre largo",
+          "postedItem": "Tarjeta de objeto tal como se publica",
+          "rankTen": "Rango de Miedo 10",
+          "rankThree": "Rango de Miedo 3",
+          "rankTracks": "Registros de rango",
+          "rankZero": "Rango de Miedo 0: sin prueba",
+          "readOnlyEmpty": "Solo lectura, sin reglas",
+          "request": "Tarjeta de petición",
+          "ringsAndTraits": "Anillos y Atributos con Puntos de Vacío",
+          "rollButton": "Botones de tirada en filas de Habilidad",
+          "rollFace": "Cara de tirada con una reserva de Habilidad",
+          "rowControls": "Controles de fila",
+          "rowDetails": "Detalles de fila: reglas y descripción",
+          "rowDetailText": "Texto de detalle de fila",
+          "save": "Guardar",
+          "sectionTitle": "Fila de título con los controles de agregar y expandir",
+          "sixTabs": "Seis pestañas",
+          "skilledRoll": "Tirada con Habilidad: un 10 explotó",
+          "skillHeader": "Encabezado de la lista de Habilidades",
+          "skillRows": "Habilidades: una Habilidad de escuela y un nombre largo",
+          "slotCounts": "Espacios de hechizo 0, 1, 3 y 9",
+          "sortHeader": "Encabezados ordenables y uno simple",
+          "spellRows": "Hechizos",
+          "success": "Éxito con Incrementos y una nota",
+          "summary": "Resumen de objeto",
+          "tattooRows": "Tatuajes",
+          "techniqueRows": "Técnicas",
+          "textSection": "Sección de texto: descripción",
+          "titleTools": "Sección con herramientas de título",
+          "traitRank": "Control de rango de Atributo: Resistencia 1",
+          "twoTabs": "Dos pestañas",
+          "undone": "Deshecho",
+          "unskilledMaho": "Sin Habilidad, sin Puntos de Vacío, extras de maho",
+          "unskilledRoll": "Tirada sin Habilidad: sin explosiones",
+          "voidDots": "Marcadores de Puntos de Vacío",
+          "voidOffSimple": "Vacío desactivado, movimiento Simple",
+          "voidOnFree": "Defensa Total, Vacío activado, movimiento Libre",
+          "voidRank": "Control de rango del Anillo de Vacío: 2",
+          "voidSpentKilled": "Punto de Vacío gastado, muerto",
+          "wealthChange": "Cambio de riqueza: agregar",
+          "weaponCard": "Tarjeta de arma publicada antes de 4.0.0",
+          "weaponRows": "Armas: cuerpo a cuerpo y arco",
+          "withCitation": "Con cita",
+          "withEntries": "Con entradas, una cambiada por reglas",
+          "woundsBlock": "Heridas",
+          "woundsTaken": "Heridas recibidas",
+          "woundTrack": "Registro de Heridas solo"
+        },
+        "sections": {
+          "components": "Componentes",
+          "foundations": "Fundamentos",
+          "patterns": "Patrones"
+        },
+        "theme": {
+          "dark": "Tema oscuro",
+          "light": "Tema claro"
+        },
+        "title": "Galería de diseño",
+        "toggleTheme": "Cambiar de tema"
+      },
+      "effectPanel": {
+        "noActor": "Selecciona una ficha, o asigna un personaje, para ver sus efectos.",
+        "noEnd": "Sin fin fijado",
+        "none": "{name} no tiene efectos.",
+        "openSource": "Abrir su origen",
+        "remove": "Quitar este efecto",
+        "rounds": "Asaltos restantes: {count}",
+        "time": "Tiempo restante: {time}",
+        "title": "Efectos",
+        "turns": "Turnos restantes: {count}",
+        "until": "Hasta {event}",
+        "uses": "Usos restantes: {left} de {max}"
       },
       "emphasisManager": {
         "addCustom": "Agregar Énfasis Personalizado",
         "custom": "Personalizado",
+        "emphasisName": "Nombre del Énfasis",
+        "errors": {
+          "saveFailed": "Error al guardar el Énfasis personalizado",
+          "updateFailed": "Error al actualizar el administrador de Énfasis"
+        },
         "hint": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
         "manage": "Administrar Énfasis",
-        "noEmphases": "No hay énfasis en la lista"
+        "noEmphases": "No hay énfasis en la lista",
+        "title": "Administrador de Énfasis",
+        "titleFor": "Administrador de Énfasis: {item}"
+      },
+      "npcAttackConfig": {
+        "attackModifier": "Modificador de ataque",
+        "damageModifier": "Modificador de daño",
+        "errors": {
+          "updateFailed": "Error al actualizar la configuración de ataque del PNJ"
+        },
+        "title": "Configuración de ataque de PNJ",
+        "titleFor": "Configuración de ataque de PNJ {slot}"
       },
       "wealthManager": {
         "add": "Agregar",
         "addMoney": "Agregar Dinero",
         "amount": "Cantidad",
+        "buToKoku": "5 bu → 1 koku",
+        "buToZeni": "1 bu → 10 zeni",
         "convert": "Convertir Moneda",
         "convertBuToKoku": "Convertir 5 Bu a 1 Koku",
         "convertBuToZeni": "Convertir 1 Bu a 10 Zeni",
@@ -25,15 +408,44 @@
         "currentWealth": "Riqueza Actual",
         "denomination": "Denominación",
         "errors": {
-          "openFailed": "Error al abrir el Administrador de Riqueza"
+          "addMoneyFailed": "Error al agregar dinero",
+          "convertFailed": "Error al convertir la moneda",
+          "insufficientForConversion": "Fondos insuficientes para esta conversión",
+          "insufficientFunds": "Fondos insuficientes para esta transacción",
+          "openFailed": "Error al abrir el Administrador de Riqueza",
+          "removeMoneyFailed": "Error al quitar dinero"
         },
+        "kokuToBu": "1 koku → 5 bu",
         "open": "Administrar Riqueza",
         "remove": "Quitar",
-        "removeMoney": "Quitar Dinero"
+        "removeMoney": "Quitar Dinero",
+        "title": "Administrador de riqueza",
+        "titleFor": "Administrador de riqueza: {name}",
+        "zeniToBu": "10 zeni → 1 bu"
       },
       "woundConfig": {
+        "errors": {
+          "invalidWoundConfigValue": "Valor de configuración de Heridas no válido",
+          "openFailed": "Error al abrir la configuración de Heridas",
+          "updateFailed": "Error al actualizar la configuración de Heridas"
+        },
+        "penaltyModifier": "Modificador de penalización",
+        "rateModifier": "Modificador de tasa",
         "title": "Configuración de Heridas",
         "titleFor": "Configuración de Heridas: {name}"
+      },
+      "xpManager": {
+        "addXp": "Agregar EXP",
+        "disadvantageCapTitle": "Fijar el límite de Desventajas",
+        "errors": {
+          "openFailed": "Error al abrir el administrador de EXP"
+        },
+        "noAdjustments": "No se ha agregado ni quitado EXP a mano.",
+        "noPurchases": "Todavía no se ha gastado EXP.",
+        "open": "Abrir el administrador de EXP",
+        "setDisadvantageCap": "Fijar límite",
+        "title": "Administrador de EXP",
+        "titleFor": "Administrador de EXP: {name}"
       }
     },
     "character": {
@@ -47,6 +459,7 @@
       },
       "experience": {
         "adjustExperience": "Ajustar Experiencia",
+        "bonusKiho": "Kiho adicionales",
         "breakdown": {
           "advantages": "Ventajas",
           "base": "Base",
@@ -72,16 +485,22 @@
         "purchases": "Compras",
         "reason": "Razón",
         "recalculate": "Recalcular compras de EXP desde el estado actual del personaje",
+        "schoolKiho": "Kiho de Escuela",
         "skillChange": "{name} {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "spellMemorized": "Memorizado: {name}",
         "summary": "Resumen de Experiencia",
+        "tooManyBonusKiho": "Más kiho adicionales de los que permite el Rango de Escuela de Monje (p.231).",
+        "tooManySchoolKiho": "Más Kiho de Escuela marcados de los que da la Escuela de Monje (p.231).",
         "traitChange": "{label} {from}→{to}",
         "usedTotal": "Usado / Total",
         "voidChange": "Vacío {from}→{to}",
         "xpAmount": "Cantidad"
       },
       "movement": {
+        "errors": {
+          "toggleFailed": "Error al cambiar el tipo de movimiento"
+        },
         "feet": "pies",
         "maximum": "Movimiento Máximo",
         "title": "Movimiento"
@@ -89,10 +508,19 @@
       "ranks": {
         "gloryRank": "Gloria",
         "honorRank": "Honor",
+        "insightAutomatic": "Cálculo del Rango de Perspicacia fijado en automático para {name}",
+        "insightManual": "Cálculo del Rango de Perspicacia fijado en manual para {name}",
         "statusRank": "Rango de Estatus",
         "taintRank": "Corrupción de las Tierras de Sombra"
       },
       "skills": {
+        "bonuses": {
+          "freeEmphases": "Énfasis gratuitos",
+          "freeRank": "Rango gratuito",
+          "keep": "Bonificación a conservar",
+          "roll": "Bonificación a tirar",
+          "total": "Bonificación total"
+        },
         "names": {
           "acting": "Actuación",
           "animalHandling": "Manejo de Animales",
@@ -143,6 +571,8 @@
           "mastery5": "Maestría Rango 5",
           "mastery7": "Maestría Rango 7",
           "school": "Habilidad de escuela",
+          "social": "Habilidad Social",
+          "socialHint": "Las reglas seleccionan las Habilidades Sociales con skill-tag:social; las penalizaciones de Corrupción les afectan.",
           "trait": "Atributo",
           "type": "Tipo"
         }
@@ -177,6 +607,8 @@
         "price": "Precio"
       },
       "weapons": {
+        "addsStrength": "Suma Fuerza",
+        "addsStrengthHint": "Desactivado para armas arrojadizas que no suman Fuerza, como los shuriken.",
         "arrow": "Flecha",
         "arrows": {
           "armor": "Perforante",
@@ -187,7 +619,14 @@
         },
         "associatedSkill": "Habilidad Asociada",
         "attackType": "Tipo de Ataque",
+        "belowMinStrength": "{name} necesita Fuerza {min} para empuñar {weapon}.",
+        "belowMinStrengthGM": "¿Atacar con ella de todos modos?",
         "damageKeep": "Dados de Daño Conservados",
+        "explodes": "Los dados explotan",
+        "explodesHint": "Desactivado para armas cuyos dados de daño nunca explotan, como los shuriken.",
+        "fallbackTrait": "Atributo de respaldo",
+        "meleeRange": "Arco contra un objetivo a alcance cuerpo a cuerpo",
+        "minStrength": "Fuerza mínima",
         "range": "Alcance",
         "rangedAttack": "Ataque a Distancia",
         "size": "Tamaño",
@@ -200,6 +639,9 @@
           "bow": "Kyujutsu",
           "weapon": "Kenjutsu"
         },
+        "tnMounted": "ND de ataque montado",
+        "tnOnFoot": "ND de ataque a pie",
+        "tnOnFootHint": "Se suma al ND de los ataques con esta arma mientras quien la empuña está Montado, o mientras no lo está: el dai-kyu es +10 a pie, el han-kyu +10 montado (p.199).",
         "typeBow": "Arco",
         "typeWeapon": "Arma"
       }
@@ -209,11 +651,17 @@
         "internal": "Interno",
         "karmic": "Kármico",
         "martial": "Marcial",
-        "mystic": "Místico"
+        "mystic": "Místico",
+        "schoolKiho": "Kiho de Escuela",
+        "schoolKihoHint": "Uno de los kiho que da la Escuela de Monje, que no cuestan EXP (p.231).",
+        "startingKiho": "Kiho iniciales",
+        "startingKihoHint": "Kiho que una Escuela de Monje da en el Rango 1, 0 para otras Escuelas; cada Rango posterior da dos más (p.231)."
       },
       "maho": {
         "additionalBlood": "Sangre Adicional",
         "additionalBloodBonus": "Cada cantidad adicional de costo de sangre otorga +1 Incremento Gratis",
+        "bloodRaisesToTn": "Incrementos Gratis de sangre adicional en el ND",
+        "bloodRaisesToTnHint": "Cada uno reduce el ND en 5, hasta los Incrementos Gratis que compra la sangre adicional.",
         "bloodRequired": "Costo de Sangre Requerido",
         "bloodSource": {
           "label": "Fuente de Sangre",
@@ -229,10 +677,15 @@
         "warningTitle": "Magia de Sangre - Maho Prohibido"
       },
       "spells": {
+        "aboveSchoolRank": "{spell} es de Nivel de Maestría {mastery}; {name} puede lanzar hechizos hasta {limit} en este elemento (p.164).",
+        "aboveSchoolRankGM": "¿Lanzarlo de todos modos?",
         "affinity": "Afinidad",
         "affinityTag": "[Afinidad]",
+        "anyElement": "Cualquier elemento",
         "areaOfEffect": "Área de Efecto",
         "cast": "Lanzar",
+        "castInElement": "Lanzar",
+        "chooseElement": "¿En qué elemento lanzar {spell}?",
         "concentrationName": "Concentración: {spell}",
         "deficiency": "Deficiencia",
         "deficiencyTag": "[Deficiencia]",
@@ -241,6 +694,9 @@
         "memorized": "Memorizado",
         "raises": "Incrementos",
         "range": "Alcance",
+        "shugenja": "Shugenja",
+        "shugenjaSchool": "Escuela de shugenja",
+        "shugenjaSchoolHint": "Las Tiradas de Lanzar Hechizo suman el Rango de esta Escuela. Sin una, suman el Rango de Perspicacia.",
         "slotsRestored": "Todos los espacios de hechizo restaurados al máximo",
         "slotSuffix": "[Usar Espacio de Hechizo {element}]",
         "useSpellSlot": "Usar Espacio de Hechizo",
@@ -250,7 +706,9 @@
     },
     "system": {
       "errors": {
-        "deleteEffect": "Error al eliminar efecto."
+        "createEffect": "Error al crear el efecto",
+        "deleteEffect": "Error al eliminar efecto.",
+        "toggleEffect": "Error al activar o desactivar el efecto"
       },
       "migration": {
         "compendiumIconsUpdated": {
@@ -263,9 +721,22 @@
         }
       },
       "settings": {
+        "designGallery": {
+          "hint": "Cada token, componente y patrón del sistema de diseño, dibujado con las propias plantillas del sistema.",
+          "label": "Abrir la galería de diseño",
+          "name": "Galería de diseño"
+        },
+        "floatingNumbers": {
+          "hint": "Muestra cada cambio en las Heridas y los Puntos de Vacío de un personaje como texto flotando sobre sus fichas, por ejemplo \"+7 Heridas\". El ajuste Texto de estado desplazable del núcleo también lo desactiva.",
+          "name": "Números flotantes de Heridas y Vacío"
+        },
         "forceMigration": {
           "hint": "Fuerza la ejecución de todas las migraciones en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de que se complete la migración.",
           "name": "Forzar migración al iniciar"
+        },
+        "honorRoll": {
+          "hint": "Una vez por sesión, un personaje puede repetir una Tirada de Habilidad, de Atributo, de Anillo o de Lanzar Hechizo fallida con su Rango de Honor en dados tirados y conservados; fallar cuesta un Rango de Honor. El DJ inicia una sesión con el control de fichas Nueva sesión.",
+          "name": "Regla opcional: Tirada de Honor"
         },
         "LtException": {
           "hint": "Cuando los dados conservados se reducen por debajo de 10 por conversión, suma 2.",
@@ -278,20 +749,179 @@
       }
     },
     "ui": {
+      "activation": {
+        "end": "Terminar",
+        "start": "Activar"
+      },
       "armor": {
         "allowStacking": "Permitir Apilamiento de Armadura"
       },
+      "check": {
+        "actionNote": "{action} (de {source})",
+        "actions": {
+          "complex": "Acción Compleja",
+          "free": "Acción Libre",
+          "simple": "Acción Simple"
+        },
+        "allKept": "Todos",
+        "armor": "Armadura",
+        "caller": "Bonificación",
+        "castSpell": "Lanzar como hechizo",
+        "contest": "Tirada Enfrentada",
+        "contestTie": "Empate: se vuelve a tirar.",
+        "contestWinner": "{name} gana.",
+        "damageLabel": "Daño de {weapon}",
+        "damageRollPool": "Tirada de daño ({pool})",
+        "effectsFor": "Efectos activos ({key})",
+        "freeRaisesLeft": "Incrementos Gratis: {count}",
+        "freeRaisesToTnNote": "(Incrementos Gratis gastados en el ND: {count})",
+        "increasedDamage": "Daño Aumentado (Incrementos)",
+        "keepFewer": "Conservar solo",
+        "keepModifier": "Modificador a conservar",
+        "labelWithSuffix": "{label} {suffix}",
+        "manual": "Situacional",
+        "modifiers": "Modificadores",
+        "noVoidPoints": "No quedan Puntos de Vacío",
+        "outcomeAgainstTn": "{outcome} contra ND {tn}",
+        "pool": "Reserva",
+        "raisesNote": "(Incrementos: {count})",
+        "range": {
+          "melee": "cuerpo a cuerpo",
+          "ranged": "a distancia"
+        },
+        "rangeFor": "{target} ({range})",
+        "rerolledLabel": "{label} (repetida, se conserva la mejor)",
+        "rerollKeepBetter": "Repetir, conservar la mejor",
+        "rollModifier": "Modificador a tirar",
+        "schoolRank": "Rango de Escuela",
+        "schoolRankHint": "0 sigue el Rango de Perspicacia del personaje. Fíjalo para un personaje con Múltiples Escuelas.",
+        "spellSlot": "Espacio de hechizo",
+        "statBlock": "Bloque de estadísticas",
+        "substitutes": "Sustituciones",
+        "titleAgainst": "{label} contra {target}",
+        "tnChangesNote": "({changes})",
+        "totalModifier": "Modificador total",
+        "unskilled": "Tirada sin Habilidad: los dados no explotan y no se aplican Incrementos ni Incrementos Gratis.",
+        "void": "Gastar un Punto de Vacío (+1k1)",
+        "voidSkill": "Gastar un Punto de Vacío: Rango de Habilidad 1",
+        "voidSkillHint": "Sin rangos en la Habilidad, un Punto de Vacío hace que esta tirada cuente como Rango 1: un dado más, los dados explotan y se aplican los Incrementos (p.78). Sin él, se ignoran los Incrementos de arriba.",
+        "weaponTn": "{weapon} ({where})",
+        "woundPenaltyNote": "(Penalización por Heridas +{penalty})"
+      },
       "combat": {
+        "applySelected": "Aplicar a los seleccionados",
+        "applyTo": "Aplicar a {target}",
+        "arrowArmor": {
+          "armor": "La flecha Perforante ignora la armadura",
+          "flesh": "La flecha Cortacarne duplica la armadura"
+        },
+        "calledShot": "Ataque Apuntado",
+        "calledShotHand": "Mano o pie (2 Incrementos)",
+        "calledShotHead": "Cabeza (3 Incrementos)",
+        "calledShotLimb": "Extremidad (1 Incremento)",
+        "calledShotLocation": "Ubicación del Ataque Apuntado",
+        "calledShotNote": "Ataque Apuntado ({raises} Incrementos): {location}. El DJ decide cualquier efecto sobre esa parte.",
+        "calledShotSmall": "Ojo, oreja, dedo (4 Incrementos)",
+        "calledShotUnnamed": "parte sin nombre",
+        "contestStrength": "Tirar Fuerza enfrentada",
+        "contestWaiting": "Has tirado; esperando al otro bando",
+        "disarm": "Desarmar (3 Incrementos)",
+        "disarmed": "{name} suelta el arma.",
+        "disarmNote": "Desarmar: el daño es 2k1 sin Fuerza; tira Fuerza enfrentada y, si gana el atacante, el objetivo suelta el arma.",
+        "duel": {
+          "assessment": "Evaluación",
+          "assessmentEdge": "Evaluación +10",
+          "concede": "{name} concede el duelo",
+          "conceded": "{name} concede el duelo.",
+          "dazed": "{name} está Aturdido y no puede librar un duelo de iaijutsu",
+          "done": "Terminado",
+          "edgeWon": "{name} obtiene {bonus} en el Enfoque.",
+          "facts": "Datos que descubre {name}: {count}.",
+          "firstStrike": "{name} golpea primero, con {raises} Incrementos Gratis.",
+          "focus": "Enfoque",
+          "focusMastery": "Maestría de Iaijutsu (Incremento Gratis)",
+          "kharmic": "Golpe kármico: ambos golpean a la vez.",
+          "pick": "Selecciona la ficha de un duelista y apunta a la del otro",
+          "roll": "Tirar por {name}",
+          "rollLabel": "{stage}: {name}",
+          "start": "Duelo de iaijutsu: ficha seleccionada contra ficha objetivo",
+          "strike": "Golpe",
+          "title": "Duelo de iaijutsu",
+          "yield": "{name} cede",
+          "yielded": "{name} cede."
+        },
+        "errors": {
+          "raisesInvalid": "Los Incrementos del ataque deben ser números",
+          "raisesMismatch": "Esta tarjeta indica {claimed} Incrementos; el ataque declaró {stored}",
+          "raisesOutOfRange": "Los Incrementos del ataque deben estar entre 0 y {max}"
+        },
+        "extraAttack": "Ataque Adicional (5 Incrementos)",
+        "extraAttackNote": "Ataque Adicional: una vez resuelto este ataque, daño incluido, haz una segunda tirada de ataque.",
+        "feint": "Finta (2 Incrementos)",
+        "feintNote": "Finta: la mitad del margen sobre el ND se suma al daño (hasta 5 × Rango de Perspicacia).",
+        "flowTitle": "{flow}: {stage}",
+        "fourLegged": "El objetivo tiene 4 o más patas",
+        "grapple": {
+          "break": "Romper",
+          "broken": "{name} rompe la presa.",
+          "control": "Control de la presa",
+          "controlLabel": "Control de la presa: {name}",
+          "hit": "Golpear",
+          "hitLabel": "Golpear: {weapon}",
+          "hitLog": "{name} golpea por {total}.",
+          "inControl": "{name} tiene el control.",
+          "over": "Terminada",
+          "pass": "Pasar",
+          "passed": "{name} mantiene el control.",
+          "rollControl": "Tirada de control: {name}",
+          "throw": "Proyectar",
+          "thrown": "{name} sale proyectado y queda Postrado.",
+          "title": "Presa",
+          "titleFor": "Presa: {name} / {target}",
+          "weaponLost": "{name} obtiene 2 Incrementos Gratis para Desarmar en el siguiente Turno."
+        },
+        "grappleIgnoresArmor": "La presa ignora la armadura",
+        "grappleManeuver": "Iniciar una presa (ignora la armadura)",
+        "grappleStart": "Iniciar una presa con {target}",
+        "guard": "Proteger a la ficha objetivo",
+        "guardFullAttack": "No puedes Proteger en la Postura de Ataque Total",
+        "guardPick": "Selecciona tu ficha y apunta a la que quieres proteger",
+        "increasedDamageNote": "Daño Aumentado: +{dice}k0.",
+        "initiativeVoidNone": "{name} no tiene Puntos de Vacío disponibles",
+        "initiativeVoidQuestion": "¿Gastar un Punto de Vacío para sumar +10 a la tirada de Iniciativa de {name}?",
+        "initiativeVoidSpent": "{name} gastó un Punto de Vacío en la Iniciativa (+10)",
+        "initiativeVoidTitle": "Gastar un Punto de Vacío en la Iniciativa de {name}",
+        "invulnerableNote": "Invulnerabilidad: una Herida.",
+        "killedNote": "Más allá del Nivel de Heridas Fuera de Combate: marcado como Muerto. El DJ puede quitar el estado.",
+        "knockdown": "Derribo (2 Incrementos, 4 contra 4 o más patas)",
+        "knockdownNote": "Derribo: tira Fuerza enfrentada; si gana el atacante, el objetivo queda Postrado.",
+        "knockedDown": "{name} queda Postrado.",
+        "maneuvers": "Maniobras",
+        "maneuversHint": "Los Incrementos Gratis pagan primero las maniobras, después los Incrementos declarados. Cada Incremento sobrante suma +1k0 al daño.",
         "multipleTargets": "objetivos - ND no establecido automáticamente",
+        "notEnoughRaises": "Las maniobras cuestan {cost} Incrementos; declara suficientes Incrementos (o ten Incrementos Gratis) para pagarlas (declarados: {raises})",
+        "npcInitiative": "0 tira Rango de Perspicacia 1 + Reflejos, conserva Reflejos (p.81). Por encima de 0 en ambos es la reserva propia de este PNJ.",
+        "reductionNote": "Reducción {reduction}.",
+        "resultTitle": "{name} recibe {wounds} Heridas de {damage} de daño",
+        "sources": "Fuentes de daño: {sources}",
+        "spiritNote": "Espíritu: el daño se reduce a la mitad.",
+        "unarmed": "Desarmado",
+        "undo": "Deshacer",
+        "undoneNote": "Deshecho.",
+        "voidNote": "Punto de Vacío gastado: {wounds} Heridas menos.",
         "vs": "vs"
       },
       "common": {
         "action": "Acción",
         "active": "Activo",
+        "add": "Agregar",
+        "all": "Todos",
+        "allow": "Permitir",
         "armor": "Armadura",
         "bonus": "Bonificación",
         "cancel": "Cancelar",
         "clan": "Clan",
+        "complex": "Compleja",
         "conditions": "Condiciones",
         "cost": "Costo",
         "current": "Actual",
@@ -300,9 +930,11 @@
         "disabled": "desactivado",
         "edit": "Editar",
         "effect": "Efecto",
+        "expand": "Expandir",
         "free": "Libre",
         "initiative": "Iniciativa",
         "insight": "Perspicacia",
+        "insightRank": "Rango de Perspicacia",
         "modifier": "Modificador",
         "multi": "Multiplicador",
         "name": "Nombre",
@@ -314,22 +946,127 @@
         "save": "Guardar",
         "school": "Escuela",
         "simple": "Simple",
+        "sortedAscending": "Orden ascendente",
+        "sortedDescending": "Orden descendente",
+        "spendVoidPoint": "Gastar Punto de Vacío",
         "tn": "ND",
+        "toggle": "Activar o desactivar",
         "type": "Tipo",
+        "unknown": "Desconocido",
         "xp": "Puntos de Experiencia"
       },
       "dialogs": {
+        "addAttack": "Agregar ataque",
+        "deleteAttack": {
+          "consequence": "Sus reservas de ataque y daño se vacían.",
+          "content": "¿Quitar {name}?",
+          "title": "¿Quitar ataque?"
+        },
+        "deleteEmphasis": {
+          "consequence": "Deja de estar entre los Énfasis personalizados de este mundo.",
+          "content": "¿Quitar {emphasis}?"
+        },
         "deleteItem": {
+          "consequence": "Sus efectos y reglas, y cualquier objeto que haya otorgado, se van con él.",
           "content": "¿Estás seguro de que quieres eliminar {name}?",
           "title": "¿Eliminar Objeto?"
         }
       },
       "effects": {
-        "autoProne": "Auto: Postrado"
+        "alreadyEnded": "Ese efecto ya ha terminado",
+        "applyTo": "{effect} en {target}",
+        "autoProne": "Auto: Postrado",
+        "centered": "Centrado",
+        "concentrationUpkeep": "{effect}: gasta una Acción Simple este Asalto para mantener la concentración, o termínalo.",
+        "endEncounter": "Terminar encuentro",
+        "endEncounterConfirm": "¿Terminar el encuentro? El Miedo y todos los demás efectos que duran hasta el final del encuentro terminarán ahora.",
+        "expiry": {
+          "encounterEnd": "Final del encuentro"
+        },
+        "fullDefense": "Defensa Total",
+        "fullDefenseBonus": "Defensa Total (+{bonus})",
+        "immune": "{name} es inmune a {effect}",
+        "noGM": "No hay ningún DJ conectado para aplicar ese efecto",
+        "promptAnswered": "Esa tirada ya se ha hecho",
+        "proneLargeWeapon": "Postrado: un arma grande no puede atacar hasta que quien la empuña se levante.",
+        "saveText": "Tirada de {roll} contra ND {tn}.",
+        "saveTitle": "{effect}: salvación",
+        "stanceNotAllowed": "{condition} impide {stance}",
+        "voidArmor": "Vacío: ND de Armadura +10",
+        "voidArmorNoCombat": "Debes estar en un combate activo para usar Vacío en el ND de Armadura",
+        "voidArmorNotTurn": "Solo puedes usar Vacío en el ND de Armadura en tu turno",
+        "voidArmorQuestion": "¿Gastar un Punto de Vacío para aumentar el ND de Armadura en +10 durante 1 Asalto?",
+        "voidArmorSpent": "{name} gastó un Punto de Vacío: ND de Armadura +10 durante 1 Asalto",
+        "voidArmorTitle": "Gastar un Punto de Vacío en el ND de Armadura",
+        "voidLimit": "{name} ya ha gastado un Punto de Vacío este Asalto",
+        "voidSpentThisRound": "Ya se gastó un Punto de Vacío este Asalto; uno por Asalto es el límite habitual."
+      },
+      "floating": {
+        "void": "Puntos de Vacío"
+      },
+      "grants": {
+        "granted": "{name} obtiene {item} de {giver} (Rango de Escuela {rank}).",
+        "waiting": "{name} aprende {items} de {giver} cuando estas Habilidades de escuela lleguen a rango 1: {skills}.",
+        "waitingRow": "Sus Técnicas esperan a que estas Habilidades de escuela lleguen a rango 1: {skills}"
       },
       "hints": {
+        "decreaseTrait": "Reducir {trait}",
+        "decreaseVoidRing": "Reducir el Anillo de Vacío",
+        "increaseTrait": "Aumentar {trait}",
+        "increaseVoidRing": "Aumentar el Anillo de Vacío",
         "postToChat": "Publicar en el chat",
-        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0"
+        "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0",
+        "traitRank": "{trait}: Tirada de Atributo; Shift+clic: +1, Shift+clic derecho: -1",
+        "voidRingRank": "Anillo de Vacío: Shift+clic: +1, Shift+clic derecho: -1"
+      },
+      "honorRoll": {
+        "button": "Tirada de Honor",
+        "failedReason": "Falló una Tirada de Honor",
+        "noDice": "{name} no tiene Rango de Honor al que recurrir para una Tirada de Honor",
+        "rollLabel": "{label} (Tirada de Honor)",
+        "used": "{name} ya ha hecho una Tirada de Honor en esta sesión"
+      },
+      "ledger": {
+        "hint": "Registra una ganancia o pérdida de Honor, Gloria, Estatus o Corrupción con su razón. Diez puntos forman un rango; las reglas Ledger del personaje pueden cambiar la cantidad.",
+        "points": "Puntos (negativos para perder)",
+        "reason": "Razón",
+        "record": "Registrar",
+        "title": "Registro",
+        "titleFor": "Registro: {name}",
+        "track": "Categoría",
+        "tracks": {
+          "glory": "Gloria",
+          "honor": "Honor",
+          "status": "Estatus",
+          "taint": "Corrupción"
+        }
+      },
+      "links": {
+        "checkTn": "{what}, ND {tn}",
+        "damage": "{pool} de daño",
+        "errors": {
+          "condition": "id de condición desconocido",
+          "fear": "el Rango de Miedo debe ser un número entero de 1 a 10",
+          "nothingToRoll": "nombra una habilidad, un atributo o un anillo",
+          "pool": "escribe la reserva como XkY, cada uno de 1 a 30, con un +N o -N opcional",
+          "ring": "Anillo desconocido; usa air, earth, fire, water o void",
+          "skillWithRing": "una Habilidad se tira con un Atributo o el Anillo de Vacío, no con un Anillo",
+          "syntax": "escríbelo como clave=valor|clave=valor",
+          "tn": "el ND debe ser un número entero de 1 a 999",
+          "trait": "Atributo desconocido; usa sta, wil, str, per, ref, awa, agi o int",
+          "traitAndRing": "no se pueden tirar a la vez un Atributo y un Anillo",
+          "unknownKey": "clave desconocida; usa skill, trait, ring o tn"
+        },
+        "needTrait": "{name} no tiene la Habilidad {skill}, y el enlace no nombra ningún Atributo con el que tirarla sin Habilidad",
+        "noActor": "Selecciona una ficha o asigna un personaje para tirar este enlace",
+        "noTargets": "Apunta o selecciona las fichas sobre las que actúa este enlace",
+        "request": "Pedir a los jugadores que tiren esto",
+        "requestRoll": "Tirar con mi personaje",
+        "requestTitle": "El DJ pide una tirada"
+      },
+      "macros": {
+        "missing": "El objeto o el personaje de esta macro ya no existe, o no se puede tirar desde una macro",
+        "traitMacro": "{name}: {traitName}"
       },
       "mechanics": {
         "combat": {
@@ -348,7 +1085,8 @@
           "rank": "Rango de Miedo",
           "rollForSelected": "Clic para probar Miedo contra personajes seleccionados",
           "testLabel": "Prueba de Miedo {rank} vs {name}",
-          "testResult": "Prueba de Miedo {rank}"
+          "testResult": "Prueba de Miedo {rank}",
+          "title": "Miedo"
         },
         "rings": {
           "air": "Aire",
@@ -360,6 +1098,7 @@
           "voidInitBoost": "Usar Vacío",
           "voidPoints": "Puntos de Vacío",
           "voidPointsEmpty": "Puntos de Vacío: 0",
+          "voidPointsValue": "Puntos de Vacío: {current}/{max} (clic: +1, clic derecho: -1)",
           "voidTnBoost": "Usar Vacío",
           "water": "Agua"
         },
@@ -372,10 +1111,14 @@
           "explodesOn": "Explota En",
           "failure": "Fracaso",
           "freeRaises": "Incrementos Gratis",
+          "freeRaisesHint": "Se gastan en el ND, hasta {max}.",
           "missed": "Fallado",
           "namedRoll": "Tirar: {roll}",
           "raises": "Incrementos",
+          "raisesHint": "Hasta {max}.",
+          "raisesHintWithMinimum": "Al menos {min}, hasta {max}.",
           "ringRollLabel": "Tirada de Anillo: {element}",
+          "rollRing": "Tirar {element}",
           "skillRoll": "Tirada de Habilidad",
           "skillRollLabel": "Tirada de Habilidad: {skillName} / {traitName}",
           "socialResistance": "Resistencia Social",
@@ -390,12 +1133,14 @@
           "weaponAttackRoll": "{weapon} Tirada de Ataque"
         },
         "stances": {
+          "addFailed": "Error al agregar la postura",
           "attack": "Postura de Ataque",
           "center": "Postura Centrada",
           "defense": "Postura de Defensa",
           "fullAttack": "Postura de Ataque Total",
           "fullDefense": "Postura de Defensa Total",
-          "fullDefenseHint": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura."
+          "fullDefenseHint": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura.",
+          "removeFailed": "Error al quitar la postura"
         },
         "traits": {
           "agi": "Agilidad",
@@ -408,6 +1153,7 @@
           "wil": "Voluntad"
         },
         "wounds": {
+          "activeOf": "{rank} activo",
           "alreadyFullHealth": "{name} ya está con salud completa",
           "applied": "Aplicadas {amount} heridas a {name}",
           "appliedWithArmor": "{name} recibió {original} de daño. La armadura redujo {reduction}. Aplicadas {final} heridas.",
@@ -425,6 +1171,7 @@
           "grazed": "Rozado",
           "healingApplied": "Sanó {amount} heridas (tasa de curación: {rate})",
           "healingFailed": "Error al aplicar curación a {name}",
+          "healRateBreakdown": "(Resistencia × 2) + Rango de Perspicacia + modificador = ({sta} × 2) + {rank} + {mod}",
           "healthy": "Saludable",
           "hurt": "Lastimado",
           "injured": "Herido",
@@ -438,6 +1185,7 @@
           "noVoidPoints": "No hay Puntos de Vacío disponibles para reducir daño",
           "out": "Fuera de Combate",
           "penalty": "Penalización",
+          "penaltyOf": "Penalización de {rank}",
           "reducedApplied": "Punto de Vacío gastado: Daño reducido en 10. Aplicadas {amount} heridas a {name}",
           "reducedWithArmor": "{name} recibió {original} de daño. Vacío redujo a {afterVoid}, armadura redujo {reduction}. Aplicadas {final} heridas.",
           "reduceWithVoid": "Reducir con Vacío",
@@ -445,6 +1193,8 @@
           "status": "Heridas: {current}/{max} (sufridas: {suffered})",
           "suffered": "Heridas Sufridas",
           "threshold": "Umbral",
+          "thresholdOf": "Umbral de {rank}",
+          "voidRestored": "Vacío: {count}/{count} restaurado",
           "woundBonus": "Bonificación de Heridas",
           "woundHealRate": "Tasa de Curación de Heridas",
           "woundLevel": "Nivel",
@@ -455,11 +1205,138 @@
         "actorNotFound": "Actor no encontrado para tirada de daño",
         "deficiencyBlocksCasting": "Deficiencia en {ring} reduce tu Rango de Escuela a cero - no puedes lanzar",
         "invalidRingForSpell": "Anillo inválido para espacio de hechizo: {ring}",
+        "messageTooLong": "Mensaje demasiado largo (máximo 10.000 caracteres)",
         "noActorForVoid": "No hay actor disponible para gastar puntos de vacío",
+        "noPermission": "No tienes permiso para modificar este actor",
         "noPermissionDamage": "No tienes permiso para tirar daño para este actor",
         "noSpellSlots": "Te quedaste sin espacios de hechizo para este anillo",
         "noValidWeapon": "No se encontró arma válida para tirada de ataque",
-        "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero"
+        "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
+        "tokenNoActor": "La ficha no tiene actor"
+      },
+      "purchase": {
+        "addAnyway": "¿Agregarlo de todos modos?",
+        "bypass": "Agregar de todos modos",
+        "choiceTitle": "{item}: {prompt}",
+        "choose": "Elegir",
+        "kihoMastery": "{ring} + Rango de Escuela {mastery}",
+        "makeChoice": "Elegir",
+        "noOptions": "{name} tiene una elección sin opciones entre las que elegir; no se agregó",
+        "schoolAdd": "Agregar como otra Escuela",
+        "schoolQuestion": "{name} ya estudia en {schools}. ¿Reemplazarla, o agregar {school} como otra Escuela (una Escuela Avanzada, o la Ventaja Múltiples Escuelas)?",
+        "schoolReplace": "Reemplazar",
+        "schoolTitle": "Una segunda Escuela",
+        "unmet": "{name} necesita: {list}",
+        "unmetTitle": "Requisitos no cumplidos"
+      },
+      "rules": {
+        "add": "Agregar regla",
+        "delete": "Quitar esta regla",
+        "effectSheet": "Hoja de efecto activo con reglas",
+        "formView": "Editar como formularios",
+        "hint": "Cada regla como formulario, o la lista entera como JSON. ACTIVE_EFFECTS.md enumera las claves de regla y sus campos.",
+        "invalidJson": "Reglas no guardadas: el texto no es JSON válido ({error}).",
+        "jsonView": "Editar como JSON",
+        "key": "Clave de regla",
+        "none": "Sin reglas.",
+        "notList": "Reglas no guardadas: el texto debe ser una lista JSON de objetos, cada uno con una \"key\"."
+      },
+      "ruleSummary": {
+        "action": {
+          "complex": "una Acción Compleja",
+          "free": "una Acción Libre",
+          "simple": "una Acción Simple"
+        },
+        "ActionCost": "{rolls}: {action}",
+        "ApplyCondition": "Una tirada con éxito en {rolls} puede aplicar {condition}",
+        "armorTn": {
+          "base": "El ND de Armadura base pasa a ser {value}",
+          "total": "El ND de Armadura pasa a ser {value}"
+        },
+        "ArmorTN": "ND de Armadura {value}",
+        "ChoiceSet": "Elección al agregar: {prompt}",
+        "chosen": "Elegido: {selection}",
+        "citation": "{book} p.{page}",
+        "ConditionImmunity": "Inmune a {condition}",
+        "Cost": "Precio en EXP de {what}: {value}",
+        "DamageSource": "{rolls} cuentan como {tags}",
+        "DiceRule": "Los dados explotan con {explode} o más en {rolls}",
+        "direction": {
+          "gain": "Ganancias",
+          "loss": "Pérdidas"
+        },
+        "FreeRaise": "Incrementos Gratis en {rolls}: {value}",
+        "GrantItem": "Otorga {item} con Rango de Escuela {rank}",
+        "heading": "Qué hace",
+        "ignoreReduction": "Ignora {value} de Reducción",
+        "Initiative": "Iniciativa {bonus}",
+        "Invulnerability": "Invulnerable: solo lo daña {harmedBy}",
+        "Ledger": "{direction} de {track}: {value}",
+        "maneuver": {
+          "calledShot": "Ataque Apuntado",
+          "disarm": "Desarmar",
+          "extraAttack": "Ataque Adicional",
+          "feint": "Finta",
+          "knockdown": "Derribo"
+        },
+        "Movement": "Agua {value} para el movimiento",
+        "Note": "Nota en {rolls}: {text}",
+        "OpponentModifier": "{bonus} en {rolls} hechas contra este personaje",
+        "optional": "Opcional: quien tira elige la tirada",
+        "per": {
+          "day": "día",
+          "round": "Asalto",
+          "skirmish": "escaramuza",
+          "turn": "Turno"
+        },
+        "PeriodicSave": "Termina con una tirada de {roll} contra ND {tn}",
+        "Prerequisite": "Requiere {requires}",
+        "priced": {
+          "emphasis": "un Énfasis",
+          "items": "cada objeto de tipo {type}",
+          "self": "este objeto"
+        },
+        "raiseCap": "Límite de Incrementos {value} en {rolls}",
+        "raiseMinimum": "Al menos {value} Incrementos en {rolls}",
+        "RaiseRule": "{maneuver} cuesta {cost} Incrementos en {rolls}",
+        "range": {
+          "melee": "Solo ataques cuerpo a cuerpo",
+          "ranged": "Solo ataques a distancia"
+        },
+        "Reduction": "Reducción {value}",
+        "reductionExcept": "Reducción {value}, excepto contra {except}",
+        "rerollOnes": "Repetir los 1 en {rolls}",
+        "Resource": "Usos de {slug}: {max} por {per}",
+        "RollModifier": "{bonus} en {rolls}",
+        "RollOption": "Opción de tirada: {option}",
+        "selector": {
+          "any": "todas las tiradas",
+          "attack": "tiradas de ataque",
+          "damage": "tiradas de daño",
+          "maho": "tiradas de maho",
+          "named": "tiradas de {name}",
+          "ring": "Tiradas de Anillo",
+          "skill": "Tiradas de Habilidad",
+          "skill-tag": "Tiradas de Habilidad {name}",
+          "skill-type": "Tiradas de Habilidad {name}",
+          "spell": "Tiradas de Lanzar Hechizo",
+          "trait": "Tiradas de Atributo"
+        },
+        "Spirit": "Espíritu: daño reducido a la mitad salvo si procede de {harmedBy}",
+        "Substitute": "Puede tirar {with} en lugar de {replace} en {rolls}",
+        "text": "{text}",
+        "TNModifier": "ND {value} en {rolls}",
+        "TraitAdjust": "{trait} {value}",
+        "unknown": "Regla desconocida {key}",
+        "UnskilledAs": "{rolls} sin rangos cuentan como Rango {rank}",
+        "when": "{rule} (cuando {when})",
+        "Wounds": "Heridas por Nivel de Heridas {perRank}, penalizaciones de Nivel de Heridas {penalty}"
+      },
+      "session": {
+        "confirm": "¿Empezar una nueva sesión de juego? Cada personaje recupera su Tirada de Honor.",
+        "new": "Nueva sesión",
+        "start": "Iniciar sesión",
+        "started": "Ha comenzado una nueva sesión de juego."
       },
       "sheets": {
         "abilities": "Habilidades",
@@ -467,6 +1344,7 @@
         "advantage": "Ventaja",
         "advantages": "Ventajas",
         "armor": "Armadura",
+        "attackAndDamage": "Ataque y daño",
         "background": "Trasfondo",
         "character": "Personaje",
         "demands": "Demandas",
@@ -475,24 +1353,38 @@
         "disadvantages": "Desventajas",
         "equipment": "Equipamiento",
         "item": "Objeto",
+        "itemFlavor": "[{type}]",
         "items": "Objetos",
+        "itemTitle": "{item} [{type}]",
         "kata": "Kata",
         "kiho": "Kiho",
         "mastery": "Maestría",
+        "masteryHint": "Cuesta su Nivel de Maestría en EXP (pp.231, 259). Una regla Cost cambia el precio: los kiho gratuitos de un monje, o el precio mayor de una escuela ajena a la Hermandad (p.266).",
+        "noBio": "Todavía sin Clan, Familia ni Escuela.",
         "notes": "Notas",
+        "recalculated": "Hoja recalculada para {name}",
+        "recalculateSheet": "Recalcular la hoja",
         "rulesSummary": "Resumen de Reglas",
         "skill": "Habilidad",
         "skills": "Habilidades",
         "spell": "Hechizo",
         "spells": "Hechizos",
         "spellSlots": "Espacios de Hechizo",
+        "spellSlotsOf": "Espacios de hechizo de {ring}: {count} (clic: +1, clic derecho: -1)",
+        "tabs": "Partes de la hoja",
         "tattoo": "Tatuaje",
+        "tattooPassive": "Siempre activo",
+        "tattooPassiveHint": "Activado: sus reglas se aplican mientras el personaje lo tenga. Desactivado: el botón de reproducir de la hoja de personaje lo activa, un tatuaje a la vez, durante el doble del Rango de Escuela en Asaltos.",
         "tattoos": "Tatuajes",
         "technique": "Técnica",
         "techniques": "Técnicas",
+        "typeInsightRank": "Escribir el Rango de Perspicacia a mano",
         "weapon": "Arma",
         "weapons": "Armas",
         "woundLevels": "Niveles de Heridas"
+      },
+      "sources": {
+        "core": "Libro básico"
       },
       "statusEffects": {
         "blinded": "Cegado",
@@ -514,7 +1406,28 @@
         "description": "Descripción",
         "details": "Detalles",
         "effects": "Efectos Activos",
-        "modifiers": "Modificadores"
+        "modifiers": "Modificadores",
+        "rules": "Reglas"
+      },
+      "taint": {
+        "embrace": "Abrazar la Corrupción (+1k1)",
+        "embraceHint": "Gana un punto de Corrupción por +1k1 en esta tirada.",
+        "embraceReason": "Abrazó la Corrupción",
+        "label": "Corrupción de las Tierras de Sombra",
+        "lost": "Perdido (Rango de Corrupción)"
+      },
+      "transfer": {
+        "export": "Exportar objetos con reglas",
+        "exported": {
+          "one": "Exportado {count} objeto de {folder}",
+          "other": "Exportados {count} objetos de {folder}"
+        },
+        "import": "Importar objetos con reglas",
+        "imported": "Objetos importados",
+        "importedCount": "Importados {count} objetos en {folder}",
+        "importHint": "Elige un archivo exportado de una carpeta de objetos. Sus objetos van a una carpeta nueva aquí.",
+        "invalidJson": "Ese archivo no es JSON válido.",
+        "notExport": "Ese archivo no es una exportación de objetos con reglas."
       }
     },
     "world": {
@@ -529,6 +1442,10 @@
     "Actor": {
       "npc": "PNJ",
       "pc": "PJ"
+    },
+    "ChatMessage": {
+      "checkRequest": "Petición de tirada",
+      "roll": "Tirada"
     },
     "Item": {
       "advantage": "Ventaja",
