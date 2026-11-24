@@ -43,14 +43,14 @@ export async function rollContest(attack) {
     rolled = true;
   }
   if (!rolled) {
-    ui.notifications?.info(T("l5r4.ui.combat.contestWaiting"));
+    ui.notifications?.info(formatContestState(attack, sides));
     return;
   }
   await postContestResult(attack, sides);
 }
 
 /**
- * Settle the contest once both sides have rolled.
+ * Settle the contest once both sides have rolled; until then, say whose roll it waits for (#140).
  * @param {ChatMessage} attack
  * @param {{attacker: Actor, target: Actor}} sides
  * @returns {Promise<void>}
@@ -58,6 +58,7 @@ export async function rollContest(attack) {
 async function postContestResult(attack, sides) {
   const result = getContestOutcome(attack);
   if (!result) {
+    ui.notifications?.info(formatContestState(attack, sides));
     return;
   }
   const speaker = ChatMessage.getSpeaker({ actor: sides.attacker });
@@ -101,4 +102,20 @@ async function applyContestOutcome(attack, sides, winnerSide) {
     lines.push(F("l5r4.ui.combat.disarmed", { name: sides.target.name }));
   }
   return lines;
+}
+
+/**
+ * Where a contest stands for a user who has nothing to roll: settled once both sides have rolled, otherwise waiting
+ * for the side that has not.
+ * @param {ChatMessage} attack - The attack message
+ * @param {{attacker: Actor, target: Actor}} sides
+ * @returns {string}
+ */
+function formatContestState(attack, sides) {
+  const rolls = contestRollsOf(attack);
+  if (rolls.attacker && rolls.target) {
+    return T("l5r4.ui.combat.contestSettled");
+  }
+  const waiting = rolls.attacker ? sides.target : sides.attacker;
+  return F("l5r4.ui.combat.contestWaitingFor", { name: waiting.name });
 }

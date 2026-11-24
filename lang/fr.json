@@ -824,7 +824,6 @@
         "calledShotSmall": "Œil, oreille, doigt (4 Relances)",
         "calledShotUnnamed": "partie non précisée",
         "contestStrength": "Lancer un Jet en Opposition de Force",
-        "contestWaiting": "Vous avez lancé ; en attente de l'autre camp",
         "disarm": "Désarmement (3 Relances)",
         "disarmed": "{name} lâche son arme.",
         "disarmNote": "Désarmement : les dégâts sont de 2k1 sans la Force ; lancez un Jet en Opposition de Force, et si l'attaquant l'emporte, la cible lâche son arme.",

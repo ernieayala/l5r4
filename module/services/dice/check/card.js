@@ -47,13 +47,24 @@ export function hasHonorToCall(actor) {
 }
 
 /**
- * Render a check's card from its stored context.
+ * What a check card's buttons have started, kept in its message's `flags.l5r4-enhanced.used` so the card shows it
+ * (#140).
+ * @typedef {object} CardUse
+ * @property {string} [damage]          The damage roll a hit's button posted
+ * @property {{uuid: string, name: string, wounds: number, resultId: string}[]} [applied] Actors a damage roll was
+ *   applied to, with the Wounds each took and its result card
+ * @property {number[]} [conditions]    Indexes of the offered conditions applied to the target
+ * @property {string} [grapple]         The grapple card the hit started
+ */
+
+/**
+ * Render a check's card from its stored context and what its buttons have started.
  * @param {object} system - RollMessageData source
  * @param {Roll} roll
- * @param {{actorId?: string}} [extra] - The roller's id
+ * @param {{actorId?: string, used?: CardUse}} [extra] - The roller's id, and the card's use so far
  * @returns {Promise<string>}
  */
-export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
+export async function renderCheckCard(system, roll, { actorId = "", used = {} } = {}) {
   const success = system.outcome.success;
   const isAttack = system.kind === "attack";
   const hit = isAttack && success === true;
@@ -61,6 +72,7 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
   const missed = isAttack ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
   return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
     ...system,
+    ...buildUseContext(system, used),
     tn: system.tn.effective === null ? null : system.tn,
     // A roll with no TN still shows the Raises a Contested Roll will count
     raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
@@ -81,6 +93,26 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     honorRoll: isHonorRollOffered(system) && hasHonorToCall(game.actors.get(actorId)),
     actorId
   });
+}
+
+/**
+ * Record what a check card's button started and render the card again to show it, in one update. Only the card's
+ * author or a GM may change a message; a click by anyone else changes the game but leaves the card as it was.
+ * @param {ChatMessage} message - A `roll` message
+ * @param {CardUse} change - What to add to the card's use
+ * @returns {Promise<void>}
+ */
+export async function updateCheckCardUse(message, change) {
+  if (!message.canUserModify(game.user, "update")) {
+    return;
+  }
+  const used = { ...(message.getFlag(SYS_ID, "used") ?? {}), ...change };
+  const actorId = fromUuidSync(message.system.actorUuid)?.id ?? "";
+  const content = await renderCheckCard(message.system.toObject(), message.rolls[0], {
+    actorId,
+    used
+  });
+  await message.update({ content, [`flags.${SYS_ID}.used`]: used });
 }
 
 /**
@@ -107,6 +139,29 @@ export function formatModifier({ roll = 0, keep = 0, total = 0 }) {
     parts.push(`${total > 0 ? "+" : ""}${total}`);
   }
   return parts.join(" ");
+}
+
+/**
+ * What the card shows of its use: that the hit's damage was rolled, whom a damage roll was applied to and whether to
+ * its own target, which offered conditions are on the target, and that the grapple started.
+ * @param {object} system - RollMessageData source
+ * @param {CardUse} used
+ * @returns {object} Template context
+ */
+function buildUseContext(system, used) {
+  const applied = used.applied ?? [];
+  return {
+    damageRolled: Boolean(used.damage),
+    appliedNotes: applied.map(a =>
+      F("l5r4.ui.combat.appliedTo", { name: a.name, wounds: a.wounds })
+    ),
+    targetApplied: applied.some(a => a.uuid === system.target?.uuid),
+    conditions: (system.conditions ?? []).map((condition, index) => ({
+      ...condition,
+      applied: (used.conditions ?? []).includes(index)
+    })),
+    grappleStarted: Boolean(used.grapple)
+  };
 }
 
 /**

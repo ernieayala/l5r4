@@ -7,6 +7,7 @@
  * game-rules/29_types_of_rolls.md, p.80
  */
 
+import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
@@ -14,17 +15,22 @@ import { getContestResult, getCheckResult, getPoolFormula } from "../../../utils
 import { hideUnusable } from "../../../utils/dom.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage-roll.js";
-import { renderCheckCard } from "./card.js";
+import { renderCheckCard, updateCheckCardUse } from "./card.js";
 import { hasHonorRollLeft, rollHonor } from "./honor-roll.js";
 
 /**
- * Roll damage for a hit from its attack's stored context (module/services/combat/damage-roll.js).
+ * Roll damage for a hit from its attack's stored context (module/services/combat/damage-roll.js); the attack card then
+ * says its damage was rolled (#140).
  * @param {ChatMessage} message - A `roll` message of kind "attack"
  * @param {{askForOptions?: boolean}} [options]
  * @returns {Promise<ChatMessage|null>}
  */
-export function rollDamageFromMessage(message, options = {}) {
-  return rollDamageFromAttack(message, options);
+export async function rollDamageFromMessage(message, options = {}) {
+  const damage = await rollDamageFromAttack(message, options);
+  if (damage) {
+    await updateCheckCardUse(message, { damage: damage.id });
+  }
+  return damage;
 }
 
 /**
@@ -111,7 +117,7 @@ export async function postContestedRoll(message, opponent) {
 /**
  * Put a condition the roll's ApplyCondition rules offer on its target. The roll must have succeeded; the condition
  * comes from the stored context by index, never from the card. A target the user does not own gets it through the
- * active GM.
+ * active GM. The card then marks the condition applied, so the same click does not stack a second one (#140).
  * @param {ChatMessage} message - A `roll` message
  * @param {number} index - Index into `system.conditions`
  * @returns {Promise<void>}
@@ -119,7 +125,8 @@ export async function postContestedRoll(message, opponent) {
 export async function applyConditionFromMessage(message, index) {
   const entry = message.system.conditions[index];
   const target = message.system.target.uuid ? await fromUuid(message.system.target.uuid) : null;
-  if (!entry || !target || message.system.outcome.success !== true) {
+  const applied = message.getFlag(SYS_ID, "used")?.conditions ?? [];
+  if (!entry || !target || message.system.outcome.success !== true || applied.includes(index)) {
     return;
   }
   if (!canAct(rollActor(message))) {
@@ -130,6 +137,7 @@ export async function applyConditionFromMessage(message, index) {
     // The roll the GM's client checks before it puts the condition on a target the user does not own (#162)
     proof: { kind: "roll", messageId: message.id, index }
   });
+  await updateCheckCardUse(message, { conditions: [...applied, index] });
 }
 
 /**
