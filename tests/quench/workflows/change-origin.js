@@ -8,7 +8,12 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { grantQueueOf } from "../../../module/documents/item/lifecycle/grants.js";
 import { APPLY_EFFECT_QUERY } from "../../../module/services/effects/apply.js";
-import { isAnsweringGmClient, onGmClientMessage } from "../../../module/services/gm-client.js";
+import { requestStep } from "../../../module/services/combat/flow.js";
+import {
+  isAnsweringGmClient,
+  onGmClientMessage,
+  requestGmQuery
+} from "../../../module/services/gm-client.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 import { cleanTest, guardRolls, waitFor, withAnotherClient } from "../helpers.js";
@@ -196,6 +201,49 @@ export function registerChangeOriginTests(quench) {
             assert.isTrue(actor.statuses.has("dazed"));
           })
         );
+
+        /** Run a body while recording every warning notification it shows. */
+        const warningsOf = async body => {
+          const warnings = [];
+          const warn = ui.notifications.warn;
+          ui.notifications.warn = (message, options) => {
+            warnings.push(message);
+            return warn.call(ui.notifications, message, options);
+          };
+          try {
+            await body();
+          } finally {
+            ui.notifications.warn = warn;
+          }
+          return warnings;
+        };
+
+        // #139: a refused request tells the one who asked, in their own language
+        it(
+          "should show the one who asked why the GM side refused a request",
+          clean(async () => {
+            const note = await ChatMessage.create({ content: "Quench" });
+            try {
+              const warnings = await warningsOf(() =>
+                requestStep(note, { action: "roll", duelist: 0 })
+              );
+              assert.deepEqual(warnings, [game.i18n.localize("l5r4.ui.requests.notFlowCard")]);
+            } finally {
+              await note.delete();
+            }
+          })
+        );
+
+        it("should show a failure the system does not name with its own message", async () => {
+          const warnings = await warningsOf(() =>
+            requestGmQuery("quench", {}, async () => {
+              throw new Error("Quench failure");
+            })
+          );
+          assert.deepEqual(warnings, [
+            game.i18n.localize("l5r4.ui.requests.failed", { reason: "Quench failure" })
+          ]);
+        });
       });
 
       // game-rules/36_stances.md, p.84

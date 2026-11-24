@@ -5,11 +5,13 @@
  * `game.user.isActiveGM` holds, so a GM with two windows would apply a player's damage twice (#82). The GM's clients
  * announce themselves on the system socket and keep a heartbeat; the one that started first answers
  * (module/utils/gm-client.js). A client that closes says so, so another takes over at once; one that stops without
- * a word is dropped after it has gone quiet for longer than CLIENT_TTL_MS.
+ * a word is dropped after it has gone quiet for longer than CLIENT_TTL_MS. A player's request goes to the GM through
+ * requestGmQuery, which tells the player when no GM is connected or the GM side refuses.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { isAnsweringClient } from "../utils/gm-client.js";
+import { F, T } from "../utils/localization.js";
 
 /** The system's socket channel (`"socket": true` in system.json). */
 const CHANNEL = `system.${SYS_ID}`;
@@ -50,6 +52,33 @@ export function registerGmQuery(name, handler) {
 }
 
 /**
+ * Run a request on the GM's side and tell the requester when it does not run. A GM's own client runs `local` here; a
+ * player's request goes to the active GM as a query. With no GM connected, or when the GM side refuses, the requester
+ * is told why in their own language: the GM side throws an i18n key under `l5r4.ui.requests`, which this client
+ * localizes; any other failure is shown with its message (#139).
+ * @param {string} name - The query name, in `CONFIG.queries`
+ * @param {object} data - The request
+ * @param {function(object, User): Promise<*>} [local] - Runs the request when this user is a GM
+ * @returns {Promise<*>} The GM side's answer, or undefined when it did not run
+ */
+export async function requestGmQuery(name, data, local) {
+  try {
+    if (game.user.isGM && local) {
+      return await local(data, game.user);
+    }
+    const gm = game.users.activeGM;
+    if (!gm) {
+      ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
+      return undefined;
+    }
+    return await gm.query(name, data);
+  } catch (err) {
+    ui.notifications?.warn(formatRefusal(name, err));
+    return undefined;
+  }
+}
+
+/**
  * On `ready`, for a GM client: listen on the system socket, announce this client, keep a heartbeat, and say goodbye
  * when the window closes.
  */
@@ -87,6 +116,21 @@ export function onGmClientMessage(message) {
   if (type === "hello") {
     emitGmClientMessage("here");
   }
+}
+
+/**
+ * Why the GM side did not run a request, in this user's language. A refusal the system makes is an i18n key; any
+ * other failure is unexpected, so it is also logged, and its message is shown as it came.
+ * @param {string} name - The query name
+ * @param {Error} err - The rejection
+ * @returns {string}
+ */
+function formatRefusal(name, err) {
+  if (game.i18n.has(err.message)) {
+    return T(err.message);
+  }
+  console.warn(`${SYS_ID} | ${name} failed`, err);
+  return F("l5r4.ui.requests.failed", { reason: err.message });
 }
 
 /**

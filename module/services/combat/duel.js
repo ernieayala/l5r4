@@ -278,11 +278,11 @@ registerFlow("duel", {
     const i = Number(data.duelist);
     const { actor } = sidesOf(state, i);
     if (![0, 1].includes(i) || !canActFor(user, actor) || state.stage === "done") {
-      throw new Error("Not this user's duelist, or the duel is over");
+      throw new Error("l5r4.ui.requests.notYourDuelist");
     }
     if (data.action === "concede") {
       if (!canConcede(state, i)) {
-        throw new Error("This duelist may not concede now");
+        throw new Error("l5r4.ui.requests.cannotConcede");
       }
       state.conceded = i;
       state.stage = "done";
@@ -290,7 +290,7 @@ registerFlow("duel", {
     }
     const roll = game.messages.get(String(data.rollId));
     if (roll?.type !== "roll" || roll.system.actorUuid !== actor.uuid) {
-      throw new Error("Not the duelist's roll");
+      throw new Error("l5r4.ui.requests.notDuelistRoll");
     }
     state.rolls[state.stage][i] = {
       total: roll.system.outcome.total,

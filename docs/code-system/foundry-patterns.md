@@ -266,15 +266,15 @@ A player's client asks the active GM to change a document the player does not ow
 | --- | --- |
 | The name is an exported constant, `` <NAME>_QUERY = `${SYS_ID}.<camelCase>` ``, in the service that owns the change | review |
 | One `register<Feature>Queries()` per service registers each query with `registerGmQuery` (`module/services/gm-client.js`), never by assigning `CONFIG.queries` itself: core sends a query to every client of the GM user and takes the first answer, so only the answering client runs it; `init` calls it | review |
-| The handler treats its payload as untrusted: it resolves documents by UUID, checks ids against known lists, and throws on bad input | review |
-| The caller changes the document itself when `document.isOwner`; otherwise it calls `game.users.activeGM.query(...)`, and warns with an i18n key when no GM is active | review |
+| The handler treats its payload as untrusted: it resolves documents by UUID, checks ids against known lists, and throws on bad input, with an i18n key under `l5r4.ui.requests` as the message | review |
+| The caller changes the document itself when `document.isOwner`; otherwise it calls `requestGmQuery(name, data, local)` (`module/services/gm-client.js`), which runs `local` on a GM's own client, warns when no GM is active, and shows the requester why the GM side refused, so no refusal is lost in the console (#139) | ESLint `no-restricted-syntax` (no `.query(` outside `module/services/gm-client.js`) |
 | The caller is named `request*` (`naming.md`) | Local ESLint verb rule (`naming.md`) |
 | Payloads are JSON-serializable: UUIDs and plain values, never documents (§10.5) | review |
 | Query names are fixed (Stage 17 decision 2) | review |
 
 Conforming, `module/services/effects/apply.js`: `APPLY_EFFECT_QUERY`, the owner-or-GM caller `applyEffectAnywhere`, and `registerEffectQueries` checking the actor and effect id before it applies anything.
 
-Not conforming, `endConcentration` (`module/services/effects/prompts.js`) calls `activeGM?.query` inline inside a domain verb instead of a `request*` caller.
+Not conforming, modeled: `await game.users.activeGM?.query(name, data)` from a player's client: with no GM the request is dropped without a word, and a refusal reaches only the console as an unhandled rejection.
 
 ## Chat cards
 

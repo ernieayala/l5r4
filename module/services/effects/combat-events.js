@@ -15,7 +15,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, R } from "../../utils/localization.js";
-import { isAnsweringGmClient, registerGmQuery } from "../gm-client.js";
+import { isAnsweringGmClient, registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
 
@@ -82,7 +82,7 @@ export const COMBAT_EVENTS = Object.freeze({
     if (game.user.isGM) {
       await applyCenterStance(combat);
     } else {
-      await game.users.activeGM?.query(CENTER_QUERY, { combatId: combat.id });
+      await requestGmQuery(CENTER_QUERY, { combatId: combat.id });
     }
   }
 });
@@ -92,7 +92,7 @@ export function registerCombatQueries() {
   registerGmQuery(CENTER_QUERY, async ({ combatId }) => {
     const combat = game.combats.get(String(combatId));
     if (!combat?.started) {
-      throw new Error(`No started combat ${combatId}`);
+      throw new Error("l5r4.ui.requests.noCombat");
     }
     await applyCenterStance(combat);
   });
