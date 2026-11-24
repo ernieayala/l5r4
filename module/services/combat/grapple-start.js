@@ -9,6 +9,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { F, T } from "../../utils/localization.js";
+import { updateCheckCardUse } from "../dice/check/card.js";
 import { applyEffect } from "../effects/apply.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { startFlow } from "./flow.js";
@@ -26,6 +27,10 @@ export async function startGrapple(attack) {
   const attacker = fromUuidSync(attack.system.actorUuid);
   if (!attacker?.isOwner || !fromUuidSync(attack.system.target.uuid)) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  if (attack.getFlag(SYS_ID, "used")?.grapple) {
+    ui.notifications?.info(T("l5r4.ui.combat.grappleStarted"));
     return null;
   }
   const cardId = await requestGmQuery(GRAPPLE_QUERY, { messageId: attack.id }, applyGrappleStart);
@@ -56,12 +61,17 @@ async function applyGrappleStart({ messageId }, user) {
   if (!attacker.testUserPermission(user, "OWNER")) {
     throw new Error("l5r4.ui.requests.notYourSide");
   }
+  // A hit starts one grapple; its card then says so (#140)
+  if (attack.getFlag(SYS_ID, "used")?.grapple) {
+    throw new Error("l5r4.ui.combat.grappleStarted");
+  }
   for (const actor of [attacker, target]) {
     if (!actor.statuses.has(GRAPPLED)) {
       await applyEffect(actor, GRAPPLED);
     }
   }
   const card = await startFlow("grapple", buildGrappleState(attack, attacker, target), attacker);
+  await updateCheckCardUse(attack, { grapple: card.id });
   return card.id;
 }
 

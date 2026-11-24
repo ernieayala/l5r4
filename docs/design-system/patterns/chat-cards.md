@@ -62,6 +62,8 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 
 The check card's context menu adds "re-roll and keep the better" (the message's author) and "contest the previous roll" (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)). Those entries are core's context menu, not card markup.
 
+A button that starts something leaves the card saying so (#140): a hit says its damage was rolled and offers "Roll damage again", a damage roll lists each actor it was applied to and offers "Apply to {target} again", and an applied condition or a started grapple disables its button with the reason in `data-tooltip` (`components/check-card.md`). Repeating an action stays possible where the table needs it, as a button that names the repeat. The Contested Strength roll tells the clicking user whose roll it waits for, or that it is settled (`formatContestState` (`module/services/combat/contest.js`)).
+
 ## Fixed names
 
 Posted messages store their HTML, so these names never change and every check exempts them by name. The full list with the reason is in `docs/code-system/naming.md`, Fixed names.

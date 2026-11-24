@@ -4,6 +4,10 @@ import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack } from "../../module/services/combat/damage-roll.js";
+import {
+  applyConditionFromMessage,
+  rollDamageFromMessage
+} from "../../module/services/dice/check/chat-actions.js";
 import { applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
 import { startGrapple } from "../../module/services/combat/grapple-start.js";
@@ -216,6 +220,79 @@ export function registerCombatTests(quench) {
             assert.equal(target._source.system.rings.void.value, 2, "the Void Point is back");
             assert.equal(rankOf(target), "healthy");
             assert.isTrue(resultOf(damage).getFlag(SYS_ID, "damageResult").undone);
+          })
+        );
+
+        // #140: a card shows what its buttons started
+        it(
+          "should list on a damage card whom it was applied to, offer applying again, and drop the line on Undo",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender({ armor: { bonus: 1, reduction: 3 } });
+            const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
+              askForOptions: false
+            });
+            await applyDamage(damage, [target]);
+            const applied = F("l5r4.ui.combat.appliedTo", { name: target.name, wounds: 15 });
+            const card = () => game.messages.get(damage.id);
+            assert.isTrue(await waitFor(() => card().content.includes(applied)), "listed");
+            assert.include(
+              card().content,
+              F("l5r4.ui.combat.applyToAgain", { target: target.name }),
+              "the target's button says it applies again"
+            );
+            await click(resultOf(damage), "[data-action='damage-undo']");
+            assert.isTrue(await waitFor(() => !card().content.includes(applied)), "gone on Undo");
+          })
+        );
+
+        it(
+          "should say on a hit's card that its damage was rolled",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const hit = await attack(actor, katana, await defender());
+            await rollDamageFromMessage(hit, { askForOptions: false });
+            const card = game.messages.get(hit.id);
+            assert.include(card.content, T("l5r4.ui.check.damageRolled"));
+            assert.include(
+              card.content,
+              F("l5r4.ui.check.damageRollAgain", { pool: hit.system.damage.label })
+            );
+          })
+        );
+
+        it(
+          "should apply an offered condition once, then disable its button",
+          clean(async () => {
+            const { actor, katana } = await attacker([
+              { key: "ApplyCondition", selector: "attack", condition: "dazed" }
+            ]);
+            const target = await defender();
+            const hit = await attack(actor, katana, target);
+            assert.lengthOf(hit.system.conditions, 1, "Dazed is offered");
+            await applyConditionFromMessage(hit, 0);
+            await applyConditionFromMessage(game.messages.get(hit.id), 0);
+            assert.lengthOf(
+              target.effects.filter(e => e.statuses.has("dazed")),
+              1,
+              "a second click adds none"
+            );
+            const html = await game.messages.get(hit.id).renderHTML();
+            assert.isTrue(html.querySelector("[data-action='apply-condition']").disabled);
+          })
+        );
+
+        it(
+          "should start one grapple from a hit",
+          clean(async () => {
+            const { actor } = await attacker();
+            const hit = await grappleAttack(actor, await defender());
+            const first = await startGrapple(hit);
+            const second = await startGrapple(game.messages.get(hit.id));
+            assert.exists(first);
+            assert.isNull(second, "the second click starts none");
+            const html = await game.messages.get(hit.id).renderHTML();
+            assert.isTrue(html.querySelector("[data-action='grapple-start']").disabled);
           })
         );
 

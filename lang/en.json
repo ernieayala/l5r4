@@ -771,6 +771,8 @@
         "contestTie": "Tie: roll again.",
         "contestWinner": "{name} wins.",
         "damageLabel": "Damage for {weapon}",
+        "damageRollAgain": "Roll damage again ({pool})",
+        "damageRolled": "Damage rolled",
         "damageRollPool": "Damage roll ({pool})",
         "effectsFor": "Active effects ({key})",
         "freeRaisesLeft": "Free Raises: {count}",
@@ -810,8 +812,10 @@
         "woundPenaltyNote": "(Wound penalty +{penalty})"
       },
       "combat": {
+        "appliedTo": "Applied to {name}: {wounds} Wounds",
         "applySelected": "Apply to selected",
         "applyTo": "Apply to {target}",
+        "applyToAgain": "Apply to {target} again",
         "arrowArmor": {
           "armor": "Armor Piercing arrow ignores armor",
           "flesh": "Flesh Cutter arrow doubles armor"
@@ -824,8 +828,9 @@
         "calledShotNote": "Called Shot ({raises} Raises): {location}. The GM rules any effect on that part.",
         "calledShotSmall": "Eye, ear, finger (4 Raises)",
         "calledShotUnnamed": "unnamed part",
+        "contestSettled": "Both sides have rolled; the contest is settled",
         "contestStrength": "Roll Contested Strength",
-        "contestWaiting": "You have rolled; waiting for the other side",
+        "contestWaitingFor": "Waiting for {name}'s Strength roll",
         "disarm": "Disarm (3 Raises)",
         "disarmed": "{name} drops the weapon.",
         "disarmNote": "Disarm: damage is 2k1 without Strength; roll Contested Strength, and the attacker winning makes the target drop the weapon.",
@@ -884,6 +889,7 @@
         "grappleIgnoresArmor": "Grapple ignores armor",
         "grappleManeuver": "Start a grapple (ignores armor)",
         "grappleStart": "Start grapple with {target}",
+        "grappleStarted": "The grapple has started",
         "guard": "Guard the targeted token",
         "guardFullAttack": "You cannot Guard in the Full Attack Stance",
         "guardPick": "Select your token and target the one to guard",
@@ -977,6 +983,7 @@
       },
       "effects": {
         "alreadyEnded": "That effect has already ended",
+        "appliedTo": "{effect} is on {target}",
         "applyTo": "{effect} on {target}",
         "autoProne": "Auto: Prone",
         "centered": "Centered",

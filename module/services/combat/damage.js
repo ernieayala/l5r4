@@ -15,6 +15,7 @@ import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { canReduceWithVoid, isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
+import { updateCheckCardUse } from "../dice/check/card.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
@@ -137,11 +138,34 @@ async function postResult(actor, result, existing) {
     }
   );
   const flags = { [SYS_ID]: { damageResult: { actorUuid: actor.uuid, ...result } } };
-  if (existing) {
-    await existing.update({ content, flags });
-    return existing;
+  let card = existing;
+  if (card) {
+    await card.update({ content, flags });
+  } else {
+    card = await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor }), content, flags });
   }
-  return ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor }), content, flags });
+  await updateDamageCardUse(card, actor, { ...result, taken });
+  return card;
+}
+
+/**
+ * Keep the damage roll's card in step with one of its result cards, so it lists who took its Wounds and how many:
+ * a result adds or updates its line, an undone one takes it away (#140). A damage roll deleted since shows nothing.
+ * @param {ChatMessage} card - The result card
+ * @param {Actor} actor - The damaged actor
+ * @param {object} result - The result card's flags, with the Wounds `taken` after a Void Point
+ * @returns {Promise<void>}
+ */
+async function updateDamageCardUse(card, actor, result) {
+  const damage = game.messages.get(result.damageMessageId);
+  if (!damage) {
+    return;
+  }
+  const others = (damage.getFlag(SYS_ID, "used")?.applied ?? []).filter(
+    a => a.resultId !== card.id
+  );
+  const line = { uuid: actor.uuid, name: actor.name, wounds: result.taken, resultId: card.id };
+  await updateCheckCardUse(damage, { applied: result.undone ? others : [...others, line] });
 }
 
 /**

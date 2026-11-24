@@ -824,7 +824,6 @@
         "calledShotSmall": "Ojo, oreja, dedo (4 Incrementos)",
         "calledShotUnnamed": "parte sin nombre",
         "contestStrength": "Tirar Fuerza enfrentada",
-        "contestWaiting": "Has tirado; esperando al otro bando",
         "disarm": "Desarmar (3 Incrementos)",
         "disarmed": "{name} suelta el arma.",
         "disarmNote": "Desarmar: el daño es 2k1 sin Fuerza; tira Fuerza enfrentada y, si gana el atacante, el objetivo suelta el arma.",
