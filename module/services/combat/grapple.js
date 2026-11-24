@@ -42,7 +42,10 @@ export async function startGrapple(attack) {
   }
   for (const actor of [attacker, target]) {
     if (!actor.statuses.has(GRAPPLED)) {
-      await applyEffectAnywhere(actor, GRAPPLED);
+      // The hit the GM's client checks before it grapples a target the user does not own (#162)
+      await applyEffectAnywhere(actor, GRAPPLED, {
+        proof: { kind: "grapple", messageId: attack.id }
+      });
     }
   }
   // A grapple begun with a Weapon Skill is a weapon grapple; an "Unarmed" item rolled with Jiujutsu is not

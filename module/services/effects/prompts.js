@@ -158,10 +158,14 @@ export async function endConcentration(effect) {
 
 /** Register the GM side of endConcentration and of marking a player's prompt answered. */
 export function registerPromptQueries() {
-  registerGmQuery(END_CONCENTRATION_QUERY, async ({ effectUuid }) => {
+  registerGmQuery(END_CONCENTRATION_QUERY, async ({ effectUuid }, { user }) => {
     const effect = await fromUuid(String(effectUuid));
     if (effect?.documentName !== "ActiveEffect" || !effect.statuses.has("concentration")) {
       throw new Error("l5r4.ui.requests.notConcentration");
+    }
+    // Only the caster's owner ends the caster's Concentration and the spells it holds up (#162)
+    if (!effect.parent?.testUserPermission(user, "OWNER")) {
+      throw new Error("l5r4.ui.requests.notYourCaster");
     }
     await endConcentration(effect);
   });

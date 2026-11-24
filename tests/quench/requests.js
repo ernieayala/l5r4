@@ -1,0 +1,186 @@
+import { SYS_ID } from "../../module/config/constants.js";
+import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
+import { rollCheck } from "../../module/services/dice/check/roll-check.js";
+import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
+import { cleanTest, settleChatNotifications } from "./helpers.js";
+
+/** Every d10 shows 9, so every roll is known. */
+const NINES = () => 0.15;
+
+/**
+ * Registers the `requests` batch (#162): a GM query for a player changes an actor that player does not own only with
+ * a proof the GM's client checks, and takes the effect's level and timing from the proof. The handlers run here as
+ * the world's player user would call them.
+ * @param {object} quench  The Quench API object.
+ */
+export function registerRequestsTests(quench) {
+  quench.registerBatch(
+    `${SYS_ID}.requests`,
+    context => {
+      const { describe, it, before, after, afterEach, assert } = context;
+      const clean = cleanTest(assert);
+      const created = [];
+      const track = doc => (created.push(doc), doc);
+      let player;
+      let uniform;
+
+      before(async function () {
+        player = game.users.find(user => !user.isGM);
+        if (!player) {
+          this.skip();
+        }
+        await settleChatNotifications();
+        uniform = CONFIG.Dice.randomUniform;
+        CONFIG.Dice.randomUniform = NINES;
+      });
+
+      afterEach(async () => {
+        for (const doc of created.splice(0).reverse()) {
+          await doc.delete();
+        }
+      });
+
+      after(() => {
+        if (uniform) {
+          CONFIG.Dice.randomUniform = uniform;
+        }
+      });
+
+      /** A character the player owns, with `rules` on an item. */
+      const playersCharacter = async (rules = []) => {
+        const actor = track(
+          await createTestPC({
+            name: "Requests: player's character",
+            ownership: { [player.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER }
+          })
+        );
+        if (rules.length) {
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Requests rules", type: "commonItem", system: { rules } }
+          ]);
+        }
+        return actor;
+      };
+
+      /** The effect query as the player would send it. */
+      const askEffect = (actor, id, options = {}) =>
+        CONFIG.queries[APPLY_EFFECT_QUERY](
+          { actorUuid: actor.uuid, id, options },
+          { user: player }
+        );
+
+      /** Whether a promise rejects with a refusal key. */
+      const refusalOf = promise => promise.then(() => null).catch(err => err.message);
+
+      describe("Effects on another's actor", () => {
+        it(
+          "should refuse an effect with no proof",
+          clean(async () => {
+            const npc = track(await createTestNPC({ name: "Requests: NPC" }));
+            assert.equal(
+              await refusalOf(askEffect(npc, "fatigued")),
+              "l5r4.ui.requests.effectNotProven"
+            );
+            assert.isFalse(npc.statuses.has("fatigued"));
+          })
+        );
+
+        it(
+          "should put a condition a successful roll offers on its target, and refuse one it does not",
+          clean(async () => {
+            const actor = await playersCharacter([
+              { key: "ApplyCondition", selector: "any", condition: "dazed" }
+            ]);
+            const npc = track(await createTestNPC({ name: "Requests: target" }));
+            const hit = track(
+              await rollCheck({
+                actor,
+                kind: "skill",
+                label: "Requests roll",
+                base: { roll: 3, keep: 2 },
+                tn: 5,
+                target: npc,
+                askForOptions: false
+              })
+            );
+            assert.lengthOf(hit.system.conditions, 1, "Dazed is offered");
+            const proof = { kind: "roll", messageId: hit.id, index: 0 };
+            assert.equal(
+              await refusalOf(askEffect(npc, "stunned", { proof })),
+              "l5r4.ui.requests.effectNotProven",
+              "a condition the roll does not offer"
+            );
+            assert.deepEqual(await askEffect(npc, "dazed", { proof, level: 9 }), {
+              applied: true
+            });
+            const dazed = npc.effects.find(e => e.statuses.has("dazed"));
+            assert.exists(dazed);
+            assert.notEqual(
+              dazed.system.level,
+              9,
+              "the level comes from the roll, not the request"
+            );
+          })
+        );
+
+        it(
+          "should guard a ward for a guard the player owns, timed from the guard",
+          clean(async () => {
+            const protector = await playersCharacter();
+            const ward = track(await createTestPC({ name: "Requests: ward" }));
+            const stranger = track(await createTestPC({ name: "Requests: stranger" }));
+            assert.equal(
+              await refusalOf(
+                askEffect(ward, "guarded", {
+                  proof: { kind: "guard", protectorUuid: stranger.uuid }
+                })
+              ),
+              "l5r4.ui.requests.effectNotProven",
+              "a guard the player does not own"
+            );
+            await askEffect(ward, "guarded", {
+              proof: { kind: "guard", protectorUuid: protector.uuid }
+            });
+            assert.equal(ward.effects.find(e => e.statuses.has("guarded"))?.origin, protector.uuid);
+          })
+        );
+      });
+
+      describe("Concentration and Center Stance", () => {
+        it(
+          "should let only the caster's owner end a Concentration",
+          clean(async () => {
+            const caster = track(await createTestPC({ name: "Requests: caster" }));
+            const effect = await applyEffect(caster, "concentration", { level: 1 });
+            const query = CONFIG.queries[`${SYS_ID}.endConcentration`];
+            assert.equal(
+              await refusalOf(query({ effectUuid: effect.uuid }, { user: player })),
+              "l5r4.ui.requests.notYourCaster"
+            );
+            assert.isTrue(caster.statuses.has("concentration"), "still concentrating");
+          })
+        );
+
+        it(
+          "should settle Center Stance only for the owner of the combatant ending the Round",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Requests: combatant" }));
+            const combat = track(
+              await foundry.documents.Combat.implementation.create({ scene: null, active: true })
+            );
+            await combat.createEmbeddedDocuments("Combatant", [
+              { actorId: actor.id, initiative: 10 }
+            ]);
+            await combat.startCombat();
+            const query = CONFIG.queries[`${SYS_ID}.settleCenter`];
+            assert.equal(
+              await refusalOf(query({ combatId: combat.id }, { user: player })),
+              "l5r4.ui.requests.notRoundEnd"
+            );
+          })
+        );
+      });
+    },
+    { displayName: "L5R4: GM requests" }
+  );
+}

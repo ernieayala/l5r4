@@ -125,11 +125,11 @@ export async function applyConditionFromMessage(message, index) {
   if (!canAct(rollActor(message))) {
     return;
   }
-  await applyEffectAnywhere(
-    target,
-    entry.condition,
-    entry.level === null ? {} : { level: entry.level }
-  );
+  await applyEffectAnywhere(target, entry.condition, {
+    ...(entry.level === null ? {} : { level: entry.level }),
+    // The roll the GM's client checks before it puts the condition on a target the user does not own (#162)
+    proof: { kind: "roll", messageId: message.id, index }
+  });
 }
 
 /**
