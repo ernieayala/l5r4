@@ -115,6 +115,7 @@ import { registerPacksTests } from "./packs.js";
 import { registerDesignGalleryTests } from "./design-gallery.js";
 import { registerChangeOriginTests } from "./workflows/change-origin.js";
 import { registerDialogsTests } from "./dialogs.js";
+import { registerRequestsTests } from "./requests.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -143,6 +144,7 @@ export async function registerQuenchTests(quench) {
   registerDesignGalleryTests(api);
   registerChangeOriginTests(api);
   registerDialogsTests(api);
+  registerRequestsTests(api);
   registerActorTests(api);
   registerActorWoundsTests(api);
   registerActorXpTests(api);

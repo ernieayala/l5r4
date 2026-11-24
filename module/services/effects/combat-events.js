@@ -87,12 +87,19 @@ export const COMBAT_EVENTS = Object.freeze({
   }
 });
 
-/** Register the GM side of beforeNextRound for players who end the Round. */
+/**
+ * Register the GM side of beforeNextRound for players who end the Round. Center Stance is settled once per Round, so
+ * only the owner of the combatant whose Turn ends the Round may ask for it (#162).
+ */
 export function registerCombatQueries() {
-  registerGmQuery(CENTER_QUERY, async ({ combatId }) => {
+  registerGmQuery(CENTER_QUERY, async ({ combatId }, { user }) => {
     const combat = game.combats.get(String(combatId));
     if (!combat?.started) {
       throw new Error("l5r4.ui.requests.noCombat");
+    }
+    const last = combat.turn === combat.turns.length - 1;
+    if (!last || !combat.combatant?.actor?.testUserPermission(user, "OWNER")) {
+      throw new Error("l5r4.ui.requests.notRoundEnd");
     }
     await applyCenterStance(combat);
   });

@@ -11,10 +11,10 @@
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
-import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollTrait } from "../dice/rolls/trait-roll.js";
 import { applyEffectAnywhere } from "../effects/apply.js";
+import { contestRollsOf, getContestOutcome } from "./contest-rolls.js";
 
 /**
  * Roll Strength for each side of the contest the user owns and that has not rolled, then settle it when both have.
@@ -56,14 +56,10 @@ export async function rollContest(attack) {
  * @returns {Promise<void>}
  */
 async function postContestResult(attack, sides) {
-  const rolls = contestRollsOf(attack.id);
-  if (!rolls.attacker || !rolls.target) {
+  const result = getContestOutcome(attack.id);
+  if (!result) {
     return;
   }
-  const result = getContestResult([
-    { id: "attacker", total: rolls.attacker.system.outcome.total },
-    { id: "target", total: rolls.target.system.outcome.total }
-  ]);
   const speaker = ChatMessage.getSpeaker({ actor: sides.attacker });
   if (result.tie) {
     await ChatMessage.create({
@@ -94,7 +90,10 @@ async function applyContestOutcome(attack, sides, winnerSide) {
   }
   if (knockdown) {
     if (!sides.target.statuses.has("prone")) {
-      await applyEffectAnywhere(sides.target, "prone");
+      // The contest the GM's client checks before it knocks down a target the user does not own (#162)
+      await applyEffectAnywhere(sides.target, "prone", {
+        proof: { kind: "contest", attackId: attack.id }
+      });
     }
     lines.push(F("l5r4.ui.combat.knockedDown", { name: sides.target.name }));
   }
@@ -102,24 +101,4 @@ async function applyContestOutcome(attack, sides, winnerSide) {
     lines.push(F("l5r4.ui.combat.disarmed", { name: sides.target.name }));
   }
   return lines;
-}
-
-/**
- * The Strength rolls made for an attack's contest, by side, since its last tie.
- * @param {string} attackId
- * @returns {{attacker?: ChatMessage, target?: ChatMessage}}
- */
-function contestRollsOf(attackId) {
-  const rolls = {};
-  for (const message of game.messages.contents) {
-    const mark = message.getFlag(SYS_ID, "contest");
-    if (mark?.attackId === attackId) {
-      rolls[mark.side] = message;
-    }
-    if (message.getFlag(SYS_ID, "contestTie") === attackId) {
-      delete rolls.attacker;
-      delete rolls.target;
-    }
-  }
-  return rolls;
 }

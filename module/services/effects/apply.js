@@ -9,6 +9,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
+import { getProvenEffectOptions } from "./effect-proofs.js";
 import { startedCombatOf } from "./uses.js";
 
 /** Name of the GM query that applies an effect for a player (registered in registerEffectQueries). */
@@ -23,6 +24,8 @@ export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
  * @property {object} [start]        Duration start fields (core fills the rest)
  * @property {string} [turnOf]       UUID of the actor whose Turn the duration counts from (ownTurnStartOf)
  * @property {object} [flags]        Extra `flags.l5r4-enhanced` data
+ * @property {import("./effect-proofs.js").EffectProof} [proof] What lets the user put the effect on an actor they
+ *   do not own; the GM's client checks it and takes the level and timing from it
  */
 
 /**
@@ -135,23 +138,23 @@ export function onImmuneStatus(actor, effect) {
 }
 
 /**
- * Register the GM side of applyEffectAnywhere. The query carries a player's request: the actor and effect id are
- * checked, and only statuses and the system's own effects can be applied this way. It answers whether the effect was
- * made; the only effect dropped on creation is one the actor is immune to (L5R4ActiveEffect._preCreateOperation).
+ * Register the GM side of applyEffectAnywhere. The query carries a player's request for an actor the player does not
+ * own: only statuses and the system's own effects can be applied this way, and only with a proof the GM's client
+ * checks (module/services/effects/effect-proofs.js), which also sets the effect's level and timing (#162). It answers
+ * whether the effect was made; the only effect dropped on creation is one the actor is immune to
+ * (L5R4ActiveEffect._preCreateOperation).
  */
 export function registerEffectQueries() {
-  registerGmQuery(APPLY_EFFECT_QUERY, async ({ actorUuid, id, options }) => {
+  registerGmQuery(APPLY_EFFECT_QUERY, async ({ actorUuid, id, options }, { user }) => {
     const actor = await fromUuid(String(actorUuid));
     if (actor?.documentName !== "Actor" || !(CONFIG.statusEffects[id] || SYSTEM_EFFECTS[id])) {
       throw new Error("l5r4.ui.requests.cannotApplyEffect");
     }
-    const level = Number.isInteger(options?.level) ? options.level : undefined;
-    const turnOf = (await fromUuid(String(options?.turnOf ?? "")))?.documentName === "Actor";
-    const effect = await applyEffect(actor, id, {
-      level,
-      origin: options?.origin,
-      ...(turnOf ? { turnOf: options.turnOf } : {})
-    });
+    const proven = getProvenEffectOptions({ actor, id, proof: options?.proof, user });
+    if (!proven) {
+      throw new Error("l5r4.ui.requests.effectNotProven");
+    }
+    const effect = await applyEffect(actor, id, proven);
     return { applied: Boolean(effect) };
   });
 }

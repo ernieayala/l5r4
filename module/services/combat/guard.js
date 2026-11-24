@@ -22,7 +22,12 @@ export async function guard(protector, ward) {
     return false;
   }
   await applyEffectAnywhere(protector, "guarding", { turnOf: protector.uuid });
-  await applyEffectAnywhere(ward, "guarded", { turnOf: protector.uuid, origin: protector.uuid });
+  // The guard the GM's client checks before it guards a ward the user does not own (#162)
+  await applyEffectAnywhere(ward, "guarded", {
+    turnOf: protector.uuid,
+    origin: protector.uuid,
+    proof: { kind: "guard", protectorUuid: protector.uuid }
+  });
   return true;
 }
 
