@@ -267,6 +267,31 @@ export function registerChangeOriginTests(quench) {
             }
           })
         );
+
+        // #186: a background tab's timers are throttled, so an earlier client answers each later heartbeat at once
+        it("should answer a later GM client's heartbeat, and not an earlier one's", async () => {
+          const later = { id: "quench-later-gm-client", startedAt: Date.now() + 60_000 };
+          const sent = [];
+          const emit = game.socket.emit;
+          game.socket.emit = (channel, data, ...rest) => {
+            if (channel === `system.${SYS_ID}`) {
+              sent.push(data.type);
+              return undefined;
+            }
+            return emit.call(game.socket, channel, data, ...rest);
+          };
+          try {
+            onGmClientMessage({ ...later, type: "here" }, game.user.id);
+            assert.deepEqual(sent, ["here"], "a later client's heartbeat is answered");
+            sent.length = 0;
+            onGmClientMessage({ ...earlier, type: "here" }, game.user.id);
+            assert.deepEqual(sent, [], "an earlier client's is not");
+          } finally {
+            game.socket.emit = emit;
+            onGmClientMessage({ ...later, type: "bye" }, game.user.id);
+            onGmClientMessage({ ...earlier, type: "bye" }, game.user.id);
+          }
+        });
       });
 
       // game-rules/36_stances.md, p.84
