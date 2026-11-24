@@ -90,7 +90,9 @@ export function registerDialogsTests(quench) {
 
         it(
           "should give a confirmation the system's dialog class",
-          clean(async () => {
+          clean(async function () {
+            // measureNextDialog waits two animation frames, which Chrome delays in an unfocused window
+            this.timeout(15_000);
             const content = await foundry.applications.handlebars.renderTemplate(
               DIALOG_TEMPLATES.confirm,
               { question: "Quench", consequence: "Quench" }
