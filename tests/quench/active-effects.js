@@ -351,9 +351,9 @@ export function registerActiveEffectsTests(quench) {
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
         });
 
-        // #197, Ernie's ruling: declared at the start of the Round, whoever's Turn it is
+        // #197, Ernie's ruling: declared at the start of the Round, whoever's Turn it is; later it is the GM's call (#223)
         // game-rules/25_rings_and_traits.md, p.78
-        it("should allow Void for Armor TN during the Round's first Turn only, whoever's Turn it is", async () => {
+        it("should allow Void for Armor TN during the Round's first Turn, and later only as the GM allows", async () => {
           const mine = await setUp("Active effects: armor void timing");
           const other = await createTestPC({ name: "Active effects: first to act" });
           try {
@@ -372,10 +372,15 @@ export function registerActiveEffectsTests(quench) {
               armorVoid().map(e => e.id)
             );
             await combat.nextTurn();
+            // The first prompt is the GM's Allow; the second, the Void Point's own confirmation
+            const answers = [false];
+            foundry.applications.api.DialogV2.confirm = async () => answers.shift() ?? true;
             const late = { checked: true };
             await PcActionsHandler.updateArmorVoid({ actor }, null, late);
-            assert.isFalse(late.checked, "refused past the Round's start");
+            assert.isFalse(late.checked, "declined by the GM past the Round's start");
             assert.lengthOf(armorVoid(), 0);
+            await PcActionsHandler.updateArmorVoid({ actor }, null, { checked: true });
+            assert.lengthOf(armorVoid(), 1, "allowed by the GM");
           } finally {
             await other.delete();
           }

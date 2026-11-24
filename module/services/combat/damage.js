@@ -22,6 +22,7 @@ import {
 } from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { updateCheckCardUse } from "../dice/check/card.js";
+import { askGmFor } from "../gm-allow.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
@@ -288,11 +289,30 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     }
     await spendVoidPointOnDamage(message);
   } else if (action === "undo") {
-    if (!canUndoDamage(result, user)) {
-      throw new Error("l5r4.ui.requests.onlyRollerUndoes");
-    }
-    await applyDamageUndo(message);
+    await applyRequestedUndo(message, { result, actor }, user);
   }
+}
+
+/**
+ * Undo a damage result for the requesting user. Someone else's Undo, such as the damaged character's owner taking
+ * back a mistake, is the GM's call (#223).
+ * @param {ChatMessage} message - The result card
+ * @param {{result: object, actor: Actor}} card - Its `damageResult` flag and the damaged actor
+ * @param {User} user - The requesting user
+ * @returns {Promise<void>}
+ */
+async function applyRequestedUndo(message, { result, actor }, user) {
+  const allowed =
+    canUndoDamage(result, user) ||
+    (await askGmFor(user, {
+      title: actor.name,
+      reason: T("l5r4.ui.requests.onlyRollerUndoes"),
+      ask: T("l5r4.ui.requests.allowRequest")
+    }));
+  if (!allowed) {
+    throw new Error("l5r4.ui.requests.declined");
+  }
+  await applyDamageUndo(message);
 }
 
 /**
@@ -352,7 +372,7 @@ function bindResultButtons(message, result, { html, on }) {
 
 /**
  * Apply a damage roll to the actor a request names, as the GM: the message must be a damage roll, the uuid an actor,
- * and the requesting user the roller or a GM; a player's request is checked further (validatePlayerDamage).
+ * and a player's request is checked further (validatePlayerDamage).
  * @param {ChatMessage} message - The damage roll
  * @param {string} actorUuid - The actor to damage, from the request
  * @param {User} user - The requesting user
@@ -360,7 +380,6 @@ function bindResultButtons(message, result, { html, on }) {
  */
 async function applyRequestedDamage(message, actorUuid, user) {
   const actor = await fromUuid(String(actorUuid));
-  const roller = fromUuidSync(message.system.actorUuid);
   if (
     message.type !== "roll" ||
     message.system.kind !== "damage" ||
@@ -368,30 +387,57 @@ async function applyRequestedDamage(message, actorUuid, user) {
   ) {
     throw new Error("l5r4.ui.requests.notDamageRoll");
   }
-  if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
-    throw new Error("l5r4.ui.requests.onlyRollerApplies");
-  }
   if (!user.isGM) {
-    validatePlayerDamage(message, actor, user);
+    await validatePlayerDamage(message, actor, user);
   }
   await applyToActor(message, actor);
 }
 
 /**
- * Refuse a player's damage request the roll does not allow (#162): a damage roll lands on its own target or on an
- * actor the player owns, its stored total is its Roll's, and it lands on an actor once until that result is undone; a
- * GM may apply it again. A player's client evaluates its own dice, so the total itself cannot be checked further.
+ * Check a player's damage request against what the roll allows (#162). A stored total that is not its Roll's is a
+ * tampered card and is refused. Anything else the roll does not allow is the GM's to rule on (#223): damage from a roll
+ * the player did not make, on an actor that is neither the roll's target nor the player's, or on an actor it already
+ * hit until that result is undone. The GM is asked, and a refusal names why.
  * @param {ChatMessage} message - The damage roll
  * @param {Actor} actor - The actor to damage
  * @param {User} user - The requesting player
+ * @returns {Promise<void>}
  */
-function validatePlayerDamage(message, actor, user) {
-  const ownTarget = actor.uuid === message.system.target?.uuid;
-  if (!ownTarget && !actor.testUserPermission(user, "OWNER")) {
-    throw new Error("l5r4.ui.requests.damageNotTarget");
-  }
+async function validatePlayerDamage(message, actor, user) {
   if (message.rolls[0]?.total !== message.system.outcome.total) {
     throw new Error("l5r4.ui.requests.damageMismatch");
+  }
+  const problem = getPlayerDamageProblem(message, actor, user);
+  const allowed =
+    !problem ||
+    (await askGmFor(user, {
+      title: message.system.label,
+      reason: F("l5r4.ui.requests.damageAsk", {
+        damage: message.system.outcome.total,
+        name: actor.name,
+        why: T(problem)
+      }),
+      ask: T("l5r4.ui.requests.allowRequest")
+    }));
+  if (!allowed) {
+    throw new Error("l5r4.ui.requests.declined");
+  }
+}
+
+/**
+ * What a player's damage request asks beyond what the roll allows, as the reason's i18n key; null when nothing.
+ * @param {ChatMessage} message - The damage roll
+ * @param {Actor} actor - The actor to damage
+ * @param {User} user - The requesting player
+ * @returns {string|null}
+ */
+function getPlayerDamageProblem(message, actor, user) {
+  if (!fromUuidSync(message.system.actorUuid)?.testUserPermission(user, "OWNER")) {
+    return "l5r4.ui.requests.onlyRollerApplies";
+  }
+  const ownTarget = actor.uuid === message.system.target?.uuid;
+  if (!ownTarget && !actor.testUserPermission(user, "OWNER")) {
+    return "l5r4.ui.requests.damageNotTarget";
   }
   const applied = game.messages.contents.some(card => {
     const result = card.author?.isGM ? card.getFlag(SYS_ID, "damageResult") : null;
@@ -399,9 +445,7 @@ function validatePlayerDamage(message, actor, user) {
       result?.damageMessageId === message.id && result.actorUuid === actor.uuid && !result.undone
     );
   });
-  if (applied) {
-    throw new Error("l5r4.ui.requests.damageApplied");
-  }
+  return applied ? "l5r4.ui.requests.damageApplied" : null;
 }
 
 /**

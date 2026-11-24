@@ -10,6 +10,7 @@ import { F, R, T } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
 import { buildVoidUseUpdate, startedCombatOf, warnVoidLimit } from "../../services/effects/uses.js";
 import { askConfirm } from "../../services/dialog.js";
+import { askGmAllow } from "../../services/gm-allow.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -32,7 +33,7 @@ export class PcActionsHandler {
    *
    * **Validation:**
    * - Must be in a started combat (the actor's own, not only the viewed scene's)
-   * - Must be the Round's first Turn
+   * - Past the Round's first Turn, the GM is asked (#223)
    * - Must have Void Points available (system.rings.void.value > 0)
    * - Requires user confirmation via dialog
    *
@@ -58,9 +59,7 @@ export class PcActionsHandler {
     }
 
     // Activation path: validate prerequisites
-    const problem = this.#getArmorVoidProblem(actor);
-    if (problem) {
-      ui.notifications?.warn(T(problem));
+    if (!(await this.#canDeclareArmorVoid(actor))) {
       element.checked = false;
       return;
     }
@@ -172,31 +171,47 @@ export class PcActionsHandler {
   }
 
   /**
-   * Why the actor cannot spend a Void Point on Armor TN now: no combat has started, the Round is past its start, or
-   * the actor has no Void Points. The +10 is declared at the beginning of the combat Round, which Ernie's ruling
-   * (#197) reads as while the Round's first Turn is under way, whoever's Turn it is, so a late actor is covered
-   * before the attacks of the Round.
+   * Why the actor cannot spend a Void Point on Armor TN at all: no combat has started, or the actor has no Void
+   * Points.
    * game-rules/25_rings_and_traits.md, p.78
    * @param {Actor} actor
    * @returns {string|null} The warning's i18n key, or null when the actor can spend
    */
   static #getArmorVoidProblem(actor) {
     // The actor's own started combat, which need not be the viewed scene's (#110)
-    const combat = startedCombatOf(actor);
-    if (!combat) {
+    if (!startedCombatOf(actor)) {
       return "l5r4.ui.effects.voidArmorNoCombat";
     }
-
-    if (combat.turn !== 0) {
-      return "l5r4.ui.effects.voidArmorRoundStart";
-    }
-
-    // Check void points available
     const voidCurrent = actor.system?.rings?.void?.value ?? 0;
     if (voidCurrent <= 0) {
       return "l5r4.ui.mechanics.wounds.noVoidPoints";
     }
     return null;
+  }
+
+  /**
+   * Whether the +10 may be declared now: never with no combat or no Void Points (#getArmorVoidProblem warns why). It
+   * is declared at the beginning of the combat Round, which Ernie's ruling (#197) reads as while the Round's first
+   * Turn is under way, whoever's Turn it is. Later in the Round it is the GM's call (#223): a player asks the GM, and a
+   * GM confirms.
+   * game-rules/25_rings_and_traits.md, p.78
+   * @param {Actor} actor
+   * @returns {Promise<boolean>}
+   */
+  static async #canDeclareArmorVoid(actor) {
+    const problem = this.#getArmorVoidProblem(actor);
+    if (problem) {
+      ui.notifications?.warn(T(problem));
+      return false;
+    }
+    if (startedCombatOf(actor).turn === 0) {
+      return true;
+    }
+    return askGmAllow({
+      title: T("l5r4.ui.effects.voidArmorTitle"),
+      reason: T("l5r4.ui.effects.voidArmorRoundStart"),
+      ask: T("l5r4.ui.requests.allowRequest")
+    });
   }
 
   /**

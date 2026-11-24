@@ -201,6 +201,22 @@ Conforming, `l5r4-xp-manager-empty` (`templates/apps/xp-manager.hbs`): the `{{el
 
 Non-conforming (modeled): a list with no `{{else}}`, so an empty ledger shows a header over nothing.
 
+### 10. A rule check never dead-ends
+
+The system runs a table, not a video game (Ernie, #223): it automates math and bookkeeping and leaves rulings to the GM. Before a check stops an action, decide which kind it is.
+
+| Kind | Behavior |
+| --- | --- |
+| A player's own choice (a second Void Point this Round, a stance a condition rules out) | A warning line or notification, then it goes through |
+| A ruling the rules leave to the GM (past a cap, outside the timing, an unmet prerequisite, a request the GM's client cannot check) | The player is told why and the GM is asked through `askGmAllow` (`module/services/gm-allow.js`), or `askGmFor` inside a GM query; a GM's own action is confirmed and goes through |
+| A fact (no combat, no Void Points left, a card that is not what it claims) | Refused with the reason |
+
+A disabled control in a ruling's place offers the way to ask (the attack dialog's "Ask the GM to allow more"). Card buttons stay pressable after use and the card records what happened (`components/check-card.md`), so a press repeated by mistake is harmless or undoable. Every applied result can be undone or edited by the GM. Enforced by review and the Quench batches of the action.
+
+Conforming, `#canDeclareArmorVoid` (`module/sheets/handlers/pc-actions-handler.js`): past the Round's first Turn, `askGmAllow` with the reason.
+
+Non-conforming (modeled): `ui.notifications.warn(reason); return false;` for a ruling, with no way for the GM to allow it.
+
 ## Partials and files
 
 | Item | Where |

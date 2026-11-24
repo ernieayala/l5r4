@@ -159,6 +159,8 @@
           <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
           <span data-maneuver-short-text></span>
         </p>
+        <button type="button" data-maneuver-ask hidden>{{localize "l5r4.ui.combat.maneuversAskGm"}}</button>
+        <input type="hidden" name="gmAllowed" value="" />
       {{/if}}
       <div class="form-group">
         <label for="{{formId}}-grapple">{{localize "l5r4.ui.combat.grappleManeuver"}}</label>

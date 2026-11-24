@@ -26,6 +26,7 @@ import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { rollSkill } from "../dice/rolls/skill-roll.js";
+import { askGmFor } from "../gm-allow.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, ownTurnStartOf } from "./apply.js";
 import { formatRollLabel, postPrompt, promptOf } from "./prompt-card.js";
@@ -163,9 +164,17 @@ export function registerPromptQueries() {
     if (effect?.documentName !== "ActiveEffect" || !effect.statuses.has("concentration")) {
       throw new Error("l5r4.ui.requests.notConcentration");
     }
-    // Only the caster's owner ends the caster's Concentration and the spells it holds up (#162)
-    if (!effect.parent?.testUserPermission(user, "OWNER")) {
-      throw new Error("l5r4.ui.requests.notYourCaster");
+    // The caster's owner ends the caster's Concentration and the spells it holds up (#162); anyone else asks the GM
+    // (#223)
+    const allowed =
+      Boolean(effect.parent?.testUserPermission(user, "OWNER")) ||
+      (await askGmFor(user, {
+        title: effect.name,
+        reason: T("l5r4.ui.requests.notYourCaster"),
+        ask: T("l5r4.ui.requests.allowRequest")
+      }));
+    if (!allowed) {
+      throw new Error("l5r4.ui.requests.declined");
     }
     await endConcentration(effect);
   });

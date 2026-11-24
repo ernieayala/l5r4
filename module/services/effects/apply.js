@@ -8,6 +8,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { PER_ORIGIN_STATUSES, SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
+import { askGmFor } from "../gm-allow.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { getProvenEffectOptions } from "./effect-proofs.js";
 import { startedCombatOf } from "./uses.js";
@@ -156,13 +157,36 @@ export function registerEffectQueries() {
     if (actor?.documentName !== "Actor" || !(CONFIG.statusEffects[id] || SYSTEM_EFFECTS[id])) {
       throw new Error("l5r4.ui.requests.cannotApplyEffect");
     }
-    const proven = getProvenEffectOptions({ actor, id, proof: options?.proof, user });
+    const proven =
+      getProvenEffectOptions({ actor, id, proof: options?.proof, user }) ??
+      (await askEffectAllowed(user, { actor, id, options }));
     if (!proven) {
-      throw new Error("l5r4.ui.requests.effectNotProven");
+      throw new Error("l5r4.ui.requests.declined");
     }
     const effect = await applyEffect(actor, id, proven);
     return { applied: Boolean(effect) };
   });
+}
+
+/**
+ * Ask the GM to allow an effect no proof covers, such as a condition the GM narrated (#223). The GM sees who asks and
+ * for what; the level comes from the request, which the GM has seen.
+ * @param {User} user - The requesting user
+ * @param {object} request
+ * @param {Actor} request.actor - The actor the effect goes on
+ * @param {string} request.id - A status or system effect id
+ * @param {object} [request.options] - The request's options
+ * @returns {Promise<object|null>} The effect's options, or null when the GM declines
+ */
+async function askEffectAllowed(user, { actor, id, options }) {
+  const level = Number.isInteger(options?.level) ? options.level : undefined;
+  const data = await buildBaseEffectData(actor, id);
+  const allowed = await askGmFor(user, {
+    title: data.name,
+    reason: F("l5r4.ui.requests.effectAsk", { effect: data.name, name: actor.name }),
+    ask: T("l5r4.ui.requests.allowRequest")
+  });
+  return allowed ? { level } : null;
 }
 
 /**

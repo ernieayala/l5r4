@@ -14,7 +14,8 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
-import { F, R } from "../../utils/localization.js";
+import { F, R, T } from "../../utils/localization.js";
+import { askGmFor } from "../gm-allow.js";
 import { isAnsweringGmClient, registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
@@ -98,8 +99,16 @@ export function registerCombatQueries() {
       throw new Error("l5r4.ui.requests.noCombat");
     }
     const last = combat.turn === combat.turns.length - 1;
-    if (!last || !combat.combatant?.actor?.testUserPermission(user, "OWNER")) {
-      throw new Error("l5r4.ui.requests.notRoundEnd");
+    // Anyone else ending the Round asks the GM, who may have moved the Round on for them (#223)
+    const allowed =
+      (last && Boolean(combat.combatant?.actor?.testUserPermission(user, "OWNER"))) ||
+      (await askGmFor(user, {
+        title: T("l5r4.ui.mechanics.stances.center"),
+        reason: T("l5r4.ui.requests.notRoundEnd"),
+        ask: T("l5r4.ui.requests.allowRequest")
+      }));
+    if (!allowed) {
+      throw new Error("l5r4.ui.requests.declined");
     }
     await applyCenterStance(combat);
   });

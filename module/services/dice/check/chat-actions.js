@@ -15,7 +15,7 @@ import { getContestResult, getCheckResult, getPoolFormula } from "../../../utils
 import { hideUnusable } from "../../../utils/dom.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage-roll.js";
-import { renderCheckCard, updateCheckCardUse } from "./card.js";
+import { hasHonorToCall, renderCheckCard, updateCheckCardUse } from "./card.js";
 import { hasHonorRollLeft, rollHonor } from "./honor-roll.js";
 
 /**
@@ -159,7 +159,7 @@ export function bindCheckCard(message, html) {
     "[data-action='check-damage'], [data-action='apply-condition']",
     () => isRollers
   );
-  hideUnusable(html, "[data-action='honor-roll']", () => isRollers && hasHonorRollLeft(actor));
+  hideUnusable(html, "[data-action='honor-roll']", () => isRollers && canCallHonor(actor));
   html.querySelector("[data-action='check-damage']")?.addEventListener("click", event => {
     event.preventDefault();
     rollDamageFromMessage(message, { askForOptions: !event.shiftKey });
@@ -229,4 +229,15 @@ function canAct(actor) {
   }
   ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
   return false;
+}
+
+/**
+ * Whether the current user sees the actor's Honor Roll button: a used Honor Roll leaves none for the player this
+ * session (#114); the GM keeps it, to grant another (#223).
+ * game-rules/43_honor.md, p.92
+ * @param {Actor|null} actor
+ * @returns {boolean}
+ */
+function canCallHonor(actor) {
+  return hasHonorRollLeft(actor) || (game.user.isGM && hasHonorToCall(actor));
 }

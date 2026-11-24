@@ -1011,8 +1011,9 @@ export function registerRollPipelineTests(quench) {
             const { actor } = await swordsman();
             await actor.update({ "system.rings.void.value": 0 });
             const found = await inspectAttackDialog(actor, element => ({
-              // A control is named by the label that wraps it or the label whose `for` is its id
-              unnamed: [...element.querySelectorAll("input[name], select[name]")]
+              // A control is named by the label that wraps it or the label whose `for` is its id; a hidden input
+              // (gmAllowed) is no control
+              unnamed: [...element.querySelectorAll("input[name]:not([type=hidden]), select[name]")]
                 .filter(
                   control =>
                     !control.closest("label") &&

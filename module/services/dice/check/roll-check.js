@@ -135,14 +135,31 @@ async function askCheck(request) {
   }
   const terms = { ...chosen, ...buildPreparedTerms(chosen, prepared) };
   const payment = getManeuverPayment(check, choices, terms);
-  if (payment && !payment.affordable) {
-    const { cost } = payment;
-    ui.notifications?.warn(F("l5r4.ui.combat.notEnoughRaises", { cost, raises: terms.raises }));
+  // Maneuvers the Raises do not pay for are the GM's call (#223): allowed in the dialog already, or asked here for a
+  // roll made without it
+  const unpaid = payment && !payment.affordable && choices.gmAllowed !== "1";
+  if (unpaid && !(await askUnpaidManeuvers(check, terms, payment))) {
     await request.cancel?.();
     return null;
   }
   terms.maneuvers = payment?.maneuvers ?? null;
   return { check, choices, terms };
+}
+
+/**
+ * Ask the GM to allow maneuvers the attack's Raises do not pay for (#223).
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {object} check - From buildCheck
+ * @param {object} terms - The chosen and prepared terms
+ * @param {{cost: number}} payment - From getManeuverPayment
+ * @returns {Promise<boolean>} Whether the attack rolls
+ */
+function askUnpaidManeuvers(check, terms, payment) {
+  return askGmAllow({
+    title: check.request.label,
+    reason: F("l5r4.ui.combat.notEnoughRaises", { cost: payment.cost, raises: terms.raises }),
+    ask: T("l5r4.ui.requests.allowRequest")
+  });
 }
 
 /**

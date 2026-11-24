@@ -21,6 +21,7 @@ import {
   buildRulesWithSelections
 } from "../utils/purchase.js";
 import { askButtons, askConfirm, askPrompt } from "./dialog.js";
+import { askGmAllow } from "./gm-allow.js";
 
 /**
  * Item types a new one replaces the old of (character creation Steps 1-3); a School asks first (askSchool).
@@ -161,9 +162,13 @@ async function canAddItem(actor, data, rules) {
     return true;
   }
   const list = unmet.join("; ");
+  // A player asks the GM, who may allow it anyway (#223); a GM decides here
   if (!game.user.isGM) {
-    ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
-    return false;
+    return askGmAllow({
+      title: T("l5r4.ui.purchase.unmetTitle"),
+      reason: F("l5r4.ui.purchase.unmet", { name: data.name, list }),
+      ask: T("l5r4.ui.purchase.addAnyway")
+    });
   }
   const bypass = await askConfirm({
     window: { title: T("l5r4.ui.purchase.unmetTitle") },

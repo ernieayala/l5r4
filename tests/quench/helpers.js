@@ -49,6 +49,31 @@ export function answerCheckDialog(values = {}) {
 }
 
 /**
+ * Answer every confirmation, the GM's Allow prompt among them (module/services/gm-allow.js, #223), with `answer` while
+ * `body` runs. The system's dialogs look up core's `DialogV2.confirm` when called, so replacing it reaches them.
+ * @param {boolean} answer - What the GM answers
+ * @param {function(): Promise<*>} body
+ * @returns {Promise<{result: *, asked: string[]}>} The body's result and each prompt's text, so a test can check the
+ *   GM was asked and told who asks
+ */
+export async function withGmAnswer(answer, body) {
+  const confirm = foundry.applications.api.DialogV2.confirm;
+  const asked = [];
+  foundry.applications.api.DialogV2.confirm = async config => {
+    // The confirm template is several paragraphs, which parseHTML returns as a collection
+    const parsed = foundry.utils.parseHTML(config.content);
+    const parts = parsed instanceof HTMLCollection ? [...parsed] : [parsed];
+    asked.push(parts.map(part => part.textContent).join(" "));
+    return answer;
+  };
+  try {
+    return { result: await body(), asked };
+  } finally {
+    foundry.applications.api.DialogV2.confirm = confirm;
+  }
+}
+
+/**
  * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
  * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes).
  * game-rules/36_stances.md, p.84

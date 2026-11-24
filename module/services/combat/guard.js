@@ -9,6 +9,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
 import { applyEffectAnywhere } from "../effects/apply.js";
+import { askGmAllow } from "../gm-allow.js";
 
 /**
  * Guard a character: both statuses count from the guard's Turn.
@@ -17,8 +18,15 @@ import { applyEffectAnywhere } from "../effects/apply.js";
  * @returns {Promise<boolean>} Whether the guard was set
  */
 export async function guard(protector, ward) {
-  if (protector.statuses.has("fullAttackStance")) {
-    ui.notifications?.warn(T("l5r4.ui.combat.guardFullAttack"));
+  // Not in the Full Attack Stance, unless the GM allows it (#223)
+  const allowed =
+    !protector.statuses.has("fullAttackStance") ||
+    (await askGmAllow({
+      title: T("l5r4.ui.combat.guard"),
+      reason: T("l5r4.ui.combat.guardFullAttack"),
+      ask: T("l5r4.ui.requests.allowRequest")
+    }));
+  if (!allowed) {
     return false;
   }
   await applyEffectAnywhere(protector, "guarding", { turnOf: protector.uuid });

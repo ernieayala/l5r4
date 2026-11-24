@@ -37,6 +37,7 @@ import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects
 import { registerDamageQueries } from "../module/services/combat/damage.js";
 import { registerFlowQueries } from "../module/services/combat/flow.js";
 import { registerGrappleQueries } from "../module/services/combat/grapple-start.js";
+import { registerGmAllowQueries } from "../module/services/gm-allow.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
@@ -192,6 +193,7 @@ function registerQueries() {
   registerDamageQueries();
   registerFlowQueries();
   registerGrappleQueries();
+  registerGmAllowQueries();
 }
 
 /**

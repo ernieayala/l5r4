@@ -22,6 +22,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { rollCheck } from "../dice/check/roll-check.js";
+import { askGmAllow } from "../gm-allow.js";
 import { registerFlow, canActFor, buildSkillRequest, getFreshRoll, startFlow } from "./flow.js";
 
 /**
@@ -37,16 +38,23 @@ const ASSESSMENT_EDGE = 10;
 const FOCUS_STEP = 5;
 
 /**
- * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel.
+ * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel; the GM may let one
+ * fight anyway (#223).
  * game-rules/41_conditional_effects.md, p.89
  * @param {Actor} first
  * @param {Actor} second
- * @returns {Promise<ChatMessage|null>} null when a duelist is Dazed
+ * @returns {Promise<ChatMessage|null>} null when a duelist is Dazed and the GM does not allow it
  */
-export function startDuel(first, second) {
+export async function startDuel(first, second) {
   const dazed = [first, second].find(actor => actor.statuses.has("dazed"));
-  if (dazed) {
-    ui.notifications?.warn(F("l5r4.ui.combat.duel.dazed", { name: dazed.name }));
+  const allowed =
+    !dazed ||
+    (await askGmAllow({
+      title: T("l5r4.ui.combat.duel.title"),
+      reason: F("l5r4.ui.combat.duel.dazed", { name: dazed.name }),
+      ask: T("l5r4.ui.requests.allowRequest")
+    }));
+  if (!allowed) {
     return null;
   }
   return startFlow(

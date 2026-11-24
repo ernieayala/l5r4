@@ -22,7 +22,8 @@ import {
   cleanTest,
   nextUpdate,
   settleChatNotifications,
-  waitFor
+  waitFor,
+  withGmAnswer
 } from "./helpers.js";
 
 /** Every d10 shows 9 [src: client/dice/terms/dice.mjs:412], so no die explodes. */
@@ -869,11 +870,16 @@ export function registerAuthoringTests(quench) {
               assert.notInclude(reroll.content, 'data-action="honor-roll"');
               assert.isFalse(reroll.system.outcome.success);
               assert.equal(actor.system.honor.rank, 2, "a failed Honor Roll costs a Rank");
-              assert.isNull(await rollHonor(failed), "once a session");
-              // A used Honor Roll leaves no button to press this session (#114)
+              // A second one this session is the GM's call (#223); the GM keeps the button to grant it, and a player's
+              // is gone once used (#114)
+              const declined = await withGmAnswer(false, () => rollHonor(failed));
+              assert.isNull(declined.result, "once a session, unless the GM allows another");
+              assert.lengthOf(declined.asked, 1, "the GM was asked");
               const honorButton = async () =>
                 (await failed.renderHTML()).querySelector("[data-action='honor-roll']");
-              assert.isNull(await honorButton(), "the button is gone once it is used");
+              assert.exists(await honorButton(), "the GM keeps the button");
+              const granted = await withGmAnswer(true, () => rollHonor(failed));
+              assert.ok(granted.result, "the GM granted another");
 
               await game.settings.set(SYS_ID, "session", game.settings.get(SYS_ID, "session") + 1);
               assert.exists(await honorButton(), "a new session shows it again");
