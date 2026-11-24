@@ -236,7 +236,8 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     await applyRequestedDamage(message, actorUuid, user);
     return;
   }
-  const result = message.getFlag(SYS_ID, "damageResult");
+  // The GM's client makes every result card; a player's own message carrying these flags is not one (#162)
+  const result = message.author?.isGM ? message.getFlag(SYS_ID, "damageResult") : null;
   const actor = result ? await fromUuid(result.actorUuid) : null;
   if (!actor) {
     throw new Error("l5r4.ui.requests.notDamageResult");
@@ -311,7 +312,7 @@ function bindResultButtons(message, result, { html, on }) {
 
 /**
  * Apply a damage roll to the actor a request names, as the GM: the message must be a damage roll, the uuid an actor,
- * and the requesting user the roller or a GM.
+ * and the requesting user the roller or a GM; a player's request is checked further (validatePlayerDamage).
  * @param {ChatMessage} message - The damage roll
  * @param {string} actorUuid - The actor to damage, from the request
  * @param {User} user - The requesting user
@@ -330,7 +331,37 @@ async function applyRequestedDamage(message, actorUuid, user) {
   if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
     throw new Error("l5r4.ui.requests.onlyRollerApplies");
   }
+  if (!user.isGM) {
+    validatePlayerDamage(message, actor, user);
+  }
   await applyToActor(message, actor);
+}
+
+/**
+ * Refuse a player's damage request the roll does not allow (#162): a damage roll lands on its own target or on an
+ * actor the player owns, its stored total is its Roll's, and it lands on an actor once until that result is undone; a
+ * GM may apply it again. A player's client evaluates its own dice, so the total itself cannot be checked further.
+ * @param {ChatMessage} message - The damage roll
+ * @param {Actor} actor - The actor to damage
+ * @param {User} user - The requesting player
+ */
+function validatePlayerDamage(message, actor, user) {
+  const ownTarget = actor.uuid === message.system.target?.uuid;
+  if (!ownTarget && !actor.testUserPermission(user, "OWNER")) {
+    throw new Error("l5r4.ui.requests.damageNotTarget");
+  }
+  if (message.rolls[0]?.total !== message.system.outcome.total) {
+    throw new Error("l5r4.ui.requests.damageMismatch");
+  }
+  const applied = game.messages.contents.some(card => {
+    const result = card.author?.isGM ? card.getFlag(SYS_ID, "damageResult") : null;
+    return (
+      result?.damageMessageId === message.id && result.actorUuid === actor.uuid && !result.undone
+    );
+  });
+  if (applied) {
+    throw new Error("l5r4.ui.requests.damageApplied");
+  }
 }
 
 /**

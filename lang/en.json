@@ -1236,6 +1236,9 @@
       "requests": {
         "cannotApplyEffect": "That effect cannot be applied to that actor this way",
         "cannotConcede": "This duelist cannot concede now",
+        "damageApplied": "That damage has been applied to that actor already; undo it first, or ask the GM to apply it again",
+        "damageMismatch": "That damage card's total is not its roll's",
+        "damageNotTarget": "A damage roll lands on its own target, or on an actor you own",
         "effectApplied": "{effect} applied to {name}",
         "effectNotProven": "Only the actor's owner, or a roll or action of yours that allows it, can put that effect on that actor",
         "failed": "The GM's client could not do this: {reason}",
