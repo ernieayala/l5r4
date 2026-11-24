@@ -993,7 +993,6 @@
         "stanceNotAllowed": "{condition} schließt {stance} aus",
         "voidArmor": "Leere: Rüstungs-SZ +10",
         "voidArmorNoCombat": "Leere für den Rüstungs-SZ geht nur in einem aktiven Kampf",
-        "voidArmorNotTurn": "Leere für den Rüstungs-SZ geht nur in deinem Zug",
         "voidArmorQuestion": "Einen Leere-Punkt ausgeben, um den Rüstungs-SZ für 1 Runde um +10 zu erhöhen?",
         "voidArmorSpent": "{name} hat einen Leere-Punkt ausgegeben: Rüstungs-SZ +10 für 1 Runde",
         "voidArmorTitle": "Einen Leere-Punkt für den Rüstungs-SZ ausgeben",

@@ -993,7 +993,6 @@
         "stanceNotAllowed": "{condition} impede {stance}",
         "voidArmor": "Vazio: ND de Armadura +10",
         "voidArmorNoCombat": "É preciso estar em combate ativo para usar Vazio no ND de Armadura",
-        "voidArmorNotTurn": "Só é possível usar Vazio no ND de Armadura no seu Turno",
         "voidArmorQuestion": "Gastar um Ponto de Vazio para aumentar o ND de Armadura em +10 por 1 Rodada?",
         "voidArmorSpent": "{name} gastou um Ponto de Vazio: ND de Armadura +10 por 1 Rodada",
         "voidArmorTitle": "Gastar um Ponto de Vazio no ND de Armadura",
