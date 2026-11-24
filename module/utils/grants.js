@@ -78,21 +78,26 @@ export function getMissingSchoolSkills(schoolSkills, ranks) {
 
 /**
  * A Skill's data once a grant gives it free ranks and an Emphasis: a School Skill, at least `skillRank`
- * ranks, those ranks free, and the Emphasis trained and free. A rank 0 Skill granted 1 rank and the Emphasis
- * "Void Recovery" becomes rank 1 with 1 free rank, a School Skill, with that Emphasis trained and free.
+ * ranks, those ranks free, and the Emphasis available, trained, and free. A rank 0 Skill granted 1 rank and the
+ * Emphasis "Void Recovery" becomes rank 1 with 1 free rank, a School Skill, with that Emphasis trained and free.
  * game-rules/48_character_creation_expanded.md, p.102
- * @param {{rank: number, freeRanks: number, trainedEmphases: string[], freeEmphasis: number}} system
+ * @param {{rank: number, freeRanks: number, availableEmphases: string[], trainedEmphases: string[],
+ *   freeEmphasis: number}} system
  * @param {GrantRule} rule
  * @returns {{update: object, record: {freeRanks: number, emphasis: string, freeEmphasis: number}}}
  */
 export function buildGrantedSkill(system, rule) {
   const trained = system.trainedEmphases.filter(Boolean);
   const addEmphasis = Boolean(rule.emphasis) && !trained.includes(rule.emphasis);
+  const available = system.availableEmphases.filter(Boolean);
+  const addAvailable = Boolean(rule.emphasis) && !available.includes(rule.emphasis);
   return {
     update: {
       rank: Math.max(system.rank, rule.skillRank),
       freeRanks: system.freeRanks + rule.skillRank,
       school: true,
+      // A trained Emphasis is one the Skill offers, so the Emphasis manager lists it checked (#187)
+      availableEmphases: addAvailable ? [...available, rule.emphasis] : available,
       trainedEmphases: addEmphasis ? [...trained, rule.emphasis] : trained,
       freeEmphasis: system.freeEmphasis + (rule.emphasis ? 1 : 0)
     },

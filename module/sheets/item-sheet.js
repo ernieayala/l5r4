@@ -8,6 +8,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { F } from "../utils/localization.js";
+import { getSkillEmphases } from "../utils/emphases.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import EmphasisManagerApplication from "../apps/emphasis-manager.js";
@@ -246,6 +247,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     );
 
     Object.assign(context, buildSkillOptions(item));
+    // A trained Emphasis with no available entry still gets its checkbox, so a save keeps it (#187)
+    context.emphasisOptions = item.type === "skill" ? getSkillEmphases(item.system) : [];
     Object.assign(context, this.#prepareTabs(item.type));
 
     return context;

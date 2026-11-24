@@ -29,7 +29,7 @@
           </button>
         </legend>
         <multi-checkbox name="system.trainedEmphases">
-          {{#each system.availableEmphases}}
+          {{#each emphasisOptions}}
             <option value="{{this}}" {{#if (includes ../system.trainedEmphases this)}}selected{{/if}}>{{this}}</option>
           {{/each}}
         </multi-checkbox>

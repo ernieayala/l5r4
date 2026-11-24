@@ -643,6 +643,42 @@ export function registerEmphasisManagerTests(quench) {
           assert.equal(updated.system.trait, originalTrait, "Trait preserved");
         });
 
+        // #187: Antidotes and Non-Humans are pack Emphases outside OFFICIAL_EMPHASES
+        it("should keep Emphases outside the official list when saved unchanged", async () => {
+          await skillItem.update({
+            "system.availableEmphases": ["Antidotes", "Katana"],
+            "system.trainedEmphases": ["Non-Humans"]
+          });
+          dialog = new EmphasisManager({ item: skillItem });
+          await dialog.render(true);
+          const element = dialog.element;
+          const formData = new foundry.applications.ux.FormDataExtended(element);
+          await dialog._onSubmit(new Event("submit"), element, formData);
+          assert.sameMembers(skillItem.system.availableEmphases, ["Antidotes", "Katana"]);
+          assert.deepEqual(skillItem.system.trainedEmphases, ["Non-Humans"]);
+        });
+
+        // #187: the Skill sheet submits its trained Emphases with every change
+        it("should keep a trained Emphasis with no available entry when the Skill sheet saves", async () => {
+          await skillItem.update({
+            "system.availableEmphases": [],
+            "system.trainedEmphases": ["Fortunes"]
+          });
+          const sheet = skillItem.sheet;
+          await sheet.render({ force: true });
+          try {
+            const updated = new Promise(resolve => Hooks.once("updateItem", resolve));
+            const rank = sheet.element.querySelector('[name="system.rank"]');
+            rank.value = "4";
+            rank.dispatchEvent(new Event("change", { bubbles: true }));
+            await updated;
+            assert.equal(skillItem.system.rank, 4);
+            assert.deepEqual(skillItem.system.trainedEmphases, ["Fortunes"]);
+          } finally {
+            await sheet.close({ animate: false });
+          }
+        });
+
         it("should handle item deletion gracefully", async () => {
           // ARRANGE
           dialog = new EmphasisManager({ item: skillItem });
