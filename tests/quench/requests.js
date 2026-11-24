@@ -146,6 +146,77 @@ export function registerRequestsTests(quench) {
         );
       });
 
+      describe("Damage", () => {
+        /** The damage query as the player would send it. */
+        const askDamage = request => CONFIG.queries[`${SYS_ID}.damage`](request, { user: player });
+
+        /** A damage roll by the player's character against `target`. */
+        const playersDamage = async target =>
+          track(
+            await rollCheck({
+              actor: await playersCharacter(),
+              kind: "damage",
+              label: "Requests damage",
+              base: { roll: 2, keep: 2 },
+              target,
+              askForOptions: false
+            })
+          );
+
+        it(
+          "should land a player's damage roll on its own target once, and nowhere else",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: damage target" }));
+            const bystander = track(await createTestNPC({ name: "Requests: bystander" }));
+            const damage = await playersDamage(target);
+            assert.equal(
+              await refusalOf(
+                askDamage({ action: "apply", messageId: damage.id, actorUuid: bystander.uuid })
+              ),
+              "l5r4.ui.requests.damageNotTarget"
+            );
+            assert.equal(bystander._source.system.suffered, 0, "the bystander is untouched");
+            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
+            assert.equal(target._source.system.suffered, 18, "2k2 of nines");
+            assert.equal(
+              await refusalOf(
+                askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid })
+              ),
+              "l5r4.ui.requests.damageApplied"
+            );
+            assert.equal(target._source.system.suffered, 18, "not twice");
+            for (const card of game.messages.contents.filter(
+              m => m.getFlag(SYS_ID, "damageResult")?.damageMessageId === damage.id
+            )) {
+              track(card);
+            }
+          })
+        );
+
+        it(
+          "should refuse to undo a result card the GM's client did not make",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: forged result" }));
+            const forged = track(
+              await ChatMessage.create({
+                author: player.id,
+                content: "Quench",
+                flags: {
+                  [SYS_ID]: {
+                    damageResult: { actorUuid: target.uuid, wounds: -50, damageMessageId: "" }
+                  }
+                }
+              })
+            );
+            assert.equal(
+              await refusalOf(askDamage({ action: "undo", messageId: forged.id })),
+              "l5r4.ui.requests.notDamageResult"
+            );
+            assert.equal(target._source.system.suffered, 0);
+          })
+        );
+      });
+
       describe("Concentration and Center Stance", () => {
         it(
           "should let only the caster's owner end a Concentration",
