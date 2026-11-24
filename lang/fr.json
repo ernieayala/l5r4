@@ -1,22 +1,405 @@
 {
   "l5r4": {
     "apps": {
+      "armorConfig": {
+        "errors": {
+          "openFailed": "Échec de l'ouverture de la configuration d'armure",
+          "updateFailed": "Échec de la mise à jour de la configuration d'armure"
+        },
+        "title": "Configuration d'armure",
+        "titleFor": "Configuration d'armure : {name}"
+      },
+      "combatConfig": {
+        "errors": {
+          "openFailed": "Échec de l'ouverture de la configuration de combat",
+          "updateFailed": "Échec de la mise à jour de la configuration de combat"
+        },
+        "pool": "Lancés/conservés",
+        "poolBonus": "Bonus lancés/conservés",
+        "title": "Configuration de combat",
+        "titleFor": "Configuration de combat : {name}"
+      },
+      "compendiumBrowser": {
+        "add": "Ajouter",
+        "clear": "Effacer les filtres",
+        "count": "Entrées : {count}",
+        "filters": {
+          "advantageType": "Catégorie",
+          "armorType": "Type d'armure",
+          "cost": "Coût",
+          "folder": "Groupe",
+          "keyword": "Mot-clé",
+          "kihoType": "Type de kiho",
+          "maho": "Maho",
+          "mastery": "Niveau de Maîtrise",
+          "page": "Page",
+          "ring": "Anneau",
+          "size": "Taille",
+          "skillType": "Type de Compétence",
+          "trait": "Trait",
+          "type": "Type"
+        },
+        "import": "Importer",
+        "no": "Non",
+        "noActor": "Sélectionnez un pion ou assignez un personnage auquel ajouter des objets",
+        "none": "Aucun résultat.",
+        "numbers": {
+          "armor": "ND d'Armure +{bonus}, Réduction {reduction}",
+          "spell": "{ring}, Niveau de Maîtrise {mastery}",
+          "weapon": "VD {pool}"
+        },
+        "open": "Parcourir",
+        "search": "Nom",
+        "tabs": {
+          "advantages": "Avantages et Désavantages",
+          "clans": "Clans et familles",
+          "creatures": "Créatures",
+          "equipment": "Équipement",
+          "kata": "Kata",
+          "kiho": "Kiho et tatouages",
+          "schools": "Écoles et Techniques",
+          "skills": "Compétences",
+          "spells": "Sorts"
+        },
+        "title": "Navigateur de compendiums",
+        "yes": "Oui"
+      },
       "conditionManager": {
         "errors": {
-          "openFailed": "Échec de l'ouverture du Gestionnaire de Conditions"
-        }
+          "openFailed": "Échec de l'ouverture du Gestionnaire de Conditions",
+          "updateFailed": "Échec de la mise à jour du gestionnaire de conditions"
+        },
+        "title": "Gestionnaire de conditions",
+        "titleFor": "Gestionnaire de conditions : {name}"
+      },
+      "designGallery": {
+        "color": {
+          "core": "Palette de base",
+          "domain": "Rôles du domaine",
+          "palette": "Primitives de la palette",
+          "role": "Jetons de rôle"
+        },
+        "components": {
+          "armorTnBlock": "Bloc ND d'Armure",
+          "button": "Bouton",
+          "chatCard": "Carte de chat",
+          "checkCard": "Carte de test",
+          "checkDialog": "Dialogue de test",
+          "compendiumBrowser": "Navigateur de compendiums",
+          "damageResult": "Résultat des dégâts",
+          "diceRow": "Rangée de dés",
+          "effectPanel": "Panneau des effets",
+          "effectPrompt": "Invite d'effet",
+          "expandControl": "Contrôle de dépliage",
+          "fearBlock": "Bloc de Peur",
+          "floatingNumber": "Nombre flottant",
+          "flowCard": "Carte de déroulement",
+          "formField": "Champ de formulaire",
+          "grid": "Grille",
+          "iconButton": "Bouton icône",
+          "initiativeBlock": "Bloc d'Initiative",
+          "inlineControl": "Contrôle en ligne",
+          "inlineLink": "Lien en ligne",
+          "itemHeader": "En-tête d'objet",
+          "itemRow": "Ligne d'objet",
+          "itemSummaryCard": "Carte de résumé d'objet",
+          "ledgerDialog": "Dialogue du registre",
+          "rankControl": "Contrôle de rang",
+          "requestCard": "Carte de demande",
+          "ringTraitBlock": "Bloc Anneau et Trait",
+          "rulesEditor": "Éditeur de règles",
+          "section": "Section",
+          "sortHeader": "En-tête de tri",
+          "spellSlots": "Emplacements de sort",
+          "tabs": "Onglets",
+          "voidPointDots": "Points de Vide en pastilles",
+          "woundTrack": "Piste de Blessures"
+        },
+        "entry": {
+          "none": "Aucun",
+          "page": "Page",
+          "seeAlso": "Aussi présent dans",
+          "styles": "Feuilles de style",
+          "templates": "Modèles"
+        },
+        "foundations": {
+          "below": "{ratio} contre {against} : sous {minimum}",
+          "builtOn": "Construit sur {core}",
+          "color": "Couleur",
+          "contrast": "Contraste",
+          "frames": "Cadres, mouvement, calques et états",
+          "frameSample": "Aa",
+          "icons": "Icônes",
+          "meets": "{ratio} contre {against} : atteint {minimum}",
+          "noRatio": "Aucun rapport",
+          "notDefined": "Non défini",
+          "ratio": "{ratio} contre {against}",
+          "sample": "Exemple",
+          "space": "Espace et taille",
+          "swatch": "Échantillon",
+          "token": "Jeton",
+          "typeSample": "Points de Vide 10k10",
+          "typography": "Typographie",
+          "value": "Valeur"
+        },
+        "gmOnly": "Seul un MJ peut ouvrir la galerie de design",
+        "icons": {
+          "activation": "Démarrer ou terminer une activation",
+          "add": "Ajouter ou créer",
+          "applyHealing": "Appliquer la guérison (repos)",
+          "brokenLink": "Lien rompu",
+          "conditionLink": "Lien de condition",
+          "configure": "Ouvrir une fenêtre de configuration",
+          "configureAttack": "Configurer une attaque de PNJ",
+          "contested": "Jet en Opposition",
+          "convertCoin": "Convertir en une pièce plus grande ou plus petite",
+          "currentWoundLevel": "Niveau de Blessures actuel",
+          "damageLink": "Lien de dégâts",
+          "delete": "Retirer un document ou une entrée",
+          "edit": "Modifier",
+          "endEncounter": "Terminer la rencontre",
+          "expand": "Déplier ou replier une section ou une ligne",
+          "fearLink": "Lien de Peur",
+          "guard": "Protéger",
+          "importEntry": "Importer une entrée de compendium dans le monde",
+          "invalid": "Invalide",
+          "loading": "Chargement",
+          "locked": "Verrouillé",
+          "manageEmphases": "Gérer les Emphases",
+          "newSession": "Démarrer une nouvelle session",
+          "openBrowser": "Ouvrir le navigateur de compendiums",
+          "openConditionManager": "Ouvrir le gestionnaire de conditions",
+          "openEffectPanel": "Ouvrir le panneau des effets",
+          "openLedger": "Ouvrir le registre d'Honneur, de Gloire et de Statut",
+          "openSource": "Ouvrir le document source",
+          "openWealthManager": "Ouvrir le gestionnaire de richesse",
+          "openXpManager": "Ouvrir le gestionnaire d'EXP",
+          "postRequest": "Publier une carte de demande (MJ)",
+          "postToChat": "Publier dans le chat",
+          "recalculate": "Recalculer",
+          "reroll": "Relancer et conserver le meilleur",
+          "rollCheck": "Lancer un test",
+          "rules": "Règles",
+          "save": "Sauvegarder",
+          "sorted": "Sens de la colonne triée",
+          "startDuel": "Commencer un duel",
+          "step": "Monter ou descendre d'un rang",
+          "subtract": "Soustraire un montant",
+          "toggleEffect": "Activer ou désactiver un effet",
+          "transferFolder": "Exporter ou importer un fichier de dossier",
+          "warning": "Avertissement"
+        },
+        "notes": {
+          "canvas": "Les nombres flottants sont dessinés sur le canevas, qui ne lit aucun modèle ni feuille de style : la galerie n'a donc rien à afficher. Leurs couleurs figurent dans la section des couleurs.",
+          "chatFrame": "Le cadre est le message de chat du cœur ; l'en-tête du message, avec l'orateur et l'heure, n'est ajouté que dans le journal du chat.",
+          "dialogFrame": "Le contenu du dialogue tel que le jet l'ouvre. Le cœur ajoute le cadre de la fenêtre et les boutons ; le motif des dialogues en ouvre un.",
+          "dialogPattern": "Le dialogue de test dans le cadre de dialogue du cœur. Son bouton ne fait que le fermer.",
+          "editor": "Les notes s'affichent en lecture seule : l'éditeur a besoin d'un document dans lequel sauvegarder.",
+          "expandRoll": "Appuyez sur une rangée de dés pour afficher ses dés, comme dans le journal du chat.",
+          "invalidWarningLocked": "Aucun modèle n'a encore de champ invalide, d'avertissement ou verrouillé : ces états sont des objectifs du système de design.",
+          "loading": "Aucun contrôle n'affiche encore d'état de chargement.",
+          "pseudoStates": "Survol, focus et appui : utilisez le pointeur ou le clavier sur l'exemple.",
+          "readOnly": "Une feuille que l'utilisateur ne peut pas modifier désactive ses contrôles à l'affichage ; les exemples montrent donc la forme modifiable.",
+          "reveal": "Les contrôles de ligne restent cachés tant que le pointeur n'est pas sur la ligne.",
+          "surface": "Les rapports sont mesurés dans le thème de la fenêtre. La surface est l'arrière-plan des fenêtres du cœur ; sa valeur de référence dans color.md la remplace donc.",
+          "woundConfig": "La piste modifiable se trouve dans la fenêtre de configuration des Blessures, qui a besoin d'un acteur pour s'ouvrir."
+        },
+        "patterns": {
+          "chatCard": "Carte de chat : une attaque et les dégâts qu'elle a infligés",
+          "dialog": "Dialogue : le dialogue de test",
+          "limitedView": "Feuille : la vue Limitée",
+          "openDialog": "Ouvrir le dialogue d'exemple",
+          "panelRow": "Ligne de panneau : un effet dans le panneau des effets",
+          "sheetSection": "Section de feuille : la barre latérale du PJ"
+        },
+        "sample": {
+          "description": "Texte d'exemple pour la ligne de détails. Il est assez long pour passer sur une deuxième ligne à la largeur de la feuille.",
+          "effectName": "Effet d'exemple",
+          "longName": "Un nom d'exemple assez long pour passer sur une deuxième ligne dans sa colonne",
+          "modifier": "Modificateur d'exemple",
+          "modifierOff": "Modificateur d'exemple, désactivé",
+          "note": "Une note d'exemple qu'ajoutent les règles du jet.",
+          "npcName": "Créature d'exemple",
+          "pcName": "Samouraï d'exemple",
+          "reason": "Raison d'exemple",
+          "ruleError": "Erreur d'exemple : cette valeur doit être un nombre.",
+          "substitute": "Substitution d'exemple",
+          "tattooEffect": "Texte d'effet d'exemple",
+          "tnChanges": "Changement de ND d'exemple +5",
+          "tnChangesNote": "(Changement de ND d'exemple +5)"
+        },
+        "samples": {
+          "activationOff": "Activation désactivée",
+          "activationOn": "Activation en cours",
+          "addItem": "Ajouter un objet",
+          "advantageFields": "Type et coût d'Avantage",
+          "advantageRows": "Avantages",
+          "armorBlock": "Armure",
+          "armorRows": "Armure",
+          "attackHit": "Attaque réussie, avec ses boutons de suite",
+          "bio": "Section biographie",
+          "bioEmpty": "Section biographie sans Clan, Famille ni École",
+          "bioRow": "Ligne de biographie dans sa liste",
+          "brokenLink": "Lien rompu",
+          "browserControls": "Onglets et filtres",
+          "browserEmpty": "Aucune entrée",
+          "browserRows": "Entrées",
+          "checkLink": "Lien de test",
+          "checkLinkGm": "Lien de test, tel que le MJ le voit",
+          "combatBlock": "Combat",
+          "conditionLink": "Lien de condition",
+          "coreButton": "Bouton du cœur",
+          "coreFields": "Champs du cœur, dont un désactivé",
+          "damage": "Jet de dégâts avec les boutons Appliquer",
+          "damageLink": "Lien de dégâts",
+          "disadvantageRows": "Désavantages",
+          "duel": "Duel en cours",
+          "effects": "Effets, dont un que l'utilisateur peut retirer",
+          "effectsTab": "Onglet des effets : un actif, un inactif",
+          "emphasisRoll": "Emphase : un 1 relancé",
+          "emptyList": "Section des objets sans objet",
+          "everyPart": "Toutes les parties, avec les extras du Jet d'Anneau",
+          "expandSection": "Contrôle de dépliage de section",
+          "failureHonorRoll": "Échec, avec le Jet d'Honneur",
+          "fearLink": "Lien de Peur",
+          "flowOver": "Déroulement terminé",
+          "formView": "Vue formulaire, une règle invalide",
+          "fullDefense": "Jet de Défense Totale",
+          "grapple": "Lutte sous contrôle",
+          "gridWithFullRow": "Grille avec une ligne pleine largeur",
+          "healingCard": "Carte de guérison",
+          "healthy": "En Bonne Santé",
+          "honorTrack": "Piste du Rang d'Honneur",
+          "itemRows": "Objets",
+          "jsonView": "Vue JSON",
+          "kataRows": "Kata : un actif, un inactif",
+          "kihoRows": "Kiho",
+          "lastRank": "Dernier Niveau de Blessures",
+          "limitedName": "Nom et portrait",
+          "listCollapsed": "Section de liste, repliée",
+          "listOpen": "Section de liste, dépliée",
+          "masteryFields": "Anneau et Niveau de Maîtrise",
+          "middleRank": "Niveau de Blessures intermédiaire",
+          "modifierFields": "Champs de modificateur",
+          "noActor": "Aucun acteur",
+          "noEffects": "Acteur sans effet",
+          "noEntries": "Aucune entrée",
+          "notesSection": "Section des notes",
+          "noVoidRing": "Anneau du Vide 0 : pas d'option Vide",
+          "npcHeader": "En-tête de PNJ",
+          "npcManual": "PNJ avec une piste manuelle",
+          "npcTrack": "Piste de PNJ",
+          "npcValues": "Valeurs de PNJ",
+          "oneRing": "Un Anneau : Terre 1",
+          "oneSlot": "Un emplacement de sort : Eau 0",
+          "oneTrait": "Un Trait : Endurance 1",
+          "onItemSheet": "Sur la feuille d'objet",
+          "pcHeader": "En-tête de PJ, rangs 1 à 10",
+          "pcVoidOff": "PJ, Vide désactivé",
+          "pcVoidOn": "PJ, Vide activé",
+          "plainHeader": "En-tête sans tri",
+          "plainLongName": "Sans citation, nom long",
+          "postedItem": "Carte d'objet telle que publiée",
+          "rankTen": "Rang de Peur 10",
+          "rankThree": "Rang de Peur 3",
+          "rankTracks": "Pistes de rang",
+          "rankZero": "Rang de Peur 0 : pas de test",
+          "readOnlyEmpty": "Lecture seule, aucune règle",
+          "request": "Carte de demande",
+          "ringsAndTraits": "Anneaux et Traits avec les Points de Vide",
+          "rollButton": "Boutons de jet dans les lignes de Compétence",
+          "rollFace": "Face du jet avec une réserve de Compétence",
+          "rowControls": "Contrôles de ligne",
+          "rowDetails": "Détails de ligne : règles et description",
+          "rowDetailText": "Texte de détail de ligne",
+          "save": "Sauvegarder",
+          "sectionTitle": "Ligne de titre avec les contrôles d'ajout et de dépliage",
+          "sixTabs": "Six onglets",
+          "skilledRoll": "Jet avec Compétence : un 10 a explosé",
+          "skillHeader": "En-tête de la liste des Compétences",
+          "skillRows": "Compétences : une Compétence d'École et un nom long",
+          "slotCounts": "Emplacements de sort 0, 1, 3 et 9",
+          "sortHeader": "En-têtes triables et un en-tête simple",
+          "spellRows": "Sorts",
+          "success": "Succès avec Relances et une note",
+          "summary": "Résumé d'objet",
+          "tattooRows": "Tatouages",
+          "techniqueRows": "Techniques",
+          "textSection": "Section de texte : description",
+          "titleTools": "Section avec outils de titre",
+          "traitRank": "Contrôle de rang de Trait : Endurance 1",
+          "twoTabs": "Deux onglets",
+          "undone": "Annulé",
+          "unskilledMaho": "Sans Compétence, sans Points de Vide, extras de maho",
+          "unskilledRoll": "Jet sans Compétence : aucune explosion",
+          "voidDots": "Points de Vide en pastilles",
+          "voidOffSimple": "Vide désactivé, mouvement Simple",
+          "voidOnFree": "Défense Totale, Vide activé, mouvement Libre",
+          "voidRank": "Contrôle de rang de l'Anneau du Vide : 2",
+          "voidSpentKilled": "Point de Vide dépensé, tué",
+          "wealthChange": "Changement de richesse : ajout",
+          "weaponCard": "Carte d'arme publiée avant la 4.0.0",
+          "weaponRows": "Armes : mêlée et arc",
+          "withCitation": "Avec citation",
+          "withEntries": "Avec entrées, dont une modifiée par des règles",
+          "woundsBlock": "Blessures",
+          "woundsTaken": "Blessures subies",
+          "woundTrack": "Piste de Blessures seule"
+        },
+        "sections": {
+          "components": "Composants",
+          "foundations": "Fondations",
+          "patterns": "Motifs"
+        },
+        "theme": {
+          "dark": "Thème sombre",
+          "light": "Thème clair"
+        },
+        "title": "Galerie de design",
+        "toggleTheme": "Changer de thème"
+      },
+      "effectPanel": {
+        "noActor": "Sélectionnez un pion, ou assignez un personnage, pour voir ses effets.",
+        "noEnd": "Sans fin définie",
+        "none": "Aucun effet sur {name}.",
+        "openSource": "Ouvrir sa source",
+        "remove": "Retirer cet effet",
+        "rounds": "Rounds restants : {count}",
+        "time": "Temps restant : {time}",
+        "title": "Effets",
+        "turns": "Tours restants : {count}",
+        "until": "Jusqu'à {event}",
+        "uses": "Utilisations restantes : {left} sur {max}"
       },
       "emphasisManager": {
         "addCustom": "Ajouter une Emphase Personnalisée",
         "custom": "Personnalisée",
+        "emphasisName": "Nom de l'Emphase",
+        "errors": {
+          "saveFailed": "Échec de la sauvegarde de l'Emphase personnalisée",
+          "updateFailed": "Échec de la mise à jour du gestionnaire d'Emphases"
+        },
         "hint": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
         "manage": "Gérer les Emphases",
-        "noEmphases": "Aucune emphase dans la liste"
+        "noEmphases": "Aucune emphase dans la liste",
+        "title": "Gestionnaire d'Emphases",
+        "titleFor": "Gestionnaire d'Emphases : {item}"
+      },
+      "npcAttackConfig": {
+        "attackModifier": "Modificateur d'attaque",
+        "damageModifier": "Modificateur de dégâts",
+        "errors": {
+          "updateFailed": "Échec de la mise à jour de la configuration d'attaque du PNJ"
+        },
+        "title": "Configuration d'attaque du PNJ",
+        "titleFor": "Configuration d'attaque du PNJ {slot}"
       },
       "wealthManager": {
         "add": "Ajouter",
         "addMoney": "Ajouter de l'Argent",
         "amount": "Montant",
+        "buToKoku": "5 bu → 1 koku",
+        "buToZeni": "1 bu → 10 zeni",
         "convert": "Convertir la Monnaie",
         "convertBuToKoku": "Convertir 5 Bu en 1 Koku",
         "convertBuToZeni": "Convertir 1 Bu en 10 Zeni",
@@ -25,15 +408,44 @@
         "currentWealth": "Richesse Actuelle",
         "denomination": "Dénomination",
         "errors": {
-          "openFailed": "Échec de l'ouverture du Gestionnaire de Richesse"
+          "addMoneyFailed": "Échec de l'ajout d'argent",
+          "convertFailed": "Échec de la conversion de la monnaie",
+          "insufficientForConversion": "Fonds insuffisants pour cette conversion",
+          "insufficientFunds": "Fonds insuffisants pour cette transaction",
+          "openFailed": "Échec de l'ouverture du Gestionnaire de Richesse",
+          "removeMoneyFailed": "Échec du retrait d'argent"
         },
+        "kokuToBu": "1 koku → 5 bu",
         "open": "Gérer la Richesse",
         "remove": "Retirer",
-        "removeMoney": "Retirer de l'Argent"
+        "removeMoney": "Retirer de l'Argent",
+        "title": "Gestionnaire de richesse",
+        "titleFor": "Gestionnaire de richesse : {name}",
+        "zeniToBu": "10 zeni → 1 bu"
       },
       "woundConfig": {
+        "errors": {
+          "invalidWoundConfigValue": "Valeur de configuration des Blessures invalide",
+          "openFailed": "Échec de l'ouverture de la configuration des Blessures",
+          "updateFailed": "Échec de la mise à jour de la configuration des Blessures"
+        },
+        "penaltyModifier": "Modificateur de pénalité",
+        "rateModifier": "Modificateur de taux",
         "title": "Configuration des Blessures",
         "titleFor": "Configuration des Blessures: {name}"
+      },
+      "xpManager": {
+        "addXp": "Ajouter de l'EXP",
+        "disadvantageCapTitle": "Fixer la limite des Désavantages",
+        "errors": {
+          "openFailed": "Échec de l'ouverture du gestionnaire d'EXP"
+        },
+        "noAdjustments": "Aucune EXP ajoutée ni retirée à la main.",
+        "noPurchases": "Aucune EXP dépensée pour l'instant.",
+        "open": "Ouvrir le gestionnaire d'EXP",
+        "setDisadvantageCap": "Fixer la limite",
+        "title": "Gestionnaire d'EXP",
+        "titleFor": "Gestionnaire d'EXP : {name}"
       }
     },
     "character": {
@@ -47,6 +459,7 @@
       },
       "experience": {
         "adjustExperience": "Ajuster l'Expérience",
+        "bonusKiho": "Kiho bonus",
         "breakdown": {
           "advantages": "Avantages",
           "base": "Base",
@@ -72,16 +485,22 @@
         "purchases": "Achats",
         "reason": "Raison",
         "recalculate": "Recalculer les achats d'EXP à partir de l'état actuel du personnage",
+        "schoolKiho": "Kiho d'École",
         "skillChange": "{name} {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "spellMemorized": "Mémorisé : {name}",
         "summary": "Résumé de l'Expérience",
+        "tooManyBonusKiho": "Plus de kiho bonus que le Rang de l'École de Moine ne le permet (p.231).",
+        "tooManySchoolKiho": "Plus de Kiho d'École cochés que l'École de Moine n'en accorde (p.231).",
         "traitChange": "{label} {from}→{to}",
         "usedTotal": "Utilisé / Total",
         "voidChange": "Vide {from}→{to}",
         "xpAmount": "Montant"
       },
       "movement": {
+        "errors": {
+          "toggleFailed": "Échec du changement de type de mouvement"
+        },
         "feet": "pieds",
         "maximum": "Mouvement Maximum",
         "title": "Mouvement"
@@ -89,10 +508,19 @@
       "ranks": {
         "gloryRank": "Gloire",
         "honorRank": "Honneur",
+        "insightAutomatic": "Calcul du Rang de Perspicacité passé en automatique pour {name}",
+        "insightManual": "Calcul du Rang de Perspicacité passé en manuel pour {name}",
         "statusRank": "Rang de Statut",
         "taintRank": "Corruption des Terres de l'Ombre"
       },
       "skills": {
+        "bonuses": {
+          "freeEmphases": "Emphases gratuites",
+          "freeRank": "Rang gratuit",
+          "keep": "Bonus aux dés conservés",
+          "roll": "Bonus aux dés lancés",
+          "total": "Bonus total"
+        },
         "names": {
           "acting": "Comédie",
           "animalHandling": "Dressage",
@@ -143,6 +571,8 @@
           "mastery5": "Maîtrise Rang 5",
           "mastery7": "Maîtrise Rang 7",
           "school": "Compétence d'école",
+          "social": "Compétence Sociale",
+          "socialHint": "Les règles sélectionnent les Compétences Sociales avec skill-tag:social ; les pénalités de Corruption s'y appliquent.",
           "trait": "Trait",
           "type": "Type"
         }
@@ -177,6 +607,8 @@
         "price": "Prix"
       },
       "weapons": {
+        "addsStrength": "Ajoute la Force",
+        "addsStrengthHint": "Désactivé pour les armes de jet qui n'ajoutent pas la Force, comme les shuriken.",
         "arrow": "Flèche",
         "arrows": {
           "armor": "Perforante",
@@ -187,7 +619,14 @@
         },
         "associatedSkill": "Compétence Associée",
         "attackType": "Type d'Attaque",
+        "belowMinStrength": "{name} a besoin de Force {min} pour manier {weapon}.",
+        "belowMinStrengthGM": "Attaquer quand même avec ?",
         "damageKeep": "Dés de Dégâts Conservés",
+        "explodes": "Les dés explosent",
+        "explodesHint": "Désactivé pour les armes dont les dés de dégâts n'explosent jamais, comme les shuriken.",
+        "fallbackTrait": "Trait de repli",
+        "meleeRange": "Arc contre une cible à portée de mêlée",
+        "minStrength": "Force minimum",
         "range": "Portée",
         "rangedAttack": "Attaque à Distance",
         "size": "Taille",
@@ -200,6 +639,9 @@
           "bow": "Kyujutsu",
           "weapon": "Kenjutsu"
         },
+        "tnMounted": "ND d'attaque monté",
+        "tnOnFoot": "ND d'attaque à pied",
+        "tnOnFootHint": "Ajouté au ND des attaques avec cette arme quand son porteur est Monté, ou quand il ne l'est pas : le dai-kyu a +10 à pied, le han-kyu +10 monté (p.199).",
         "typeBow": "Arc",
         "typeWeapon": "Arme"
       }
@@ -209,11 +651,17 @@
         "internal": "Interne",
         "karmic": "Karmique",
         "martial": "Martial",
-        "mystic": "Mystique"
+        "mystic": "Mystique",
+        "schoolKiho": "Kiho d'École",
+        "schoolKihoHint": "Un des kiho qu'accorde l'École de Moine, qui ne coûtent pas d'EXP (p.231).",
+        "startingKiho": "Kiho de départ",
+        "startingKihoHint": "Kiho qu'une École de Moine accorde au Rang 1, 0 pour les autres Écoles ; chaque Rang suivant en accorde deux de plus (p.231)."
       },
       "maho": {
         "additionalBlood": "Sang Supplémentaire",
         "additionalBloodBonus": "Chaque quantité supplémentaire de coût en sang accorde +1 Relance Gratuite",
+        "bloodRaisesToTn": "Relances Gratuites du sang supplémentaire sur le ND",
+        "bloodRaisesToTnHint": "Chacune baisse le ND de 5, jusqu'au nombre de Relances Gratuites qu'achète le sang supplémentaire.",
         "bloodRequired": "Coût en Sang Requis",
         "bloodSource": {
           "label": "Source de Sang",
@@ -229,10 +677,15 @@
         "warningTitle": "Magie de Sang - Maho Interdit"
       },
       "spells": {
+        "aboveSchoolRank": "{spell} est de Niveau de Maîtrise {mastery} ; {name} peut lancer des sorts jusqu'au niveau {limit} dans cet élément (p.164).",
+        "aboveSchoolRankGM": "Le lancer quand même ?",
         "affinity": "Affinité",
         "affinityTag": "[Affinité]",
+        "anyElement": "N'importe quel élément",
         "areaOfEffect": "Zone d'Effet",
         "cast": "Lancer",
+        "castInElement": "Lancer",
+        "chooseElement": "Lancer {spell} dans quel élément ?",
         "concentrationName": "Concentration: {spell}",
         "deficiency": "Déficience",
         "deficiencyTag": "[Déficience]",
@@ -241,6 +694,9 @@
         "memorized": "Mémorisé",
         "raises": "Relances",
         "range": "Portée",
+        "shugenja": "Shugenja",
+        "shugenjaSchool": "École de shugenja",
+        "shugenjaSchoolHint": "Les Jets de Lancement de Sort ajoutent le Rang de cette École. Sans école, ils ajoutent le Rang de Perspicacité.",
         "slotsRestored": "Tous les emplacements de sort restaurés au maximum",
         "slotSuffix": "[Utiliser Emplacement de Sort {element}]",
         "useSpellSlot": "Utiliser Emplacement de Sort",
@@ -250,7 +706,9 @@
     },
     "system": {
       "errors": {
-        "deleteEffect": "Échec de la suppression de l'effet."
+        "createEffect": "Échec de la création de l'effet",
+        "deleteEffect": "Échec de la suppression de l'effet.",
+        "toggleEffect": "Échec de l'activation ou de la désactivation de l'effet"
       },
       "migration": {
         "compendiumIconsUpdated": {
@@ -263,9 +721,22 @@
         }
       },
       "settings": {
+        "designGallery": {
+          "hint": "Chaque jeton, composant et motif du système de design, dessiné par les propres modèles du système.",
+          "label": "Ouvrir la galerie de design",
+          "name": "Galerie de design"
+        },
+        "floatingNumbers": {
+          "hint": "Affiche chaque changement des Blessures et des Points de Vide d'un personnage sous forme de texte flottant au-dessus de ses pions, par exemple « +7 Blessures ». Le paramètre « Texte de statut défilant » du cœur le désactive aussi.",
+          "name": "Nombres flottants de Blessures et de Vide"
+        },
         "forceMigration": {
           "hint": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée.",
           "name": "Forcer la migration au démarrage"
+        },
+        "honorRoll": {
+          "hint": "Une fois par session, un personnage peut relancer un Jet de Compétence, de Trait, d'Anneau ou de Lancement de Sort raté avec son Rang d'Honneur en dés lancés et conservés ; un échec coûte un Rang d'Honneur. Le MJ démarre une session avec le contrôle de pion Nouvelle session.",
+          "name": "Règle optionnelle : Jet d'Honneur"
         },
         "LtException": {
           "hint": "Lorsque les dés conservés sont réduits en dessous de 10 par conversion, ajouter 2.",
@@ -278,20 +749,179 @@
       }
     },
     "ui": {
+      "activation": {
+        "end": "Terminer",
+        "start": "Activer"
+      },
       "armor": {
         "allowStacking": "Autoriser l'Empilement d'Armure"
       },
+      "check": {
+        "actionNote": "{action} (de {source})",
+        "actions": {
+          "complex": "Action Complexe",
+          "free": "Action Libre",
+          "simple": "Action Simple"
+        },
+        "allKept": "Tous",
+        "armor": "Armure",
+        "caller": "Bonus",
+        "castSpell": "Lancer comme un sort",
+        "contest": "Jet en Opposition",
+        "contestTie": "Égalité : relancez.",
+        "contestWinner": "{name} l'emporte.",
+        "damageLabel": "Dégâts de {weapon}",
+        "damageRollPool": "Jet de dégâts ({pool})",
+        "effectsFor": "Effets actifs ({key})",
+        "freeRaisesLeft": "Relances Gratuites : {count}",
+        "freeRaisesToTnNote": "(Relances Gratuites dépensées sur le ND : {count})",
+        "increasedDamage": "Dégâts Accrus (Relances)",
+        "keepFewer": "Ne conserver que",
+        "keepModifier": "Modificateur de dés conservés",
+        "labelWithSuffix": "{label} {suffix}",
+        "manual": "Situationnel",
+        "modifiers": "Modificateurs",
+        "noVoidPoints": "Plus aucun Point de Vide",
+        "outcomeAgainstTn": "{outcome} contre ND {tn}",
+        "pool": "Réserve",
+        "raisesNote": "(Relances : {count})",
+        "range": {
+          "melee": "mêlée",
+          "ranged": "distance"
+        },
+        "rangeFor": "{target} ({range})",
+        "rerolledLabel": "{label} (relancé, meilleur conservé)",
+        "rerollKeepBetter": "Relancer, conserver le meilleur",
+        "rollModifier": "Modificateur de dés lancés",
+        "schoolRank": "Rang d'École",
+        "schoolRankHint": "0 suit le Rang de Perspicacité du personnage. Renseignez-le pour un personnage aux Écoles Multiples.",
+        "spellSlot": "Emplacement de sort",
+        "statBlock": "Profil",
+        "substitutes": "Substitutions",
+        "titleAgainst": "{label} contre {target}",
+        "tnChangesNote": "({changes})",
+        "totalModifier": "Modificateur total",
+        "unskilled": "Jet sans Compétence : les dés n'explosent pas, et aucune Relance ni Relance Gratuite ne s'applique.",
+        "void": "Dépenser un Point de Vide (+1k1)",
+        "voidSkill": "Dépenser un Point de Vide : Rang de Compétence 1",
+        "voidSkillHint": "Sans rang dans la Compétence, un Point de Vide fait compter ce jet comme Rang 1 : un dé de plus, les dés explosent et les Relances s'appliquent (p.78). Sans lui, les Relances ci-dessus sont ignorées.",
+        "weaponTn": "{weapon} ({where})",
+        "woundPenaltyNote": "(Pénalité de Blessure +{penalty})"
+      },
       "combat": {
+        "applySelected": "Appliquer à la sélection",
+        "applyTo": "Appliquer à {target}",
+        "arrowArmor": {
+          "armor": "La flèche Perforante ignore l'armure",
+          "flesh": "La flèche Tranche-Chair double l'armure"
+        },
+        "calledShot": "Coup Ciblé",
+        "calledShotHand": "Main ou pied (2 Relances)",
+        "calledShotHead": "Tête (3 Relances)",
+        "calledShotLimb": "Membre (1 Relance)",
+        "calledShotLocation": "Localisation du Coup Ciblé",
+        "calledShotNote": "Coup Ciblé ({raises} Relances) : {location}. Le MJ décide de tout effet sur cette partie.",
+        "calledShotSmall": "Œil, oreille, doigt (4 Relances)",
+        "calledShotUnnamed": "partie non précisée",
+        "contestStrength": "Lancer un Jet en Opposition de Force",
+        "contestWaiting": "Vous avez lancé ; en attente de l'autre camp",
+        "disarm": "Désarmement (3 Relances)",
+        "disarmed": "{name} lâche son arme.",
+        "disarmNote": "Désarmement : les dégâts sont de 2k1 sans la Force ; lancez un Jet en Opposition de Force, et si l'attaquant l'emporte, la cible lâche son arme.",
+        "duel": {
+          "assessment": "Évaluation",
+          "assessmentEdge": "Évaluation +10",
+          "concede": "{name} abandonne",
+          "conceded": "{name} abandonne.",
+          "dazed": "{name} est Étourdi et ne peut pas livrer de duel iaijutsu",
+          "done": "Terminé",
+          "edgeWon": "{name} gagne {bonus} en Focalisation.",
+          "facts": "Faits que {name} apprend : {count}.",
+          "firstStrike": "{name} frappe en premier, avec {raises} Relances Gratuites.",
+          "focus": "Focalisation",
+          "focusMastery": "Maîtrise d'Iaijutsu (Relance Gratuite)",
+          "kharmic": "Frappe karmique : les deux frappent en même temps.",
+          "pick": "Sélectionnez le pion d'un duelliste et ciblez celui de l'autre",
+          "roll": "Lancer pour {name}",
+          "rollLabel": "{stage} : {name}",
+          "start": "Duel iaijutsu : pion sélectionné contre pion ciblé",
+          "strike": "Frappe",
+          "title": "Duel iaijutsu",
+          "yield": "{name} cède",
+          "yielded": "{name} cède."
+        },
+        "errors": {
+          "raisesInvalid": "Les Relances d'attaque doivent être des nombres",
+          "raisesMismatch": "Cette carte indique {claimed} Relances ; l'attaque en a déclaré {stored}",
+          "raisesOutOfRange": "Les Relances d'attaque doivent aller de 0 à {max}"
+        },
+        "extraAttack": "Attaque Supplémentaire (5 Relances)",
+        "extraAttackNote": "Attaque Supplémentaire : une fois cette attaque résolue, dégâts compris, faites un second jet d'attaque.",
+        "feint": "Feinte (2 Relances)",
+        "feintNote": "Feinte : la moitié de la marge au-dessus du ND s'ajoute aux dégâts (jusqu'à 5 × Rang de Perspicacité).",
+        "flowTitle": "{flow} : {stage}",
+        "fourLegged": "La cible a 4 pattes ou plus",
+        "grapple": {
+          "break": "Se dégager",
+          "broken": "{name} se dégage de la lutte.",
+          "control": "Contrôle de la lutte",
+          "controlLabel": "Contrôle de la lutte : {name}",
+          "hit": "Frapper",
+          "hitLabel": "Coup : {weapon}",
+          "hitLog": "{name} frappe pour {total}.",
+          "inControl": "{name} a le contrôle.",
+          "over": "Terminée",
+          "pass": "Passer",
+          "passed": "{name} garde le contrôle.",
+          "rollControl": "Jet de contrôle : {name}",
+          "throw": "Projeter",
+          "thrown": "{name} est projeté À Terre.",
+          "title": "Lutte",
+          "titleFor": "Lutte : {name} / {target}",
+          "weaponLost": "{name} gagne 2 Relances Gratuites pour Désarmer au prochain Tour."
+        },
+        "grappleIgnoresArmor": "La lutte ignore l'armure",
+        "grappleManeuver": "Engager une lutte (ignore l'armure)",
+        "grappleStart": "Engager la lutte avec {target}",
+        "guard": "Protéger le pion ciblé",
+        "guardFullAttack": "Vous ne pouvez pas Protéger en Posture d'Attaque Totale",
+        "guardPick": "Sélectionnez votre pion et ciblez celui à protéger",
+        "increasedDamageNote": "Dégâts Accrus : +{dice}k0.",
+        "initiativeVoidNone": "{name} n'a aucun Point de Vide disponible",
+        "initiativeVoidQuestion": "Dépenser un Point de Vide pour ajouter +10 au jet d'initiative de {name} ?",
+        "initiativeVoidSpent": "{name} a dépensé un Point de Vide pour l'initiative (+10)",
+        "initiativeVoidTitle": "Dépenser un Point de Vide pour l'Initiative de {name}",
+        "invulnerableNote": "Invulnérabilité : une Blessure.",
+        "killedNote": "Au-delà du Niveau de Blessures Hors Combat : marqué Mort. Le MJ peut retirer ce statut.",
+        "knockdown": "Renversement (2 Relances, 4 contre 4 pattes ou plus)",
+        "knockdownNote": "Renversement : lancez un Jet en Opposition de Force ; si l'attaquant l'emporte, la cible est mise À Terre.",
+        "knockedDown": "{name} est mis À Terre.",
+        "maneuvers": "Manœuvres",
+        "maneuversHint": "Les Relances Gratuites paient d'abord les manœuvres, puis les Relances déclarées. Chaque Relance restante ajoute +1k0 aux dégâts.",
         "multipleTargets": "cibles - ND non défini automatiquement",
+        "notEnoughRaises": "Les manœuvres coûtent {cost} Relances ; déclarez assez de Relances (ou ayez des Relances Gratuites) pour les payer (déclarées : {raises})",
+        "npcInitiative": "0 lance Rang de Perspicacité 1 + Réflexes, conserve Réflexes (p.81). Au-dessus de 0 dans les deux, c'est la réserve propre à ce PNJ.",
+        "reductionNote": "Réduction {reduction}.",
+        "resultTitle": "{name} subit {wounds} Blessures sur {damage} dégâts",
+        "sources": "Sources de dégâts : {sources}",
+        "spiritNote": "Esprit : les dégâts sont divisés par deux.",
+        "unarmed": "Mains nues",
+        "undo": "Annuler",
+        "undoneNote": "Annulé.",
+        "voidNote": "Point de Vide dépensé : {wounds} Blessures de moins.",
         "vs": "vs"
       },
       "common": {
         "action": "Action",
         "active": "Actif",
+        "add": "Ajouter",
+        "all": "Tous",
+        "allow": "Autoriser",
         "armor": "Armure",
         "bonus": "Bonus",
         "cancel": "Annuler",
         "clan": "Clan",
+        "complex": "Complexe",
         "conditions": "Conditions",
         "cost": "Coût",
         "current": "Actuel",
@@ -300,9 +930,11 @@
         "disabled": "désactivé",
         "edit": "Modifier",
         "effect": "Effet",
+        "expand": "Déplier",
         "free": "Libre",
         "initiative": "Initiative",
         "insight": "Perspicacité",
+        "insightRank": "Rang de Perspicacité",
         "modifier": "Modificateur",
         "multi": "Multiplicateur",
         "name": "Nom",
@@ -314,22 +946,127 @@
         "save": "Sauvegarder",
         "school": "École",
         "simple": "Simple",
+        "sortedAscending": "Tri croissant",
+        "sortedDescending": "Tri décroissant",
+        "spendVoidPoint": "Dépenser un Point de Vide",
         "tn": "ND",
+        "toggle": "Activer ou désactiver",
         "type": "Type",
+        "unknown": "Inconnu",
         "xp": "Points d'Expérience"
       },
       "dialogs": {
+        "addAttack": "Ajouter une attaque",
+        "deleteAttack": {
+          "consequence": "Ses réserves d'attaque et de dégâts sont effacées.",
+          "content": "Retirer {name} ?",
+          "title": "Retirer l'attaque ?"
+        },
+        "deleteEmphasis": {
+          "consequence": "Elle quitte les Emphases personnalisées de ce monde.",
+          "content": "Retirer {emphasis} ?"
+        },
         "deleteItem": {
+          "consequence": "Ses effets et ses règles, ainsi que tout objet qu'il a accordé, disparaissent avec lui.",
           "content": "Êtes-vous sûr de vouloir supprimer {name} ?",
           "title": "Supprimer l'Objet ?"
         }
       },
       "effects": {
-        "autoProne": "Auto: À Terre"
+        "alreadyEnded": "Cet effet a déjà pris fin",
+        "applyTo": "{effect} sur {target}",
+        "autoProne": "Auto: À Terre",
+        "centered": "Centré",
+        "concentrationUpkeep": "{effect} : dépensez une Action Simple ce Round pour maintenir la concentration, ou mettez-y fin.",
+        "endEncounter": "Terminer la rencontre",
+        "endEncounterConfirm": "Terminer la rencontre ? La Peur et tout autre effet durant jusqu'à la fin de la rencontre prendront fin maintenant.",
+        "expiry": {
+          "encounterEnd": "Fin de la rencontre"
+        },
+        "fullDefense": "Défense Totale",
+        "fullDefenseBonus": "Défense Totale (+{bonus})",
+        "immune": "{name} est immunisé contre {effect}",
+        "noGM": "Aucun MJ n'est connecté pour appliquer cet effet",
+        "promptAnswered": "Ce jet a déjà été effectué",
+        "proneLargeWeapon": "À Terre : une grande arme ne peut pas attaquer tant que son porteur n'est pas relevé.",
+        "saveText": "Jet ({roll}) contre ND {tn}.",
+        "saveTitle": "{effect} : jet de sauvegarde",
+        "stanceNotAllowed": "{condition} exclut {stance}",
+        "voidArmor": "Vide : ND d'Armure +10",
+        "voidArmorNoCombat": "Il faut être en combat actif pour utiliser le Vide pour le ND d'Armure",
+        "voidArmorNotTurn": "Le Vide ne peut servir au ND d'Armure que pendant votre tour",
+        "voidArmorQuestion": "Dépenser un Point de Vide pour augmenter le ND d'Armure de +10 pendant 1 round ?",
+        "voidArmorSpent": "{name} a dépensé un Point de Vide : ND d'Armure +10 pendant 1 Round",
+        "voidArmorTitle": "Dépenser un Point de Vide pour le ND d'Armure",
+        "voidLimit": "{name} a déjà dépensé un Point de Vide ce Round",
+        "voidSpentThisRound": "Un Point de Vide a déjà été dépensé ce Round ; la limite habituelle est d'un par Round."
+      },
+      "floating": {
+        "void": "Points de Vide"
+      },
+      "grants": {
+        "granted": "{name} gagne {item} de {giver} (Rang d'École {rank}).",
+        "waiting": "{name} apprend {items} de {giver} dès que ces Compétences d'École atteignent le rang 1 : {skills}.",
+        "waitingRow": "Ses Techniques attendent ces Compétences d'École au rang 1 : {skills}"
       },
       "hints": {
+        "decreaseTrait": "Diminuer {trait}",
+        "decreaseVoidRing": "Diminuer l'Anneau du Vide",
+        "increaseTrait": "Augmenter {trait}",
+        "increaseVoidRing": "Augmenter l'Anneau du Vide",
         "postToChat": "Publier dans le chat",
-        "shiftClickRankPoints": "Shift+Clic : ±0.1, Shift+Ctrl+Clic : ±1.0"
+        "shiftClickRankPoints": "Shift+Clic : ±0.1, Shift+Ctrl+Clic : ±1.0",
+        "traitRank": "{trait} : Jet de Trait ; Shift+clic : +1, Shift+clic droit : -1",
+        "voidRingRank": "Anneau du Vide : Shift+clic : +1, Shift+clic droit : -1"
+      },
+      "honorRoll": {
+        "button": "Jet d'Honneur",
+        "failedReason": "Jet d'Honneur raté",
+        "noDice": "{name} n'a aucun Rang d'Honneur sur lequel s'appuyer pour un Jet d'Honneur",
+        "rollLabel": "{label} (Jet d'Honneur)",
+        "used": "{name} a déjà fait un Jet d'Honneur cette session"
+      },
+      "ledger": {
+        "hint": "Enregistrez un gain ou une perte d'Honneur, de Gloire, de Statut ou de Corruption avec sa raison. Dix points font un rang ; les règles Ledger du personnage peuvent changer la quantité.",
+        "points": "Points (négatif pour une perte)",
+        "reason": "Raison",
+        "record": "Enregistrer",
+        "title": "Registre",
+        "titleFor": "Registre : {name}",
+        "track": "Piste",
+        "tracks": {
+          "glory": "Gloire",
+          "honor": "Honneur",
+          "status": "Statut",
+          "taint": "Corruption"
+        }
+      },
+      "links": {
+        "checkTn": "{what}, ND {tn}",
+        "damage": "Dégâts {pool}",
+        "errors": {
+          "condition": "identifiant de condition inconnu",
+          "fear": "le Rang de Peur doit être un nombre entier de 1 à 10",
+          "nothingToRoll": "nommez une Compétence, un Trait ou un Anneau",
+          "pool": "écrivez la réserve sous la forme XkY, chacun de 1 à 30, avec un +N ou -N facultatif",
+          "ring": "Anneau inconnu ; utilisez air, earth, fire, water ou void",
+          "skillWithRing": "une Compétence se lance avec un Trait ou l'Anneau du Vide, pas avec un Anneau",
+          "syntax": "écrivez-le sous la forme key=value|key=value",
+          "tn": "le ND doit être un nombre entier de 1 à 999",
+          "trait": "Trait inconnu ; utilisez sta, wil, str, per, ref, awa, agi ou int",
+          "traitAndRing": "un Trait et un Anneau ne peuvent pas être lancés ensemble",
+          "unknownKey": "clé inconnue ; utilisez skill, trait, ring ou tn"
+        },
+        "needTrait": "{name} n'a pas la Compétence {skill}, et le lien ne nomme aucun Trait pour la lancer sans Compétence",
+        "noActor": "Sélectionnez un pion ou assignez un personnage pour lancer ce lien",
+        "noTargets": "Ciblez ou sélectionnez les pions sur lesquels ce lien agit",
+        "request": "Demander aux joueurs de lancer ceci",
+        "requestRoll": "Lancer avec mon personnage",
+        "requestTitle": "Le MJ demande un jet"
+      },
+      "macros": {
+        "missing": "L'objet ou le personnage de cette macro n'existe plus, ou ne peut pas être lancé depuis une macro",
+        "traitMacro": "{name} : {traitName}"
       },
       "mechanics": {
         "combat": {
@@ -348,7 +1085,8 @@
           "rank": "Rang de Peur",
           "rollForSelected": "Cliquez pour tester la Peur contre les personnages sélectionnés",
           "testLabel": "Test de Peur {rank} vs {name}",
-          "testResult": "Test de Peur {rank}"
+          "testResult": "Test de Peur {rank}",
+          "title": "Peur"
         },
         "rings": {
           "air": "Air",
@@ -360,6 +1098,7 @@
           "voidInitBoost": "Utiliser Vide",
           "voidPoints": "Points de Vide",
           "voidPointsEmpty": "Points de Vide: 0",
+          "voidPointsValue": "Points de Vide : {current}/{max} (clic : +1, clic droit : -1)",
           "voidTnBoost": "Utiliser Vide",
           "water": "Eau"
         },
@@ -372,10 +1111,14 @@
           "explodesOn": "Explose Sur",
           "failure": "Échec",
           "freeRaises": "Relances Gratuites",
+          "freeRaisesHint": "Dépensées sur le ND, jusqu'à {max}.",
           "missed": "Raté",
           "namedRoll": "Lancer: {roll}",
           "raises": "Relances",
+          "raisesHint": "Jusqu'à {max}.",
+          "raisesHintWithMinimum": "Au moins {min}, jusqu'à {max}.",
           "ringRollLabel": "Jet d'Anneau: {element}",
+          "rollRing": "Lancer {element}",
           "skillRoll": "Jet de Compétence",
           "skillRollLabel": "Jet de Compétence: {skillName} / {traitName}",
           "socialResistance": "Résistance Sociale",
@@ -390,12 +1133,14 @@
           "weaponAttackRoll": "{weapon} Jet d'Attaque"
         },
         "stances": {
+          "addFailed": "Échec de l'ajout de la posture",
           "attack": "Posture d'Attaque",
           "center": "Posture Centrée",
           "defense": "Posture de Défense",
           "fullAttack": "Posture d'Attaque Totale",
           "fullDefense": "Posture de Défense Totale",
-          "fullDefenseHint": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture."
+          "fullDefenseHint": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture.",
+          "removeFailed": "Échec du retrait de la posture"
         },
         "traits": {
           "agi": "Agilité",
@@ -408,6 +1153,7 @@
           "wil": "Volonté"
         },
         "wounds": {
+          "activeOf": "{rank} : actif",
           "alreadyFullHealth": "{name} est déjà en pleine santé",
           "applied": "Appliqué {amount} blessures à {name}",
           "appliedWithArmor": "{name} a reçu {original} dégâts. L'armure a réduit de {reduction}. Appliqué {final} blessures.",
@@ -425,6 +1171,7 @@
           "grazed": "Effleuré",
           "healingApplied": "Guéri {amount} blessures (taux de guérison : {rate})",
           "healingFailed": "Échec de l'application de la guérison à {name}",
+          "healRateBreakdown": "(Endurance × 2) + Rang de Perspicacité + modificateur = ({sta} × 2) + {rank} + {mod}",
           "healthy": "En Bonne Santé",
           "hurt": "Blessé",
           "injured": "Gravement Blessé",
@@ -438,6 +1185,7 @@
           "noVoidPoints": "Aucun Point de Vide disponible pour réduire les dégâts",
           "out": "Hors Combat",
           "penalty": "Pénalité",
+          "penaltyOf": "Pénalité ({rank})",
           "reducedApplied": "Point de Vide dépensé : Dégâts réduits de 10. Appliqué {amount} blessures à {name}",
           "reducedWithArmor": "{name} a reçu {original} dégâts. Vide réduit à {afterVoid}, armure réduite de {reduction}. Appliqué {final} blessures.",
           "reduceWithVoid": "Réduire avec Vide",
@@ -445,6 +1193,8 @@
           "status": "Blessures : {current}/{max} (subies : {suffered})",
           "suffered": "Blessures Subies",
           "threshold": "Seuil",
+          "thresholdOf": "Seuil ({rank})",
+          "voidRestored": "Vide : {count}/{count} restauré",
           "woundBonus": "Bonus de Blessures",
           "woundHealRate": "Taux de Guérison des Blessures",
           "woundLevel": "Niveau",
@@ -455,11 +1205,138 @@
         "actorNotFound": "Acteur non trouvé pour le jet de dégâts",
         "deficiencyBlocksCasting": "Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
         "invalidRingForSpell": "Anneau invalide pour l'emplacement de sort : {ring}",
+        "messageTooLong": "Message trop long (10 000 caractères maximum)",
         "noActorForVoid": "Aucun acteur disponible pour dépenser des points de vide",
+        "noPermission": "Vous n'avez pas la permission de modifier cet acteur",
         "noPermissionDamage": "Vous n'avez pas la permission de lancer les dégâts pour cet acteur",
         "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
         "noValidWeapon": "Aucune arme valide trouvée pour le jet d'attaque",
-        "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro"
+        "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
+        "tokenNoActor": "Le pion n'a pas d'acteur"
+      },
+      "purchase": {
+        "addAnyway": "L'ajouter quand même ?",
+        "bypass": "Ajouter quand même",
+        "choiceTitle": "{item} : {prompt}",
+        "choose": "Choisir",
+        "kihoMastery": "{ring} + Rang d'École {mastery}",
+        "makeChoice": "Choisir",
+        "noOptions": "{name} a un choix sans aucune option ; il n'a pas été ajouté",
+        "schoolAdd": "Ajouter comme autre École",
+        "schoolQuestion": "{name} étudie déjà à {schools}. La remplacer, ou ajouter {school} comme autre École (une École Avancée, ou l'Avantage Écoles Multiples) ?",
+        "schoolReplace": "Remplacer",
+        "schoolTitle": "Une seconde École",
+        "unmet": "{name} requiert : {list}",
+        "unmetTitle": "Prérequis non remplis"
+      },
+      "rules": {
+        "add": "Ajouter une règle",
+        "delete": "Retirer cette règle",
+        "effectSheet": "Feuille d'effet actif avec règles",
+        "formView": "Modifier en formulaires",
+        "hint": "Chaque règle sous forme de formulaire, ou toute la liste en JSON. ACTIVE_EFFECTS.md liste les clés de règle et leurs champs.",
+        "invalidJson": "Règles non sauvegardées : le texte n'est pas du JSON valide ({error}).",
+        "jsonView": "Modifier en JSON",
+        "key": "Clé de règle",
+        "none": "Aucune règle.",
+        "notList": "Règles non sauvegardées : le texte doit être une liste JSON d'objets, chacun avec une « key »."
+      },
+      "ruleSummary": {
+        "action": {
+          "complex": "une Action Complexe",
+          "free": "une Action Libre",
+          "simple": "une Action Simple"
+        },
+        "ActionCost": "{rolls} : {action}",
+        "ApplyCondition": "Un jet réussi parmi les {rolls} peut appliquer {condition}",
+        "armorTn": {
+          "base": "Le ND d'Armure de base devient {value}",
+          "total": "Le ND d'Armure devient {value}"
+        },
+        "ArmorTN": "ND d'Armure {value}",
+        "ChoiceSet": "Choix à l'ajout : {prompt}",
+        "chosen": "Choisi : {selection}",
+        "citation": "{book} p.{page}",
+        "ConditionImmunity": "Immunisé contre {condition}",
+        "Cost": "Prix en EXP pour {what} : {value}",
+        "DamageSource": "{rolls} comptent comme {tags}",
+        "DiceRule": "Les dés explosent sur {explode} ou plus aux {rolls}",
+        "direction": {
+          "gain": "gains",
+          "loss": "pertes"
+        },
+        "FreeRaise": "Relances Gratuites aux {rolls} : {value}",
+        "GrantItem": "Accorde {item} au Rang d'École {rank}",
+        "heading": "Ce que cela fait",
+        "ignoreReduction": "Ignore {value} de Réduction",
+        "Initiative": "Initiative {bonus}",
+        "Invulnerability": "Invulnérable : blessé uniquement par {harmedBy}",
+        "Ledger": "{track} ({direction}) : {value}",
+        "maneuver": {
+          "calledShot": "Coup Ciblé",
+          "disarm": "Désarmement",
+          "extraAttack": "Attaque Supplémentaire",
+          "feint": "Feinte",
+          "knockdown": "Renversement"
+        },
+        "Movement": "Eau {value} pour le mouvement",
+        "Note": "Note sur les {rolls} : {text}",
+        "OpponentModifier": "{bonus} aux {rolls} effectués contre ce personnage",
+        "optional": "Optionnel : le lanceur choisit le jet",
+        "per": {
+          "day": "jour",
+          "round": "Round",
+          "skirmish": "escarmouche",
+          "turn": "Tour"
+        },
+        "PeriodicSave": "Prend fin sur un jet ({roll}) contre ND {tn}",
+        "Prerequisite": "Requiert {requires}",
+        "priced": {
+          "emphasis": "une Emphase",
+          "items": "chaque objet {type}",
+          "self": "cet objet"
+        },
+        "raiseCap": "Limite de Relances {value} aux {rolls}",
+        "raiseMinimum": "Au moins {value} Relances aux {rolls}",
+        "RaiseRule": "{maneuver} coûte {cost} Relances aux {rolls}",
+        "range": {
+          "melee": "Attaques de mêlée uniquement",
+          "ranged": "Attaques à distance uniquement"
+        },
+        "Reduction": "Réduction {value}",
+        "reductionExcept": "Réduction {value}, sauf contre {except}",
+        "rerollOnes": "Relancer les 1 aux {rolls}",
+        "Resource": "Utilisations de {slug} : {max} par {per}",
+        "RollModifier": "{bonus} aux {rolls}",
+        "RollOption": "Option de jet : {option}",
+        "selector": {
+          "any": "jets de tout type",
+          "attack": "jets d'attaque",
+          "damage": "jets de dégâts",
+          "maho": "jets de maho",
+          "named": "jets avec {name}",
+          "ring": "Jets d'Anneau",
+          "skill": "Jets de Compétence",
+          "skill-tag": "Jets de Compétence {name}",
+          "skill-type": "Jets de Compétence {name}",
+          "spell": "Jets de Lancement de Sort",
+          "trait": "Jets de Trait"
+        },
+        "Spirit": "Esprit : dégâts divisés par deux sauf s'ils viennent de {harmedBy}",
+        "Substitute": "Peut lancer {with} à la place de {replace} aux {rolls}",
+        "text": "{text}",
+        "TNModifier": "ND {value} aux {rolls}",
+        "TraitAdjust": "{trait} {value}",
+        "unknown": "Règle inconnue {key}",
+        "UnskilledAs": "{rolls} sans rang comptent comme Rang {rank}",
+        "when": "{rule} (lorsque {when})",
+        "Wounds": "Blessures par Niveau de Blessures {perRank}, pénalités des Niveaux de Blessures {penalty}"
+      },
+      "session": {
+        "confirm": "Commencer une nouvelle session de jeu ? Chaque personnage récupère son Jet d'Honneur.",
+        "new": "Nouvelle session",
+        "start": "Démarrer la session",
+        "started": "Une nouvelle session de jeu a commencé."
       },
       "sheets": {
         "abilities": "Capacités",
@@ -467,6 +1344,7 @@
         "advantage": "Avantage",
         "advantages": "Avantages",
         "armor": "Armure",
+        "attackAndDamage": "Attaque et dégâts",
         "background": "Historique",
         "character": "Personnage",
         "demands": "Exigences",
@@ -475,24 +1353,38 @@
         "disadvantages": "Désavantages",
         "equipment": "Équipement",
         "item": "Objet",
+        "itemFlavor": "[{type}]",
         "items": "Objets",
+        "itemTitle": "{item} [{type}]",
         "kata": "Kata",
         "kiho": "Kiho",
         "mastery": "Maîtrise",
+        "masteryHint": "Coûte son Niveau de Maîtrise en EXP (pp.231, 259). Une règle Cost change le prix : les kiho gratuits d'un moine, ou le prix plus élevé d'une école hors de la Confrérie (p.266).",
+        "noBio": "Pas encore de Clan, de Famille ni d'École.",
         "notes": "Notes",
+        "recalculated": "Feuille recalculée pour {name}",
+        "recalculateSheet": "Recalculer la feuille",
         "rulesSummary": "Résumé des Règles",
         "skill": "Compétence",
         "skills": "Compétences",
         "spell": "Sort",
         "spells": "Sorts",
         "spellSlots": "Emplacements de Sort",
+        "spellSlotsOf": "Emplacements de sort ({ring}) : {count} (clic : +1, clic droit : -1)",
+        "tabs": "Parties de la feuille",
         "tattoo": "Tatouage",
+        "tattooPassive": "Toujours actif",
+        "tattooPassiveHint": "Activé : ses règles s'appliquent tant que le personnage l'a. Désactivé : le bouton de lecture de la feuille de personnage l'active, un tatouage à la fois, pendant deux fois le Rang d'École en Rounds.",
         "tattoos": "Tatouages",
         "technique": "Technique",
         "techniques": "Techniques",
+        "typeInsightRank": "Saisir le Rang de Perspicacité à la main",
         "weapon": "Arme",
         "weapons": "Armes",
         "woundLevels": "Niveaux de Blessures"
+      },
+      "sources": {
+        "core": "Livre de base"
       },
       "statusEffects": {
         "blinded": "Aveuglé",
@@ -514,7 +1406,28 @@
         "description": "Description",
         "details": "Détails",
         "effects": "Effets Actifs",
-        "modifiers": "Modificateurs"
+        "modifiers": "Modificateurs",
+        "rules": "Règles"
+      },
+      "taint": {
+        "embrace": "Embrasser la Corruption (+1k1)",
+        "embraceHint": "Gagnez un point de Corruption pour +1k1 sur ce jet.",
+        "embraceReason": "A embrassé la Corruption",
+        "label": "Corruption des Terres de l'Ombre",
+        "lost": "Perdu (Rang de Corruption)"
+      },
+      "transfer": {
+        "export": "Exporter les objets avec règles",
+        "exported": {
+          "one": "{count} objet exporté depuis {folder}",
+          "other": "{count} objets exportés depuis {folder}"
+        },
+        "import": "Importer des objets avec règles",
+        "imported": "Objets importés",
+        "importedCount": "{count} objets importés dans {folder}",
+        "importHint": "Choisissez un fichier exporté depuis un dossier d'objets. Ses objets vont dans un nouveau dossier ici.",
+        "invalidJson": "Ce fichier n'est pas du JSON valide.",
+        "notExport": "Ce fichier n'est pas un export d'objets avec règles."
       }
     },
     "world": {
@@ -529,6 +1442,10 @@
     "Actor": {
       "npc": "PNJ",
       "pc": "PJ"
+    },
+    "ChatMessage": {
+      "checkRequest": "Demande de jet",
+      "roll": "Jet"
     },
     "Item": {
       "advantage": "Avantage",

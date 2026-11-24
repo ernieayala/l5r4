@@ -1,22 +1,405 @@
 {
   "l5r4": {
     "apps": {
+      "armorConfig": {
+        "errors": {
+          "openFailed": "Fehler beim Öffnen der Rüstungskonfiguration",
+          "updateFailed": "Fehler beim Aktualisieren der Rüstungskonfiguration"
+        },
+        "title": "Rüstungskonfiguration",
+        "titleFor": "Rüstungskonfiguration: {name}"
+      },
+      "combatConfig": {
+        "errors": {
+          "openFailed": "Fehler beim Öffnen der Kampfkonfiguration",
+          "updateFailed": "Fehler beim Aktualisieren der Kampfkonfiguration"
+        },
+        "pool": "Würfeln/Behalten",
+        "poolBonus": "Bonus auf Würfeln/Behalten",
+        "title": "Kampfkonfiguration",
+        "titleFor": "Kampfkonfiguration: {name}"
+      },
+      "compendiumBrowser": {
+        "add": "Hinzufügen",
+        "clear": "Filter zurücksetzen",
+        "count": "Einträge: {count}",
+        "filters": {
+          "advantageType": "Art",
+          "armorType": "Rüstungstyp",
+          "cost": "Kosten",
+          "folder": "Gruppe",
+          "keyword": "Schlüsselwort",
+          "kihoType": "Kiho-Typ",
+          "maho": "Maho",
+          "mastery": "Meisterschaftsstufe",
+          "page": "Seite",
+          "ring": "Ring",
+          "size": "Größe",
+          "skillType": "Fertigkeitstyp",
+          "trait": "Eigenschaft",
+          "type": "Typ"
+        },
+        "import": "Importieren",
+        "no": "Nein",
+        "noActor": "Wähle einen Spielstein aus oder weise einen Charakter zu, um Gegenstände hinzuzufügen",
+        "none": "Keine Treffer.",
+        "numbers": {
+          "armor": "Rüstungs-SZ +{bonus}, Reduzierung {reduction}",
+          "spell": "{ring}, Meisterschaftsstufe {mastery}",
+          "weapon": "Schaden {pool}"
+        },
+        "open": "Durchsuchen",
+        "search": "Name",
+        "tabs": {
+          "advantages": "Vorteile und Nachteile",
+          "clans": "Klans und Familien",
+          "creatures": "Kreaturen",
+          "equipment": "Ausrüstung",
+          "kata": "Kata",
+          "kiho": "Kiho und Tätowierungen",
+          "schools": "Schulen und Techniken",
+          "skills": "Fertigkeiten",
+          "spells": "Zauber"
+        },
+        "title": "Kompendium-Browser",
+        "yes": "Ja"
+      },
       "conditionManager": {
         "errors": {
-          "openFailed": "Fehler beim Öffnen des Zustandsverwalters"
-        }
+          "openFailed": "Fehler beim Öffnen des Zustandsverwalters",
+          "updateFailed": "Fehler beim Aktualisieren des Zustandsverwalters"
+        },
+        "title": "Zustandsverwalter",
+        "titleFor": "Zustandsverwalter: {name}"
+      },
+      "designGallery": {
+        "color": {
+          "core": "Kernpalette",
+          "domain": "Domänenrollen",
+          "palette": "Paletten-Grundwerte",
+          "role": "Rollen-Token"
+        },
+        "components": {
+          "armorTnBlock": "Rüstungs-SZ-Block",
+          "button": "Schaltfläche",
+          "chatCard": "Chatkarte",
+          "checkCard": "Wurfkarte",
+          "checkDialog": "Wurfdialog",
+          "compendiumBrowser": "Kompendium-Browser",
+          "damageResult": "Schadensergebnis",
+          "diceRow": "Würfelzeile",
+          "effectPanel": "Effektleiste",
+          "effectPrompt": "Effektabfrage",
+          "expandControl": "Aufklapp-Steuerelement",
+          "fearBlock": "Furchtblock",
+          "floatingNumber": "Schwebende Zahl",
+          "flowCard": "Ablaufkarte",
+          "formField": "Formularfeld",
+          "grid": "Raster",
+          "iconButton": "Symbolschaltfläche",
+          "initiativeBlock": "Initiativeblock",
+          "inlineControl": "Inline-Steuerelement",
+          "inlineLink": "Inline-Link",
+          "itemHeader": "Gegenstandskopf",
+          "itemRow": "Gegenstandszeile",
+          "itemSummaryCard": "Gegenstands-Übersichtskarte",
+          "ledgerDialog": "Registerdialog",
+          "rankControl": "Rangsteuerung",
+          "requestCard": "Anfragekarte",
+          "ringTraitBlock": "Ring- und Eigenschaftsblock",
+          "rulesEditor": "Regeleditor",
+          "section": "Abschnitt",
+          "sortHeader": "Sortierkopf",
+          "spellSlots": "Zauberplätze",
+          "tabs": "Reiter",
+          "voidPointDots": "Leere-Punkt-Markierungen",
+          "woundTrack": "Wundenleiste"
+        },
+        "entry": {
+          "none": "Keine",
+          "page": "Seite",
+          "seeAlso": "Auch gezeigt in",
+          "styles": "Stylesheets",
+          "templates": "Vorlagen"
+        },
+        "foundations": {
+          "below": "{ratio} gegen {against}: unter {minimum}",
+          "builtOn": "Aufgebaut auf {core}",
+          "color": "Farbe",
+          "contrast": "Kontrast",
+          "frames": "Rahmen, Bewegung, Ebenen und Zustände",
+          "frameSample": "Aa",
+          "icons": "Symbole",
+          "meets": "{ratio} gegen {against}: erfüllt {minimum}",
+          "noRatio": "Kein Verhältnis",
+          "notDefined": "Nicht definiert",
+          "ratio": "{ratio} gegen {against}",
+          "sample": "Beispiel",
+          "space": "Abstand und Größe",
+          "swatch": "Farbfeld",
+          "token": "Token",
+          "typeSample": "Leere-Punkte 10k10",
+          "typography": "Typografie",
+          "value": "Wert"
+        },
+        "gmOnly": "Nur ein SL kann die Design-Galerie öffnen",
+        "icons": {
+          "activation": "Aktivierung starten oder beenden",
+          "add": "Hinzufügen oder erstellen",
+          "applyHealing": "Heilung anwenden (Ruhe)",
+          "brokenLink": "Defekter Link",
+          "conditionLink": "Zustandslink",
+          "configure": "Konfigurationsfenster öffnen",
+          "configureAttack": "NSC-Angriff konfigurieren",
+          "contested": "Vergleichender Wurf",
+          "convertCoin": "In eine größere oder kleinere Münze umtauschen",
+          "currentWoundLevel": "Aktuelle Wundenstufe",
+          "damageLink": "Schadenslink",
+          "delete": "Dokument oder Eintrag entfernen",
+          "edit": "Bearbeiten",
+          "endEncounter": "Begegnung beenden",
+          "expand": "Abschnitt oder Zeile auf- oder zuklappen",
+          "fearLink": "Furchtlink",
+          "guard": "Beschützen",
+          "importEntry": "Kompendiumeintrag in die Welt importieren",
+          "invalid": "Ungültig",
+          "loading": "Lädt",
+          "locked": "Gesperrt",
+          "manageEmphases": "Schwerpunkte verwalten",
+          "newSession": "Neue Sitzung beginnen",
+          "openBrowser": "Kompendium-Browser öffnen",
+          "openConditionManager": "Zustandsverwalter öffnen",
+          "openEffectPanel": "Effektleiste öffnen",
+          "openLedger": "Register für Ehre, Ruhm und Status öffnen",
+          "openSource": "Quelldokument öffnen",
+          "openWealthManager": "Vermögensverwaltung öffnen",
+          "openXpManager": "EP-Verwaltung öffnen",
+          "postRequest": "Anfragekarte posten (SL)",
+          "postToChat": "Im Chat posten",
+          "recalculate": "Neu berechnen",
+          "reroll": "Neu würfeln und das Bessere behalten",
+          "rollCheck": "Einen Wurf würfeln",
+          "rules": "Regeln",
+          "save": "Speichern",
+          "sorted": "Richtung der sortierten Spalte",
+          "startDuel": "Duell beginnen",
+          "step": "Einen Rang erhöhen oder senken",
+          "subtract": "Einen Betrag abziehen",
+          "toggleEffect": "Einen Effekt ein- oder ausschalten",
+          "transferFolder": "Eine Ordnerdatei exportieren oder importieren",
+          "warning": "Warnung"
+        },
+        "notes": {
+          "canvas": "Schwebende Zahlen werden auf die Spielfläche gezeichnet, die weder Vorlage noch Stylesheet liest, daher kann die Galerie nichts davon darstellen. Ihre Farben stehen im Farbabschnitt.",
+          "chatFrame": "Der Rahmen ist die Chatnachricht des Kerns; der Nachrichtenkopf mit Sprecher und Zeit kommt nur im Chatprotokoll hinzu.",
+          "dialogFrame": "Der Inhalt des Dialogs, wie der Wurf ihn öffnet. Der Kern fügt Fensterrahmen und Schaltflächen hinzu; das Dialogmuster öffnet einen.",
+          "dialogPattern": "Der Wurfdialog im Dialograhmen des Kerns. Seine Schaltfläche schließt ihn nur.",
+          "editor": "Notizen zeigen ihre schreibgeschützte Form: Der Editor braucht ein Dokument, in das er speichern kann.",
+          "expandRoll": "Drücke auf eine Würfelzeile, um ihre Würfel zu zeigen, wie im Chatprotokoll.",
+          "invalidWarningLocked": "Noch keine Vorlage hat ein ungültiges, gewarntes oder gesperrtes Feld: Diese Zustände sind Ziele des Designsystems.",
+          "loading": "Noch kein Steuerelement zeigt einen Ladezustand.",
+          "pseudoStates": "Hover, Fokus und Drücken: Nutze Zeiger oder Tastatur am Beispiel.",
+          "readOnly": "Ein Bogen, den der Betrachter nicht bearbeiten kann, deaktiviert beim Rendern seine Steuerelemente, daher zeigen die Beispiele die bearbeitbare Form.",
+          "reveal": "Zeilensteuerelemente bleiben verborgen, bis der Zeiger über der Zeile ist.",
+          "surface": "Verhältnisse werden im Thema des Fensters gemessen. Die Oberfläche ist der Fensterhintergrund des Kerns, daher steht sein Referenzwert aus color.md dafür.",
+          "woundConfig": "Die bearbeitbare Leiste liegt im Fenster Wundenkonfiguration, das zum Öffnen einen Akteur braucht."
+        },
+        "patterns": {
+          "chatCard": "Chatkarte: ein Angriff und der Schaden, den er verursacht hat",
+          "dialog": "Dialog: der Wurfdialog",
+          "limitedView": "Bogen: die eingeschränkte Ansicht",
+          "openDialog": "Beispieldialog öffnen",
+          "panelRow": "Leistenzeile: ein Effekt in der Effektleiste",
+          "sheetSection": "Bogenabschnitt: die SC-Seitenleiste"
+        },
+        "sample": {
+          "description": "Beispieltext für die Detailzeile. Er ist lang genug, um bei der Breite des Bogens in eine zweite Zeile umzubrechen.",
+          "effectName": "Beispieleffekt",
+          "longName": "Ein Beispielname, lang genug, um in seiner Spalte in eine zweite Zeile umzubrechen",
+          "modifier": "Beispielmodifikator",
+          "modifierOff": "Beispielmodifikator, aus",
+          "note": "Eine Beispielnotiz, die die Regeln des Wurfs hinzufügen.",
+          "npcName": "Beispielkreatur",
+          "pcName": "Beispiel-Samurai",
+          "reason": "Beispielgrund",
+          "ruleError": "Beispielfehler: Dieser Wert muss eine Zahl sein.",
+          "substitute": "Beispielersetzung",
+          "tattooEffect": "Beispiel-Effekttext",
+          "tnChanges": "Beispiel-SZ-Änderung +5",
+          "tnChangesNote": "(Beispiel-SZ-Änderung +5)"
+        },
+        "samples": {
+          "activationOff": "Aktivierung aus",
+          "activationOn": "Aktivierung an",
+          "addItem": "Gegenstand hinzufügen",
+          "advantageFields": "Vorteilstyp und Kosten",
+          "advantageRows": "Vorteile",
+          "armorBlock": "Rüstung",
+          "armorRows": "Rüstung",
+          "attackHit": "Treffender Angriff mit seinen Folgeschaltflächen",
+          "bio": "Biografie-Abschnitt",
+          "bioEmpty": "Biografie-Abschnitt ohne Klan, Familie oder Schule",
+          "bioRow": "Biografiezeile in ihrer Liste",
+          "brokenLink": "Defekter Link",
+          "browserControls": "Reiter und Filter",
+          "browserEmpty": "Keine Einträge",
+          "browserRows": "Einträge",
+          "checkLink": "Wurflink",
+          "checkLinkGm": "Wurflink, wie der SL ihn sieht",
+          "combatBlock": "Kampf",
+          "conditionLink": "Zustandslink",
+          "coreButton": "Kern-Schaltfläche",
+          "coreFields": "Kernfelder, eines deaktiviert",
+          "damage": "Schadenswurf mit Anwenden-Schaltflächen",
+          "damageLink": "Schadenslink",
+          "disadvantageRows": "Nachteile",
+          "duel": "Laufendes Duell",
+          "effects": "Effekte, einen davon darf der Benutzer entfernen",
+          "effectsTab": "Reiter Effekte: einer an, einer aus",
+          "emphasisRoll": "Schwerpunkt: eine 1 neu gewürfelt",
+          "emptyList": "Gegenstandsabschnitt ohne Gegenstände",
+          "everyPart": "Alle Teile, mit den Extras des Ringwurfs",
+          "expandSection": "Aufklapp-Steuerelement eines Abschnitts",
+          "failureHonorRoll": "Fehlschlag, mit dem Ehrenwurf",
+          "fearLink": "Furchtlink",
+          "flowOver": "Ablauf beendet",
+          "formView": "Formularansicht, eine Regel ungültig",
+          "fullDefense": "Wurf für Volle Verteidigung",
+          "grapple": "Ringkampf, einer hat die Kontrolle",
+          "gridWithFullRow": "Raster mit einer Zeile in voller Breite",
+          "healingCard": "Heilungskarte",
+          "healthy": "Gesund",
+          "honorTrack": "Ehrenrang-Leiste",
+          "itemRows": "Gegenstände",
+          "jsonView": "JSON-Ansicht",
+          "kataRows": "Kata: eine aktiv, eine nicht",
+          "kihoRows": "Kiho",
+          "lastRank": "Letzte Wundenstufe",
+          "limitedName": "Name und Porträt",
+          "listCollapsed": "Listenabschnitt, zugeklappt",
+          "listOpen": "Listenabschnitt, aufgeklappt",
+          "masteryFields": "Ring und Meisterschaftsstufe",
+          "middleRank": "Mittlere Wundenstufe",
+          "modifierFields": "Modifikatorfelder",
+          "noActor": "Kein Akteur",
+          "noEffects": "Akteur ohne Effekte",
+          "noEntries": "Keine Einträge",
+          "notesSection": "Notizabschnitt",
+          "noVoidRing": "Leere-Ring 0: kein Leere-Schalter",
+          "npcHeader": "NSC-Kopf",
+          "npcManual": "NSC mit manueller Leiste",
+          "npcTrack": "NSC-Leiste",
+          "npcValues": "NSC-Werte",
+          "oneRing": "Ein Ring: Erde 1",
+          "oneSlot": "Ein Zauberplatz: Wasser 0",
+          "oneTrait": "Eine Eigenschaft: Ausdauer 1",
+          "onItemSheet": "Auf dem Gegenstandsbogen",
+          "pcHeader": "SC-Kopf, Ränge 1 bis 10",
+          "pcVoidOff": "SC, Leere aus",
+          "pcVoidOn": "SC, Leere an",
+          "plainHeader": "Kopf ohne Sortierung",
+          "plainLongName": "Keine Quellenangabe, langer Name",
+          "postedItem": "Gegenstandskarte wie gepostet",
+          "rankTen": "Furchtrang 10",
+          "rankThree": "Furchtrang 3",
+          "rankTracks": "Rangleisten",
+          "rankZero": "Furchtrang 0: kein Test",
+          "readOnlyEmpty": "Schreibgeschützt, keine Regeln",
+          "request": "Anfragekarte",
+          "ringsAndTraits": "Ringe und Eigenschaften mit Leere-Punkten",
+          "rollButton": "Würfelschaltflächen in Fertigkeitszeilen",
+          "rollFace": "Wurfansicht mit einem Fertigkeitspool",
+          "rowControls": "Zeilensteuerelemente",
+          "rowDetails": "Zeilendetails: Regeln und Beschreibung",
+          "rowDetailText": "Zeilendetailtext",
+          "save": "Speichern",
+          "sectionTitle": "Titelzeile mit den Steuerelementen zum Hinzufügen und Aufklappen",
+          "sixTabs": "Sechs Reiter",
+          "skilledRoll": "Geübter Wurf: eine 10 explodiert",
+          "skillHeader": "Kopf der Fertigkeitsliste",
+          "skillRows": "Fertigkeiten: eine Schulfertigkeit und ein langer Name",
+          "slotCounts": "Zauberplätze 0, 1, 3 und 9",
+          "sortHeader": "Sortierbare Köpfe und ein einfacher",
+          "spellRows": "Zauber",
+          "success": "Erfolg mit Erhöhungen und einer Notiz",
+          "summary": "Gegenstandsübersicht",
+          "tattooRows": "Tätowierungen",
+          "techniqueRows": "Techniken",
+          "textSection": "Textabschnitt: Beschreibung",
+          "titleTools": "Abschnitt mit Titelwerkzeugen",
+          "traitRank": "Rangsteuerung einer Eigenschaft: Ausdauer 1",
+          "twoTabs": "Zwei Reiter",
+          "undone": "Rückgängig gemacht",
+          "unskilledMaho": "Ungeübt, keine Leere-Punkte, Maho-Extras",
+          "unskilledRoll": "Ungeübter Wurf: keine Explosionen",
+          "voidDots": "Leere-Punkt-Markierungen",
+          "voidOffSimple": "Leere aus, einfache Bewegung",
+          "voidOnFree": "Volle Verteidigung, Leere an, freie Bewegung",
+          "voidRank": "Rangsteuerung des Leere-Rings: 2",
+          "voidSpentKilled": "Leere-Punkt ausgegeben, getötet",
+          "wealthChange": "Vermögensänderung: hinzufügen",
+          "weaponCard": "Waffenkarte, vor 4.0.0 gepostet",
+          "weaponRows": "Waffen: Nahkampf und Bogen",
+          "withCitation": "Mit Quellenangabe",
+          "withEntries": "Mit Einträgen, einer durch Regeln geändert",
+          "woundsBlock": "Wunden",
+          "woundsTaken": "Erlittene Wunden",
+          "woundTrack": "Wundenleiste allein"
+        },
+        "sections": {
+          "components": "Komponenten",
+          "foundations": "Grundlagen",
+          "patterns": "Muster"
+        },
+        "theme": {
+          "dark": "Dunkles Thema",
+          "light": "Helles Thema"
+        },
+        "title": "Design-Galerie",
+        "toggleTheme": "Thema wechseln"
+      },
+      "effectPanel": {
+        "noActor": "Wähle einen Spielstein aus oder weise einen Charakter zu, um seine Effekte zu sehen.",
+        "noEnd": "Kein festes Ende",
+        "none": "Keine Effekte auf {name}.",
+        "openSource": "Quelle öffnen",
+        "remove": "Diesen Effekt entfernen",
+        "rounds": "Verbleibende Runden: {count}",
+        "time": "Verbleibende Zeit: {time}",
+        "title": "Effekte",
+        "turns": "Verbleibende Züge: {count}",
+        "until": "Bis {event}",
+        "uses": "Verbleibende Nutzungen: {left} von {max}"
       },
       "emphasisManager": {
         "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen",
         "custom": "Benutzerdefiniert",
+        "emphasisName": "Name des Schwerpunkts",
+        "errors": {
+          "saveFailed": "Fehler beim Speichern des benutzerdefinierten Schwerpunkts",
+          "updateFailed": "Fehler beim Aktualisieren der Schwerpunktverwaltung"
+        },
         "hint": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
         "manage": "Schwerpunkte Verwalten",
-        "noEmphases": "Keine Schwerpunkte in der Liste"
+        "noEmphases": "Keine Schwerpunkte in der Liste",
+        "title": "Schwerpunktverwaltung",
+        "titleFor": "Schwerpunktverwaltung: {item}"
+      },
+      "npcAttackConfig": {
+        "attackModifier": "Angriffsmodifikator",
+        "damageModifier": "Schadensmodifikator",
+        "errors": {
+          "updateFailed": "Fehler beim Aktualisieren der NSC-Angriffskonfiguration"
+        },
+        "title": "NSC-Angriffskonfiguration",
+        "titleFor": "NSC-Angriffskonfiguration {slot}"
       },
       "wealthManager": {
         "add": "Hinzufügen",
         "addMoney": "Geld Hinzufügen",
         "amount": "Betrag",
+        "buToKoku": "5 Bu → 1 Koku",
+        "buToZeni": "1 Bu → 10 Zeni",
         "convert": "Währung Umtauschen",
         "convertBuToKoku": "5 Bu zu 1 Koku umtauschen",
         "convertBuToZeni": "1 Bu zu 10 Zeni umtauschen",
@@ -25,15 +408,44 @@
         "currentWealth": "Aktuelles Vermögen",
         "denomination": "Währung",
         "errors": {
-          "openFailed": "Fehler beim Öffnen der Vermögensverwaltung"
+          "addMoneyFailed": "Fehler beim Hinzufügen von Geld",
+          "convertFailed": "Fehler beim Umtauschen der Währung",
+          "insufficientForConversion": "Nicht genug Geld für diesen Umtausch",
+          "insufficientFunds": "Nicht genug Geld für diese Transaktion",
+          "openFailed": "Fehler beim Öffnen der Vermögensverwaltung",
+          "removeMoneyFailed": "Fehler beim Entfernen von Geld"
         },
+        "kokuToBu": "1 Koku → 5 Bu",
         "open": "Vermögen Verwalten",
         "remove": "Entfernen",
-        "removeMoney": "Geld Entfernen"
+        "removeMoney": "Geld Entfernen",
+        "title": "Vermögensverwaltung",
+        "titleFor": "Vermögensverwaltung: {name}",
+        "zeniToBu": "10 Zeni → 1 Bu"
       },
       "woundConfig": {
+        "errors": {
+          "invalidWoundConfigValue": "Ungültiger Wert in der Wundenkonfiguration",
+          "openFailed": "Fehler beim Öffnen der Wundenkonfiguration",
+          "updateFailed": "Fehler beim Aktualisieren der Wundenkonfiguration"
+        },
+        "penaltyModifier": "Strafmodifikator",
+        "rateModifier": "Ratenmodifikator",
         "title": "Wundenkonfiguration",
         "titleFor": "Wundenkonfiguration: {name}"
+      },
+      "xpManager": {
+        "addXp": "EP hinzufügen",
+        "disadvantageCapTitle": "Limit für Nachteile festlegen",
+        "errors": {
+          "openFailed": "Fehler beim Öffnen der EP-Verwaltung"
+        },
+        "noAdjustments": "Keine EP von Hand hinzugefügt oder abgezogen.",
+        "noPurchases": "Noch keine EP ausgegeben.",
+        "open": "EP-Verwaltung öffnen",
+        "setDisadvantageCap": "Limit festlegen",
+        "title": "EP-Verwaltung",
+        "titleFor": "EP-Verwaltung: {name}"
       }
     },
     "character": {
@@ -47,6 +459,7 @@
       },
       "experience": {
         "adjustExperience": "Erfahrung Anpassen",
+        "bonusKiho": "Bonus-Kiho",
         "breakdown": {
           "advantages": "Vorteile",
           "base": "Basis",
@@ -72,16 +485,22 @@
         "purchases": "Käufe",
         "reason": "Grund",
         "recalculate": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
+        "schoolKiho": "Schul-Kiho",
         "skillChange": "{name} {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "spellMemorized": "Gelernt: {name}",
         "summary": "Erfahrungszusammenfassung",
+        "tooManyBonusKiho": "Mehr Bonus-Kiho, als der Rang der Mönchsschule erlaubt (p.231).",
+        "tooManySchoolKiho": "Mehr Schul-Kiho angekreuzt, als die Mönchsschule gewährt (p.231).",
         "traitChange": "{label} {from}→{to}",
         "usedTotal": "Verwendet / Gesamt",
         "voidChange": "Leere {from}→{to}",
         "xpAmount": "Menge"
       },
       "movement": {
+        "errors": {
+          "toggleFailed": "Fehler beim Umschalten der Bewegungsart"
+        },
         "feet": "Fuß",
         "maximum": "Maximale Bewegung",
         "title": "Bewegung"
@@ -89,10 +508,19 @@
       "ranks": {
         "gloryRank": "Ruhm",
         "honorRank": "Ehre",
+        "insightAutomatic": "Berechnung des Einsichtsrangs für {name} auf automatisch gesetzt",
+        "insightManual": "Berechnung des Einsichtsrangs für {name} auf manuell gesetzt",
         "statusRank": "Statusrang",
         "taintRank": "Schattenland-Verderben"
       },
       "skills": {
+        "bonuses": {
+          "freeEmphases": "Freie Schwerpunkte",
+          "freeRank": "Freier Rang",
+          "keep": "Behalten-Bonus",
+          "roll": "Würfel-Bonus",
+          "total": "Gesamtbonus"
+        },
         "names": {
           "acting": "Schauspielerei",
           "animalHandling": "Tierpflege",
@@ -143,6 +571,8 @@
           "mastery5": "Meisterschaft Rang 5",
           "mastery7": "Meisterschaft Rang 7",
           "school": "Schulfertigkeit",
+          "social": "Soziale Fertigkeit",
+          "socialHint": "Regeln wählen soziale Fertigkeiten mit skill-tag:social; Verderben-Strafen wirken auf sie.",
           "trait": "Eigenschaft",
           "type": "Typ"
         }
@@ -177,6 +607,8 @@
         "price": "Preis"
       },
       "weapons": {
+        "addsStrength": "Addiert Stärke",
+        "addsStrengthHint": "Aus für Wurfwaffen, die keine Stärke addieren, etwa Shuriken.",
         "arrow": "Pfeil",
         "arrows": {
           "armor": "Panzerbrecher",
@@ -187,7 +619,14 @@
         },
         "associatedSkill": "Zugeordnete Fertigkeit",
         "attackType": "Angriffsart",
+        "belowMinStrength": "{name} braucht Stärke {min}, um {weapon} zu führen.",
+        "belowMinStrengthGM": "Trotzdem damit angreifen?",
         "damageKeep": "Behaltene Schadenswürfel",
+        "explodes": "Würfel explodieren",
+        "explodesHint": "Aus für Waffen, deren Schadenswürfel nie explodieren, etwa Shuriken.",
+        "fallbackTrait": "Ersatz-Eigenschaft",
+        "meleeRange": "Bogen gegen ein Ziel in Nahkampfreichweite",
+        "minStrength": "Mindeststärke",
         "range": "Reichweite",
         "rangedAttack": "Fernkampfangriff",
         "size": "Größe",
@@ -200,6 +639,9 @@
           "bow": "Kyujutsu",
           "weapon": "Kenjutsu"
         },
+        "tnMounted": "Angriffs-SZ beritten",
+        "tnOnFoot": "Angriffs-SZ zu Fuß",
+        "tnOnFootHint": "Wird zum SZ von Angriffen mit dieser Waffe addiert, während ihr Träger beritten ist bzw. nicht: der Dai-kyu hat +10 zu Fuß, der Han-kyu +10 beritten (p.199).",
         "typeBow": "Bogen",
         "typeWeapon": "Waffe"
       }
@@ -209,11 +651,17 @@
         "internal": "Intern",
         "karmic": "Karmisch",
         "martial": "Kampf",
-        "mystic": "Mystisch"
+        "mystic": "Mystisch",
+        "schoolKiho": "Schul-Kiho",
+        "schoolKihoHint": "Eines der Kiho, die die Mönchsschule gewährt und die keine EP kosten (p.231).",
+        "startingKiho": "Start-Kiho",
+        "startingKihoHint": "Kiho, die eine Mönchsschule auf Rang 1 gewährt, 0 bei anderen Schulen; jeder spätere Rang gewährt zwei weitere (p.231)."
       },
       "maho": {
         "additionalBlood": "Zusätzliches Blut",
         "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
+        "bloodRaisesToTn": "Freie Erhöhungen aus zusätzlichem Blut auf den SZ",
+        "bloodRaisesToTnHint": "Jede senkt den SZ um 5, bis zu den Freien Erhöhungen, die das zusätzliche Blut erkauft.",
         "bloodRequired": "Blutkosten Erforderlich",
         "bloodSource": {
           "label": "Blutquelle",
@@ -229,10 +677,15 @@
         "warningTitle": "Blutmagie - Verbotenes Maho"
       },
       "spells": {
+        "aboveSchoolRank": "{spell} hat Meisterschaftsstufe {mastery}; {name} kann in diesem Element Zauber bis {limit} wirken (p.164).",
+        "aboveSchoolRankGM": "Trotzdem wirken?",
         "affinity": "Affinität",
         "affinityTag": "[Affinität]",
+        "anyElement": "Beliebiges Element",
         "areaOfEffect": "Wirkungsbereich",
         "cast": "Wirken",
+        "castInElement": "Wirken",
+        "chooseElement": "{spell} in welchem Element wirken?",
         "concentrationName": "Konzentration: {spell}",
         "deficiency": "Mangel",
         "deficiencyTag": "[Mangel]",
@@ -241,6 +694,9 @@
         "memorized": "Gelernt",
         "raises": "Erhöhungen",
         "range": "Reichweite",
+        "shugenja": "Shugenja",
+        "shugenjaSchool": "Shugenja-Schule",
+        "shugenjaSchoolHint": "Zauberspruch-Würfe addieren den Rang dieser Schule. Ohne eine addieren sie den Einsichtsrang.",
         "slotsRestored": "Alle Zauberplätze auf Maximum wiederhergestellt",
         "slotSuffix": "[Zauberplatz Verwenden {element}]",
         "useSpellSlot": "Zauberplatz Verwenden",
@@ -250,7 +706,9 @@
     },
     "system": {
       "errors": {
-        "deleteEffect": "Fehler beim Löschen des Effekts."
+        "createEffect": "Fehler beim Erstellen des Effekts",
+        "deleteEffect": "Fehler beim Löschen des Effekts.",
+        "toggleEffect": "Fehler beim Umschalten des Effekts"
       },
       "migration": {
         "compendiumIconsUpdated": {
@@ -263,9 +721,22 @@
         }
       },
       "settings": {
+        "designGallery": {
+          "hint": "Jedes Token, jede Komponente und jedes Muster des Designsystems, gezeichnet mit den eigenen Vorlagen des Systems.",
+          "label": "Design-Galerie öffnen",
+          "name": "Design-Galerie"
+        },
+        "floatingNumbers": {
+          "hint": "Zeigt jede Änderung der Wunden und Leere-Punkte eines Charakters als schwebenden Text über seinen Spielsteinen an, zum Beispiel \"+7 Wunden\". Die Kerneinstellung für scrollenden Statustext schaltet ihn ebenfalls ab.",
+          "name": "Schwebende Wunden- und Leere-Zahlen"
+        },
         "forceMigration": {
           "hint": "Erzwingt die Ausführung aller Migrationen beim nächsten Weltladen, unabhängig von der Version. Setzt sich automatisch zurück, nachdem die Migration abgeschlossen ist.",
           "name": "Migration beim Start erzwingen"
+        },
+        "honorRoll": {
+          "hint": "Einmal pro Sitzung darf ein Charakter einen misslungenen Fertigkeits-, Eigenschafts-, Ring- oder Zauberspruch-Wurf mit dem Ehrenrang in gewürfelten und behaltenen Würfeln wiederholen; ein Fehlschlag kostet einen Ehrenrang. Der SL beginnt eine Sitzung mit der Spielstein-Steuerung Neue Sitzung.",
+          "name": "Optionale Regel: Ehrenwurf"
         },
         "LtException": {
           "hint": "Wenn behaltene Würfel durch Umwandlung unter 10 reduziert werden, 2 hinzufügen.",
@@ -278,20 +749,179 @@
       }
     },
     "ui": {
+      "activation": {
+        "end": "Beenden",
+        "start": "Aktivieren"
+      },
       "armor": {
         "allowStacking": "Rüstungsstapelung Erlauben"
       },
+      "check": {
+        "actionNote": "{action} (durch {source})",
+        "actions": {
+          "complex": "Komplexe Aktion",
+          "free": "Freie Aktion",
+          "simple": "Einfache Aktion"
+        },
+        "allKept": "Alle",
+        "armor": "Rüstung",
+        "caller": "Bonus",
+        "castSpell": "Als Zauber wirken",
+        "contest": "Vergleichender Wurf",
+        "contestTie": "Gleichstand: erneut würfeln.",
+        "contestWinner": "{name} gewinnt.",
+        "damageLabel": "Schaden für {weapon}",
+        "damageRollPool": "Schadenswurf ({pool})",
+        "effectsFor": "Aktive Effekte ({key})",
+        "freeRaisesLeft": "Freie Erhöhungen: {count}",
+        "freeRaisesToTnNote": "(Freie Erhöhungen auf den SZ ausgegeben: {count})",
+        "increasedDamage": "Erhöhter Schaden (Erhöhungen)",
+        "keepFewer": "Nur behalten",
+        "keepModifier": "Behalten-Modifikator",
+        "labelWithSuffix": "{label} {suffix}",
+        "manual": "Situativ",
+        "modifiers": "Modifikatoren",
+        "noVoidPoints": "Keine Leere-Punkte übrig",
+        "outcomeAgainstTn": "{outcome} gegen SZ {tn}",
+        "pool": "Pool",
+        "raisesNote": "(Erhöhungen: {count})",
+        "range": {
+          "melee": "Nahkampf",
+          "ranged": "Fernkampf"
+        },
+        "rangeFor": "{target} ({range})",
+        "rerolledLabel": "{label} (neu gewürfelt, Besseres behalten)",
+        "rerollKeepBetter": "Neu würfeln, Besseres behalten",
+        "rollModifier": "Würfelmodifikator",
+        "schoolRank": "Schulrang",
+        "schoolRankHint": "0 folgt dem Einsichtsrang des Charakters. Setze ihn für einen Charakter mit mehreren Schulen.",
+        "spellSlot": "Zauberplatz",
+        "statBlock": "Werteblock",
+        "substitutes": "Ersetzungen",
+        "titleAgainst": "{label} gegen {target}",
+        "tnChangesNote": "({changes})",
+        "totalModifier": "Gesamtmodifikator",
+        "unskilled": "Ungeübter Wurf: Würfel explodieren nicht, und es gelten weder Erhöhungen noch Freie Erhöhungen.",
+        "void": "Einen Leere-Punkt ausgeben (+1k1)",
+        "voidSkill": "Einen Leere-Punkt ausgeben: Fertigkeitsrang 1",
+        "voidSkillHint": "Ohne Ränge in der Fertigkeit lässt ein Leere-Punkt diesen Wurf als Rang 1 zählen: ein Würfel mehr, Würfel explodieren, und Erhöhungen gelten (p.78). Ohne ihn werden die Erhöhungen oben ignoriert.",
+        "weaponTn": "{weapon} ({where})",
+        "woundPenaltyNote": "(Wundenstrafe +{penalty})"
+      },
       "combat": {
+        "applySelected": "Auf Ausgewählte anwenden",
+        "applyTo": "Auf {target} anwenden",
+        "arrowArmor": {
+          "armor": "Panzerbrecher-Pfeil ignoriert Rüstung",
+          "flesh": "Fleischschneider-Pfeil verdoppelt Rüstung"
+        },
+        "calledShot": "Gezielter Angriff",
+        "calledShotHand": "Hand oder Fuß (2 Erhöhungen)",
+        "calledShotHead": "Kopf (3 Erhöhungen)",
+        "calledShotLimb": "Gliedmaße (1 Erhöhung)",
+        "calledShotLocation": "Ziel des Gezielten Angriffs",
+        "calledShotNote": "Gezielter Angriff ({raises} Erhöhungen): {location}. Der SL entscheidet über jede Wirkung auf diesen Körperteil.",
+        "calledShotSmall": "Auge, Ohr, Finger (4 Erhöhungen)",
+        "calledShotUnnamed": "unbenannter Körperteil",
+        "contestStrength": "Vergleichenden Stärkewurf würfeln",
+        "contestWaiting": "Du hast gewürfelt; warte auf die andere Seite",
+        "disarm": "Entwaffnen (3 Erhöhungen)",
+        "disarmed": "{name} lässt die Waffe fallen.",
+        "disarmNote": "Entwaffnen: Der Schaden ist 2k1 ohne Stärke; würfle einen vergleichenden Stärkewurf, und gewinnt der Angreifer, lässt das Ziel die Waffe fallen.",
+        "duel": {
+          "assessment": "Einschätzung",
+          "assessmentEdge": "Einschätzung +10",
+          "concede": "{name} gibt auf",
+          "conceded": "{name} gibt auf.",
+          "dazed": "{name} ist benommen und kann kein Iaijutsu-Duell führen",
+          "done": "Vorbei",
+          "edgeWon": "{name} erhält {bonus} auf Fokus.",
+          "facts": "Fakten, die {name} erfährt: {count}.",
+          "firstStrike": "{name} schlägt zuerst zu, mit {raises} Freien Erhöhungen.",
+          "focus": "Fokus",
+          "focusMastery": "Iaijutsu-Meisterschaft (Freie Erhöhung)",
+          "kharmic": "Karmischer Schlag: Beide schlagen gleichzeitig zu.",
+          "pick": "Wähle den Spielstein eines Duellanten aus und visiere den des anderen an",
+          "roll": "Für {name} würfeln",
+          "rollLabel": "{stage}: {name}",
+          "start": "Iaijutsu-Duell: ausgewählter Spielstein gegen anvisierten Spielstein",
+          "strike": "Schlag",
+          "title": "Iaijutsu-Duell",
+          "yield": "{name} gibt nach",
+          "yielded": "{name} gibt nach."
+        },
+        "errors": {
+          "raisesInvalid": "Angriffserhöhungen müssen Zahlen sein",
+          "raisesMismatch": "Diese Karte beansprucht {claimed} Erhöhungen; der Angriff hat {stored} angesagt",
+          "raisesOutOfRange": "Angriffserhöhungen müssen zwischen 0 und {max} liegen"
+        },
+        "extraAttack": "Zusätzlicher Angriff (5 Erhöhungen)",
+        "extraAttackNote": "Zusätzlicher Angriff: Sobald dieser Angriff samt Schaden abgehandelt ist, mache einen zweiten Angriffswurf.",
+        "feint": "Finte (2 Erhöhungen)",
+        "feintNote": "Finte: Die Hälfte des Überschusses über den SZ wird zum Schaden addiert (bis zu 5 × Einsichtsrang).",
+        "flowTitle": "{flow}: {stage}",
+        "fourLegged": "Ziel hat 4 oder mehr Beine",
+        "grapple": {
+          "break": "Lösen",
+          "broken": "{name} löst sich aus dem Ringkampf.",
+          "control": "Ringkampf-Kontrolle",
+          "controlLabel": "Ringkampf-Kontrolle: {name}",
+          "hit": "Schlagen",
+          "hitLabel": "Schlag: {weapon}",
+          "hitLog": "{name} trifft für {total}.",
+          "inControl": "{name} hat die Kontrolle.",
+          "over": "Vorbei",
+          "pass": "Passen",
+          "passed": "{name} behält die Kontrolle.",
+          "rollControl": "Kontrollwurf: {name}",
+          "throw": "Werfen",
+          "thrown": "{name} wird geworfen und liegt am Boden.",
+          "title": "Ringkampf",
+          "titleFor": "Ringkampf: {name} / {target}",
+          "weaponLost": "{name} erhält 2 Freie Erhöhungen, um im nächsten Zug zu entwaffnen."
+        },
+        "grappleIgnoresArmor": "Ringkampf ignoriert Rüstung",
+        "grappleManeuver": "Ringkampf beginnen (ignoriert Rüstung)",
+        "grappleStart": "Ringkampf mit {target} beginnen",
+        "guard": "Anvisierten Spielstein beschützen",
+        "guardFullAttack": "Du kannst in der Haltung Voller Angriff nicht beschützen",
+        "guardPick": "Wähle deinen Spielstein aus und visiere den an, den du beschützen willst",
+        "increasedDamageNote": "Erhöhter Schaden: +{dice}k0.",
+        "initiativeVoidNone": "{name} hat keine Leere-Punkte verfügbar",
+        "initiativeVoidQuestion": "Einen Leere-Punkt ausgeben, um +10 auf den Initiativewurf von {name} zu addieren?",
+        "initiativeVoidSpent": "{name} hat einen Leere-Punkt für die Initiative ausgegeben (+10)",
+        "initiativeVoidTitle": "Einen Leere-Punkt für die Initiative von {name} ausgeben",
+        "invulnerableNote": "Unverwundbarkeit: eine Wunde.",
+        "killedNote": "Über die Wundenstufe Kampfunfähig hinaus: als Tot markiert. Der SL kann den Status entfernen.",
+        "knockdown": "Niederwerfen (2 Erhöhungen, 4 gegen 4 oder mehr Beine)",
+        "knockdownNote": "Niederwerfen: Würfle einen vergleichenden Stärkewurf; gewinnt der Angreifer, liegt das Ziel am Boden.",
+        "knockedDown": "{name} wird niedergeworfen und liegt am Boden.",
+        "maneuvers": "Manöver",
+        "maneuversHint": "Freie Erhöhungen bezahlen zuerst die Manöver, danach angesagte Erhöhungen. Übrige Erhöhungen addieren je +1k0 Schaden.",
         "multipleTargets": "Ziele - SZ nicht automatisch gesetzt",
+        "notEnoughRaises": "Die Manöver kosten {cost} Erhöhungen; sage genug Erhöhungen an (oder nutze Freie Erhöhungen), um sie zu bezahlen (angesagt: {raises})",
+        "npcInitiative": "0 würfelt Einsichtsrang 1 + Reflexe, behalte Reflexe (p.81). Über 0 in beiden ist der eigene Pool dieses NSC.",
+        "reductionNote": "Reduzierung {reduction}.",
+        "resultTitle": "{name} erleidet {wounds} Wunden durch {damage} Schaden",
+        "sources": "Schadensquellen: {sources}",
+        "spiritNote": "Geist: Der Schaden wird halbiert.",
+        "unarmed": "Unbewaffnet",
+        "undo": "Rückgängig machen",
+        "undoneNote": "Rückgängig gemacht.",
+        "voidNote": "Leere-Punkt ausgegeben: {wounds} Wunden weniger.",
         "vs": "vs"
       },
       "common": {
         "action": "Aktion",
         "active": "Aktiv",
+        "add": "Hinzufügen",
+        "all": "Alle",
+        "allow": "Erlauben",
         "armor": "Rüstung",
         "bonus": "Bonus",
         "cancel": "Abbrechen",
         "clan": "Klan",
+        "complex": "Komplex",
         "conditions": "Zustände",
         "cost": "Kosten",
         "current": "Aktuell",
@@ -300,9 +930,11 @@
         "disabled": "deaktiviert",
         "edit": "Bearbeiten",
         "effect": "Effekt",
+        "expand": "Aufklappen",
         "free": "Frei",
         "initiative": "Initiative",
         "insight": "Einsicht",
+        "insightRank": "Einsichtsrang",
         "modifier": "Modifikator",
         "multi": "Multiplikator",
         "name": "Name",
@@ -314,22 +946,127 @@
         "save": "Speichern",
         "school": "Schule",
         "simple": "Einfach",
+        "sortedAscending": "Aufsteigend sortiert",
+        "sortedDescending": "Absteigend sortiert",
+        "spendVoidPoint": "Leere-Punkt ausgeben",
         "tn": "SZ",
+        "toggle": "Ein- oder ausschalten",
         "type": "Typ",
+        "unknown": "Unbekannt",
         "xp": "Erfahrungspunkte"
       },
       "dialogs": {
+        "addAttack": "Angriff hinzufügen",
+        "deleteAttack": {
+          "consequence": "Seine Angriffs- und Schadenspools werden geleert.",
+          "content": "{name} entfernen?",
+          "title": "Angriff entfernen?"
+        },
+        "deleteEmphasis": {
+          "consequence": "Er wird aus den benutzerdefinierten Schwerpunkten dieser Welt entfernt.",
+          "content": "{emphasis} entfernen?"
+        },
         "deleteItem": {
+          "consequence": "Seine Effekte und Regeln sowie jeder Gegenstand, den er gewährt hat, werden mit entfernt.",
           "content": "Bist du sicher, dass du {name} löschen möchtest?",
           "title": "Gegenstand Löschen?"
         }
       },
       "effects": {
-        "autoProne": "Auto: Am Boden"
+        "alreadyEnded": "Dieser Effekt ist bereits beendet",
+        "applyTo": "{effect} auf {target}",
+        "autoProne": "Auto: Am Boden",
+        "centered": "Zentriert",
+        "concentrationUpkeep": "{effect}: Gib in dieser Runde eine Einfache Aktion aus, um konzentriert zu bleiben, oder beende den Effekt.",
+        "endEncounter": "Begegnung beenden",
+        "endEncounterConfirm": "Die Begegnung beenden? Furcht und jeder andere Effekt, der bis zum Ende der Begegnung dauert, endet jetzt.",
+        "expiry": {
+          "encounterEnd": "Ende der Begegnung"
+        },
+        "fullDefense": "Volle Verteidigung",
+        "fullDefenseBonus": "Volle Verteidigung (+{bonus})",
+        "immune": "{name} ist immun gegen {effect}",
+        "noGM": "Kein SL ist verbunden, um diesen Effekt anzuwenden",
+        "promptAnswered": "Dieser Wurf wurde bereits gemacht",
+        "proneLargeWeapon": "Am Boden: Eine große Waffe kann nicht angreifen, bis ihr Träger aufsteht.",
+        "saveText": "{roll}-Wurf gegen SZ {tn}.",
+        "saveTitle": "{effect}: Rettungswurf",
+        "stanceNotAllowed": "{condition} schließt {stance} aus",
+        "voidArmor": "Leere: Rüstungs-SZ +10",
+        "voidArmorNoCombat": "Leere für den Rüstungs-SZ geht nur in einem aktiven Kampf",
+        "voidArmorNotTurn": "Leere für den Rüstungs-SZ geht nur in deinem Zug",
+        "voidArmorQuestion": "Einen Leere-Punkt ausgeben, um den Rüstungs-SZ für 1 Runde um +10 zu erhöhen?",
+        "voidArmorSpent": "{name} hat einen Leere-Punkt ausgegeben: Rüstungs-SZ +10 für 1 Runde",
+        "voidArmorTitle": "Einen Leere-Punkt für den Rüstungs-SZ ausgeben",
+        "voidLimit": "{name} hat in dieser Runde bereits einen Leere-Punkt ausgegeben",
+        "voidSpentThisRound": "In dieser Runde wurde bereits ein Leere-Punkt ausgegeben; einer pro Runde ist die übliche Grenze."
+      },
+      "floating": {
+        "void": "Leere-Punkte"
+      },
+      "grants": {
+        "granted": "{name} erhält {item} von {giver} (Schulrang {rank}).",
+        "waiting": "{name} lernt {items} von {giver}, sobald diese Schulfertigkeiten Rang 1 erreichen: {skills}.",
+        "waitingRow": "Die Techniken warten auf diese Schulfertigkeiten auf Rang 1: {skills}"
       },
       "hints": {
+        "decreaseTrait": "{trait} senken",
+        "decreaseVoidRing": "Leere-Ring senken",
+        "increaseTrait": "{trait} erhöhen",
+        "increaseVoidRing": "Leere-Ring erhöhen",
         "postToChat": "Im Chat posten",
-        "shiftClickRankPoints": "Shift+Klick: ±0.1, Shift+Strg+Klick: ±1.0"
+        "shiftClickRankPoints": "Shift+Klick: ±0.1, Shift+Strg+Klick: ±1.0",
+        "traitRank": "{trait}: Eigenschaftswurf; Shift+Klick: +1, Shift+Rechtsklick: -1",
+        "voidRingRank": "Leere-Ring: Shift+Klick: +1, Shift+Rechtsklick: -1"
+      },
+      "honorRoll": {
+        "button": "Ehrenwurf",
+        "failedReason": "Ehrenwurf misslungen",
+        "noDice": "{name} hat keinen Ehrenrang, auf den ein Ehrenwurf zurückgreifen kann",
+        "rollLabel": "{label} (Ehrenwurf)",
+        "used": "{name} hat in dieser Sitzung bereits einen Ehrenwurf gemacht"
+      },
+      "ledger": {
+        "hint": "Trage einen Gewinn oder Verlust an Ehre, Ruhm, Status oder Verderben mit seinem Grund ein. Zehn Punkte ergeben einen Rang; die Registerregeln des Charakters können den Betrag ändern.",
+        "points": "Punkte (negativ für Verlust)",
+        "reason": "Grund",
+        "record": "Eintragen",
+        "title": "Register",
+        "titleFor": "Register: {name}",
+        "track": "Leiste",
+        "tracks": {
+          "glory": "Ruhm",
+          "honor": "Ehre",
+          "status": "Status",
+          "taint": "Verderben"
+        }
+      },
+      "links": {
+        "checkTn": "{what}, SZ {tn}",
+        "damage": "{pool} Schaden",
+        "errors": {
+          "condition": "unbekannte Zustands-ID",
+          "fear": "der Furchtrang muss eine ganze Zahl von 1 bis 10 sein",
+          "nothingToRoll": "nenne eine Fertigkeit, eine Eigenschaft oder einen Ring",
+          "pool": "schreibe den Pool als XkY, jeweils von 1 bis 30, mit optionalem +N oder -N",
+          "ring": "unbekannter Ring; verwende air, earth, fire, water oder void",
+          "skillWithRing": "eine Fertigkeit wird mit einer Eigenschaft oder dem Leere-Ring gewürfelt, nicht mit einem Ring",
+          "syntax": "schreibe es als key=value|key=value",
+          "tn": "der SZ muss eine ganze Zahl von 1 bis 999 sein",
+          "trait": "unbekannte Eigenschaft; verwende sta, wil, str, per, ref, awa, agi oder int",
+          "traitAndRing": "eine Eigenschaft und ein Ring können nicht beide gewürfelt werden",
+          "unknownKey": "unbekannter Schlüssel; verwende skill, trait, ring oder tn"
+        },
+        "needTrait": "{name} hat die Fertigkeit {skill} nicht, und der Link nennt keine Eigenschaft, um sie ungeübt zu würfeln",
+        "noActor": "Wähle einen Spielstein aus oder weise einen Charakter zu, um diesen Link zu würfeln",
+        "noTargets": "Visiere die Spielsteine an, auf die dieser Link wirkt, oder wähle sie aus",
+        "request": "Die Spieler bitten, dies zu würfeln",
+        "requestRoll": "Mit meinem Charakter würfeln",
+        "requestTitle": "Der SL bittet um einen Wurf"
+      },
+      "macros": {
+        "missing": "Gegenstand oder Charakter dieses Makros existiert nicht mehr oder kann nicht aus einem Makro gewürfelt werden",
+        "traitMacro": "{name}: {traitName}"
       },
       "mechanics": {
         "combat": {
@@ -348,7 +1085,8 @@
           "rank": "Furchtrang",
           "rollForSelected": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
           "testLabel": "Furcht {rank} Test vs {name}",
-          "testResult": "Furcht {rank} Test"
+          "testResult": "Furcht {rank} Test",
+          "title": "Furcht"
         },
         "rings": {
           "air": "Luft",
@@ -360,6 +1098,7 @@
           "voidInitBoost": "Leere Nutzen",
           "voidPoints": "Leere-Punkte",
           "voidPointsEmpty": "Leere-Punkte: 0",
+          "voidPointsValue": "Leere-Punkte: {current}/{max} (Klick: +1, Rechtsklick: -1)",
           "voidTnBoost": "Leere Nutzen",
           "water": "Wasser"
         },
@@ -372,10 +1111,14 @@
           "explodesOn": "Explodiert Bei",
           "failure": "Fehlschlag",
           "freeRaises": "Freie Erhöhungen",
+          "freeRaisesHint": "Auf den SZ ausgegeben, bis zu {max}.",
           "missed": "Verfehlt",
           "namedRoll": "Würfeln: {roll}",
           "raises": "Erhöhungen",
+          "raisesHint": "Bis zu {max}.",
+          "raisesHintWithMinimum": "Mindestens {min}, bis zu {max}.",
           "ringRollLabel": "Ringwurf: {element}",
+          "rollRing": "{element} würfeln",
           "skillRoll": "Fertigkeitswurf",
           "skillRollLabel": "Fertigkeitswurf: {skillName} / {traitName}",
           "socialResistance": "Sozialer Widerstand",
@@ -390,12 +1133,14 @@
           "weaponAttackRoll": "{weapon} Angriffswurf"
         },
         "stances": {
+          "addFailed": "Fehler beim Hinzufügen der Haltung",
           "attack": "Angriffshaltung",
           "center": "Zentrierte Haltung",
           "defense": "Verteidigungshaltung",
           "fullAttack": "Voller Angriff",
           "fullDefense": "Volle Verteidigung",
-          "fullDefenseHint": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
+          "fullDefenseHint": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung.",
+          "removeFailed": "Fehler beim Entfernen der Haltung"
         },
         "traits": {
           "agi": "Gewandtheit",
@@ -408,6 +1153,7 @@
           "wil": "Willenskraft"
         },
         "wounds": {
+          "activeOf": "{rank} aktiv",
           "alreadyFullHealth": "{name} ist bereits bei voller Gesundheit",
           "applied": "{amount} Wunden auf {name} angewendet",
           "appliedWithArmor": "{name} erhielt {original} Schaden. Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
@@ -425,6 +1171,7 @@
           "grazed": "Gestreift",
           "healingApplied": "{amount} Wunden geheilt (Heilungsrate: {rate})",
           "healingFailed": "Fehler beim Anwenden der Heilung auf {name}",
+          "healRateBreakdown": "(Ausdauer × 2) + Einsichtsrang + Modifikator = ({sta} × 2) + {rank} + {mod}",
           "healthy": "Gesund",
           "hurt": "Verletzt",
           "injured": "Verwundet",
@@ -438,6 +1185,7 @@
           "noVoidPoints": "Keine Leere-Punkte verfügbar, um Schaden zu reduzieren",
           "out": "Kampfunfähig",
           "penalty": "Strafe",
+          "penaltyOf": "Strafe für {rank}",
           "reducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
           "reducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
           "reduceWithVoid": "Mit Leere Reduzieren",
@@ -445,6 +1193,8 @@
           "status": "Wunden: {current}/{max} (erlitten: {suffered})",
           "suffered": "Erlittene Wunden",
           "threshold": "Schwelle",
+          "thresholdOf": "Schwelle für {rank}",
+          "voidRestored": "Leere: {count}/{count} wiederhergestellt",
           "woundBonus": "Wundenbonus",
           "woundHealRate": "Wundheilungsrate",
           "woundLevel": "Stufe",
@@ -455,11 +1205,138 @@
         "actorNotFound": "Akteur für Schadenswurf nicht gefunden",
         "deficiencyBlocksCasting": "Mangel in {ring} reduziert deinen Schulrang auf null - kann nicht wirken",
         "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
+        "messageTooLong": "Nachricht zu lang (maximal 10.000 Zeichen)",
         "noActorForVoid": "Kein Akteur verfügbar, um Leere-Punkte auszugeben",
+        "noPermission": "Du hast keine Berechtigung, diesen Akteur zu ändern",
         "noPermissionDamage": "Du hast keine Berechtigung, Schaden für diesen Akteur zu würfeln",
         "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen",
         "noValidWeapon": "Keine gültige Waffe für Angriffswurf gefunden",
-        "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist"
+        "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
+        "tokenNoActor": "Spielstein hat keinen Akteur"
+      },
+      "purchase": {
+        "addAnyway": "Trotzdem hinzufügen?",
+        "bypass": "Trotzdem hinzufügen",
+        "choiceTitle": "{item}: {prompt}",
+        "choose": "Wählen",
+        "kihoMastery": "{ring} + Schulrang {mastery}",
+        "makeChoice": "Auswählen",
+        "noOptions": "{name} hat eine Auswahl ohne Optionen; der Gegenstand wurde nicht hinzugefügt",
+        "schoolAdd": "Als weitere Schule hinzufügen",
+        "schoolQuestion": "{name} lernt bereits an {schools}. Ersetzen oder {school} als weitere Schule hinzufügen (eine Fortgeschrittene Schule oder der Vorteil Mehrere Schulen)?",
+        "schoolReplace": "Ersetzen",
+        "schoolTitle": "Eine zweite Schule",
+        "unmet": "{name} benötigt: {list}",
+        "unmetTitle": "Voraussetzungen nicht erfüllt"
+      },
+      "rules": {
+        "add": "Regel hinzufügen",
+        "delete": "Diese Regel entfernen",
+        "effectSheet": "Bogen für aktive Effekte mit Regeln",
+        "formView": "Als Formulare bearbeiten",
+        "hint": "Jede Regel als Formular oder die ganze Liste als JSON. ACTIVE_EFFECTS.md listet die Regelschlüssel und ihre Felder.",
+        "invalidJson": "Regeln nicht gespeichert: Der Text ist kein gültiges JSON ({error}).",
+        "jsonView": "Als JSON bearbeiten",
+        "key": "Regelschlüssel",
+        "none": "Keine Regeln.",
+        "notList": "Regeln nicht gespeichert: Der Text muss eine JSON-Liste von Objekten sein, jedes mit einem \"key\"."
+      },
+      "ruleSummary": {
+        "action": {
+          "complex": "eine Komplexe Aktion",
+          "free": "eine Freie Aktion",
+          "simple": "eine Einfache Aktion"
+        },
+        "ActionCost": "{rolls}: {action}",
+        "ApplyCondition": "Ein erfolgreicher Wurf für {rolls} kann {condition} anwenden",
+        "armorTn": {
+          "base": "Basis-Rüstungs-SZ wird {value}",
+          "total": "Rüstungs-SZ wird {value}"
+        },
+        "ArmorTN": "Rüstungs-SZ {value}",
+        "ChoiceSet": "Auswahl beim Hinzufügen: {prompt}",
+        "chosen": "Gewählt: {selection}",
+        "citation": "{book} p.{page}",
+        "ConditionImmunity": "Immun gegen {condition}",
+        "Cost": "EP-Preis für {what}: {value}",
+        "DamageSource": "{rolls} zählen als {tags}",
+        "DiceRule": "Würfel explodieren ab {explode} für {rolls}",
+        "direction": {
+          "gain": "Gewinne",
+          "loss": "Verluste"
+        },
+        "FreeRaise": "Freie Erhöhungen für {rolls}: {value}",
+        "GrantItem": "Gewährt {item} auf Schulrang {rank}",
+        "heading": "Was es bewirkt",
+        "ignoreReduction": "Ignoriert {value} Reduzierung",
+        "Initiative": "Initiative {bonus}",
+        "Invulnerability": "Unverwundbar: nur verletzbar durch {harmedBy}",
+        "Ledger": "{track} {direction}: {value}",
+        "maneuver": {
+          "calledShot": "Gezielter Angriff",
+          "disarm": "Entwaffnen",
+          "extraAttack": "Zusätzlicher Angriff",
+          "feint": "Finte",
+          "knockdown": "Niederwerfen"
+        },
+        "Movement": "Wasser {value} für Bewegung",
+        "Note": "Notiz für {rolls}: {text}",
+        "OpponentModifier": "{bonus} für {rolls} gegen diesen Charakter",
+        "optional": "Optional: Der Würfelnde wählt den Wurf",
+        "per": {
+          "day": "Tag",
+          "round": "Runde",
+          "skirmish": "Gefecht",
+          "turn": "Zug"
+        },
+        "PeriodicSave": "Endet bei einem {roll}-Wurf gegen SZ {tn}",
+        "Prerequisite": "Erfordert {requires}",
+        "priced": {
+          "emphasis": "einen Schwerpunkt",
+          "items": "jeden Gegenstand vom Typ {type}",
+          "self": "diesen Gegenstand"
+        },
+        "raiseCap": "Erhöhungslimit {value} für {rolls}",
+        "raiseMinimum": "Mindestens {value} Erhöhungen für {rolls}",
+        "RaiseRule": "{maneuver} kostet {cost} Erhöhungen für {rolls}",
+        "range": {
+          "melee": "Nur Nahkampfangriffe",
+          "ranged": "Nur Fernkampfangriffe"
+        },
+        "Reduction": "Reduzierung {value}",
+        "reductionExcept": "Reduzierung {value}, außer gegen {except}",
+        "rerollOnes": "1en für {rolls} neu würfeln",
+        "Resource": "Nutzungen von {slug}: {max} pro {per}",
+        "RollModifier": "{bonus} für {rolls}",
+        "RollOption": "Wurfoption: {option}",
+        "selector": {
+          "any": "alle Würfe",
+          "attack": "Angriffswürfe",
+          "damage": "Schadenswürfe",
+          "maho": "Maho-Würfe",
+          "named": "{name}-Würfe",
+          "ring": "Ringwürfe",
+          "skill": "Fertigkeitswürfe",
+          "skill-tag": "{name}-Fertigkeitswürfe",
+          "skill-type": "{name}-Fertigkeitswürfe",
+          "spell": "Zauberspruch-Würfe",
+          "trait": "Eigenschaftswürfe"
+        },
+        "Spirit": "Geist: Schaden halbiert, außer durch {harmedBy}",
+        "Substitute": "Darf {with} statt {replace} für {rolls} würfeln",
+        "text": "{text}",
+        "TNModifier": "SZ {value} für {rolls}",
+        "TraitAdjust": "{trait} {value}",
+        "unknown": "Unbekannte Regel {key}",
+        "UnskilledAs": "{rolls} ohne Ränge zählen als Rang {rank}",
+        "when": "{rule} (wenn {when})",
+        "Wounds": "Wunden pro Wundenstufe {perRank}, Strafen der Wundenstufen {penalty}"
+      },
+      "session": {
+        "confirm": "Eine neue Spielsitzung beginnen? Jeder Charakter erhält seinen Ehrenwurf zurück.",
+        "new": "Neue Sitzung",
+        "start": "Sitzung beginnen",
+        "started": "Eine neue Spielsitzung hat begonnen."
       },
       "sheets": {
         "abilities": "Fähigkeiten",
@@ -467,6 +1344,7 @@
         "advantage": "Vorteil",
         "advantages": "Vorteile",
         "armor": "Rüstung",
+        "attackAndDamage": "Angriff und Schaden",
         "background": "Hintergrund",
         "character": "Charakter",
         "demands": "Anforderungen",
@@ -475,24 +1353,38 @@
         "disadvantages": "Nachteile",
         "equipment": "Ausrüstung",
         "item": "Gegenstand",
+        "itemFlavor": "[{type}]",
         "items": "Gegenstände",
+        "itemTitle": "{item} [{type}]",
         "kata": "Kata",
         "kiho": "Kiho",
         "mastery": "Meisterschaft",
+        "masteryHint": "Kostet seine Meisterschaftsstufe in EP (pp.231, 259). Eine Kostenregel ändert den Preis: die freien Kiho eines Mönchs oder den höheren Preis einer Schule außerhalb der Bruderschaft (p.266).",
+        "noBio": "Noch kein Klan, keine Familie und keine Schule.",
         "notes": "Notizen",
+        "recalculated": "Bogen für {name} neu berechnet",
+        "recalculateSheet": "Bogen neu berechnen",
         "rulesSummary": "Regelzusammenfassung",
         "skill": "Fertigkeit",
         "skills": "Fertigkeiten",
         "spell": "Zauber",
         "spells": "Zauber",
         "spellSlots": "Zauberplätze",
+        "spellSlotsOf": "{ring}-Zauberplätze: {count} (Klick: +1, Rechtsklick: -1)",
+        "tabs": "Bogenteile",
         "tattoo": "Tätowierung",
+        "tattooPassive": "Immer aktiv",
+        "tattooPassiveHint": "An: Ihre Regeln gelten, solange der Charakter sie trägt. Aus: Die Abspieltaste auf dem Charakterbogen aktiviert sie, eine Tätowierung auf einmal, für das Doppelte des Schulrangs in Runden.",
         "tattoos": "Tätowierungen",
         "technique": "Technik",
         "techniques": "Techniken",
+        "typeInsightRank": "Einsichtsrang von Hand eingeben",
         "weapon": "Waffe",
         "weapons": "Waffen",
         "woundLevels": "Wundenstufen"
+      },
+      "sources": {
+        "core": "Grundregelwerk"
       },
       "statusEffects": {
         "blinded": "Geblendet",
@@ -514,7 +1406,28 @@
         "description": "Beschreibung",
         "details": "Details",
         "effects": "Aktive Effekte",
-        "modifiers": "Modifikatoren"
+        "modifiers": "Modifikatoren",
+        "rules": "Regeln"
+      },
+      "taint": {
+        "embrace": "Das Verderben annehmen (+1k1)",
+        "embraceHint": "Erhalte einen Punkt Verderben für +1k1 auf diesen Wurf.",
+        "embraceReason": "Das Verderben angenommen",
+        "label": "Schattenland-Verderben",
+        "lost": "Verloren (Verderbensrang)"
+      },
+      "transfer": {
+        "export": "Gegenstände mit Regeln exportieren",
+        "exported": {
+          "one": "{count} Gegenstand aus {folder} exportiert",
+          "other": "{count} Gegenstände aus {folder} exportiert"
+        },
+        "import": "Gegenstände mit Regeln importieren",
+        "imported": "Importierte Gegenstände",
+        "importedCount": "{count} Gegenstände in {folder} importiert",
+        "importHint": "Wähle eine Datei, die aus einem Gegenstandsordner exportiert wurde. Ihre Gegenstände kommen hier in einen neuen Ordner.",
+        "invalidJson": "Diese Datei ist kein gültiges JSON.",
+        "notExport": "Diese Datei ist kein Export von Gegenständen mit Regeln."
       }
     },
     "world": {
@@ -529,6 +1442,10 @@
     "Actor": {
       "npc": "NSC",
       "pc": "SC"
+    },
+    "ChatMessage": {
+      "checkRequest": "Wurfanfrage",
+      "roll": "Wurf"
     },
     "Item": {
       "advantage": "Vorteil",
