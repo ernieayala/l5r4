@@ -258,7 +258,8 @@ rmSync(path.join(worldDir, "data", "users", "LOCK"), { force: true });
   for (const message of MESSAGES) {
     await db.put(`!messages!${message._id}`, {
       type: "base",
-      style: 5,
+      // Foundry 13 CHAT_MESSAGE_STYLES.OTHER, the style a 3.2.1 roll message is saved with
+      style: 0,
       author: GM_ID,
       timestamp: timestamp++,
       sound: null,

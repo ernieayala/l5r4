@@ -25,7 +25,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   - Bows become weapons. Emphases split into available and trained lists. Icons move to `.webp`.
 - Removed on load: the Skill "Insight bonus" field, the kata and kiho `cost` field, and the PC Void-on-Armor-TN markers.
 - After upgrading, check:
-  - XP totals. Void XP now counts its bonus, kata and kiho cost their Mastery Level, and Family and School bonuses to the same Trait are free.
+  - XP totals. Void XP now counts its bonus, kata and kiho cost their Mastery Level, and Family and School bonuses to the same Trait are free. 3.2.1 counted a Family or School Trait bonus twice: the bonus raised the Trait, and the first rank bought to 3 was also free. 4.0.0 charges that rank at 4 × the new rank (p.103), so XP spent rises for characters who bought ranks in a Trait their Family or School raised.
   - Insight Rank. It counts only bought ranks and creation bonuses, plus Courtier and Etiquette Mastery Insight.
   - NPC Wounds and Initiative.
 - A Full Defense roll saved by 3.2.1 is not carried over; 4.0.0 asks for the roll at each Turn start.
