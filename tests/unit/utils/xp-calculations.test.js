@@ -73,6 +73,17 @@ describe("getCreationFreeBonus", () => {
       expect(getCreationFreeBonus(actor, "agi")).toBe(0.5);
     });
 
+    // #156, Ernie's ruling: the creation bonus belongs to the School a character starts in
+    // game-rules/48_character_creation_expanded.md, p.102
+    // game-rules/49_improving_your_character.md, p.105
+    it("should give no creation bonus for a second School", () => {
+      const second = ruleItem("school", "agi", 1, {
+        flags: { "l5r4-enhanced": { secondSchool: true } }
+      });
+      const actor = { items: [ruleItem("school", "agi"), second], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "agi")).toBe(1);
+    });
+
     it("should read a Void Ring bonus with the key void", () => {
       const actor = {
         items: [ruleItem("family", "void"), ruleItem("school", "void")],
