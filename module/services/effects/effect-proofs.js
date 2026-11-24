@@ -6,7 +6,6 @@
  * and timing come from the proof, never from the request. Any player can write a chat message with any content, so a
  * proof can only bind a request to what the requester's own character could have done.
  * game-rules/38_maneuvers.md, p.86-87
- * game-rules/40_grappling.md, p.88-89
  */
 
 import { toInt } from "../../utils/type-coercion.js";
@@ -14,8 +13,8 @@ import { getContestOutcome } from "../combat/contest-rolls.js";
 
 /**
  * @typedef {object} EffectProof
- * @property {"roll"|"grapple"|"contest"|"guard"} kind  What allows the effect
- * @property {string} [messageId]     The roll whose offered condition, or grapple, it is
+ * @property {"roll"|"contest"|"guard"} kind  What allows the effect
+ * @property {string} [messageId]     The roll whose offered condition it is
  * @property {number} [index]         Index into the roll's offered conditions
  * @property {string} [attackId]      The attack whose Contested Strength the requester's side won
  * @property {string} [protectorUuid] The guard the requester owns
@@ -32,7 +31,6 @@ import { getContestOutcome } from "../combat/contest-rolls.js";
 /** One check per proof kind. */
 const PROOFS = Object.freeze({
   roll: getRollProofOptions,
-  grapple: getGrappleProofOptions,
   contest: getContestProofOptions,
   guard: getGuardProofOptions
 });
@@ -84,18 +82,6 @@ function getRollProofOptions(request) {
     return null;
   }
   return entry.level === null ? {} : { level: entry.level };
-}
-
-/**
- * Grappled on the target of a hit with the Grapple maneuver.
- * game-rules/40_grappling.md, p.88-89
- * @param {EffectRequest} request
- * @returns {object|null}
- */
-function getGrappleProofOptions(request) {
-  const message = getSuccessAgainst(request.proof.messageId, request);
-  const grapple = message?.system.kind === "attack" && message.system.maneuvers?.grapple;
-  return request.id === "grappled" && grapple ? {} : null;
 }
 
 /**

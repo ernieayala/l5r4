@@ -1,8 +1,8 @@
 /**
  * @module services/combat/flow
  * @description Chat cards that run a multi-step combat flow (an iaijutsu duel, a grapple). The card's state lives in
- * its flags; only the active GM changes it, so a player's step goes to the GM as a query, the step checks the
- * requesting user, and the GM re-renders the card.
+ * its flags; only the active GM makes and changes it, so a player's step goes to the GM as a query, the step checks
+ * the requesting user and the roll it records (getFreshRoll), and the GM re-renders the card.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -125,6 +125,30 @@ export function bindFlowCards(message, html) {
   }
 }
 
+/**
+ * The roll a step records, checked on the GM: a roll message by the side's actor, of the kind the step expects, posted
+ * after the flow card, and not recorded by the flow before, so an old roll or one roll twice cannot fill a step (#162).
+ * The flow's state keeps the rolls it recorded in `usedRolls`.
+ * @param {ChatMessage} card - The flow card
+ * @param {object} state - The flow's state, whose `usedRolls` gains the roll
+ * @param {{rollId: string, actor: Actor, kinds: string[]}} expected - The roll named, its actor, and the kinds allowed
+ * @returns {ChatMessage}
+ */
+export function getFreshRoll(card, state, { rollId, actor, kinds }) {
+  const roll = game.messages.get(String(rollId));
+  const fresh =
+    roll?.type === "roll" &&
+    roll.system.actorUuid === actor.uuid &&
+    kinds.includes(roll.system.kind) &&
+    roll.timestamp >= card.timestamp &&
+    !(state.usedRolls ?? []).includes(roll.id);
+  if (!fresh) {
+    throw new Error("l5r4.ui.requests.notFreshRoll");
+  }
+  state.usedRolls = [...(state.usedRolls ?? []), roll.id];
+  return roll;
+}
+
 /** Register the GM side of flow steps. */
 export function registerFlowQueries() {
   registerGmQuery(FLOW_QUERY, (request, { user }) => applyFlowStep(request, user));
@@ -138,7 +162,8 @@ export function registerFlowQueries() {
  */
 async function applyFlowStep({ messageId, data }, user) {
   const card = game.messages.get(String(messageId));
-  const flow = card?.getFlag(SYS_ID, "flow");
+  // A flow card is the GM's client's: a player's own message carrying a flow could hold any state (#162)
+  const flow = card?.author?.isGM ? card.getFlag(SYS_ID, "flow") : null;
   const handler = flow ? flows.get(flow.name) : null;
   if (!handler) {
     throw new Error("l5r4.ui.requests.notFlowCard");

@@ -22,7 +22,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { rollCheck } from "../dice/check/roll-check.js";
-import { registerFlow, canActFor, buildSkillRequest, startFlow } from "./flow.js";
+import { registerFlow, canActFor, buildSkillRequest, getFreshRoll, startFlow } from "./flow.js";
 
 /**
  * Assessment margin that wins +1k1 on Focus.
@@ -270,11 +270,12 @@ registerFlow("duel", {
    * Record a roll or a concession (on the GM). The roll is read from its own message.
    * @param {object} state
    * @param {object} step
+   * @param {ChatMessage} step.card - The duel card
    * @param {object} step.data - The step the clicking client sent
    * @param {User} step.user - The requesting user
    * @returns {Promise<object>}
    */
-  async step(state, { data, user }) {
+  async step(state, { card, data, user }) {
     const i = Number(data.duelist);
     const { actor } = sidesOf(state, i);
     if (![0, 1].includes(i) || !canActFor(user, actor) || state.stage === "done") {
@@ -288,10 +289,12 @@ registerFlow("duel", {
       state.stage = "done";
       return state;
     }
-    const roll = game.messages.get(String(data.rollId));
-    if (roll?.type !== "roll" || roll.system.actorUuid !== actor.uuid) {
+    // The card's own rule: an empty slot this stage, and in the strike the first striker first (#162)
+    if (!buildDuelists(state)[i].canRoll) {
       throw new Error("l5r4.ui.requests.notDuelistRoll");
     }
+    const kinds = state.stage === "strike" ? ["attack"] : ["skill"];
+    const roll = getFreshRoll(card, state, { rollId: data.rollId, actor, kinds });
     state.rolls[state.stage][i] = {
       total: roll.system.outcome.total,
       success: roll.system.outcome.success,

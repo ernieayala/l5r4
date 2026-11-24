@@ -30,7 +30,7 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 | Button | Action | Shown when | Runs |
 | --- | --- | --- | --- |
 | Roll Contested Strength | `combat-contest` | A hit with a target and Knockdown or Disarm | `rollContest` (`module/services/combat/contest.js`) |
-| Start grapple with {target} | `grapple-start` | A hit with a target and the Grapple maneuver | `startGrapple` (`module/services/combat/grapple.js`) |
+| Start grapple with {target} | `grapple-start` | A hit with a target and the Grapple maneuver | `startGrapple` (`module/services/combat/grapple-start.js`) |
 | Apply to {target} | `damage-apply-target` | A damage roll with a target | `applyDamage` (`module/services/combat/damage.js`) |
 | Apply to selected | `damage-apply-selected` | Every damage roll | `applyDamage` (`module/services/combat/damage.js`) |
 | {effect} on {target} | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition | `applyConditionFromMessage` (`module/services/dice/check/chat-actions.js`) |

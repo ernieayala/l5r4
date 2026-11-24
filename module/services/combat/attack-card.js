@@ -6,7 +6,7 @@
 
 import { hideUnusable } from "../../utils/dom.js";
 import { rollContest } from "./contest.js";
-import { startGrapple } from "./grapple.js";
+import { startGrapple } from "./grapple-start.js";
 
 /**
  * Wire an attack card's Contested Strength (Knockdown, Disarm) and grapple buttons, each shown only to a user who

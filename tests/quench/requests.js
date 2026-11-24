@@ -1,6 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
+import { startDuel } from "../../module/services/combat/duel.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications } from "./helpers.js";
 
@@ -223,6 +224,65 @@ export function registerRequestsTests(quench) {
               "l5r4.ui.requests.notDamageResult"
             );
             assert.equal(target._source.system.suffered, 0);
+          })
+        );
+      });
+
+      describe("Duel and grapple cards", () => {
+        const askStep = (card, data) =>
+          CONFIG.queries[`${SYS_ID}.flow`]({ messageId: card.id, data }, { user: player });
+
+        /** An Assessment roll by `actor`: Iaijutsu / Awareness. */
+        const assessment = async actor =>
+          track(
+            await rollCheck({
+              actor,
+              kind: "skill",
+              label: "Requests assessment",
+              base: { roll: 2, keep: 2 },
+              skill: "iaijutsu",
+              trait: "awa",
+              askForOptions: false
+            })
+          );
+
+        it(
+          "should act only on a flow card the GM's client made",
+          clean(async () => {
+            const forged = track(
+              await ChatMessage.create({
+                author: player.id,
+                content: "Quench",
+                flags: { [SYS_ID]: { flow: { name: "duel", state: {} } } }
+              })
+            );
+            assert.equal(
+              await refusalOf(askStep(forged, { action: "roll", duelist: 0, rollId: "" })),
+              "l5r4.ui.requests.notFlowCard"
+            );
+          })
+        );
+
+        it(
+          "should record a duelist's roll only once, and only one made after the card",
+          clean(async () => {
+            const duelist = await playersCharacter();
+            const other = track(await createTestPC({ name: "Requests: other duelist" }));
+            const early = await assessment(duelist);
+            const card = track(await startDuel(duelist, other));
+            assert.equal(
+              await refusalOf(askStep(card, { action: "roll", duelist: 0, rollId: early.id })),
+              "l5r4.ui.requests.notFreshRoll",
+              "a roll older than the card"
+            );
+            const roll = await assessment(duelist);
+            await askStep(card, { action: "roll", duelist: 0, rollId: roll.id });
+            assert.isNotNull(card.getFlag(SYS_ID, "flow").state.rolls.assessment[0], "recorded");
+            assert.equal(
+              await refusalOf(askStep(card, { action: "roll", duelist: 0, rollId: roll.id })),
+              "l5r4.ui.requests.notDuelistRoll",
+              "the slot is filled"
+            );
           })
         );
       });

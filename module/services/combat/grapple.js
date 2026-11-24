@@ -1,7 +1,8 @@
 /**
  * @module services/combat/grapple
  * @description A grapple as a guided card. A hit with the Grapple maneuver (Jiujutsu / Agility, ignoring armor in
- * the Armor TN) starts it from the attack card: both sides are Grappled and the attacker is in control. Control is
+ * the Armor TN) starts it from the attack card (grapple-start.js): both sides are Grappled and the attacker is in
+ * control. Control is
  * re-rolled as a Contested Skill / Strength Roll, where the attacker uses the Skill the grapple began with
  * (Jiujutsu, or a weapon's Skill) and the defender Jiujutsu. The one in control may:
  * - Hit: unarmed damage (Strength k1), or the weapon's damage for a weapon grapple, as a damage roll against the
@@ -19,53 +20,14 @@ import { T, F } from "../../utils/localization.js";
 import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
-import { applyEffectAnywhere, effectsOf } from "../effects/apply.js";
-import { registerFlow, canActFor, buildSkillRequest, startFlow } from "./flow.js";
+import { applyEffect, effectsOf } from "../effects/apply.js";
+import { registerFlow, canActFor, buildSkillRequest, getFreshRoll } from "./flow.js";
 
 /**
- * The grapple statuses both sides carry.
+ * The grapple status both sides carry.
  * game-rules/40_grappling.md, p.89
  */
-const GRAPPLED = "grappled";
-
-/**
- * Start a grapple from a hit with the Grapple maneuver: both sides become Grappled, the attacker in control.
- * @param {ChatMessage} attack - The attack message
- * @returns {Promise<ChatMessage|null>}
- */
-export async function startGrapple(attack) {
-  const attacker = fromUuidSync(attack.system.actorUuid);
-  const target = fromUuidSync(attack.system.target.uuid);
-  if (!attacker?.isOwner || !target) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
-    return null;
-  }
-  for (const actor of [attacker, target]) {
-    if (!actor.statuses.has(GRAPPLED)) {
-      // The hit the GM's client checks before it grapples a target the user does not own (#162)
-      await applyEffectAnywhere(actor, GRAPPLED, {
-        proof: { kind: "grapple", messageId: attack.id }
-      });
-    }
-  }
-  // A grapple begun with a Weapon Skill is a weapon grapple; an "Unarmed" item rolled with Jiujutsu is not
-  // game-rules/40_grappling.md, p.89
-  const skill = attack.system.skill || "jiujutsu";
-  const weapon = skill !== "jiujutsu" && attack.system.weaponUuid ? attack.system.damage : null;
-  return startFlow(
-    "grapple",
-    {
-      sides: [attacker.uuid, target.uuid],
-      skill,
-      weapon: weapon?.label ? { ...weapon } : null,
-      control: 0,
-      rolls: [null, null],
-      log: [F("l5r4.ui.combat.grapple.inControl", { name: attacker.name })],
-      over: false
-    },
-    attacker
-  );
-}
+export const GRAPPLED = "grappled";
 
 /**
  * The two sides of a grapple.
@@ -137,18 +99,20 @@ function rollHit(state) {
  * game-rules/40_grappling.md, p.88
  * @param {object} state - The grapple's state, changed in place
  * @param {Actor[]} sides - The two sides
- * @param {{data: object, user: User}} step - The step the clicking client sent and the requesting user
+ * @param {{card: ChatMessage, data: object, user: User}} step - The grapple card, the step the clicking client sent,
+ *   and the requesting user
  */
-function applyControlRoll(state, sides, { data, user }) {
+function applyControlRoll(state, sides, { card, data, user }) {
   const i = Number(data.side);
-  const roll = game.messages.get(String(data.rollId));
-  if (
-    ![0, 1].includes(i) ||
-    !canActFor(user, sides[i]) ||
-    roll?.system.actorUuid !== sides[i].uuid
-  ) {
+  // An empty slot only: a side rolls control once until both have (#162)
+  if (![0, 1].includes(i) || !canActFor(user, sides[i]) || state.rolls[i] !== null) {
     throw new Error("l5r4.ui.requests.notYourSide");
   }
+  const roll = getFreshRoll(card, state, {
+    rollId: data.rollId,
+    actor: sides[i],
+    kinds: ["skill"]
+  });
   state.rolls[i] = roll.system.outcome.total;
   if (state.rolls.every(total => total !== null)) {
     applyControlContest(state, sides);
@@ -184,26 +148,24 @@ function applyControlContest(state, sides) {
  * game-rules/40_grappling.md, p.88-89
  * @param {object} state - The grapple's state, changed in place
  * @param {Actor[]} sides - The two sides
- * @param {{data: object, user: User}} step - The step the clicking client sent and the requesting user
+ * @param {{card: ChatMessage, data: object, user: User}} step - The grapple card, the step the clicking client sent,
+ *   and the requesting user
  * @returns {Promise<void>}
  */
-async function applyControllerAction(state, sides, { data, user }) {
+async function applyControllerAction(state, sides, { card, data, user }) {
   const controller = sides[state.control];
   const other = sides[1 - state.control];
   if (!canActFor(user, controller)) {
     throw new Error("l5r4.ui.requests.onlyController");
   }
   if (data.action === "hit") {
-    const roll = game.messages.get(String(data.rollId));
-    if (roll?.system.actorUuid !== controller.uuid || roll.system.kind !== "damage") {
-      throw new Error("l5r4.ui.requests.notControllerDamage");
-    }
-    const total = roll.system.outcome.total;
+    const hit = { rollId: data.rollId, actor: controller, kinds: ["damage"] };
+    const total = getFreshRoll(card, state, hit).system.outcome.total;
     state.log.push(F("l5r4.ui.combat.grapple.hitLog", { name: controller.name, total }));
   } else if (data.action === "throw") {
     await endGrapple(sides);
     if (!other.statuses.has("prone")) {
-      await applyEffectAnywhere(other, "prone");
+      await applyEffect(other, "prone");
     }
     state.log.push(F("l5r4.ui.combat.grapple.thrown", { name: other.name }));
     state.over = true;
@@ -268,20 +230,21 @@ registerFlow("grapple", {
    * Record a step on the GM.
    * @param {object} state
    * @param {object} step
+   * @param {ChatMessage} step.card - The grapple card
    * @param {object} step.data - The step the clicking client sent
    * @param {User} step.user - The requesting user
    * @returns {Promise<object>}
    */
-  async step(state, { data, user }) {
+  async step(state, { card, data, user }) {
     const sides = sidesOf(state);
     if (state.over) {
       throw new Error("l5r4.ui.requests.grappleOver");
     }
     if (data.action === "control") {
-      applyControlRoll(state, sides, { data, user });
+      applyControlRoll(state, sides, { card, data, user });
       return state;
     }
-    await applyControllerAction(state, sides, { data, user });
+    await applyControllerAction(state, sides, { card, data, user });
     return state;
   },
 
