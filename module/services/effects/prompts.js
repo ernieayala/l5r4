@@ -19,7 +19,6 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { getNextSaveTn } from "../../utils/effects.js";
 import { toInt } from "../../utils/type-coercion.js";
@@ -29,6 +28,7 @@ import { rollCheck } from "../dice/check/roll-check.js";
 import { rollSkill } from "../dice/rolls/skill-roll.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, ownTurnStartOf } from "./apply.js";
+import { formatRollLabel, postPrompt, promptOf } from "./prompt-card.js";
 
 /** Name of the GM query that ends a Concentration for a player. */
 const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
@@ -57,7 +57,7 @@ export async function postSavePrompts(actor, event) {
       { kind: "save", ...save, tn },
       {
         title: F("l5r4.ui.effects.saveTitle", { effect: save.source }),
-        text: F("l5r4.ui.effects.saveText", { roll: rollLabel(save.roll), tn }),
+        text: F("l5r4.ui.effects.saveText", { roll: formatRollLabel(save.roll), tn }),
         button: T("l5r4.ui.common.roll")
       }
     );
@@ -97,7 +97,7 @@ export function postConcentrationPrompt(actor, effect) {
     { kind: "concentration", effectUuid: effect.uuid, roll: "trait:wil", tn },
     {
       title: F("l5r4.ui.effects.saveTitle", { effect: effect.name }),
-      text: F("l5r4.ui.effects.saveText", { roll: rollLabel("trait:wil"), tn }),
+      text: F("l5r4.ui.effects.saveText", { roll: formatRollLabel("trait:wil"), tn }),
       button: T("l5r4.ui.common.roll")
     }
   );
@@ -171,7 +171,7 @@ export function registerPromptQueries() {
   });
   registerGmQuery(ANSWER_PROMPT_QUERY, async ({ messageId }, { user }) => {
     const message = game.messages.get(String(messageId));
-    const request = message?.getFlag(SYS_ID, "prompt");
+    const request = promptOf(message);
     const actor = request ? await fromUuid(request.actorUuid) : null;
     if (!actor?.testUserPermission(user, "OWNER")) {
       throw new Error("l5r4.ui.requests.notYourPrompt");
@@ -187,8 +187,8 @@ export function registerPromptQueries() {
  * @returns {Promise<void>}
  */
 export async function onPromptClick(message) {
-  const request = message.getFlag(SYS_ID, "prompt");
-  const actor = await fromUuid(request.actorUuid);
+  const request = promptOf(message);
+  const actor = request ? await fromUuid(request.actorUuid) : null;
   if (!actor?.isOwner) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return;
@@ -204,7 +204,8 @@ export async function onPromptClick(message) {
     return;
   }
   const effect = await fromUuid(request.effectUuid);
-  if (!effect) {
+  // The prompt's effect is on the prompted actor: a save never ends anyone else's
+  if (effect?.parent !== actor) {
     ui.notifications?.info(T("l5r4.ui.effects.alreadyEnded"));
     return;
   }
@@ -223,7 +224,7 @@ export async function onPromptClick(message) {
  * @param {HTMLElement} html
  */
 export function bindPromptCard(message, html) {
-  const request = message.getFlag(SYS_ID, "prompt");
+  const request = promptOf(message);
   if (!request) {
     return;
   }
@@ -272,25 +273,6 @@ async function applyPromptResult(effect, request, { success }) {
 }
 
 /**
- * Post a prompt card for an actor.
- * @param {Actor} actor
- * @param {object} request - Stored in the message flags; `kind` names the handler
- * @param {{title: string, text?: string, button: string}} card
- * @returns {Promise<ChatMessage>}
- */
-async function postPrompt(actor, request, card) {
-  const content = await foundry.applications.handlebars.renderTemplate(
-    CHAT_TEMPLATES.effectPrompt,
-    card
-  );
-  return ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor }),
-    content,
-    flags: { [SYS_ID]: { prompt: { actorUuid: actor.uuid, ...request } } }
-  });
-}
-
-/**
  * Apply a PeriodicSave's roll to its effect: success ends it; a failure ends it after the next Round (Stunned) or
  * lowers the next save's TN (Dazed, decision 5).
  * game-rules/41_conditional_effects.md, p.89
@@ -311,16 +293,6 @@ async function applySaveResult(effect, request, { success }) {
   } else {
     await effect.setFlag(SYS_ID, "saveTn", getNextSaveTn(request.tn, request.step, request.min));
   }
-}
-
-/**
- * Label of a save's roll: the Ring or Trait name.
- * @param {string} roll - "ring:earth" or "trait:wil"
- * @returns {string}
- */
-function rollLabel(roll) {
-  const [type, key] = roll.split(":");
-  return T(type === "ring" ? `l5r4.ui.mechanics.rings.${key}` : `l5r4.ui.mechanics.traits.${key}`);
 }
 
 /**

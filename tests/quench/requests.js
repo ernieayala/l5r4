@@ -2,6 +2,7 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { startDuel } from "../../module/services/combat/duel.js";
+import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications } from "./helpers.js";
 
@@ -283,6 +284,73 @@ export function registerRequestsTests(quench) {
               "l5r4.ui.requests.notDuelistRoll",
               "the slot is filled"
             );
+          })
+        );
+      });
+
+      describe("Prompt and contest cards", () => {
+        it(
+          "should refuse to answer a prompt card the GM's client did not post",
+          clean(async () => {
+            const actor = await playersCharacter();
+            const forged = track(
+              await ChatMessage.create({
+                author: player.id,
+                content: "Quench",
+                flags: { [SYS_ID]: { prompt: { kind: "fullDefense", actorUuid: actor.uuid } } }
+              })
+            );
+            const query = CONFIG.queries[`${SYS_ID}.answerPrompt`];
+            assert.equal(
+              await refusalOf(query({ messageId: forged.id }, { user: player })),
+              "l5r4.ui.requests.notYourPrompt"
+            );
+          })
+        );
+
+        it(
+          "should count a contest roll only for the side whose actor made it",
+          clean(async () => {
+            const attacker = await playersCharacter();
+            const target = track(await createTestNPC({ name: "Requests: contest target" }));
+            const attack = track(
+              await rollCheck({
+                actor: attacker,
+                kind: "attack",
+                label: "Requests attack",
+                base: { roll: 3, keep: 2 },
+                target,
+                tn: 5,
+                askForOptions: false
+              })
+            );
+            const strength = track(
+              await rollCheck({
+                actor: attacker,
+                kind: "trait",
+                label: "Requests Strength",
+                base: { roll: 2, keep: 2 },
+                trait: "str",
+                askForOptions: false
+              })
+            );
+            await strength.setFlag(SYS_ID, "contest", { attackId: attack.id, side: "target" });
+            assert.notExists(
+              contestRollsOf(attack).target,
+              "the attacker's roll does not count for the target"
+            );
+            const own = track(
+              await rollCheck({
+                actor: target,
+                kind: "trait",
+                label: "Requests Strength",
+                base: { roll: 2, keep: 2 },
+                trait: "str",
+                askForOptions: false
+              })
+            );
+            await own.setFlag(SYS_ID, "contest", { attackId: attack.id, side: "target" });
+            assert.equal(contestRollsOf(attack).target?.id, own.id, "the target's own roll counts");
           })
         );
       });

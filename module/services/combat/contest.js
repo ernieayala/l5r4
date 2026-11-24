@@ -28,7 +28,7 @@ export async function rollContest(attack) {
   };
   let rolled = false;
   for (const [side, actor] of Object.entries(sides)) {
-    if (!actor?.isOwner || contestRollsOf(attack.id)[side]) {
+    if (!actor?.isOwner || contestRollsOf(attack)[side]) {
       continue;
     }
     const message = await rollTrait({
@@ -56,7 +56,7 @@ export async function rollContest(attack) {
  * @returns {Promise<void>}
  */
 async function postContestResult(attack, sides) {
-  const result = getContestOutcome(attack.id);
+  const result = getContestOutcome(attack);
   if (!result) {
     return;
   }
