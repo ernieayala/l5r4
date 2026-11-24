@@ -993,7 +993,6 @@
         "stanceNotAllowed": "{condition} exclut {stance}",
         "voidArmor": "Vide : ND d'Armure +10",
         "voidArmorNoCombat": "Il faut être en combat actif pour utiliser le Vide pour le ND d'Armure",
-        "voidArmorNotTurn": "Le Vide ne peut servir au ND d'Armure que pendant votre tour",
         "voidArmorQuestion": "Dépenser un Point de Vide pour augmenter le ND d'Armure de +10 pendant 1 round ?",
         "voidArmorSpent": "{name} a dépensé un Point de Vide : ND d'Armure +10 pendant 1 Round",
         "voidArmorTitle": "Dépenser un Point de Vide pour le ND d'Armure",

@@ -1,7 +1,7 @@
 /**
  * @module sheets/handlers/pc-actions-handler
  * @description PC sheet actions for Void Point spending and the Insight Rank's mode, delegating to services: Void
- * for Armor TN gives +10 for one Round and only on the actor's turn in combat, after a DialogV2 confirmation; Void
+ * for Armor TN gives +10 for one Round, declared at the start of the Round in combat, after a DialogV2 confirmation; Void
  * for Initiative sets a flag the initiative roll spends for +10; a GM's lock button switches the Insight Rank
  * between computed and typed.
  */
@@ -27,12 +27,12 @@ export class PcActionsHandler {
    * **Game Rules Context:**
    * Per core rules:
    * - Spend Void at beginning of round for +10 Armor TN for 1 round
-   * - Only works if in combat on the actor's turn
+   * - Declared while the Round's first Turn is under way, whoever's Turn it is (Ernie's ruling, #197)
    * - Void Point is spent immediately when activated
    *
    * **Validation:**
    * - Must be in a started combat (the actor's own, not only the viewed scene's)
-   * - Must be actor's turn (current combatant matches actor)
+   * - Must be the Round's first Turn
    * - Must have Void Points available (system.rings.void.value > 0)
    * - Requires user confirmation via dialog
    *
@@ -172,8 +172,10 @@ export class PcActionsHandler {
   }
 
   /**
-   * Why the actor cannot spend a Void Point on Armor TN now: no combat has started, it is not the actor's turn, or
-   * the actor has no Void Points.
+   * Why the actor cannot spend a Void Point on Armor TN now: no combat has started, the Round is past its start, or
+   * the actor has no Void Points. The +10 is declared at the beginning of the combat Round, which Ernie's ruling
+   * (#197) reads as while the Round's first Turn is under way, whoever's Turn it is, so a late actor is covered
+   * before the attacks of the Round.
    * game-rules/25_rings_and_traits.md, p.78
    * @param {Actor} actor
    * @returns {string|null} The warning's i18n key, or null when the actor can spend
@@ -185,10 +187,8 @@ export class PcActionsHandler {
       return "l5r4.ui.effects.voidArmorNoCombat";
     }
 
-    // Check if it's this actor's turn
-    const currentCombatant = combat.combatant;
-    if (!currentCombatant || currentCombatant.actorId !== actor.id) {
-      return "l5r4.ui.effects.voidArmorNotTurn";
+    if (combat.turn !== 0) {
+      return "l5r4.ui.effects.voidArmorRoundStart";
     }
 
     // Check void points available

@@ -993,7 +993,6 @@
         "stanceNotAllowed": "{condition} impide {stance}",
         "voidArmor": "Vacío: ND de Armadura +10",
         "voidArmorNoCombat": "Debes estar en un combate activo para usar Vacío en el ND de Armadura",
-        "voidArmorNotTurn": "Solo puedes usar Vacío en el ND de Armadura en tu turno",
         "voidArmorQuestion": "¿Gastar un Punto de Vacío para aumentar el ND de Armadura en +10 durante 1 Asalto?",
         "voidArmorSpent": "{name} gastó un Punto de Vacío: ND de Armadura +10 durante 1 Asalto",
         "voidArmorTitle": "Gastar un Punto de Vacío en el ND de Armadura",

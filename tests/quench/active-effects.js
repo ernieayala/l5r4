@@ -1,6 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../module/config/status-effects.js";
-import { applyEffect } from "../../module/services/effects/apply.js";
+import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
 import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
@@ -349,6 +349,36 @@ export function registerActiveEffectsTests(quench) {
             "Void spent on Armor TN"
           );
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
+        });
+
+        // #197, Ernie's ruling: declared at the start of the Round, whoever's Turn it is
+        // game-rules/25_rings_and_traits.md, p.78
+        it("should allow Void for Armor TN during the Round's first Turn only, whoever's Turn it is", async () => {
+          const mine = await setUp("Active effects: armor void timing");
+          const other = await createTestPC({ name: "Active effects: first to act" });
+          try {
+            await combat.createEmbeddedDocuments("Combatant", [
+              { actorId: other.id, initiative: 30 }
+            ]);
+            await mine.update({ initiative: 10 });
+            await combat.startCombat();
+            assert.equal(combat.combatant.actorId, other.id, "the other acts first");
+            const armorVoid = () => effectsOf(actor, "voidArmor");
+            const element = { checked: true };
+            await PcActionsHandler.updateArmorVoid({ actor }, null, element);
+            assert.lengthOf(armorVoid(), 1, "spent during the first Turn, on another's Turn");
+            await actor.deleteEmbeddedDocuments(
+              "ActiveEffect",
+              armorVoid().map(e => e.id)
+            );
+            await combat.nextTurn();
+            const late = { checked: true };
+            await PcActionsHandler.updateArmorVoid({ actor }, null, late);
+            assert.isFalse(late.checked, "refused past the Round's start");
+            assert.lengthOf(armorVoid(), 0);
+          } finally {
+            await other.delete();
+          }
         });
       });
 
