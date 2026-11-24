@@ -1,18 +1,18 @@
 /**
  * @module apps/combat-config
  * @description A form window for one actor's combat values: the initiative roll, keep, and total modifiers and the
- * movement multiplier and modifier. DebouncedFieldMixin saves each field as it changes; the window stays open after
+ * movement multiplier and modifier. FieldSaveMixin saves each field as it changes; the window stays open after
  * submit so the user can tweak values during combat setup.
  */
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+import { FieldSaveMixin } from "../mixins/field-save-mixin.js";
 
 /**
  * The combat configuration window for one actor.
  */
-export default class CombatConfigApplication extends DebouncedFieldMixin(
+export default class CombatConfigApplication extends FieldSaveMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
@@ -59,7 +59,6 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
     });
     super(mergedOptions);
     this.actor = actor;
-    this._initializeDebouncing();
   }
 
   /**
@@ -117,12 +116,11 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
     };
   }
 
-  // _onRender and _onFieldChange are provided by DebouncedFieldMixin
+  // _onRender and _onFieldChange are provided by FieldSaveMixin
 
   /**
    * Update actor with new combat configuration value.
    * Updates system data fields for initiative and movement settings.
-   * Includes validation to prevent updates after application close.
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
@@ -131,11 +129,6 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
     try {
       if (!this.actor) {
         console.warn(`${SYS_ID}`, "CombatConfig: No actor for update");
-        return;
-      }
-
-      if (!this.rendered) {
-        console.warn(`${SYS_ID}`, "CombatConfig: Update after close");
         return;
       }
 
@@ -164,6 +157,4 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
       event.preventDefault();
     }
   }
-
-  // close() method is provided by DebouncedFieldMixin
 }

@@ -2,11 +2,11 @@
  * Wound Config Edge Case Tests
  *
  * Tests edge cases in wound configuration dialog that could corrupt wound data.
- * Specifically tests invalid multipliers, debounce data loss, and negative modifiers.
+ * Specifically tests invalid multipliers, edits kept when the window closes, and negative modifiers.
  *
  * **What Can Break:**
  * - Invalid multiplier values (99, 0, negative)
- * - Debounce data loss when closing < 300ms
+ * - An edit lost when the window closes right after it, or when a second edit follows it (#137)
  * - Negative wound modifiers
  * - Extreme wound penalty values
  * - Rapid configuration changes
@@ -16,7 +16,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import WoundConfigApplication from "../../../module/apps/wound-config.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
-import { MULTI_CLOSE_TIMEOUT_MS } from "../helpers.js";
+import { MULTI_CLOSE_TIMEOUT_MS, waitFor } from "../helpers.js";
 
 /**
  * Register wound config edge case tests
@@ -142,12 +142,19 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("Debounce data loss prevention", () => {
+      describe("Edits kept on close", () => {
         let actor, dialog;
+
+        /** Change a named field of the window the way a user does. */
+        const changeField = (name, value) => {
+          const input = dialog.element.querySelector(`[name="${name}"]`);
+          input.value = value;
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        };
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Wound config edge cases: debounce",
+            name: "Wound config edge cases: close",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsMultiplier: 2
@@ -197,26 +204,22 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(actor.system.woundsMultiplier, 2, "Multiplier unchanged");
         });
 
-        it("should preserve data when closing after a short delay of 100 ms", async () => {
-          // ARRANGE - Wait short time
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ACT - Close
+        it("should keep an edit when the window closes right after it", async () => {
+          changeField("woundsMod", "4");
           await dialog.close({ animate: false });
-
-          // ASSERT
-          assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
+          await waitFor(() => actor._source.system.woundsMod === 4);
+          assert.equal(actor._source.system.woundsMod, 4, "saved");
         });
 
-        it("should preserve data when closing after a medium delay of 300 ms", async () => {
-          // ARRANGE - Wait medium time (typical debounce threshold)
-          await new Promise(resolve => setTimeout(resolve, 300));
-
-          // ACT - Close
-          await dialog.close({ animate: false });
-
-          // ASSERT
-          assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
+        it("should keep both of two fields edited back to back", async () => {
+          changeField("woundsMod", "3");
+          changeField("woundsPenaltyMod", "2");
+          await waitFor(
+            () =>
+              actor._source.system.woundsMod === 3 && actor._source.system.woundsPenaltyMod === 2
+          );
+          assert.equal(actor._source.system.woundsMod, 3, "the first field");
+          assert.equal(actor._source.system.woundsPenaltyMod, 2, "the second field");
         });
 
         it("should handle multiple dialogs for same actor", async function () {

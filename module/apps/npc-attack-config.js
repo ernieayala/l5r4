@@ -1,7 +1,7 @@
 /**
  * @module apps/npc-attack-config
  * @description A form window for one NPC attack slot and its damage: the attack's name, roll and keep dice, modifier,
- * and action type, and the damage's dice, modifier, and type. It uses no DebouncedFieldMixin: the values save
+ * and action type, and the damage's dice, modifier, and type. It uses no FieldSaveMixin: the values save
  * together when the user clicks save, and the window closes then. The constructor takes the actor and the attack key
  * (`attack1`), because an NPC has several attack slots.
  */

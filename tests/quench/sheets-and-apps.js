@@ -832,6 +832,33 @@ export function registerSheetsAndAppsTests(quench) {
           })
         );
 
+        // #137: each change saves at once, so a second edit or closing the window loses nothing
+        it(
+          "should save three combat config fields edited back to back, then closed at once",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const app = new CombatConfigApplication(pc);
+            await app.render({ force: true });
+            const change = (name, value) => {
+              const input = app.element.querySelector(`[name="${name}"]`);
+              input.value = value;
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            };
+            change("initiative.rollMod", "2");
+            change("initiative.keepMod", "1");
+            change("initiative.totalMod", "3");
+            await app.close({ animate: false });
+            const initiative = () => pc._source.system.initiative;
+            await waitFor(
+              () =>
+                initiative().rollMod === 2 &&
+                initiative().keepMod === 1 &&
+                initiative().totalMod === 3
+            );
+            assert.include(initiative(), { rollMod: 2, keepMod: 1, totalMod: 3 });
+          })
+        );
+
         it(
           "should save an armor config field and run every action",
           clean(async function () {

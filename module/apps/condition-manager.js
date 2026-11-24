@@ -1,7 +1,7 @@
 /**
  * @module apps/condition-manager
  * @description A window that toggles an actor's status conditions, every status effect except the stances, as
- * ActiveEffect documents, and refreshes the actor's tokens when one changes. It uses no DebouncedFieldMixin and no
+ * ActiveEffect documents, and refreshes the actor's tokens when one changes. It uses no FieldSaveMixin and no
  * form submission: the multi-checkbox element reports its own change events, and one change adds or removes every
  * condition that differs.
  */

@@ -1,18 +1,18 @@
 /**
  * @module apps/armor-config
  * @description A form window for one actor's armor values: the Armor TN modifier, the reduction modifier, and
- * whether armor items stack. DebouncedFieldMixin saves each field as it changes, because the TN and reduction values
- * update while the user types; the window stays open after submit so the user can make several adjustments.
+ * whether armor items stack. FieldSaveMixin saves each field as it changes; the window stays open after submit so the
+ * user can make several adjustments.
  */
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+import { FieldSaveMixin } from "../mixins/field-save-mixin.js";
 
 /**
  * The armor configuration window for one actor.
  */
-export default class ArmorConfigApplication extends DebouncedFieldMixin(
+export default class ArmorConfigApplication extends FieldSaveMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
@@ -59,7 +59,6 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
     });
     super(mergedOptions);
     this.actor = actor;
-    this._initializeDebouncing();
   }
 
   /**
@@ -119,12 +118,11 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
     };
   }
 
-  // _onRender and _onFieldChange are provided by DebouncedFieldMixin
+  // _onRender and _onFieldChange are provided by FieldSaveMixin
 
   /**
    * Update actor with new armor configuration value.
    * Handles both system data fields and flag-based allowArmorStacking setting.
-   * Includes validation to prevent updates after application close.
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
@@ -133,11 +131,6 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
     try {
       if (!this.actor) {
         console.warn(`${SYS_ID}`, "ArmorConfig: No actor for update");
-        return;
-      }
-
-      if (!this.rendered) {
-        console.warn(`${SYS_ID}`, "ArmorConfig: Update after close");
         return;
       }
 
@@ -172,6 +165,4 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
       event.preventDefault();
     }
   }
-
-  // close() method is provided by DebouncedFieldMixin
 }

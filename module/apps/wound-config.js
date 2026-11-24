@@ -1,7 +1,7 @@
 /**
  * @module apps/wound-config
  * @description A form window for one actor's wound tracking: manual or formula Wounds, the Earth multiplier, the
- * Wound and penalty modifiers, and an NPC's number of Wound Ranks. DebouncedFieldMixin saves each field as it
+ * Wound and penalty modifiers, and an NPC's number of Wound Ranks. FieldSaveMixin saves each field as it
  * changes, and `_validateFieldValue` rejects a value outside the allowed range first; the window stays open after
  * submit so the user can make several adjustments.
  */
@@ -9,7 +9,7 @@ import { SYS_ID } from "../config/constants.js";
 import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-import { DebouncedFieldMixin, toFieldValue } from "../mixins/debounced-field-mixin.js";
+import { FieldSaveMixin, toFieldValue } from "../mixins/field-save-mixin.js";
 
 /**
  * Valid wound calculation modes.
@@ -44,7 +44,7 @@ const MAX_NPC_WOUND_LEVELS = 8;
 /**
  * The wound configuration window for one actor.
  */
-export default class WoundConfigApplication extends DebouncedFieldMixin(
+export default class WoundConfigApplication extends FieldSaveMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
@@ -90,7 +90,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
     });
     super(mergedOptions);
     this.actor = actor;
-    this._initializeDebouncing();
   }
 
   /**
@@ -168,14 +167,15 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
     };
   }
 
-  // _onRender is provided by DebouncedFieldMixin
+  // _onRender is provided by FieldSaveMixin
 
   /**
    * Handle field change events with validation notification.
-   * Overrides DebouncedFieldMixin to add user notification on validation failure.
+   * Overrides FieldSaveMixin to add user notification on validation failure.
    *
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The form field element that changed
+   * @returns {Promise<void>}
    * @override
    */
   async _onFieldChange(event, element) {
@@ -194,13 +194,13 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       return;
     }
 
-    this.updateDebounced(field, validatedValue);
+    await this._updateActor(field, validatedValue);
   }
 
   /**
    * Validate field values before applying updates.
    * Enforces constraints on wound mode, multipliers, NPC wound levels, and modifiers.
-   * Overrides DebouncedFieldMixin validation hook.
+   * Overrides FieldSaveMixin validation hook.
    *
    * @param {string} field - The field name being validated
    * @param {*} value - The value to validate
@@ -236,8 +236,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
 
   /**
    * Update actor with new wound configuration value.
-   * Validates field value before updating, prevents updates after application close. The wound mode decides which
-   * fields the window shows, so a new mode renders it again.
+   * The wound mode decides which fields the window shows, so a new mode renders it again while it is open.
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
@@ -246,11 +245,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
     try {
       if (!this.actor) {
         console.warn(`${SYS_ID}`, "WoundConfig: No actor reference available for update");
-        return;
-      }
-
-      if (!this.rendered || this.rendered === false) {
-        console.warn(`${SYS_ID}`, "WoundConfig: Attempted update after application closed");
         return;
       }
 
@@ -283,8 +277,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       event.preventDefault();
     }
   }
-
-  // close() method is provided by DebouncedFieldMixin
 }
 
 /**
