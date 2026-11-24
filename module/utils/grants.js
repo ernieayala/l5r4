@@ -6,6 +6,7 @@
  * item names its giver in `flags.l5r4-enhanced.grantedBy`.
  */
 
+import { SYS_ID } from "../config/constants.js";
 import { hasOpenChoice } from "./choices.js";
 
 /**
@@ -25,6 +26,17 @@ import { hasOpenChoice } from "./choices.js";
  * @property {string} emphasis     The Emphasis the grant added to the trained list, or ""
  * @property {number} freeEmphasis Free Emphases the grant gave a Skill, 0 or 1
  */
+
+/**
+ * Whether a School was added beside the character's other School, as the purchase marks it with
+ * `flags.l5r4-enhanced.secondSchool` (Multiple Schools, roadmap/STAGE-18 decision 10).
+ * game-rules/64_advantages.md, p.151
+ * @param {object} item - An item or its data
+ * @returns {boolean}
+ */
+export function isSecondSchool(item) {
+  return item.type === "school" && item.flags?.[SYS_ID]?.secondSchool === true;
+}
 
 /**
  * The grants due: rules not yet recorded whose School Rank the giver has reached. A uuid still naming an open

@@ -15,15 +15,6 @@ import { F, R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * Whether a School was added beside the character's other School, as the purchase marks it.
- * @param {Item} giver
- * @returns {boolean}
- */
-export function isSecondSchool(giver) {
-  return giver.type === "school" && giver.getFlag(SYS_ID, "secondSchool") === true;
-}
-
-/**
  * A second School's due grants: its Skills are recorded but not given, and the rest wait until each of its School
  * Skills is at rank 1.
  * game-rules/64_advantages.md, p.151

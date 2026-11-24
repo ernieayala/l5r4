@@ -16,12 +16,13 @@ import {
   buildEmptyGrantRecord,
   buildGrantedSkill,
   getPendingGrants,
-  buildUngrantedSkill
+  buildUngrantedSkill,
+  isSecondSchool
 } from "../../../utils/grants.js";
 import { F, R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
-import { getSecondSchoolGrants, isSecondSchool } from "./second-school.js";
+import { getSecondSchoolGrants } from "./second-school.js";
 
 /**
  * Grant work waiting per actor UUID, so one client's grants for an actor never overlap.

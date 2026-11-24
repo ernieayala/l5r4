@@ -432,6 +432,29 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #156, Ernie's ruling: the creation Trait bonus belongs to the School a character starts in
+        // game-rules/48_character_creation_expanded.md, p.102
+        // game-rules/49_improving_your_character.md, p.105
+        it(
+          "should give a second School no Trait bonus",
+          clean(async function () {
+            this.timeout(15_000);
+            const { actor } = await schooled();
+            const agility = actor.system.traits.agi;
+            const second = {
+              name: "Quench Agile School",
+              type: "school",
+              system: { rules: [{ key: "TraitAdjust", trait: "agi", value: 1 }] }
+            };
+            const { result } = await answerPurchaseDialogs(
+              createPurchasedItem(actor, second),
+              "add"
+            );
+            assert.ok(result, "added beside the first School");
+            assert.equal(actor.system.traits.agi, agility, "Agility is unchanged");
+          })
+        );
+
         // game-rules/64_advantages.md, p.151
         it(
           "should give a second School no free Skills and hold its Techniques until its Skills reach rank 1",

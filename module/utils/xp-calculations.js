@@ -8,6 +8,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { toNumber, toString } from "./type-coercion.js";
 import { getTraitAdjustTotal } from "./rule-engine.js";
+import { isSecondSchool } from "./grants.js";
 
 /**
  * Gets the creation bonus for a trait, split by where it comes from. A Family rule giving +1 Strength gives
@@ -68,7 +69,9 @@ function getCreationBonusInternal(actor, trait) {
 
 /**
  * The Family and School documents whose bonuses count: the flagged ones (which may be in compendiums), then the
- * owned ones, each once by UUID or id.
+ * owned ones, each once by UUID or id. A second School gives no creation bonus (Ernie's ruling, #156).
+ * game-rules/48_character_creation_expanded.md, p.102
+ * game-rules/49_improving_your_character.md, p.105
  * @param {object} actor - Foundry actor document
  * @returns {object[]} The documents
  */
@@ -87,7 +90,7 @@ function creationDocsOf(actor) {
     if (!it || typeof it.type !== "string") {
       continue;
     }
-    if (it.type === "family" || it.type === "school") {
+    if (it.type === "family" || (it.type === "school" && !isSecondSchool(it))) {
       docs.push(it);
     }
   }

@@ -22,6 +22,7 @@ import {
 import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
 import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
+import { isSecondSchool } from "../../utils/grants.js";
 import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
 import { getStackedModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
@@ -145,7 +146,10 @@ function onRuleProblem(actor, source, message) {
 }
 
 /**
- * The rule sources of the items whose rules are active, a choice not yet made waiting for it.
+ * The rule sources of the items whose rules are active, a choice not yet made waiting for it. A second School's
+ * TraitAdjust is the creation bonus of the School a character starts in, so it gives none (Ernie's ruling, #156).
+ * game-rules/48_character_creation_expanded.md, p.102
+ * game-rules/49_improving_your_character.md, p.105
  * @param {Actor} actor
  * @returns {object[]} Each rule with its source name, item id, and for a weapon its weapon id
  */
@@ -155,8 +159,10 @@ function itemRuleSourcesOf(actor) {
     if (item.system.rulesActive) {
       // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
       const extra = item.type === "weapon" ? { weaponId: item.id } : {};
+      const secondSchool = isSecondSchool(item);
       sources.push(
         ...applyChoices(item.system.ownedRules)
+          .filter(rule => !(secondSchool && rule?.key === "TraitAdjust"))
           // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
           .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
           .map(rule => ({
