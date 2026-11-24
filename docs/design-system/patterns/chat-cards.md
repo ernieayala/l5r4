@@ -48,7 +48,7 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 | Card | Button | `data-action` | Shown when | Who may use it |
 | --- | --- | --- | --- | --- |
 | Check card | Contested Strength roll | `combat-contest` | A hit with Knockdown or Disarm on a target | Each side's owner rolls that side (`rollContest` (`module/services/combat/contest.js`)) |
-| Check card | Grapple | `grapple-start` | A hit that declared a grapple | The attacker's owner (`startGrapple` (`module/services/combat/grapple.js`)) |
+| Check card | Grapple | `grapple-start` | A hit that declared a grapple | The attacker's owner (`startGrapple` (`module/services/combat/grapple-start.js`)) |
 | Check card | Apply to the target | `damage-apply-target` | A damage roll with a target | The roller or the GM, through the GM's client |
 | Check card | Apply to selected | `damage-apply-selected` | Every damage roll | As above |
 | Check card | Apply a condition to the target | `apply-condition` with `data-index` | A success whose rules offer a condition | The roller or the GM |

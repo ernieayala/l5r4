@@ -6,7 +6,7 @@ import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack } from "../../module/services/combat/damage-roll.js";
 import { applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
-import { startGrapple } from "../../module/services/combat/grapple.js";
+import { startGrapple } from "../../module/services/combat/grapple-start.js";
 import { startDuel } from "../../module/services/combat/duel.js";
 import { guard } from "../../module/services/combat/guard.js";
 import { applyLongRest } from "../../module/services/rest.js";
