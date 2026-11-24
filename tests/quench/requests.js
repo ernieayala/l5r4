@@ -1,4 +1,5 @@
 import { SYS_ID } from "../../module/config/constants.js";
+import { CHAT_TEMPLATES } from "../../module/config/templates.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { startDuel } from "../../module/services/combat/duel.js";
@@ -351,6 +352,31 @@ export function registerRequestsTests(quench) {
             );
             await own.setFlag(SYS_ID, "contest", { attackId: attack.id, side: "target" });
             assert.equal(contestRollsOf(attack).target?.id, own.id, "the target's own roll counts");
+          })
+        );
+      });
+
+      describe("Request cards", () => {
+        it(
+          "should show a request card's Roll button only when the GM's client posted it",
+          clean(async () => {
+            const content = await foundry.applications.handlebars.renderTemplate(
+              CHAT_TEMPLATES.checkRequest,
+              { text: "Quench", tn: 10 }
+            );
+            const card = author =>
+              ChatMessage.create({
+                type: "checkRequest",
+                author,
+                content,
+                system: { label: "Quench", skill: "", trait: "awa", ring: "", tn: 10 }
+              });
+            const button = async message =>
+              Boolean(
+                (await message.renderHTML()).querySelector("[data-action='check-request-roll']")
+              );
+            assert.isTrue(await button(track(await card(game.user.id))), "the GM's card");
+            assert.isFalse(await button(track(await card(player.id))), "a player's card");
           })
         );
       });

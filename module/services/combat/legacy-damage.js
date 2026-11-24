@@ -4,7 +4,9 @@
  * damage in the HTML. Either button applies the damage to the first selected token. Reduce with Void first spends one
  * of the target's Void Points for 10 fewer Wounds, declared before the damage is applied. The equipped armor's
  * Reduction then lowers what is left. Neither step takes the damage below 0. The card's damage is untrusted HTML, so
- * it is clamped to 0-99 as the legacy attack card's dice are. A `roll` message's damage goes through
+ * it is clamped to 0-99 as the legacy attack card's dice are, and it lands only on a token the clicking user owns, or
+ * any for a GM, who clicks it deliberately: a legacy card a player writes now cannot be told from one posted before
+ * 4.0.0, so that is the limit of what such a card can do (#162). A `roll` message's damage goes through
  * module/services/combat/damage.js. module/hooks/register-all.js wires the binder.
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/73_armor.md, p.198
