@@ -10,18 +10,21 @@ import { SYS_ID } from "../../config/constants.js";
 import { getContestResult } from "../../utils/check.js";
 
 /**
- * The Strength rolls made for an attack's contest, by side, since its last tie.
- * @param {string} attackId
+ * The Strength rolls made for an attack's contest, by side, since its last tie. A roll counts for a side only when that
+ * side's actor made it: the mark is on the roller's own message, which the roller could set to either side (#162).
+ * @param {ChatMessage} attack - The attack message
  * @returns {{attacker?: ChatMessage, target?: ChatMessage}}
  */
-export function contestRollsOf(attackId) {
+export function contestRollsOf(attack) {
+  const actors = { attacker: attack.system.actorUuid, target: attack.system.target?.uuid };
   const rolls = {};
   for (const message of game.messages.contents) {
     const mark = message.getFlag(SYS_ID, "contest");
-    if (mark?.attackId === attackId) {
+    const own = message.type === "roll" && message.system.actorUuid === actors[mark?.side];
+    if (mark?.attackId === attack.id && own) {
       rolls[mark.side] = message;
     }
-    if (message.getFlag(SYS_ID, "contestTie") === attackId) {
+    if (message.getFlag(SYS_ID, "contestTie") === attack.id) {
       delete rolls.attacker;
       delete rolls.target;
     }
@@ -32,11 +35,11 @@ export function contestRollsOf(attackId) {
 /**
  * The side that won an attack's contest, once both sides have rolled.
  * game-rules/29_types_of_rolls.md, p.80
- * @param {string} attackId
+ * @param {ChatMessage} attack - The attack message
  * @returns {{winner: string|null, tie: boolean}|null} null until both sides have rolled
  */
-export function getContestOutcome(attackId) {
-  const rolls = contestRollsOf(attackId);
+export function getContestOutcome(attack) {
+  const rolls = contestRollsOf(attack);
   if (!rolls.attacker || !rolls.target) {
     return null;
   }

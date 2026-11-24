@@ -96,7 +96,7 @@ function getContestProofOptions(request) {
   if (request.id !== "prone" || !knockdown) {
     return null;
   }
-  const outcome = getContestOutcome(attack.id);
+  const outcome = getContestOutcome(attack);
   return outcome && !outcome.tie && outcome.winner === "attacker" ? {} : null;
 }
 
