@@ -710,16 +710,6 @@
         "deleteEffect": "Échec de la suppression de l'effet.",
         "toggleEffect": "Échec de l'activation ou de la désactivation de l'effet"
       },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image.",
-          "other": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image."
-        },
-        "iconsUpdated": {
-          "one": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde.",
-          "other": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde."
-        }
-      },
       "settings": {
         "designGallery": {
           "hint": "Chaque jeton, composant et motif du système de design, dessiné par les propres modèles du système.",

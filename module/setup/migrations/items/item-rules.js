@@ -2,7 +2,6 @@
  * @module setup/migrations/items/item-rules
  * @description Moves 3.2.1 item mechanics into `system.rules` (roadmap/STAGE-07-RULE-ENGINE.md, Conversions).
  */
-import { SYS_ID } from "../../../config/constants.js";
 
 const TRAIT_CHANGE = /^system\.traits\.(sta|wil|str|per|ref|awa|agi|int)$/;
 const voidChangeKeys = new Set(["system.rings.void.rank", "system.rings.void.value"]);
@@ -25,38 +24,19 @@ const MASTER_OF_BLOOD_RULES = Object.freeze([
 ]);
 
 /**
- * Moves item mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, a Master of
- * Blood advantage gets its rules, and any item's Free Raises become a FreeRaise rule. Running again changes nothing.
+ * Moves one item's mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, a Master
+ * of Blood advantage gets its rules, and the item's Free Raises become a FreeRaise rule. It runs once per item
+ * (#181), so a rule a GM deletes afterwards stays deleted.
  *
- * @param {Document[]} docs - Documents to scan; non-Items are skipped
- * @param {string} label - Migration context label for console logging
+ * @param {Item} item
  * @returns {Promise<void>}
  */
-export async function migrateItemRules(docs, label) {
-  let migrated = 0;
-  for (const item of docs) {
-    if (item.documentName !== "Item") {
-      continue;
-    }
-    try {
-      let changed = await migrateFreeRaises(item);
-      if (item.type === "family" || item.type === "school") {
-        changed = (await migrateCreationBonusEffects(item)) || changed;
-      } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
-        changed = (await migrateMasterOfBloodRules(item)) || changed;
-      }
-      migrated += Number(changed);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to move item mechanics into rules", {
-        label,
-        id: item.id,
-        name: item.name,
-        err
-      });
-    }
-  }
-  if (migrated > 0) {
-    console.warn(`${SYS_ID} | Moved the mechanics of ${migrated} items into rules (${label})`);
+export async function migrateItemRules(item) {
+  await migrateFreeRaises(item);
+  if (item.type === "family" || item.type === "school") {
+    await migrateCreationBonusEffects(item);
+  } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
+    await migrateMasterOfBloodRules(item);
   }
 }
 
@@ -80,12 +60,12 @@ function changedTraitOf(change) {
  * rules. The changes leave the effect, and an effect left with no changes and no statuses is deleted, so the
  * bonus applies once.
  * @param {Item} item
- * @returns {Promise<boolean>} Whether the item changed.
+ * @returns {Promise<void>}
  */
 async function migrateCreationBonusEffects(item) {
   const { rules, updates, deletions } = buildCreationBonusMoves(item);
   if (rules.length === 0) {
-    return false;
+    return;
   }
 
   await item.update(
@@ -98,7 +78,6 @@ async function migrateCreationBonusEffects(item) {
   if (deletions.length > 0) {
     await item.deleteEmbeddedDocuments("ActiveEffect", deletions, { render: false });
   }
-  return true;
 }
 
 /**
@@ -154,7 +133,7 @@ function buildTraitAdjustMoves(effect) {
  * Master of Blood: 3.2.1 recognized the advantage by name; it now carries its rules. Each is added when the item
  * lacks a rule of its key, so running again changes nothing.
  * @param {Item} item
- * @returns {Promise<boolean>} Whether the item changed.
+ * @returns {Promise<void>}
  */
 async function migrateMasterOfBloodRules(item) {
   const rules = item._source.system.rules;
@@ -166,10 +145,9 @@ async function migrateMasterOfBloodRules(item) {
       )
   );
   if (missing.length === 0) {
-    return false;
+    return;
   }
   await item.update({ "system.rules": [...rules, ...structuredClone(missing)] }, { render: false });
-  return true;
 }
 
 /**
@@ -177,12 +155,12 @@ async function migrateMasterOfBloodRules(item) {
  * roll, which the GM can see and narrow in the rules editor (Ernie's ruling). The field is set to 0, so running
  * again changes nothing.
  * @param {Item} item
- * @returns {Promise<boolean>} Whether the item changed.
+ * @returns {Promise<void>}
  */
 async function migrateFreeRaises(item) {
   const value = Number(item._source.system.freeRaises);
   if (!(value > 0)) {
-    return false;
+    return;
   }
   await item.update(
     {
@@ -191,5 +169,4 @@ async function migrateFreeRaises(item) {
     },
     { render: false }
   );
-  return true;
 }

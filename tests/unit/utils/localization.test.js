@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { pluralKeyOf } from "../../../module/utils/localization.js";
 
-const keyOf = category => `l5r4.system.migration.iconsUpdated.${category}`;
+const keyOf = category => `l5r4.system.migration.migrated.${category}`;
 
 /** A game.i18n for one language whose files define the one and other leaves. */
 const i18nFor = lang => ({

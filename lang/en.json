@@ -711,13 +711,13 @@
         "toggleEffect": "Failed to toggle effect"
       },
       "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Compendium migration: updated {count} image path",
-          "other": "Compendium migration: updated {count} image paths"
+        "failed": {
+          "one": "{count} document could not be migrated and is tried again the next time a GM loads the world. The console (F12) names it",
+          "other": "{count} documents could not be migrated and are tried again the next time a GM loads the world. The console (F12) names them"
         },
-        "iconsUpdated": {
-          "one": "Migration: updated {count} world image path",
-          "other": "Migration: updated {count} world image paths"
+        "migrated": {
+          "one": "Brought {count} document up to date with this version",
+          "other": "Brought {count} documents up to date with this version"
         }
       },
       "settings": {
@@ -731,7 +731,7 @@
           "name": "Floating Wound and Void numbers"
         },
         "forceMigration": {
-          "hint": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes.",
+          "hint": "Runs every migration step again on every document the next time the world loads, whatever each document records. Turns itself off afterwards.",
           "name": "Force migration on startup"
         },
         "honorRoll": {
@@ -743,7 +743,7 @@
           "name": "Apply Little Truths exception"
         },
         "runMigration": {
-          "hint": "If enabled, pending data migrations will run the next time the world loads. Disable to skip migrations for troubleshooting.",
+          "hint": "Each time a GM loads the world, documents from an older version, including ones imported since, are brought up to date. Disable to skip migrations for troubleshooting.",
           "name": "Run migrations on startup"
         }
       }

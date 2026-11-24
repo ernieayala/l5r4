@@ -710,16 +710,6 @@
         "deleteEffect": "Fehler beim Löschen des Effekts.",
         "toggleEffect": "Fehler beim Umschalten des Effekts"
       },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert.",
-          "other": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert."
-        },
-        "iconsUpdated": {
-          "one": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert.",
-          "other": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert."
-        }
-      },
       "settings": {
         "designGallery": {
           "hint": "Jedes Token, jede Komponente und jedes Muster des Designsystems, gezeichnet mit den eigenen Vorlagen des Systems.",

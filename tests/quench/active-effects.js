@@ -563,7 +563,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.setFlag(SYS_ID, "xpFreeTraitBase", { str: 1 });
           await actor.setFlag(SYS_ID, "xpRetroactiveVersion", 123);
           assert.equal(actor.system._xp.breakdown.traits, 0, "the flag hides the bought rank");
-          await migrateEffectFreeTraitBase([actor], "quench");
+          await migrateEffectFreeTraitBase(actor);
           assert.equal(actor.getFlag(SYS_ID, "xpFreeTraitBase").str, 0);
           assert.equal(actor.getFlag(SYS_ID, "xpRetroactiveVersion"), 0, "history rebuilds");
           assert.equal(actor.system._xp.breakdown.traits, 20, "Strength 4 to 5 costs 4 x 5");

@@ -319,14 +319,14 @@ Two kinds, each with one job.
 | Kind | Where | Runs | Shape |
 | --- | --- | --- | --- |
 | Source shape | `module/data/migrate-source.js`, called from `migrateData` | Each time stored data is read; changes nothing on disk | `migrate<Shape>Source(source)`, changes `source` in place |
-| World data | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per version, from `migrateWorld` in `module/setup/migrations.js`, in `ready` | `async migrate<What>(docs, label)` |
+| World data | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per document: on the active GM's world load, from `migrateWorld` in `module/setup/migrations.js`, and when a document is created or imported | `async migrate<What>(doc)`, listed with its schema number in `ITEM_STEPS`, `EFFECT_STEPS`, or `ACTOR_STEPS` |
 
 | Rule | Check |
 | --- | --- |
 | A schema change ships with its migration in the same change (CLAUDE.md **Change Control**) | review |
-| A world step reads `document._source`, skips documents it does not match, and updates with `{ render: false }` | review |
-| A world step runs for world documents and for each pack, listed in both `migrateWorldDocuments` and `migratePackDocuments` | review |
-| Stored world data is a trust boundary: a step may guard and catch per document, and logs one count line | review |
+| A world step reads `document._source`, leaves alone a document it does not match, and updates with `{ render: false }` | review |
+| A new world step takes the next schema number and raises `MIGRATION_SCHEMA` (`module/config/constants.js`); a step already shipped keeps its number | review |
+| A world step throws when it fails: `migrateDocument` catches per document, logs it, and leaves it unmarked so the next run tries it again | review |
 | History words that describe the old stored shape are allowed in migration code (`documentation.md` **Comments**) | review |
 | Old stored keys a migration reads are fixed names | review |
 | Each step has a Vitest case for the shape it changes and runs in the `world-upgrade` Quench batch in the 3.2.1 fixture world | `tests/unit/data/migrate-source.test.js`, `tests/quench/world-upgrade.js` |

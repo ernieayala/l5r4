@@ -710,16 +710,6 @@
         "deleteEffect": "Error al eliminar efecto.",
         "toggleEffect": "Error al activar o desactivar el efecto"
       },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen.",
-          "other": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
-        },
-        "iconsUpdated": {
-          "one": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
-          "other": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo."
-        }
-      },
       "settings": {
         "designGallery": {
           "hint": "Cada token, componente y patrón del sistema de diseño, dibujado con las propias plantillas del sistema.",

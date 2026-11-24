@@ -67,11 +67,11 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `open` | Open a window: an app, a sheet, or a dialog that stays open | `openArmorConfig` (`module/sheets/handlers/app-launcher-handler.js`), `openLedgerDialog` |
 | `ask` | Show a dialog and wait for the user's answer | `askChoices` (`module/services/dice/check/dialog.js`), `askChoice` |
 | `is` | Predicate: a state | `isDead` (`module/utils/damage.js`), `isLost` |
-| `has` | Predicate: owns or contains | `hasOpenChoice` (`module/utils/choices.js`), `hasBeenMigrated` |
+| `has` | Predicate: owns or contains | `hasOpenChoice` (`module/utils/choices.js`), `hasHonorRollLeft` |
 | `can` | Predicate: allowed by permissions or the rules | `canEmbraceTaint` (`module/utils/taint.js`) |
 | `spend`, `test`, `start`, `end`, `guard` | Game verb: the action the book names for a game act (spend a Void Point, test Fear, start a duel, end an effect, guard an ally) | `spendVoidPoint` (`module/services/dice/resources/void-points.js`), `testFear` (`module/services/fear.js`), `startDuel` (`module/services/combat/duel.js`), `endConcentration` (`module/services/effects/prompts.js`), `guardFromCanvas` (`module/services/combat/guard.js`) |
 | `prepare` | Compute derived data during document preparation | `prepareFear` (`module/documents/actor/calculations/fear-system.js`) |
-| `migrate` | Change stored source data to the current shape | `migratePcSource` (`module/data/migrate-source.js`), `migrateArmorTypes` |
+| `migrate` | Change stored source data to the current shape | `migratePcSource` (`module/data/migrate-source.js`), `migrateArmorType` |
 | `register` | Add to a Foundry registry or hook during init | `registerEffectQueries` (`module/services/effects/apply.js`) |
 | `bind` | Attach listeners to a rendered chat card or dialog | `bindCheckCard` (`module/services/dice/check/chat-actions.js`) |
 | `hide` | Remove from rendered HTML a control the viewer may not use | `hideUnusable` (`module/utils/dom.js`) |
@@ -105,7 +105,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `mayActFor` (modeled) | `may` is not a predicate prefix | `canActFor` (`module/services/combat/flow.js`) |
 | `needsRetroactiveUpdate` (modeled) | `needs` is not a predicate prefix | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`) |
 | `initializeCombat` (modeled) | Init entries use `register` | `registerCombatQueries` (`module/services/effects/combat-events.js`) |
-| `runIconPathMigration` (modeled) | Migrations use `migrate` | `migrateIconPaths` (`module/setup/migrations/icons/icon-paths.js`) |
+| `runIconPathMigration` (modeled) | Migrations use `migrate` | `migrateItemIcon` (`module/setup/migrations/icons/icon-paths.js`) |
 | `handleFearClick` (modeled) | Event handlers use `on` | `onFearClick` (`module/services/fear.js`) |
 | `calculateInsightRank` (modeled) | A read by another verb | `getInsightRank` (`module/documents/actor/calculations/xp-system.js`) |
 | `createSkillData` (`tests/fixtures/item-fixtures.js`) | Returns plain data, not a document | `buildSkillData` |
@@ -118,7 +118,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | Init entry | `register<Feature>()` | `registerEffectQueries` (`module/services/effects/apply.js`) | `initializeCombat` (modeled) | `l5r4/naming` |
 | GM query registration | `register<Feature>Queries()` | `registerEffectQueries` | `setupQueries` (modeled) | `l5r4/naming` |
 | Card binding | `bind<Card>Card(message, html)`, singular | `bindCheckCard` (`module/services/dice/check/chat-actions.js`) | `bindDamageCards` (`module/services/combat/damage.js`) | Review |
-| Migration step | `migrate<What>`; a source migration in a data model is `migrate<Shape>Source(source)` | `migrateArmorTypes` (`module/setup/migrations/items/armor-types.js`), `migratePcSource` | `runIconPathMigration` (modeled) | `l5r4/naming` |
+| Migration step | `migrate<What>`; a source migration in a data model is `migrate<Shape>Source(source)` | `migrateArmorType` (`module/setup/migrations/items/armor-types.js`), `migratePcSource` | `runIconPathMigration` (modeled) | `l5r4/naming` |
 | Sheet handler static | `<verb><Object>(context, event, element)`, no `handle` prefix | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) | `handleToggleArmorVoid` → `updateArmorVoid` (modeled) | `l5r4/naming` |
 
 ## Members

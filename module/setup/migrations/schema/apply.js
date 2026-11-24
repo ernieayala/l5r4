@@ -2,7 +2,6 @@
  * @module setup/migrations/schema/apply
  * @description Renames legacy field names to the current schema (snake_case to camelCase).
  */
-import { SYS_ID } from "../../../config/constants.js";
 import { getByPath, updateByPath, deleteByPath } from "../utils/helpers.js";
 import { SCHEMA_MAP } from "./map.js";
 
@@ -12,10 +11,6 @@ import { SCHEMA_MAP } from "./map.js";
  * Scans the document against SCHEMA_MAP rules to identify legacy field names that need
  * transformation. Only creates updates if legacy fields exist AND target fields are empty.
  * Preserves existing data at target locations (non-destructive).
- *
- * Idempotency: Called from migrateWorld() which filters out already-migrated documents,
- * so this function only processes documents that haven't been migrated yet. This prevents
- * overwriting manually-corrected field names when forceMigration is triggered.
  *
  * A SCHEMA_MAP entry such as `{ docType: "Actor", type: "npc", from: "system.armor.armor_tn", to:
  * "system.armor.armorTn" }` moves the value at `from` to `to`.
@@ -59,30 +54,13 @@ export function buildSchemaUpdate(doc) {
 }
 
 /**
- * Applies schema field remapping to a collection of documents.
- *
- * Iterates through documents and applies SCHEMA_MAP transformations (e.g., snake_case →
- * camelCase field names). Each document is evaluated independently and updated only if
- * changes are needed. Errors are logged but don't halt the batch process.
- *
- * @param {Document[]} docs - Array of Actor or Item documents to process
- * @param {string} label - Migration context label for console logging
+ * Apply the SCHEMA_MAP renames (snake_case to camelCase field names) to one document, when it has any.
+ * @param {Document} doc - An Actor or Item
  * @returns {Promise<void>}
  */
-export async function applySchemaMapToDocs(docs, label) {
-  for (const doc of docs) {
-    try {
-      const update = buildSchemaUpdate(doc);
-      if (update) {
-        await doc.update(update);
-      }
-    } catch (e) {
-      console.warn(`${SYS_ID}`, "Schema remap failed", {
-        label,
-        id: doc.id,
-        type: doc.type,
-        error: e
-      });
-    }
+export async function applySchemaMap(doc) {
+  const update = buildSchemaUpdate(doc);
+  if (update) {
+    await doc.update(update);
   }
 }

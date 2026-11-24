@@ -1,9 +1,17 @@
 /**
  * @module setup/migrations/utils/helpers
  * @description Shared helpers for the data migration steps: dot-path reads and writes, Wound Rank data
- * normalization, and the per-document migration marker that makes a second run skip a document.
+ * normalization, and the migration schema a document is at.
  */
-import { SYS_ID, MIGRATION_FLAG } from "../../../config/constants.js";
+import {
+  SYS_ID,
+  LEGACY_MIGRATION_FLAG,
+  MIGRATION_FLAG,
+  MIGRATION_SCHEMA
+} from "../../../config/constants.js";
+
+/** The first system version whose migration brought documents to schema 1. */
+const SCHEMA_1_VERSION = "4.0.0";
 
 /**
  * Retrieves a nested property value from an object using dot notation path.
@@ -114,47 +122,36 @@ export function migrateWoundLevelData(woundData) {
 }
 
 /**
- * Checks if a document has already been migrated to a specific version.
- *
- * Reads the migration marker flag from document.flags.l5r4-enhanced.migratedVersion
- * to determine if migrations have already run on this document. Prevents re-running
- * migrations on manually-corrected data, ensuring true idempotency.
- *
- * @param {Document} doc - Actor or Item document to check
- * @param {string} targetVersion - System version to check against (e.g., "1.2.3")
- * @returns {boolean} True if document already migrated to targetVersion or later
+ * The migration schema a document's source is at (#181). Its MIGRATION_FLAG when set. Otherwise the version it was
+ * migrated or saved with decides: 4.0.0 or later is schema 1, the steps 4.0.0 ran; earlier, or another system's,
+ * is 0. A source with no version, or one saved by the running version, was made now and is current.
+ * @param {object} source - A document's source, or its creation data
+ * @param {string|null} [legacyVersion] - The version to read when the source has no LEGACY_MIGRATION_FLAG: for a
+ *   Scene, which no runner marked, the version the world last migrated to (the `lastMigratedVersion` setting)
+ * @returns {number}
  */
-export function hasBeenMigrated(doc, targetVersion) {
-  const migratedVersion = doc?.flags?.[SYS_ID]?.[MIGRATION_FLAG];
-  if (!migratedVersion) {
-    return false;
+export function getMigrationSchema(source, legacyVersion = null) {
+  const flags = source.flags?.[SYS_ID] ?? {};
+  if (Number.isInteger(flags[MIGRATION_FLAG])) {
+    return flags[MIGRATION_FLAG];
   }
-
-  // Simple string comparison works for semantic versioning (1.2.3 format)
-  // Returns true if migratedVersion >= targetVersion
-  return migratedVersion >= targetVersion;
+  const version = flags[LEGACY_MIGRATION_FLAG] ?? legacyVersion ?? getSavedVersion(source._stats);
+  if (!version || !foundry.utils.isNewerVersion(game.system.version, version)) {
+    return MIGRATION_SCHEMA;
+  }
+  return foundry.utils.isNewerVersion(SCHEMA_1_VERSION, version) ? 0 : 1;
 }
 
 /**
- * Marks a document as migrated to a specific version.
- *
- * Sets the migration marker flag on document.flags.l5r4-enhanced.migratedVersion
- * to prevent future migrations from re-running on this document. Should be called
- * after successful migration of a document.
- *
- * @param {Document} doc - Actor or Item document to mark as migrated
- * @param {string} version - System version to mark (e.g., "1.2.3")
- * @returns {Promise<void>}
+ * The system version a document was saved with: its export's when it was exported, "0.0.0" when another system
+ * saved it, null when none is recorded.
+ * @param {object|undefined} stats - The source's `_stats`
+ * @returns {string|null}
  */
-export async function updateMigratedVersion(doc, version) {
-  try {
-    await doc.setFlag(SYS_ID, MIGRATION_FLAG, version);
-  } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to set migration flag", {
-      id: doc.id,
-      name: doc.name,
-      version,
-      error: err
-    });
+function getSavedVersion(stats) {
+  const saved = stats?.exportSource ?? stats;
+  if (!saved?.systemVersion) {
+    return null;
   }
+  return !saved.systemId || saved.systemId === SYS_ID ? saved.systemVersion : "0.0.0";
 }

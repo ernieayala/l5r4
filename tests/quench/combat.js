@@ -1520,18 +1520,7 @@ export function registerCombatTests(quench) {
               })
             );
             assert.deepInclude(npc.system.initiative, { roll: 2, keep: 2 }, "the stored pool");
-            // Migrations report what they changed on console.warn; hold that line back so cleanTest sees the rest
-            const warn = console.warn;
-            const held = [];
-            console.warn = (...args) => held.push(args.join(" "));
-            try {
-              await migrateNpcInitiative([npc], "quench");
-            } finally {
-              console.warn = warn;
-            }
-            assert.deepEqual(held, [
-              "l5r4-enhanced | 1 NPCs now roll the Initiative formula (quench)"
-            ]);
+            await migrateNpcInitiative(npc);
             assert.deepInclude(npc.system.initiative, { roll: 4, keep: 3 });
           })
         );

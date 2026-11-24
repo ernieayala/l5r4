@@ -710,16 +710,6 @@
         "deleteEffect": "Falha ao excluir efeito.",
         "toggleEffect": "Falha ao alternar o efeito"
       },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem.",
-          "other": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem."
-        },
-        "iconsUpdated": {
-          "one": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo.",
-          "other": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo."
-        }
-      },
       "settings": {
         "designGallery": {
           "hint": "Cada token, componente e padrão do sistema de design, desenhado pelos próprios templates do sistema.",

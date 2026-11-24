@@ -11,7 +11,7 @@ import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
-import { migrateUnlinkedTokens } from "../../module/setup/migrations/actors/unlinked-tokens.js";
+import { getTokenDeltaDocuments } from "../../module/setup/migrations/actors/unlinked-tokens.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
@@ -708,21 +708,22 @@ export function registerRulesTests(quench) {
       };
 
       /**
-       * Run migrateItemRules, holding back its summary warning (migrations report what they changed on
-       * console.warn) so cleanTest still catches any other warning.
+       * Run migrateItemRules on each item.
        * @param {Item[]} items
        */
       const migrateItems = async items => {
-        const warn = console.warn;
-        const held = [];
-        console.warn = (...args) => held.push(args.join(" "));
-        try {
-          await migrateItemRules(items, "quench");
-        } finally {
-          console.warn = warn;
+        for (const item of items) {
+          await migrateItemRules(item);
         }
-        for (const message of held) {
-          assert.match(message, /Moved the mechanics of \d+ items into rules/);
+      };
+
+      /**
+       * Run migrateStatusEffectRules on each of an actor's effects.
+       * @param {Actor} actor
+       */
+      const migrateEffects = async actor => {
+        for (const effect of actor.effects) {
+          await migrateStatusEffectRules(effect);
         }
       };
 
@@ -816,7 +817,7 @@ export function registerRulesTests(quench) {
               [`flags.${SYS_ID}.fearRank`]: 3
             });
             assert.equal(actor.system.armorTn.current, before, "no rules, no bonus");
-            await migrateStatusEffectRules([actor], "quench");
+            await migrateEffects(actor);
             assert.equal(actor.system.armorTn.current, before + actor.system.rings.air);
             assert.equal(stance.system.group, "stance");
             assert.equal(fear.system.level, 3, "Fear Rank moved to the level");
@@ -826,7 +827,7 @@ export function registerRulesTests(quench) {
               -3,
               "Fear 3: -3k0"
             );
-            await migrateStatusEffectRules([actor], "quench");
+            await migrateEffects(actor);
             assert.lengthOf(stance._source.system.rules, 1, "running again adds nothing");
           })
         );
@@ -860,7 +861,9 @@ export function registerRulesTests(quench) {
               foundry.documents.ActiveEffect.registry.delete(fear);
               // Core copies the actor's effects into the delta when the token's first own effect is made
               const deltaIds = token.delta.effects.map(e => e.id);
-              await migrateUnlinkedTokens([token], "quench");
+              for (const effect of getTokenDeltaDocuments(token).effects) {
+                await migrateStatusEffectRules(effect);
+              }
               const migrated = token.delta.effects.get(fear.id);
               assert.equal(migrated.system.level, 2);
               assert.isNotEmpty(migrated.system.rules);

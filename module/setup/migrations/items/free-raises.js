@@ -2,67 +2,22 @@
  * @module setup/migrations/items/free-raises
  * @description Ensures every item with the itemDescription template has the freeRaises field.
  */
-import { SYS_ID } from "../../../config/constants.js";
 
 /**
- * Ensures all items with itemDescription template have freeRaises field.
- *
- * Backfills freeRaises field for items created before the Raise/Free Raise system
- * was implemented. All items using the itemDescription template (advantages, disadvantages,
- * spells, techniques, skills, etc.) should have freeRaises: 0 as default.
+ * Backfills an item's freeRaises field at 0 for items created before the Raise/Free Raise system was implemented.
+ * All items using the itemDescription template (advantages, disadvantages, spells, techniques, skills, etc.) should
+ * have it.
  *
  * L5R4 Free Raises Mechanic:
  * Free Raises grant Raise benefits without +5 TN increase and don't count toward
  * Void Ring maximum. Items like advantages or school techniques can grant Free Raises.
  *
- * @param {Document[]} docs - Array of Item documents to scan
- * @param {string} label - Migration context label for console logging
+ * @param {Item} item
  * @returns {Promise<void>}
  */
-export async function migrateFreeRaisesDefaults(docs, label) {
-  const itemDocs = docs.filter(doc => doc.documentName === "Item");
-  if (itemDocs.length === 0) {
-    return;
+export async function migrateFreeRaisesDefault(item) {
+  const freeRaises = item.system?.freeRaises;
+  if (freeRaises === undefined || freeRaises === null) {
+    await item.update({ "system.freeRaises": 0 }, { diff: true, render: false });
   }
-
-  console.warn(
-    `${SYS_ID} | Migrating ${itemDocs.length} items to ensure freeRaises field exists (${label})`
-  );
-
-  let migratedCount = 0;
-
-  for (const item of itemDocs) {
-    try {
-      if (await migrateItemFreeRaises(item)) {
-        migratedCount++;
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate freeRaises default", {
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        err
-      });
-    }
-  }
-
-  if (migratedCount > 0) {
-    console.warn(
-      `${SYS_ID} | Successfully migrated ${migratedCount} items with freeRaises field (${label})`
-    );
-  }
-}
-
-/**
- * Set an item's missing `freeRaises` to 0.
- * @param {Item} item
- * @returns {Promise<boolean>} Whether the item was updated
- */
-async function migrateItemFreeRaises(item) {
-  const currentFreeRaises = item.system?.freeRaises;
-  if (currentFreeRaises !== undefined && currentFreeRaises !== null) {
-    return false;
-  }
-  await item.update({ "system.freeRaises": 0 }, { diff: true, render: false });
-  return true;
 }

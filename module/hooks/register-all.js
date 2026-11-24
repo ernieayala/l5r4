@@ -50,6 +50,7 @@ import { registerGmClient } from "../services/gm-client.js";
 import EffectPanelApplication from "../apps/effect-panel.js";
 import CompendiumBrowserApplication from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
+import { onCreateMigrateDocument, onPreCreateMigrationSchema } from "../setup/migrations.js";
 
 /** The hooks after which the open effect panel redraws: control changes, and effects or the actor change. */
 const EFFECT_PANEL_REDRAWS = Object.freeze([
@@ -80,6 +81,7 @@ export function registerAllHooks() {
   registerChatCardHooks();
   registerInterfaceHooks();
   registerCombatHooks();
+  registerMigrationHooks();
 
   // Item folders: export and import items with their rules
   Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
@@ -100,6 +102,17 @@ function registerChangeOriginHooks() {
     Hooks.on(`preCreate${documentName}`, onPreCreateChangeOrigin);
     Hooks.on(`preUpdate${documentName}`, onPreUpdateChangeOrigin);
     Hooks.on(`preDelete${documentName}`, onPreDeleteChangeOrigin);
+  }
+}
+
+/**
+ * Migration (#181): a created Actor, Item, or Scene records the schema its data had, and the active GM brings one
+ * from an older version up to date.
+ */
+function registerMigrationHooks() {
+  for (const documentName of ["Actor", "Item", "Scene"]) {
+    Hooks.on(`preCreate${documentName}`, onPreCreateMigrationSchema);
+    Hooks.on(`create${documentName}`, onCreateMigrateDocument);
   }
 }
 

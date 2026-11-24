@@ -3,8 +3,8 @@
  * @description The system's entry module, the one place that wires the system into Foundry. During `init` it
  * registers the settings, the document classes, the Roll & Keep die, the CONFIG values, the GM queries, the data
  * models, CONFIG.l5r4 and the status effects, the sheets, the templates and Handlebars helpers, the text enrichers,
- * and every hook. When Quench is active it loads the test batches; during `ready` a GM runs the data migrations
- * when the system version changed.
+ * and every hook. When Quench is active it loads the test batches; during `ready` the active GM brings documents
+ * below the current migration schema up to date.
  */
 import { SYS_ID } from "../module/config/constants.js";
 import { 
@@ -113,39 +113,23 @@ Hooks.once("quenchReady", async quench => {
 /**
  * Foundry VTT Ready Hook
  * Executes after Foundry completes initialization and world data is loaded.
- * Executes data migrations for GMs.
  * This hook fires once per session after all modules and systems are ready.
- * 
+ *
  * **Migration System:**
- * Only executes for GM users to prevent concurrent migration conflicts.
- * Compares system.version against lastMigratedVersion setting to detect updates.
- * Respects runMigration and forceMigration settings for migration control.
- * Updates lastMigratedVersion on completion and clears forceMigration flag.
+ * On the active GM's client, while runMigration is on, every world load brings documents below the current
+ * migration schema up to date (module/setup/migrations.js); documents already current are only read. Force
+ * migration runs every step again once, then turns itself off.
  *
  * @listens Hooks#ready
  */
 Hooks.once("ready", async () => {
-  if (game.user?.isGM) {
-    const currentVersion = game.system?.version ?? "0.0.0";
-    const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
-    const runFlag = game.settings.get(SYS_ID, "runMigration") ?? false;
-    const forceFlag = game.settings.get(SYS_ID, "forceMigration") ?? false;
-    const newer = (foundry?.utils?.isNewerVersion?.(currentVersion, last)) ?? (currentVersion !== last);
-
-    if (runFlag && (newer || forceFlag)) {
-      try {
-        await migrateWorld(last, currentVersion);
-      } catch (e) {
-        console.warn(`${SYS_ID}`, "migrateWorld failed", e);
-      } finally {
-        try {
-          await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion);
-          if (forceFlag) {
-            await game.settings.set(SYS_ID, "forceMigration", false);
-          }
-        } catch {}
-      }
-    }
+  if (!game.users.activeGM?.isSelf || !game.settings.get(SYS_ID, "runMigration")) {
+    return;
+  }
+  const force = game.settings.get(SYS_ID, "forceMigration");
+  await migrateWorld({ force });
+  if (force) {
+    await game.settings.set(SYS_ID, "forceMigration", false);
   }
 });
 

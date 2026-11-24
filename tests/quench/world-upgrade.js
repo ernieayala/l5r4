@@ -1,4 +1,4 @@
-import { SYS_ID } from "../../module/config/constants.js";
+import { SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA } from "../../module/config/constants.js";
 
 /** The world tests/fixtures/world-3.2.1/build-world.mjs writes. */
 const FIXTURE_WORLD = "l5r4-321-fixture";
@@ -23,10 +23,9 @@ export function registerWorldUpgradeTests(quench) {
         }
       });
 
-      it("should have run the migrations for this version", () => {
-        assert.equal(game.settings.get(SYS_ID, "lastMigratedVersion"), game.system.version);
-        for (const doc of [...game.actors, ...game.items]) {
-          assert.equal(doc.getFlag(SYS_ID, "migratedVersion"), game.system.version, doc.name);
+      it("should have brought every actor, item, and scene to the current migration schema", () => {
+        for (const doc of [...game.actors, ...game.items, ...game.scenes]) {
+          assert.equal(doc.getFlag(SYS_ID, MIGRATION_FLAG), MIGRATION_SCHEMA, doc.name);
         }
       });
 

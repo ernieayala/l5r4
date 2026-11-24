@@ -2,40 +2,20 @@
  * @module setup/migrations/items/normalize
  * @description Ensures consistent data types and formats for weapon and bow items.
  */
-import { SYS_ID } from "../../../config/constants.js";
 
 /**
- * Normalizes weapon/bow item data for consistency.
+ * Lowercases a weapon's or bow's size. Early system versions may have stored size values with mixed case ("Medium"
+ * vs "medium"); filtering and comparison read the lowercase value.
  *
- * Ensures weapon size properties use lowercase values. Early system versions may have
- * stored size values with mixed case ("Medium" vs "medium"). This migration enforces
- * lowercase for consistent filtering and comparison.
- *
- * @param {Document[]} docs - Array of Item documents to normalize
- * @param {string} label - Migration context label for console logging
+ * @param {Item} item - An item; anything but a weapon or bow is left alone
  * @returns {Promise<void>}
  */
-export async function migrateWeaponSizes(docs, label) {
-  for (const doc of docs) {
-    try {
-      if (doc.documentName !== "Item") {
-        continue;
-      }
-      const t = doc.type;
-      if (t !== "weapon" && t !== "bow") {
-        continue;
-      }
-      const sz = doc.system?.size;
-      if (typeof sz === "string" && sz !== sz.toLowerCase()) {
-        await doc.update({ "system.size": sz.toLowerCase() }, { diff: true, render: false });
-      }
-    } catch (e) {
-      console.warn(`${SYS_ID}`, "Normalization failed", {
-        label,
-        id: doc.id,
-        type: doc.type,
-        error: e
-      });
-    }
+export async function migrateWeaponSize(item) {
+  if (item.type !== "weapon" && item.type !== "bow") {
+    return;
+  }
+  const size = item.system?.size;
+  if (typeof size === "string" && size !== size.toLowerCase()) {
+    await item.update({ "system.size": size.toLowerCase() }, { diff: true, render: false });
   }
 }

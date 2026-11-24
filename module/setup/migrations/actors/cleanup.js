@@ -2,7 +2,6 @@
  * @module setup/migrations/actors/cleanup
  * @description Removes legacy field names from actors after the migration to the new schema.
  */
-import { SYS_ID } from "../../../config/constants.js";
 import { getByPath, updateByPath } from "../utils/helpers.js";
 
 /**
@@ -28,29 +27,13 @@ const LEGACY_FIELDS = Object.freeze([
  * current-schema fields. Only removes fields when BOTH old and new versions exist,
  * preserving data safety.
  *
- * @param {Document[]} docs - Array of Actor documents to clean up
- * @param {string} label - Migration context label for console logging
+ * @param {Actor} actor
  * @returns {Promise<void>}
  */
-export async function deleteLegacyFields(docs, label) {
-  for (const doc of docs) {
-    try {
-      if (doc.documentName !== "Actor") {
-        continue;
-      }
-
-      const updates = buildLegacyFieldDeletions(doc);
-      if (updates) {
-        await doc.update(updates, { diff: true, render: false });
-      }
-    } catch (e) {
-      console.warn(`${SYS_ID}`, "Legacy cleanup failed", {
-        label,
-        id: doc.id,
-        type: doc.type,
-        error: e
-      });
-    }
+export async function deleteLegacyFields(actor) {
+  const updates = buildLegacyFieldDeletions(actor);
+  if (updates) {
+    await actor.update(updates, { diff: true, render: false });
   }
 }
 

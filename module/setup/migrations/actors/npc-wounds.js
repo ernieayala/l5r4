@@ -2,7 +2,6 @@
  * @module setup/migrations/actors/npc-wounds
  * @description Migrates legacy NPC wound structures to the current schema with manual and formula modes.
  */
-import { SYS_ID } from "../../../config/constants.js";
 import { migrateWoundLevelData } from "../utils/helpers.js";
 
 /**
@@ -29,56 +28,20 @@ import { migrateWoundLevelData } from "../utils/helpers.js";
  * Legacy wound_lvl / woundLevels become manualWoundLevels earlier, in NpcData.migrateData
  * (module/data/migrate-source.js), because the schema drops those keys when the actor loads.
  *
- * @param {Document[]} docs - Array of Actor documents to scan for NPCs
- * @param {string} label - Migration context label for console logging
+ * @param {Actor} actor - An actor; a PC is left alone
  * @returns {Promise<void>}
  */
-export async function migrateLegacyNpcWounds(docs, label) {
-  const npcActors = docs.filter(doc => doc.type === "npc");
-  if (npcActors.length === 0) {
+export async function migrateLegacyNpcWounds(actor) {
+  if (actor.type !== "npc") {
     return;
   }
-
-  console.warn(`${SYS_ID} | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
-
-  let migratedCount = 0;
-
-  for (const actor of npcActors) {
-    try {
-      if (await migrateNpcActorWounds(actor)) {
-        migratedCount++;
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate legacy NPC wounds", {
-        id: actor.id,
-        name: actor.name,
-        err
-      });
-    }
-  }
-
-  if (migratedCount > 0) {
-    console.warn(
-      `${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`
-    );
-  }
-}
-
-/**
- * Migrate one NPC's wound data: its missing wound settings and its legacy wound values.
- * @param {Actor} actor - An NPC
- * @returns {Promise<boolean>} Whether the actor was updated
- */
-async function migrateNpcActorWounds(actor) {
   const updates = {
     ...buildWoundSettingDefaults(actor.system),
     ...buildLegacyWoundValues(actor.system)
   };
-  if (Object.keys(updates).length === 0) {
-    return false;
+  if (Object.keys(updates).length > 0) {
+    await actor.update(updates, { diff: true, render: false });
   }
-  await actor.update(updates, { diff: true, render: false });
-  return true;
 }
 
 /**
