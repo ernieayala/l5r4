@@ -46,60 +46,24 @@ export async function getMappedIconPath(img) {
 }
 
 /**
- * Determines updated icon path for a document, with special bow handling.
- *
- * Checks standard icon migration map and applies special logic for weapon items with
- * isBow flag to ensure they use the bow icon. Also assigns type-appropriate default
- * icons to items that don't have proper system icons (e.g., Foundry defaults or
- * unmapped legacy icons).
- *
- * Migration Strategy:
- * 1. Try to migrate via ICON_MIGRATION_MAP (old PNG → new WebP).
- * 2. For items without system icons, assign type-appropriate default icon.
- * 3. Special case: weapon.isBow=true gets bow icon.
- *
+ * The image a document moves to in the icon migration, changing only images the migration knows (#180): a legacy
+ * system path in ICON_MIGRATION_MAP moves to its WebP replacement; an Item with no image or Foundry's placeholder
+ * (the item bag, the mystery man) gets its type's default icon; a bow showing a system default icon of another type
+ * gets the bow icon. Any other image, art a user chose included, stays, so the pass changes nothing on a second run.
  * @param {Document} doc - Document to evaluate for icon update
  * @param {string} docType - Document type ("Actor" or "Item")
  * @returns {Promise<string|null>} New icon path if update needed, null otherwise
  */
 export async function getUpdatedIconPath(doc, docType) {
-  let nextImg = await getMappedIconPath(doc.img);
-
-  // Special handling for Items: assign type-appropriate default icons
-  if (docType === "Item") {
-    // Check if item is using bow weapon type
-    const isBow = doc.type === "weapon" && doc.system?.isBow;
-    const iconType = isBow ? "bow" : doc.type;
-
-    // If no migration found via map, check if item needs default icon assignment
-    if (!nextImg) {
-      const currentImg = doc.img;
-      const hasSystemIcon =
-        typeof currentImg === "string" && currentImg.startsWith(PATHS.icons + "/");
-      const isFoundryDefault =
-        !currentImg || currentImg === "icons/svg/item-bag.svg" || currentImg.includes("mystery");
-
-      // Assign type-appropriate default icon if:
-      // - Using Foundry default icon, OR
-      // - Not using a system icon (might be old path or external icon)
-      if (isFoundryDefault || !hasSystemIcon) {
-        const defaultIcon = DEFAULT_ICONS[iconType];
-        if (defaultIcon && currentImg !== defaultIcon) {
-          nextImg = defaultIcon;
-        }
-      }
-    }
-
-    // Ensure bow weapons use bow icon
-    if (isBow) {
-      const bowIcon = DEFAULT_ICONS.bow;
-      if (bowIcon && doc.img !== bowIcon && nextImg !== bowIcon) {
-        nextImg = bowIcon;
-      }
-    }
+  const mapped = await getMappedIconPath(doc.img);
+  if (mapped || docType !== "Item") {
+    return mapped;
   }
-
-  return nextImg;
+  const isBow = doc.type === "weapon" && Boolean(doc.system?.isBow);
+  const defaultIcon = DEFAULT_ICONS[isBow ? "bow" : doc.type];
+  const replaceable =
+    isPlaceholderIcon(doc.img) || (isBow && Object.values(DEFAULT_ICONS).includes(doc.img));
+  return defaultIcon && replaceable && doc.img !== defaultIcon ? defaultIcon : null;
 }
 
 /**
@@ -152,4 +116,13 @@ async function getDirFiles(dirPath) {
     dirCache.set(dirPath, empty);
     return empty;
   }
+}
+
+/**
+ * Whether an image is no image at all or one of Foundry's placeholders, which an item shows until art is chosen.
+ * @param {string|null|undefined} img
+ * @returns {boolean}
+ */
+function isPlaceholderIcon(img) {
+  return !img || img === "icons/svg/item-bag.svg" || img.includes("mystery");
 }
