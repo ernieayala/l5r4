@@ -4,9 +4,10 @@
  * the first answer, and its turn events and the system's GM-only work run on each client where
  * `game.user.isActiveGM` holds, so a GM with two windows would apply a player's damage twice (#82). The GM's clients
  * announce themselves on the system socket and keep a heartbeat; the one that started first answers
- * (module/utils/gm-client.js). A client that closes says so, so another takes over at once; one that stops without
- * a word is dropped after it has gone quiet for longer than CLIENT_TTL_MS. A player's request goes to the GM through
- * requestGmQuery, which tells the player when no GM is connected or the GM side refuses.
+ * (module/utils/gm-client.js), and it answers each later client's heartbeat, so a background tab whose timers the
+ * browser throttles stays counted. A client that closes says so, so another takes over at once; one that stops
+ * without a word is dropped after it has gone quiet for longer than CLIENT_TTL_MS. A player's request goes to the GM
+ * through requestGmQuery, which tells the player when no GM is connected or the GM side refuses.
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -120,7 +121,10 @@ export function onGmClientMessage(message, senderId) {
     return;
   }
   others.set(id, { id, startedAt: started, seen: Date.now() });
-  if (type === "hello") {
+  // A browser throttles the timers of a background tab, so an earlier client's own heartbeat can lapse while it still
+  // answers queries, and both would answer. It answers each later client's heartbeat at once instead: a socket event
+  // is not throttled (#186). A later client does not answer an earlier one's, so no reply loops.
+  if (type === "hello" || isLaterClient({ id, startedAt: started })) {
     emitGmClientMessage("here");
   }
 }
@@ -138,6 +142,17 @@ function formatRefusal(name, err) {
   }
   console.warn(`${SYS_ID} | ${name} failed`, err);
   return F("l5r4.ui.requests.failed", { reason: err.message });
+}
+
+/**
+ * Whether another GM client started after this one, in the order isAnsweringClient uses.
+ * @param {{id: string, startedAt: number}} other
+ * @returns {boolean}
+ */
+function isLaterClient(other) {
+  return (
+    other.startedAt > startedAt || (other.startedAt === startedAt && other.id > game.socket.id)
+  );
 }
 
 /**
