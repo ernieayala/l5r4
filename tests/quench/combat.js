@@ -554,7 +554,9 @@ export function registerCombatTests(quench) {
         it(
           "should stop the roll for maneuvers the Raises cannot pay for",
           clean(async () => {
-            const { actor, katana } = await attacker();
+            // Void 3, so Disarm (3) is within the cap and offered; 1 declared Raise does not pay for it. The values are
+            // set without input events, so the dialog's live check does not disable Roll and the pipeline's check runs
+            const { actor, katana } = await attacker([], 3);
             const target = await defender();
             const before = game.messages.size;
             const none = await attack(actor, katana, target, {
