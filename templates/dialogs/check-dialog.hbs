@@ -154,6 +154,11 @@
           <label for="{{formId}}-extra-attack">{{localize "l5r4.ui.combat.extraAttack"}}</label>
           <input type="checkbox" id="{{formId}}-extra-attack" name="maneuver.extraAttack" />
         </div>
+        <p class="hint" data-maneuver-cost aria-live="polite" hidden></p>
+        <p class="l5r4-check-dialog-warning" role="note" data-maneuver-short hidden>
+          <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
+          <span data-maneuver-short-text></span>
+        </p>
       {{/if}}
       <div class="form-group">
         <label for="{{formId}}-grapple">{{localize "l5r4.ui.combat.grappleManeuver"}}</label>

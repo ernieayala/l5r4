@@ -7,6 +7,7 @@ The one dialog every roll opens before it rolls: the pool, each modifier with a 
 | Template | `templates/dialogs/check-dialog.hbs`, `DIALOG_TEMPLATES.check` |
 | Extras | `templates/dialogs/check-extras/ring.hbs`, `spell.hbs`, `maho.hbs`, `slot.hbs` (`DIALOG_TEMPLATES.checkRing`, `checkSpell`, `checkMaho`, `checkSlot`), rendered by the caller and inserted as `{{{extras}}}` |
 | Opened by | `askChoices` (`module/services/dice/check/roll-check.js`): width 420, modal, title the roll's label, one button `l5r4.ui.common.roll`; closing returns null and nothing rolls |
+| Live parts | An attack's maneuvers: `bindManeuverCost` (`module/services/dice/check/maneuver-cost.js`), from the same terms the roll settles |
 | Read by | `formDataOf` (`module/services/dice/check/roll-check.js`), then every value coerced and bounded as user input (`buildChosenTerms` (`module/services/dice/check/terms.js`)) |
 | SCSS | `scss/components/_check-dialog.scss`, styling `.l5r4-check-dialog` |
 | Quench | `l5r4-enhanced.roll-pipeline` |
@@ -27,6 +28,8 @@ The dialog is not a posted card, so every class may change. Classes follow `l5r4
 | Field | Core's `div.form-group` with a `<label>` and one control | `form-group` (core) |  |
 | Hint | `<p>` | `hint` (core) |  |
 | Maneuvers | `<fieldset>` of attack maneuvers | `l5r4-check-dialog-group` |  |
+| Maneuver cost | `<p aria-live="polite">`, hidden while no maneuver costs Raises: the cost, what pays it, and the TN (`l5r4.ui.combat.maneuverCost`) | `hint` (core) | `[data-maneuver-cost]` |
+| Maneuvers not paid | Warning line holding `l5r4.ui.combat.notEnoughRaises`, hidden while the Raises pay | `l5r4-check-dialog-warning` | `[data-maneuver-short]` |
 | Extras | `<fieldset>` from an extras template; the slot extra is one `form-group` | `l5r4-check-dialog-group`; `l5r4-check-dialog-slot form-group` |  |
 | Warning | `<p role="note">` led by an `inert` `fa-triangle-exclamation` icon: the Void-spent line, the maho blood warning | `l5r4-check-dialog-warning`, icon `l5r4-check-dialog-warning-icon` |  |
 
@@ -58,7 +61,9 @@ Each part renders only when the roll offers it (`buildDialogContext` (`module/se
 | Void Point already spent this Round | Warning line: `fa-triangle-exclamation` in the warning color, the words in the text color (states.md Warning) | A `<p>` of class `l5r4-check-dialog-warning` holding `l5r4.ui.effects.voidSpentThisRound` (`templates/dialogs/check-dialog.hbs`) |
 | Maho | Warning line, as above | A `<p>` of class `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`) |
 | Out of range | The number field's `min` and `max` stop the spinner; the pipeline bounds whatever is typed | `min`, `max` on Raises, Free Raises, Keep only |
-| Not enough Raises | Warning notification `l5r4.ui.combat.notEnoughRaises`; nothing rolls | `askCheck` (`module/services/dice/check/roll-check.js`) |
+| Maneuver picked | The declared Raises rise to cover what the Free Raises do not, up to the cap; the roller may change them after | `updateRaisesToCover` (`module/services/dice/check/maneuver-cost.js`) |
+| Maneuver over the cap | The checkbox or Called Shot option disabled, with the reason (`l5r4.ui.combat.maneuverOverCap`) in `data-tooltip`, or `title` on an option; a picked one stays enabled | `updateManeuverChoices` (`module/services/dice/check/maneuver-cost.js`) |
+| Not enough Raises | The warning line shows and Roll is disabled, so the dialog stays open with its input; a roll made without the dialog warns with the same key and does not roll | `updateManeuverCost` (`module/services/dice/check/maneuver-cost.js`), `askCheck` (`module/services/dice/check/roll-check.js`) |
 
 ## Parameters
 
