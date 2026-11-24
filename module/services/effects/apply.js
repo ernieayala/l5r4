@@ -6,7 +6,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
+import { PER_ORIGIN_STATUSES, SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { getProvenEffectOptions } from "./effect-proofs.js";
@@ -64,7 +64,10 @@ export async function buildEffectData(
 }
 
 /**
- * Create an effect on an actor the user owns.
+ * Create an effect on an actor the user owns. A status the actor already holds is not created twice, since a
+ * condition is a state the character is in, not a penalty that adds up (two Dazed are one -3k0): the one held
+ * starts its duration again, and takes the new level when it is higher (#177).
+ * game-rules/41_conditional_effects.md, p.89
  * @param {Actor} actor
  * @param {string} id
  * @param {EffectOptions} [options]
@@ -72,9 +75,12 @@ export async function buildEffectData(
  */
 export async function applyEffect(actor, id, { turnOf, ...options } = {}) {
   const start = turnOf ? ownTurnStartOf(await fromUuid(turnOf)) : options.start;
-  const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
-    await buildEffectData(actor, id, { ...options, start })
-  ]);
+  const data = await buildEffectData(actor, id, { ...options, start });
+  const held = heldStatusOf(actor, id, data.origin);
+  if (held) {
+    return updateHeldStatus(held, data);
+  }
+  const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [data]);
   return effect;
 }
 
@@ -157,6 +163,44 @@ export function registerEffectQueries() {
     const effect = await applyEffect(actor, id, proven);
     return { applied: Boolean(effect) };
   });
+}
+
+/**
+ * The status effect an actor already holds that applying `id` from `origin` would repeat: any effect with the status,
+ * or for a status held once per origin (PER_ORIGIN_STATUSES), the one from the same origin. None for a system effect,
+ * whose services replace their own.
+ * @param {Actor} actor
+ * @param {string} id - A status or system effect id
+ * @param {string|undefined} origin - UUID of what causes the new effect
+ * @returns {ActiveEffect|null}
+ */
+function heldStatusOf(actor, id, origin) {
+  if (!CONFIG.statusEffects[id]) {
+    return null;
+  }
+  const perOrigin = PER_ORIGIN_STATUSES.includes(id);
+  return effectsOf(actor, id).find(e => !perOrigin || e.origin === (origin ?? null)) ?? null;
+}
+
+/**
+ * Apply a status again to the effect that holds it: its duration starts again, as core starts a new effect's, and a
+ * higher level replaces the lower with the new effect's name. A lower level leaves the level as it is. Fear 3 after
+ * Fear 2 is -3k0, not -5k0: the book does not say whether Fear stacks, and Ernie's ruling (#177) is that the higher
+ * replaces the lower.
+ * game-rules/42_fear.md, p.90
+ * @param {ActiveEffect} held - From heldStatusOf
+ * @param {object} data - From buildEffectData
+ * @returns {Promise<ActiveEffect>}
+ */
+async function updateHeldStatus(held, data) {
+  const level = data.system.level;
+  const higher = Number.isInteger(level) && level > (held.system.level ?? 0);
+  await held.update({
+    start: { ...foundry.documents.ActiveEffect.getEffectStart(), ...(data.start ?? {}) },
+    duration: data.duration,
+    ...(higher ? { name: data.name, "system.level": level } : {})
+  });
+  return held;
 }
 
 /**

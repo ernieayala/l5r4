@@ -502,6 +502,8 @@ An effect made by the system can carry two more values, which a macro sets throu
 
 **Status effects** are the stances and conditions shown on tokens. Apply them from the token's status menu, the Condition Manager, or the stance control on the sheet. Each carries its rules; an effect a macro makes with only a status id (`{ statuses: ["prone"] }`) gets them too.
 
+A character holds each condition once. Applying a condition the character already has, from a chat link, a card button, or a Fear test, restarts its duration. If the new one has a higher level, it replaces the old one: Fear 3 after Fear 2 is -3k0, not -5k0. Concentration is held once per spell, and Guarded once per guard.
+
 | Status | What it does (Core Rulebook) |
 | --- | --- |
 | Attack Stance | Nothing to calculate (p.84) |
