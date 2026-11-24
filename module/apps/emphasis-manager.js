@@ -9,6 +9,7 @@ import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/reference-data.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, T } from "../utils/localization.js";
+import { buildEmphasisList } from "../utils/emphases.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
 import { askConfirm, askPrompt } from "../services/dialog.js";
@@ -98,17 +99,12 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     try {
       const context = await super._prepareContext(_options);
 
-      const availableEmphases = this.item.system?.availableEmphases ?? [];
-      const availableSet = new Set(availableEmphases);
-
-      const worldCustom = getWorldCustomEmphases();
-      const allEmphases = [...Array.from(OFFICIAL_EMPHASES), ...worldCustom].sort();
-
-      const emphasisList = allEmphases.map(name => ({
-        name,
-        available: availableSet.has(name),
-        custom: !OFFICIAL_EMPHASES.includes(name)
-      }));
+      // Every Emphasis the Skill holds is listed, so saving keeps one outside the official and custom lists (#187)
+      const emphasisList = buildEmphasisList({
+        official: OFFICIAL_EMPHASES,
+        custom: getWorldCustomEmphases(),
+        skill: this.item.system
+      });
 
       return {
         ...context,

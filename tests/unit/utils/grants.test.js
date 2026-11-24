@@ -19,6 +19,7 @@ const record = (uuid, extra = {}) => ({
 const skill = (extra = {}) => ({
   rank: 0,
   freeRanks: 0,
+  availableEmphases: [],
   trainedEmphases: [],
   freeEmphasis: 0,
   ...extra
@@ -77,6 +78,7 @@ describe("buildGrantedSkill", () => {
         rank: 1,
         freeRanks: 1,
         school: true,
+        availableEmphases: ["Void Recovery"],
         trainedEmphases: ["Void Recovery"],
         freeEmphasis: 1
       },
@@ -86,11 +88,26 @@ describe("buildGrantedSkill", () => {
 
   it("should keep a higher rank, and not repeat an Emphasis already trained", () => {
     const { update, record: rec } = buildGrantedSkill(
-      skill({ rank: 3, trainedEmphases: ["Katana"] }),
+      skill({ rank: 3, availableEmphases: ["Katana"], trainedEmphases: ["Katana"] }),
       rule("u", 0, { emphasis: "Katana" })
     );
-    expect(update).toMatchObject({ rank: 3, freeRanks: 1, trainedEmphases: ["Katana"] });
+    expect(update).toMatchObject({
+      rank: 3,
+      freeRanks: 1,
+      availableEmphases: ["Katana"],
+      trainedEmphases: ["Katana"]
+    });
     expect(rec).toEqual({ freeRanks: 1, emphasis: "", freeEmphasis: 1 });
+  });
+
+  // #187: Lore: Theology granted to a Skill that does not list it
+  it("should make a granted Emphasis available as well as trained", () => {
+    const { update } = buildGrantedSkill(
+      skill({ availableEmphases: ["Shugenja"] }),
+      rule("u", 0, { emphasis: "Theology" })
+    );
+    expect(update.availableEmphases).toEqual(["Shugenja", "Theology"]);
+    expect(update.trainedEmphases).toEqual(["Theology"]);
   });
 });
 
