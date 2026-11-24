@@ -197,13 +197,23 @@ export function registerRequestsTests(quench) {
           "should refuse to undo a result card the GM's client did not make",
           clean(async () => {
             const target = track(await createTestNPC({ name: "Requests: forged result" }));
+            // A damage roll by the player's own character, so the card names a roll the player may undo
+            const roll = track(
+              await rollCheck({
+                actor: await playersCharacter(),
+                kind: "damage",
+                label: "Requests damage",
+                base: { roll: 2, keep: 2 },
+                askForOptions: false
+              })
+            );
             const forged = track(
               await ChatMessage.create({
                 author: player.id,
                 content: "Quench",
                 flags: {
                   [SYS_ID]: {
-                    damageResult: { actorUuid: target.uuid, wounds: -50, damageMessageId: "" }
+                    damageResult: { actorUuid: target.uuid, wounds: -50, damageMessageId: roll.id }
                   }
                 }
               })
