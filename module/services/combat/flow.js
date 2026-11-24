@@ -6,11 +6,10 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
-import { registerGmQuery } from "../gm-client.js";
+import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 
 /** Name of the GM query that runs a flow step for a player. */
 const FLOW_QUERY = `${SYS_ID}.flow`;
@@ -81,21 +80,13 @@ export async function startFlow(name, state, speaker) {
 }
 
 /**
- * Ask the active GM to run a step, or run it when this user is the GM.
+ * Ask the active GM to run a step, or run it when this user is the GM; a refusal is shown to this user.
  * @param {ChatMessage} card
  * @param {object} data - The step: an action and its values
  * @returns {Promise<void>}
  */
 export async function requestStep(card, data) {
-  if (game.user.isGM) {
-    return applyFlowStep({ messageId: card.id, data }, game.user);
-  }
-  const gm = game.users.activeGM;
-  if (!gm) {
-    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
-    return undefined;
-  }
-  return gm.query(FLOW_QUERY, { messageId: card.id, data });
+  await requestGmQuery(FLOW_QUERY, { messageId: card.id, data }, applyFlowStep);
 }
 
 /**
@@ -150,7 +141,7 @@ async function applyFlowStep({ messageId, data }, user) {
   const flow = card?.getFlag(SYS_ID, "flow");
   const handler = flow ? flows.get(flow.name) : null;
   if (!handler) {
-    throw new Error(`Not a flow card: ${messageId}`);
+    throw new Error("l5r4.ui.requests.notFlowCard");
   }
   const state = await handler.step(foundry.utils.deepClone(flow.state), { card, data, user });
   await card.update({

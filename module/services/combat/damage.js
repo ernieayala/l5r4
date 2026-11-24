@@ -15,7 +15,7 @@ import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { canReduceWithVoid, isDead, getVoidReduction, getWoundsTaken } from "../../utils/damage.js";
 import { hideUnusable } from "../../utils/dom.js";
-import { registerGmQuery } from "../gm-client.js";
+import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /** Name of the GM query that carries a player's damage action. */
@@ -230,7 +230,7 @@ async function applyDamageUndo(card) {
 async function applyDamageAction({ action, messageId, actorUuid }, user) {
   const message = game.messages.get(String(messageId));
   if (!message) {
-    throw new Error(`No message ${messageId}`);
+    throw new Error("l5r4.ui.requests.messageGone");
   }
   if (action === "apply") {
     await applyRequestedDamage(message, actorUuid, user);
@@ -239,16 +239,16 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
   const result = message.getFlag(SYS_ID, "damageResult");
   const actor = result ? await fromUuid(result.actorUuid) : null;
   if (!actor) {
-    throw new Error("Not a damage result");
+    throw new Error("l5r4.ui.requests.notDamageResult");
   }
   if (action === "void") {
     if (!user.isGM && !actor.testUserPermission(user, "OWNER")) {
-      throw new Error("Only the damaged actor's owner spends its Void Point");
+      throw new Error("l5r4.ui.requests.onlyOwnerVoid");
     }
     await spendVoidPointOnDamage(message);
   } else if (action === "undo") {
     if (!canUndoDamage(result, user)) {
-      throw new Error("Only the roller or a GM undoes this damage");
+      throw new Error("l5r4.ui.requests.onlyRollerUndoes");
     }
     await applyDamageUndo(message);
   }
@@ -325,27 +325,19 @@ async function applyRequestedDamage(message, actorUuid, user) {
     message.system.kind !== "damage" ||
     actor?.documentName !== "Actor"
   ) {
-    throw new Error("Not a damage roll and an actor");
+    throw new Error("l5r4.ui.requests.notDamageRoll");
   }
   if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
-    throw new Error("Only the roller or a GM applies this damage");
+    throw new Error("l5r4.ui.requests.onlyRollerApplies");
   }
   await applyToActor(message, actor);
 }
 
 /**
- * Ask the active GM to run a damage action, or run it when this user is the GM.
+ * Ask the active GM to run a damage action, or run it when this user is the GM; a refusal is shown to this user.
  * @param {object} request
  * @returns {Promise<void>}
  */
 async function requestDamageAction(request) {
-  if (game.user.isGM) {
-    return applyDamageAction(request, game.user);
-  }
-  const gm = game.users.activeGM;
-  if (!gm) {
-    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
-    return undefined;
-  }
-  return gm.query(DAMAGE_QUERY, request);
+  await requestGmQuery(DAMAGE_QUERY, request, applyDamageAction);
 }

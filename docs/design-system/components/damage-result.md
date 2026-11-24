@@ -76,7 +76,7 @@ A long actor name wraps in the title. The two buttons share one row; each label 
 | # | Rule | Enforced by | Conforming | Non-conforming |
 | --- | --- | --- | --- | --- |
 | DM1 | A change to the result re-renders the same message; no second card | Quench `l5r4-enhanced.combat` | `existing.update({ content, flags })` in `postResult` (`module/services/combat/damage.js`) | Posting a new "Void spent" card under the old one (modeled) |
-| DM2 | The buttons act on the flags, which only the GM changes; a player's click goes to the GM as a query | Quench `l5r4-enhanced.combat` | `gm.query(DAMAGE_QUERY, request)` (`module/services/combat/damage.js`) | Updating the actor from the player's client (modeled) |
+| DM2 | The buttons act on the flags, which only the GM changes; a player's click goes to the GM as a query | Quench `l5r4-enhanced.combat` | `requestGmQuery(DAMAGE_QUERY, request, applyDamageAction)` (`module/services/combat/damage.js`) | Updating the actor from the player's client (modeled) |
 | DM3 | Undone shows a note and drops the buttons, besides the disabled look | Review, in the gallery's chat section | `{{#if undone}}<div class="check-note">{{localize "l5r4.ui.combat.undoneNote"}}</div>{{/if}}` (`templates/chat/damage-result.hbs`) | Dimming alone (modeled) |
 | DM4 | The disabled look reads the state token | `tests/conventions/styles.test.js` (state rules read `--l5r4-state-*`) | `opacity: var(--l5r4-state-disabled-opacity);` in `&.-undone` (`scss/components/_damage-result.scss`) | `opacity: 0.7;` (modeled) |
 | DM5 | The Wounds in the title are the Wounds taken after a Void Point, as one sentence | Review | `wounds: taken` (`module/services/combat/damage.js`) | Title and a separate "minus 10" note for the reader to subtract (modeled) |

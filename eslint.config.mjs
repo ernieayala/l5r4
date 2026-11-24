@@ -164,6 +164,13 @@ const DIALOG_SYNTAX = {
     "Open a dialog through module/services/dialog.js (askPrompt, askConfirm, askButtons, openDialog)."
 };
 
+// A player's request to the GM's client goes through requestGmQuery, which tells the player when it is refused
+// (docs/code-system/foundry-patterns.md, GM queries): only module/services/gm-client.js calls a user's query().
+const QUERY_SYNTAX = {
+  selector: "CallExpression[callee.property.name='query']",
+  message: "Ask the GM's client through requestGmQuery (module/services/gm-client.js)."
+};
+
 // Hooks register in one place: module/hooks/register-all.js (docs/code-system/foundry-patterns.md, Chat cards).
 const HOOKS_SYNTAX = {
   selector: "CallExpression[callee.object.name='Hooks'][callee.property.name=/^(on|once)$/]",
@@ -311,13 +318,28 @@ export default [
     files: ["module/**/*.js"],
     ignores: ["module/hooks/**"],
     rules: {
-      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, DIALOG_SYNTAX, HOOKS_SYNTAX]
+      "no-restricted-syntax": [
+        "error",
+        ...SYSTEM_PRESENTATION_SYNTAX,
+        DIALOG_SYNTAX,
+        HOOKS_SYNTAX,
+        QUERY_SYNTAX
+      ]
     }
   },
   {
     // The one module that opens core's DialogV2 (DIALOG_SYNTAX)
     files: ["module/services/dialog.js"],
-    rules: { "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, HOOKS_SYNTAX] }
+    rules: {
+      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, HOOKS_SYNTAX, QUERY_SYNTAX]
+    }
+  },
+  {
+    // The one module that queries the GM's client (QUERY_SYNTAX)
+    files: ["module/services/gm-client.js"],
+    rules: {
+      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, DIALOG_SYNTAX, HOOKS_SYNTAX]
+    }
   },
   {
     files: ["module/**/*.js"],

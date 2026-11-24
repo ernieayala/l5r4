@@ -144,7 +144,7 @@ function applyControlRoll(state, sides, { data, user }) {
     !canActFor(user, sides[i]) ||
     roll?.system.actorUuid !== sides[i].uuid
   ) {
-    throw new Error("Not this user's side or roll");
+    throw new Error("l5r4.ui.requests.notYourSide");
   }
   state.rolls[i] = roll.system.outcome.total;
   if (state.rolls.every(total => total !== null)) {
@@ -188,12 +188,12 @@ async function applyControllerAction(state, sides, { data, user }) {
   const controller = sides[state.control];
   const other = sides[1 - state.control];
   if (!canActFor(user, controller)) {
-    throw new Error("Only the side in control acts");
+    throw new Error("l5r4.ui.requests.onlyController");
   }
   if (data.action === "hit") {
     const roll = game.messages.get(String(data.rollId));
     if (roll?.system.actorUuid !== controller.uuid || roll.system.kind !== "damage") {
-      throw new Error("Not the controller's damage roll");
+      throw new Error("l5r4.ui.requests.notControllerDamage");
     }
     const total = roll.system.outcome.total;
     state.log.push(F("l5r4.ui.combat.grapple.hitLog", { name: controller.name, total }));
@@ -211,7 +211,7 @@ async function applyControllerAction(state, sides, { data, user }) {
   } else if (data.action === "pass") {
     state.log.push(F("l5r4.ui.combat.grapple.passed", { name: controller.name }));
   } else {
-    throw new Error(`Unknown grapple action ${data.action}`);
+    throw new Error("l5r4.ui.requests.unknownAction");
   }
 }
 
@@ -272,7 +272,7 @@ registerFlow("grapple", {
   async step(state, { data, user }) {
     const sides = sidesOf(state);
     if (state.over) {
-      throw new Error("The grapple is over");
+      throw new Error("l5r4.ui.requests.grappleOver");
     }
     if (data.action === "control") {
       applyControlRoll(state, sides, { data, user });

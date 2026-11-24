@@ -8,7 +8,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
 import { F, T } from "../../utils/localization.js";
-import { registerGmQuery } from "../gm-client.js";
+import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { startedCombatOf } from "./uses.js";
 
 /** Name of the GM query that applies an effect for a player (registered in registerEffectQueries). */
@@ -76,7 +76,8 @@ export async function applyEffect(actor, id, { turnOf, ...options } = {}) {
 }
 
 /**
- * Create an effect on any actor: by the user when they own it, otherwise through the active GM.
+ * Create an effect on any actor: by the user when they own it, otherwise through the active GM. The GM's client says
+ * whether it made the effect, so this user hears that it was applied, or that the actor is immune (#139).
  * @param {Actor} actor
  * @param {string} id
  * @param {EffectOptions} [options]
@@ -87,12 +88,13 @@ export async function applyEffectAnywhere(actor, id, options = {}) {
     await applyEffect(actor, id, options);
     return;
   }
-  const gm = game.users.activeGM;
-  if (!gm) {
-    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
+  const answer = await requestGmQuery(APPLY_EFFECT_QUERY, { actorUuid: actor.uuid, id, options });
+  if (!answer) {
     return;
   }
-  await gm.query(APPLY_EFFECT_QUERY, { actorUuid: actor.uuid, id, options });
+  const effect = options.name ?? T(CONFIG.statusEffects[id]?.name ?? SYSTEM_EFFECTS[id].name);
+  const key = answer.applied ? "l5r4.ui.requests.effectApplied" : "l5r4.ui.effects.immune";
+  ui.notifications?.info(F(key, { name: actor.name, effect }));
 }
 
 /**
@@ -134,21 +136,23 @@ export function onImmuneStatus(actor, effect) {
 
 /**
  * Register the GM side of applyEffectAnywhere. The query carries a player's request: the actor and effect id are
- * checked, and only statuses and the system's own effects can be applied this way.
+ * checked, and only statuses and the system's own effects can be applied this way. It answers whether the effect was
+ * made; the only effect dropped on creation is one the actor is immune to (L5R4ActiveEffect._preCreateOperation).
  */
 export function registerEffectQueries() {
   registerGmQuery(APPLY_EFFECT_QUERY, async ({ actorUuid, id, options }) => {
     const actor = await fromUuid(String(actorUuid));
     if (actor?.documentName !== "Actor" || !(CONFIG.statusEffects[id] || SYSTEM_EFFECTS[id])) {
-      throw new Error(`Cannot apply "${id}" to ${actorUuid}`);
+      throw new Error("l5r4.ui.requests.cannotApplyEffect");
     }
     const level = Number.isInteger(options?.level) ? options.level : undefined;
     const turnOf = (await fromUuid(String(options?.turnOf ?? "")))?.documentName === "Actor";
-    await applyEffect(actor, id, {
+    const effect = await applyEffect(actor, id, {
       level,
       origin: options?.origin,
       ...(turnOf ? { turnOf: options.turnOf } : {})
     });
+    return { applied: Boolean(effect) };
   });
 }
 

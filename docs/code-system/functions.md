@@ -76,7 +76,7 @@ What a function hands back when it cannot do its job depends on its layer, becau
 | --- | --- | --- | --- |
 | Utils | The value, or `{ valid: true, ...values }` from a validator or parser | `{ valid: false, error: "<i18n key>" }`. Utils have no Foundry globals, so the caller localizes `error` | The shape most validators use; the key, not English text, because every user-facing string is an i18n key (CLAUDE.md **Presentation**) |
 | Services, Documents, Sheets, Apps | The value, or nothing | Show `ui.notifications?.warn(T(key))`, then return `null`; a function with no return value returns | The shape most services use |
-| GM query handler (`CONFIG.queries`) | The value, or nothing | `throw new Error(...)`; the request came from another client, so it is a trust boundary and the handler refuses it | The services' throws refuse a request on the GM side |
+| GM query handler (`CONFIG.queries`) | The value, or nothing | `throw new Error("<i18n key>")`, a key under `l5r4.ui.requests`; the request came from another client, so it is a trust boundary and the handler refuses it. `requestGmQuery` (`module/services/gm-client.js`) localizes the key on the requester's client and shows it | The services' throws refuse a request on the GM side; the requester reads the refusal in their own language (#139) |
 | A prompt the user dismisses | The answer | `null`: `DialogV2.wait` resolves to `null` on dismissal when `rejectClose` is false [src: client/applications/api/dialog.mjs:405-418] | Every `DialogV2` call that sets `rejectClose` sets it to `false` |
 
 A pure read with no answer (a roll with no TN) returns `null` too; that is a value, not a problem, and shows no notification.
@@ -85,7 +85,7 @@ A pure read with no answer (a roll with no TN) returns `null` too; that is a val
 | --- | --- |
 | Utils validators and parsers return `{ valid, error }` with an i18n key in `error` | review |
 | Client-side code reports a fixable problem with one notification and `null` (or a bare `return` when it returns no value), never a result object | review |
-| Only GM query handlers throw for a refused request | review |
+| Only GM query handlers throw for a refused request, and the message is an i18n key under `l5r4.ui.requests` | review |
 | `DialogV2` calls pass `rejectClose: false` | review |
 | A caller checks the documented "no result" value and returns early | review |
 

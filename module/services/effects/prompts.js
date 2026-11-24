@@ -27,7 +27,7 @@ import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { rollSkill } from "../dice/rolls/skill-roll.js";
-import { registerGmQuery } from "../gm-client.js";
+import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, ownTurnStartOf } from "./apply.js";
 
 /** Name of the GM query that ends a Concentration for a player. */
@@ -143,7 +143,7 @@ export async function rollFullDefense(actor) {
  */
 export async function endConcentration(effect) {
   if (!game.user.isGM) {
-    await game.users.activeGM?.query(END_CONCENTRATION_QUERY, { effectUuid: effect.uuid });
+    await requestGmQuery(END_CONCENTRATION_QUERY, { effectUuid: effect.uuid });
     return;
   }
   const tokenActors = (canvas?.tokens?.placeables ?? []).map(t => t.actor).filter(Boolean);
@@ -161,7 +161,7 @@ export function registerPromptQueries() {
   registerGmQuery(END_CONCENTRATION_QUERY, async ({ effectUuid }) => {
     const effect = await fromUuid(String(effectUuid));
     if (effect?.documentName !== "ActiveEffect" || !effect.statuses.has("concentration")) {
-      throw new Error(`Not a Concentration effect: ${effectUuid}`);
+      throw new Error("l5r4.ui.requests.notConcentration");
     }
     await endConcentration(effect);
   });
@@ -170,7 +170,7 @@ export function registerPromptQueries() {
     const request = message?.getFlag(SYS_ID, "prompt");
     const actor = request ? await fromUuid(request.actorUuid) : null;
     if (!actor?.testUserPermission(user, "OWNER")) {
-      throw new Error(`Not a prompt the user may answer: ${messageId}`);
+      throw new Error("l5r4.ui.requests.notYourPrompt");
     }
     await message.setFlag(SYS_ID, "promptAnswered", true);
   });
@@ -246,11 +246,7 @@ async function requestPromptAnswered(message) {
     await message.setFlag(SYS_ID, "promptAnswered", true);
     return;
   }
-  if (!game.users.activeGM) {
-    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
-    return;
-  }
-  await game.users.activeGM.query(ANSWER_PROMPT_QUERY, { messageId: message.id });
+  await requestGmQuery(ANSWER_PROMPT_QUERY, { messageId: message.id });
 }
 
 /**
