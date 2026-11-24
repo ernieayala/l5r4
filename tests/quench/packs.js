@@ -10,6 +10,7 @@ import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { grantQueueOf } from "../../module/documents/item/lifecycle/grants.js";
 import { activationOf, updateActivation } from "../../module/services/effects/activation.js";
 import { getWoundsTaken } from "../../module/utils/damage.js";
+import { isSecondSchool } from "../../module/utils/grants.js";
 import { createShugenja, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications, waitFor } from "./helpers.js";
 
@@ -138,8 +139,11 @@ export function registerPacksTests(quench) {
        */
       const missingRules = (actor, doc) => {
         const reached = actor.rules.filter(e => e.source === doc.name).map(e => e.rule.key);
+        // A second School gives no Trait bonus (Ernie's ruling, #156), so its TraitAdjust stays out by design
+        const second = isSecondSchool(doc);
         return doc.system.rules
           .map(rule => rule.key)
+          .filter(key => !(second && key === "TraitAdjust"))
           .filter(key => {
             const at = reached.indexOf(key);
             return at < 0 || !reached.splice(at, 1);
