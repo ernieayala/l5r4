@@ -31,7 +31,7 @@ Core wraps the content in `div.dialog-content` inside `form.dialog-form` and ren
 | Check dialog | `prompt`, modal | The form's values, or `null` when closed | Every roll the pipeline makes, unless Shift skips it: `askCheck` (`module/services/dice/check/roll-check.js`) |
 | Choice prompt | `prompt` or `input` | The chosen value, or `null` | A rule's open choice, `askChoice` (`module/services/purchase.js`); the ledger change; a name |
 | Choice of two | `wait` with buttons | The pressed button's action, or `null` | Add a School beside the others or replace them: `askSchool` (`module/services/purchase.js`) |
-| Confirmation | `confirm` | `true`, `false`, or `null` when closed | End the encounter, start a session, a GM allowing a roll the rules forbid: `askGmAllow` (`module/services/gm-allow.js`) |
+| Confirmation | `confirm` | `true`, `false`, or `null` when closed | End the encounter, start a session, a GM allowing what the rules forbid: `askGmAllow` (`module/services/gm-allow.js`), which a player's attempt reaches on the GM's screen as "{name} asks to go ahead" (`foundations/states.md` rule 10) |
 | Destructive | `confirm` | As above | Removing an item, an NPC attack, a custom Emphasis (rule 3) |
 
 A window that stays open while the user works (the XP manager, the wealth manager) is an app, not a dialog (`patterns/panels-and-browsers.md`).

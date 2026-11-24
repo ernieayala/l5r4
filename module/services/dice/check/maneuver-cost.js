@@ -4,15 +4,19 @@
  * cost, what pays for them (Free Raises not spent on the TN first, then declared Raises), and the TN that results.
  * Picking a maneuver, or spending a Free Raise on the TN, raises the declared Raises to cover the cost, up to the
  * roll's cap; the roller may still declare more for Increased Damage, or fewer, since declaring Raises stays their
- * choice. A maneuver the roll cannot pay for at its cap is disabled with the reason, and while the picks cost more
- * than the Raises pay, Roll is disabled and a warning line says why, so the dialog never closes on a roll that cannot
- * be made. The values come from the same terms the roll uses (terms.js), so the dialog and the roll agree.
+ * choice. For a player, a maneuver the roll cannot pay for at its cap is disabled with the reason, and while the picks
+ * cost more than the Raises pay, Roll is disabled and a warning line says why, so the dialog never closes on a roll
+ * that cannot be made. Going past what the Raises pay is the GM's call (#223): a player's "Ask the GM" button asks,
+ * and once the GM allows it nothing is locked; a GM is never locked and sees the warning. The `gmAllowed` field tells
+ * the pipeline the GM allowed it. The values come from the same terms the roll uses (terms.js), so the dialog and the
+ * roll agree.
  * game-rules/28_raises.md, p.79
  * game-rules/38_maneuvers.md, p.86-87
  */
 
-import { F } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { getManeuverCost } from "../../../utils/damage.js";
+import { askGmAllow } from "../../gm-allow.js";
 import { buildTnModifiers, getCheckTn } from "./message-data.js";
 import { buildChosenTerms, buildPreparedTerms, getManeuverPayment } from "./terms.js";
 
@@ -41,7 +45,32 @@ export function bindManeuverCost(form, check, readChoices) {
   };
   form.addEventListener("input", update);
   form.addEventListener("change", update);
+  bindGmAsk(form, check, update);
   update();
+}
+
+/**
+ * Unlock the maneuvers for a GM at once, and for a player once the GM allows it through the "Ask the GM" button.
+ * @param {HTMLFormElement} form
+ * @param {object} check - From buildCheck
+ * @param {function(): void} update - Shows the dialog's state again
+ */
+function bindGmAsk(form, check, update) {
+  const allowed = form.elements.namedItem("gmAllowed");
+  if (game.user.isGM) {
+    allowed.value = "1";
+  }
+  form.querySelector("[data-maneuver-ask]").addEventListener("click", async () => {
+    const yes = await askGmAllow({
+      title: check.request.label,
+      reason: F("l5r4.ui.combat.maneuversAsk", { name: check.actor.name }),
+      ask: T("l5r4.ui.requests.allowRequest")
+    });
+    if (yes) {
+      allowed.value = "1";
+      update();
+    }
+  });
 }
 
 /**
@@ -77,7 +106,8 @@ function updateRaisesToCover(form, { terms, payment, free }) {
 }
 
 /**
- * Show the cost line, the warning when the Raises do not pay, the Roll button's state, and each maneuver's.
+ * Show the cost line, the warning when the Raises do not pay, the Roll button's state, each maneuver's, and the
+ * player's "Ask the GM" button while something is locked.
  * @param {HTMLFormElement} form
  * @param {object} check - From buildCheck
  * @param {ReturnType<typeof getAttackTerms>} attack
@@ -85,6 +115,7 @@ function updateRaisesToCover(form, { terms, payment, free }) {
 function updateManeuverCost(form, check, attack) {
   const { terms, payment, free, tn } = attack;
   const { cost, affordable } = payment;
+  const unlocked = form.elements.namedItem("gmAllowed").value === "1";
   const fromFree = Math.min(cost, free);
   const line = form.querySelector("[data-maneuver-cost]");
   line.hidden = cost === 0;
@@ -100,24 +131,26 @@ function updateManeuverCost(form, check, attack) {
     "l5r4.ui.combat.notEnoughRaises",
     { cost, raises: terms.raises }
   );
-  form.querySelector("[data-action='ok']").disabled = !affordable;
-  updateManeuverChoices(form, check, attack);
+  form.querySelector("[data-action='ok']").disabled = !affordable && !unlocked;
+  const locked = updateManeuverChoices(form, check, { ...attack, unlocked });
+  form.querySelector("[data-maneuver-ask]").hidden = unlocked || (affordable && !locked);
 }
 
 /**
  * Disable each maneuver the roll cannot pay for with the others picked, at its cap and its Free Raises, with the
- * reason; a picked maneuver stays enabled so the roller can drop it.
+ * reason; a picked maneuver stays enabled so the roller can drop it. Once unlocked, none is disabled.
  * game-rules/28_raises.md, p.79
  * @param {HTMLFormElement} form
  * @param {object} check - From buildCheck
- * @param {ReturnType<typeof getAttackTerms>} attack
+ * @param {ReturnType<typeof getAttackTerms> & {unlocked: boolean}} attack
+ * @returns {boolean} Whether any maneuver is disabled
  */
-function updateManeuverChoices(form, check, { payment, free }) {
+function updateManeuverChoices(form, check, { payment, free, unlocked }) {
   const max = Number(form.elements.namedItem("raises").max);
   const getCostWith = change =>
     getManeuverCost({ ...payment.maneuvers, ...change }, check.ctx.raises.maneuverCosts);
   const formatReason = cost =>
-    cost > max + free ? F("l5r4.ui.combat.maneuverOverCap", { cost, max, free }) : "";
+    !unlocked && cost > max + free ? F("l5r4.ui.combat.maneuverOverCap", { cost, max, free }) : "";
   for (const key of PAID_MANEUVERS) {
     const box = form.elements.namedItem(`maneuver.${key}`);
     updateControlState(
@@ -135,6 +168,7 @@ function updateManeuverChoices(form, check, { payment, free }) {
       "title"
     );
   }
+  return [...form.querySelectorAll("[name^='maneuver.'], option")].some(c => c.disabled);
 }
 
 /**

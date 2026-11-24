@@ -904,6 +904,8 @@
         "maneuverCost": "The maneuvers cost {cost} Raises: {free} from Free Raises, {raises} from declared Raises. TN {tn}.",
         "maneuverOverCap": "With this, the maneuvers cost {cost} Raises; this roll can pay at most {max} Raises and {free} Free Raises",
         "maneuvers": "Maneuvers",
+        "maneuversAsk": "Maneuvers for {name} beyond what this roll's Raises pay for",
+        "maneuversAskGm": "Ask the GM to allow more",
         "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
         "multipleTargets": "Several targets: set the TN by hand",
         "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them (declared: {raises})",
@@ -1239,14 +1241,19 @@
         "unmetTitle": "Prerequisites not met"
       },
       "requests": {
+        "allowRequest": "Allow it anyway?",
+        "askingGm": "Asking the GM: {reason}",
         "cannotApplyEffect": "That effect cannot be applied to that actor this way",
         "cannotConcede": "This duelist cannot concede now",
-        "damageApplied": "That damage has been applied to that actor already; undo it first, or ask the GM to apply it again",
+        "damageApplied": "That damage has been applied to that actor already",
+        "damageAsk": "Apply {damage} damage to {name}. {why}",
         "damageMismatch": "That damage card's total is not its roll's",
         "damageNotTarget": "A damage roll lands on its own target, or on an actor you own",
+        "declined": "The GM did not allow that",
         "effectApplied": "{effect} applied to {name}",
-        "effectNotProven": "Only the actor's owner, or a roll or action of yours that allows it, can put that effect on that actor",
+        "effectAsk": "Put {effect} on {name}. No roll or action of theirs allows it",
         "failed": "The GM's client could not do this: {reason}",
+        "gmDeclined": "The GM did not allow it: {reason}",
         "grappleOver": "The grapple is over",
         "messageGone": "That chat card no longer exists",
         "noCombat": "No combat has started",
@@ -1266,6 +1273,7 @@
         "onlyOwnerVoid": "Only the damaged character's owner spends its Void Point",
         "onlyRollerApplies": "Only the one who rolled the damage, or the GM, applies it",
         "onlyRollerUndoes": "Only the one who rolled the damage, or the GM, undoes it",
+        "playerAsks": "{name} asks to go ahead: {reason}",
         "unknownAction": "That action is not known"
       },
       "rules": {

@@ -10,6 +10,7 @@ import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { buildPool, getCheckResult, getPoolFormula } from "../../../utils/check.js";
 import { getTaintEffects } from "../../../utils/taint.js";
+import { askGmAllow } from "../../gm-allow.js";
 import { applyTrackChange } from "../../ledger.js";
 import { hasHonorToCall, isHonorRollOffered, renderCheckCard } from "./card.js";
 
@@ -24,7 +25,7 @@ import { hasHonorToCall, isHonorRollOffered, renderCheckCard } from "./card.js";
  */
 export async function rollHonor(message) {
   const actor = fromUuidSync(message.system.actorUuid) ?? null;
-  const allowed = validateHonorRoll(message, actor);
+  const allowed = await validateHonorRoll(message, actor);
   if (!allowed) {
     return null;
   }
@@ -60,13 +61,15 @@ export function hasHonorRollLeft(actor) {
 
 /**
  * Whether the roll's actor may make its Honor Roll: the user owns the actor, the card offers the roll, the actor has
- * not used it this session, and it has an Honor Rank to roll. A refusal warns and gives null.
+ * not used it this session or the GM allows another, and it has an Honor Rank to roll. A refusal warns and gives
+ * null.
  * game-rules/43_honor.md, p.92
  * @param {ChatMessage} message - A failed `roll` message
  * @param {Actor|null} actor - The roll's actor
- * @returns {{honor: number, session: unknown}|null} The Honor Rank and the current session, or null when refused
+ * @returns {Promise<{honor: number, session: unknown}|null>} The Honor Rank and the current session, or null when
+ *   refused
  */
-function validateHonorRoll(message, actor) {
+async function validateHonorRoll(message, actor) {
   if (!actor?.isOwner) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return null;
@@ -75,8 +78,16 @@ function validateHonorRoll(message, actor) {
     return null;
   }
   const session = game.settings.get(SYS_ID, "session");
-  if (actor.getFlag(SYS_ID, "honorRollSession") === session) {
-    ui.notifications?.warn(F("l5r4.ui.honorRoll.used", { name: actor.name }));
+  // A second Honor Roll in a session is the GM's call (#223)
+  const again = actor.getFlag(SYS_ID, "honorRollSession") === session;
+  if (
+    again &&
+    !(await askGmAllow({
+      title: T("l5r4.ui.honorRoll.button"),
+      reason: F("l5r4.ui.honorRoll.used", { name: actor.name }),
+      ask: T("l5r4.ui.requests.allowRequest")
+    }))
+  ) {
     return null;
   }
   // A card posted before the roller lost his last Honor Rank still offers the roll. A Taint penalty that shrinks

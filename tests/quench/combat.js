@@ -22,7 +22,8 @@ import {
   autoAnswerRolls,
   cleanTest,
   settleChatNotifications,
-  waitFor
+  waitFor,
+  withGmAnswer
 } from "./helpers.js";
 
 /** Every d10 shows 9: a face is ceil((1 - u) × 10) [src: client/dice/terms/dice.mjs:412], so no die explodes. */
@@ -682,17 +683,21 @@ export function registerCombatTests(quench) {
         );
 
         it(
-          "should stop the roll for maneuvers the Raises cannot pay for",
+          "should stop the roll for maneuvers the Raises cannot pay for when the GM declines",
           clean(async () => {
             // Void 3, so Disarm (3) is within the cap and offered; 1 declared Raise does not pay for it. The values are
-            // set without input events, so the dialog's live check does not disable Roll and the pipeline's check runs
+            // set without input events, so the dialog's live check does not disable Roll and the pipeline's check runs;
+            // an empty gmAllowed is a player's form, so the GM is asked (#223)
             const { actor, katana } = await attacker([], 3);
             const target = await defender();
             const before = game.messages.size;
-            const none = await attack(actor, katana, target, {
-              raises: 1,
-              "maneuver.disarm": true
-            });
+            const { result: none } = await withGmAnswer(false, () =>
+              attack(actor, katana, target, {
+                raises: 1,
+                gmAllowed: "",
+                "maneuver.disarm": true
+              })
+            );
             assert.isNull(none);
             assert.equal(game.messages.size, before);
           })
@@ -778,12 +783,15 @@ export function registerCombatTests(quench) {
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
-            const short = await attack(actor, katana, target, {
-              raises: 3,
-              "maneuver.knockdown": true,
-              "maneuver.fourLegged": true
-            });
-            assert.isNull(short);
+            const { result: short } = await withGmAnswer(false, () =>
+              attack(actor, katana, target, {
+                raises: 3,
+                gmAllowed: "",
+                "maneuver.knockdown": true,
+                "maneuver.fourLegged": true
+              })
+            );
+            assert.isNull(short, "a player's 3 Raises do not pay 4, and the GM declines");
           })
         );
 
@@ -816,12 +824,21 @@ export function registerCombatTests(quench) {
             };
             const line = form.querySelector("[data-maneuver-cost]");
             const roll = form.querySelector("[data-action='ok']");
+            const askGm = form.querySelector("[data-maneuver-ask]");
+            const allowed = form.elements.namedItem("gmAllowed");
             const option = value =>
               form.querySelector(`[name="maneuver.calledShot"] option[value="${value}"]`);
             assert.isTrue(line.hidden, "no maneuver, no cost line");
+            // #223: a GM is never locked
+            assert.equal(allowed.value, "1", "the GM's dialog is unlocked");
+            assert.isFalse(option("3").disabled, "the GM may pick past the cap");
+            assert.isTrue(askGm.hidden);
+            // A player's dialog: locked until the GM allows more
+            set("gmAllowed", "");
             assert.isTrue(option("3").disabled, "a head shot (3) is over the Void Ring 2 cap");
             assert.include(option("3").title, "3");
             assert.isFalse(option("2").disabled);
+            assert.isFalse(askGm.hidden, "a locked choice offers to ask the GM");
 
             set("maneuver.calledShot", 2);
             assert.equal(form.elements.namedItem("raises").value, "2", "Raises cover the hand");
@@ -848,10 +865,21 @@ export function registerCombatTests(quench) {
               "the roller's own Raises stay"
             );
 
-            set("raises", 2);
+            // The GM allows it: everything unlocks, and the roll goes through short
+            const confirm = foundry.applications.api.DialogV2.confirm;
+            foundry.applications.api.DialogV2.confirm = async () => true;
+            try {
+              askGm.click();
+              assert.isTrue(await waitFor(() => allowed.value === "1"), "the GM allowed more");
+            } finally {
+              foundry.applications.api.DialogV2.confirm = confirm;
+            }
+            assert.isFalse(roll.disabled);
+            assert.isFalse(feint.disabled);
+            assert.isTrue(askGm.hidden);
             roll.click();
             const message = await rolled;
-            assert.equal(message.system.maneuvers.calledShot, 2);
+            assert.equal(message.system.maneuvers.calledShot, 2, "rolled with 1 Raise for 2");
           })
         );
 
@@ -888,6 +916,24 @@ export function registerCombatTests(quench) {
             assert.isTrue(await guard(actor, ward));
             assert.equal(actor.system.armorTn.current, guardTN - 5);
             assert.equal(ward.system.armorTn.current, wardTN + 10);
+          })
+        );
+
+        // Not in the Full Attack Stance, unless the GM allows it (#223)
+        // game-rules/38_maneuvers.md, p.87
+        it(
+          "should Guard from the Full Attack Stance only as the GM allows",
+          clean(async () => {
+            const { actor } = await attacker();
+            const ward = await defender();
+            await actor.toggleStatusEffect("fullAttackStance", { active: true });
+            const declined = await withGmAnswer(false, () => guard(actor, ward));
+            assert.isFalse(declined.result);
+            assert.include(declined.asked[0], T("l5r4.ui.combat.guardFullAttack"));
+            assert.isFalse(ward.statuses.has("guarded"));
+            const allowed = await withGmAnswer(true, () => guard(actor, ward));
+            assert.isTrue(allowed.result);
+            assert.isTrue(ward.statuses.has("guarded"));
           })
         );
       });
@@ -1255,20 +1301,18 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // The GM may let a Dazed character fight anyway (#223)
         // game-rules/41_conditional_effects.md, p.89
-        it("should keep a Dazed character from fighting a duel", async () => {
+        it("should keep a Dazed character from a duel unless the GM allows it", async () => {
           const { actor } = await attacker();
           const target = await defender();
           await target.toggleStatusEffect("dazed", { active: true });
-          const warnings = [];
-          const warn = ui.notifications.warn;
-          ui.notifications.warn = message => warnings.push(message);
-          try {
-            assert.isNull(await startDuel(actor, target));
-          } finally {
-            ui.notifications.warn = warn;
-          }
-          assert.deepEqual(warnings, [F("l5r4.ui.combat.duel.dazed", { name: target.name })]);
+          const declined = await withGmAnswer(false, () => startDuel(actor, target));
+          assert.isNull(declined.result, "declined");
+          assert.include(declined.asked[0], F("l5r4.ui.combat.duel.dazed", { name: target.name }));
+          const { result: card } = await withGmAnswer(true, () => startDuel(actor, target));
+          assert.exists(card, "allowed");
+          await card.delete();
         });
       });
 

@@ -62,8 +62,9 @@ Each part renders only when the roll offers it (`buildDialogContext` (`module/se
 | Maho | Warning line, as above | A `<p>` of class `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`) |
 | Out of range | The number field's `min` and `max` stop the spinner; the pipeline bounds whatever is typed | `min`, `max` on Raises, Free Raises, Keep only |
 | Maneuver picked | The declared Raises rise to cover what the Free Raises do not, up to the cap; the roller may change them after | `updateRaisesToCover` (`module/services/dice/check/maneuver-cost.js`) |
-| Maneuver over the cap | The checkbox or Called Shot option disabled, with the reason (`l5r4.ui.combat.maneuverOverCap`) in `data-tooltip`, or `title` on an option; a picked one stays enabled | `updateManeuverChoices` (`module/services/dice/check/maneuver-cost.js`) |
-| Not enough Raises | The warning line shows and Roll is disabled, so the dialog stays open with its input; a roll made without the dialog warns with the same key and does not roll | `updateManeuverCost` (`module/services/dice/check/maneuver-cost.js`), `askCheck` (`module/services/dice/check/roll-check.js`) |
+| Maneuver over the cap | For a player, the checkbox or Called Shot option disabled, with the reason (`l5r4.ui.combat.maneuverOverCap`) in `data-tooltip`, or `title` on an option; a picked one stays enabled. Never for a GM | `updateManeuverChoices` (`module/services/dice/check/maneuver-cost.js`) |
+| Not enough Raises | The warning line shows. For a player, Roll is disabled, so the dialog stays open with its input; a GM may roll | `updateManeuverCost` (`module/services/dice/check/maneuver-cost.js`) |
+| Locked for a player | "Ask the GM to allow more" (`l5r4.ui.combat.maneuversAskGm`) shows; the GM's Allow unlocks every maneuver and Roll, and `gmAllowed` tells the pipeline so. A roll made without the dialog asks the GM before it rolls (`foundations/states.md` rule 10) | `bindGmAsk` (`module/services/dice/check/maneuver-cost.js`), `askCheck` (`module/services/dice/check/roll-check.js`) |
 
 ## Parameters
 

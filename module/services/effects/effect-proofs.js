@@ -109,13 +109,9 @@ function getContestProofOptions(request) {
 function getGuardProofOptions({ actor, id, proof, user }) {
   const protector = fromUuidSync(String(proof.protectorUuid));
   const owned = protector?.documentName === "Actor" && protector.testUserPermission(user, "OWNER");
-  // Not in the Full Attack Stance, as guard() checks on the requester's client
-  if (
-    id !== "guarded" ||
-    !owned ||
-    protector === actor ||
-    protector.statuses.has("fullAttackStance")
-  ) {
+  // The Full Attack Stance is checked on the requester's client, where the GM may already have allowed it (guard(),
+  // #223), so it is not asked again here
+  if (id !== "guarded" || !owned || protector === actor) {
     return null;
   }
   return { origin: protector.uuid, turnOf: protector.uuid };

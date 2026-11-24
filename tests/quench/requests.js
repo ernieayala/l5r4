@@ -5,15 +5,15 @@ import { rollCheck } from "../../module/services/dice/check/roll-check.js";
 import { startDuel } from "../../module/services/combat/duel.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
-import { cleanTest, settleChatNotifications } from "./helpers.js";
+import { cleanTest, settleChatNotifications, withGmAnswer } from "./helpers.js";
 
 /** Every d10 shows 9, so every roll is known. */
 const NINES = () => 0.15;
 
 /**
- * Registers the `requests` batch (#162): a GM query for a player changes an actor that player does not own only with
- * a proof the GM's client checks, and takes the effect's level and timing from the proof. The handlers run here as
- * the world's player user would call them.
+ * Registers the `requests` batch (#162): a GM query for a player changes an actor that player does not own with a
+ * proof the GM's client checks, which sets the effect's level and timing, or once the GM allows it when asked (#223).
+ * The handlers run here as the world's player user would call them.
  * @param {object} quench  The Quench API object.
  */
 export function registerRequestsTests(quench) {
@@ -76,20 +76,26 @@ export function registerRequestsTests(quench) {
       const refusalOf = promise => promise.then(() => null).catch(err => err.message);
 
       describe("Effects on another's actor", () => {
+        // #223: an effect no proof covers is the GM's call, not a refusal
         it(
-          "should refuse an effect with no proof",
+          "should ask the GM about an effect with no proof, naming the player",
           clean(async () => {
             const npc = track(await createTestNPC({ name: "Requests: NPC" }));
-            assert.equal(
-              await refusalOf(askEffect(npc, "fatigued")),
-              "l5r4.ui.requests.effectNotProven"
-            );
-            assert.isFalse(npc.statuses.has("fatigued"));
+            let refusal;
+            const { asked } = await withGmAnswer(false, async () => {
+              refusal = await refusalOf(askEffect(npc, "fatigued"));
+            });
+            assert.equal(refusal, "l5r4.ui.requests.declined");
+            assert.lengthOf(asked, 1, "the GM was asked");
+            assert.include(asked[0], player.name);
+            assert.isFalse(npc.statuses.has("fatigued"), "declined");
+            await withGmAnswer(true, () => askEffect(npc, "fatigued"));
+            assert.isTrue(npc.statuses.has("fatigued"), "allowed");
           })
         );
 
         it(
-          "should put a condition a successful roll offers on its target, and refuse one it does not",
+          "should put a condition a successful roll offers on its target, and ask the GM about one it does not",
           clean(async () => {
             const actor = await playersCharacter([
               { key: "ApplyCondition", selector: "any", condition: "dazed" }
@@ -108,10 +114,23 @@ export function registerRequestsTests(quench) {
             );
             assert.lengthOf(hit.system.conditions, 1, "Dazed is offered");
             const proof = { kind: "roll", messageId: hit.id, index: 0 };
+            let refusal;
+            const { asked } = await withGmAnswer(false, async () => {
+              refusal = await refusalOf(askEffect(npc, "stunned", { proof }));
+            });
             assert.equal(
-              await refusalOf(askEffect(npc, "stunned", { proof })),
-              "l5r4.ui.requests.effectNotProven",
+              refusal,
+              "l5r4.ui.requests.declined",
               "a condition the roll does not offer"
+            );
+            assert.lengthOf(asked, 1);
+            const { asked: offered } = await withGmAnswer(false, () =>
+              askEffect(npc, "dazed", { proof })
+            );
+            assert.isEmpty(offered, "an offered condition asks nobody");
+            await npc.deleteEmbeddedDocuments(
+              "ActiveEffect",
+              npc.effects.filter(e => e.statuses.has("dazed")).map(e => e.id)
             );
             assert.deepEqual(await askEffect(npc, "dazed", { proof, level: 9 }), {
               applied: true
@@ -132,15 +151,15 @@ export function registerRequestsTests(quench) {
             const protector = await playersCharacter();
             const ward = track(await createTestPC({ name: "Requests: ward" }));
             const stranger = track(await createTestPC({ name: "Requests: stranger" }));
-            assert.equal(
-              await refusalOf(
+            let refusal;
+            await withGmAnswer(false, async () => {
+              refusal = await refusalOf(
                 askEffect(ward, "guarded", {
                   proof: { kind: "guard", protectorUuid: stranger.uuid }
                 })
-              ),
-              "l5r4.ui.requests.effectNotProven",
-              "a guard the player does not own"
-            );
+              );
+            });
+            assert.equal(refusal, "l5r4.ui.requests.declined", "a guard the player does not own");
             await askEffect(ward, "guarded", {
               proof: { kind: "guard", protectorUuid: protector.uuid }
             });
@@ -167,27 +186,35 @@ export function registerRequestsTests(quench) {
           );
 
         it(
-          "should land a player's damage roll on its own target once, and nowhere else",
+          "should land a player's damage roll on its own target, and ask the GM about anything more",
           clean(async () => {
             const target = track(await createTestNPC({ name: "Requests: damage target" }));
             const bystander = track(await createTestNPC({ name: "Requests: bystander" }));
             const damage = await playersDamage(target);
+            const apply = actor =>
+              refusalOf(
+                askDamage({ action: "apply", messageId: damage.id, actorUuid: actor.uuid })
+              );
+            const refusals = [];
+            const { asked } = await withGmAnswer(false, async () => {
+              refusals.push(await apply(bystander));
+              refusals.push(await apply(target));
+              refusals.push(await apply(target));
+            });
+            assert.deepEqual(refusals, [
+              "l5r4.ui.requests.declined",
+              null,
+              "l5r4.ui.requests.declined"
+            ]);
+            assert.lengthOf(asked, 2, "the GM was asked about the bystander and the second hit");
             assert.equal(
-              await refusalOf(
-                askDamage({ action: "apply", messageId: damage.id, actorUuid: bystander.uuid })
-              ),
-              "l5r4.ui.requests.damageNotTarget"
+              bystander._source.system.suffered,
+              0,
+              "declined: the bystander is untouched"
             );
-            assert.equal(bystander._source.system.suffered, 0, "the bystander is untouched");
-            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
-            assert.equal(target._source.system.suffered, 18, "2k2 of nines");
-            assert.equal(
-              await refusalOf(
-                askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid })
-              ),
-              "l5r4.ui.requests.damageApplied"
-            );
-            assert.equal(target._source.system.suffered, 18, "not twice");
+            assert.equal(target._source.system.suffered, 18, "2k2 of nines, not twice");
+            await withGmAnswer(true, () => apply(bystander));
+            assert.equal(bystander._source.system.suffered, 18, "allowed by the GM");
             for (const card of game.messages.contents.filter(
               m => m.getFlag(SYS_ID, "damageResult")?.damageMessageId === damage.id
             )) {
@@ -383,21 +410,24 @@ export function registerRequestsTests(quench) {
 
       describe("Concentration and Center Stance", () => {
         it(
-          "should let only the caster's owner end a Concentration",
+          "should ask the GM before anyone but the caster's owner ends a Concentration",
           clean(async () => {
             const caster = track(await createTestPC({ name: "Requests: caster" }));
             const effect = await applyEffect(caster, "concentration", { level: 1 });
             const query = CONFIG.queries[`${SYS_ID}.endConcentration`];
-            assert.equal(
-              await refusalOf(query({ effectUuid: effect.uuid }, { user: player })),
-              "l5r4.ui.requests.notYourCaster"
-            );
+            let refusal;
+            await withGmAnswer(false, async () => {
+              refusal = await refusalOf(query({ effectUuid: effect.uuid }, { user: player }));
+            });
+            assert.equal(refusal, "l5r4.ui.requests.declined");
             assert.isTrue(caster.statuses.has("concentration"), "still concentrating");
+            await withGmAnswer(true, () => query({ effectUuid: effect.uuid }, { user: player }));
+            assert.isFalse(caster.statuses.has("concentration"), "ended once the GM allowed it");
           })
         );
 
         it(
-          "should settle Center Stance only for the owner of the combatant ending the Round",
+          "should ask the GM before settling Center Stance for anyone but the owner ending the Round",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Requests: combatant" }));
             const combat = track(
@@ -408,10 +438,12 @@ export function registerRequestsTests(quench) {
             ]);
             await combat.startCombat();
             const query = CONFIG.queries[`${SYS_ID}.settleCenter`];
-            assert.equal(
-              await refusalOf(query({ combatId: combat.id }, { user: player })),
-              "l5r4.ui.requests.notRoundEnd"
-            );
+            let refusal;
+            const { asked } = await withGmAnswer(false, async () => {
+              refusal = await refusalOf(query({ combatId: combat.id }, { user: player }));
+            });
+            assert.equal(refusal, "l5r4.ui.requests.declined");
+            assert.lengthOf(asked, 1);
           })
         );
       });
