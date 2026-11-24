@@ -27,6 +27,7 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { getStackedModifiers } from "../../../utils/modifier-stacking.js";
 import { buildPool, getCheckResult, getPoolFormula, getTn } from "../../../utils/check.js";
 import { askGmAllow } from "../../gm-allow.js";
+import { askPrompt } from "../../dialog.js";
 import { spendVoidPoint } from "../resources/void-points.js";
 import { applyTrackChange } from "../../ledger.js";
 import { renderCheckCard } from "./card.js";
@@ -312,7 +313,7 @@ async function askChoices(request, context) {
     formId,
     extras
   });
-  return foundry.applications.api.DialogV2.prompt({
+  return askPrompt({
     window: { title: request.label },
     position: { width: 420 },
     content,

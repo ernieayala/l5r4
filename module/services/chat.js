@@ -15,8 +15,7 @@ import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
 import { hideUnusable } from "../utils/dom.js";
 import { rollWeaponDamage } from "./dice/rolls/weapon-roll.js";
-
-const DIALOG = foundry.applications.api.DialogV2;
+import { askPrompt } from "./dialog.js";
 
 /**
  * Item creation result object
@@ -55,7 +54,7 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
     preferredType
   });
 
-  return DIALOG.prompt({
+  return askPrompt({
     window: { title: T("l5r4.ui.sheets.addItem") },
     content,
     ok: {

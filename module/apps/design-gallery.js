@@ -21,9 +21,10 @@ import {
 import { GALLERY_PATTERNS } from "../config/design-gallery/patterns.js";
 import { F, T } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
+import { openDialog } from "../services/dialog.js";
 import { renderTokenRow } from "./token-contrast.js";
 
-const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { renderTemplate } = foundry.applications.handlebars;
 
 /** Where the gallery's own templates live. */
@@ -121,7 +122,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
    */
   static async #onOpenSampleDialog() {
     const { dialog } = GALLERY_PATTERNS.find(pattern => pattern.dialog);
-    await new DialogV2({
+    await openDialog({
       window: { title: T("l5r4.apps.designGallery.patterns.dialog") },
       position: { width: 420 },
       content: await renderTemplate(
@@ -129,7 +130,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
         this.#contextOf({ context: "plain", with: dialog.with })
       ),
       buttons: [{ action: "ok", label: "l5r4.ui.common.roll", default: true }]
-    }).render({ force: true });
+    });
   }
 
   /**

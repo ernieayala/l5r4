@@ -122,7 +122,7 @@ const SYSTEM_PRESENTATION_SYNTAX = [
   },
   {
     selector:
-      ":matches(CallExpression[callee.object.name='DialogV2'], CallExpression[callee.object.property.name='DialogV2']) Property[key.name='content'] > :matches(Literal, TemplateLiteral)",
+      ":matches(CallExpression[callee.object.name='DialogV2'], CallExpression[callee.object.property.name='DialogV2'], CallExpression[callee.name=/^(askPrompt|askConfirm|askButtons|openDialog)$/]) Property[key.name='content'] > :matches(Literal, TemplateLiteral)",
     message: "DialogV2 content is a template from templates/dialogs/."
   },
   {
@@ -155,6 +155,14 @@ const SYSTEM_PRESENTATION_SYNTAX = [
     message: "The rollMode option is deprecated in v14: pass messageMode."
   }
 ];
+
+// Every dialog the system opens carries the l5r4-dialog class, which scrolls its fields with the buttons in view
+// (docs/design-system/patterns/dialogs.md, rule 8): only module/services/dialog.js reaches core's DialogV2.
+const DIALOG_SYNTAX = {
+  selector: "MemberExpression[property.name='DialogV2']",
+  message:
+    "Open a dialog through module/services/dialog.js (askPrompt, askConfirm, askButtons, openDialog)."
+};
 
 // Hooks register in one place: module/hooks/register-all.js (docs/code-system/foundry-patterns.md, Chat cards).
 const HOOKS_SYNTAX = {
@@ -296,12 +304,19 @@ export default [
         },
         { property: "appv1", message: "Use ApplicationV2 (foundry.applications.api)." }
       ],
-      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX]
+      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, DIALOG_SYNTAX]
     }
   },
   {
     files: ["module/**/*.js"],
     ignores: ["module/hooks/**"],
+    rules: {
+      "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, DIALOG_SYNTAX, HOOKS_SYNTAX]
+    }
+  },
+  {
+    // The one module that opens core's DialogV2 (DIALOG_SYNTAX)
+    files: ["module/services/dialog.js"],
     rules: { "no-restricted-syntax": ["error", ...SYSTEM_PRESENTATION_SYNTAX, HOOKS_SYNTAX] }
   },
   {

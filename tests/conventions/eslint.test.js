@@ -27,6 +27,7 @@ const VIOLATING = Object.freeze([
     as: "module/services/example.js"
   },
   { rule: "no-restricted-syntax", file: "presentation.js", as: "module/services/example.js" },
+  { rule: "no-restricted-syntax", file: "direct-dialog.js", as: "module/services/example.js" },
   { rule: "camelcase", file: "camelcase.js", as: "module/services/example.js" },
   { rule: "new-cap", file: "new-cap.js", as: "module/services/example.js" },
   { rule: "max-params", file: "max-params.js", as: "module/services/example.js" },

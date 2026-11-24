@@ -20,6 +20,7 @@ import { isOwnChange } from "../../utils/change-origin.js";
 import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { isAnsweringGmClient } from "../gm-client.js";
+import { askConfirm } from "../dialog.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
 
@@ -52,7 +53,7 @@ export async function updateProne(actor) {
  * @returns {Promise<void>}
  */
 export async function endEncounter() {
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await askConfirm({
     window: { title: T("l5r4.ui.effects.endEncounter") },
     content: await R(DIALOG_TEMPLATES.confirm, {
       question: T("l5r4.ui.effects.endEncounterConfirm")

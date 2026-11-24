@@ -1,0 +1,24 @@
+/**
+ * Dialog Layout
+ * Every dialog the system opens (module/services/dialog.js). Core's .window-content hides its overflow, so the fields
+ * scroll inside the window and the footer buttons stay in view (docs/design-system/patterns/dialogs.md, rule 8)
+ */
+
+.l5r4-dialog {
+  .dialog-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .dialog-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .form-footer {
+    flex: none;
+  }
+}

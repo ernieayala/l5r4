@@ -13,6 +13,7 @@ import { VOID_INITIATIVE_BONUS } from "../config/game-mechanics.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "./effects/uses.js";
+import { askConfirm } from "./dialog.js";
 
 /**
  * Prompts each PC combatant that marked a Void Point for Initiative, spends the Void Point on a yes, and clears the
@@ -49,7 +50,7 @@ async function spendInitiativeVoidPoint(actor) {
     return false;
   }
 
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await askConfirm({
     window: { title: F("l5r4.ui.combat.initiativeVoidTitle", { name: actor.name }) },
     content: await R(DIALOG_TEMPLATES.confirm, {
       question: F("l5r4.ui.combat.initiativeVoidQuestion", { name: actor.name })

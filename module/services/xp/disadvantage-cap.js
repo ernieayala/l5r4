@@ -7,6 +7,7 @@
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { askPrompt } from "../dialog.js";
 
 /**
  * Ask for a character's new Disadvantage XP cap.
@@ -15,7 +16,7 @@ import { toInt } from "../../utils/type-coercion.js";
  * field holds no number or a negative one
  */
 export async function askDisadvantageCap(currentCap) {
-  const answer = await foundry.applications.api.DialogV2.prompt({
+  const answer = await askPrompt({
     window: { title: T("l5r4.apps.xpManager.disadvantageCapTitle") },
     content: await R(DIALOG_TEMPLATES.disadvantageCap, { currentCap }),
     ok: {

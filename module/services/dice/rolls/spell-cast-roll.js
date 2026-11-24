@@ -28,6 +28,7 @@ import {
 } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
 import { askGmAllow } from "../../gm-allow.js";
+import { askPrompt } from "../../dialog.js";
 
 /**
  * The elements a universal spell is cast in.
@@ -159,7 +160,7 @@ function buildSlotHooks(actor, spell, { ring, slots }) {
  * @returns {Promise<string|null>} The element, or null when the caster cancels
  */
 async function askElement(spell) {
-  return foundry.applications.api.DialogV2.prompt({
+  return askPrompt({
     window: { title: spell.name },
     content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.choice, {
       formId: foundry.utils.randomID(),

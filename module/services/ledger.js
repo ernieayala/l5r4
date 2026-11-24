@@ -13,6 +13,7 @@ import { applyRankPointsDelta } from "../utils/advancement.js";
 import { getLedgerChange } from "../utils/ledger.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
+import { askPrompt } from "./dialog.js";
 
 /** Entries the ledger dialog lists, newest first. */
 const SHOWN_ENTRIES = 20;
@@ -105,7 +106,7 @@ export async function applyTrackChange(actor, track, { points, reason }) {
  */
 export async function openLedgerDialog(actor) {
   const content = await renderLedgerContent(actor);
-  const choice = await foundry.applications.api.DialogV2.prompt({
+  const choice = await askPrompt({
     window: { title: F("l5r4.ui.ledger.titleFor", { name: actor.name }) },
     position: { width: 440 },
     content,

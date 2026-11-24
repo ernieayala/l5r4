@@ -11,6 +11,7 @@ import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, T } from "../utils/localization.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
+import { askConfirm, askPrompt } from "../services/dialog.js";
 
 /**
  * The Emphasis manager window for one skill item.
@@ -223,7 +224,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       return;
     }
 
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
+    const confirmed = await askConfirm({
       window: { title: T("l5r4.ui.common.delete") },
       content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
         question: F("l5r4.ui.dialogs.deleteEmphasis.content", { emphasis: emphasisName }),
@@ -300,7 +301,7 @@ async function askEmphasisName({ title, label, data }) {
     data
   );
 
-  return foundry.applications.api.DialogV2.prompt({
+  return askPrompt({
     window: { title: T(title) },
     content,
     ok: {
