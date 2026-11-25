@@ -21,6 +21,7 @@
       },
       "compendiumBrowser": {
         "add": "Add",
+        "added": "{item} added to {name}",
         "clear": "Clear filters",
         "count": "Entries: {count}",
         "filters": {
@@ -440,6 +441,7 @@
       },
       "xpManager": {
         "addXp": "Add XP",
+        "disadvantageCapInvalid": "Enter a whole number of 0 or more",
         "disadvantageCapTitle": "Set Disadvantage cap",
         "errors": {
           "openFailed": "Failed to open XP manager"
@@ -823,6 +825,7 @@
           "armor": "Armor Piercing arrow ignores armor",
           "flesh": "Flesh Cutter arrow doubles armor"
         },
+        "attackNoTn": "No TN, so no hit or miss: target one token before attacking to use its Armor TN, or enter a TN in the roll dialog.",
         "calledShot": "Called Shot",
         "calledShotDeclared": "Called Shot ({raises} Raises): {location}",
         "calledShotHand": "Hand or foot (2 Raises)",
@@ -1047,8 +1050,10 @@
         "used": "{name} has already made an Honor Roll this session"
       },
       "ledger": {
+        "changedByRules": "{track} for {name}: recorded {points}, not {asked}; the character's Ledger rules changed the amount",
         "hint": "Record a gain or loss of Honor, Glory, Status, or Taint with its reason. Ten points make a rank; the character's Ledger rules may change the amount.",
         "points": "Points (negative to lose)",
+        "pointsRequired": "Enter the points gained or lost first",
         "reason": "Reason",
         "record": "Record",
         "title": "Ledger",
@@ -1224,7 +1229,14 @@
       },
       "notifications": {
         "actorNotFound": "Actor not found for damage roll",
+        "atLimit": {
+          "highest": "{name}: already at the highest",
+          "lowest": "{name}: already at the lowest"
+        },
         "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to 0: you cannot cast",
+        "deleteFailed": "{name} could not be deleted; the console has the details",
+        "dropFailed": "{name} could not be added; the console has the details",
+        "dropNotFound": "The dropped item could not be found",
         "invalidRingForSpell": "Invalid Ring for spell slot: {ring}",
         "messageTooLong": "Message too long (maximum 10,000 characters)",
         "noActorForVoid": "No actor available for Void Point spending",
@@ -1232,7 +1244,10 @@
         "noPermissionDamage": "You do not have permission to roll damage for this actor",
         "noSpellSlots": "You ran out of spell slots for this Ring",
         "noValidWeapon": "No valid weapon found for attack roll",
+        "postFailed": "{name} could not be posted to chat; the console has the details",
         "schoolRankZero": "You cannot cast a spell with School Rank reduced to 0",
+        "shiftToChange": "Hold Shift and click to change {name}",
+        "skillNoTrait": "{skill} has no Trait to roll with: pick one on the Skill",
         "tokenNoActor": "Token has no actor"
       },
       "purchase": {
@@ -1418,6 +1433,7 @@
         "kiho": "Kiho",
         "mastery": "Mastery",
         "masteryHint": "Costs its Mastery Level in XP (pp.231, 259). A Cost rule changes the price: a monk's free kiho, or a non-Brotherhood school's higher one (p.266).",
+        "nameRequired": "Name the item first",
         "noBio": "No Clan, Family, or School yet.",
         "notes": "Notes",
         "recalculated": "Sheet recalculated for {name}",
@@ -1428,6 +1444,7 @@
         "spell": "Spell",
         "spells": "Spells",
         "spellSlots": "Spell slots",
+        "spellSlotsName": "{ring} spell slots",
         "spellSlotsOf": "{ring} spell slots: {count} (click: +1, right-click: -1)",
         "tabs": "Sheet parts",
         "tattoo": "Tattoo",
@@ -1483,6 +1500,7 @@
         "import": "Import items with rules",
         "imported": "Imported items",
         "importedCount": "Imported {count} items into {folder}",
+        "importedSome": "Imported {count} items into {folder}; {skipped} could not be imported, and the console names them",
         "importHint": "Choose a file exported from an Item folder. Its items go into a new folder here.",
         "invalidJson": "That file is not valid JSON.",
         "notExport": "That file is not an export of items with rules."

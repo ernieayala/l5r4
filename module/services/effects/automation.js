@@ -22,7 +22,7 @@ import { toInt } from "../../utils/type-coercion.js";
 import { isAnsweringGmClient } from "../gm-client.js";
 import { askConfirm } from "../dialog.js";
 import { applyEffect, effectsOf } from "./apply.js";
-import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
+import { postConcentrationPrompt, postFullDefensePrompt, rollFullDefense } from "./prompts.js";
 
 /**
  * Put Prone on an actor that is Down and not dead, and take the automatic Prone off one that is not Down.
@@ -124,17 +124,22 @@ export async function onUpdateActorWounds(actor, changes, options) {
 }
 
 /**
- * Ask for the Full Defense roll on the client that took the stance (module/utils/change-origin.js).
+ * Ask for the Full Defense roll on the client that took the stance (module/utils/change-origin.js). A roll dialog
+ * closed without rolling leaves the stance with no Armor TN bonus, so the Full Defense card is posted for the roll to
+ * be made from chat (#142).
+ * game-rules/36_stances.md, p.84
  * @param {ActiveEffect} effect
  * @param {object} options - The creation's options
+ * @returns {Promise<void>}
  */
-export function onCreateActiveEffectFullDefense(effect, options) {
+export async function onCreateActiveEffectFullDefense(effect, options) {
   if (
     isOwnChange(options, game.socket.id) &&
     effect.parent?.documentName === "Actor" &&
-    effect.statuses.has("fullDefenseStance")
+    effect.statuses.has("fullDefenseStance") &&
+    !(await rollFullDefense(effect.parent))
   ) {
-    rollFullDefense(effect.parent);
+    await postFullDefensePrompt(effect.parent);
   }
 }
 

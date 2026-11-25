@@ -383,44 +383,23 @@ export function registerCombatTests(quench) {
           })
         );
 
-        // The warning shows on the clicking player's client, not the GM's (#113)
+        // #113, #142: an actor with no Void Point has nothing to spend, so its owner sees no button to press
         it(
-          "should warn a player with no Void Points on the player's own client, asking the GM nothing",
-          clean(async function () {
-            const player = game.users.find(user => !user.isGM);
-            if (!player) {
-              this.skip();
-            }
+          "should show Reduce with Void only while the damaged actor has a Void Point",
+          clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
-            await target.update({
-              "system.rings.void.value": 0,
-              [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-            });
+            await target.update({ "system.rings.void.value": 0 });
             const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
               askForOptions: false
             });
             await applyDamage(damage, [target]);
             const card = resultOf(damage);
-            const gm = game.users.current;
-            const activeGM = game.users.activeGM;
-            const query = activeGM.query;
-            const warn = ui.notifications.warn;
-            const queries = [];
-            const warnings = [];
-            activeGM.query = (...request) => (queries.push(request), Promise.resolve());
-            ui.notifications.warn = message => warnings.push(message);
-            game.users.current = player;
-            try {
-              (await card.renderHTML()).querySelector("[data-action='damage-void']").click();
-              await waitFor(() => warnings.length > 0 || queries.length > 0, 2000);
-            } finally {
-              game.users.current = gm;
-              activeGM.query = query;
-              ui.notifications.warn = warn;
-            }
-            assert.lengthOf(queries, 0, "no request to the GM");
-            assert.deepEqual(warnings, [T("l5r4.ui.mechanics.wounds.noVoidPoints")]);
+            const voidButton = async () =>
+              (await card.renderHTML()).querySelector("[data-action='damage-void']");
+            assert.notExists(await voidButton(), "hidden with no Void Point");
+            await target.update({ "system.rings.void.value": 1 });
+            assert.exists(await voidButton(), "shown once the actor has one");
           })
         );
 

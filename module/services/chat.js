@@ -15,7 +15,7 @@ import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
 import { hideUnusable } from "../utils/dom.js";
 import { rollWeaponDamage } from "./dice/rolls/weapon-roll.js";
-import { askPrompt } from "./dialog.js";
+import { askPrompt, bindSubmitCheck } from "./dialog.js";
 
 /**
  * Item creation result object
@@ -52,6 +52,11 @@ export async function getUnifiedItemOptions(preferredType = null) {
       label: T("l5r4.ui.sheets.addItem"),
       callback: getItemCreateResult
     },
+    // Add waits for a name, so the dialog never closes on one it would drop (#142)
+    render: (_event, dialog) =>
+      bindSubmitCheck(dialog.element.querySelector("form"), form =>
+        form.elements.itemName.value.trim() ? "" : T("l5r4.ui.sheets.nameRequired")
+      ),
     rejectClose: false,
     modal: true
   });

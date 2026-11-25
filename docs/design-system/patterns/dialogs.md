@@ -158,6 +158,7 @@ Non-conforming, modeled: `foundry.applications.api.DialogV2.prompt({ ... })` fro
 | Submitting | Core disables every footer button until the callback returns | `client/applications/api/dialog.mjs:266-275` |
 | Closed | Resolves `null` (`rejectClose: false`); the caller treats it as cancel and changes nothing | `client/applications/api/dialog.mjs:405`; `askChoices` (`module/services/dice/check/dialog.js`) |
 | Invalid input | The field's own `min`, `max`, and `step`; a value past them is user input the caller validates (`docs/code-system/foundry-patterns.md`, Forms) | `name="raises"` and `name="freeRaisesToTn"` in `templates/dialogs/check-dialog.hbs` |
+| Unusable input | The submit button disabled, its `data-tooltip` saying what the form still needs, until the form holds input the caller can use, so a press never closes the dialog on input it would throw away | `bindSubmitCheck` (`module/services/dialog.js`): the Add item name, the ledger's points, the Disadvantage cap |
 
 ## Keyboard and screen reader
 

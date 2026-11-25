@@ -91,7 +91,7 @@ export class RollHandler {
   static rollSkill(actor, item, askForOptions) {
     const traitKey = toTraitKey(item.system?.trait);
     if (!traitKey) {
-      console.warn("[L5R4] Skill is missing system.trait; cannot roll:", item?.name);
+      ui.notifications?.warn(F("l5r4.ui.notifications.skillNoTrait", { skill: item.name }));
       return undefined;
     }
     return RollHandler.#rollOnce(`${actor.id}-skill-${item.id}`, () =>

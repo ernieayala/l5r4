@@ -70,9 +70,17 @@ export async function createImportedItems(text, parent) {
     await buildImportSources(transfer.items, folder)
   );
   await updateImportedRules(created);
-  ui.notifications?.info(
-    F("l5r4.ui.transfer.importedCount", { count: created.length, folder: folder.name })
-  );
+  // Items core could not import are counted too, not only those created (#142)
+  const skipped = transfer.items.length - created.length;
+  if (skipped > 0) {
+    ui.notifications?.warn(
+      F("l5r4.ui.transfer.importedSome", { count: created.length, folder: folder.name, skipped })
+    );
+  } else {
+    ui.notifications?.info(
+      F("l5r4.ui.transfer.importedCount", { count: created.length, folder: folder.name })
+    );
+  }
   return created;
 }
 

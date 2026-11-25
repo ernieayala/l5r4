@@ -1393,12 +1393,31 @@ export function registerPacksTests(quench) {
             await waitFor(() => token.object);
             token.object.control({ releaseOthers: true });
             const app = await openOn("equipment");
+            const notices = [];
+            const notify = ui.notifications.notify;
+            ui.notifications.notify = function (message, type, options = {}) {
+              notices.push(message);
+              return notify.call(this, message, type, { ...options, console: false });
+            };
             try {
               app.search = "Tetsubo";
               await app.render();
               app.element.querySelector("[data-action='add-entry']").click();
               assert.isTrue(await waitFor(() => actor.items.some(i => i.name === "Tetsubo")));
+              // The actor was picked for the user, so the notice names it (#142)
+              assert.isTrue(
+                await waitFor(() =>
+                  notices.includes(
+                    game.i18n.localize("l5r4.apps.compendiumBrowser.added", {
+                      item: "Tetsubo",
+                      name: actor.name
+                    })
+                  )
+                ),
+                notices.join("\n")
+              );
             } finally {
+              ui.notifications.notify = notify;
               await app.close({ animate: false });
             }
           })

@@ -1235,7 +1235,10 @@ export function registerSheetsAndAppsTests(quench) {
             let labels = {};
             const answered = answerDialog(dialog => {
               labels = buttonLabelsOf(dialog);
-              dialog.element.querySelector('[name="itemName"]').value = "Sheets Lantern";
+              // Typed as a user types it: Add waits for a name (#142)
+              const name = dialog.element.querySelector('[name="itemName"]');
+              name.value = "Sheets Lantern";
+              name.dispatchEvent(new Event("input", { bubbles: true }));
               dialog.element.querySelector('[data-action="ok"]').click();
             });
             const [item] = await create();

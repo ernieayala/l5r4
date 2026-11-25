@@ -350,15 +350,21 @@ function bindApplyButtons(message, html, on) {
 }
 
 /**
- * Wire a damage result card's Void and Undo buttons, each shown only to the users who may use it (#108). The Void
- * check runs on the clicking client too, which can see the owner's Void Points, so a refusal warns that player (#113).
+ * Wire a damage result card's Void and Undo buttons, each shown only to the users who may use it (#108); Reduce with
+ * Void also only while the actor has a Void Point to spend. The Void check runs on the clicking client too, which can
+ * see the owner's Void Points, so a refusal warns that player (#113).
  * @param {ChatMessage} message - The result card
  * @param {object} result - Its `damageResult` flag
  * @param {{html: HTMLElement, on: function(string, Function): void}} card - The rendered card and its click binder
  */
 function bindResultButtons(message, result, { html, on }) {
   const actor = fromUuidSync(result.actorUuid);
-  hideUnusable(html, "[data-action='damage-void']", () => Boolean(actor?.isOwner));
+  // An actor with no Void Point left has nothing to spend: the button shows once it has one again (#142)
+  hideUnusable(
+    html,
+    "[data-action='damage-void']",
+    () => Boolean(actor?.isOwner) && toInt(actor.system.rings.void.value) > 0
+  );
   hideUnusable(html, "[data-action='damage-undo']", () => canUndoDamage(result, game.user));
   on("damage-void", () => {
     if (!canReduceWithVoid(result, toInt(actor.system.rings.void.value))) {

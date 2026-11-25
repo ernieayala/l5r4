@@ -6,6 +6,7 @@
  * drop returns false.
  */
 import { SYS_ID } from "../../config/constants.js";
+import { F, T } from "../../utils/localization.js";
 import { createPurchasedItem } from "../../services/purchase.js";
 
 /**
@@ -69,25 +70,26 @@ export class DragDropHandler {
    * @returns {Promise<Item|false>} The created item, or false when nothing was added
    */
   static async onItemDrop(context, event, data) {
+    // A drop that adds nothing says why (#142); a purchase the user cancels says nothing more
     if (!context.actor.isOwner) {
+      ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
       return false;
     }
-
+    // Resolve source item by UUID; the drag data is a trust boundary
+    const item = await fromUuid(data.uuid ?? "").catch(() => null);
+    if (!item) {
+      ui.notifications?.warn(T("l5r4.ui.notifications.dropNotFound"));
+      return false;
+    }
+    // A row dragged from this sheet (for a hotbar macro) and let go on it again adds nothing
+    if (item.parent === context.actor) {
+      return false;
+    }
     try {
-      // Resolve source item by UUID
-      const item = await fromUuid(data.uuid);
-      if (!item) {
-        console.warn(`${SYS_ID} DragDropHandler: Could not resolve item UUID`, data.uuid);
-        return false;
-      }
-      // A row dragged from this sheet (for a hotbar macro) and let go on it again adds nothing
-      if (item.parent === context.actor) {
-        return false;
-      }
-
       return (await createPurchasedItem(context.actor, item.toObject())) ?? false;
     } catch (err) {
-      console.warn(`${SYS_ID} DragDropHandler: Failed to drop item`, { err, data });
+      console.error(`${SYS_ID} DragDropHandler: Failed to drop item`, { err, data });
+      ui.notifications?.error(F("l5r4.ui.notifications.dropFailed", { name: item.name }));
       return false;
     }
   }

@@ -73,14 +73,7 @@ export async function renderCheckCard(system, roll, { actorId = "", used = {} } 
   return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
     ...system,
     ...buildUseContext(system, used),
-    tn: system.tn.effective === null ? null : system.tn,
-    raisesText: formatRaisesNote(system),
-    // A roll with no TN still shows the Raises a Contested Roll will count
-    raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
-    tnChanges: system.tn.modifiers?.length
-      ? F("l5r4.ui.check.tnChangesNote", { changes: formatTnChanges(system.tn.modifiers) })
-      : "",
-    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
+    ...buildTnContext(system),
     outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
     appliedModifiers: system.modifiers
       .filter(m => m.enabled && (m.roll || m.keep || m.total))
@@ -162,6 +155,27 @@ function buildUseContext(system, used) {
       applied: (used.conditions ?? []).includes(index)
     })),
     grappleStarted: Boolean(used.grapple)
+  };
+}
+
+/**
+ * What the card shows of its TN: the TN, or for an attack without one the reason it shows no hit or miss and no damage
+ * (#142); the Raises line, and the Raises a roll with no TN still shows for a Contested Roll to count; the TN changes;
+ * and the Free Raises left.
+ * @param {object} system - RollMessageData source
+ * @returns {object} Template context
+ */
+function buildTnContext(system) {
+  const noTn = system.tn.effective === null;
+  return {
+    tn: noTn ? null : system.tn,
+    noTnNote: noTn && system.kind === "attack" ? T("l5r4.ui.combat.attackNoTn") : "",
+    raisesText: formatRaisesNote(system),
+    raisesWithoutTn: noTn ? system.tn.raises : 0,
+    tnChanges: system.tn.modifiers?.length
+      ? F("l5r4.ui.check.tnChangesNote", { changes: formatTnChanges(system.tn.modifiers) })
+      : "",
+    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN
   };
 }
 

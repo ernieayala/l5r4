@@ -49,6 +49,28 @@ export function openDialog(config) {
 }
 
 /**
+ * Keep a dialog's submit button disabled while what its form holds cannot be submitted, its tooltip saying why, so a
+ * press never closes the dialog on input it would then throw away (#142; foundations/states.md, Disabled).
+ * @param {HTMLFormElement} form - The rendered dialog's form
+ * @param {function(HTMLFormElement): string} getRefusal - Why the form cannot be submitted now; empty when it can
+ */
+export function bindSubmitCheck(form, getRefusal) {
+  const submit = form.querySelector("[data-action='ok']");
+  const update = () => {
+    const reason = getRefusal(form);
+    submit.disabled = Boolean(reason);
+    if (reason) {
+      submit.dataset.tooltip = reason;
+    } else {
+      delete submit.dataset.tooltip;
+    }
+  };
+  form.addEventListener("input", update);
+  form.addEventListener("change", update);
+  update();
+}
+
+/**
  * A dialog configuration with the system's class added to any it already lists.
  * @param {object} config - DialogV2 configuration
  * @returns {object}

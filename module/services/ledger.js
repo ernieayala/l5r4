@@ -13,7 +13,7 @@ import { applyRankPointsDelta } from "../utils/advancement.js";
 import { getLedgerChange } from "../utils/ledger.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
-import { askPrompt } from "./dialog.js";
+import { askPrompt, bindSubmitCheck } from "./dialog.js";
 
 /** Entries the ledger dialog lists, newest first. */
 const SHOWN_ENTRIES = 20;
@@ -105,11 +105,33 @@ export async function applyTrackChange(actor, track, { points, reason }) {
  * @returns {Promise<LedgerEntry|null>} The recorded change, or null when nothing was recorded
  */
 export async function openLedgerDialog(actor) {
-  const content = await renderLedgerContent(actor);
-  const choice = await askPrompt({
+  const choice = await askLedgerChange(actor);
+  // The form is user input: the track must be one the actor has, and nothing is recorded for 0 points
+  if (!choice || !ledgerTracksOf(actor).includes(choice.track) || !choice.points) {
+    return null;
+  }
+  const entry = await applyTrackChange(actor, choice.track, {
+    points: choice.points,
+    reason: choice.reason.trim()
+  });
+  // A Ledger rule sized the change: say so now, not only when the ledger is opened again (#142)
+  if (entry.points !== entry.asked) {
+    warnLedgerRuleChange(actor, entry);
+  }
+  return entry;
+}
+
+/**
+ * Ask for a ledger change in the ledger dialog. Record waits for points, so the dialog never closes on a reason it
+ * would drop (#142).
+ * @param {Actor} actor
+ * @returns {Promise<{track: string, points: number, reason: string}|null>} null when the dialog is closed
+ */
+async function askLedgerChange(actor) {
+  return askPrompt({
     window: { title: F("l5r4.ui.ledger.titleFor", { name: actor.name }) },
     position: { width: 440 },
-    content,
+    content: await renderLedgerContent(actor),
     ok: {
       label: T("l5r4.ui.ledger.record"),
       callback: (_event, button) => {
@@ -121,16 +143,28 @@ export async function openLedgerDialog(actor) {
         };
       }
     },
+    render: (_event, dialog) =>
+      bindSubmitCheck(dialog.element.querySelector("form"), form =>
+        toInt(form.elements.points.value) ? "" : T("l5r4.ui.ledger.pointsRequired")
+      ),
     rejectClose: false
   });
-  // The form is user input: the track must be one the actor has, and nothing is recorded for 0 points
-  if (!choice || !ledgerTracksOf(actor).includes(choice.track) || !choice.points) {
-    return null;
-  }
-  return applyTrackChange(actor, choice.track, {
-    points: choice.points,
-    reason: choice.reason.trim()
-  });
+}
+
+/**
+ * Tell the user the actor's Ledger rules changed the points recorded.
+ * @param {Actor} actor
+ * @param {LedgerEntry} entry - The recorded change, its points not those asked
+ */
+function warnLedgerRuleChange(actor, entry) {
+  ui.notifications?.warn(
+    F("l5r4.ui.ledger.changedByRules", {
+      name: actor.name,
+      track: T(`l5r4.ui.ledger.tracks.${entry.track}`),
+      asked: entry.asked,
+      points: entry.points
+    })
+  );
 }
 
 /**

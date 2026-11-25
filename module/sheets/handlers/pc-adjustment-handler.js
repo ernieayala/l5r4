@@ -8,7 +8,9 @@
 import { SYS_ID } from "../../config/constants.js";
 import { RANK_TRACK_RANGE } from "../../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../../utils/advancement.js";
+import { F, T } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
+import { warnAtLimit } from "./trait-handler.js";
 
 /**
  * Handler class for PC character sheet adjustments.
@@ -63,8 +65,10 @@ export class PcAdjustmentHandler {
       // Apply delta with bounds [0, 9] matching Ring rank maximum
       const next = getClamped(current + (delta || 0), 0, 9);
       if (next === current) {
+        const ring = T(`l5r4.ui.mechanics.rings.${path.split(".").pop()}`);
+        warnAtLimit(F("l5r4.ui.sheets.spellSlotsName", { ring }), delta);
         return;
-      } // No-op if already at boundary
+      }
 
       await context.actor.update({ [path]: next });
     } catch (err) {
@@ -107,37 +111,30 @@ export class PcAdjustmentHandler {
   // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateRankPoints(context, event, element, baseDelta) {
     try {
-      // Safety: require Shift key to prevent accidental adjustment
-      if (!event?.shiftKey) {
-        return;
-      }
-
       const key = String(element?.dataset?.key || "");
       if (!key) {
         return;
       }
 
-      // Read the stored rank/points, not the prepared ones, so an Active Effect on them is never written into
-      // storage (B6)
-      const sys = context.actor._source.system;
-      const cur = {
-        rank: Number(sys?.[key]?.rank ?? 0) || 0,
-        points: Number(sys?.[key]?.points ?? 0) || 0
-      };
+      // Safety: require Shift key to prevent accidental adjustment; a plain click says how (#142)
+      if (!event?.shiftKey) {
+        ui.notifications?.info(
+          F("l5r4.ui.notifications.shiftToChange", { name: element.dataset.label })
+        );
+        return;
+      }
 
       // Ctrl key switches between point adjustment (±1) and rank adjustment (±10)
       const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
-
-      // Apply delta with overflow/underflow handling, within the track's range (Status reaches -10)
-      // game-rules/45_status.md, p.94-95
-      const [minRank, maxRank] = RANK_TRACK_RANGE[key] ?? [0, 10];
-      const next = applyRankPointsDelta(cur, step, { minRank, maxRank });
-
-      const update = {};
-      update[`system.${key}.rank`] = next.rank;
-      update[`system.${key}.points`] = next.points;
-
-      await context.actor.update(update);
+      const next = this.#getNextRankPoints(context.actor, key, step);
+      if (!next) {
+        warnAtLimit(element.dataset.label, step);
+        return;
+      }
+      await context.actor.update({
+        [`system.${key}.rank`]: next.rank,
+        [`system.${key}.points`]: next.points
+      });
     } catch (err) {
       console.warn(`${SYS_ID} PcAdjustmentHandler: failed to update rank/points`, {
         err,
@@ -145,5 +142,23 @@ export class PcAdjustmentHandler {
         element
       });
     }
+  }
+
+  /**
+   * A track's rank and points after a step, within the track's range (Status reaches -10); null when the track is
+   * already at the bound the step heads for. Reads the stored values, not the prepared ones, so an Active Effect on
+   * them is never written into storage (B6).
+   * game-rules/45_status.md, p.94-95
+   * @param {Actor} actor
+   * @param {string} key - The track's system field: honor, glory, status, or shadowTaint
+   * @param {number} step - Points as a fraction of a rank: ±0.1 a point, ±1 a rank
+   * @returns {{rank: number, points: number}|null}
+   */
+  static #getNextRankPoints(actor, key, step) {
+    const stored = actor._source.system[key];
+    const cur = { rank: Number(stored?.rank ?? 0) || 0, points: Number(stored?.points ?? 0) || 0 };
+    const [minRank, maxRank] = RANK_TRACK_RANGE[key] ?? [0, 10];
+    const next = applyRankPointsDelta(cur, step, { minRank, maxRank });
+    return next.rank === cur.rank && next.points === cur.points ? null : next;
   }
 }
