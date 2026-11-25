@@ -22,7 +22,7 @@ Callers that fix an arity: Foundry overrides (`_prepareSubmitData(event, form, f
 | Two positional, then options | `applyEffect` (`module/services/effects/apply.js`): `applyEffect(actor, id, { turnOf, ...options } = {})` | `getArmorTnPenalty` (`module/utils/armor-penalties.js`): `getArmorTnPenalty(actor, skillName = null, traitName = null)`, a third positional parameter that is not the options object |
 | Options last | `rollDamageFromAttack` (`module/services/combat/damage-roll.js`): `rollDamageFromAttack(message, { askForOptions = true } = {})` | `makeExamplePool(roll, keep, bonus, { label } = {})`, three positional before the options (modeled) |
 | Options only | `testFear` (`module/services/fear.js`): `testFear({ npc, character } = {})` | A builder with five positional parameters (modeled) |
-| Fixed arity | `onUpdateActiveEffectAnimation` (`module/services/animations/hooks.js`) takes core's four `updateActiveEffect` arguments | A function of the system's own with five positional parameters and no caller fixing them (modeled) |
+| Fixed arity | `_prepareSubmitData` (`module/sheets/npc-sheet.js`) takes core's four `DocumentSheetV2#_prepareSubmitData` arguments | A function of the system's own with five positional parameters and no caller fixing them (modeled) |
 
 ## Boolean parameters
 
@@ -35,7 +35,6 @@ A positional boolean that picks what a function does is two jobs in one signatur
 
 Positional booleans in the code:
 
-- `isStance` in `startAnimation` (`module/services/animations/status-animations.js`)
 - `duplicate` in `XpManagerApplication#_getXpManual` (`module/apps/xp-manager.js`)
 - `unskilled` in `getMaxRaises` (`module/utils/check.js`)
 - `askForOptions` in `RollHandler.rollSkill`, `RollHandler.rollWeaponAttack`, `RollHandler.rollTrait`, and `RollHandler.rollRing`, and `showDialog` in `RollHandler.rollSpellCast` (`module/sheets/handlers/roll-handler.js`)
@@ -45,7 +44,7 @@ The last is the initial value of a boolean field, a value and not a switch, so i
 
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
-| Two functions | `getStanceAnimation` and `getConditionAnimation` (`module/services/animations/asset-library.js`): `getStanceAnimation(stanceId)` and `getConditionAnimation(conditionId)` | `startAnimation` (`module/services/animations/status-animations.js`): `startAnimation(actor, statusId, isStance = false)` picks the stance or the condition table in its body |
+| Two functions | `getStanceAnimation` and `getConditionAnimation` (`module/services/animations/asset-library.js`): `getStanceAnimation(stanceId)` and `getConditionAnimation(conditionId)` | `startAnimation(actor, statusId, isStance = false)` picking the stance or the condition table in its body (modeled) |
 | Fact by name | `applyTenDiceRule` (`module/utils/ten-dice.js`): `{ littleTruths = false }` in the options object | `getMaxRaises` (`module/utils/check.js`): `getMaxRaises(voidRing, unskilled = false)` |
 
 ## Function length
@@ -131,5 +130,5 @@ ESLint core `no-else-return` reports no departure in `module/` or `dist/l5r4-enh
 
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
-| Guard clauses | `startAnimation` (`module/services/animations/status-animations.js`): three guards return before the token loop | `validateVoidPoints` (`module/services/dice/resources/void-points.js`): a fallback on `actor.system?.rings?.void?.value ?? 0`, a schema field that always exists |
+| Guard clauses | `startAttackAnimation` (`module/services/animations/attack-animations.js`): two guards return before it picks the animation | `validateVoidPoints` (`module/services/dice/resources/void-points.js`): a fallback on `actor.system?.rings?.void?.value ?? 0`, a schema field that always exists |
 | No `else` after `return` | `getSlotStatus` (`module/services/dice/check/spell-slots.js`): each branch returns and the last path needs no `else` | An `if` branch that returns, then an `else` holding the rest of the function (modeled) |

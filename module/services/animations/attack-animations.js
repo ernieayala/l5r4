@@ -1,27 +1,18 @@
 /**
  * @module services/animations/attack-animations
- * @description Plays weapon attack animations with Sequencer and JB2A: a katana slash toward the target for a melee
- * attack, and for a bow an arrow from attacker to target, picking the JB2A arrow variant (5, 15, 30, 60, or 90 feet)
- * that covers the distance between the tokens.
+ * @description Plays weapon attack animations with Sequencer and JB2A, on this client only: a katana slash toward the
+ * target for a melee attack, and for a bow an arrow from attacker to target.
  */
 
 import { isJb2aAvailable, isMotionReduced, isSequencerAvailable } from "./asset-library.js";
 
 /**
- * Arrow animation base path for physical white arrows.
- * Distance variant will be appended (05ft, 15ft, 30ft, 60ft, 90ft).
+ * The JB2A arrow entry. It holds a file per range (5, 15, 30, 60, 90 feet), and Sequencer stretches the one that
+ * covers the distance between the tokens (`SequencerFileRangeFind#getFileForDistance`).
  *
  * @constant {string}
  */
-const ARROW_BASE_PATH = "jb2a.arrow.physical.white.01";
-
-/**
- * Available arrow distance variants in ascending order.
- * Used to select closest matching animation for actual distance.
- *
- * @constant {number[]}
- */
-const ARROW_DISTANCES = Object.freeze([5, 15, 30, 60, 90]);
+const ARROW_PATH = "jb2a.arrow.physical.white.01";
 
 /**
  * Katana melee attack animation variants.
@@ -81,7 +72,7 @@ export async function startMeleeAnimation(attackerToken, targetToken) {
       .scale(1)
       .waitUntilFinished(-200); // Start next effect 200ms before slash completes
 
-    await sequence.play();
+    await sequence.play({ local: true });
   } catch (error) {
     console.warn("L5R4 | Failed to play melee attack animation:", error);
   }
@@ -91,8 +82,7 @@ export async function startMeleeAnimation(attackerToken, targetToken) {
  * Play arrow attack animation from attacker to target.
  *
  * Creates a projectile animation using Sequencer that travels from the
- * attacking token to the target token. Animation variant is automatically
- * selected based on distance between tokens.
+ * attacking token to the target token, in the arrow file for that distance.
  *
  * Defensive Coding:
  * - Returns early if Sequencer or JB2A not available
@@ -117,64 +107,36 @@ export async function startArrowAnimation(attackerToken, targetToken) {
   }
 
   try {
-    // Calculate distance and select appropriate animation
-    const distance = getTokenDistance(attackerToken, targetToken);
-    const arrowPath = getArrowAnimation(distance);
-
-    // Create and play Sequencer animation
     const sequence = new Sequence();
 
     sequence
       .effect()
-      .file(arrowPath)
+      .file(ARROW_PATH)
       .atLocation(attackerToken)
       .stretchTo(targetToken)
       .waitUntilFinished(-500); // Start next effect 500ms before arrow completes
 
-    await sequence.play();
+    await sequence.play({ local: true });
   } catch (error) {
     console.warn("L5R4 | Failed to play arrow attack animation:", error);
   }
 }
 
 /**
- * Check if a weapon is a bow (ranged weapon).
- *
- * Determines if the weapon should trigger arrow animations.
- * Checks weapon.system.isBow flag (primary) and legacy type checks.
- *
- * L5R4 Weapon Structure:
- * - Modern bows: type='weapon' with system.isBow=true
- * - Legacy bows: type='bow' (pre-v1.0.0 migration)
+ * Whether a weapon shoots arrows: a bow (`system.isBow`, the flag the bow rules read), or a `bow` item from a world
+ * older than the bow-to-weapon migration. The name does not count (#198 ruling).
  *
  * @param {Item} weapon - The weapon item to check
  * @returns {boolean} True if weapon is a bow
  */
 export function isBowWeapon(weapon) {
-  if (!weapon) {
-    return false;
-  }
-
-  // Primary check: system.isBow flag (modern weapons)
-  if (weapon.system?.isBow === true) {
-    return true;
-  }
-
-  // Legacy check: type='bow' (pre-v1.0.0 worlds)
-  if (weapon.type === "bow") {
-    return true;
-  }
-
-  // Fallback: Check weapon name for bow/yumi keywords
-  const weaponName = weapon.name?.toLowerCase() ?? "";
-  return weaponName.includes("bow") || weaponName.includes("yumi");
+  return weapon.system.isBow === true || weapon.type === "bow";
 }
 
 /**
- * Handle attack roll for potential weapon animation.
- *
- * Called when an attack roll is made. Checks if it's a bow or melee attack
- * and plays appropriate animation (arrow for bows, katana slash for melee).
+ * Play a hit's attack animation on this client: an arrow for a bow, a katana slash for any other weapon. Each client
+ * plays its own, and only when it sees both tokens and its user did not ask for less motion, so a hidden attacker's
+ * square stays hidden (#198).
  *
  * @param {Actor} attacker - The attacking actor
  * @param {Actor} target - The target actor
@@ -183,21 +145,16 @@ export function isBowWeapon(weapon) {
  */
 export async function startAttackAnimation(attacker, target, weapon) {
   // A user who asked for less motion reads the hit from the chat card (motion.md rule 5)
-  if (!weapon || isMotionReduced()) {
+  if (isMotionReduced()) {
     return;
   }
 
-  // Get tokens for attacker and target
-  const attackerTokens = attacker?.getActiveTokens() ?? [];
-  const targetTokens = target?.getActiveTokens() ?? [];
-
-  if (attackerTokens.length === 0 || targetTokens.length === 0) {
+  // The first of each actor's tokens on this client's canvas, when this client sees it
+  const attackerToken = attacker.getActiveTokens()[0];
+  const targetToken = target.getActiveTokens()[0];
+  if (!attackerToken?.isVisible || !targetToken?.isVisible) {
     return;
   }
-
-  // Use first active token for each
-  const attackerToken = attackerTokens[0];
-  const targetToken = targetTokens[0];
 
   // Check weapon type and play appropriate animation
   if (isBowWeapon(weapon)) {
@@ -207,63 +164,4 @@ export async function startAttackAnimation(attacker, target, weapon) {
     // Melee attack: Play katana slash animation
     await startMeleeAnimation(attackerToken, targetToken);
   }
-}
-
-/**
- * Calculate grid distance between two tokens.
- *
- * Uses Foundry's grid system to calculate distance in feet/units.
- * Handles both gridded and gridless scenes.
- *
- * @param {Token} sourceToken - The attacking token
- * @param {Token} targetToken - The target token
- * @returns {number} Distance in grid units (feet)
- */
-function getTokenDistance(sourceToken, targetToken) {
-  if (!sourceToken || !targetToken) {
-    return 0;
-  }
-
-  // Get token centers
-  const source = {
-    x: sourceToken.x + sourceToken.width / 2,
-    y: sourceToken.y + sourceToken.height / 2
-  };
-
-  const target = {
-    x: targetToken.x + targetToken.width / 2,
-    y: targetToken.y + targetToken.height / 2
-  };
-
-  // Calculate distance using Foundry's measurement system
-  const ray = new foundry.canvas.geometry.Ray(source, target);
-  const distance = canvas.grid.measurePath([{ ray }])[0];
-
-  return Math.round(distance);
-}
-
-/**
- * Select appropriate arrow animation variant based on distance.
- *
- * Chooses the closest matching distance variant from available options.
- * If distance exceeds all variants, uses the longest (90ft).
- *
- * @param {number} distance - Actual distance in feet
- * @returns {string} Full JB2A arrow animation path
- */
-function getArrowAnimation(distance) {
-  // Find the closest distance variant that's >= actual distance
-  let selectedDistance = ARROW_DISTANCES[ARROW_DISTANCES.length - 1]; // Default to 90ft
-
-  for (const variant of ARROW_DISTANCES) {
-    if (distance <= variant) {
-      selectedDistance = variant;
-      break;
-    }
-  }
-
-  // Format distance with leading zero (5 -> 05)
-  const formattedDistance = String(selectedDistance).padStart(2, "0");
-
-  return `${ARROW_BASE_PATH}.${formattedDistance}ft`;
 }

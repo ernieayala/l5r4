@@ -85,7 +85,8 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `log` | Write to the console for debugging; no other side effect | `logError` (`module/utils/error-logging.js`) |
 | `warn` | Show the user a warning notification; the operation goes ahead | `warnVoidLimit` (`module/services/effects/uses.js`) |
 | `export` | Write documents out to a file the browser saves | `exportItemFolder` (`module/services/item-transfer.js`) |
-| `settle` | Wait until pending asynchronous work has finished | `settleStarts` (`module/services/animations/status-animations.js`) |
+| `settle` | Wait until pending asynchronous work has finished | `settleLoads` (`module/services/animations/status-animations.js`) |
+| `refresh` | Bring what this client's canvas shows in line with the current state; no stored data changes | `refreshTokenAnimations` (`module/services/animations/status-animations.js`) |
 | `*Field` | Return a new `foundry.data.fields` instance for a schema | `numberField` (`module/data/fields.js`) |
 
 ### Names the vocabulary rejects
@@ -100,7 +101,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `applyEffectAnywhere` (`module/services/effects/apply.js`) | Asks the GM through a query | `requestEffect` |
 | `chooseElement` (modeled) | Shows a dialog and waits | `askElement` (`module/services/dice/rolls/spell-cast-roll.js`) |
 | `getUnifiedItemOptions` (`module/services/chat.js`) | `get` with a dialog behind it | `askItemOptions` |
-| `removeAnimation` (modeled) | Remove is `delete` | `deleteAnimation` (`module/services/animations/status-animations.js`) |
+| `removeItem` (modeled) | Remove is `delete` | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) |
 | `syncProne` (modeled) | Changes data by another verb | `updateProne` (`module/services/effects/automation.js`) |
 | `mayActFor` (modeled) | `may` is not a predicate prefix | `canActFor` (`module/services/combat/flow.js`) |
 | `needsRetroactiveUpdate` (modeled) | `needs` is not a predicate prefix | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`) |

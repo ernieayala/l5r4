@@ -25,8 +25,8 @@ A sprite's timing function is `steps(N)`, where N is the sprite file's frame cou
 | Roll button sprite (urban) | `.l5r4-button-face` (`scss/components/_button.scss`) | `mask-reverse-urban` over `--l5r4-duration-sprite`, `forwards`; none on a disabled face | As the Trait roll sprite |
 | Rank block sprite (nature) | `.l5r4-rank-control-value` (`scss/components/_rank-control.scss`) | `mask-forward-nature` over `--l5r4-duration-sprite`, `forwards` | As the Trait roll sprite |
 | Floating Wound and Void Point numbers | `startScrollingText` (`module/services/scrolling-text.js`) | Core's `createScrollingText`: 2000 ms, rises 2 token heights, jitter 0.25 | `distance: 0` and `jitter: 0`, so the number fades in and out where it appears (rule 5) |
-| Stance and condition loops | `STANCE_ANIMATIONS` and `CONDITION_ANIMATIONS` (`module/services/animations/asset-library.js`), played by `startAnimation` (`module/services/animations/status-animations.js`) | Sequencer persistent effects, when Sequencer and JB2A are active | Not played; the token's status icon carries the state (`isMotionReduced` (`module/services/animations/asset-library.js`), rule 5) |
-| Attack animations | `startAttackAnimation` (`module/services/animations/attack-animations.js`) | Sequencer one-shot on a hit | Not played; the chat card carries the result (rule 5) |
+| Stance and condition loops | `STANCE_ANIMATIONS` and `CONDITION_ANIMATIONS` (`module/services/animations/asset-library.js`), played by `refreshTokenAnimations` (`module/services/animations/status-animations.js`) | Sequencer persistent effects each client plays for itself, when Sequencer and JB2A are active | Not played; the token's status icon carries the state (`isMotionReduced` (`module/services/animations/asset-library.js`), rule 5) |
+| Attack animations | `startAttackAnimation` (`module/services/animations/attack-animations.js`) | Sequencer one-shot on a hit, played by each client that can read the roll and sees both tokens | Not played; the chat card carries the result (rule 5) |
 | Loading spinner | Core's `fa-spin` (states.md, Loading) | Font Awesome spin | Font Awesome's own reduced-motion rule stops it (`public/fonts/fontawesome/css/all.min.css`) |
 
 The keyframes are the two the sprites play, each in the file of the component that owns its sprite: `mask-reverse-urban` in `scss/components/_button.scss` (the Trait roll in `scss/features/_traits-rings.scss` plays it too) and `mask-forward-nature` in `scss/components/_rank-control.scss`. No duration other than the two tokens exists.
@@ -103,7 +103,7 @@ Non-conforming: an animation that pulses a Void Point dot to say Void Points are
 
 ### 5. Canvas and Sequencer motion checks the media query when it plays
 
-CSS cannot reach the canvas. A service that plays motion on the canvas reads `window.matchMedia("(prefers-reduced-motion: reduce)").matches` at the moment it plays and takes the reduced form in the table above. Floating numbers honor the system's `floatingNumbers` client setting (`registerClientSettings` (`module/setup/settings/client.js`)) and core's `scrollingStatusText` setting (`client/canvas/groups/interface.mjs:175`); reduced motion keeps the number and drops the travel. Core's fade-in scales the text from 0.6 to 1 (`client/canvas/groups/interface.mjs:211-221`); core owns that and the system leaves it. Stage 17 decision 16 sets this: every animation has a reduced-motion form, and floating numbers appear and fade without moving. The Sequencer stance, condition, and attack animations start only when `isMotionReduced` (`module/services/animations/asset-library.js`) is false. Enforced by review, the `l5r4-enhanced.table-tools` Quench batch for floating numbers, and the `l5r4-enhanced.animations` batch for stances and conditions.
+CSS cannot reach the canvas. A service that plays motion on the canvas reads `window.matchMedia("(prefers-reduced-motion: reduce)").matches` at the moment it plays and takes the reduced form in the table above. Each client plays the canvas motion it shows, so the query it reads is its own user's: one user's setting never decides what another sees. Floating numbers honor the system's `floatingNumbers` client setting (`registerClientSettings` (`module/setup/settings/client.js`)) and core's `scrollingStatusText` setting (`client/canvas/groups/interface.mjs:175`); reduced motion keeps the number and drops the travel. Core's fade-in scales the text from 0.6 to 1 (`client/canvas/groups/interface.mjs:211-221`); core owns that and the system leaves it. Stage 17 decision 16 sets this: every animation has a reduced-motion form, and floating numbers appear and fade without moving. The Sequencer stance, condition, and attack animations start only when `isMotionReduced` (`module/services/animations/asset-library.js`) is false. Enforced by review, the `l5r4-enhanced.table-tools` Quench batch for floating numbers, and the `l5r4-enhanced.animations` batch for stances and conditions.
 
 Conforming, modeled on `onUpdateActorScrollingText` and `startScrollingText` (`module/services/scrolling-text.js`):
 
@@ -116,9 +116,9 @@ canvas.interface.createScrollingText(origin, text, {
 });
 ```
 
-Conforming, `startAnimation` (`module/services/animations/status-animations.js`): it returns before playing when `isMotionReduced()` holds.
+Conforming, `refreshTokenAnimations` (`module/services/animations/status-animations.js`): a token wants no aura on a client whose user asked for less motion, so the refresh starts none there and ends any it shows.
 
-Non-conforming (modeled): a Sequencer loop that starts with no check, so a user who asked for less motion sees a spinning token border for the whole encounter.
+Non-conforming (modeled): a Sequencer loop that starts with no check, so a user who asked for less motion sees a spinning token border for the whole encounter; or one the sending client checks and Sequencer then plays for every client.
 
 ## Partials and files
 

@@ -15,11 +15,11 @@ import {
   onPreUpdateChangeOrigin
 } from "../../../module/services/change-origin.js";
 import {
-  onCreateActiveEffectAnimation,
+  onActiveEffectAnimation,
+  onCanvasReadyAnimation,
   onCreateChatMessageAnimation,
-  onDeleteActiveEffectAnimation,
   onDeleteActorAnimation,
-  onUpdateActiveEffectAnimation
+  onDrawTokenAnimation
 } from "../../../module/services/animations/hooks.js";
 import {
   isJb2aAvailable,
@@ -122,10 +122,12 @@ export function registerHookWiringTests(quench) {
         it("should wire the animation hooks only when Sequencer and JB2A are both active", () => {
           const wired = isSequencerAvailable() && isJb2aAvailable();
           for (const [hook, fn] of [
-            ["createActiveEffect", onCreateActiveEffectAnimation],
-            ["updateActiveEffect", onUpdateActiveEffectAnimation],
-            ["deleteActiveEffect", onDeleteActiveEffectAnimation],
+            ["createActiveEffect", onActiveEffectAnimation],
+            ["updateActiveEffect", onActiveEffectAnimation],
+            ["deleteActiveEffect", onActiveEffectAnimation],
             ["deleteActor", onDeleteActorAnimation],
+            ["canvasReady", onCanvasReadyAnimation],
+            ["drawToken", onDrawTokenAnimation],
             ["createChatMessage", onCreateChatMessageAnimation]
           ]) {
             assert.equal(positionOf(hook, fn) >= 0, wired, `${fn.name} on ${hook}`);

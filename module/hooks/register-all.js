@@ -11,11 +11,11 @@ import {
   onPreUpdateChangeOrigin
 } from "../services/change-origin.js";
 import {
-  onCreateActiveEffectAnimation,
+  onActiveEffectAnimation,
+  onCanvasReadyAnimation,
   onCreateChatMessageAnimation,
-  onDeleteActiveEffectAnimation,
   onDeleteActorAnimation,
-  onUpdateActiveEffectAnimation
+  onDrawTokenAnimation
 } from "../services/animations/hooks.js";
 import { hasAnimationModules } from "../services/animations/asset-library.js";
 import {
@@ -116,13 +116,18 @@ function registerMigrationHooks() {
   }
 }
 
-/** Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active. */
+/**
+ * Animation system, when Sequencer and JB2A are both active: each client keeps its tokens' stance and condition auras
+ * in line with their statuses, and plays the attack animations of the hits it can read.
+ */
 function registerAnimationHooks() {
   if (hasAnimationModules()) {
-    Hooks.on("createActiveEffect", onCreateActiveEffectAnimation);
-    Hooks.on("updateActiveEffect", onUpdateActiveEffectAnimation);
-    Hooks.on("deleteActiveEffect", onDeleteActiveEffectAnimation);
+    for (const action of ["create", "update", "delete"]) {
+      Hooks.on(`${action}ActiveEffect`, onActiveEffectAnimation);
+    }
     Hooks.on("deleteActor", onDeleteActorAnimation);
+    Hooks.on("canvasReady", onCanvasReadyAnimation);
+    Hooks.on("drawToken", onDrawTokenAnimation);
     Hooks.on("createChatMessage", onCreateChatMessageAnimation);
   }
 }
