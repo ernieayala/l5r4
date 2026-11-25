@@ -1,7 +1,7 @@
 /**
  * @module documents/actor/calculations/npc-wound-system
  * @description Prepares an NPC's Wound Ranks during actor data preparation: thresholds and penalties from its Earth
- * Ring (formula mode) or from the GM's entries (manual mode), with one to eight ranks in use and Out always last; the
+ * Ring (formula mode) or from the GM's entries (manual mode), with two to eight ranks in use and Out always last; the
  * current rank among the ranks its mode uses; and the ranks the NPC sheet shows. Modifies `sys.woundLevels`,
  * `sys.manualWoundLevels`, and the sheet's visible ranks in place.
  */
@@ -20,28 +20,14 @@ import {
 } from "./wound-system.js";
 
 /**
- * The Wound Rank keys in use for a count of ranks: Healthy and Out for 1, Healthy, Nicked, and Out for 2, otherwise
- * the first ranks of WOUND_LEVEL_ORDER with the last one replaced by Out, so Out always ends the list.
- * @param {number} nrWoundLvls - Number of wound levels (1-8)
+ * The Wound Rank keys in use for a count of ranks, Out included (Ernie's ruling, #155): the first ranks of
+ * WOUND_LEVEL_ORDER, then Out. 2 is Healthy and Out, 3 adds Nicked, 8 is every rank.
+ * @param {number} nrWoundLvls - Number of Wound Ranks, Out included (2-8)
  * @returns {string[]} Array of wound level keys to use
  */
 export function getWoundLevelsForCount(nrWoundLvls) {
-  const count = getClamped(nrWoundLvls ?? 3, 1, 8);
-
-  // Two levels tracked: Healthy and Out
-  if (count === 1) {
-    return ["healthy", "out"];
-  }
-  if (count === 2) {
-    return ["healthy", "nicked", "out"];
-  }
-  // Use first N levels from standard order
-  const levels = WOUND_LEVEL_ORDER.slice(0, count);
-  // Ensure last level is always "out"
-  if (!levels.includes("out")) {
-    levels[levels.length - 1] = "out";
-  }
-  return levels;
+  const count = getClamped(nrWoundLvls ?? 3, 2, WOUND_LEVEL_ORDER.length);
+  return [...WOUND_LEVEL_ORDER.slice(0, count - 1), "out"];
 }
 
 /**
@@ -107,10 +93,9 @@ export function prepareCurrentWoundLevelByMode(sys, order, { sCapped, woundMode 
  * @param {string[]} order - Ordered array of wound level keys
  */
 export function prepareVisibleWoundLevels(sys, order) {
-  const nrWoundLvls = getClamped(toInt(sys.nrWoundLvls) || 3, 1, 8);
   const isManualMode = sys.woundMode === "manual";
 
-  const baseVisibleOrder = getWoundLevelsForCount(nrWoundLvls);
+  const baseVisibleOrder = getWoundLevelsForCount(toInt(sys.nrWoundLvls) || 3);
 
   sys.visibleWoundLevels = {};
   sys.visibleManualWoundLevels = {};

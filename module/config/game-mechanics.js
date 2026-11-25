@@ -101,14 +101,12 @@ export const ARROW_ARMOR_FACTOR = Object.freeze({ armor: 0, flesh: 2 });
 export const RANGED_IN_MELEE_PENALTY = -10;
 
 /**
- * NPC wound level configuration by rank.
- * Maps NPC rank (1-8) to number of wound levels: a rank 3 NPC has 3.
- * Higher rank NPCs have more wound levels before dying.
- * @type {Readonly<{1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
+ * The counts of Wound Ranks an NPC in formula mode may use, Out included (Ernie's ruling, #155): 2 is Healthy and
+ * Out, 8 every rank.
+ * @type {Readonly<{2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
  * @constant
  */
 export const NPC_NUMBER_WOUND_LEVELS = Object.freeze({
-  1: 1,
   2: 2,
   3: 3,
   4: 4,

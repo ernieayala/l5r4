@@ -76,7 +76,11 @@ export function registerMigrationEdgeCaseTests(quench) {
         it("should compare legacy versions as versions, not as text", () => {
           assert.equal(getMigrationSchema(legacy("3.9.0")), 0);
           assert.equal(getMigrationSchema(legacy("3.10.0")), 0, "3.10.0 is before 4.0.0");
-          assert.equal(getMigrationSchema(legacy("4.0.0")), 1);
+          // 4.0.0 ran the schema 1 steps; a document the running version saved was made now and is current
+          const saved400 = foundry.utils.isNewerVersion(game.system.version, "4.0.0")
+            ? 1
+            : MIGRATION_SCHEMA;
+          assert.equal(getMigrationSchema(legacy("4.0.0")), saved400);
           // As text, "10.0.0" sorts before "4.0.0"
           assert.equal(getMigrationSchema(legacy("10.0.0")), MIGRATION_SCHEMA);
         });
@@ -101,6 +105,31 @@ export function registerMigrationEdgeCaseTests(quench) {
             "another system's"
           );
           assert.equal(getMigrationSchema({}), MIGRATION_SCHEMA, "no version: made now");
+        });
+      });
+
+      // #155
+      describe("NPC Wound Rank count", () => {
+        it("should keep a schema 1 NPC's Wound Ranks when the count comes to include Out", async () => {
+          const npc = track(
+            await createTestNPC({
+              name: "Migration: NPC wound count",
+              system: { woundMode: "formula", nrWoundLvls: 2 }
+            })
+          );
+          await npc.setFlag(SYS_ID, MIGRATION_FLAG, 1);
+          await migrateActor(npc, newRun());
+          assert.equal(npc._source.system.nrWoundLvls, 3);
+          assert.deepEqual(Object.keys(npc.system.visibleWoundLevels), [
+            "healthy",
+            "nicked",
+            "out"
+          ]);
+          assert.equal(npc.getFlag(SYS_ID, MIGRATION_FLAG), MIGRATION_SCHEMA);
+          // A count set after the migration stays
+          await npc.update({ "system.nrWoundLvls": 2 });
+          await migrateActor(npc, newRun());
+          assert.deepEqual(Object.keys(npc.system.visibleWoundLevels), ["healthy", "out"]);
         });
       });
 

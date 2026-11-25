@@ -1475,6 +1475,7 @@
         "typeInsightRank": "Type the Insight Rank in",
         "weapon": "Weapon",
         "weapons": "Weapons",
+        "woundLevelCount": "Wound Ranks, Out included",
         "woundLevels": "Wound Ranks"
       },
       "sources": {

@@ -7,6 +7,7 @@
 import { applySchemaMap } from "./schema/apply.js";
 import { migrateLegacyNpcWounds } from "./actors/npc-wounds.js";
 import { migrateNpcInitiative } from "./actors/npc-initiative.js";
+import { migrateNpcWoundCount } from "./actors/npc-wound-count.js";
 import { deleteLegacyFields } from "./actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./actors/xp-free-trait-base.js";
 import { migrateStatusEffectRules } from "./actors/status-effect-rules.js";
@@ -56,5 +57,6 @@ export const ACTOR_STEPS = Object.freeze([
   { schema: 1, migrate: migrateNpcInitiative },
   { schema: 1, migrate: deleteLegacyFields },
   { schema: 1, migrate: migrateEffectFreeTraitBase },
-  { schema: 1, migrate: migrateActorIcon }
+  { schema: 1, migrate: migrateActorIcon },
+  { schema: 2, migrate: migrateNpcWoundCount }
 ]);

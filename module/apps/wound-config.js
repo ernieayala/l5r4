@@ -30,10 +30,10 @@ const MIN_WOUND_MULTIPLIER = 2;
 const MAX_WOUND_MULTIPLIER = 5;
 
 /**
- * Minimum number of wound levels for NPC actors.
+ * Minimum number of wound levels for NPC actors: Healthy and Out (#155).
  * @constant {number}
  */
-const MIN_NPC_WOUND_LEVELS = 1;
+const MIN_NPC_WOUND_LEVELS = 2;
 
 /**
  * Maximum number of wound levels for NPC actors.
@@ -162,7 +162,7 @@ export default class WoundConfigApplication extends FieldSaveMixin(
       wounds: {},
       visibleManualWoundLevels: {},
       config: {
-        npcNumberWoundLevels: { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 }
+        npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
       }
     };
   }
