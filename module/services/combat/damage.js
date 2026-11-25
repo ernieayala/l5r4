@@ -342,7 +342,12 @@ function bindApplyButtons(message, html, on) {
   );
   on("damage-apply-target", async () => {
     const target = await fromUuid(message.system.target.uuid);
-    await applyDamage(message, target ? [target] : []);
+    // The roll named a target that has since been deleted: say so, not that no token is selected (#144)
+    if (!target) {
+      ui.notifications?.warn(T("l5r4.ui.combat.targetGone"));
+      return;
+    }
+    await applyDamage(message, [target]);
   });
   on("damage-apply-selected", () =>
     applyDamage(message, [...new Set(canvas.tokens.controlled.map(t => t.actor).filter(Boolean))])

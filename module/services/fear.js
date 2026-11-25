@@ -167,10 +167,8 @@ async function rollFearTest({ character, tn, fearRank, label } = {}) {
     beforePost: async result => buildFearLabel(result, { tn, fearRank }),
     after: async message => {
       if (message.system.outcome.success === false) {
-        await applyEffectAnywhere(character, "feared", {
-          level: fearRank,
-          name: F("l5r4.ui.mechanics.fear.label", { rank: fearRank })
-        });
+        // The effect's name, "Fear N", comes from its level on whichever client makes it (#144)
+        await applyEffectAnywhere(character, "feared", { level: fearRank });
       }
     }
   });

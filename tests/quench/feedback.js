@@ -11,6 +11,9 @@ import { openLedgerDialog } from "../../module/services/ledger.js";
 import { askDisadvantageCap } from "../../module/services/xp/disadvantage-cap.js";
 import { buildFolderTransfer, createImportedItems } from "../../module/services/item-transfer.js";
 import { renderCheckCard } from "../../module/services/dice/check/card.js";
+import { rollAgainKeepBetter } from "../../module/services/dice/check/chat-actions.js";
+import { startGrapple } from "../../module/services/combat/grapple-start.js";
+import { buildEffectData } from "../../module/services/effects/apply.js";
 import { promptOf } from "../../module/services/effects/prompt-card.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
@@ -399,6 +402,102 @@ export function registerFeedbackTests(quench) {
               );
             assert.isTrue(await waitFor(() => Boolean(posted())), "the card to roll it later");
             assert.isTrue(actor.statuses.has("fullDefenseStance"), "the stance stays");
+          })
+        );
+      });
+
+      // #144
+      describe("Messages that name their case", () => {
+        /** An actor deleted at once, whose UUID a roll can still name. */
+        const goneActor = async () => {
+          const gone = await createTestPC({ name: "Feedback: gone" });
+          const uuid = gone.uuid;
+          await gone.delete();
+          return uuid;
+        };
+
+        it(
+          "should say the target is gone when Apply to target finds no target",
+          clean(async () => {
+            const roller = track(await createTestPC({ name: "Feedback: roller" }));
+            const roll = await new Roll("3d10xa10k2").evaluate();
+            const system = {
+              kind: "damage",
+              actorUuid: roller.uuid,
+              label: "Katana",
+              modifiers: [],
+              notes: [],
+              target: { uuid: await goneActor(), name: "Feedback: gone" },
+              tn: { effective: null, raises: 0, freeRaises: 0, freeRaisesToTN: 0, modifiers: [] },
+              outcome: { total: roll.total, success: null }
+            };
+            const message = await ChatMessage.create({
+              type: "roll",
+              system,
+              rolls: [roll],
+              content: await renderCheckCard(system, roll)
+            });
+            try {
+              (await message.renderHTML())
+                .querySelector("[data-action='damage-apply-target']")
+                .click();
+              const gone = game.i18n.localize("l5r4.ui.combat.targetGone");
+              assert.isTrue(
+                await waitFor(() => shown().includes(`warning: ${gone}`)),
+                shown().join("\n")
+              );
+            } finally {
+              await message.delete();
+            }
+          })
+        );
+
+        it(
+          "should say the target is gone when a grapple's target no longer exists",
+          clean(async () => {
+            const attacker = track(await createTestPC({ name: "Feedback: grappler" }));
+            const started = await startGrapple({
+              id: "quenchNoAttack",
+              system: { actorUuid: attacker.uuid, target: { uuid: await goneActor() } }
+            });
+            assert.isNull(started);
+            assert.deepEqual(shown(), [
+              `warning: ${game.i18n.localize("l5r4.ui.combat.targetGone")}`
+            ]);
+          })
+        );
+
+        it(
+          "should say a re-roll is refused because the user does not own the roller",
+          clean(async () => {
+            const roller = track(
+              await createTestPC({
+                name: "Feedback: not mine",
+                ownership: { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE, [game.user.id]: 0 }
+              })
+            );
+            Object.defineProperty(game.user, "isGM", { configurable: true, get: () => false });
+            try {
+              await rollAgainKeepBetter({ type: "roll", system: { actorUuid: roller.uuid } });
+            } finally {
+              delete game.user.isGM;
+            }
+            assert.deepEqual(shown(), [
+              `warning: ${game.i18n.localize("l5r4.ui.notifications.noPermissionRoll")}`
+            ]);
+          })
+        );
+
+        it(
+          "should name a Fear effect by its rank however it is made",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Feedback: afraid" }));
+            // The GM's client builds a player's effect from its level alone
+            const data = await buildEffectData(actor, "feared", { level: 2 });
+            assert.equal(
+              data.name,
+              game.i18n.localize("l5r4.ui.mechanics.fear.label", { rank: 2 })
+            );
           })
         );
       });

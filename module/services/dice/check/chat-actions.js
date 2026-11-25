@@ -227,7 +227,8 @@ function canAct(actor) {
   if (actor?.isOwner || game.user.isGM) {
     return true;
   }
-  ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
+  // Any of the card's actions, not only damage (#144)
+  ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionRoll"));
   return false;
 }
 
