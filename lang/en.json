@@ -786,6 +786,7 @@
         "noVoidPoints": "No Void Points left",
         "outcomeAgainstTn": "{outcome} against TN {tn}",
         "pool": "Pool",
+        "raisesAttackNote": "(Raises: {count}; {maneuvers} for maneuvers, {damage} for Increased Damage)",
         "raisesNote": "(Raises: {count})",
         "range": {
           "melee": "melee",
@@ -820,6 +821,7 @@
           "flesh": "Flesh Cutter arrow doubles armor"
         },
         "calledShot": "Called Shot",
+        "calledShotDeclared": "Called Shot ({raises} Raises): {location}",
         "calledShotHand": "Hand or foot (2 Raises)",
         "calledShotHead": "Head (3 Raises)",
         "calledShotLimb": "Limb (1 Raise)",
@@ -911,6 +913,7 @@
         "maneuversAsk": "Maneuvers for {name} beyond what this roll's Raises pay for",
         "maneuversAskGm": "Ask the GM to allow more",
         "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
+        "maneuversMissed": "Declared: {maneuvers}. They fail with the attack.",
         "multipleTargets": "Several targets: set the TN by hand",
         "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them (declared: {raises})",
         "npcInitiative": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",

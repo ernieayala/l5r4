@@ -74,6 +74,7 @@ export async function renderCheckCard(system, roll, { actorId = "", used = {} } 
     ...system,
     ...buildUseContext(system, used),
     tn: system.tn.effective === null ? null : system.tn,
+    raisesText: formatRaisesNote(system),
     // A roll with no TN still shows the Raises a Contested Roll will count
     raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
     tnChanges: system.tn.modifiers?.length
@@ -86,7 +87,7 @@ export async function renderCheckCard(system, roll, { actorId = "", used = {} } 
       .map(m => ({ label: m.label, text: formatModifier(m) })),
     roll: await roll.render(),
     damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
-    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : [],
+    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : formatMissedManeuvers(maneuvers),
     contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
     grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
     applyTarget: system.kind === "damage" ? system.target?.name : "",
@@ -162,6 +163,55 @@ function buildUseContext(system, used) {
     })),
     grappleStarted: Boolean(used.grapple)
   };
+}
+
+/**
+ * The card's Raises line: for an attack, what its declared Raises paid for, maneuvers or Increased Damage (#136);
+ * for any other roll with a TN, the count. Empty with no Raises or no TN.
+ * game-rules/38_maneuvers.md, p.87
+ * @param {object} system - RollMessageData source
+ * @returns {string}
+ */
+function formatRaisesNote(system) {
+  const count = system.tn.raises;
+  if (!count || system.tn.effective === null) {
+    return "";
+  }
+  if (system.kind !== "attack") {
+    return F("l5r4.ui.check.raisesNote", { count });
+  }
+  const damage = system.maneuvers.increasedDamage;
+  return F("l5r4.ui.check.raisesAttackNote", { count, maneuvers: count - damage, damage });
+}
+
+/**
+ * The line a missed attack's card shows for the maneuvers it declared: they failed with it (#136). None when it
+ * declared none, and on any roll that is not an attack.
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {object} maneuvers
+ * @returns {string[]}
+ */
+function formatMissedManeuvers(maneuvers) {
+  const declared = [];
+  if (maneuvers.calledShot) {
+    declared.push(
+      F("l5r4.ui.combat.calledShotDeclared", {
+        raises: maneuvers.calledShot,
+        location: maneuvers.location || T("l5r4.ui.combat.calledShotUnnamed")
+      })
+    );
+  }
+  for (const key of ["feint", "knockdown", "disarm", "extraAttack"]) {
+    if (maneuvers[key]) {
+      declared.push(T(`l5r4.ui.ruleSummary.maneuver.${key}`));
+    }
+  }
+  if (maneuvers.grapple) {
+    declared.push(T("l5r4.ui.combat.grapple.title"));
+  }
+  return declared.length
+    ? [F("l5r4.ui.combat.maneuversMissed", { maneuvers: declared.join(", ") })]
+    : [];
 }
 
 /**

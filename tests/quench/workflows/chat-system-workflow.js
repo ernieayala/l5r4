@@ -688,6 +688,54 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.include(html, 'data-action="effect-prompt"', "Roll button present");
         });
 
+        /** An attack's stored context: a Called Shot to the sword hand and a Feint, 5 Raises declared, 1 left over. */
+        const attackSystem = success => ({
+          kind: "attack",
+          label: "Katana",
+          modifiers: [],
+          notes: [],
+          target: { uuid: actor.uuid, name: actor.name },
+          tn: {
+            base: 15,
+            effective: 35,
+            raises: 5,
+            freeRaises: 0,
+            freeRaisesToTN: 0,
+            woundPenalty: 0,
+            modifiers: []
+          },
+          outcome: { total: success ? 40 : 20, success },
+          maneuvers: {
+            calledShot: 2,
+            location: "sword hand",
+            feint: true,
+            increasedDamage: 1
+          },
+          damage: { label: "3k2" },
+          conditions: []
+        });
+
+        // #136
+        it("should name a missed attack's maneuvers and what its Raises paid for", async () => {
+          const roll = await new Roll("5d10xa10k3").evaluate();
+          const html = await renderCheckCard(attackSystem(false), roll, { actorId: actor.id });
+          assert.include(
+            html,
+            "Declared: Called Shot (2 Raises): sword hand, Feint. They fail with the attack."
+          );
+          assert.include(html, "(Raises: 5; 4 for maneuvers, 1 for Increased Damage)");
+          assert.notInclude(html, "check-damage", "no damage button on a miss");
+        });
+
+        it("should say what a hit's maneuvers do, and not that they failed", async () => {
+          const roll = await new Roll("5d10xa10k3").evaluate();
+          const html = await renderCheckCard(attackSystem(true), roll, { actorId: actor.id });
+          assert.include(html, "Called Shot (2 Raises): sword hand. The GM rules");
+          assert.include(html, "Feint: half the margin");
+          assert.notInclude(html, "They fail with the attack");
+          assert.include(html, "(Raises: 5; 4 for maneuvers, 1 for Increased Damage)");
+        });
+
         it("should offer Apply to the damage roll's target by name", async () => {
           // ARRANGE
           const roll = new Roll("3d10xa10k2");
