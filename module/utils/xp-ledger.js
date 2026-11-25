@@ -34,7 +34,8 @@ const SPENT_CATEGORIES = Object.freeze([
  * @property {string} key
  * @property {number} stored    The stored rank, a rule's bonus not included
  * @property {number} freeBase  Free ranks a legacy Family or School bonus marked as stored (flags.xpFreeTraitBase)
- * @property {number} bonus     Family and School bonus that raises the price of each rank
+ * @property {number} bonus     Family and School bonus that raises the price of each rank, rules and legacy fields
+ * @property {number} legacy    The part of `bonus` from legacy `trait`/`bonus` fields, which freeBase ranks store
  * @property {number} discount  Flat change to each step (flags.traitDiscounts)
  */
 
@@ -67,7 +68,8 @@ const SPENT_CATEGORIES = Object.freeze([
  * @property {number} manual        XP the GM awarded
  * @property {number} disadvantageCap  Most XP Disadvantages give (10)
  * @property {XpTrait[]} traits
- * @property {{stored: number, freeBase: number, bonus: number, discount: number}} void  As a Trait (XpTrait)
+ * @property {{stored: number, freeBase: number, bonus: number, legacy: number, discount: number}} void  As a Trait
+ *   (XpTrait)
  * @property {XpSkill[]} skills
  * @property {XpItem[]} items
  */
@@ -130,8 +132,23 @@ export function getCostPricer({ costs, options, rollData, report = () => {} }) {
 export function getXpEntries(build, price = (_selectors, base) => base) {
   return buildCappedEntries(
     [
-      ...getTraitEntries(build.traits, price),
-      ...getVoidEntries(build.void, price),
+      ...build.traits.flatMap(trait =>
+        getRankEntries(
+          trait,
+          {
+            type: "trait",
+            name: trait.key,
+            multiplier: TRAIT_XP_MULTIPLIER,
+            selector: `trait:${trait.key}`
+          },
+          price
+        )
+      ),
+      ...getRankEntries(
+        build.void,
+        { type: "void", name: "void", multiplier: VOID_XP_MULTIPLIER, selector: "ring:void" },
+        price
+      ),
       ...getSkillEntries(build.skills, price),
       ...getItemEntries(build.items, price)
     ],
@@ -171,49 +188,27 @@ export function getXpTotals(build, entries) {
 }
 
 /**
- * Each Trait rank bought: four times the new rank, its Family and School bonus included.
+ * Each rank bought of a Trait (four times the new rank) or the Void Ring (six times, #44), its Family and School
+ * bonus raising each price: all of the bonus but the legacy free ranks the stored rank already holds, so a School's
+ * rule bonus always counts (#154). Agility stored 4 with one legacy free rank and bonus 2 (legacy 1, rule 1) buys
+ * 4 → 5 at 4 × 5.
  * game-rules/48_character_creation_expanded.md, p.103
- * @param {XpTrait[]} traits
+ * @param {XpTrait|XpBuild["void"]} rank
+ * @param {{type: string, name: string, multiplier: number, selector: string}} kind
  * @param {function(string[], number): number} price
  * @returns {XpEntry[]}
  */
-function getTraitEntries(traits, price) {
+function getRankEntries(rank, { type, name, multiplier, selector }, price) {
+  const bonus = rank.bonus - Math.min(rank.freeBase, rank.legacy);
   const entries = [];
-  for (const trait of traits) {
-    const bonus = trait.freeBase > 0 ? 0 : trait.bonus;
-    for (let r = 2 + trait.freeBase + 1; r <= trait.stored; r++) {
-      const base = Math.max(0, TRAIT_XP_MULTIPLIER * (r + bonus) + trait.discount);
-      entries.push({
-        type: "trait",
-        name: trait.key,
-        from: r + bonus - 1,
-        to: r + bonus,
-        delta: price([`trait:${trait.key}`], base)
-      });
-    }
-  }
-  return entries;
-}
-
-/**
- * Each Void Ring rank bought: six times the new rank. The Void Ring's Family or School bonus raises each rank's price
- * as a Trait's does (#44).
- * game-rules/48_character_creation_expanded.md, p.103
- * @param {XpBuild["void"]} voidRing
- * @param {function(string[], number): number} price
- * @returns {XpEntry[]}
- */
-function getVoidEntries(voidRing, price) {
-  const entries = [];
-  const voidBonus = voidRing.freeBase > 0 ? 0 : voidRing.bonus;
-  for (let r = 2 + voidRing.freeBase + 1; r <= voidRing.stored; r++) {
-    const base = Math.max(0, VOID_XP_MULTIPLIER * (r + voidBonus) + voidRing.discount);
+  for (let r = 2 + rank.freeBase + 1; r <= rank.stored; r++) {
+    const base = Math.max(0, multiplier * (r + bonus) + rank.discount);
     entries.push({
-      type: "void",
-      name: "void",
-      from: r + voidBonus - 1,
-      to: r + voidBonus,
-      delta: price(["ring:void"], base)
+      type,
+      name,
+      from: r + bonus - 1,
+      to: r + bonus,
+      delta: price([selector], base)
     });
   }
   return entries;

@@ -55,9 +55,10 @@ function gyukaro() {
       stored: key === "ref" ? 3 : 2,
       freeBase: 0,
       bonus: bonus[key] ?? 0,
+      legacy: 0,
       discount: 0
     })),
-    void: { stored: 3, freeBase: 0, bonus: 0, discount: 0 },
+    void: { stored: 3, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
     skills: grants.map(grant => ({
       name: grant.name,
       type: entry("skills", grant.name).system.type,

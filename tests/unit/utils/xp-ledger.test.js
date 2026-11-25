@@ -11,6 +11,7 @@ const traits = (overrides = {}) =>
     stored: 2,
     freeBase: 0,
     bonus: 0,
+    legacy: 0,
     discount: 0,
     ...overrides[key]
   }));
@@ -25,7 +26,7 @@ const build = (extra = {}) => ({
   manual: 0,
   disadvantageCap: 10,
   traits: traits(),
-  void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+  void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
   skills: [],
   items: [],
   ...extra
@@ -48,7 +49,7 @@ describe("Book example: character creation (p.103-104)", () => {
   // rank 2. School Skills at rank 1 for free, Meditation with its free Emphasis, Iaijutsu as the chosen Skill.
   const gyukaro = build({
     traits: traits({ per: { bonus: 1 }, agi: { bonus: 1 }, ref: { stored: 3 } }),
-    void: { stored: 3, freeBase: 0, bonus: 0, discount: 0 },
+    void: { stored: 3, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
     skills: [
       skill("Defense", 2),
       skill("Kenjutsu", 3),
@@ -106,16 +107,28 @@ describe("getXpEntries", () => {
   it("should price and name a Void rank on top of its Family or School bonus, as a Trait", () => {
     // Stored 3 with a +1 Void bonus: the Void Ring goes from 3 to 4, which costs 6 × 4
     const entries = getXpEntries(
-      build({ void: { stored: 3, freeBase: 0, bonus: 1, discount: 0 } })
+      build({ void: { stored: 3, freeBase: 0, bonus: 1, legacy: 0, discount: 0 } })
     );
     expect(entries).toEqual([{ type: "void", name: "void", from: 3, to: 4, delta: 24 }]);
   });
 
   it("should start above a legacy free rank and then ignore the bonus", () => {
     const entries = getXpEntries(
-      build({ traits: traits({ str: { stored: 4, freeBase: 1, bonus: 1 } }) })
+      build({ traits: traits({ str: { stored: 4, freeBase: 1, bonus: 1, legacy: 1 } }) })
     );
     expect(entries.map(e => [e.to, e.delta])).toEqual([[4, 16]]);
+  });
+
+  // #154
+  it("should keep a School rule's bonus beside a legacy free rank, for a Trait and the Void Ring", () => {
+    const trait = { stored: 4, freeBase: 1, bonus: 2, legacy: 1 };
+    const entries = getXpEntries(
+      build({ traits: traits({ agi: trait }), void: { ...trait, discount: 0 } })
+    );
+    expect(entries).toEqual([
+      { type: "trait", name: "agi", from: 4, to: 5, delta: 20 },
+      { type: "void", name: "void", from: 4, to: 5, delta: 30 }
+    ]);
   });
 
   it("should apply a flat Trait discount, never below 0", () => {
@@ -175,7 +188,7 @@ describe("Disadvantage XP past the cap", () => {
     manual: 0,
     disadvantageCap: cap,
     traits: [],
-    void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+    void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
     skills: [],
     items: costs.map((cost, i) => ({ id: `d${i}`, type: "disadvantage", name: `D${i}`, cost }))
   });
@@ -197,13 +210,13 @@ describe("Disadvantage XP past the cap", () => {
 
 describe("XP spent past the total", () => {
   it("should give how far spending goes past the total, and 0 within it", () => {
-    const traits = [{ key: "agi", stored: 5, freeBase: 0, bonus: 0, discount: 0 }];
+    const traits = [{ key: "agi", stored: 5, freeBase: 0, bonus: 0, legacy: 0, discount: 0 }];
     const b = {
       base: 40,
       manual: 0,
       disadvantageCap: 10,
       traits,
-      void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+      void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
       skills: [],
       items: []
     };

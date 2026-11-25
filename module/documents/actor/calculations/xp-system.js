@@ -132,12 +132,14 @@ function xpRanksOf(actor, flags) {
       stored: toInt(stored.traits[key]),
       freeBase: toInt(freeTraitBase[key] ?? 0),
       bonus: toInt(getCreationFreeBonus(actor, key)),
+      legacy: toInt(getCreationFreeBonusSources(actor, key).legacy),
       discount: toInt(traitDiscounts[key] ?? 0)
     })),
     void: {
       stored: toInt(stored.rings.void.rank),
       freeBase: toInt(freeTraitBase.void ?? 0),
       bonus: toInt(getCreationFreeBonus(actor, "void")),
+      legacy: toInt(getCreationFreeBonusSources(actor, "void").legacy),
       discount: toInt(traitDiscounts.void ?? 0)
     }
   };
