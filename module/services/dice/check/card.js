@@ -180,22 +180,26 @@ function buildTnContext(system) {
 }
 
 /**
- * The card's Raises line: for an attack, what its declared Raises paid for, maneuvers or Increased Damage (#136);
- * for any other roll with a TN, the count. Empty with no Raises or no TN.
+ * The card's Raises line: for an attack, what its declared Raises and the Free Raises not spent on the TN paid for,
+ * maneuvers or Increased Damage (#136, #157); for any other roll with a TN, the count. Empty with no Raises to tell
+ * or no TN.
  * game-rules/38_maneuvers.md, p.87
  * @param {object} system - RollMessageData source
  * @returns {string}
  */
 function formatRaisesNote(system) {
-  const count = system.tn.raises;
-  if (!count || system.tn.effective === null) {
+  const { raises: count, freeRaises, freeRaisesToTN, effective } = system.tn;
+  const free = system.kind === "attack" ? freeRaises - freeRaisesToTN : 0;
+  if (!(count || free) || effective === null) {
     return "";
   }
   if (system.kind !== "attack") {
     return F("l5r4.ui.check.raisesNote", { count });
   }
-  const damage = system.maneuvers.increasedDamage;
-  return F("l5r4.ui.check.raisesAttackNote", { count, maneuvers: count - damage, damage });
+  const { cost: maneuvers, increasedDamage: damage } = system.maneuvers;
+  return free
+    ? F("l5r4.ui.check.raisesFreeAttackNote", { count, free, maneuvers, damage })
+    : F("l5r4.ui.check.raisesAttackNote", { count, maneuvers, damage });
 }
 
 /**

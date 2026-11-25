@@ -709,6 +709,7 @@ export function registerChatSystemWorkflowTests(quench) {
             calledShot: 2,
             location: "sword hand",
             feint: true,
+            cost: 4,
             increasedDamage: 1
           },
           damage: { label: "3k2" },
@@ -725,6 +726,15 @@ export function registerChatSystemWorkflowTests(quench) {
           );
           assert.include(html, "(Raises: 5; 4 for maneuvers, 1 for Increased Damage)");
           assert.notInclude(html, "check-damage", "no damage button on a miss");
+        });
+
+        // #157
+        it("should read an attack card posted before its maneuver cost was stored", () => {
+          const { cost } = foundry.documents.ChatMessage.implementation.fromSource({
+            type: "roll",
+            system: { kind: "attack", tn: { raises: 5 }, maneuvers: { increasedDamage: 1 } }
+          }).system.maneuvers;
+          assert.equal(cost, 4, "the declared Raises its Increased Damage left");
         });
 
         it("should say what a hit's maneuvers do, and not that they failed", async () => {

@@ -44,7 +44,7 @@ Rules read with `/rule` before building: `32_attack_and_defense.md` p.82, `33_wo
 3. Damage to a creature: Reduction first, then Spirit halves it and Invulnerability turns it into one Wound (pp.319-320). When Reduction leaves no damage, Invulnerability leaves none (Ernie, 2026-11-13).
 4. Damage past the Out Wound Rank marks the actor Dead (p.82) and the card says so; the GM can remove the status (Ernie, 2026-11-13).
 5. Applying damage lands at once. The target's owner then gets a button on the result card to spend a Void Point for 10 fewer Wounds (p.78), taken back from what was applied; nothing waits on another player (Ernie, 2026-11-13).
-6. Free Raises not spent on the TN pay for an attack's maneuvers before declared Raises do; declared Raises left over become Increased Damage (+1k0 each, p.87). Maneuvers the Raises cannot pay for stop the roll with a warning.
+6. Declared Raises and the Free Raises not spent on the TN pay for an attack's maneuvers together; every one left over becomes Increased Damage (+1k0 each, p.79, p.87; Ernie's ruling, #157). Maneuvers the Raises cannot pay for stop the roll with a warning.
 7. Rules on a weapon item (`system.rules`) apply only to rolls made with that weapon: its attack, its damage, and its sheet values. Rules on other items and on effects apply as before.
 8. The duel and the grapple run as chat cards whose state only the active GM changes; a player's step goes to the GM as a query, which reads each total from the roll message it names, never from the request.
 

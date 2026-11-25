@@ -703,6 +703,40 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #157
+        // game-rules/28_raises.md, p.79
+        it(
+          "should make Free Raises left after the TN and maneuvers Increased Damage, and say so on the card",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              {
+                name: "Free",
+                system: { rules: [{ key: "FreeRaise", selector: "skill:kenjutsu", value: 2 }] }
+              }
+            ]);
+            const target = await defender();
+            const hit = await attack(actor, katana, target, { raises: 0 });
+            assert.deepInclude(hit.system.maneuvers, { cost: 0, increasedDamage: 2 });
+            assert.include(
+              hit.content,
+              F("l5r4.ui.check.raisesFreeAttackNote", {
+                count: 0,
+                free: 2,
+                maneuvers: 0,
+                damage: 2
+              })
+            );
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            const label = T("l5r4.ui.check.increasedDamage");
+            assert.deepInclude(
+              damage.system.modifiers.find(m => m.label === label),
+              { roll: 2 },
+              "+2k0 on the damage"
+            );
+          })
+        );
+
         it(
           "should roll Disarm as 2k1 damage without Strength, and disarm for the winner of Contested Strength",
           clean(async () => {

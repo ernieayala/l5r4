@@ -80,11 +80,21 @@ describe("getManeuverCost", () => {
 });
 
 describe("getRaiseAllocation", () => {
-  it("should spend unspent Free Raises on maneuvers first, leftover declared Raises as Increased Damage", () => {
+  it("should pay maneuvers from Raises and unspent Free Raises together, the rest Increased Damage", () => {
     expect(getRaiseAllocation({ raises: 3, freeRaises: 1, cost: 2 })).toEqual({
       affordable: true,
       increasedDamage: 2
     });
+  });
+
+  // #157: a Free Raise gives the benefit of a Raise, Increased Damage included (Ernie's ruling)
+  // game-rules/28_raises.md, p.79
+  it("should make Free Raises left after the TN and the maneuvers Increased Damage", () => {
+    expect(getRaiseAllocation({ raises: 0, freeRaises: 2, cost: 0 })).toEqual({
+      affordable: true,
+      increasedDamage: 2
+    });
+    expect(getRaiseAllocation({ raises: 1, freeRaises: 3, cost: 2 }).increasedDamage).toBe(2);
   });
 
   // game-rules/28_raises.md, p.79

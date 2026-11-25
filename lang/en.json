@@ -796,6 +796,7 @@
         "outcomeAgainstTn": "{outcome} against TN {tn}",
         "pool": "Pool",
         "raisesAttackNote": "(Raises: {count}; {maneuvers} for maneuvers, {damage} for Increased Damage)",
+        "raisesFreeAttackNote": "(Raises: {count}, Free Raises: {free}; {maneuvers} for maneuvers, {damage} for Increased Damage)",
         "raisesNote": "(Raises: {count})",
         "range": {
           "melee": "melee",

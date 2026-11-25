@@ -177,6 +177,7 @@ export function getManeuverPayment(check, choices, terms) {
     cost
   });
   maneuvers.increasedDamage = increasedDamage;
+  maneuvers.cost = cost;
   return { maneuvers, cost, affordable };
 }
 
