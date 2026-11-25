@@ -1,27 +1,20 @@
 /**
  * @module services/purchase
  * @description Adding an item to a character (roadmap/STAGE-11, STAGE-15). Its Prerequisite rules, and a kiho's
- * Mastery Level, are checked, a GM may add it anyway, and each open ChoiceSet asks its question, never offering what
- * the item grants anyway; the answers are stored in the item's rules (module/utils/choices.js). A character's Clan,
- * Family, or School replaces the one it had. Grants follow on creation (module/documents/item/lifecycle/grants.js). A
- * drop on a sheet and the compendium browser's Add both go through `createPurchasedItem`.
+ * Mastery Level, are checked, a GM may add it anyway, and each open ChoiceSet asks its question
+ * (module/services/item-choices.js). A character's Clan, Family, or School replaces the one it had. Grants follow on
+ * creation (module/documents/item/lifecycle/grants.js). A drop on a sheet and the compendium browser's Add both go
+ * through `createPurchasedItem`.
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { CHOICE_LIST_VALUES } from "../config/rule-keys.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
 import { getHighestSchoolRank, ringRankOf } from "../utils/mechanics.js";
-import {
-  openChoices,
-  getFixedGrantUuids,
-  getUngrantedOptions,
-  getUnmetPrerequisites,
-  isKihoMasteryMet,
-  buildRulesWithSelections
-} from "../utils/purchase.js";
-import { askButtons, askConfirm, askPrompt } from "./dialog.js";
+import { getUnmetPrerequisites, isKihoMasteryMet } from "../utils/purchase.js";
+import { askButtons, askConfirm } from "./dialog.js";
 import { askGmAllow } from "./gm-allow.js";
+import { askItemChoices } from "./item-choices.js";
 
 /**
  * Item types a new one replaces the old of (character creation Steps 1-3); a School asks first (askSchool).
@@ -124,26 +117,6 @@ function buildSecondSchoolData(data) {
 }
 
 /**
- * The item's data with each open choice asked and stored in its rules.
- * @param {object} data - The item's source data
- * @param {object[]} rules - The item's rules
- * @returns {Promise<object|null>} The data, or null when the buyer cancels a choice
- */
-async function askItemChoices(data, rules) {
-  const selections = await askOpenChoices(data.name, rules);
-  if (!selections) {
-    return null;
-  }
-  if (!Object.keys(selections).length) {
-    return data;
-  }
-  return {
-    ...data,
-    system: { ...data.system, rules: buildRulesWithSelections(rules, selections) }
-  };
-}
-
-/**
  * Whether an item may be added to the actor: its prerequisites, and a kiho's Mastery Level, are met, or a GM adds it
  * anyway when asked. A player whose character does not meet them is told which.
  * @param {Actor} actor
@@ -199,108 +172,6 @@ function getUnmetKihoMastery(actor, kiho) {
       mastery: kiho.mastery
     })
   ];
-}
-
-/**
- * Ask each open choice of an item's rules, in order. No choice offers what the item grants anyway.
- * game-rules/48_character_creation_expanded.md, p.102
- * @param {string} itemName
- * @param {object[]} rules - The item's rules
- * @returns {Promise<Record<number, string>|null>} The selections by rule index, or null when the buyer cancels one
- */
-async function askOpenChoices(itemName, rules) {
-  const uuids = getFixedGrantUuids(rules);
-  const granted = {
-    uuids,
-    names: uuids.map(uuid => fromUuidSync(uuid, { strict: false })?.name).filter(Boolean)
-  };
-  const selections = {};
-  for (const choice of openChoices(rules)) {
-    const selection = await askChoice(itemName, choice, granted);
-    if (selection === null) {
-      return null;
-    }
-    selections[choice.index] = selection;
-  }
-  return selections;
-}
-
-/**
- * The options of a choice: its own, or a built-in list of Traits, Rings, or Skills.
- * @param {import("../utils/purchase.js").OpenChoice} choice
- * @returns {Promise<Array<{value: string, label: string, name?: string}>>}
- */
-async function getChoiceOptions(choice) {
-  if (choice.list === "traits") {
-    return CHOICE_LIST_VALUES.traits.map(key => ({
-      value: key,
-      label: T(`l5r4.ui.mechanics.traits.${key}`)
-    }));
-  }
-  if (choice.list === "rings") {
-    return CHOICE_LIST_VALUES.rings.map(key => ({
-      value: key,
-      label: T(`l5r4.ui.mechanics.rings.${key}`)
-    }));
-  }
-  if (choice.list === "skills") {
-    return getSkillOptions(choice.filter);
-  }
-  return choice.options;
-}
-
-/**
- * The skills list: every Skill item in the world and in Item compendiums, by uuid, kept to the filter's Skill types,
- * each with its Skill's name.
- * @param {string[]} filter - Skill types to keep; empty keeps all
- * @returns {Promise<Array<{value: string, label: string, name: string}>>}
- */
-async function getSkillOptions(filter) {
-  const isAllowedType = type => filter.length === 0 || filter.includes(type);
-  const options = game.items
-    .filter(item => item.type === "skill" && isAllowedType(item.system.type))
-    .map(item => ({ value: item.uuid, label: item.name, name: item.name }));
-  for (const pack of game.packs.filter(p => p.documentName === "Item")) {
-    const index = await pack.getIndex({ fields: ["type", "system.type"] });
-    for (const entry of index) {
-      if (entry.type === "skill" && isAllowedType(entry.system?.type)) {
-        const label = `${entry.name} (${pack.title})`;
-        options.push({ value: entry.uuid, label, name: entry.name });
-      }
-    }
-  }
-  return options.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
-}
-
-/**
- * Ask one choice, without the options the item grants anyway.
- * @param {string} itemName
- * @param {import("../utils/purchase.js").OpenChoice} choice
- * @param {{uuids: string[], names: string[]}} granted - What the item grants whatever is chosen
- * @returns {Promise<string|null>} The selection, or null when the buyer cancels
- */
-async function askChoice(itemName, choice, granted) {
-  const options = getUngrantedOptions(await getChoiceOptions(choice), granted);
-  if (!options.length) {
-    ui.notifications?.warn(F("l5r4.ui.purchase.noOptions", { name: itemName }));
-    return null;
-  }
-  const prompt = choice.prompt || T("l5r4.ui.purchase.choose");
-  return askPrompt({
-    window: { title: F("l5r4.ui.purchase.choiceTitle", { item: itemName, prompt }) },
-    content: await R(DIALOG_TEMPLATES.choice, {
-      formId: foundry.utils.randomID(),
-      label: prompt,
-      name: "selection",
-      options: options.map(({ value, label }) => ({ value, label }))
-    }),
-    ok: {
-      label: T("l5r4.ui.purchase.makeChoice"),
-      callback: (_event, button) => button.form.elements.selection.value || null
-    },
-    rejectClose: false,
-    modal: true
-  });
 }
 
 /**

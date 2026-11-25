@@ -944,6 +944,39 @@ export function registerRulesTests(quench) {
           ]);
           await item.delete();
         });
+
+        // #141
+        it("should stay in the JSON view with the text as typed when Switch view cannot parse it", async () => {
+          const [item] = await Item.createDocuments([ruleItem([], "Quench sheet switch view")]);
+          const errors = [];
+          const notify = ui.notifications.notify;
+          ui.notifications.notify = function (message, type, options = {}) {
+            if (type === "error") {
+              errors.push(message);
+            }
+            return notify.call(this, message, type, { ...options, console: false });
+          };
+          const sheet = item.sheet;
+          try {
+            sheet.rulesMode = "json";
+            await sheet.render({ force: true });
+            sheet.element.querySelector("textarea[name=rulesJson]").value = "[{";
+            sheet.element.querySelector('[data-action="toggle-rules-view"]').click();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            assert.equal(sheet.rulesMode, "json", "the view does not switch");
+            assert.equal(
+              sheet.element.querySelector("textarea[name=rulesJson]").value,
+              "[{",
+              "the text is as typed"
+            );
+            assert.lengthOf(errors, 1, "the error says why");
+            assert.match(errors[0], /not valid JSON/);
+          } finally {
+            ui.notifications.notify = notify;
+            await sheet.close({ animate: false });
+            await item.delete();
+          }
+        });
       });
 
       // #174: what a rule applies to

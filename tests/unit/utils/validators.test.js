@@ -1,6 +1,37 @@
 import { describe, expect, it } from "vitest";
 import { MAX_RAISES } from "../../../module/config/game-mechanics.js";
-import { validateAttackRaises } from "../../../module/utils/validators.js";
+import { validateAttackRaises, validateEmphasisName } from "../../../module/utils/validators.js";
+
+// #141: the reason is a key the custom Emphasis dialog shows under its field
+describe("validateEmphasisName", () => {
+  it("should accept a name and return it trimmed", () => {
+    expect(validateEmphasisName("  Katana ")).toEqual({ valid: true, sanitized: "Katana" });
+  });
+
+  it("should refuse an empty name with the length limits as data", () => {
+    expect(validateEmphasisName("   ")).toEqual({
+      valid: false,
+      error: "l5r4.apps.emphasisManager.errors.nameLength",
+      data: { min: 1, max: 100 }
+    });
+  });
+
+  it("should refuse characters outside letters, numbers, spaces, hyphens, and apostrophes", () => {
+    expect(validateEmphasisName("Invalid@Name")).toEqual({
+      valid: false,
+      error: "l5r4.apps.emphasisManager.errors.nameCharacters",
+      data: {}
+    });
+  });
+
+  it("should refuse a name already among the given ones", () => {
+    expect(validateEmphasisName(" Archery ", ["Archery"])).toEqual({
+      valid: false,
+      error: "l5r4.apps.emphasisManager.errors.nameTaken",
+      data: { name: "Archery" }
+    });
+  });
+});
 
 describe("validateAttackRaises", () => {
   it("should accept matching Raises and return them", () => {

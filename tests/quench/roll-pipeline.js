@@ -7,6 +7,7 @@ import { rollWeaponDamage } from "../../module/services/dice/rolls/weapon-roll.j
 import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
 import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { getCastingSchoolRank } from "../../module/utils/spell-casting.js";
 import {
   postContestedRoll,
   rollAgainKeepBetter,
@@ -554,6 +555,87 @@ export function registerRollPipelineTests(quench) {
             await answered;
             assert.equal(poolOf(message), `${3 + rank}k3`);
             assert.equal(actor._source.system.spellSlots.void, voidSlots - 1);
+          })
+        );
+
+        /** The next dialog, once rendered, with its form and its Roll button. */
+        const nextDialog = () =>
+          new Promise(resolve =>
+            Hooks.once("renderDialogV2", app =>
+              resolve({
+                app,
+                form: app.element.querySelector("form"),
+                ok: app.element.querySelector('[data-action="ok"]')
+              })
+            )
+          );
+
+        /** Tick or untick a checkbox as the user would, so the dialog's live parts see it. */
+        const setBox = (form, name, checked) => {
+          form.elements[name].checked = checked;
+          form.elements[name].dispatchEvent(new Event("change", { bubbles: true }));
+        };
+
+        // #141
+        // game-rules/66_magic_and_spell_casting.md, p.163
+        it(
+          "should offer no slot type with none left in the cast dialog",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.spellSlots": { fire: 0, void: 2 } });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const opened = nextDialog();
+            const cast = rollSpellCast({ actor, spell, showDialog: true });
+            const { form, ok } = await opened;
+            const slot = form.elements.slot;
+            assert.isTrue(slot.querySelector('[value="elemental"]').disabled, "no Fire slot left");
+            assert.isFalse(slot.querySelector('[value="void"]').disabled);
+            assert.equal(slot.value, "void", "the slot left is picked");
+            ok.click();
+            keep(await cast);
+            assert.equal(actor._source.system.spellSlots.void, 1);
+          })
+        );
+
+        // #141
+        // game-rules/66_magic_and_spell_casting.md, p.163-164
+        it(
+          "should hold a Ring Roll's cast in its dialog while the School Rank cannot make it",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const rank = actor.system.insight.rank;
+            const opened = nextDialog();
+            const roll = rollRing({
+              actor,
+              ringName: "Air",
+              ringRank: 3,
+              ringKey: "air",
+              askForOptions: true
+            });
+            const { app, form, ok } = await opened;
+            assert.equal(
+              getCastingSchoolRank(actor),
+              1,
+              "a Deficiency takes this School Rank to 0"
+            );
+            const warning = form.querySelector("[data-casting-blocked]");
+            setBox(form, "spellCasting", true);
+            setBox(form, "deficiency", true);
+            assert.isFalse(warning.hidden, "the reason shows while the cast cannot be made");
+            assert.isTrue(ok.disabled, "Roll waits");
+            assert.equal(
+              warning.textContent.trim(),
+              game.i18n.localize("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: "Air" })
+            );
+            setBox(form, "deficiency", false);
+            assert.isTrue(warning.hidden);
+            assert.isFalse(ok.disabled, "the dialog is still open, with the choices made");
+            assert.isTrue(app.rendered);
+            ok.click();
+            const message = keep(await roll);
+            assert.equal(poolOf(message), `${3 + rank}k3`, "cast with the School Rank");
           })
         );
 

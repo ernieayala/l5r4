@@ -31,3 +31,10 @@
   user-select: text;
   width: calc(100% - 2px);
 }
+
+// The Invalid state's message under a field (components/form-field.md): danger color, led by its icon
+.l5r4-form-field-error {
+  color: var(--l5r4-color-danger);
+  font-size: var(--l5r4-font-size-meta);
+  margin: 0;
+}

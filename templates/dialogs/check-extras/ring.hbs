@@ -13,4 +13,9 @@
     <input type="checkbox" id="{{formId}}-deficiency" name="deficiency" {{checked deficiency}} />
   </div>
   {{> "systems/l5r4-enhanced/templates/dialogs/check-extras/slot.hbs"}}
+  {{!-- Shown while a cast is ticked that the School Rank cannot make; Roll waits until it can (#141) --}}
+  <p class="l5r4-check-dialog-warning" role="note" data-casting-blocked hidden>
+    <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
+    <span data-casting-blocked-text></span>
+  </p>
 </fieldset>

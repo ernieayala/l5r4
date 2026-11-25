@@ -398,6 +398,40 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #141
+        it(
+          "should ask no choice when a later one has no options",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: no options" }));
+            const warnings = [];
+            const warn = ui.notifications.warn;
+            ui.notifications.warn = message => warnings.push(message);
+            let asked;
+            try {
+              asked = await answerPurchaseDialogs(
+                preparePurchase(actor, {
+                  name: "Quench Empty Choice",
+                  type: "advantage",
+                  system: {
+                    rules: [
+                      { key: "ChoiceSet", flag: "first", options: [{ value: "a", label: "A" }] },
+                      { key: "ChoiceSet", flag: "second", list: "skills", filter: ["quench-none"] }
+                    ]
+                  }
+                }),
+                "add"
+              );
+            } finally {
+              ui.notifications.warn = warn;
+            }
+            assert.isNull(asked.result, "nothing is added");
+            assert.deepEqual(asked.titles, [], "no question was asked to be thrown away");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.purchase.noOptions", { name: "Quench Empty Choice" })
+            ]);
+          })
+        );
+
         it(
           "should ask whether a second School replaces the first before its choices",
           clean(async function () {

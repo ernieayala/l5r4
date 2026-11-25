@@ -145,7 +145,8 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
 
   /**
    * Handle form submission to update NPC attack and damage data.
-   * Expands form data and updates both attack and damage keys on actor.
+   * Expands form data and updates both attack and damage keys on actor. A failed update throws, so core shows the
+   * reason and keeps the window open with what was entered (#141); a successful one closes it (`closeOnSubmit`).
    *
    * @param {Event} _event - The submit event (unused)
    * @param {HTMLFormElement} _form - The form element (unused)
@@ -163,15 +164,8 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
         [`system.${this.attackKey}`]: data[this.attackKey],
         [`system.${this.damageKey}`]: data[this.damageKey]
       });
-
-      this.close();
     } catch (err) {
-      logError("Failed to update NPC attack", err, {
-        actorId: this.actor?.id,
-        attackKey: this.attackKey,
-        damageKey: this.damageKey
-      });
-      ui.notifications?.error(T("l5r4.apps.npcAttackConfig.errors.updateFailed"));
+      throw new Error(T("l5r4.apps.npcAttackConfig.errors.updateFailed"), { cause: err });
     }
   }
 

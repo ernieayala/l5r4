@@ -51,6 +51,13 @@ export default class EmphasisManagerApplication extends foundry.applications.api
   };
 
   /**
+   * The names ticked in the window before a custom Emphasis change re-rendered it, which its rows show again so
+   * unsaved ticks survive (#141); null before any.
+   * @type {Set<string>|null}
+   */
+  #ticked = null;
+
+  /**
    * Create a new EmphasisManager instance.
    *
    * NOTE: Unlike other apps, this uses options-based constructor because it operates
@@ -106,11 +113,14 @@ export default class EmphasisManagerApplication extends foundry.applications.api
         skill: this.item.system
       });
 
+      const ticked = this.#ticked;
       return {
         ...context,
         item: this.item,
         skillName: this.item.name,
-        emphasisList
+        emphasisList: ticked
+          ? emphasisList.map(row => ({ ...row, available: ticked.has(row.name) }))
+          : emphasisList
       };
     } catch (err) {
       logError("Failed to prepare emphasis manager context", err, {
@@ -135,40 +145,17 @@ export default class EmphasisManagerApplication extends foundry.applications.api
   }
 
   /**
-   * Handle form submission to update skill's available emphases.
-   * Extracts checked emphasis checkboxes and updates item.
+   * Handle form submission: the Skill's available Emphases become the ones ticked. A failed update throws, so core
+   * shows the reason and keeps the window open with the ticks as they were (#141).
    *
-   * @param {Event} event - The submit event
+   * @param {Event} _event - The submit event (unused)
    * @param {HTMLFormElement} form - The form element
-   * @param {FormDataExtended} formData - The form data
    */
-  async _onSubmit(event, form, formData) {
-    const item = this.item;
-
-    // Extract checked emphases from form data
-    const formObject = formData.object;
-    const checkedEmphases = [];
-
-    // Process form entries - checkboxes are prefixed with "emphasis."
-    for (const [key, value] of Object.entries(formObject)) {
-      // Handle various checkbox value formats (boolean, string, "on")
-      const isChecked = value === true || value === "true" || value === "on";
-
-      // Extract emphasis name from form field key (e.g., "emphasis.Archery" -> "Archery")
-      if (key.startsWith("emphasis.") && isChecked) {
-        const emphasisName = key.substring("emphasis.".length);
-        checkedEmphases.push(emphasisName);
-      }
-    }
-
+  async _onSubmit(_event, form) {
     try {
-      await item.update({ "system.availableEmphases": checkedEmphases });
+      await this.item.update({ "system.availableEmphases": [...tickedOf(form)] });
     } catch (err) {
-      logError("Failed to update emphases", err, {
-        itemId: this.item?.id,
-        checkedEmphases
-      });
-      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.updateFailed"));
+      throw new Error(T("l5r4.apps.emphasisManager.errors.updateFailed"), { cause: err });
     }
   }
 
@@ -183,17 +170,16 @@ export default class EmphasisManagerApplication extends foundry.applications.api
   static async #onAddEmphasis(_event, _element) {
     const name = await askEmphasisName({
       title: "l5r4.apps.emphasisManager.addCustom",
-      label: "l5r4.ui.common.add"
+      label: "l5r4.ui.common.add",
+      existing: getWorldCustomEmphases()
     });
-
-    if (!name || !name.trim()) {
+    if (!name) {
       return;
     }
 
-    const trimmedName = name.trim();
-
+    this.#ticked = tickedOf(this.form);
     try {
-      await createWorldCustomEmphasis(trimmedName);
+      await createWorldCustomEmphasis(name);
     } catch {
       ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
       return;
@@ -235,6 +221,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       return;
     }
 
+    this.#ticked = tickedOf(this.form);
     await deleteWorldCustomEmphasis(emphasisName);
 
     if (this.rendered) {
@@ -261,17 +248,16 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     const newName = await askEmphasisName({
       title: "l5r4.ui.common.edit",
       label: "l5r4.ui.common.save",
-      data: { currentName: oldName }
+      currentName: oldName,
+      existing: getWorldCustomEmphases().filter(name => name !== oldName)
     });
-
-    if (!newName || !newName.trim() || newName.trim() === oldName) {
+    if (!newName || newName === oldName) {
       return;
     }
 
-    const trimmedNewName = newName.trim();
-
+    this.#ticked = tickedOf(this.form, { [oldName]: newName });
     try {
-      await updateWorldCustomEmphasis(oldName, trimmedNewName);
+      await updateWorldCustomEmphasis(oldName, newName);
     } catch {
       ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
       return;
@@ -284,17 +270,32 @@ export default class EmphasisManagerApplication extends foundry.applications.api
 }
 
 /**
- * Ask for a custom Emphasis name in the custom Emphasis dialog.
+ * The Emphases ticked in the window's form now, a renamed one under its new name.
+ * @param {HTMLFormElement} form - The Emphasis manager's form
+ * @param {Record<string, string>} [renamed={}] - New name by old name
+ * @returns {Set<string>}
+ */
+function tickedOf(form, renamed = {}) {
+  const ticked = [...form.querySelectorAll("input[name^='emphasis.']")]
+    .filter(box => box.checked)
+    .map(box => box.name.slice("emphasis.".length));
+  return new Set(ticked.map(name => renamed[name] ?? name));
+}
+
+/**
+ * Ask for a custom Emphasis name in the custom Emphasis dialog. The name is checked as it is typed: while it cannot
+ * be saved, the reason shows under the field and the button waits, so nothing typed is lost (#141).
  * @param {object} prompt
  * @param {string} prompt.title - The window title's i18n key
  * @param {string} prompt.label - The confirm button's i18n key
- * @param {object} [prompt.data] - The dialog's template data: the current name when renaming
- * @returns {Promise<string|null>} The name entered, or null when the dialog is dismissed
+ * @param {string} [prompt.currentName=""] - The name being renamed
+ * @param {string[]} prompt.existing - The names it may not repeat
+ * @returns {Promise<string|null>} The trimmed name, or null when the dialog is dismissed
  */
-async function askEmphasisName({ title, label, data }) {
+async function askEmphasisName({ title, label, currentName = "", existing }) {
   const content = await foundry.applications.handlebars.renderTemplate(
     DIALOG_TEMPLATES.customEmphasis,
-    data
+    { currentName, formId: foundry.utils.randomID() }
   );
 
   return askPrompt({
@@ -302,10 +303,41 @@ async function askEmphasisName({ title, label, data }) {
     content,
     ok: {
       label: T(label),
-      callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
+      callback: (_event, button) =>
+        validateEmphasisName(button.form.elements.emphasisName.value, existing).sanitized ?? null
     },
+    render: (_event, dialog) =>
+      bindEmphasisNameCheck(dialog.element.querySelector("form"), existing),
     rejectClose: false
   });
+}
+
+/**
+ * Check the custom Emphasis dialog's name as it is typed: the button waits while the name is invalid, and once the
+ * user has typed, the reason shows under the field, which is marked invalid (foundations/states.md, Invalid).
+ * @param {HTMLFormElement} form - The dialog's form
+ * @param {string[]} existing - The names it may not repeat
+ */
+function bindEmphasisNameCheck(form, existing) {
+  const field = form.elements.emphasisName;
+  const message = form.querySelector("[data-emphasis-name-error]");
+  const button = form.querySelector("[data-action='ok']");
+  const update = typed => {
+    const { valid, error, data } = validateEmphasisName(field.value, existing);
+    const shown = typed && !valid;
+    button.disabled = !valid;
+    message.hidden = !shown;
+    message.querySelector("[data-emphasis-name-error-text]").textContent = valid
+      ? ""
+      : F(error, data);
+    if (shown) {
+      field.setAttribute("aria-invalid", "true");
+    } else {
+      field.removeAttribute("aria-invalid");
+    }
+  };
+  field.addEventListener("input", () => update(true));
+  update(false);
 }
 
 /**
@@ -325,26 +357,14 @@ function getWorldCustomEmphases() {
 
 /**
  * Save a new custom emphasis to world settings.
- * Validates name and checks for duplicates before saving.
  *
- * @param {string} emphasisName - The emphasis name to save
- * @throws {Error} If validation fails or emphasis already exists
+ * @param {string} emphasisName - The name the dialog checked (askEmphasisName)
  */
 async function createWorldCustomEmphasis(emphasisName) {
-  const validation = validateEmphasisName(emphasisName);
-  if (!validation.valid) {
-    throw new Error(validation.error);
-  }
-
-  const trimmed = emphasisName.trim();
-  const current = getWorldCustomEmphases();
-
-  if (current.includes(trimmed)) {
-    throw new Error("Emphasis already exists");
-  }
-
-  current.push(trimmed);
-  await game.settings.set("l5r4-enhanced", "customEmphases", current);
+  await game.settings.set("l5r4-enhanced", "customEmphases", [
+    ...getWorldCustomEmphases(),
+    emphasisName
+  ]);
 }
 
 /**
@@ -360,29 +380,14 @@ async function deleteWorldCustomEmphasis(emphasisName) {
 
 /**
  * Update an existing custom emphasis name in world settings.
- * Validates new name and checks for duplicates before updating.
  *
  * @param {string} oldName - The current emphasis name
- * @param {string} newName - The new emphasis name
- * @throws {Error} If validation fails or new name already exists
+ * @param {string} newName - The new name the dialog checked (askEmphasisName)
  */
 async function updateWorldCustomEmphasis(oldName, newName) {
-  const validation = validateEmphasisName(newName);
-  if (!validation.valid) {
-    throw new Error(validation.error);
-  }
-
-  const trimmed = newName.trim();
-  const current = getWorldCustomEmphases();
-  const index = current.indexOf(oldName);
-
-  if (index !== -1) {
-    const otherEmphases = current.filter((_, i) => i !== index);
-    if (otherEmphases.includes(trimmed)) {
-      throw new Error("Emphasis already exists");
-    }
-
-    current[index] = trimmed;
-    await game.settings.set("l5r4-enhanced", "customEmphases", current);
-  }
+  await game.settings.set(
+    "l5r4-enhanced",
+    "customEmphases",
+    getWorldCustomEmphases().map(name => (name === oldName ? newName : name))
+  );
 }

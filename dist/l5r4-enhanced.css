@@ -460,6 +460,12 @@ body > * {
   width: calc(100% - 2px);
 }
 
+.l5r4-form-field-error {
+  color: var(--l5r4-color-danger);
+  font-size: var(--l5r4-font-size-meta);
+  margin: 0;
+}
+
 /**
  * Button
  * The roll button: a label under a brush-stroke face whose sprite plays on hover (components/button.md)

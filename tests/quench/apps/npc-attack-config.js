@@ -311,6 +311,38 @@ export function registerNpcAttackConfigTests(quench) {
           // Editor should be closed
           assert.isFalse(editor.rendered, "Editor closed after submission");
         });
+
+        // #141
+        it("should stay open with what was entered when the save fails", async () => {
+          const element = editor.element;
+          element.querySelector('[name="attack3.name"]').value = "Typed Name";
+          const errors = [];
+          const notify = ui.notifications.notify;
+          ui.notifications.notify = function (message, type, options = {}) {
+            if (type === "error") {
+              errors.push(message);
+            }
+            return notify.call(this, message, type, { ...options, console: false });
+          };
+          const update = actor.update;
+          const error = console.error;
+          actor.update = () => Promise.reject(new Error("Quench: refused"));
+          console.error = () => {};
+          try {
+            element.requestSubmit();
+            await new Promise(resolve => setTimeout(resolve, 400));
+          } finally {
+            actor.update = update;
+            console.error = error;
+            ui.notifications.notify = notify;
+          }
+          assert.isTrue(editor.rendered, "the window stays open");
+          assert.equal(element.querySelector('[name="attack3.name"]').value, "Typed Name");
+          assert.deepEqual(errors, [
+            game.i18n.localize("l5r4.apps.npcAttackConfig.errors.updateFailed")
+          ]);
+          assert.equal(actor.system.attack3.name, "Yari", "nothing saved");
+        });
       });
 
       describe("NPC attack config for different attack slots", () => {

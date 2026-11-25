@@ -377,6 +377,9 @@
         "custom": "Custom",
         "emphasisName": "Emphasis name",
         "errors": {
+          "nameCharacters": "An Emphasis name may hold letters, numbers, spaces, hyphens, and apostrophes",
+          "nameLength": "An Emphasis name has {min} to {max} characters",
+          "nameTaken": "A custom Emphasis named {name} already exists",
           "saveFailed": "Failed to save custom Emphasis",
           "updateFailed": "Failed to update emphasis manager"
         },
