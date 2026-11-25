@@ -219,6 +219,44 @@ export function registerAuthoringTests(quench) {
             assert.notOk(named(actor, "Kenjutsu"));
           })
         );
+
+        // #143
+        it(
+          "should note a grant whose item is missing, record nothing, and grant it once the item exists",
+          clean(async () => {
+            const [lost] = await Item.createDocuments([createSkillData("Quench Lost Art", 0)]);
+            const lostData = lost.toObject();
+            const uuid = lost.uuid;
+            await lost.delete();
+            const actor = track(await createTestPC({ name: "Character options: lost" }));
+            await createPurchasedItem(actor, {
+              name: "Quench Lost School",
+              type: "school",
+              system: { rules: [{ key: "GrantItem", uuid }] }
+            });
+            const note = () =>
+              posted.find(
+                m => m.content.includes(uuid) && m.content.includes("Quench Lost School")
+              );
+            assert.isTrue(
+              await waitFor(() => Boolean(note())),
+              "a note names the giver and the UUID"
+            );
+            assert.include(note().whisper, game.user.id, "to the GM and the owners");
+            const school = named(actor, "Quench Lost School");
+            assert.notExists(
+              (school.getFlag(SYS_ID, "grants") ?? []).find(record => record.uuid === uuid),
+              "not recorded as granted"
+            );
+            const [back] = await Item.createDocuments([lostData], { keepId: true });
+            worldItems.push(back);
+            await actor.update({ "system.honor.points": 1 });
+            assert.isTrue(
+              await waitFor(() => Boolean(named(actor, "Quench Lost Art"))),
+              "granted once the item exists"
+            );
+          })
+        );
       });
 
       describe("Purchase: prerequisites and choices", () => {

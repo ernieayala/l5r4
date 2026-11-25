@@ -10,7 +10,6 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { applyChoices } from "../../../utils/choices.js";
 import {
   buildEmptyGrantRecord,
@@ -19,9 +18,10 @@ import {
   buildUngrantedSkill,
   isSecondSchool
 } from "../../../utils/grants.js";
-import { F, R } from "../../../utils/localization.js";
+import { F } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
+import { postGrantNote, postGrantProblem } from "./grant-notes.js";
 import { getSecondSchoolGrants } from "./second-school.js";
 
 /**
@@ -98,7 +98,9 @@ function updateGrantQueue(actor, task) {
     // A request already sent when the actor was deleted fails with it; there is nothing left to grant
     if (fromUuidSync(actor.uuid)) {
       console.error(`${SYS_ID} | Grants for ${actor.name} failed`, err);
+      return postGrantProblem(actor, F("l5r4.ui.grants.failed", { name: actor.name }));
     }
+    return undefined;
   });
   queues.set(actor.uuid, next);
   next.finally(() => {
@@ -110,8 +112,8 @@ function updateGrantQueue(actor, task) {
 }
 
 /**
- * An item's GrantItem rules, choices filled in. A rule that fails validation is skipped with a warning; it is
- * stored user JSON.
+ * An item's GrantItem rules, choices filled in. A rule that fails validation is skipped, and a note to the GM and
+ * the owners names the item and why (#143); it is stored user JSON.
  * @param {Item} item
  * @returns {import("../../../utils/grants.js").GrantRule[]}
  */
@@ -126,6 +128,11 @@ function grantRulesOf(item) {
       rules.push({ uuid, rank, skillRank, emphasis });
     } catch (err) {
       console.warn(`${SYS_ID} | GrantItem rule on "${item.name}" skipped: ${err.message}`);
+      // Left running: the rules are read synchronously; a note that cannot post is logged
+      postGrantProblem(
+        item.actor,
+        F("l5r4.ui.grants.invalid", { giver: item.name, error: err.message })
+      ).catch(noteErr => console.error(`${SYS_ID} | Grant note failed`, noteErr));
     }
   }
   return rules;
@@ -205,14 +212,18 @@ async function createDueGrants(actor) {
     const { grant, skip } = isSecondSchool(giver)
       ? await getSecondSchoolGrants(actor, giver, { rules, due })
       : { grant: due, skip: [] };
+    const recorded = records.length;
     records.push(...skip.map(rule => buildEmptyGrantRecord(rule.uuid)));
     for (const rule of grant) {
       if (isActorGone()) {
         return;
       }
-      records.push(await createDueGrant(actor, rule, { giver }));
+      const record = await createDueGrant(actor, rule, { giver });
+      if (record) {
+        records.push(record);
+      }
     }
-    if ((grant.length || skip.length) && !isActorGone()) {
+    if (records.length > recorded && !isActorGone()) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
@@ -252,47 +263,26 @@ function buildUngrantChanges(actor, giver) {
 
 /**
  * Grant one due rule: give its item to the actor and, when the grant waited for a School Rank, post a chat note. A
- * rule whose UUID is not an item is recorded as granted with no item, so it is not tried again.
+ * rule whose UUID is not an item grants nothing and is not recorded, so it is tried again once the item exists (a
+ * pack restored, an item recreated); a note to the GM and the owners names the giver and the UUID (#143).
  * @param {Actor} actor
  * @param {import("../../../utils/grants.js").GrantRule} rule
  * @param {object} grant
  * @param {Item} grant.giver - The item whose rule grants it
- * @returns {Promise<import("../../../utils/grants.js").GrantRecord>}
+ * @returns {Promise<import("../../../utils/grants.js").GrantRecord|null>} null when nothing was granted
  */
 async function createDueGrant(actor, rule, { giver }) {
-  const source = await fromUuid(rule.uuid);
+  const source = await fromUuid(rule.uuid).catch(() => null);
   if (source?.documentName !== "Item") {
-    console.warn(`${SYS_ID} | "${giver.name}" grants ${rule.uuid}, which is not an item`);
-    return buildEmptyGrantRecord(rule.uuid);
+    await postGrantProblem(
+      actor,
+      F("l5r4.ui.grants.missing", { giver: giver.name, uuid: rule.uuid })
+    );
+    return null;
   }
   const record = await createGrantedItem(actor, rule, { giver, source });
   if (rule.rank > 0) {
     await postGrantNote(actor, { giver, source, rank: rule.rank });
   }
   return record;
-}
-
-/**
- * Post the chat note that a grant which waited for a School Rank has come.
- * @param {Actor} actor
- * @param {object} grant
- * @param {Item} grant.giver - The item whose rule grants it
- * @param {Item} grant.source - The item granted
- * @param {number} grant.rank - The School Rank it waited for
- * @returns {Promise<void>}
- */
-async function postGrantNote(actor, { giver, source, rank }) {
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor }),
-    content: await R(CHAT_TEMPLATES.note, {
-      lines: [
-        F("l5r4.ui.grants.granted", {
-          name: actor.name,
-          item: source.name,
-          giver: giver.name,
-          rank
-        })
-      ]
-    })
-  });
 }

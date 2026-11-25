@@ -1028,7 +1028,10 @@
         "void": "Void Points"
       },
       "grants": {
+        "failed": "Granting items to {name} failed; the console has the details.",
         "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
+        "invalid": "{giver} has a GrantItem rule that is not valid, so it grants nothing: {error}",
+        "missing": "{giver} grants {uuid}, but no item has that UUID, so nothing was granted. It is tried again once the item exists.",
         "waiting": "{name} learns {items} from {giver} once these School Skills reach rank 1: {skills}.",
         "waitingRow": "Its Techniques wait for these School Skills at rank 1: {skills}"
       },
