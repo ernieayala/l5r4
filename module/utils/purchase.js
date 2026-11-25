@@ -25,20 +25,6 @@ export function getUnmetPrerequisites(rules, options) {
 }
 
 /**
- * Whether a character may learn a kiho: its Ring plus its School Rank meets the kiho's Mastery Level. This is the
- * Brotherhood monk's test; the optional rules for other characters (Ring alone, or School Rank alone) are never
- * looser, so a kiho this refuses no character may learn, and the GM decides the rest by adding it anyway.
- * game-rules/87_kiho.md, p.261, 266
- * @param {number} mastery - The kiho's Mastery Level
- * @param {number} ring - The character's rank in the kiho's Ring
- * @param {number} schoolRank - The character's School Rank
- * @returns {boolean}
- */
-export function isKihoMasteryMet(mastery, ring, schoolRank) {
-  return ring + schoolRank >= mastery;
-}
-
-/**
  * @typedef {object} OpenChoice
  * @property {number} index   The rule's index in the item's rules
  * @property {string} flag

@@ -658,6 +658,16 @@
     },
     "magic": {
       "kiho": {
+        "access": {
+          "auto": "As its other fields show",
+          "brotherhood": "Brotherhood monk",
+          "label": "Kiho",
+          "monk": "Other monk school (1½× XP)",
+          "ninja": "Ninja (2× XP)",
+          "none": "None",
+          "shugenja": "Shugenja (2× XP)"
+        },
+        "accessHint": "How a student learns kiho: a monk meets the Mastery Level with Ring and School Rank, a shugenja with the Ring, a ninja with the School Rank (p.266).",
         "internal": "Internal",
         "karmic": "Karmic",
         "martial": "Martial",
@@ -1277,7 +1287,11 @@
         "bypass": "Add anyway",
         "choiceTitle": "{item}: {prompt}",
         "choose": "Choose",
+        "kihoCap": "no more kiho than {cap}, the School Rank (p.266)",
         "kihoMastery": "{ring} + School Rank {mastery}",
+        "kihoMasteryRank": "School Rank {mastery}",
+        "kihoMasteryRing": "{ring} {mastery}",
+        "kihoNoSchool": "a School that teaches kiho (p.266)",
         "makeChoice": "Choose",
         "noOptions": "{name} has a choice with nothing to choose from; it was not added",
         "schoolAdd": "Add as another School",

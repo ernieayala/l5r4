@@ -299,7 +299,9 @@ export function registerAuthoringTests(quench) {
           "should ask a GM to add a kiho whose Mastery Level the Ring plus School Rank does not reach",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Character options: monk" }));
-            await actor.createEmbeddedDocuments("Item", [createSchoolData("Quench Monk School")]);
+            await actor.createEmbeddedDocuments("Item", [
+              createSchoolData("Quench Monk School", { system: { kiho: 3 } })
+            ]);
             const kiho = {
               name: "Quench Void Kiho",
               type: "kiho",
@@ -316,6 +318,45 @@ export function registerAuthoringTests(quench) {
               "Quench Void Kiho",
               "Void 3 and School Rank 1 reach 4: no question asked"
             );
+          })
+        );
+
+        // #159: a shugenja meets the Mastery Level with the Ring alone, pays twice, and knows no more kiho than the
+        // School Rank; another Monk School pays 1½ times; with no such School the GM is asked (Ernie's ruling)
+        // game-rules/87_kiho.md, p.266
+        it(
+          "should test, price, and cap kiho by the buyer's School",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: kiho buyer" }));
+            const kiho = (name, mastery) => ({
+              name,
+              type: "kiho",
+              system: { ring: "void", mastery, type: "mystical" }
+            });
+            const asked = async (data, answer) => {
+              const answered = answerConfirm(answer);
+              const result = await preparePurchase(actor, data);
+              await answered;
+              return result;
+            };
+            assert.isNull(await asked(kiho("Quench No School", 1), "no"), "no School teaches kiho");
+
+            const [school] = await actor.createEmbeddedDocuments("Item", [
+              createSchoolData("Quench Shugenja School", { system: { shugenja: true, rank: 1 } })
+            ]);
+            assert.isNull(
+              await asked(kiho("Quench Above Void", 3), "no"),
+              "Void 2 does not reach 3"
+            );
+            const [known] = await actor.createEmbeddedDocuments("Item", [
+              await preparePurchase(actor, kiho("Quench Within Void", 2))
+            ]);
+            assert.equal(actor.system._xp.breakdown.kiho, 4, "twice Mastery 2");
+            assert.isNull(await asked(kiho("Quench Second", 1), "no"), "School Rank 1: one kiho");
+
+            await school.update({ "system.kihoAccess": "monk" });
+            assert.equal(actor.system._xp.breakdown.kiho, 3, "1½ × 2, rounded up");
+            await known.delete();
           })
         );
 

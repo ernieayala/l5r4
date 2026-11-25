@@ -10,8 +10,9 @@
 import { SYS_ID } from "../config/constants.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
-import { getHighestSchoolRank, ringRankOf } from "../utils/mechanics.js";
-import { getUnmetPrerequisites, isKihoMasteryMet } from "../utils/purchase.js";
+import { getKihoCap, isKihoMasteryMet } from "../utils/kiho.js";
+import { ringRankOf } from "../utils/mechanics.js";
+import { getUnmetPrerequisites } from "../utils/purchase.js";
 import { askButtons, askConfirm } from "./dialog.js";
 import { askGmAllow } from "./gm-allow.js";
 import { askItemChoices } from "./item-choices.js";
@@ -22,6 +23,17 @@ import { askItemChoices } from "./item-choices.js";
  * @type {ReadonlySet<string>}
  */
 const bioTypes = new Set(["clan", "family", "school"]);
+
+/**
+ * How each kind of kiho buyer's Mastery Level test reads as a prerequisite.
+ * game-rules/87_kiho.md, p.261, 266
+ */
+const KIHO_MASTERY_KEYS = Object.freeze({
+  brotherhood: "l5r4.ui.purchase.kihoMastery",
+  monk: "l5r4.ui.purchase.kihoMastery",
+  shugenja: "l5r4.ui.purchase.kihoMasteryRing",
+  ninja: "l5r4.ui.purchase.kihoMasteryRank"
+});
 
 /**
  * Check an item's prerequisites against the actor and ask its open choices. A player cannot add an item whose
@@ -156,22 +168,29 @@ async function canAddItem(actor, data, rules) {
 }
 
 /**
- * A kiho's Mastery Level as a prerequisite: its label when the actor's Ring and School Rank do not reach it.
- * game-rules/87_kiho.md, p.261
+ * What a kiho asks of its buyer, as prerequisites (Ernie's ruling, #159): a School that gives kiho; the Mastery Level
+ * reached as that buyer reaches it (Ring and School Rank for a monk, the Ring for a shugenja, the School Rank for a
+ * ninja); and, outside the Brotherhood, no more kiho than the School Rank allows. Each label names what is unmet.
+ * game-rules/87_kiho.md, p.261, 266
  * @param {Actor} actor
  * @param {{ring: string, mastery: number}} kiho - The kiho's system data
  * @returns {string[]}
  */
 function getUnmetKihoMastery(actor, kiho) {
-  if (isKihoMasteryMet(kiho.mastery, ringRankOf(actor, kiho.ring), getHighestSchoolRank(actor))) {
-    return [];
+  const buyer = actor.system.kihoBuyer;
+  if (!buyer) {
+    return [T("l5r4.ui.purchase.kihoNoSchool")];
   }
-  return [
-    F("l5r4.ui.purchase.kihoMastery", {
-      ring: T(`l5r4.ui.mechanics.rings.${kiho.ring}`),
-      mastery: kiho.mastery
-    })
-  ];
+  const unmet = [];
+  if (!isKihoMasteryMet(buyer, { mastery: kiho.mastery, ring: ringRankOf(actor, kiho.ring) })) {
+    const ring = T(`l5r4.ui.mechanics.rings.${kiho.ring}`);
+    unmet.push(F(KIHO_MASTERY_KEYS[buyer.access], { ring, mastery: kiho.mastery }));
+  }
+  const cap = getKihoCap(buyer);
+  if (cap !== null && actor.items.filter(item => item.type === "kiho").length >= cap) {
+    unmet.push(F("l5r4.ui.purchase.kihoCap", { cap }));
+  }
+  return unmet;
 }
 
 /**

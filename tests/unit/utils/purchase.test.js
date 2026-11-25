@@ -4,8 +4,7 @@ import {
   getUnmetPrerequisites,
   buildRulesWithSelections,
   getFixedGrantUuids,
-  getUngrantedOptions,
-  isKihoMasteryMet
+  getUngrantedOptions
 } from "../../../module/utils/purchase.js";
 
 describe("getUnmetPrerequisites", () => {
@@ -114,16 +113,6 @@ describe("The getFixedGrantUuids and getUngrantedOptions helpers", () => {
     expect(getUngrantedOptions(options, { uuids: [kenjutsu], names: ["Kenjutsu"] })).toEqual([
       options[1]
     ]);
-  });
-});
-
-// game-rules/87_kiho.md, p.261
-describe("isKihoMasteryMet", () => {
-  it("should meet a Mastery Level with the kiho's Ring plus the School Rank", () => {
-    // Touch the Void Dragon, Mastery Level 4: Void 3 and School Rank 1 reach it, Void 2 does not
-    expect(isKihoMasteryMet(4, 3, 1)).toBe(true);
-    expect(isKihoMasteryMet(4, 2, 1)).toBe(false);
-    expect(isKihoMasteryMet(3, 2, 1)).toBe(true);
   });
 });
 

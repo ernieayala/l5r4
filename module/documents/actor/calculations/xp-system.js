@@ -12,7 +12,7 @@ import {
   getCreationFreeBonus,
   getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
-import { getKihoLimits } from "../../../utils/kiho.js";
+import { getKihoLimits, getKihoPrice } from "../../../utils/kiho.js";
 import { getCostPricer, getXpEntries, getXpTotals } from "../../../utils/xp-ledger.js";
 
 /**
@@ -164,15 +164,17 @@ function xpSkillsOf(actor) {
 }
 
 /**
- * The priced items: Advantages and Disadvantages at their cost; a kata, a kiho, and a memorized spell at their
- * Mastery Level (#43), and a kiho the Monk School gives at 0 (Stage 18 decision 19).
+ * The priced items: Advantages and Disadvantages at their cost; a kata and a memorized spell at their Mastery Level
+ * (#43); a kiho at its buyer's price (getKihoPrice, #159), and one the Monk School gives at 0 (Stage 18 decision 19).
  * game-rules/66_magic_and_spell_casting.md, p.164
  * game-rules/80_brotherhood_of_shinsei.md, p.231
  * game-rules/86_kata.md, p.259
+ * game-rules/87_kiho.md, p.266
  * @param {Actor} actor
  * @returns {import("../../../utils/xp-ledger.js").XpItem[]}
  */
 function xpItemsOf(actor) {
+  const access = actor.system.kihoBuyer?.access;
   const items = [];
   for (const item of actor.items) {
     if (["advantage", "disadvantage"].includes(item.type)) {
@@ -181,13 +183,10 @@ function xpItemsOf(actor) {
       ["kata", "kiho"].includes(item.type) ||
       (item.type === "spell" && item.system.memorized === true)
     ) {
-      const free = item.type === "kiho" && item.system.schoolKiho;
-      items.push({
-        id: item.id,
-        type: item.type,
-        name: item.name,
-        cost: free ? 0 : toInt(item.system.mastery)
-      });
+      const mastery = toInt(item.system.mastery);
+      const cost =
+        item.type !== "kiho" ? mastery : item.system.schoolKiho ? 0 : getKihoPrice(mastery, access);
+      items.push({ id: item.id, type: item.type, name: item.name, cost });
     }
   }
   return items;

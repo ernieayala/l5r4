@@ -111,17 +111,25 @@ export function registerPacksTests(quench) {
         }
       };
 
-      /** A PC, optionally of a Clan, holding a copy of a pack entry, through the drop path. */
+      /**
+       * A PC, optionally of a Clan or a School (its system data), holding a copy of a pack entry, through the drop
+       * path. A kiho needs a School that teaches it (#159).
+       */
       const holding = async (
         pack,
         name,
-        { traits = { str: 2, ref: 2, agi: 2 }, clan = null, picks = [] } = {}
+        { traits = { str: 2, ref: 2, agi: 2 }, clan = null, school = null, picks = [] } = {}
       ) => {
         const actor = track(
           await createTestPC({ name: `Compendium packs: ${name}`, system: { traits } })
         );
         if (clan) {
           await actor.createEmbeddedDocuments("Item", [{ name: clan, type: "clan" }]);
+        }
+        if (school) {
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Quench Monk School", type: "school", system: school }
+          ]);
         }
         // An unmet prerequisite is refused, so a row fails when its setup misses one
         const item = await drop(actor, pack, name, { picks, confirm: "no" });
@@ -1004,7 +1012,8 @@ export function registerPacksTests(quench) {
             // Air 4 reaches its Mastery Level 4
             // game-rules/87_kiho.md, p.261
             const { actor, item } = await holding("kiho", "Soul of the Four Winds", {
-              traits: { str: 2, ref: 4, awa: 4, agi: 2 }
+              traits: { str: 2, ref: 4, awa: 4, agi: 2 },
+              school: { kiho: 3 }
             });
             const before = actor.system.armorTn.current;
             await updateActivation(actor, item);
@@ -1042,7 +1051,8 @@ export function registerPacksTests(quench) {
           "should take the Air Ring from unarmed damage only while Air Fist is active",
           clean(async () => {
             const { actor, item } = await holding("kiho", "Air Fist", {
-              traits: { str: 2, ref: 3, awa: 3, agi: 2 }
+              traits: { str: 2, ref: 3, awa: 3, agi: 2 },
+              school: { kiho: 3 }
             });
             // Read by name: the server returns created documents in no fixed order
             const created = await actor.createEmbeddedDocuments("Item", [

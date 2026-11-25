@@ -17,6 +17,7 @@ import {
   SKILL_TYPES,
   ACTION_TYPES,
   KIHO_TYPES,
+  KIHO_ACCESS_TYPES,
   ADVANTAGE_TYPES
 } from "../../../config/localization.js";
 import { NPC_NUMBER_WOUND_LEVELS } from "../../../config/game-mechanics.js";
@@ -35,6 +36,7 @@ import { NPC_NUMBER_WOUND_LEVELS } from "../../../config/game-mechanics.js";
  * @property {object} config.skillTypes - Skill category keys (high, bugei, merch, low)
  * @property {object} config.actionTypes - Action timing keys (simple, complex, free)
  * @property {object} config.kihoTypes - Kiho category keys (internal, karmic, martial, mystic)
+ * @property {object} config.kihoAccess - How a School's student learns kiho (brotherhood, monk, shugenja, ninja, none)
  * @property {object} config.advantageTypes - Advantage/disadvantage type keys (physical, mental, social, material, spiritual, ancestor)
  * @property {object} config.npcNumberWoundLevels - NPC rank to wound level count mapping (1-8)
  */
@@ -58,6 +60,7 @@ export function prepareItemSheetOptions(data) {
     skillTypes: SKILL_TYPES,
     actionTypes: ACTION_TYPES,
     kihoTypes: KIHO_TYPES,
+    kihoAccess: KIHO_ACCESS_TYPES,
     advantageTypes: ADVANTAGE_TYPES,
     npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
   };
