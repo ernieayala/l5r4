@@ -737,6 +737,33 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #148
+        // game-rules/38_maneuvers.md, p.86
+        it(
+          "should roll a Disarm's 2k1 exploding on 10, without the weapon's Explodes on or damage rules",
+          clean(async () => {
+            const { actor, katana } = await attacker(
+              [{ key: "RollModifier", selector: "damage", roll: 1 }],
+              3
+            );
+            // The batch rolls every die as a 9, so dice exploding on 9 would never stop
+            await katana.update({ "system.explodesOn": 9 });
+            const target = await defender();
+            const hit = await attack(actor, katana, target, { raises: 3, "maneuver.disarm": true });
+            assert.equal(hit.system.damage.explode, 9, "the attack stores the weapon's");
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            assert.equal(`${damage.system.pool.roll}k${damage.system.pool.keep}`, "2k1");
+            assert.include(damage.rolls[0].formula, "2d10xa10k1");
+            const fromKatana = message =>
+              message.system.modifiers.filter(m => m.label === katana.name).length;
+            assert.equal(fromKatana(damage), 0, "no weapon rule");
+            await katana.update({ "system.explodesOn": 10 });
+            const plain = await attack(actor, katana, target, { raises: 0 });
+            const normal = await rollDamageFromAttack(plain, { askForOptions: false });
+            assert.equal(fromKatana(normal), 1, "a normal hit has the weapon's rule");
+          })
+        );
+
         it(
           "should knock the target Prone on Knockdown when Contested Strength is won",
           clean(async () => {
