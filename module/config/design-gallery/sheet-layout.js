@@ -30,6 +30,7 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
       `${T}/actor/_partials/_section-title.hbs`,
       `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/actor/_partials/_item-section.hbs`,
+      `${T}/actor/_partials/_item-sections.hbs`,
       `${T}/actor/_partials/_bio.hbs`,
       `${T}/actor/_partials/_note-section.hbs`
     ],
@@ -66,7 +67,15 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
         label: "l5r4.apps.designGallery.samples.titleTools",
         partial: `${T}/actor/_partials/_item-section.hbs`,
         scope: "pc",
-        context: "pc"
+        context: "pc",
+        with: { wealth: true }
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.npcItemSections",
+        partial: `${T}/actor/_partials/_item-sections.hbs`,
+        scope: "npc",
+        context: "npc",
+        with: { weapons: ROWS.weapons, advantages: ROWS.advantages }
       },
       {
         label: "l5r4.apps.designGallery.samples.bio",
@@ -74,8 +83,8 @@ export const GALLERY_SHEET_LAYOUT = Object.freeze([
         scope: "pc",
         context: "pc",
         with: {
-          bioClan: { id: "galleryClan", name: "Crane", system: { description: DESCRIPTION } },
-          bioFamily: { id: "galleryFamily", name: "Kakita", system: {} },
+          bioClans: [{ id: "galleryClan", name: "Crane", system: { description: DESCRIPTION } }],
+          bioFamilies: [{ id: "galleryFamily", name: "Kakita", system: {} }],
           bioSchools: [
             { item: { id: "gallerySchool", name: "Kakita Bushi", system: {} }, waitingFor: [] },
             {

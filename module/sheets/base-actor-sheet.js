@@ -11,11 +11,14 @@ import { getIconPath } from "../utils/icons.js";
 import { formatInitiativePool } from "../utils/initiative.js";
 import { on } from "../utils/dom.js";
 import { getSortPrefs } from "../services/sort-preferences.js";
+import { activeItemIdsOf, updateActivation } from "../services/effects/activation.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
 import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
+import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
+import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { RestHandler } from "./handlers/rest-handler.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { SortHandler } from "./handlers/sort-handler.js";
@@ -25,6 +28,7 @@ import { openImageEditor } from "./ui/image-editor.js";
 import { TRAIT_DRAG_TYPE } from "./ui/macros.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { TextEditor } = foundry.applications.ux;
 
 /**
  * The shared base of the L5R4 actor sheets.
@@ -78,8 +82,16 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     "roll-skill": (sheet, event, element) => sheet._onSkillRoll(event, element),
     "roll-trait": (sheet, event, element) => sheet._onTraitRoll(event, element),
     "roll-weapon-attack": (sheet, event, element) => sheet._onWeaponAttackRoll(event, element),
+    "roll-weapon-damage": (sheet, event, element) =>
+      PcRollHandler.rollWeaponDamage(sheet._getHandlerContext(), event, element),
     "cast-spell": (sheet, event, element) =>
       RollHandler.rollClickedSpellCast(sheet._getHandlerContext(), event, element),
+    "adjust-spell-slot": (sheet, event, element) =>
+      PcAdjustmentHandler.updateSpellSlot(sheet._getHandlerContext(), event, element, +1),
+    "toggle-activation": (sheet, _event, element) => {
+      const item = sheet.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
+      return item ? updateActivation(sheet.actor, item) : undefined;
+    },
     "adjust-void-points": (sheet, event, element) => sheet._onVoidPointsAdjust(event, element, +1),
     "toggle-movement-type": (sheet, event) =>
       StanceHandler.updateMovementType(sheet._getHandlerContext(), event),
@@ -93,11 +105,14 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
 
   /**
    * Adds the sort header columns of every list (module/config/sort-keys.js) and each list's stored sort, which the
-   * section partials pass to templates/actor/_partials/_sort-header.hbs, and the Initiative pool as one string, so
-   * the template does no arithmetic (components/initiative-block.md C1).
+   * section partials pass to templates/actor/_partials/_sort-header.hbs; the Initiative pool as one string, so
+   * the template does no arithmetic (components/initiative-block.md C1); the kata, kiho, and tattoos in effect; and
+   * the notes enriched with core's links, `@UUID` references, and inline rolls, which a viewer who cannot edit the
+   * actor reads (templates/actor/_partials/_note-section.hbs). Secrets show to a user who can edit it.
    *
    * @param {object} options - Rendering options
-   * @returns {Promise<object>} The context, with `sortColumns`, `sortState`, and `initiativeFormula`
+   * @returns {Promise<object>} The context, with `sortColumns`, `sortState`, `initiativeFormula`, `activeItemIds`,
+   *   and `enriched.notes`
    * @override
    */
   async _prepareContext(options) {
@@ -107,6 +122,14 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     context.initiativeFormula = formatInitiativePool(this.actor.system.initiative, {
       littleTruths: game.settings.get(SYS_ID, "LtException")
     });
+    context.activeItemIds = activeItemIdsOf(this.actor);
+    context.enriched = {
+      notes: await TextEditor.enrichHTML(this.actor.system.notes, {
+        secrets: this.isEditable,
+        documents: true,
+        links: true
+      })
+    };
     return context;
   }
 
@@ -623,10 +646,15 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
 
   /**
    * Route click, right-click, and change on any [data-action] element to _onAction, _onActionContext, and
-   * _onActionChange. A right-click's own menu is suppressed.
+   * _onActionChange, and a click on the portrait to the image editor. A right-click's own menu is suppressed.
    * @param {HTMLElement} root - The sheet's root element
    */
   #bindActionEvents(root) {
+    on(root, "click", {
+      selector: "[data-edit='img']",
+      handler: ev => this._onEditImage(ev)
+    });
+
     on(root, "click", {
       selector: "[data-action]",
       handler: (ev, el) => {

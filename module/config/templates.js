@@ -180,6 +180,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/actor/_partials/_weapon-section.hbs`,
   `${PATHS.templates}/actor/_partials/_armor-section.hbs`,
   `${PATHS.templates}/actor/_partials/_item-section.hbs`,
+  `${PATHS.templates}/actor/_partials/_item-sections.hbs`,
   `${PATHS.templates}/actor/_partials/_spell-section.hbs`,
   `${PATHS.templates}/actor/_partials/_technique-section.hbs`,
   `${PATHS.templates}/actor/_partials/_kiho-section.hbs`,

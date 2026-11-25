@@ -84,34 +84,7 @@
   {{#if skills.length}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_skill-section.hbs"}}
   {{/if}}
-  {{#if (or weapons.length bows.length)}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_weapon-section.hbs"}}
-  {{/if}}
-  {{#if armors.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_armor-section.hbs"}}
-  {{/if}}
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-section.hbs"}}
-  {{#if spells.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-section.hbs"}}
-  {{/if}}
-  {{#if techniques.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_technique-section.hbs"}}
-  {{/if}}
-  {{#if kihos.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_kiho-section.hbs"}}
-  {{/if}}
-  {{#if katas.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_kata-section.hbs"}}
-  {{/if}}
-  {{#if tattoos.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_tattoo-section.hbs"}}
-  {{/if}}
-  {{#if advantages.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_advantage-section.hbs"}}
-  {{/if}}
-  {{#if disadvantages.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_disadvantage-section.hbs"}}
-  {{/if}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-sections.hbs" wealth=true}}
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_bio.hbs"}}
 
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_note-section.hbs" system=system actor=actor enriched=enriched editable=editable}}

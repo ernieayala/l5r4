@@ -325,30 +325,6 @@ export class RollHandler {
   }
 
   /**
-   * Roll an XkY pool from the clicked element's data-roll, data-keep, data-rolllabel, data-trait, and
-   * data-rolltype ("attack", "damage", or a plain roll).
-   * @param {object} context - Sheet context with `actor`
-   * @param {Event} event - Click event
-   * @returns {Promise<ChatMessage|null|undefined>}
-   */
-  static async rollNpcPool(context, event) {
-    event?.preventDefault?.();
-    const ds = event.currentTarget?.dataset || {};
-    const rollType = ds.rolltype || "simple";
-    const rollName = `${ds.rolllabel || ""} ${ds.trait || ""}`.trim();
-    return RollHandler.#rollOnce(`${context.actor.id}-simple-${rollType}-${rollName}`, () =>
-      rollPool({
-        roll: toInt(ds.roll),
-        keep: toInt(ds.keep),
-        rollName,
-        askForOptions: !event.shiftKey,
-        rollType,
-        actor: context.actor
-      })
-    );
-  }
-
-  /**
    * The item of the row the element sits in.
    * @param {Actor} actor
    * @param {HTMLElement} element

@@ -42,6 +42,10 @@
   </section>
 
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_skill-section.hbs"}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-sections.hbs"}}
+  {{#if (or bioClans.length bioFamilies.length bioSchools.length)}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_bio.hbs"}}
+  {{/if}}
 
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_note-section.hbs" system=system actor=actor enriched=enriched editable=editable}}
 </section>

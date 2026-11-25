@@ -22,7 +22,7 @@ How the PC, NPC, and item sheets compose components into one window: header, por
 | --- | --- | --- |
 | Header | Name (an input) with the recalculate control, Clan, School, Insight Rank with the GM's computed or typed switch, XP spent of total with the XP manager control, Insight; framed by the brush border (`foundations/frames.md` rule 7) | `l5r4-pc-info` (`templates/actor/_partials/_stats.hbs`) |
 | Rings | The five Ring medallions, the eight Traits with their rank controls, the Void Ring rank, and the Void Point dots | `templates/actor/_partials/_traits-rings.hbs`, included by `_stats.hbs` |
-| Sections | Skills, Weapons, Armor, Items, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages, Bio, Notes, in that order | `templates/actor/_partials/_stats.hbs`, one `_<noun>-section.hbs` each |
+| Sections | Skills, Weapons, Armor, Items, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages, Bio, Notes, in that order | `templates/actor/_partials/_stats.hbs`, one `_<noun>-section.hbs` each; Weapons to Disadvantages through `_item-sections.hbs` with `wealth=true` |
 | Sidebar | Portrait, then Honor, Glory, Status, and Taint, then Initiative and stances, Armor TN, and the Wound track | `l5r4-sheet-sidebar` (`templates/actor/pc.hbs`): `_ranks.hbs`, `_combat.hbs`, `_armor.hbs`, `_wounds.hbs` |
 
 ### NPC sheet
@@ -33,7 +33,7 @@ How the PC, NPC, and item sheets compose components into one window: header, por
 | --- | --- | --- |
 | Header | Name and, for a pack creature, its book citation (`l5r4-citation`); no Clan, School, Insight, or XP | `l5r4-pc-info` (`templates/actor/_partials/_stats-npc.hbs`) |
 | Rings | The same block; Void Point dots only when `showNpcVoidPoints` is set | `templates/actor/_partials/_traits-rings.hbs` with `showVoidPoints=@root.showNpcVoidPoints` (`templates/actor/_partials/_stats-npc.hbs`) |
-| Sections | Attacks (up to three, from `system.attack1` to `attack3`), Skills, Notes. Skills always renders | `templates/actor/_partials/_stats-npc.hbs` |
+| Sections | Attacks (up to three, from `system.attack1` to `attack3`), Skills, then every PC list section the NPC holds items for, then Bio when it holds a Clan, Family, or School, then Notes. Skills always renders; Items has no wealth, so it renders only with items. No item an NPC holds is hidden | `templates/actor/_partials/_stats-npc.hbs`, with `_item-sections.hbs` and `_bio.hbs` |
 | Sidebar | Portrait, Initiative and stances, Armor TN, Wound track, Fear. No rank blocks | `l5r4-sheet-sidebar` (`templates/actor/npc.hbs`): `_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs` |
 
 ### Item sheet
@@ -160,7 +160,7 @@ Non-conforming (modeled): an `is-active` class and `data-dir` attribute set afte
 
 ### 4. An empty list section is left out
 
-A list section renders only when its list has an entry (the `{{#if skills.length}}` guard and its siblings in `templates/actor/_partials/_stats.hbs`). A section with fields of its own (Items with wealth, Bio, Notes, the NPC's Attacks and Skills) always renders; when its list is empty it shows one italic line in the list's place (`foundations/states.md` rule 9), worded as `patterns/feedback.md` sets. The sort header renders only over a list with entries. Enforced by review; the gallery shows each section empty and full.
+A list section renders only when its list has an entry (the `{{#if skills.length}}` guard in `templates/actor/_partials/_stats.hbs` and its siblings in `_item-sections.hbs`). A section with fields of its own (the PC's Items with wealth, the PC's Bio, Notes, the NPC's Attacks and Skills) always renders; when its list is empty it shows one italic line in the list's place (`foundations/states.md` rule 9), worded as `patterns/feedback.md` sets. The sort header renders only over a list with entries. Enforced by review; the gallery shows each section empty and full.
 
 Conforming, `templates/actor/_partials/_item-section.hbs`: the header and list render inside `{{#if items.length}}`.
 
@@ -214,11 +214,13 @@ The partials below read their parent's context where no parameter is named on th
 | Partial | Parameters |
 | --- | --- |
 | `templates/actor/_partials/_stats.hbs` | The PC sheet context: `actor`, `system`, `traitsEff`, `collapsedSections`, item lists |
-| `templates/actor/_partials/_stats-npc.hbs` | The NPC sheet context: `actor`, `system`, `attacks`, `firstEmptyAttack`, `summary` |
+| `templates/actor/_partials/_stats-npc.hbs` | The NPC sheet context: `actor`, `system`, `attacks`, `firstEmptyAttack`, `summary`, `collapsedSections`, item lists, `bioClans`, `bioFamilies`, `bioSchools` |
+| `templates/actor/_partials/_item-sections.hbs` | The item lists (`PcContextBuilder.buildSortedItems` (`module/sheets/pc-context-builder.js`)), `collapsedSections`, `activeItemIds`; `wealth` on the PC sheet |
+| `templates/actor/_partials/_item-section.hbs` | `items`, `collapsedSections`, `system`; `wealth`, the koku, bu, and zeni fields and the wealth manager control |
 | `templates/actor/_partials/_<noun>-section.hbs` | Its list (`skills`, `weapons`, ...), `collapsedSections` |
 | `templates/actor/_partials/_expand.hbs` | `collapsed` |
 | `templates/actor/_partials/_unified-item-create.hbs` | None; the section's `data-scope` gives the type |
-| `templates/actor/_partials/_bio.hbs` | `bioClan`, `bioFamily`, `bioSchools` (each `{item, waitingFor}`, the first School first), `collapsedSections` |
+| `templates/actor/_partials/_bio.hbs` | `bioClans`, `bioFamilies`, `bioSchools` (each `{item, waitingFor}`, the first School first), `collapsedSections` (`PcContextBuilder.buildBioFields`) |
 | `templates/cards/<subtype>.hbs` | `name`, `type`, `system`, `inSheet`, `docId`; `ranged` on `weapon.hbs` |
 | `templates/cards/_partials/_controls.hbs` | None |
 | `templates/cards/_partials/_activate.hbs` | `active` |

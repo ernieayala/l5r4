@@ -89,7 +89,7 @@ export class ItemCrudHandler {
 
     const preferredType = this.getSectionItemType(element);
 
-    const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
+    const result = await Chat.getUnifiedItemOptions(preferredType);
 
     if (!result) {
       return [];

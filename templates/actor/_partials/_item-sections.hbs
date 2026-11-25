@@ -1,0 +1,34 @@
+{{!-- The item list sections the PC and NPC sheets share, from weapons to Disadvantages, each only when it has
+items (patterns/sheets.md rule 4), so no item an actor holds is hidden (#183). Parameters: the sheet context's lists
+(PcContextBuilder.buildSortedItems), and wealth (the PC's money, which keeps the items section, with its wealth fields,
+showing when it has no items). --}}
+{{#if (or weapons.length bows.length)}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_weapon-section.hbs"}}
+{{/if}}
+{{#if armors.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_armor-section.hbs"}}
+{{/if}}
+{{#if (or wealth items.length)}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-section.hbs"}}
+{{/if}}
+{{#if spells.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-section.hbs"}}
+{{/if}}
+{{#if techniques.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_technique-section.hbs"}}
+{{/if}}
+{{#if kihos.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_kiho-section.hbs"}}
+{{/if}}
+{{#if katas.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_kata-section.hbs"}}
+{{/if}}
+{{#if tattoos.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_tattoo-section.hbs"}}
+{{/if}}
+{{#if advantages.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_advantage-section.hbs"}}
+{{/if}}
+{{#if disadvantages.length}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_disadvantage-section.hbs"}}
+{{/if}}

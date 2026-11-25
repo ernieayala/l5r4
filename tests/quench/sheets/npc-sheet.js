@@ -13,6 +13,7 @@
  * - Skill sorting by the Roll and Emphasis heads
  * - NPC Attack Editor integration
  * - Roll/keep display formatting
+ * - Every item type in its section, read-only notes, and one portrait listener (#183)
  *
  */
 
@@ -621,6 +622,110 @@ export function registerNpcSheetTests(quench) {
             assert.equal(column().getAttribute("aria-pressed"), "true", "rank pressed");
           } finally {
             await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
+          }
+        });
+      });
+
+      describe("NPC sheet items, notes, and portrait (#183)", () => {
+        let actor, sheet;
+
+        beforeEach(async () => {
+          actor = await createTestNPC({ name: "NPC sheet: holding NPC" });
+          // A link that only enrichment turns into an anchor
+          await actor.update({ "system.notes": `Waits at @UUID[${actor.uuid}]{the bridge}` });
+          sheet = actor.sheet;
+        });
+
+        afterEach(async () => {
+          await sheet?.close({ animate: false });
+          await actor?.delete();
+        });
+
+        it("should show a row for every item the NPC holds, whatever its type", async () => {
+          const types = [
+            "weapon",
+            "armor",
+            "commonItem",
+            "spell",
+            "technique",
+            "kata",
+            "kiho",
+            "tattoo",
+            "advantage",
+            "disadvantage",
+            "clan",
+            "family",
+            "school"
+          ];
+          const items = await actor.createEmbeddedDocuments(
+            "Item",
+            types.map(type => ({ name: `Held ${type}`, type }))
+          );
+          await sheet.render(true);
+
+          for (const item of items) {
+            assert.exists(
+              sheet.element.querySelector(`[data-item-id="${item.id}"] [data-action="edit-item"]`),
+              `a ${item.type} row with its edit control`
+            );
+          }
+        });
+
+        it("should wire the weapon, spell slot, and activation controls the sections show", () => {
+          const actions = sheet.constructor.CLICK_ACTIONS;
+          for (const action of ["roll-weapon-damage", "adjust-spell-slot", "toggle-activation"]) {
+            assert.isFunction(actions[action], action);
+          }
+        });
+
+        it("should offer every section's item type in the Add dialog", async () => {
+          const html = await foundry.applications.handlebars.renderTemplate(
+            `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
+            { preferredType: "spell" }
+          );
+          // One root element, so parseHTML returns it [src: client/utils/helpers.mjs:382-389]
+          const select = foundry.utils.parseHTML(html).querySelector("select");
+          const values = [...select.options].map(option => option.value);
+          for (const type of [
+            "skill",
+            "weapon",
+            "armor",
+            "commonItem",
+            "spell",
+            "advantage",
+            "kiho"
+          ]) {
+            assert.include(values, type);
+          }
+          assert.equal(select.value, "spell", "the section's type preselected");
+        });
+
+        it("should show the notes as enriched text to a viewer who cannot edit the NPC", async () => {
+          Object.defineProperty(sheet, "isEditable", { get: () => false, configurable: true });
+          try {
+            await sheet.render(true);
+            assert.notExists(sheet.element.querySelector("prose-mirror"), "no editor");
+            const link = sheet.element.querySelector(`a[data-uuid="${actor.uuid}"]`);
+            assert.exists(link, "the notes' link, enriched");
+            assert.include(link.textContent, "the bridge");
+          } finally {
+            delete sheet.isEditable;
+          }
+        });
+
+        it("should open one image editor per portrait click, however often the sheet renders", async () => {
+          await sheet.render(true);
+          await sheet.render(true);
+          await sheet.render(true);
+          let opened = 0;
+          sheet._onEditImage = () => {
+            opened++;
+          };
+          try {
+            sheet.element.querySelector("[data-edit='img']").click();
+            assert.equal(opened, 1);
+          } finally {
+            delete sheet._onEditImage;
           }
         });
       });
