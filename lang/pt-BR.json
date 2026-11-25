@@ -625,7 +625,6 @@
         "explodes": "Dados explodem",
         "explodesHint": "Desligado para armas cujos dados de dano nunca explodem, como shuriken.",
         "fallbackTrait": "Atributo alternativo",
-        "meleeRange": "Arco contra um alvo ao alcance corpo a corpo",
         "minStrength": "Força mínima",
         "range": "Alcance",
         "rangedAttack": "Ataque à Distância",

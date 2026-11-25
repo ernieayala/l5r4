@@ -8,7 +8,7 @@
  * modifier keeps its label so the dialog lists it with a toggle and the card shows it.
  */
 
-import { ARROW_ARMOR_FACTOR, BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
+import { ARROW_ARMOR_FACTOR, RANGED_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getBagEntries } from "../../../utils/rule-bag.js";
@@ -191,7 +191,7 @@ function buildRuleQuery(actor, spec) {
 
 /**
  * The check's modifiers: its RollModifier rules; the target's OpponentModifier rules, tested from its side (its
- * options, with the roller as its target); Active Effect values in `system.bonuses`; and a bow's shot in melee range.
+ * options, with the roller as its target); Active Effect values in `system.bonuses`; and a ranged attack in melee range.
  * @param {Actor} actor
  * @param {object} spec - getCheckContext's spec
  * @param {object} query
@@ -200,7 +200,7 @@ function buildRuleQuery(actor, spec) {
  * @returns {CheckModifier[]}
  */
 function getCheckModifiers(actor, spec, { entriesOf, selectors }) {
-  const { kind, target, weapon } = spec;
+  const { kind, target } = spec;
   const modifiers = entriesOf("rollModifiers").map(entry => buildCheckModifier(entry));
   if (target?.ruleBag) {
     const theirs = buildCheckOptions(target, kind, { target: actor });
@@ -212,14 +212,15 @@ function getCheckModifiers(actor, spec, { entriesOf, selectors }) {
     }
   }
   modifiers.push(...getEffectBonusModifiers(actor, spec));
-  // A bow shot at a target in melee range is -10; the roller judges the range, so it starts unticked
-  // game-rules/74_weapons.md, p.199
-  if (kind === "attack" && weapon?.system.isBow) {
+  // Any ranged attack at a target within melee range is -10: bows, thrown weapons, any attack the roller marks ranged.
+  // The roller judges the range, so it starts unticked, and it drops out of a melee attack (#149)
+  // game-rules/32_attack_and_defense.md, p.82
+  if (kind === "attack") {
     modifiers.push({
-      label: T("l5r4.equipment.weapons.meleeRange"),
+      label: T("l5r4.equipment.weapons.rangedInMelee"),
       roll: 0,
       keep: 0,
-      total: BOW_IN_MELEE_PENALTY,
+      total: RANGED_IN_MELEE_PENALTY,
       enabled: false,
       range: "ranged",
       consumes: null

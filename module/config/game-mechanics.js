@@ -95,10 +95,10 @@ export const ARROW_MODS = Object.freeze({
 export const ARROW_ARMOR_FACTOR = Object.freeze({ armor: 0, flesh: 2 });
 
 /**
- * Change to the total of a bow attack on a target in melee range with the archer.
- * game-rules/74_weapons.md, p.199
+ * Change to the total of any ranged attack on a target within melee range.
+ * game-rules/32_attack_and_defense.md, p.82
  */
-export const BOW_IN_MELEE_PENALTY = -10;
+export const RANGED_IN_MELEE_PENALTY = -10;
 
 /**
  * NPC wound level configuration by rank.

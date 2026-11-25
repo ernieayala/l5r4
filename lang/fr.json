@@ -625,7 +625,6 @@
         "explodes": "Les dés explosent",
         "explodesHint": "Désactivé pour les armes dont les dés de dégâts n'explosent jamais, comme les shuriken.",
         "fallbackTrait": "Trait de repli",
-        "meleeRange": "Arc contre une cible à portée de mêlée",
         "minStrength": "Force minimum",
         "range": "Portée",
         "rangedAttack": "Attaque à Distance",

@@ -1444,7 +1444,7 @@ export function registerCombatTests(quench) {
                 tn: target.system.armorTn.current
               }).then(async message => (await answered, message));
             };
-            const label = T("l5r4.equipment.weapons.meleeRange");
+            const label = T("l5r4.equipment.weapons.rangedInMelee");
             const index = getCheckContext(actor, {
               kind: "attack",
               weapon: bow,
@@ -1453,6 +1453,37 @@ export function registerCombatTests(quench) {
             assert.isAtLeast(index, 0, "offered, unticked");
             assert.equal((await shoot({})).rolls[0].total, 36, "6k4 of nines");
             assert.equal((await shoot({ [`modifier.${index}`]: true })).rolls[0].total, 26);
+          })
+        );
+
+        // #149
+        // game-rules/32_attack_and_defense.md, p.82
+        it(
+          "should take -10 on any ranged attack at a target in melee range, and none on a melee attack",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const label = T("l5r4.equipment.weapons.rangedInMelee");
+            const index = getCheckContext(actor, {
+              kind: "attack",
+              weapon: katana,
+              target
+            }).modifiers.findIndex(m => m.label === label);
+            assert.isAtLeast(index, 0, "offered for a weapon that is not a bow");
+            const strike = choices => {
+              const answered = answerCheckDialog({ [`modifier.${index}`]: true, ...choices });
+              return rollCheck({
+                actor,
+                kind: "attack",
+                label: "Thrown katana",
+                base: { roll: 6, keep: 4 },
+                weapon: katana,
+                target,
+                tn: target.system.armorTn.current
+              }).then(async message => (await answered, message));
+            };
+            assert.equal((await strike({ isRanged: true })).rolls[0].total, 26, "thrown: -10");
+            assert.equal((await strike({ isRanged: false })).rolls[0].total, 36, "melee: none");
           })
         );
 

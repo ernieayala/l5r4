@@ -635,10 +635,10 @@
         "explodes": "Dice explode",
         "explodesHint": "Off for weapons whose damage dice never explode, such as shuriken.",
         "fallbackTrait": "Fallback Trait",
-        "meleeRange": "Bow at a target in melee range",
         "minStrength": "Minimum Strength",
         "range": "Range",
         "rangedAttack": "Ranged attack",
+        "rangedInMelee": "Ranged attack at a target in melee range",
         "size": "Size",
         "sizes": {
           "large": "Large",

@@ -625,7 +625,6 @@
         "explodes": "Würfel explodieren",
         "explodesHint": "Aus für Waffen, deren Schadenswürfel nie explodieren, etwa Shuriken.",
         "fallbackTrait": "Ersatz-Eigenschaft",
-        "meleeRange": "Bogen gegen ein Ziel in Nahkampfreichweite",
         "minStrength": "Mindeststärke",
         "range": "Reichweite",
         "rangedAttack": "Fernkampfangriff",

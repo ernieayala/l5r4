@@ -1032,7 +1032,11 @@ export function registerRollPipelineTests(quench) {
               trait: "agi",
               target
             });
-            assert.lengthOf(mounted.modifiers, 0);
+            assert.notDeepInclude(
+              mounted.modifiers.map(m => [m.roll, m.keep]),
+              [1, 0],
+              "no Mounted +1k0 against a mounted target"
+            );
           })
         );
 
