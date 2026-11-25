@@ -1754,6 +1754,7 @@
       "pages": "275, 277-279",
       "status": "automated",
       "code": [
+        "module/documents/actor/calculations/taint-system.js",
         "module/documents/actor/rules.js",
         "module/services/dice/check/chat-actions.js",
         "module/services/dice/check/roll-check.js",

@@ -493,6 +493,48 @@ export function registerRulesTests(quench) {
           })
         );
 
+        // #147
+        // game-rules/89_shadowlands_taint.md, p.278-279
+        // game-rules/31_combat_round.md, p.81
+        it(
+          "should add a Lost character's Taint Rank to the Initiative rolled, PC and NPC",
+          clean(async () => {
+            const pc = track(
+              await createTestPC({
+                name: "Rule engine: lost initiative",
+                system: { traits: { ref: 3 }, insight: { autoCalculate: false, rank: 2 } }
+              })
+            );
+            const npc = track(
+              await createTestNPC({
+                name: "Rule engine: lost initiative NPC",
+                system: { traits: { ref: 3 } }
+              })
+            );
+            const combat = await foundry.documents.Combat.implementation.create({ scene: null });
+            try {
+              const [pcCombatant, npcCombatant] = await combat.createEmbeddedDocuments(
+                "Combatant",
+                [{ actorId: pc.id }, { actorId: npc.id }]
+              );
+              const formulas = () => [
+                pcCombatant._getInitiativeFormula(),
+                npcCombatant._getInitiativeFormula()
+              ];
+              await pc.update({ "system.shadowTaint.rank": 4 });
+              await npc.update({ "system.shadowTaint.rank": 4 });
+              assert.deepEqual(formulas(), ["5d10xa10k3", "4d10xa10k3"], "Rank 4 is not Lost");
+              await pc.update({ "system.shadowTaint.rank": 5 });
+              await npc.update({ "system.shadowTaint.rank": 5 });
+              assert.deepEqual(formulas(), ["5d10xa10k3+5", "4d10xa10k3+5"], "Lost at Rank 5");
+              await pc.update({ "system.rings.void.rank": 6 });
+              assert.equal(formulas()[0], "5d10xa10k3", "a Ring at 6 holds out until Rank 7");
+            } finally {
+              await combat.delete();
+            }
+          })
+        );
+
         // Void Points held drop to a maximum the Taint lowers (#124)
         // game-rules/89_shadowlands_taint.md, p.278-279
         it(

@@ -23,11 +23,12 @@ import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
 import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
 import { isSecondSchool } from "../../utils/grants.js";
-import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
+import { getTaintEffects } from "../../utils/taint.js";
 import { getStackedModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { createRule } from "../../data/rules/rule-models.js";
 import { prepareInitialRollOptions, prepareRankRollOptions } from "./roll-options.js";
+import { prepareTaint } from "./calculations/taint-system.js";
 
 /** Rule problems already reported, so a bad rule warns once, not on every preparation. */
 const reported = new Set();
@@ -105,7 +106,7 @@ export function applyDerivedRules(actor, sys) {
   applyRuleModifiers(sys, out);
   prepareActorRuleOutputs(actor, out);
   applyInitiativeRollModifiers(sys, { bag: out.bag, options });
-  prepareMaxVoidPoints(sys);
+  prepareTaint(sys);
 }
 
 /**
@@ -276,18 +277,4 @@ function applyInitiativeRollModifiers(sys, { bag, options }) {
   sys.initiative.rollMod += onInitiative.roll;
   sys.initiative.keepMod += onInitiative.keep;
   sys.initiative.totalMod += onInitiative.total;
-}
-
-/**
- * Prepare the maximum Void Points: Taint Level 4 costs a Void Point from the maximum, not from the Void Ring; the
- * Lost have none.
- * game-rules/89_shadowlands_taint.md, p.278-279
- * @param {object} sys - The actor's prepared system data
- */
-function prepareMaxVoidPoints(sys) {
-  sys.rings.void.max = getMaxVoidPoints(
-    toInt(sys.rings.void.rank),
-    toInt(sys.shadowTaint.rank),
-    getHighestRing(sys.rings)
-  );
 }
