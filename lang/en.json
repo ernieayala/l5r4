@@ -1204,6 +1204,8 @@
           "armorReduction": "Reduction",
           "armorTn": "Armor TN",
           "armorTnBase": "Armor TN base",
+          "armorWorn": "From armor",
+          "armorWornHint": "The part of the Armor TN that is armor worn; Grappled and Stunned keep it.",
           "crippled": "Crippled",
           "down": "Down",
           "earthMultiplier": "Earth multiplier",

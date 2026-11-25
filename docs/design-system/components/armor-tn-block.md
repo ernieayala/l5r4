@@ -21,6 +21,7 @@ The sidebar block that shows how hard the actor is to hit and how much damage ar
 | Grid | `grid.md` | `l5r4-grid` |
 | Armor TN | PC: a `<span>`, then the Void toggle. NPC: `<input type="number" name="system.armor.armorTn" aria-label>` | none |
 | Void toggle | `<input type="checkbox" data-action="toggle-armor-void" data-tooltip aria-label>`, only with a Void Ring above 0 | none |
+| From armor | NPC only: `<input type="number" name="system.armor.bonus" min="0" aria-label data-tooltip>`, the part of the Armor TN that is armor worn, which Grappled, Stunned, and "ignores armor" effects read (`prepareNpcArmorTn` (`module/documents/actor/preparation/npc-preparation.js`)) | none |
 | Reduction | PC: a `<span>`. NPC: `<input type="number" name="system.armor.reduction" aria-label>` | none |
 
 ## Variants
@@ -28,7 +29,7 @@ The sidebar block that shows how hard the actor is to hit and how much damage ar
 | Variant | Selects it | Values |
 | --- | --- | --- |
 | PC | `actor.type` is `pc` | Computed text; the configuration window sets the armor worn and bonuses |
-| NPC | `actor.type` is `npc` | Number inputs the GM types |
+| NPC | `actor.type` is `npc` | Number inputs the GM types: Armor TN, how much of it is armor, and Reduction |
 
 ## States
 
@@ -82,4 +83,4 @@ Labels wrap in their cell; values are two digits.
 
 ## Names
 
-Fixed (Stage 17 decision 2): the stored `system.armor.armorTn` and `system.armor.reduction` fields and the `voidArmor` effect id.
+Fixed (Stage 17 decision 2): the stored `system.armor.armorTn`, `system.armor.reduction`, and `system.armor.bonus` fields and the `voidArmor` effect id.

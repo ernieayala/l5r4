@@ -1499,6 +1499,29 @@ export function registerCombatTests(quench) {
             assert.equal(rider.system.armorTn.current, 32);
           })
         );
+
+        // #152
+        // game-rules/41_conditional_effects.md, p.89
+        it(
+          "should keep an NPC's armor when Grappled or Stunned sets its Armor TN to 5 + armor",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({
+                name: "Combat armored NPC",
+                system: { armor: { armorTn: 18, bonus: 3, reduction: 1 } }
+              })
+            );
+            assert.deepInclude(npc.system.armorTn, { base: 15, bonus: 3, current: 18 });
+            for (const status of ["grappled", "stunned"]) {
+              await npc.toggleStatusEffect(status, { active: true });
+              assert.equal(npc.system.armorTn.current, 8, `${status}: 5 + 3 armor`);
+              await npc.toggleStatusEffect(status, { active: false });
+            }
+            await npc.update({ "system.armor.bonus": 0 });
+            await npc.toggleStatusEffect("grappled", { active: true });
+            assert.equal(npc.system.armorTn.current, 5, "no armor entered: 5");
+          })
+        );
       });
 
       // game-rules/31_combat_round.md, p.81

@@ -97,15 +97,21 @@ function prepareNpcInitiative(actor, sys) {
 }
 
 /**
- * Prepare the Armor TN: NPCs use simplified armor, one entered Armor TN with the armor in it, so it stands as the
- * base and armor adds 0; then the ArmorTN and Reduction rules.
+ * Prepare the Armor TN: an NPC has one entered Armor TN with its armor in it, and the GM enters how much of it is
+ * armor worn. That part is the armor bonus, so Grappled and Stunned (5 + armor) and "ignores armor" effects read it;
+ * the rest is the base (#152). Then the ArmorTN and Reduction rules. An Armor TN of 18 with 3 from armor is base 15
+ * and armor 3, so Grappled gives 8.
+ * game-rules/32_attack_and_defense.md, p.82
+ * game-rules/41_conditional_effects.md, p.89
  * @param {Actor} actor - The NPC actor
  * @param {object} sys - The actor's system data object (mutated in place)
  */
 function prepareNpcArmorTn(actor, sys) {
+  const armor = sys.armor.bonus;
+  const base = toInt(sys.armor?.armorTn ?? 0) - armor;
   sys.armorTn = sys.armorTn || {};
-  sys.armorTn.base = 0;
-  sys.armorTn.bonus = 0;
+  sys.armorTn.base = base;
+  sys.armorTn.bonus = armor;
   sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
-  applyArmorRules(actor, sys, { base: toInt(sys.armor?.armorTn ?? 0), armor: 0, other: 0 });
+  applyArmorRules(actor, sys, { base, armor, other: 0 });
 }
