@@ -573,8 +573,11 @@ export function registerXpManagerTests(quench) {
           ]);
           dialog = new XpManagerApplication(actor);
           await dialog.render(true);
+          // The server returns created items in no fixed order; the one counted second goes past the cap
+          const over = actor.system._xp.entries.find(entry => entry.overCap);
+          assert.equal(over?.overCap, 4, "6 + 8 is 4 past 10, in either order");
           const capped = game.i18n.localize("l5r4.character.experience.overCap", {
-            name: "Quench Phobia",
+            name: over.name,
             over: 4
           });
           assert.include(dialog.element.textContent, capped);
