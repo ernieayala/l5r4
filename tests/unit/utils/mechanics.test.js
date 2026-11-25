@@ -12,6 +12,7 @@ import {
   getEffectiveTrait,
   getRollParams,
   getWeaponSkillTrait,
+  getWeaponSkillChoices,
   ringRankOf,
   getHighestSchoolRank
 } from "../../../module/utils/mechanics.js";
@@ -678,5 +679,32 @@ describe("getWeaponSkillTrait", () => {
       const result = getWeaponSkillTrait(prepared(actor), weapon);
       expect(result.traitValue).toBe(3);
     });
+  });
+});
+
+describe("getWeaponSkillChoices", () => {
+  it("should offer each Skill by its name", () => {
+    expect(getWeaponSkillChoices(["Kenjutsu", "Kyujutsu"], "")).toEqual({
+      Kenjutsu: "Kenjutsu",
+      Kyujutsu: "Kyujutsu"
+    });
+  });
+
+  it("should key the Skill an attack matches without case by the stored text", () => {
+    expect(getWeaponSkillChoices(["Kenjutsu", "Kyujutsu"], "kenjutsu")).toEqual({
+      kenjutsu: "Kenjutsu",
+      Kyujutsu: "Kyujutsu"
+    });
+  });
+
+  it("should keep a stored Skill the owner lacks as its own choice", () => {
+    expect(getWeaponSkillChoices(["Kyujutsu"], "Kenjutsu")).toEqual({
+      Kyujutsu: "Kyujutsu",
+      Kenjutsu: "Kenjutsu"
+    });
+  });
+
+  it("should keep a stored Skill when the owner has no Skills", () => {
+    expect(getWeaponSkillChoices([], "kyujutsu")).toEqual({ kyujutsu: "kyujutsu" });
   });
 });

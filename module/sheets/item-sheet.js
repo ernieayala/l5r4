@@ -9,6 +9,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { F } from "../utils/localization.js";
 import { getSkillEmphases } from "../utils/emphases.js";
+import { getWeaponSkillChoices } from "../utils/mechanics.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import EmphasisManagerApplication from "../apps/emphasis-manager.js";
@@ -525,7 +526,8 @@ async function formatEnrichedFields(system, { secrets }) {
 
 /**
  * A weapon a PC owns lists the PC's skills, after "None", to associate one with the weapon for its attack rolls
- * (Kenjutsu with a katana, Kyujutsu with a yumi); any other item lists none.
+ * (Kenjutsu with a katana, Kyujutsu with a yumi), keeping the weapon's stored Skill (getWeaponSkillChoices); any
+ * other item lists none.
  * @param {Item} item
  * @returns {{skillOptions: Record<string, string>, hasCharacterSkills: boolean, isOwnedByCharacter: boolean}}
  */
@@ -533,15 +535,13 @@ function buildSkillOptions(item) {
   if (item.type !== "weapon" || item.parent?.type !== "pc") {
     return { hasCharacterSkills: false, isOwnedByCharacter: false, skillOptions: {} };
   }
-  const skills = item.parent.items.filter(i => i.type === "skill");
-  const skillOptions = {};
-  skillOptions[""] = game.i18n.localize("l5r4.ui.common.none");
+  const skillNames = item.parent.items.filter(i => i.type === "skill").map(i => i.name);
+  const skillOptions = {
+    "": game.i18n.localize("l5r4.ui.common.none"),
+    ...getWeaponSkillChoices(skillNames, item.system.associatedSkill)
+  };
 
-  for (const skill of skills) {
-    skillOptions[skill.name] = skill.name;
-  }
-
-  return { skillOptions, hasCharacterSkills: skills.length > 0, isOwnedByCharacter: true };
+  return { skillOptions, hasCharacterSkills: skillNames.length > 0, isOwnedByCharacter: true };
 }
 
 /**

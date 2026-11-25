@@ -176,6 +176,81 @@ export function registerItemSheetTests(quench) {
         });
       });
 
+      describe("Weapon Skill field", () => {
+        const clean = cleanTest(assert);
+        let actor, sheet;
+
+        /** Render a weapon's sheet, change its Minimum Strength, and wait for the save. */
+        const saveAnotherField = async weapon => {
+          sheet = weapon.sheet;
+          await sheet.render(true);
+          const field = sheet.element.querySelector('[name="system.minStrength"]');
+          field.value = "4";
+          field.dispatchEvent(new Event("change", { bubbles: true }));
+          assert.isTrue(await waitFor(() => weapon.system.minStrength === 4), "the sheet saved");
+        };
+
+        afterEach(async () => {
+          if (sheet?.rendered) {
+            await sheet.close({ animate: false });
+          }
+          sheet = null;
+          await actor?.delete();
+          actor = null;
+        });
+
+        it(
+          "should keep a PC weapon's Skill when its case differs from the PC's Skill",
+          clean(async () => {
+            actor = await createTestPC({ name: "Item sheet: Skill case" });
+            const [, weapon] = await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Kenjutsu", 2),
+              createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } })
+            ]);
+            await saveAnotherField(weapon);
+            assert.equal(
+              sheet.element.querySelector('[name="system.associatedSkill"]').value,
+              "kenjutsu"
+            );
+            assert.equal(weapon.system.associatedSkill, "kenjutsu");
+          })
+        );
+
+        it(
+          "should keep a PC weapon's Skill the PC lacks",
+          clean(async () => {
+            actor = await createTestPC({ name: "Item sheet: Skill lacked" });
+            const [, weapon] = await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Kyujutsu", 2),
+              createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } })
+            ]);
+            await saveAnotherField(weapon);
+            assert.equal(
+              sheet.element.querySelector('[name="system.associatedSkill"]').value,
+              "Kenjutsu"
+            );
+            assert.equal(weapon.system.associatedSkill, "Kenjutsu");
+          })
+        );
+
+        it(
+          "should let a GM set an NPC weapon's Skill",
+          clean(async () => {
+            actor = await Actor.create({ name: "Item sheet: NPC Skill", type: "npc" });
+            const [weapon] = await actor.createEmbeddedDocuments("Item", [
+              createWeaponData("Spear", 3, 2)
+            ]);
+            sheet = weapon.sheet;
+            await sheet.render(true);
+            const field = sheet.element.querySelector('[name="system.associatedSkill"]');
+            assert.isFalse(field.disabled, "the field is editable");
+            field.value = "Spears";
+            field.dispatchEvent(new Event("change", { bubbles: true }));
+            assert.isTrue(await waitFor(() => weapon.system.associatedSkill === "Spears"));
+          })
+        );
+      });
+
       describe("Armor item sheet", () => {
         let item, sheet;
 
