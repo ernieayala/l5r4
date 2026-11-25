@@ -71,7 +71,7 @@ Block, file, and page share one name: `scss/components/_<name>.scss` styles `.l5
 | [request-card.md](request-card.md) | A GM's request for a roll | Chat log |
 | [damage-result.md](damage-result.md) | Wounds dealt, Void reduction, undo | Chat log |
 | [effect-prompt.md](effect-prompt.md) | A save or check an effect asks for | Chat log |
-| [flow-card.md](flow-card.md) | A guided duel or grapple | Chat log |
+| [flow-card.md](flow-card.md) | A guided duel, grapple, or group Fear test | Chat log |
 | [item-summary-card.md](item-summary-card.md) | An item's rule lines and book citation | Chat log, sheets, browser |
 | [check-dialog.md](check-dialog.md) | Roll options before a check | `DialogV2` |
 | [ledger-dialog.md](ledger-dialog.md) | A change to Honor, Glory, Status, or Taint | `DialogV2` |

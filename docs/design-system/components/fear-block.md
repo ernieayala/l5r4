@@ -1,6 +1,6 @@
 # Fear block
 
-The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM types, and, when the rank is above 0, a button that rolls Fear for the selected tokens.
+The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM types, and, when the rank is above 0, a button that posts a Fear [flow card](flow-card.md) for the selected tokens.
 
 | Item | Detail |
 | --- | --- |
@@ -9,7 +9,7 @@ The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM ty
 | SCSS | None of its own: `section.md`, `grid.md`, and `button.md` draw it |
 | Block class | `l5r4-fear` on the section |
 | Shows in | NPC sidebar (`templates/actor/npc.hbs`) |
-| Handler | `NpcActionsHandler.testFear` (`module/sheets/handlers/npc-actions-handler.js`), then `onFearClick` (`module/services/fear.js`) |
+| Handler | `NpcActionsHandler.testFear` (`module/sheets/handlers/npc-actions-handler.js`), then `onFearClick` (`module/services/fear-card.js`) |
 | Game terms | Fear, Fear Rank (`game-rules/42_fear.md, p.90`) |
 | Gallery | Rank 0 (no button), rank 3, rank 10; the button hovered and focused |
 
@@ -40,7 +40,7 @@ The test button's label reads "Fear {rank}" (`l5r4.ui.mechanics.fear.label`), so
 | Rest | Grid and core button rest looks |  |
 | Hover | Core's button hover | `:hover` |
 | Focus-visible | Core's focus ring on the button; core's field outline on the input | `:focus-visible` |
-| No target | The button stays enabled; a press with no token selected warns `l5r4.ui.mechanics.fear.noTargets` from `onFearClick` (`module/services/fear.js`) | None |
+| No target | The button stays enabled; a press with no token selected warns `l5r4.ui.mechanics.fear.noTargets` from `startFearTest` (`module/services/fear-card.js`) | None |
 | Read-only | Core disables the input and the button on a sheet the viewer cannot edit (`button.md` B8) | Core's `disabled` |
 
 ## Tokens
@@ -52,7 +52,7 @@ None of its own. The test button is core's; it takes the block's full width, as 
 | Input | Result |
 | --- | --- |
 | Tab | Rank input, then the test button |
-| Enter or Space | On the button: rolls Fear for the selected tokens |
+| Enter or Space | On the button: posts the Fear card for the selected tokens |
 | Screen reader | The input reads "Fear Rank"; the button reads its label, "Fear 3"; its `data-tooltip` shows sighted users what it does |
 
 ## Long text
@@ -71,7 +71,7 @@ The button label is short ("Fear 3") and wraps inside the button if a translatio
 | # | Conforming | Non-conforming |
 | --- | --- | --- |
 | R1 | `<button type="button" class="l5r4-fear-test" data-action="test-fear" data-fear-rank="{{system.fear.rank}}" ...>` (modeled) | `<a class="button fear-test" data-action="test-fear" ...>` (modeled) |
-| R2 | "Roll Fear for the selected tokens": `l5r4.ui.mechanics.fear.rollForSelected` (`lang/en.json`) | "Click to test Fear against selected characters" (modeled) |
+| R2 | "Post a Fear test for the selected tokens": `l5r4.ui.mechanics.fear.rollForSelected` (`lang/en.json`) | "Click to test Fear against selected characters" (modeled) |
 | R3 | `aria-label="{{localize "l5r4.ui.mechanics.fear.rank"}}"` on the input (`templates/actor/_partials/_fear.hbs`) | The input with no `aria-label` (modeled) |
 | R4 | Heading `l5r4.ui.mechanics.fear.title`, "Fear", over the grid label `l5r4.ui.mechanics.fear.rank`, "Fear Rank" (`templates/actor/_partials/_fear.hbs`) | Heading "Fear Rank" over a grid label "Rank" (modeled) |
 

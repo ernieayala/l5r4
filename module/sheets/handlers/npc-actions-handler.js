@@ -6,7 +6,7 @@
  */
 
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
-import { onFearClick } from "../../services/fear.js";
+import { onFearClick } from "../../services/fear-card.js";
 import { askConfirm } from "../../services/dialog.js";
 import NpcAttackConfigApplication from "../../apps/npc-attack-config.js";
 
@@ -18,7 +18,7 @@ export class NpcActionsHandler {
   /**
    * Initiates a Fear resistance test against this NPC.
    *
-   * Triggers Fear tests for all currently selected tokens (excluding the NPC itself).
+   * Posts one Fear card for all currently selected tokens (excluding the NPC itself), from which each owner rolls.
    * Selected characters make Raw Willpower rolls vs TN (5 + 5×Fear Rank), adding their
    * Honor Rank to the roll.
    *

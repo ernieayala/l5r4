@@ -17,7 +17,7 @@ import { PATHS } from "./constants.js";
  * @property {string} weaponCard - Weapon attack roll display
  * @property {string} effectPrompt - A save, Full Defense roll, or Concentration check an effect asks for
  * @property {string} damageResult - Wounds a damage roll dealt, with Void reduction and Undo
- * @property {string} flowCard - A guided combat flow (iaijutsu duel, grapple)
+ * @property {string} flowCard - A guided flow (iaijutsu duel, grapple, a group's Fear test)
  * @property {string} healing - Healing action results
  * @property {string} checkRequest - A GM's request for a roll (module/services/check-request.js)
  * @property {string} itemSummary - An item card's rule lines and book citation (module/utils/rule-summary.js)

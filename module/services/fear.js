@@ -7,7 +7,8 @@
  * - Catastrophic Failure (fail by 15+): Character flees or cowers
  *
  * The roll goes through the roll pipeline (module/services/dice/check/roll-check.js) as a Willpower Trait roll, so
- * its card carries the TN, the outcome, and the stored context like every other roll.
+ * its card carries the TN, the outcome, and the stored context like every other roll. A group's test is the Fear card
+ * (module/services/fear-card.js).
  * game-rules/42_fear.md, p.90
  */
 
@@ -15,18 +16,9 @@ import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { getEffectiveTrait } from "../utils/mechanics.js";
-import { getFearTn } from "../utils/fear.js";
+import { isCatastrophicFear } from "../utils/fear.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
-
-/**
- * Failing the Fear roll by this much or more overwhelms the character.
- * game-rules/42_fear.md, p.90
- */
-const CATASTROPHIC_MARGIN = 15;
-
-/** Lock to prevent concurrent Fear test executions from multiple rapid clicks */
-let fearTestInProgress = false;
 
 /**
  * @typedef {object} FearTestOptions
@@ -34,24 +26,9 @@ let fearTestInProgress = false;
  * @property {number} tn - Target number to resist the Fear effect
  * @property {number} fearRank - Fear Rank of the effect (1-10)
  * @property {string} label - The card's label, naming the creature when there is one
+ * @property {boolean} [askForOptions=false] - Show the check dialog, where a Void Point or a modifier is the roller's
+ *   to choose (#151)
  */
-
-/**
- * Test a character against a Fear Rank with no creature behind it, as a Fear link does: TN 5 + 5 × Rank.
- * game-rules/42_fear.md, p.90
- * @param {object} options
- * @param {L5R4Actor} options.character
- * @param {number} options.fearRank - 1-10
- * @returns {Promise<ChatMessage|null>}
- */
-export function testFearRank({ character, fearRank }) {
-  return rollFearTest({
-    character,
-    tn: getFearTn(fearRank),
-    fearRank,
-    label: F("l5r4.ui.mechanics.fear.testResult", { rank: fearRank })
-  });
-}
 
 /**
  * Triggers a Fear test for a single character against an NPC's Fear effect
@@ -62,9 +39,10 @@ export function testFearRank({ character, fearRank }) {
  * @param {object} options - Test parameters
  * @param {L5R4Actor} options.npc - The creature with the Fear ability
  * @param {L5R4Actor} options.character - The character being tested
+ * @param {boolean} [options.askForOptions=false] - Show the check dialog
  * @returns {Promise<ChatMessage|null>} Created chat message, or null if invalid/failed
  */
-export async function testFear({ npc, character } = {}) {
+export async function testFear({ npc, character, askForOptions = false } = {}) {
   if (!npc || !character) {
     console.warn(`${SYS_ID}`, "Fear test: missing npc or character", { npc, character });
     return null;
@@ -80,74 +58,18 @@ export async function testFear({ npc, character } = {}) {
 
   const label = F("l5r4.ui.mechanics.fear.testLabel", { rank: fearRank, name: npc.name });
 
-  return rollFearTest({ character, tn, fearRank, label });
+  return rollFearTest({ character, tn, fearRank, label, askForOptions });
 }
 
 /**
- * Executes Fear tests for multiple characters against a single NPC
- *
- * Sequentially processes each character to maintain proper roll order
- * in the chat log. Displays warning if no valid characters provided.
- *
- * @param {object} options - Test parameters
- * @param {L5R4Actor} options.npc - The creature with the Fear ability
- * @param {L5R4Actor[]} options.characters - Array of characters to test
- * @returns {Promise<void>}
- */
-export async function testFearMultiple({ npc, characters } = {}) {
-  if (!npc || !characters || characters.length === 0) {
-    ui.notifications?.warn(T("l5r4.ui.mechanics.fear.noTargets"));
-    return;
-  }
-
-  for (const character of characters) {
-    await testFear({ npc, character });
-  }
-}
-
-/**
- * Handles Fear button clicks on NPC sheets
- *
- * Collects all controlled tokens (excluding the NPC itself) and triggers
- * Fear tests against them. Uses a lock to prevent concurrent executions
- * that could result in duplicate rolls or race conditions.
- *
- * Requires Foundry canvas with selected tokens.
- *
- * @param {object} options - Handler parameters
- * @param {L5R4Actor} options.npc - The creature triggering Fear
- * @returns {Promise<void>}
- */
-export async function onFearClick({ npc } = {}) {
-  if (!npc || fearTestInProgress) {
-    return;
-  }
-
-  fearTestInProgress = true;
-  try {
-    const selectedTokens = Array.from(canvas?.tokens?.controlled ?? []);
-    const characters = selectedTokens
-      .map(token => token.actor)
-      .filter(actor => actor && actor.id !== npc.id);
-
-    if (characters.length === 0) {
-      ui.notifications?.warn(T("l5r4.ui.mechanics.fear.noTargets"));
-      return;
-    }
-
-    await testFearMultiple({ npc, characters });
-  } finally {
-    fearTestInProgress = false;
-  }
-}
-
-/**
- * Roll a Fear test and, on a failure, give the character the Feared condition at the Fear Rank.
- *
+ * Roll a Fear test and, on a failure, give the character the Feared condition at the Fear Rank. A Void Point may be
+ * spent on it as on any Trait roll, through the dialog.
+ * game-rules/42_fear.md, p.90
+ * game-rules/25_rings_and_traits.md, p.78
  * @param {FearTestOptions} options - Fear test configuration
  * @returns {Promise<ChatMessage|null>} The roll's message, or null when the character cannot roll
  */
-async function rollFearTest({ character, tn, fearRank, label } = {}) {
+export async function rollFearTest({ character, tn, fearRank, label, askForOptions = false } = {}) {
   const willpower = getEffectiveTrait(character, "wil");
   if (willpower <= 0) {
     ui.notifications?.warn(F("l5r4.ui.mechanics.fear.noWillpower", { name: character.name }));
@@ -163,7 +85,7 @@ async function rollFearTest({ character, tn, fearRank, label } = {}) {
     trait: "wil",
     tn,
     modifiers: honorRank ? [{ label: T("l5r4.character.ranks.honorRank"), total: honorRank }] : [],
-    askForOptions: false,
+    askForOptions,
     beforePost: async result => buildFearLabel(result, { tn, fearRank }),
     after: async message => {
       if (message.system.outcome.success === false) {
@@ -185,9 +107,8 @@ function buildFearLabel({ success, total }, { tn, fearRank }) {
   if (success) {
     return {};
   }
-  const key =
-    total - tn <= -CATASTROPHIC_MARGIN
-      ? "l5r4.ui.mechanics.fear.catastrophicSuffix"
-      : "l5r4.ui.mechanics.fear.penaltySuffix";
+  const key = isCatastrophicFear(total, tn)
+    ? "l5r4.ui.mechanics.fear.catastrophicSuffix"
+    : "l5r4.ui.mechanics.fear.penaltySuffix";
   return { labelSuffix: F(key, { penalty: fearRank }) };
 }

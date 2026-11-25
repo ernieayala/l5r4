@@ -205,10 +205,10 @@ registerFlow("grapple", {
    * A button on the grapple card, on the clicking client.
    * @param {ChatMessage} _card
    * @param {object} state
-   * @param {DOMStringMap} dataset
+   * @param {{dataset: DOMStringMap}} press - The button pressed
    * @returns {Promise<object|null>}
    */
-  async click(_card, state, dataset) {
+  async click(_card, state, { dataset }) {
     const action = dataset.flowAction;
     const i = buttonSideOf(state, dataset);
     if (!sidesOf(state)[i]?.isOwner) {

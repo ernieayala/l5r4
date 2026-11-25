@@ -107,7 +107,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `needsRetroactiveUpdate` (modeled) | `needs` is not a predicate prefix | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`) |
 | `initializeCombat` (modeled) | Init entries use `register` | `registerCombatQueries` (`module/services/effects/combat-events.js`) |
 | `runIconPathMigration` (modeled) | Migrations use `migrate` | `migrateItemIcon` (`module/setup/migrations/icons/icon-paths.js`) |
-| `handleFearClick` (modeled) | Event handlers use `on` | `onFearClick` (`module/services/fear.js`) |
+| `handleFearClick` (modeled) | Event handlers use `on` | `onFearClick` (`module/services/fear-card.js`) |
 | `calculateInsightRank` (modeled) | A read by another verb | `getInsightRank` (`module/documents/actor/calculations/xp-system.js`) |
 | `createSkillData` (`tests/fixtures/item-fixtures.js`) | Returns plain data, not a document | `buildSkillData` |
 

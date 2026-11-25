@@ -1,6 +1,7 @@
 /**
  * @module services/combat/flow
- * @description Chat cards that run a multi-step combat flow (an iaijutsu duel, a grapple). The card's state lives in
+ * @description Chat cards that run a multi-step flow (an iaijutsu duel, a grapple, a group's Fear test). The card's
+ * state lives in
  * its flags; only the active GM makes and changes it, so a player's step goes to the GM as a query, the step checks
  * the requesting user and the roll it records (getFreshRoll), and the GM re-renders the card. A card's steps run one
  * at a time, each reading the card fresh, so two steps sent together are both kept (#164). The GM can always correct a
@@ -19,8 +20,9 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
 
 /**
  * @typedef {object} Flow
- * @property {function(ChatMessage, object, DOMStringMap): Promise<object|null>} click  On the clicking client: roll
- *   if the step needs it, and return the step to send, or null
+ * @property {function(ChatMessage, object, {dataset: DOMStringMap, shiftKey: boolean}): Promise<object|null>} click  On
+ *   the clicking client, with the button pressed and whether Shift was held: roll if the step needs it, and return the
+ *   step to send, or null
  * @property {function(object, DOMStringMap): Actor|null} actorOf  The actor a button acts for; the card shows the
  *   button only to that actor's owners (#112)
  * @property {function(object, {card: ChatMessage, data: object, user: User}): Promise<object>} step  On the GM:
@@ -114,8 +116,8 @@ export function canActFor(user, actor) {
 }
 
 /**
- * Wire a flow card's buttons: each `[data-flow-action]` calls the flow's `click(card, state, dataset)` on this
- * client, which rolls if needed and returns the step to send, or nothing.
+ * Wire a flow card's buttons: each `[data-flow-action]` calls the flow's `click(card, state, press)` on this client,
+ * which rolls if needed and returns the step to send, or nothing.
  * @param {ChatMessage} message
  * @param {HTMLElement} html
  */
@@ -130,18 +132,7 @@ export function bindFlowCards(message, html) {
   );
   hideUnusable(html, "[data-flow-gm]", () => game.user.isGM);
   for (const button of html.querySelectorAll("[data-flow-action]")) {
-    button.addEventListener("click", async event => {
-      event.preventDefault();
-      // No roll is made that no GM could record (#164)
-      if (!game.user.isGM && !game.users.activeGM) {
-        ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
-        return;
-      }
-      const step = await handler.click(message, flow.state, event.currentTarget.dataset);
-      if (step) {
-        await requestStep(message, step);
-      }
-    });
+    button.addEventListener("click", event => onFlowClick(event, message, handler));
   }
   for (const button of html.querySelectorAll("[data-flow-gm]")) {
     button.addEventListener("click", event => {
@@ -178,6 +169,28 @@ export function getFreshRoll(card, state, { rollId, actor, kinds }) {
 /** Register the GM side of flow steps. */
 export function registerFlowQueries() {
   registerGmQuery(FLOW_QUERY, (request, { user }) => applyFlowStep(request, user));
+}
+
+/**
+ * A flow button pressed on this client: the flow's `click` gets the button and whether Shift was held, then its step
+ * goes to the GM.
+ * @param {MouseEvent} event
+ * @param {ChatMessage} message - The flow card, its state as rendered
+ * @param {Flow} handler - The flow
+ * @returns {Promise<void>}
+ */
+async function onFlowClick(event, message, handler) {
+  event.preventDefault();
+  // No roll is made that no GM could record (#164)
+  if (!game.user.isGM && !game.users.activeGM) {
+    ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
+    return;
+  }
+  const press = { dataset: event.currentTarget.dataset, shiftKey: event.shiftKey };
+  const step = await handler.click(message, message.getFlag(SYS_ID, "flow").state, press);
+  if (step) {
+    await requestStep(message, step);
+  }
 }
 
 /**

@@ -19,7 +19,7 @@ import { getRollActor } from "./dice/resources/void-points.js";
 import { formatSkillLabel } from "./dice/rolls/skill-roll.js";
 import { buildSkillRequest } from "./combat/flow.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
-import { testFearRank } from "./fear.js";
+import { startFearTest } from "./fear-card.js";
 
 /**
  * The text a link shows when it has no `{label}`.
@@ -117,7 +117,7 @@ async function rollLink(spec) {
 }
 
 /**
- * Run a Condition or Fear link on its targets (getLinkTargets): the status applied, or a Fear test at the link's
+ * Run a Condition or Fear link on its targets (getLinkTargets): the status applied, or one Fear card at the link's
  * Rank.
  * @param {import("../utils/link-syntax.js").LinkSpec} spec - A Condition or Fear link
  * @returns {Promise<null>}
@@ -128,12 +128,13 @@ async function applyLinkToTargets(spec) {
     ui.notifications?.warn(T("l5r4.ui.links.noTargets"));
     return null;
   }
+  if (spec.type === "Fear") {
+    // One Fear card for every target, each owner rolling through the check dialog (#151)
+    await startFearTest({ characters: actors, fearRank: spec.rank });
+    return null;
+  }
   for (const actor of actors) {
-    if (spec.type === "Condition") {
-      await applyEffectAnywhere(actor, spec.condition);
-    } else {
-      await testFearRank({ character: actor, fearRank: spec.rank });
-    }
+    await applyEffectAnywhere(actor, spec.condition);
   }
   return null;
 }

@@ -183,7 +183,7 @@ function registerInterfaceHooks() {
 }
 
 /**
- * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple),
+ * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple, Fear),
  * the duel and Guard token controls, and the GM's "New session" control for once-per-session abilities.
  */
 function registerCombatHooks() {

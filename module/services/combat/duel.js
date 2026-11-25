@@ -252,10 +252,10 @@ registerFlow("duel", {
    * A button on the duel card: roll this stage for the duelist the user owns, or concede.
    * @param {ChatMessage} _card
    * @param {object} state
-   * @param {DOMStringMap} dataset
+   * @param {{dataset: DOMStringMap}} press - The button pressed
    * @returns {Promise<object|null>}
    */
-  async click(_card, state, dataset) {
+  async click(_card, state, { dataset }) {
     const i = Number(dataset.duelist);
     const { actor, opponent } = sidesOf(state, i);
     if (!actor?.isOwner) {

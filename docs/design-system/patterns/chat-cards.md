@@ -57,7 +57,7 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 | Damage result | Reduce with Void | `damage-void` | Wounds taken, no Void Point spent, not undone | The damaged actor's owner; removed for others |
 | Damage result | Undo | `damage-undo` | Not undone | The roller or the GM |
 | Effect prompt | Roll | `effect-prompt` | Always | The actor's owner |
-| Flow card | Each step of a duel or grapple | `data-flow-action` with `data-duelist`, `data-side` | The flow's state offers it | Checked on the GM's client per step |
+| Flow card | Each step of a duel, grapple, or group Fear test | `data-flow-action` with `data-duelist`, `data-side` | The flow's state offers it | Checked on the GM's client per step; a Fear roll through the dialog, Shift skipping it |
 | Request card | Roll with my character | `check-request-roll` | Always | Any user with a character or a controlled token |
 
 The check card's context menu adds "re-roll and keep the better" (the message's author) and "contest the previous roll" (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)). Those entries are core's context menu, not card markup.
