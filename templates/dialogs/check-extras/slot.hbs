@@ -8,6 +8,12 @@
     <option value="void" {{#if (eq slot "void")}}selected{{/if}} {{disabled (not voidSlots)}}>
       {{localize "l5r4.magic.spells.voidSlot"}} ({{voidSlots}})
     </option>
-    <option value="none" {{#if (eq slot "none")}}selected{{/if}}>{{localize "l5r4.ui.common.none"}}</option>
   </select>
 </div>
+{{!-- A cast spends a slot; with none left the GM is asked to allow it (#158) --}}
+{{#unless (or elementalSlots voidSlots)}}
+  <p class="l5r4-check-dialog-warning" role="note" data-no-slot>
+    <i class="l5r4-check-dialog-warning-icon fa-solid fa-triangle-exclamation" inert></i>
+    {{localize "l5r4.magic.spells.noSlotLeft" ring=ringName}}
+  </p>
+{{/unless}}
