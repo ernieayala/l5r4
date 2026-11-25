@@ -513,14 +513,14 @@ export function registerRulesTests(quench) {
             );
             const combat = await foundry.documents.Combat.implementation.create({ scene: null });
             try {
-              const [pcCombatant, npcCombatant] = await combat.createEmbeddedDocuments(
-                "Combatant",
-                [{ actorId: pc.id }, { actorId: npc.id }]
-              );
-              const formulas = () => [
-                pcCombatant._getInitiativeFormula(),
-                npcCombatant._getInitiativeFormula()
-              ];
+              // The combat returns its combatants in turn order, not the order given
+              const combatants = await combat.createEmbeddedDocuments("Combatant", [
+                { actorId: pc.id },
+                { actorId: npc.id }
+              ]);
+              const formulaOf = actor =>
+                combatants.find(c => c.actorId === actor.id)._getInitiativeFormula();
+              const formulas = () => [formulaOf(pc), formulaOf(npc)];
               await pc.update({ "system.shadowTaint.rank": 4 });
               await npc.update({ "system.shadowTaint.rank": 4 });
               assert.deepEqual(formulas(), ["5d10xa10k3", "4d10xa10k3"], "Rank 4 is not Lost");
