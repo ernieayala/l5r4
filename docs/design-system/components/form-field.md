@@ -53,7 +53,7 @@ Core field (apps, dialogs, item sheet):
 | Disabled | Core's disabled field; `data-tooltip` on the field says why | `disabled` |
 | Read-only | The value as text in `l5r4-form-field-value`, never a disabled input. On a sheet the viewer cannot edit, core disables inputs | Text |
 | Invalid | `aria-invalid="true"`; a message below in `--l5r4-color-danger` led by `fa-circle-exclamation`, in `l5r4-form-field-error` (the custom Emphasis name (`templates/dialogs/custom-emphasis-dialog.hbs`)) | `aria-invalid`, `aria-describedby` |
-| Warning | A `role="note"` line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, its words in `--l5r4-color-text` | `role="note"` |
+| Warning | A `role="note"` line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, its words in `--l5r4-color-text`; beside a value, the icon alone in `l5r4-form-field-warning` with its words in `data-tooltip` and `aria-label` (XP spent past the total, `templates/actor/_partials/_stats.hbs`) | `role="note"` |
 | Locked | The value as text with `fa-lock` beside it; `data-tooltip` names what holds it | Text and an `inert` `fa-lock` |
 | Empty | An input shows its placeholder in core's placeholder color; a read-only value shows an em dash | `placeholder`; `—` |
 

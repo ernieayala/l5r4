@@ -204,14 +204,19 @@ function formatProgression(label, fromValue, toValue) {
  * Extracts display name for item-based entries (advantages, disadvantages, kata, kiho).
  *
  * Tries itemName first, then note field, then fallback if neither exists.
- * Handles cases where entries may have incomplete data from older versions.
+ * Handles cases where entries may have incomplete data from older versions. A Disadvantage past the cap says how much
+ * of it the total leaves out (#145).
  *
  * @param {object} entry - Raw XP entry from calculator
  * @param {string} [entry.itemName] - Item name from actor.items
  * @param {string} [entry.note] - Legacy note field
+ * @param {number} [entry.overCap] - A Disadvantage's XP past the Disadvantage cap
  * @param {string} fallback - Fallback label if both fields missing
  * @returns {string} Display name for the entry
  */
 function formatItemEntry(entry, fallback) {
-  return entry.itemName || entry.note || fallback;
+  const name = entry.itemName || entry.note || fallback;
+  return entry.overCap
+    ? game.i18n.localize("l5r4.character.experience.overCap", { name, over: entry.overCap })
+    : name;
 }

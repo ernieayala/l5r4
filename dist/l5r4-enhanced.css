@@ -460,6 +460,10 @@ body > * {
   width: calc(100% - 2px);
 }
 
+.l5r4-form-field-warning {
+  color: var(--l5r4-color-warning);
+}
+
 .l5r4-form-field-error {
   color: var(--l5r4-color-danger);
   font-size: var(--l5r4-font-size-meta);
@@ -1968,6 +1972,10 @@ body > * {
 }
 .l5r4-xp-manager .l5r4-xp-manager-warning-icon {
   color: var(--l5r4-color-warning);
+}
+.l5r4-xp-manager .l5r4-xp-manager-error {
+  color: var(--l5r4-color-danger);
+  margin: 0;
 }
 .l5r4-xp-manager .l5r4-xp-manager-empty {
   font-style: italic;

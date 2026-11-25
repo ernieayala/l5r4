@@ -67,6 +67,16 @@
             {{#if system._xp}}
               <div class="l5r4-form-field-group flexrow -gap-md">
                 <span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>
+                {{#if system._xp.overspent}}
+                  {{!-- Spent past the total is the player's and GM's call: marked, never refused (#145) --}}
+                  <span
+                    class="flex0 l5r4-form-field-warning"
+                    role="note"
+                    data-xp-overspent
+                    data-tooltip="{{localize "l5r4.character.experience.overspent" over=system._xp.overspent}}"
+                    aria-label="{{localize "l5r4.character.experience.overspent" over=system._xp.overspent}}"
+                  ><i class="fa-solid fa-triangle-exclamation" inert></i></span>
+                {{/if}}
                 <button type="button" class="inline-control icon" data-action="open-xp-manager" data-tooltip="{{localize "l5r4.apps.xpManager.open"}}" aria-label="{{localize "l5r4.apps.xpManager.open"}}"><i class="fa-solid fa-chart-line" inert></i></button>
               </div>
             {{/if}}

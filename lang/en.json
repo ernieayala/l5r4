@@ -444,7 +444,9 @@
         "disadvantageCapInvalid": "Enter a whole number of 0 or more",
         "disadvantageCapTitle": "Set Disadvantage cap",
         "errors": {
-          "openFailed": "Failed to open XP manager"
+          "calculateFailed": "XP could not be calculated: {error}",
+          "openFailed": "Failed to open XP manager",
+          "writeFailed": "The XP change was not saved: {error}"
         },
         "noAdjustments": "No XP added or taken away by hand.",
         "noPurchases": "No XP spent yet.",
@@ -488,6 +490,8 @@
           "voidIncrease": "Void increase"
         },
         "note": "Note",
+        "overCap": "{name} ({over} XP over the Disadvantage cap, not counted)",
+        "overspent": "{over} XP spent past the total",
         "purchases": "Purchases",
         "reason": "Reason",
         "recalculate": "Recalculate XP purchases from current character state",

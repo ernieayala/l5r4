@@ -12,12 +12,8 @@ import {
   getCreationFreeBonus,
   getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
-import {
-  getCostPricer,
-  getKihoLimits,
-  getXpEntries,
-  getXpTotals
-} from "../../../utils/xp-ledger.js";
+import { getKihoLimits } from "../../../utils/kiho.js";
+import { getCostPricer, getXpEntries, getXpTotals } from "../../../utils/xp-ledger.js";
 
 /**
  * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25

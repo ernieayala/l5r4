@@ -6,8 +6,6 @@
  * rebuilt from the character as it is, not logged as purchases happen.
  */
 
-import { SYS_ID } from "../../config/constants.js";
-
 /**
  * One history record builder per ledger entry type that is not an item; historyRecordOf builds the rest.
  * @type {Readonly<Record<string, (entry: import("../../utils/xp-ledger.js").XpEntry) => object>>}
@@ -100,31 +98,25 @@ export function buildMergedXpHistory(existingSpent, retroactiveSpent) {
  *
  * @param {Actor} actor - A prepared PC
  * @returns {Promise<Array<object>>} History records: id, delta (XP spent; negative for a Disadvantage), note, type,
- *   ts, and per type traitLabel, skillName, emphasis, itemName, fromValue, toValue. Empty on an error, so the XP
- *   manager still opens.
+ *   ts, and per type traitLabel, skillName, emphasis, itemName, fromValue, toValue. A failure throws, so the XP
+ *   manager shows it rather than an empty history that looks real (#145).
  */
 export async function buildXpHistory(actor) {
-  try {
-    const now = Date.now();
-    const entries = actor.system._xp.entries;
-    const spent = [];
-    // The ledger lists purchases in a fixed order; synthetic timestamps keep that order in the history
-    entries.forEach((entry, i) => {
-      const record = historyRecordOf(entry);
-      if (record) {
-        spent.push({
-          id: foundry.utils.randomID(),
-          ...record,
-          ts: now - (entries.length - i) * 1000
-        });
-      }
-    });
-    return spent;
-  } catch (err) {
-    // Fail gracefully: return empty history rather than breaking the UI
-    console.warn(`${SYS_ID}`, "Failed to build XP history", err);
-    return [];
-  }
+  const now = Date.now();
+  const entries = actor.system._xp.entries;
+  const spent = [];
+  // The ledger lists purchases in a fixed order; synthetic timestamps keep that order in the history
+  entries.forEach((entry, i) => {
+    const record = historyRecordOf(entry);
+    if (record) {
+      spent.push({
+        id: foundry.utils.randomID(),
+        ...record,
+        ts: now - (entries.length - i) * 1000
+      });
+    }
+  });
+  return spent;
 }
 
 /**
@@ -137,6 +129,10 @@ function historyRecordOf(entry) {
   if (Object.hasOwn(HISTORY_RECORD_BUILDERS, entry.type)) {
     return HISTORY_RECORD_BUILDERS[entry.type](entry);
   }
-  const { type, name, delta } = entry;
-  return delta === 0 ? null : { delta, type, itemName: name, note: name };
+  const { type, name, delta, overCap } = entry;
+  if (delta === 0) {
+    return null;
+  }
+  // A Disadvantage past the cap keeps how much of it the total leaves out, which the history shows (#145)
+  return { delta, type, itemName: name, note: name, ...(overCap ? { overCap } : {}) };
 }

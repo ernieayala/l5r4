@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  getCostPricer,
-  getKihoLimits,
-  getXpEntries,
-  getXpTotals
-} from "../../../module/utils/xp-ledger.js";
+import { getCostPricer, getXpEntries, getXpTotals } from "../../../module/utils/xp-ledger.js";
 
 /**
  * Every Trait at the starting rank 2, no bonus, no discount.
@@ -172,41 +167,50 @@ describe("getXpTotals", () => {
   });
 });
 
-// game-rules/80_brotherhood_of_shinsei.md, p.231
-describe("getKihoLimits", () => {
-  const kiho = (school, other) => [
-    ...Array.from({ length: school }, () => ({ schoolKiho: true })),
-    ...Array.from({ length: other }, () => ({ schoolKiho: false }))
-  ];
-
-  it("should give a Monk School its starting kiho, two more a Rank, and a bonus kiho a Rank", () => {
-    expect(getKihoLimits([{ kiho: 3, rank: 1 }], kiho(3, 1))).toEqual({
-      school: 3,
-      schoolAllowed: 3,
-      bonus: 1,
-      bonusAllowed: 1
-    });
-    expect(getKihoLimits([{ kiho: 3, rank: 3 }], kiho(7, 0))).toMatchObject({
-      schoolAllowed: 7,
-      bonusAllowed: 3
-    });
+// #145
+// game-rules/63_advantages_and_disadvantages.md, p.145
+describe("Disadvantage XP past the cap", () => {
+  const build = (costs, cap = 10) => ({
+    base: 40,
+    manual: 0,
+    disadvantageCap: cap,
+    traits: [],
+    void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+    skills: [],
+    items: costs.map((cost, i) => ({ id: `d${i}`, type: "disadvantage", name: `D${i}`, cost }))
   });
 
-  it("should give the Temples of the Thousand Fortunes four starting kiho", () => {
-    expect(getKihoLimits([{ kiho: 4, rank: 1 }], kiho(4, 0)).schoolAllowed).toBe(4);
+  it("should mark the XP each Disadvantage gives past the cap, in order", () => {
+    const entries = getXpEntries(build([6, 8]));
+    expect(entries.map(e => e.overCap)).toEqual([undefined, 4]);
+    expect(getXpTotals(build([6, 8]), entries).breakdown.disadvantagesGranted).toBe(10);
   });
 
-  it("should count only Monk Schools, and none for a character without one", () => {
-    expect(getKihoLimits([{ kiho: 0, rank: 2 }], kiho(0, 1))).toBeNull();
-    expect(
-      getKihoLimits(
-        [
-          { kiho: 3, rank: 2 },
-          { kiho: 0, rank: 1 }
-        ],
-        kiho(5, 2)
-      )
-    ).toMatchObject({ schoolAllowed: 5, bonusAllowed: 2 });
+  it("should mark a whole Disadvantage once the cap is reached", () => {
+    expect(getXpEntries(build([10, 3])).map(e => e.overCap)).toEqual([undefined, 3]);
+  });
+
+  it("should mark nothing at or under the cap", () => {
+    expect(getXpEntries(build([4, 6])).some(e => e.overCap)).toBe(false);
+  });
+});
+
+describe("XP spent past the total", () => {
+  it("should give how far spending goes past the total, and 0 within it", () => {
+    const traits = [{ key: "agi", stored: 5, freeBase: 0, bonus: 0, discount: 0 }];
+    const b = {
+      base: 40,
+      manual: 0,
+      disadvantageCap: 10,
+      traits,
+      void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+      skills: [],
+      items: []
+    };
+    // Agility 2 to 5 costs 12 + 16 + 20 = 48 against 40
+    expect(getXpTotals(b, getXpEntries(b))).toMatchObject({ spent: 48, overspent: 8 });
+    b.manual = 10;
+    expect(getXpTotals(b, getXpEntries(b)).overspent).toBe(0);
   });
 });
 

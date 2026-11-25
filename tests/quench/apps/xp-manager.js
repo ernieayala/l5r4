@@ -497,6 +497,111 @@ export function registerXpManagerTests(quench) {
           assert.isAtLeast(insight.rank, 1, "Insight rank at least 1");
         });
       });
+
+      // #145
+      describe("XP manager errors, overspending, and the Disadvantage cap", () => {
+        let actor, dialog;
+        const notices = [];
+        let notify;
+
+        beforeEach(async () => {
+          notify = ui.notifications.notify;
+          ui.notifications.notify = function (message, type, options = {}) {
+            notices.push(`${type}: ${message}`);
+            return notify.call(this, message, type, { ...options, console: false });
+          };
+          actor = await createTestPC({ name: "XP manager: #145" });
+        });
+
+        afterEach(async () => {
+          ui.notifications.notify = notify;
+          notices.length = 0;
+          if (dialog?.rendered) {
+            await dialog.close({ animate: false });
+          }
+          await actor?.delete();
+        });
+
+        it("should show an error, not numbers, when the XP cannot be calculated", async () => {
+          dialog = new XpManagerApplication(actor);
+          const error = console.error;
+          Object.defineProperty(actor.system, "_xp", {
+            configurable: true,
+            get: () => {
+              throw new Error("Quench: no XP");
+            }
+          });
+          console.error = () => {};
+          try {
+            await dialog.render(true);
+          } finally {
+            delete actor.system._xp;
+            console.error = error;
+          }
+          const shown = dialog.element.querySelector("[role='alert']");
+          assert.exists(shown, "an error state");
+          assert.include(
+            shown.textContent,
+            game.i18n.localize("l5r4.apps.xpManager.errors.calculateFailed", {
+              error: "Quench: no XP"
+            })
+          );
+          assert.notExists(dialog.element.querySelector("[data-xp-total]"), "no total shown");
+        });
+
+        it("should mark XP spent past the total on the sheet and in the window", async () => {
+          await actor.update({ "system.traits.agi": 5 });
+          const over = actor.system._xp.overspent;
+          assert.isAbove(over, 0, "Agility 5 costs past the starting 40");
+          const text = game.i18n.localize("l5r4.character.experience.overspent", { over });
+          dialog = new XpManagerApplication(actor);
+          await dialog.render(true);
+          assert.include(dialog.element.querySelector("[role='note']").textContent, text);
+          await actor.sheet.render({ force: true });
+          try {
+            const mark = actor.sheet.element.querySelector("[data-xp-overspent]");
+            assert.equal(mark?.dataset.tooltip, text, "the sheet marks it");
+          } finally {
+            await actor.sheet.close({ animate: false });
+          }
+        });
+
+        it("should say a Disadvantage past the cap is not all counted", async () => {
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Quench Doubt", type: "disadvantage", system: { cost: 6 } },
+            { name: "Quench Phobia", type: "disadvantage", system: { cost: 8 } }
+          ]);
+          dialog = new XpManagerApplication(actor);
+          await dialog.render(true);
+          const capped = game.i18n.localize("l5r4.character.experience.overCap", {
+            name: "Quench Phobia",
+            over: 4
+          });
+          assert.include(dialog.element.textContent, capped);
+        });
+
+        it("should say an XP change that could not be saved was not", async () => {
+          dialog = new XpManagerApplication(actor);
+          await dialog.render(true);
+          const setFlag = actor.setFlag;
+          const error = console.error;
+          actor.setFlag = () => Promise.reject(new Error("Quench: refused"));
+          console.error = () => {};
+          try {
+            dialog.element.querySelector("[data-field='xp-amount']").value = "3";
+            dialog.element.querySelector("[data-action='add-xp']").click();
+            await waitFor(() => notices.length > 0);
+          } finally {
+            actor.setFlag = setFlag;
+            console.error = error;
+          }
+          assert.deepEqual(notices, [
+            `error: ${game.i18n.localize("l5r4.apps.xpManager.errors.writeFailed", {
+              error: "Quench: refused"
+            })}`
+          ]);
+        });
+      });
     },
     { displayName: "L5R4: XP manager" }
   );
