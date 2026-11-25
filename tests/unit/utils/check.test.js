@@ -111,6 +111,22 @@ describe("buildPool", () => {
     expect(pool({ roll: 4, keep: 2, keepOverride: 1 })).toMatchObject({ keep: 1 });
     expect(pool({ roll: 4, keep: 2, keepOverride: 3 })).toMatchObject({ keep: 2 });
   });
+
+  // #150: the Ten Dice Rule's +2s stay when the roller keeps fewer (Ernie's ruling)
+  // game-rules/26_special_dice_rules.md, p.77
+  it("should keep the roller's fewer dice after the Ten Dice Rule, its +2s staying", () => {
+    expect(pool({ roll: 12, keep: 4, keepOverride: 3 })).toMatchObject({
+      roll: 10,
+      keep: 3,
+      bonus: 0
+    });
+    expect(pool({ roll: 12, keep: 4, keepOverride: 6 })).toMatchObject({ roll: 10, keep: 5 });
+    expect(pool({ roll: 14, keep: 12, keepOverride: 3 })).toMatchObject({
+      roll: 10,
+      keep: 3,
+      bonus: 12
+    });
+  });
 });
 
 describe("getPoolFormula", () => {

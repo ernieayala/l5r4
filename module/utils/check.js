@@ -37,7 +37,8 @@ import { applyTenDiceRule } from "./ten-dice.js";
  * Build the dice pool for a check: the base pool plus enabled modifiers, stacked as the sheet stacks them, and a
  * Void Point (+1k1), then the Ten Dice Rule last, which also keeps no more dice than are rolled. Unskilled dice
  * never explode. A Skill of 4 with a Trait of 3 builds 7k3: `{ roll: 7, keep: 3, bonus: 0, explode: 10,
- * rerollOnes: false }`. A keep override keeps fewer dice than the pool allows.
+ * rerollOnes: false }`. A keep override keeps fewer dice than the pool allows after the Ten Dice Rule: 12k4 keeping
+ * 3 is 10k3, and 14k12 keeping 3 is 10k3+12.
  * game-rules/23_roll_and_keep.md, p.75
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/26_special_dice_rules.md, p.77
@@ -53,7 +54,8 @@ import { applyTenDiceRule } from "./ten-dice.js";
  * @param {boolean} [spec.unskilled=false] - An Unskilled Roll
  * @param {number} [spec.explode=10] - Explode threshold before the unskilled rule
  * @param {boolean} [spec.rerollOnes=false] - Re-roll 1s once
- * @param {number|null} [spec.keepOverride] - Keep fewer dice than the pool allows; ignored when not lower
+ * @param {number|null} [spec.keepOverride] - Keep fewer dice than the pool allows, at least 1; ignored when not
+ *   lower
  * @param {boolean} [spec.littleTruths=false] - The Little Truths Ten Dice exception (see applyTenDiceRule)
  * @returns {CheckPool} The pool
  */
@@ -69,18 +71,13 @@ export function buildPool({
   keepOverride = null,
   littleTruths = false
 }) {
-  const { rolled, kept, flat } = getModifiedPool({
-    roll,
-    keep,
-    bonus,
-    modifiers,
-    voidPoint,
-    keepOverride
-  });
+  const { rolled, kept, flat } = getModifiedPool({ roll, keep, bonus, modifiers, voidPoint });
   const ten = applyTenDiceRule(rolled, kept, { bonus: flat, littleTruths });
+  // The roller's keep is the last word on kept dice, so the Ten Dice Rule's conversions cannot add any back (#150).
+  // Its +2s stand for dice past the ten-dice limit, not dice kept, so they stay (Ernie's ruling, #150)
   return {
     roll: ten.roll,
-    keep: ten.keep,
+    keep: keepOverride ? Math.min(ten.keep, keepOverride) : ten.keep,
     bonus: ten.bonus,
     explode: unskilled ? null : explode,
     rerollOnes
@@ -213,7 +210,7 @@ export function parseRollAndKeep(text) {
 
 /**
  * A check's pool before the Ten Dice Rule: the base pool plus the enabled modifiers, stacked as the sheet stacks
- * them, and a Void Point (+1k1), then a lower keep override.
+ * them, and a Void Point (+1k1).
  * game-rules/25_rings_and_traits.md, p.78
  * @param {object} spec - buildPool's parts of the same names
  * @param {number} spec.roll
@@ -221,20 +218,11 @@ export function parseRollAndKeep(text) {
  * @param {number} spec.bonus
  * @param {PoolModifier[]} spec.modifiers
  * @param {boolean} spec.voidPoint
- * @param {number|null} spec.keepOverride
  * @returns {{rolled: number, kept: number, flat: number}} Rolled and kept dice, and the flat bonus
  */
-function getModifiedPool({ roll, keep, bonus, modifiers, voidPoint, keepOverride }) {
+function getModifiedPool({ roll, keep, bonus, modifiers, voidPoint }) {
   const added = getStackedModifiers(modifiers.filter(modifier => modifier.enabled !== false));
-  let rolled = roll + added.roll;
-  let kept = keep + added.keep;
   const flat = bonus + added.total;
-  if (voidPoint) {
-    rolled += 1;
-    kept += 1;
-  }
-  if (keepOverride !== null && keepOverride !== undefined && keepOverride < kept) {
-    kept = Math.max(0, keepOverride);
-  }
-  return { rolled, kept, flat };
+  const extra = voidPoint ? 1 : 0;
+  return { rolled: roll + added.roll + extra, kept: keep + added.keep + extra, flat };
 }
