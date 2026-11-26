@@ -271,6 +271,38 @@ describe("contest", () => {
     ).toMatchObject({ winner: "a", tie: false });
   });
 
+  // #166, Ernie's ruling: both sides falling short of their Raises is a tie
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should call a tie when both sides fall short of their Raises", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 40, raises: 2 },
+        { id: "b", total: 32, raises: 1 }
+      ])
+    ).toMatchObject({ winner: null, tie: true });
+  });
+
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should give the win to a side that makes its Raises when the other side raised too", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 40, raises: 1 },
+        { id: "b", total: 32, raises: 1 }
+      ])
+    ).toMatchObject({ winner: "a", tie: false });
+  });
+
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should drop a raiser who falls short and give the win to the best of the rest", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 50, raises: 3 },
+        { id: "b", total: 40 },
+        { id: "c", total: 30 }
+      ]).winner
+    ).toBe("b");
+  });
+
   // game-rules/29_types_of_rolls.md, p.80
   it("should pick the highest of several", () => {
     expect(

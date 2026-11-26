@@ -113,8 +113,8 @@ function applyControlRoll(state, sides, { card, data, user }) {
     actor: sides[i],
     kinds: ["skill"]
   });
-  state.rolls[i] = roll.system.outcome.total;
-  if (state.rolls.every(total => total !== null)) {
+  state.rolls[i] = { total: roll.system.outcome.total, raises: roll.system.tn.raises };
+  if (state.rolls.every(entry => entry !== null)) {
     applyControlContest(state, sides);
   }
 }
@@ -128,7 +128,14 @@ function applyControlRoll(state, sides, { card, data, user }) {
  * @param {Actor[]} sides - The two sides
  */
 function applyControlContest(state, sides) {
-  const result = getContestResult(state.rolls.map((total, side) => ({ id: String(side), total })));
+  // Each side's declared Raises count (#166); a card from 4.0.0 stored a control roll as its bare total
+  const result = getContestResult(
+    state.rolls.map((entry, side) => ({
+      id: String(side),
+      total: typeof entry === "number" ? entry : entry.total,
+      raises: typeof entry === "number" ? 0 : entry.raises
+    }))
+  );
   if (result.tie) {
     state.log.push(T("l5r4.ui.check.contestTie"));
   } else {

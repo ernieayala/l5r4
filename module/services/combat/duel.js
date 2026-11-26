@@ -7,7 +7,7 @@
  *   duelist may concede here.
  * - Focus: a Contested Iaijutsu / Void roll (+5 at Iaijutsu 5, a Mastery Ability); beating the opponent by 5 or
  *   more wins the first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic
- *   (simultaneous).
+ *   (simultaneous). Raises declared on Focus must be beaten by 5 each too, or the strike is kharmic (#166).
  * - Strike: Iaijutsu / Reflexes attacks against the opponent's Armor TN, posted as attacks, so damage follows
  *   through the attack card. Once a first strike hits, the struck duelist may yield, which ends the duel, or strike
  *   back, which a duel to first blood counts dishonorable (Ernie's ruling, Stage 18 decision 18).
@@ -18,6 +18,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { CONTEST_MARGIN_PER_RAISE } from "../../config/game-mechanics.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
@@ -221,20 +222,30 @@ function updateStage(state) {
     state.facts = totals.map(t => (t.success ? 1 + t.raises : 0));
     state.stage = "focus";
   } else if (state.stage === "focus") {
-    const [a, b] = totals.map(t => t.total);
-    const margin = Math.abs(a - b);
-    if (margin < FOCUS_STEP) {
-      state.firstStrike = null;
-      state.freeRaises = 0;
-    } else {
-      state.firstStrike = a > b ? 0 : 1;
-      state.freeRaises = Math.floor((margin - FOCUS_STEP) / FOCUS_STEP);
-    }
+    applyFocusResult(state, totals);
     state.stage = "strike";
   } else {
     state.stage = "done";
   }
   return state;
+}
+
+/**
+ * Settle Focus: the duelist ahead by 5 or more strikes first, with a Free Raise per further 5. A duelist who declared
+ * Raises must also be ahead by 5 per Raise, or he fails and the strike is kharmic; his Free Raises still count from
+ * the whole margin (Ernie's ruling, #166).
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ * game-rules/29_types_of_rolls.md, p.80
+ * @param {object} state - The duel's state, changed in place
+ * @param {Array<{total: number, raises: number}>} focus - Each duelist's Focus roll
+ */
+function applyFocusResult(state, focus) {
+  const ahead = focus[0].total >= focus[1].total ? 0 : 1;
+  const margin = focus[ahead].total - focus[1 - ahead].total;
+  const needed = Math.max(FOCUS_STEP, CONTEST_MARGIN_PER_RAISE * toInt(focus[ahead].raises));
+  const won = margin >= needed;
+  state.firstStrike = won ? ahead : null;
+  state.freeRaises = won ? Math.floor((margin - FOCUS_STEP) / FOCUS_STEP) : 0;
 }
 
 registerFlow("duel", {

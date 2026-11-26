@@ -10,6 +10,7 @@
  * game-rules/33_wounds.md, p.82
  */
 
+import { CONTEST_MARGIN_PER_RAISE } from "../config/game-mechanics.js";
 import { getStackedModifiers } from "./modifier-stacking.js";
 import { applyTenDiceRule } from "./ten-dice.js";
 
@@ -166,20 +167,22 @@ export function getCheckResult(total, tn) {
 
 /**
  * Resolve a Contested Roll: the highest result wins. A roller who declared Raises must beat each opponent by 5 per
- * Raise or fail, so each total counts as total - 5 × Raises. A margin of exactly 5 per Raise is enough (Ernie's
- * ruling, 2026-11-14): a raiser level with the best count wins. Any other equal best counts are a tie, which is
- * re-rolled. So 22 with one Raise counts as 17: it loses to 18 and beats 17, a margin of exactly 5.
+ * Raise or fail; a margin of exactly 5 per Raise is enough (Ernie's ruling, 2026-11-14). A roller who fails drops out,
+ * and the highest total among the rest wins, so 22 with one Raise beats 17 and loses to 18. With no one left, as when
+ * both sides fall short of their Raises, or with the best totals level, it is a tie, which is re-rolled (Ernie's
+ * ruling, #166): 40 with 2 Raises against 32 with 1 Raise is a tie.
  * game-rules/29_types_of_rolls.md, p.80
  * @param {Array<{id: string, total: number, raises?: number}>} entries
- * @returns {{winner: string|null, tie: boolean, scores: Record<string, number>}}
+ * @returns {{winner: string|null, tie: boolean}}
  */
 export function getContestResult(entries) {
-  const scores = Object.fromEntries(entries.map(e => [e.id, e.total - 5 * (e.raises ?? 0)]));
-  const best = Math.max(...Object.values(scores));
-  const leaders = entries.filter(e => scores[e.id] === best);
-  const raisers = leaders.filter(e => (e.raises ?? 0) > 0);
-  const winner = leaders.length === 1 ? leaders[0] : raisers.length === 1 ? raisers[0] : null;
-  return winner ? { winner: winner.id, tie: false, scores } : { winner: null, tie: true, scores };
+  const standing = entries.filter(e => {
+    const margin = CONTEST_MARGIN_PER_RAISE * (e.raises ?? 0);
+    return margin === 0 || entries.every(o => o === e || e.total - o.total >= margin);
+  });
+  const best = Math.max(...standing.map(e => e.total));
+  const leaders = standing.filter(e => e.total === best);
+  return leaders.length === 1 ? { winner: leaders[0].id, tie: false } : { winner: null, tie: true };
 }
 
 /**

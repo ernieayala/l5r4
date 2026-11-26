@@ -820,6 +820,33 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #166: a side's declared Raises must be beaten by 5 each, or that side fails the contest
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should count the attacker's declared Raises in Contested Strength",
+          clean(async function () {
+            // Two roll dialogs and the verdict can outrun Mocha's 2 s default
+            this.timeout(10_000);
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            // The attacker's dialog opens first, then the target's
+            const answered = answerCheckDialog({ raises: 2 }).then(() => answerCheckDialog());
+            await rollContest(hit);
+            await answered;
+            assert.equal(contestRollsOf(hit).attacker.system.tn.raises, 2);
+            const loser = F("l5r4.ui.check.contestWinner", { name: target.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(loser)),
+              "Strength 3 (27) beats Strength 2 (18) by 9, short of the 10 two Raises need"
+            );
+            assert.isFalse(target.statuses.has("prone"));
+          })
+        );
+
         // #165: a connected player's side is theirs to roll, Void Point and Raises included
         // game-rules/25_rings_and_traits.md, p.78
         it(
@@ -1146,6 +1173,31 @@ export function registerCombatTests(quench) {
             );
           })
         );
+
+        // #166: Raises declared on a control roll must be beaten by 5 each
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should give control to the other side when the higher roll falls short of its Raises",
+          clean(async () => {
+            const { actor } = await attacker();
+            const target = await defender();
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const raised = answerCheckDialog({ raises: 2 });
+            await click(card, "[data-flow-action='control'][data-side='0']");
+            await raised;
+            await waitFor(() => state().rolls[0] !== null);
+            const plain = answerCheckDialog();
+            await click(card, "[data-flow-action='control'][data-side='1']");
+            await plain;
+            assert.isTrue(await waitFor(() => state().log.length === 2), "the contest settled");
+            assert.equal(
+              state().control,
+              1,
+              "Jiujutsu 1 + Strength 3 (27) beats Strength 2 (18) by 9, short of the 10 two Raises need"
+            );
+          })
+        );
       });
 
       // game-rules/39_iaijutsu_dueling.md, p.87-88
@@ -1194,6 +1246,45 @@ export function registerCombatTests(quench) {
               "the strike carries the sword's damage"
             );
             assert.include(strike.content, "check-damage", "5k3 of nines (27) hits Armor TN 20");
+          })
+        );
+
+        // #166, Ernie's ruling: Raises declared on Focus gate the first strike; Free Raises count the whole margin
+        // game-rules/39_iaijutsu_dueling.md, p.87
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should make a Focus kharmic when the duelist ahead falls short of his declared Raises",
+          clean(async () => {
+            const { actor } = await attacker([], 3);
+            const target = await defender();
+            const card = await startDuel(actor, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.assessment[0] !== null);
+              await click(card, "[data-flow-action='roll'][data-duelist='1']");
+              await waitFor(() => state().stage === "focus");
+            } finally {
+              stop();
+            }
+            const raised = answerCheckDialog({ raises: 2 });
+            await click(card, "[data-flow-action='roll'][data-duelist='0']");
+            await raised;
+            await waitFor(() => state().rolls.focus[0] !== null);
+            const plain = answerCheckDialog();
+            await click(card, "[data-flow-action='roll'][data-duelist='1']");
+            await plain;
+            assert.isTrue(await waitFor(() => state().stage === "strike"));
+            const [a, b] = state().rolls.focus.map(r => r.total);
+            assert.deepEqual(
+              [a, b],
+              [27, 18],
+              "Iaijutsu 2 + Void 3: 5k3; Iaijutsu 1 + Void 2: 3k2"
+            );
+            assert.equal(state().rolls.focus[0].raises, 2);
+            assert.isNull(state().firstStrike, "ahead by 9, short of the 10 two Raises need");
+            assert.equal(state().freeRaises, 0);
           })
         );
 

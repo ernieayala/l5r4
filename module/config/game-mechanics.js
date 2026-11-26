@@ -60,6 +60,14 @@ export const RIDING_ARMOR_MOUNTED_BONUS = 8;
 export const TN_PER_RAISE = 5;
 
 /**
+ * How much a roller who declared Raises on a Contested Roll must beat each opponent by, per Raise.
+ * game-rules/29_types_of_rolls.md, p.80
+ * @type {number}
+ * @constant
+ */
+export const CONTEST_MARGIN_PER_RAISE = 5;
+
+/**
  * Maximum number of Raises allowed on a single roll.
  * System enforces this limit to prevent excessive Raise calls.
  * @type {number}
