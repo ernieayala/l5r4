@@ -11,18 +11,19 @@
  * - Break: the grapple ends;
  * - Pass: keep control.
  * A weapon grappler who loses control gives the opponent two Free Raises for a Disarm next Turn; the card says so.
+ * The control rolls and their contest are in grapple-control.js.
  * game-rules/40_grappling.md, p.88-89
  * game-rules/29_types_of_rolls.md, p.80
  */
 
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { T, F } from "../../utils/localization.js";
-import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { getCheckContext } from "../dice/check/collect.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { applyEffect, effectsOf } from "../effects/apply.js";
 import { registerFlow, canActFor, buildSkillRequest, getFreshRoll } from "./flow.js";
+import { applyControlReplacement, applyControlRoll } from "./grapple-control.js";
 
 /**
  * The grapple status both sides carry.
@@ -109,62 +110,6 @@ function rollHit(state) {
     explode: weapon?.explode ?? 10,
     target: other
   });
-}
-
-/**
- * Record a side's control roll in the state, after checking the side and the roll are the user's; once both sides
- * have rolled, settle the Contested Roll.
- * game-rules/40_grappling.md, p.88
- * @param {object} state - The grapple's state, changed in place
- * @param {Actor[]} sides - The two sides
- * @param {{card: ChatMessage, data: object, user: User}} step - The grapple card, the step the clicking client sent,
- *   and the requesting user
- */
-function applyControlRoll(state, sides, { card, data, user }) {
-  const i = Number(data.side);
-  // An empty slot only: a side rolls control once until both have (#162)
-  if (![0, 1].includes(i) || !canActFor(user, sides[i]) || state.rolls[i] !== null) {
-    throw new Error("l5r4.ui.requests.notYourSide");
-  }
-  const roll = getFreshRoll(card, state, {
-    rollId: data.rollId,
-    actor: sides[i],
-    kinds: ["skill"]
-  });
-  state.rolls[i] = { total: roll.system.outcome.total, raises: roll.system.tn.raises };
-  if (state.rolls.every(entry => entry !== null)) {
-    applyControlContest(state, sides);
-  }
-}
-
-/**
- * Settle the control rolls as a Contested Roll: a tie changes nothing, otherwise the winner takes control, and a
- * weapon grappler who loses it is told the opponent gains Free Raises for a Disarm. The rolls are cleared.
- * game-rules/40_grappling.md, p.88-89
- * game-rules/29_types_of_rolls.md, p.80
- * @param {object} state - The grapple's state, changed in place
- * @param {Actor[]} sides - The two sides
- */
-function applyControlContest(state, sides) {
-  // Each side's declared Raises count (#166); a card from 4.0.0 stored a control roll as its bare total
-  const result = getContestResult(
-    state.rolls.map((entry, side) => ({
-      id: String(side),
-      total: typeof entry === "number" ? entry : entry.total,
-      raises: typeof entry === "number" ? 0 : entry.raises
-    }))
-  );
-  if (result.tie) {
-    state.log.push(T("l5r4.ui.check.contestTie"));
-  } else {
-    const winner = Number(result.winner);
-    if (state.weapon && state.control === 0 && winner === 1) {
-      state.log.push(F("l5r4.ui.combat.grapple.weaponLost", { name: sides[1].name }));
-    }
-    state.control = winner;
-    state.log.push(F("l5r4.ui.combat.grapple.inControl", { name: sides[winner].name }));
-  }
-  state.rolls = [null, null];
 }
 
 /**
@@ -270,7 +215,21 @@ registerFlow("grapple", {
       return state;
     }
     await applyControllerAction(state, sides, { card, data, user });
+    // The controller acted on the control the contest gave: it can no longer be settled again (#169)
+    state.settled = null;
     return state;
+  },
+
+  /**
+   * A roll that replaces a recorded control roll (on the GM): it takes the original's place while its pair is still
+   * open, or settles the last contest again while no one has rolled or acted since (#169, Ernie's ruling).
+   * game-rules/43_honor.md, p.92
+   * @param {object} state
+   * @param {{originalId: string, roll: ChatMessage}} replacement
+   * @returns {Promise<object|null>} null when a later step depends on the original
+   */
+  async replace(state, replacement) {
+    return applyControlReplacement(state, sidesOf(state), replacement) ? state : null;
   },
 
   /**

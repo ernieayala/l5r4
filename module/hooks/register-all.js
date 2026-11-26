@@ -31,6 +31,7 @@ import {
   bindCheckCard,
   onGetChatMessageContextOptions
 } from "../services/dice/check/chat-actions.js";
+import { onUpdateActorHonorRoll } from "../services/dice/check/honor-roll.js";
 import { bindPromptCard } from "../services/effects/prompts.js";
 import { bindCheckRequestCard } from "../services/check-request.js";
 import { bindInitiativeRequestCard } from "../services/initiative-request.js";
@@ -154,6 +155,8 @@ function registerChatCardHooks() {
   Hooks.on("chatMessage", onChatMessage);
   Hooks.on("renderChatMessageHTML", bindCheckCard);
   Hooks.on("getChatMessageContextOptions", onGetChatMessageContextOptions);
+  // A used Honor Roll leaves every card of its actor (#169)
+  Hooks.on("updateActor", onUpdateActorHonorRoll);
 
   // Effect prompt cards: the owner's roll button
   Hooks.on("renderChatMessageHTML", bindPromptCard);

@@ -38,6 +38,9 @@ const ASSESSMENT_EDGE = 10;
  */
 const FOCUS_STEP = 5;
 
+/** The duel's stages in order. */
+const STAGES = Object.freeze(["assessment", "focus", "strike", "done"]);
+
 /**
  * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel; the GM may let one
  * fight anyway (#223).
@@ -207,6 +210,20 @@ function sidesOf(state, i) {
 }
 
 /**
+ * A duel roll as the state records it: its message, total, outcome, and declared Raises.
+ * @param {ChatMessage} roll
+ * @returns {{id: string, total: number, success: boolean|null, raises: number}}
+ */
+function recordOf(roll) {
+  return {
+    id: roll.id,
+    total: roll.system.outcome.total,
+    success: roll.system.outcome.success,
+    raises: roll.system.tn.raises
+  };
+}
+
+/**
  * Settle a stage once both duelists have rolled it.
  * @param {object} state
  * @returns {object}
@@ -314,11 +331,33 @@ registerFlow("duel", {
     }
     const kinds = state.stage === "strike" ? ["attack"] : ["skill"];
     const roll = getFreshRoll(card, state, { rollId: data.rollId, actor, kinds });
-    state.rolls[state.stage][i] = {
-      total: roll.system.outcome.total,
-      success: roll.system.outcome.success,
-      raises: roll.system.tn.raises
-    };
+    state.rolls[state.stage][i] = recordOf(roll);
+    return updateStage(state);
+  },
+
+  /**
+   * A roll that replaces a duelist's recorded one (on the GM): it takes the original's place, and its stage settles
+   * again, while the stage is open or the next has no roll yet and no one has conceded (#169, Ernie's ruling).
+   * game-rules/43_honor.md, p.92
+   * @param {object} state
+   * @param {{originalId: string, roll: ChatMessage}} replacement
+   * @returns {Promise<object|null>} null when a later step depends on the original
+   */
+  async replace(state, { originalId, roll }) {
+    const stage = STAGES.find(s => s !== "done" && state.rolls[s].some(r => r?.id === originalId));
+    const next = STAGES[STAGES.indexOf(stage) + 1];
+    // Settled, not ended by the GM: both rolled it, and the stage after it has no roll
+    const settled =
+      state.stage === next &&
+      state.rolls[stage].every(r => r !== null) &&
+      (next === "done" || state.rolls[next].every(r => r === null));
+    const open = stage === state.stage || settled;
+    if (!stage || !open || state.conceded !== null) {
+      return null;
+    }
+    const i = state.rolls[stage].findIndex(r => r?.id === originalId);
+    state.rolls[stage][i] = recordOf(roll);
+    state.stage = stage;
     return updateStage(state);
   },
 

@@ -5,11 +5,14 @@
  * its flags; only the active GM makes and changes it, so a player's step goes to the GM as a query, the step checks
  * the requesting user and the roll it records (getFreshRoll), and the GM re-renders the card. A card's steps run one
  * at a time, each reading the card fresh, so two steps sent together are both kept (#164). The GM can always correct a
- * card: Redo clears the step in play and End stops the flow, even when a participant is gone (#164, #223).
+ * card: Redo clears the step in play and End stops the flow, even when a participant is gone (#164, #223). A roll
+ * that replaces a recorded one (an Honor Roll, a re-roll keeping the better) takes its place while no later step
+ * depends on it (#169).
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { T } from "../../utils/localization.js";
+import { CHAT_TEMPLATES } from "../../config/templates.js";
+import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
@@ -27,6 +30,9 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
  *   button only to that actor's owners (#112)
  * @property {function(object, {card: ChatMessage, data: object, user: User}): Promise<object>} step  On the GM:
  *   check the user, return the new state
+ * @property {function(object, {originalId: string, roll: ChatMessage}): Promise<object|null>} replace  On the GM:
+ *   put a roll that replaces a recorded one (an Honor Roll, a re-roll keeping the better) in its place and settle its
+ *   stage again; null when a later step already depends on the original (#169)
  * @property {function(object): object} redo  On the GM: the state with the step in play cleared
  * @property {function(object): Promise<object>} end  On the GM: the state ended, its statuses cleared
  * @property {function(object): Promise<string>} render  The card's HTML for a state
@@ -166,6 +172,38 @@ export function getFreshRoll(card, state, { rollId, actor, kinds }) {
   return roll;
 }
 
+/**
+ * Send a roll that replaces another (an Honor Roll, a re-roll keeping the better) to every flow card that recorded the
+ * original, so each puts it in the original's place (#169, Ernie's ruling).
+ * game-rules/43_honor.md, p.92
+ * @param {ChatMessage} original - The roll replaced
+ * @param {ChatMessage} replacement - The roll that replaces it
+ * @returns {Promise<void>}
+ */
+export async function applyRerollToFlows(original, replacement) {
+  const cards = game.messages.filter(card =>
+    (card.getFlag(SYS_ID, "flow")?.state.usedRolls ?? []).includes(original.id)
+  );
+  for (const card of cards) {
+    await requestStep(card, { action: "replace", of: original.id, rollId: replacement.id });
+  }
+}
+
+/**
+ * Tell the table a roll came too late to replace the one a flow or contest recorded: a later step already depends on
+ * it, so the GM corrects the card with Redo (#169).
+ * @param {Actor|null} actor - The roller
+ * @returns {Promise<ChatMessage>}
+ */
+export async function postReplacedTooLate(actor) {
+  return ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.note, {
+      lines: [F("l5r4.ui.requests.replacedTooLate", { name: actor?.name ?? "?" })]
+    })
+  });
+}
+
 /** Register the GM side of flow steps. */
 export function registerFlowQueries() {
   registerGmQuery(FLOW_QUERY, (request, { user }) => applyFlowStep(request, user));
@@ -234,11 +272,63 @@ async function updateFlowCard({ messageId, data }, user) {
       throw new Error("l5r4.ui.requests.gmCorrects");
     }
     next = data.action === "redo" ? handler.redo(state) : await handler.end(state);
+  } else if (data?.action === "replace") {
+    next = await applyFlowReplacement(handler, state, { data, user });
   } else {
     next = await handler.step(state, { card, data, user });
+  }
+  if (!next) {
+    return;
   }
   await card.update({
     content: await handler.render(next),
     [`flags.${SYS_ID}.flow.state`]: next
   });
+}
+
+/**
+ * A replacement step on the GM: the roll is checked, the user must act for its roller, and the flow puts it in the
+ * original's place. When a later step depends on the original, the table is told and the card stays as it is (#169).
+ * game-rules/43_honor.md, p.92
+ * @param {Flow} handler - The card's flow
+ * @param {object} state - The flow's state, read fresh
+ * @param {{data: object, user: User}} step - The step and the requesting user
+ * @returns {Promise<object|null>} The new state, or null when the card stays as it is
+ */
+async function applyFlowReplacement(handler, state, { data, user }) {
+  const { original, roll } = getReplacementRoll(state, data);
+  const actor = fromUuidSync(roll.system.actorUuid) ?? null;
+  if (!canActFor(user, actor)) {
+    throw new Error("l5r4.ui.requests.notReplacement");
+  }
+  const next = await handler.replace(state, { originalId: original.id, roll });
+  if (!next) {
+    await postReplacedTooLate(actor);
+  }
+  return next;
+}
+
+/**
+ * The roll that replaces one the flow recorded, checked on the GM: a roll message that names the original as the roll
+ * it re-rolled, by the same actor, the original recorded by this flow and the replacement not yet. The flow's state
+ * keeps it in `usedRolls`.
+ * @param {object} state - The flow's state, whose `usedRolls` gains the replacement
+ * @param {{of: string, rollId: string}} data - The step: the original and the replacement (from another client)
+ * @returns {{original: ChatMessage, roll: ChatMessage}}
+ */
+function getReplacementRoll(state, data) {
+  const used = state.usedRolls ?? [];
+  const original = used.includes(String(data.of)) ? game.messages.get(String(data.of)) : null;
+  const roll = game.messages.get(String(data.rollId));
+  const replaces =
+    Boolean(original) &&
+    roll?.type === "roll" &&
+    [roll.system.honorRollOf, roll.system.rerollOf].includes(original.id) &&
+    roll.system.actorUuid === original.system.actorUuid &&
+    !used.includes(roll.id);
+  if (!replaces) {
+    throw new Error("l5r4.ui.requests.notReplacement");
+  }
+  state.usedRolls = [...used, roll.id];
+  return { original, roll };
 }

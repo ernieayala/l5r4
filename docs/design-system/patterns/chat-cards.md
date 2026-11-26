@@ -63,6 +63,8 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 
 The check card's context menu adds "re-roll and keep the better" (the message's author) and "contest the previous roll" (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)). Those entries are core's context menu, not card markup.
 
+A re-roll and an Honor Roll take the original's place in the duel, grapple, Fear card, or Knockdown or Disarm contest that recorded it, and that stage settles again while no later step depends on the original; otherwise a note says it came too late and the GM corrects the card (`applyReroll` (`module/services/combat/replacement.js`)). A used Honor Roll redraws every card of its actor, so its button leaves them all (`onUpdateActorHonorRoll` (`module/services/dice/check/honor-roll.js`)).
+
 A button that starts something leaves the card saying so (#140): a hit says its damage was rolled and offers "Roll damage again", a damage roll lists each actor it was applied to and offers "Apply to {target} again", and an applied condition or a started grapple disables its button with the reason in `data-tooltip` (`components/check-card.md`). Repeating an action stays possible where the table needs it, as a button that names the repeat. The Contested Strength roll tells the clicking user whose roll it waits for, or that it is settled (`formatContestState` (`module/services/combat/contest.js`)).
 
 ## Fixed names

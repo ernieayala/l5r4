@@ -15,6 +15,7 @@ import { getContestResult, getCheckResult, getPoolFormula } from "../../../utils
 import { hideUnusable } from "../../../utils/dom.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage-roll.js";
+import { applyReroll } from "../../combat/replacement.js";
 import { hasHonorToCall, renderCheckCard, updateCheckCardUse } from "./card.js";
 import { hasHonorRollLeft, rollHonor } from "./honor-roll.js";
 
@@ -35,7 +36,8 @@ export async function rollDamageFromMessage(message, options = {}) {
 
 /**
  * Re-roll a check with the same pool and keep the better total, as an ability that grants a re-roll allows. No
- * Void Point is spent again; the TN and Raises stand.
+ * Void Point is spent again; the TN and Raises stand. The re-roll takes the original's place in the duel, grapple, Fear
+ * test, or contest that recorded it (#169).
  * @param {ChatMessage} message - A `roll` message
  * @returns {Promise<ChatMessage|null>}
  */
@@ -60,12 +62,14 @@ export async function rollAgainKeepBetter(message) {
     rerollOf: message.id
   };
   const content = await renderCheckCard(system, kept, { actorId: actor.id });
-  return foundry.dice.Roll.fromData(kept.toJSON()).toMessage({
+  const posted = await foundry.dice.Roll.fromData(kept.toJSON()).toMessage({
     type: "roll",
     system,
     speaker: message.speaker,
     content
   });
+  await applyReroll(message, posted);
+  return posted;
 }
 
 /**

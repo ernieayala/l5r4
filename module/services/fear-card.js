@@ -14,6 +14,7 @@ import { F, T } from "../utils/localization.js";
 import { getFearTn, isCatastrophicFear } from "../utils/fear.js";
 import { hasActivePlayer } from "../utils/ownership.js";
 import { canActFor, getFreshRoll, registerFlow, requestStep, startFlow } from "./combat/flow.js";
+import { effectsOf } from "./effects/apply.js";
 import { rollFearTest } from "./fear.js";
 
 /** Lock to prevent concurrent Fear test executions from multiple rapid clicks */
@@ -138,6 +139,33 @@ registerFlow("fear", {
   },
 
   /**
+   * A roll that replaces a character's recorded one (on the GM): each character's test stands alone, so it always
+   * takes the original's place. A test that now resists ends the Feared condition the failure gave at this Rank (#169).
+   * game-rules/42_fear.md, p.90
+   * game-rules/43_honor.md, p.92
+   * @param {object} state
+   * @param {{originalId: string, roll: ChatMessage}} replacement
+   * @returns {Promise<object|null>} null when the card holds no such roll
+   */
+  async replace(state, { originalId, roll }) {
+    const i = state.results.findIndex(result => result?.id === originalId);
+    if (i < 0) {
+      return null;
+    }
+    const failed = !state.results[i].success;
+    state.results[i] = fearRecordOf(roll);
+    const character = fromUuidSync(state.characters[i] ?? "");
+    if (failed && state.results[i].success && character) {
+      const feared = effectsOf(character, "feared").filter(e => e.system.level === state.fearRank);
+      await character.deleteEmbeddedDocuments(
+        "ActiveEffect",
+        feared.map(e => e.id)
+      );
+    }
+    return state;
+  },
+
+  /**
    * The GM's Redo: clear the last roll recorded, so that character rolls again. A Feared condition it gave stays for
    * the GM to remove.
    * @param {object} state
@@ -226,10 +254,19 @@ async function rollFearForUnplayed(card) {
  * @returns {object} The state
  */
 function applyFearRoll(state, i, roll) {
-  const { total, success } = roll.system.outcome;
-  state.results[i] = { total, success: Boolean(success) };
+  state.results[i] = fearRecordOf(roll);
   state.order.push(i);
   return state;
+}
+
+/**
+ * A Fear roll as the card records it: its message, total, and whether it resisted.
+ * @param {ChatMessage} roll
+ * @returns {{id: string, total: number, success: boolean}}
+ */
+function fearRecordOf(roll) {
+  const { total, success } = roll.system.outcome;
+  return { id: roll.id, total, success: Boolean(success) };
 }
 
 /**

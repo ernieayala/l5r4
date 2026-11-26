@@ -12,12 +12,22 @@ import { buildPool, getCheckResult, getPoolFormula } from "../../../utils/check.
 import { getTaintEffects } from "../../../utils/taint.js";
 import { askGmAllow } from "../../gm-allow.js";
 import { applyTrackChange } from "../../ledger.js";
+import { applyReroll } from "../../combat/replacement.js";
 import { hasHonorToCall, isHonorRollOffered, renderCheckCard } from "./card.js";
+
+/**
+ * The actors whose Honor Roll is being made on this client, by UUID: a second press waits for nothing and rolls
+ * nothing (#169).
+ * @type {Set<string>}
+ */
+const rolling = new Set();
 
 /**
  * The optional Honor Roll: once per session, the owner of a failed roll re-rolls it at the same TN with Honor Rank
  * in rolled and kept dice instead of the original dice, the Ten Dice Rule last. Taint Level 4 takes 2k2 from it.
- * Failing it costs a full Rank of Honor, through the ledger.
+ * Failing it costs a full Rank of Honor, through the ledger. One Honor Roll per actor runs at a time, so a second press
+ * before the session is marked does nothing (#169). The Honor Roll takes the failed roll's place in the duel, grapple,
+ * Fear test, or contest that recorded it.
  * game-rules/43_honor.md, p.92
  * game-rules/89_shadowlands_taint.md, p.278
  * @param {ChatMessage} message - A failed `roll` message
@@ -25,24 +35,33 @@ import { hasHonorToCall, isHonorRollOffered, renderCheckCard } from "./card.js";
  */
 export async function rollHonor(message) {
   const actor = fromUuidSync(message.system.actorUuid) ?? null;
-  const allowed = await validateHonorRoll(message, actor);
-  if (!allowed) {
+  if (rolling.has(actor?.uuid)) {
     return null;
   }
-  const source = message.system.toObject();
-  const { pool, modifiers } = buildHonorPool(actor, allowed.honor, source.modifiers);
-  await actor.setFlag(SYS_ID, "honorRollSession", allowed.session);
-  const roll = new foundry.dice.Roll(getPoolFormula(pool));
-  await roll.evaluate();
-  const outcome = getCheckResult(roll.total, source.tn.effective);
-  const posted = await postHonorRoll(message, roll, { source, pool, modifiers, outcome, actor });
-  if (!outcome.success) {
-    await applyTrackChange(actor, "honor", {
-      points: -10,
-      reason: T("l5r4.ui.honorRoll.failedReason")
-    });
+  rolling.add(actor?.uuid);
+  try {
+    return await rollHonorOnce(message, actor);
+  } finally {
+    rolling.delete(actor?.uuid);
   }
-  return posted;
+}
+
+/**
+ * Re-render each `roll` card of an actor whose Honor Roll session changed, so a used Honor Roll's button leaves every
+ * card (#169). Handles `updateActor`.
+ * game-rules/43_honor.md, p.92
+ * @param {Actor} actor
+ * @param {object} changes - The update's changes
+ */
+export function onUpdateActorHonorRoll(actor, changes) {
+  if (!foundry.utils.hasProperty(changes, `flags.${SYS_ID}.honorRollSession`)) {
+    return;
+  }
+  for (const message of game.messages) {
+    if (message.type === "roll" && message.system.actorUuid === actor.uuid) {
+      ui.chat?.updateMessage(message);
+    }
+  }
 }
 
 /**
@@ -136,6 +155,36 @@ function buildHonorPool(actor, honor, failedModifiers) {
     littleTruths: game.settings.get(SYS_ID, "LtException")
   });
   return { pool, modifiers };
+}
+
+/**
+ * Make one Honor Roll: the session is marked before the dice roll, then the card posts, takes the failed roll's place
+ * where it was recorded, and a failure costs a Rank of Honor.
+ * game-rules/43_honor.md, p.92
+ * @param {ChatMessage} message - A failed `roll` message
+ * @param {Actor|null} actor - The roll's actor
+ * @returns {Promise<ChatMessage|null>}
+ */
+async function rollHonorOnce(message, actor) {
+  const allowed = await validateHonorRoll(message, actor);
+  if (!allowed) {
+    return null;
+  }
+  const source = message.system.toObject();
+  const { pool, modifiers } = buildHonorPool(actor, allowed.honor, source.modifiers);
+  await actor.setFlag(SYS_ID, "honorRollSession", allowed.session);
+  const roll = new foundry.dice.Roll(getPoolFormula(pool));
+  await roll.evaluate();
+  const outcome = getCheckResult(roll.total, source.tn.effective);
+  const posted = await postHonorRoll(message, roll, { source, pool, modifiers, outcome, actor });
+  await applyReroll(message, posted);
+  if (!outcome.success) {
+    await applyTrackChange(actor, "honor", {
+      points: -10,
+      reason: T("l5r4.ui.honorRoll.failedReason")
+    });
+  }
+  return posted;
 }
 
 /**

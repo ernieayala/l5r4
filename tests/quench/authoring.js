@@ -1046,6 +1046,53 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #169: a second press before the first lands rolls nothing, and every card of the actor is drawn again
+        // game-rules/43_honor.md, p.92
+        it(
+          "should make one Honor Roll for a double press, and redraw the actor's cards once it is used",
+          clean(async function () {
+            this.timeout(15_000);
+            const enabled = game.settings.get(SYS_ID, "honorRoll");
+            const uniform = CONFIG.Dice.randomUniform;
+            const updateMessage = ui.chat.updateMessage;
+            await game.settings.set(SYS_ID, "honorRoll", true);
+            CONFIG.Dice.randomUniform = NINES;
+            const redrawn = [];
+            try {
+              const actor = track(
+                await createTestPC({
+                  name: "Character options: hasty",
+                  system: { honor: { rank: 3 } }
+                })
+              );
+              const failed = await rollCheck({
+                actor,
+                kind: "trait",
+                label: "Agility",
+                base: { roll: 2, keep: 2 },
+                trait: "agi",
+                tn: 100,
+                askForOptions: false
+              });
+              ui.chat.updateMessage = function (message, ...rest) {
+                redrawn.push(message.id);
+                return updateMessage.call(this, message, ...rest);
+              };
+              const [first, second] = await Promise.all([rollHonor(failed), rollHonor(failed)]);
+              assert.ok(first, "the first press rolls");
+              assert.isNull(second, "the second press rolls nothing");
+              const honorRolls = game.messages.filter(m => m.system?.honorRollOf === failed.id);
+              assert.lengthOf(honorRolls, 1, "one Honor Roll posted");
+              assert.equal(actor.system.honor.rank, 2, "one Rank lost, not two");
+              assert.include(redrawn, failed.id, "the failed roll's card is drawn again");
+            } finally {
+              ui.chat.updateMessage = updateMessage;
+              CONFIG.Dice.randomUniform = uniform;
+              await game.settings.set(SYS_ID, "honorRoll", enabled);
+            }
+          })
+        );
+
         // Fear's penalty falls on all die rolls, the Honor Roll's too (roadmap/STAGE-18 decision 16, #111)
         // game-rules/42_fear.md, p.90
         // game-rules/43_honor.md, p.92

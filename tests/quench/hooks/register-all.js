@@ -38,6 +38,7 @@ import {
   bindCheckCard,
   onGetChatMessageContextOptions
 } from "../../../module/services/dice/check/chat-actions.js";
+import { onUpdateActorHonorRoll } from "../../../module/services/dice/check/honor-roll.js";
 import { bindCheckRequestCard } from "../../../module/services/check-request.js";
 import { bindInitiativeRequestCard } from "../../../module/services/initiative-request.js";
 import {
@@ -98,7 +99,11 @@ export function registerHookWiringTests(quench) {
             onPreUpdateActorWounds,
             onPreUpdateActorScrollingText
           ]);
-          assertWiredInOrder("updateActor", [onUpdateActorWounds, onUpdateActorScrollingText]);
+          assertWiredInOrder("updateActor", [
+            onUpdateActorWounds,
+            onUpdateActorHonorRoll,
+            onUpdateActorScrollingText
+          ]);
           assertWiredInOrder("createActiveEffect", [onCreateActiveEffectFullDefense]);
         });
 
@@ -159,6 +164,7 @@ export function registerHookWiringTests(quench) {
         it("should register the damage and flow GM queries", () => {
           assert.isFunction(CONFIG.queries[`${SYS_ID}.damage`]);
           assert.isFunction(CONFIG.queries[`${SYS_ID}.flow`]);
+          assert.isFunction(CONFIG.queries[`${SYS_ID}.replaceContestRoll`]);
         });
       });
 

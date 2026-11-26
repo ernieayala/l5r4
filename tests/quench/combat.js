@@ -6,6 +6,7 @@ import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack } from "../../module/services/combat/damage-roll.js";
 import {
   applyConditionFromMessage,
+  rollAgainKeepBetter,
   rollDamageFromMessage
 } from "../../module/services/dice/check/chat-actions.js";
 import { applyDamage } from "../../module/services/combat/damage.js";
@@ -16,6 +17,8 @@ import { startDuel } from "../../module/services/combat/duel.js";
 import { END_GUARD_QUERY, guard } from "../../module/services/combat/guard.js";
 import { effectsOf } from "../../module/services/effects/apply.js";
 import { applyLongRest } from "../../module/services/rest.js";
+import { rollHonor } from "../../module/services/dice/check/honor-roll.js";
+import { startFearTest } from "../../module/services/fear-card.js";
 import { migrateNpcInitiative } from "../../module/setup/migrations/actors/npc-initiative.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
@@ -151,6 +154,20 @@ export function registerCombatTests(quench) {
         });
         await answered;
         return message;
+      };
+
+      /**
+       * Run `fn` drawing the next dice from `draws` (CONFIG.Dice.randomUniform values; 0.05 is a 10, which explodes),
+       * then nines again.
+       */
+      const withDice = async (draws, fn) => {
+        const queue = [...draws];
+        CONFIG.Dice.randomUniform = () => queue.shift() ?? 0.15;
+        try {
+          return await fn();
+        } finally {
+          CONFIG.Dice.randomUniform = NINES;
+        }
       };
 
       /**
@@ -821,6 +838,38 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #169: a re-roll that replaces a side's Strength roll settles the contest again (Ernie's ruling)
+        it(
+          "should settle Contested Strength again when a re-roll replaces a side's roll",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            const stop = autoAnswerRolls();
+            try {
+              await rollContest(hit);
+            } finally {
+              stop();
+            }
+            assert.isTrue(await waitFor(() => target.statuses.has("prone")), "27 beats 18");
+            const theirs = contestRollsOf(hit).target;
+            // Strength 2, 2k2: 10, 10, 10, 9 and 9 is 48
+            const reroll = await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(theirs));
+            assert.equal(reroll.system.outcome.total, 48);
+            assert.isTrue(await waitFor(() => contestRollsOf(hit).target?.id === reroll.id));
+            assert.isTrue(
+              await waitFor(() => !target.statuses.has("prone")),
+              "48 beats 27: the Prone the contest gave is gone"
+            );
+            const winner = F("l5r4.ui.check.contestWinner", { name: target.name });
+            assert.include(game.messages.contents.at(-1).content, winner);
+          })
+        );
+
         // #166: a side's declared Raises must be beaten by 5 each, or that side fails the contest
         // game-rules/29_types_of_rolls.md, p.80
         it(
@@ -1281,6 +1330,79 @@ export function registerCombatTests(quench) {
             );
           })
         );
+
+        // #169, Ernie's ruling: a re-roll settles the last control contest again until someone rolls or acts
+        it(
+          "should settle control again from a re-roll, and not once the controller has acted",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor } = await attacker();
+            const target = await defender();
+            await target.createEmbeddedDocuments("Item", [createSkillData("Jiujutsu", 1, "agi")]);
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='control'][data-side='0']");
+              await waitFor(() => state().rolls[0] !== null);
+              await click(card, "[data-flow-action='control'][data-side='1']");
+              await waitFor(() => state().log.length === 2);
+            } finally {
+              stop();
+            }
+            assert.equal(state().control, 0, "Jiujutsu 1 + Strength 3 (27) beats 1 + 2 (18)");
+            const [mine, theirs] = state().settled.rolls.map(r => game.messages.get(r.id));
+            // Jiujutsu 1 + Strength 2, 3k2, with exploding 10s: well past 27
+            const reroll = await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(theirs));
+            assert.isAbove(reroll.system.outcome.total, 27);
+            assert.isTrue(await waitFor(() => state().control === 1), "the re-roll beats 27");
+            assert.equal(state().settled.rolls[1].id, reroll.id);
+
+            await click(card, "[data-flow-action='pass']");
+            assert.isTrue(await waitFor(() => state().settled === null), "the controller acted");
+            await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(mine));
+            const tooLate = F("l5r4.ui.requests.replacedTooLate", { name: actor.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(tooLate))
+            );
+            assert.equal(state().control, 1, "control stays with the side that passed");
+          })
+        );
+      });
+
+      // #169: an Honor Roll takes the failed roll's place on a Fear card
+      // game-rules/42_fear.md, p.90
+      // game-rules/43_honor.md, p.92
+      describe("Fear card re-roll", () => {
+        it(
+          "should record a successful Honor Roll on the Fear card and end the Feared it gave",
+          clean(async function () {
+            this.timeout(10_000);
+            const enabled = game.settings.get(SYS_ID, "honorRoll");
+            await game.settings.set(SYS_ID, "honorRoll", true);
+            try {
+              const character = track(
+                await createTestPC({
+                  name: "Combat frightened",
+                  system: { traits: { wil: 2 }, honor: { rank: 4, points: 0 } }
+                })
+              );
+              const card = await startFearTest({ characters: [character], fearRank: 5 });
+              const state = () => card.getFlag(SYS_ID, "flow").state;
+              assert.isTrue(await waitFor(() => state().results[0] !== null));
+              assert.isFalse(state().results[0].success, "2k2 (18) + Honor 4 misses TN 30");
+              assert.isTrue(await waitFor(() => character.statuses.has("feared")));
+              const failed = game.messages.get(state().results[0].id);
+              const honor = await rollHonor(failed);
+              assert.isTrue(honor.system.outcome.success, "Honor Rank 4, 4k4 (36), makes TN 30");
+              assert.isTrue(await waitFor(() => state().results[0].id === honor.id));
+              assert.isTrue(state().results[0].success);
+              assert.isTrue(await waitFor(() => !character.statuses.has("feared")));
+            } finally {
+              await game.settings.set(SYS_ID, "honorRoll", enabled);
+            }
+          })
+        );
       });
 
       // game-rules/39_iaijutsu_dueling.md, p.87-88
@@ -1368,6 +1490,49 @@ export function registerCombatTests(quench) {
             assert.equal(state().rolls.focus[0].raises, 2);
             assert.isNull(state().firstStrike, "ahead by 9, short of the 10 two Raises need");
             assert.equal(state().freeRaises, 0);
+          })
+        );
+
+        // #169, Ernie's ruling: a re-roll settles its stage again while the next stage has no roll; later, the card
+        // stays as it is and the table is told
+        it(
+          "should settle Focus again from a re-roll, and leave a settled Assessment once Focus is rolled",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor } = await attacker();
+            const target = await defender();
+            const card = await startDuel(actor, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              for (const stage of ["assessment", "focus"]) {
+                await click(card, "[data-flow-action='roll'][data-duelist='0']");
+                await waitFor(() => state().rolls[stage][0] !== null);
+                await click(card, "[data-flow-action='roll'][data-duelist='1']");
+                await waitFor(() => state().stage !== stage);
+              }
+            } finally {
+              stop();
+            }
+            assert.isNull(state().firstStrike, "18 against 18 is kharmic");
+            const focus = game.messages.get(state().rolls.focus[0].id);
+            // Iaijutsu 2 + Void 2, 4k2: 10, 9 and 9s keep 19 and 9
+            const reroll = await withDice([0.05], () => rollAgainKeepBetter(focus));
+            assert.isTrue(await waitFor(() => state().rolls.focus[0].id === reroll.id));
+            assert.equal(state().rolls.focus[0].total, 28);
+            assert.equal(state().firstStrike, 0, "ahead by 10 now");
+            assert.equal(state().freeRaises, 1, "a Free Raise for the 5 past the first");
+            assert.equal(state().stage, "strike");
+
+            const assessment = game.messages.get(state().rolls.assessment[1].id);
+            const before = foundry.utils.deepClone(state());
+            await withDice([0.05], () => rollAgainKeepBetter(assessment));
+            const tooLate = F("l5r4.ui.requests.replacedTooLate", { name: target.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(tooLate)),
+              "Focus already depends on the Assessment"
+            );
+            assert.deepEqual(state().rolls, before.rolls);
           })
         );
 

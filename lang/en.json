@@ -1338,6 +1338,7 @@
         "notFlowCard": "That card is not a duel, grapple, or Fear card",
         "notFreshRoll": "That step needs a new roll of its own, made after the card",
         "notGrappleHit": "That card is not a hit with the Grapple maneuver against a target",
+        "notReplacement": "That roll does not replace one of yours recorded here",
         "notRoundEnd": "Only the owner of the combatant whose Turn ends the Round can end it",
         "notYourCaster": "Only the caster's owner ends that concentration",
         "notYourDuelist": "That duelist is not yours, or the duel is over",
@@ -1350,6 +1351,7 @@
         "onlyRollerApplies": "Only the one who rolled the damage, or the GM, applies it",
         "onlyRollerUndoes": "Only the one who rolled the damage, or the GM, undoes it",
         "playerAsks": "{name} asks to go ahead: {reason}",
+        "replacedTooLate": "{name}'s new roll came after the next step was taken, so it changes nothing here. The GM can Redo the step.",
         "unknownAction": "That action is not known"
       },
       "rules": {
