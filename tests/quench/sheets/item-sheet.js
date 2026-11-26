@@ -181,13 +181,16 @@ export function registerItemSheetTests(quench) {
         let actor, sheet;
 
         /** Render a weapon's sheet, change its Minimum Strength, and wait for the save. */
-        const saveAnotherField = async weapon => {
+        // The server returns created documents in no fixed order, so the weapon is found by type
+        const saveAnotherField = async created => {
+          const weapon = created.find(item => item.type === "weapon");
           sheet = weapon.sheet;
           await sheet.render(true);
           const field = sheet.element.querySelector('[name="system.minStrength"]');
           field.value = "4";
           field.dispatchEvent(new Event("change", { bubbles: true }));
           assert.isTrue(await waitFor(() => weapon.system.minStrength === 4), "the sheet saved");
+          return weapon;
         };
 
         afterEach(async () => {
@@ -203,11 +206,12 @@ export function registerItemSheetTests(quench) {
           "should keep a PC weapon's Skill when its case differs from the PC's Skill",
           clean(async () => {
             actor = await createTestPC({ name: "Item sheet: Skill case" });
-            const [, weapon] = await actor.createEmbeddedDocuments("Item", [
-              createSkillData("Kenjutsu", 2),
-              createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } })
-            ]);
-            await saveAnotherField(weapon);
+            const weapon = await saveAnotherField(
+              await actor.createEmbeddedDocuments("Item", [
+                createSkillData("Kenjutsu", 2),
+                createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } })
+              ])
+            );
             assert.equal(
               sheet.element.querySelector('[name="system.associatedSkill"]').value,
               "kenjutsu"
@@ -220,11 +224,12 @@ export function registerItemSheetTests(quench) {
           "should keep a PC weapon's Skill the PC lacks",
           clean(async () => {
             actor = await createTestPC({ name: "Item sheet: Skill lacked" });
-            const [, weapon] = await actor.createEmbeddedDocuments("Item", [
-              createSkillData("Kyujutsu", 2),
-              createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } })
-            ]);
-            await saveAnotherField(weapon);
+            const weapon = await saveAnotherField(
+              await actor.createEmbeddedDocuments("Item", [
+                createSkillData("Kyujutsu", 2),
+                createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } })
+              ])
+            );
             assert.equal(
               sheet.element.querySelector('[name="system.associatedSkill"]').value,
               "Kenjutsu"
