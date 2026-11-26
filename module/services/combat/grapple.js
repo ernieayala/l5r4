@@ -6,7 +6,7 @@
  * re-rolled as a Contested Skill / Strength Roll, where the attacker uses the Skill the grapple began with
  * (Jiujutsu, or a weapon's Skill) and the defender Jiujutsu. The one in control may:
  * - Hit: unarmed damage (Strength k1), or the weapon's damage for a weapon grapple, as a damage roll against the
- *   other side;
+ *   other side, with no Raises but with Free Raises;
  * - Throw: the other side falls Prone and the grapple ends;
  * - Break: the grapple ends;
  * - Pass: keep control.
@@ -19,6 +19,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { T, F } from "../../utils/localization.js";
 import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
+import { getCheckContext } from "../dice/check/collect.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { applyEffect, effectsOf } from "../effects/apply.js";
 import { registerFlow, canActFor, buildSkillRequest, getFreshRoll } from "./flow.js";
@@ -52,6 +53,17 @@ async function endGrapple(sides) {
 }
 
 /**
+ * The Skill a side grapples with: the one the grapple began with for the attacker, Jiujutsu for the defender.
+ * game-rules/40_grappling.md, p.88
+ * @param {object} state
+ * @param {number} i
+ * @returns {string}
+ */
+function skillOf(state, i) {
+  return i === 0 ? state.skill : "jiujutsu";
+}
+
+/**
  * Roll a side's control roll.
  * game-rules/40_grappling.md, p.88
  * @param {object} state
@@ -61,7 +73,7 @@ async function endGrapple(sides) {
 function rollControl(state, i) {
   const [actor, opponent] = i === 0 ? sidesOf(state) : sidesOf(state).reverse();
   return rollCheck({
-    ...buildSkillRequest(actor, i === 0 ? state.skill : "jiujutsu", "str"),
+    ...buildSkillRequest(actor, skillOf(state, i), "str"),
     kind: "skill",
     label: F("l5r4.ui.combat.grapple.controlLabel", { name: actor.name }),
     target: opponent
@@ -69,7 +81,9 @@ function rollControl(state, i) {
 }
 
 /**
- * Roll the controller's Hit: unarmed damage (Strength k1) or the grappling weapon's damage, with no Raises.
+ * Roll the controller's Hit: unarmed damage (Strength k1) or the grappling weapon's damage, with no Raises, as no
+ * attack roll is made. Free Raises still apply, each +1k0: those an attack with the controller's grapple Skill
+ * would have, which the roller may change (#167, Ernie's ruling).
  * game-rules/29_types_of_rolls.md, p.80
  * game-rules/40_grappling.md, p.88-89
  * @param {object} state
@@ -79,9 +93,13 @@ function rollHit(state) {
   const [actor, other] = state.control === 0 ? sidesOf(state) : sidesOf(state).reverse();
   const weapon = state.control === 0 ? state.weapon : null;
   const strength = getEffectiveTrait(actor, "str");
+  const skill = skillOf(state, state.control);
+  const { freeRaises } = getCheckContext(actor, { kind: "attack", skill, target: other });
   return rollCheck({
     actor,
     kind: "damage",
+    freeRaises,
+    takesFreeRaises: true,
     label: F("l5r4.ui.combat.grapple.hitLabel", {
       weapon: weapon?.label ?? T("l5r4.ui.combat.unarmed")
     }),

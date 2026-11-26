@@ -798,6 +798,8 @@
         "damageRolled": "Damage rolled",
         "damageRollPool": "Damage roll ({pool})",
         "effectsFor": "Active effects ({key})",
+        "freeRaisesDamage": "Increased Damage (Free Raises)",
+        "freeRaisesDamageHint": "Each adds +1k0. No Raises: there is no attack roll.",
         "freeRaisesLeft": "Free Raises: {count}",
         "freeRaisesToTnNote": "(Free Raises spent on the TN: {count})",
         "increasedDamage": "Increased Damage (Raises)",

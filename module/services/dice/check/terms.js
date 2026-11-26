@@ -3,17 +3,17 @@
  * @description The terms of one check in the roll pipeline (roll-check.js): what it rolls before the roller chooses
  * (target, gathered modifiers, pool, Unskilled state, Void, Taint, wound penalty, TN, Emphases), the dialog's context,
  * the terms the roller's choices and the caller's preparation set, and whether the Raises pay for an attack's
- * maneuvers. Dialog choices are user input, so each is coerced and bounded here.
+ * maneuvers. Dialog choices are user input, so each is coerced and bounded here. The modifiers are built in
+ * modifiers.js.
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/28_raises.md, p.79
  * game-rules/30_skill_rolls_expanded.md, p.80
  * game-rules/38_maneuvers.md, p.86-87
+ * game-rules/40_grappling.md, p.88
  * game-rules/89_shadowlands_taint.md, p.279
  */
 
-import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { getEffectiveTrait } from "../../../utils/mechanics.js";
 import { buildPool, getMaxRaises } from "../../../utils/check.js";
 import { getRaiseAllocation, getManeuverCost } from "../../../utils/damage.js";
 import { canEmbraceTaint, getHighestRing, getLostBonus } from "../../../utils/taint.js";
@@ -21,10 +21,11 @@ import { getTargets } from "../resources/target-resolver.js";
 import { isVoidOverLimit } from "../../effects/uses.js";
 import { formatModifier, formatTnChanges } from "./card.js";
 import { getCheckContext } from "./collect.js";
+import { buildAppliedModifiers, buildCheckModifiers } from "./modifiers.js";
 
 /**
  * The check's terms before the roller chooses: its target, gathered modifiers, pool, Unskilled state, Void, Taint,
- * wound penalty, TN, and Emphases.
+ * wound penalty, TN, and Emphases; and whether a damage roll takes Free Raises, as a grapple Hit does (#167).
  * @param {CheckRequest} request
  * @returns {object}
  */
@@ -33,8 +34,7 @@ export function buildCheck(request) {
   const isDamage = kind === "damage";
   const { autoTn, targetData } = getTargets(actor, kind === "attack" ? "attack" : null);
   const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
-  const { skill, trait, ring, options } = request;
-  const weapon = request.weapon ?? null;
+  const { skill, trait, ring, options, weapon = null } = request;
   const ctx = getCheckContext(actor, { kind, skill, trait, ring, target, weapon, options });
   // An Unskilled Roll in a Skill an UnskilledAs rule covers counts as that many ranks, so it is not Unskilled
   // game-rules/30_skill_rolls_expanded.md, p.80
@@ -45,6 +45,7 @@ export function buildCheck(request) {
     actor,
     kind,
     isDamage,
+    takesFreeRaises: isDamage && Boolean(request.takesFreeRaises),
     target,
     ctx,
     unskilled,
@@ -87,6 +88,7 @@ export function buildDialogContext(check) {
     maxRaises: offered.max,
     minRaises: offered.min,
     freeRaises: offered.free,
+    damageFreeRaises: check.takesFreeRaises,
     voidAllowed: !isDamage,
     voidPoints: check.voidState.points,
     voidOverLimit: !isDamage && isVoidOverLimit(actor),
@@ -116,6 +118,9 @@ export function buildChosenTerms(check, choices) {
   const voidSkill = check.voidSkillAllowed && Boolean(choices.voidSkill);
   const rolledUnskilled = check.unskilled && !voidSkill;
   const { allowed, max, min, free } = getRaiseLimits(check, { unskilled: rolledUnskilled });
+  const damageFreeRaises = check.takesFreeRaises
+    ? Math.max(0, toInt(choices.damageFreeRaises ?? free))
+    : 0;
   return {
     range,
     embrace,
@@ -123,7 +128,7 @@ export function buildChosenTerms(check, choices) {
     rolledUnskilled,
     raisesAllowed: allowed,
     freeRaises: free,
-    applied: buildAppliedModifiers(check, choices, { range, embrace, voidSkill }),
+    applied: buildAppliedModifiers(check, choices, { range, embrace, voidSkill, damageFreeRaises }),
     raises: allowed ? Math.min(Math.max(min, toInt(choices.raises ?? min)), max) : 0,
     freeRaisesToTn: Math.min(Math.max(0, toInt(choices.freeRaisesToTn)), free),
     voidPoint: !check.isDamage && Boolean(choices.void),
@@ -198,29 +203,12 @@ function buildTaintTerms({ actor, kind, trait }) {
 }
 
 /**
- * The modifiers offered to the roller: the gathered ones, the caller's, and a Lost character's Taint Rank, which a
- * Lost character adds to every physical Trait roll, always.
- * game-rules/89_shadowlands_taint.md, p.279
- * @param {object} check - From buildCheck
- * @returns {object[]}
- */
-function buildCheckModifiers(check) {
-  const { ctx, request, lost } = check;
-  const modifiers = [
-    ...ctx.modifiers,
-    ...(request.modifiers ?? []).map(m => ({ roll: 0, keep: 0, total: 0, enabled: true, ...m }))
-  ];
-  if (lost) {
-    modifiers.push(buildModifier(T("l5r4.ui.taint.lost"), { total: lost }));
-  }
-  return modifiers;
-}
-
-/**
  * The Raises a roll allows, Unskilled or not; RaiseRule rules move the Void Ring cap and may require Raises. The
- * Free Raises offered are those of rules and those the caller grants, so either kind may lower the TN.
+ * Free Raises offered are those of rules and those the caller grants, so either kind may lower the TN. A damage roll
+ * that takes Free Raises (a grapple Hit) is offered the caller's, with no Raises.
  * game-rules/28_raises.md, p.79
  * game-rules/30_skill_rolls_expanded.md, p.80
+ * game-rules/40_grappling.md, p.88
  * @param {object} check - From buildCheck
  * @param {object} roll
  * @param {boolean} roll.unskilled - The roll is Unskilled
@@ -234,81 +222,8 @@ function getRaiseLimits(check, { unskilled }) {
     allowed,
     max,
     min: Math.min(Math.max(0, ctx.raises.minimum), max),
-    free: allowed ? ctx.freeRaises + toInt(request.freeRaises) : 0
+    free: allowed || check.takesFreeRaises ? ctx.freeRaises + toInt(request.freeRaises) : 0
   };
-}
-
-/**
- * Each modifier as the roller left it, a modifier for the other attack range dropped, then the ones the choices
- * add: the manual modifier, Social resistance, Embracing the Taint, each Substitute, and the Void Point on a Skill.
- * @param {object} check - From buildCheck
- * @param {object} choices - The dialog's values
- * @param {object} picks
- * @param {string} picks.range - "melee" or "ranged"
- * @param {boolean} picks.embrace - The roller embraces the Taint
- * @param {boolean} picks.voidSkill - A Void Point raises the Skill to Rank 1
- * @returns {object[]}
- */
-function buildAppliedModifiers(check, choices, { range, embrace, voidSkill }) {
-  const { request, actor } = check;
-  const enabled = choices.modifier ?? {};
-  const applied = check.modifiers
-    .map((m, i) => ({
-      ...m,
-      enabled: request.askForOptions === false ? m.enabled : Boolean(enabled[i])
-    }))
-    .filter(m => !m.range || m.range === range);
-  const manual = buildModifier(T("l5r4.ui.check.manual"), {
-    roll: toInt(choices.rollMod),
-    keep: toInt(choices.keepMod),
-    total: toInt(choices.totalMod)
-  });
-  if (manual.roll || manual.keep || manual.total) {
-    applied.push(manual);
-  }
-  if (check.isSkill && choices.socialResistance) {
-    const total = toInt(actor.system.honor?.rank);
-    applied.push(buildModifier(T("l5r4.ui.mechanics.rolls.socialResistance"), { total }));
-  }
-  if (embrace) {
-    applied.push(buildModifier(T("l5r4.ui.taint.embrace"), { roll: 1, keep: 1 }));
-  }
-  applied.push(...buildSubstituteModifiers(check, choices));
-  if (voidSkill) {
-    applied.push(buildModifier(T("l5r4.ui.check.voidSkill"), { roll: 1 }));
-  }
-  return applied;
-}
-
-/**
- * The Substitutes the roller ticked: each swaps the Trait in the pool, so its rank counts in both rolled and kept
- * dice.
- * @param {object} check - From buildCheck
- * @param {object} choices - The dialog's values
- * @returns {object[]}
- */
-function buildSubstituteModifiers(check, choices) {
-  const { ctx, request, actor } = check;
-  const substitutes = choices.substitute ?? {};
-  return ctx.substitutes.flatMap((substitute, i) => {
-    const [, from] = substitute.replace.split(":");
-    const [, to] = substitute.with.split(":");
-    if (!substitutes[i] || request.trait !== from || !to) {
-      return [];
-    }
-    const delta = getEffectiveTrait(actor, to) - getEffectiveTrait(actor, from);
-    return [buildModifier(substitute.label, { roll: delta, keep: delta })];
-  });
-}
-
-/**
- * An enabled modifier with only the parts given; the rest are 0.
- * @param {string} label
- * @param {{roll?: number, keep?: number, total?: number}} parts
- * @returns {{label: string, roll: number, keep: number, total: number, enabled: boolean}}
- */
-function buildModifier(label, { roll = 0, keep = 0, total = 0 }) {
-  return { label, roll, keep, total, enabled: true };
 }
 
 /**

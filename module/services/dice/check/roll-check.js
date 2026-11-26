@@ -59,6 +59,8 @@ import { buildCheck, buildChosenTerms, buildPreparedTerms, getManeuverPayment } 
  * @property {string[]} [options=[]]     Roll options the caller adds for predicates (a duel stage: `duel:focus`)
  * @property {number} [freeRaises=0]     Free Raises the caller grants before the dialog, offered with those of rules
  *   (a duel's Focus winner)
+ * @property {boolean} [takesFreeRaises=false] A damage roll with no attack roll before it (a grapple Hit): no Raises,
+ *   but its Free Raises add +1k0 each, as many as the roller sets (terms.js)
  * @property {{label: string, roll: number, keep: number, bonus?: number, explode?: number|null}} [damage]
  *   An attack's damage pool, stored on its message for the damage button
  * @property {string} [attackOf]         The attack message a damage roll belongs to

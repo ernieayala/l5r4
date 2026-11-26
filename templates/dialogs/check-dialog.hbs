@@ -58,6 +58,12 @@
         <p class="hint">{{localize "l5r4.ui.mechanics.rolls.freeRaisesHint" max=freeRaises}}</p>
       </div>
     {{/if}}
+  {{else if damageFreeRaises}}
+    <div class="form-group">
+      <label for="{{formId}}-damage-free-raises">{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}</label>
+      <input type="number" id="{{formId}}-damage-free-raises" name="damageFreeRaises" value="{{freeRaises}}" min="0" />
+      <p class="hint">{{localize "l5r4.ui.check.freeRaisesDamageHint"}}</p>
+    </div>
   {{else if unskilled}}
     <p class="hint">{{localize "l5r4.ui.check.unskilled"}}</p>
   {{/if}}

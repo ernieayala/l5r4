@@ -48,6 +48,7 @@ One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide an
 | TN | Number input, the TN changes as a hint, Wound penalty checkbox (`name="tn"`, `name="woundPenalty"`) | The roll has a TN |
 | Raises | Number input bounded by the allowed minimum and maximum (`name="raises"`) | Raises are allowed |
 | Free Raises to the TN | Number input up to the Free Raises held (`name="freeRaisesToTn"`) | The roller holds Free Raises |
+| Free Raises to damage | Number input from 0, starting at the Free Raises offered, each +1k0 (`name="damageFreeRaises"`) | A damage roll with no attack roll (a grapple Hit) |
 | Unskilled hint | One line (`l5r4.ui.check.unskilled`) | An Unskilled Roll |
 | Void Point | Checkbox, the Void Points left in its label; disabled at none (`name="void"`, `name="voidSkill"`). Each use takes its own point, so once every point is chosen the other use disables and says why (`bindVoidUses`, `module/services/dice/check/dialog.js`) | A Void Point may be spent |
 | Embrace Taint | Checkbox (`name="embraceTaint"`) | The rules allow it |

@@ -1119,6 +1119,38 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #167: a Hit takes no Raises, as no attack roll is made, but Free Raises still apply, each +1k0
+        // game-rules/40_grappling.md, p.88
+        it(
+          "should add the grapple Skill's Free Raises to a Hit, as many as the roller sets",
+          clean(async () => {
+            const { actor } = await attacker();
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              {
+                name: "Free",
+                system: { rules: [{ key: "FreeRaise", selector: "skill:jiujutsu", value: 1 }] }
+              }
+            ]);
+            const target = await defender();
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const hit = async values => {
+              const logged = card.getFlag(SYS_ID, "flow").state.log.length;
+              const answered = answerCheckDialog(values);
+              await click(card, "[data-flow-action='hit']");
+              await answered;
+              assert.isTrue(
+                await waitFor(() => card.getFlag(SYS_ID, "flow").state.log.length > logged)
+              );
+              const { pool } = game.messages.contents.findLast(
+                m => m.type === "roll" && m.system.kind === "damage"
+              ).system;
+              return `${pool.roll}k${pool.keep}`;
+            };
+            assert.equal(await hit(), "4k1", "Strength 3k1 and the Jiujutsu Free Raise's +1k0");
+            assert.equal(await hit({ damageFreeRaises: 3 }), "6k1", "the roller set 3");
+          })
+        );
+
         // game-rules/40_grappling.md, p.89
         it(
           "should deal weapon damage in a weapon grapple; losing control gives two Free Raises to Disarm",
