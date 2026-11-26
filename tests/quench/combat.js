@@ -13,7 +13,8 @@ import { rollContest } from "../../module/services/combat/contest.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { startGrapple } from "../../module/services/combat/grapple-start.js";
 import { startDuel } from "../../module/services/combat/duel.js";
-import { guard } from "../../module/services/combat/guard.js";
+import { END_GUARD_QUERY, guard } from "../../module/services/combat/guard.js";
+import { effectsOf } from "../../module/services/effects/apply.js";
 import { applyLongRest } from "../../module/services/rest.js";
 import { migrateNpcInitiative } from "../../module/setup/migrations/actors/npc-initiative.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
@@ -1017,6 +1018,56 @@ export function registerCombatTests(quench) {
             assert.isTrue(await guard(actor, ward));
             assert.equal(actor.system.armorTn.current, guardTN - 5);
             assert.equal(ward.system.armorTn.current, wardTN + 10);
+          })
+        );
+
+        // #168: a guard protects one character, so Guard used again replaces the guard's Guard
+        // game-rules/38_maneuvers.md, p.87
+        it(
+          "should hold one Guard per guard, on the same ward or a new one",
+          clean(async () => {
+            const { actor } = await attacker();
+            const first = await defender();
+            const second = await defender();
+            const base = [actor, first, second].map(a => a.system.armorTn.current);
+            const armorTns = () => [actor, first, second].map(a => a.system.armorTn.current);
+            await guard(actor, first);
+            await guard(actor, first);
+            assert.deepEqual(
+              armorTns(),
+              [base[0] - 5, base[1] + 10, base[2]],
+              "the same ward again"
+            );
+            await guard(actor, second);
+            assert.deepEqual(armorTns(), [base[0] - 5, base[1], base[2] + 10], "a new ward");
+            assert.equal(effectsOf(actor, "guarding").length, 1);
+            assert.equal(effectsOf(first, "guarded").length, 0);
+          })
+        );
+
+        // #168: the GM ends a Guard for the guard's owner only
+        it(
+          "should end a Guard through the GM only for the guard's owner",
+          clean(async () => {
+            const { actor } = await attacker();
+            const ward = await defender();
+            await guard(actor, ward);
+            const player = game.users.find(u => !u.isGM);
+            const endGuard = CONFIG.queries[END_GUARD_QUERY];
+            let refused = null;
+            try {
+              await endGuard({ protectorUuid: actor.uuid }, { user: player });
+            } catch (err) {
+              refused = err.message;
+            }
+            assert.equal(refused, "l5r4.ui.requests.notYourGuard");
+            assert.isTrue(ward.statuses.has("guarded"), "a refusal ends nothing");
+            await actor.update({
+              [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+            });
+            await endGuard({ protectorUuid: actor.uuid }, { user: player });
+            assert.isFalse(ward.statuses.has("guarded"));
+            assert.isFalse(actor.statuses.has("guarding"));
           })
         );
 

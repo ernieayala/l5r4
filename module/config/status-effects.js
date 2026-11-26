@@ -11,14 +11,14 @@
  * game-rules/36_stances.md, p.84
  * game-rules/41_conditional_effects.md, p.89
  * game-rules/42_fear.md, p.90
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  */
 
 import { PATHS } from "./constants.js";
 
 /**
  * Until the start of the Turn of the combatant whose Turn it was when the effect began (Guard).
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  */
 const UNTIL_NEXT_TURN = Object.freeze({ value: 1, units: "rounds", expiry: "turnStart" });
 
@@ -167,7 +167,7 @@ export const STATUS_EFFECTS = Object.freeze([
     name: "l5r4.ui.statusEffects.guarded",
     img: `${PATHS.icons}/guarded.webp`,
     // +10 Armor TN until the guard's next Turn
-    // game-rules/38_maneuvers.md, p.86
+    // game-rules/38_maneuvers.md, p.87
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: 10 }] }
   },
@@ -176,7 +176,7 @@ export const STATUS_EFFECTS = Object.freeze([
     name: "l5r4.ui.statusEffects.guarding",
     img: `${PATHS.icons}/guarding.webp`,
     // -5 Armor TN until the guard's next Turn
-    // game-rules/38_maneuvers.md, p.86
+    // game-rules/38_maneuvers.md, p.87
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: -5 }] }
   },
@@ -246,7 +246,7 @@ export const STATUS_EFFECTS = Object.freeze([
 /**
  * Statuses an actor can hold once per origin: a Concentration per spell held, a Guard per protector. Every other
  * status is held once, so applying it again updates the one held (applyEffect, #177).
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  * game-rules/67_universal_spells.md, p.166
  */
 export const PER_ORIGIN_STATUSES = Object.freeze(["concentration", "guarded"]);

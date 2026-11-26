@@ -38,6 +38,7 @@ import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects
 import { registerDamageQueries } from "../module/services/combat/damage.js";
 import { registerFlowQueries } from "../module/services/combat/flow.js";
 import { registerGrappleQueries } from "../module/services/combat/grapple-start.js";
+import { registerGuardQueries } from "../module/services/combat/guard.js";
 import { registerGmAllowQueries } from "../module/services/gm-allow.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
@@ -171,7 +172,7 @@ function registerCoreConfig() {
 /**
  * Register what a player's client asks the active GM to do: apply a condition to an actor the player does not own,
  * end a Concentration, settle Center Stance when a player ends the Round, apply or undo damage, run a combat flow
- * step.
+ * step, end a Guard.
  */
 function registerQueries() {
   registerEffectQueries();
@@ -180,6 +181,7 @@ function registerQueries() {
   registerDamageQueries();
   registerFlowQueries();
   registerGrappleQueries();
+  registerGuardQueries();
   registerGmAllowQueries();
 }
 

@@ -1342,6 +1342,7 @@
         "notYourCaster": "Only the caster's owner ends that concentration",
         "notYourDuelist": "That duelist is not yours, or the duel is over",
         "notYourFearTest": "That character is not yours, or has made this Fear test",
+        "notYourGuard": "Only the guard's owner ends that Guard",
         "notYourPrompt": "That prompt is not yours to answer",
         "notYourSide": "That side or roll is not yours",
         "onlyController": "Only the side in control acts",
