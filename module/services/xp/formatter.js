@@ -151,10 +151,7 @@ function formatEntryLabels(e) {
   if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
     return {
       type: game.i18n.localize("l5r4.character.experience.breakdown.skills"),
-      note:
-        e.emphasis || e.note?.includes("Emphasis:")
-          ? e.note
-          : formatProgression(e.skillName, e.fromValue, e.toValue)
+      note: formatSkillNote(e)
     };
   }
   if (Object.hasOwn(ITEM_ENTRY_LABELS, e.type)) {
@@ -198,6 +195,24 @@ function formatLegacyEntryLabels(e) {
  */
 function formatProgression(label, fromValue, toValue) {
   return fromValue !== undefined ? `${label} ${fromValue}→${toValue}` : `${label} ${toValue}`;
+}
+
+/**
+ * A Skill entry's note in the reader's language: an Emphasis bought, the stored note of one from before Emphases were
+ * stored apart, or the rank progression (#161).
+ * @param {{skillName: string, emphasis?: string, note?: string, fromValue: number, toValue: number}} e
+ * @returns {string}
+ */
+function formatSkillNote(e) {
+  if (e.emphasis) {
+    return game.i18n.localize("l5r4.character.experience.emphasisNote", {
+      skill: e.skillName,
+      emphasis: e.emphasis
+    });
+  }
+  return e.note?.includes("Emphasis:")
+    ? e.note
+    : formatProgression(e.skillName, e.fromValue, e.toValue);
 }
 
 /**

@@ -483,6 +483,7 @@
           "void": "Void"
         },
         "disadvantageCapLabel": "Maximum XP",
+        "emphasisNote": "{skill}: Emphasis {emphasis}",
         "fallbackLabels": {
           "skillCreated": "Skill created",
           "skillIncreased": "Skill increased",
@@ -511,7 +512,7 @@
         "errors": {
           "toggleFailed": "Failed to toggle movement type"
         },
-        "feet": "ft",
+        "feetValue": "{n} ft",
         "maximum": "Maximum movement",
         "title": "Movement"
       },

@@ -501,7 +501,7 @@
         "errors": {
           "toggleFailed": "Error al cambiar el tipo de movimiento"
         },
-        "feet": "pies",
+        "feetValue": "{n} pies",
         "maximum": "Movimiento Máximo",
         "title": "Movimiento"
       },

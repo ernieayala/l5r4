@@ -19,11 +19,11 @@ The sidebar block for a skirmish: the current stance, the Initiative pool with i
 | Section | `<section>` | `l5r4-section l5r4-combat` |  |
 | Title bar | Compact section title with the condition manager and combat configuration icon buttons | `l5r4-section-title -compact` |  |
 | Grid | `grid.md` | `l5r4-grid` |  |
-| Stance | `<select data-action="apply-stance" aria-label>` in a value cell | none |  |
+| Stance | `<select data-action="apply-stance" aria-label data-tooltip>` in a value cell; the tooltip is the full stance name, for a translation the cell cuts short | none |  |
 | Initiative pool | `<span>` with the pool string | `l5r4-combat-initiative` |  |
 | Void toggle | `<input type="checkbox" name="system.initiative.useVoid" data-action="toggle-initiative-void" data-tooltip aria-label>` after the pool, only with a Void Ring above 0 | none |  |
-| Movement | Text with the unit, then a core button that switches Simple and Free | none | The text sits in a bare `div`; the button is `data-action="toggle-movement-type"` (`templates/actor/_partials/_combat.hbs`) |
-| Maximum | Text with the unit | none | A bare `l5r4-grid-value` div after the `l5r4.character.movement.maximum` (`templates/actor/_partials/_combat.hbs`) label |
+| Movement | `l5r4.character.movement.feetValue` with the number, then a core button that switches Simple and Free | none | The text sits in a bare `div`; the button is `data-action="toggle-movement-type"` (`templates/actor/_partials/_combat.hbs`) |
+| Maximum | `l5r4.character.movement.feetValue` with the number | none | A bare `l5r4-grid-value` div after the `l5r4.character.movement.maximum` (`templates/actor/_partials/_combat.hbs`) label |
 
 ## Variants
 
@@ -59,7 +59,7 @@ None of its own. The section and grid tokens apply (`section.md`, `grid.md`). Th
 
 ## Long text
 
-Stance names in the select are the book's names and can run long; the select takes its cell's width and shows the full name in its open list. The pool string is short (`5k3+10`). Movement values carry their unit after the number.
+Stance names in the select are the book's names and can run long, longer in translation; the select takes its cell's width, shows the full name in its open list, and names it in its tooltip. The pool string is short (`5k3+10`). A movement value is one localized string, the number and the unit joined by a no-break space, so each language sets its own order and the pair never wraps apart (#161).
 
 ## Rules
 
@@ -75,7 +75,7 @@ Stance names in the select are the book's names and can run long; the select tak
 | --- | --- | --- |
 | C1 | `<span class="l5r4-combat-initiative">{{initiativeFormula}}</span>` (`templates/actor/_partials/_combat.hbs`) | `{{system.initiative.roll}}k{{system.initiative.keep}}+{{system.initiative.totalMod}}`, the pool built in the template (modeled) |
 | C2 | `5k3-2` from `formatInitiativePool` (`module/utils/initiative.js`) | `5k3+-2`, which a literal `+` before a negative total gives (modeled) |
-| C3 | `<select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">` (`templates/actor/_partials/_combat.hbs`) | `<select data-action="apply-stance">` with no name (modeled) |
+| C3 | `aria-label="{{localize "l5r4.character.stance.current"}}"` on the `data-action="apply-stance"` select (`templates/actor/_partials/_combat.hbs`) | `<select data-action="apply-stance">` with no name (modeled) |
 | C4 | `aria-label="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"` beside the same `data-tooltip` key on the Void toggle (`templates/actor/_partials/_combat.hbs`) | The Void toggle with `data-tooltip` and no `aria-label` (modeled) |
 | C5 | The block styled by `_section.scss` and `_grid.scss` alone | A stylesheet of the block's own that holds only comments (modeled) |
 

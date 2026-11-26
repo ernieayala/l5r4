@@ -22,7 +22,12 @@
   <div class="l5r4-grid">
     <span class="l5r4-grid-label">{{localize "l5r4.character.stance.current"}}</span>
     <div class="flexrow l5r4-grid-value">
-      <select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">
+      {{!-- The full stance where a translation is longer than the sidebar (#161) --}}
+      <select
+        data-action="apply-stance"
+        aria-label="{{localize "l5r4.character.stance.current"}}"
+        data-tooltip="{{localize (lookup config.stances currentStance)}}"
+      >
         {{#each config.stances as |label id|}}
           <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
             {{localize label}}
@@ -48,10 +53,11 @@
     <span class="l5r4-grid-label">{{localize "l5r4.character.movement.title"}}</span>
     <div class="flexrow -gap-sm l5r4-grid-value">
       <div>
+        {{!-- Each language sets its own spacing and order of number and unit (#161) --}}
         {{#if system.movement.showSimple}}
-          {{system.movement.simpleAction}}{{localize "l5r4.character.movement.feet"}}
+          {{localize "l5r4.character.movement.feetValue" n=system.movement.simpleAction}}
         {{else}}
-          {{system.movement.freeAction}}{{localize "l5r4.character.movement.feet"}}
+          {{localize "l5r4.character.movement.feetValue" n=system.movement.freeAction}}
         {{/if}}
       </div>
       {{#if system.movement.showSimple}}
@@ -67,6 +73,6 @@
       {{/if}}
     </div>
     <span class="l5r4-grid-label">{{localize "l5r4.character.movement.maximum"}}</span>
-    <div class="flexrow -gap-sm l5r4-grid-value">{{system.movement.maximum}}{{localize "l5r4.character.movement.feet"}}</div>
+    <div class="flexrow -gap-sm l5r4-grid-value">{{localize "l5r4.character.movement.feetValue" n=system.movement.maximum}}</div>
   </div>
 </section>

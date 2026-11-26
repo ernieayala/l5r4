@@ -48,7 +48,7 @@ const HISTORY_RECORD_BUILDERS = Object.freeze({
     emphasis,
     fromValue: 0,
     toValue: 1,
-    note: `${name} - Emphasis: ${emphasis}`
+    note: game.i18n.localize("l5r4.character.experience.emphasisNote", { skill: name, emphasis })
   }),
   spell: ({ type, name, delta }) => ({
     delta,

@@ -501,7 +501,7 @@
         "errors": {
           "toggleFailed": "Fehler beim Umschalten der Bewegungsart"
         },
-        "feet": "Fuß",
+        "feetValue": "{n} Fuß",
         "maximum": "Maximale Bewegung",
         "title": "Bewegung"
       },

@@ -19,6 +19,8 @@
         data-field="system.trait"
         data-type="String"
         aria-label="{{localize "l5r4.character.skills.properties.trait"}}"
+        {{!-- The full Trait where a translation is longer than the column (#161) --}}
+        data-tooltip="{{localize (lookup @root.config.traits system.trait)}}"
       >
         {{selectOptions @root.config.traits selected=system.trait localize=true}}
       </select>

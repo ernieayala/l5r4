@@ -116,6 +116,40 @@ export function registerPcSheetTests(quench) {
 
           assert.exists(mainSheet, "Main sheet structure exists");
         });
+
+        // #161: a number and its unit come from one localized string; a select a translation can cut names its value
+        it("should show movement through its localized format and name each select's value", async () => {
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Etiquette", 1, "awa")]);
+          await sheet.render(true);
+          const element = sheet.element;
+          const maximum = game.i18n.localize("l5r4.character.movement.feetValue", {
+            n: actor.system.movement.maximum
+          });
+          assert.include(element.querySelector("[data-sheet-body]").textContent, maximum);
+          const stance = element.querySelector("[data-action='apply-stance']");
+          assert.equal(
+            stance.dataset.tooltip,
+            stance.selectedOptions[0].textContent.trim(),
+            "the stance select names its stance"
+          );
+          const trait = element.querySelector("[data-field='system.trait']");
+          assert.equal(trait.dataset.tooltip, trait.selectedOptions[0].textContent.trim());
+        });
+
+        // #161: Cyrillic in core's display face comes from the bundled PT Sans Narrow
+        it("should add a Cyrillic face to the display font", async () => {
+          const faces = [...document.fonts].filter(
+            face =>
+              face.family.replaceAll('"', "") === "Modesto Condensed" &&
+              face.unicodeRange.includes("U+400")
+          );
+          assert.lengthOf(faces, 2, "regular and bold");
+          await Promise.all(faces.map(face => face.load()));
+          assert.isTrue(
+            faces.every(face => face.status === "loaded"),
+            "the font files load"
+          );
+        });
       });
 
       describe("PC sheet data updates", () => {

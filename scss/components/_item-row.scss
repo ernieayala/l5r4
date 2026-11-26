@@ -107,10 +107,12 @@
     }
   }
 
+  // The Trait column fits the longest translated Trait name, and the Skill name keeps a little more than the Emphases
+  // so a name with its School mark stays on one line (#161)
   &.-skill {
     .l5r4-item-row {
       grid-template-columns:
-        1fr var(--l5r4-size-column-60) var(--l5r4-size-column-120) var(--l5r4-size-column-60)
+        1.3fr var(--l5r4-size-column-60) var(--l5r4-size-column-150) var(--l5r4-size-column-60)
         1fr var(--l5r4-size-column-controls);
     }
   }
