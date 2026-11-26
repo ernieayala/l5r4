@@ -162,7 +162,7 @@ Documents import no service (CLAUDE.md **Layers**). Two shapes carry what a docu
 | Need | Shape | Example |
 | --- | --- | --- |
 | A one-way event the document reports | A system hook: the document calls `Hooks.callAll("l5r4-enhanced.<event>", ...)` with the name from `module/config/`, and `module/hooks/register-all.js` wires the service's handler | `L5R4ActiveEffect._preCreateOperation` fires `IMMUNE_STATUS_HOOK` (`module/config/constants.js`); `registerAllHooks` wires `onImmuneStatus` (`module/services/effects/apply.js`) |
-| A value the document needs back | A static slot on the document class that `dist/l5r4-enhanced.js` fills during `init` | `L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints` (`module/documents/combat.js`, `module/services/initiative.js`) |
+| A value the document needs back | A static slot on the document class that `dist/l5r4-enhanced.js` fills during `init` | `L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints` (`module/documents/combat.js`, `module/services/initiative.js`); `L5R4Combat.postInitiativeRequests = postInitiativeRequests` (`dist/l5r4-enhanced.js`) |
 
 A hook handler's return value is ignored, so anything the document waits for or reads back is a slot.
 

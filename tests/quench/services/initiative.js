@@ -15,6 +15,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import L5R4Combat from "../../../module/documents/combat.js";
 import L5R4Combatant from "../../../module/documents/combatant.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
+import { waitFor, withConnectedPlayer, withGmAnswer } from "../helpers.js";
 
 /**
  * Register initiative service integration tests
@@ -667,6 +668,58 @@ export function registerInitiativeTests(quench) {
             "voidInitiative",
             "nothing stored for the bonus"
           );
+        });
+
+        // #165: the Void Point is the player's to spend, so a GM's Roll All sends it to them as a request card
+        // game-rules/25_rings_and_traits.md, p.78
+        it("should send a connected player's marked Void Point to them, and roll for whoever presses the card", async () => {
+          actor = await createTestPC({ name: "Initiative: player's Void Point" });
+          await actor.update({ "system.initiative.useVoid": true });
+          combat = await Combat.create({ scene: null, active: false });
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id }
+          ]);
+          const cardsFor = () =>
+            game.messages.filter(
+              m => m.getFlag(SYS_ID, "initiativeRequest")?.combatantId === combatant.id
+            );
+          try {
+            await withConnectedPlayer(actor, async player => {
+              const sent = await withGmAnswer(true, () => combat.rollAll());
+              assert.lengthOf(sent.asked, 0, "the GM is not asked the player's question");
+              assert.isNull(combatant.initiative, "the PC waits for its player");
+              assert.isTrue(actor.system.initiative.useVoid, "the mark stays for the player");
+              assert.lengthOf(cardsFor(), 1);
+              assert.includeMembers(cardsFor()[0].whisper, [player.id, game.user.id]);
+              await withGmAnswer(true, () => combat.rollAll());
+              assert.lengthOf(cardsFor(), 1, "a second Roll All posts no second card");
+              const html = await cardsFor()[0].renderHTML();
+              const pressed = withGmAnswer(true, async () => {
+                html.querySelector("[data-action='initiative-request-roll']").click();
+                return waitFor(() => combatant.initiative !== null);
+              });
+              const { result, asked } = await pressed;
+              assert.isTrue(result, "the GM's press rolls for them");
+              assert.lengthOf(asked, 1, "with the Void Point question on the presser's screen");
+              assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
+            });
+          } finally {
+            for (const card of cardsFor()) {
+              await card.delete();
+            }
+          }
+        });
+
+        // #165: a PC with no Void Point left has nothing to choose, so it rolls at once
+        it("should roll a connected player's PC at once when it has no Void Point left", async () => {
+          actor = await createTestPC({ name: "Initiative: no Void Point" });
+          await actor.update({ "system.initiative.useVoid": true, "system.rings.void.value": 0 });
+          combat = await Combat.create({ scene: null, active: false });
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id }
+          ]);
+          await withConnectedPlayer(actor, () => combat.rollAll());
+          assert.isNotNull(combatant.initiative);
         });
       });
 

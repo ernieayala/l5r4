@@ -10,6 +10,7 @@ import {
 } from "../../module/services/dice/check/chat-actions.js";
 import { applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
+import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { startGrapple } from "../../module/services/combat/grapple-start.js";
 import { startDuel } from "../../module/services/combat/duel.js";
 import { guard } from "../../module/services/combat/guard.js";
@@ -23,6 +24,7 @@ import {
   cleanTest,
   settleChatNotifications,
   waitFor,
+  withConnectedPlayer,
   withGmAnswer
 } from "./helpers.js";
 
@@ -815,6 +817,38 @@ export function registerCombatTests(quench) {
               stop();
             }
             assert.isTrue(await waitFor(() => target.statuses.has("prone")));
+          })
+        );
+
+        // #165: a connected player's side is theirs to roll, Void Point and Raises included
+        // game-rules/25_rings_and_traits.md, p.78
+        it(
+          "should leave a connected player's Contested Strength to them, and ask the GM before rolling it",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            const stop = autoAnswerRolls();
+            try {
+              await withConnectedPlayer(target, async () => {
+                const first = await withGmAnswer(true, () => rollContest(hit));
+                assert.lengthOf(first.asked, 0, "the GM had a side of its own to roll");
+                assert.exists(contestRollsOf(hit).attacker, "the side no player plays is rolled");
+                assert.notExists(contestRollsOf(hit).target, "the player's side waits");
+                const waited = await withGmAnswer(false, () => rollContest(hit));
+                assert.lengthOf(waited.asked, 1, "a press with nothing else left asks the GM");
+                assert.include(waited.asked[0], target.name);
+                assert.notExists(contestRollsOf(hit).target, "declined, it still waits");
+                await withGmAnswer(true, () => rollContest(hit));
+                assert.exists(contestRollsOf(hit).target, "the GM rolls for them");
+              });
+            } finally {
+              stop();
+            }
+            assert.isTrue(await waitFor(() => target.statuses.has("prone")), "and it settles");
           })
         );
 

@@ -12,6 +12,7 @@ import { SYS_ID } from "../config/constants.js";
 import { CHAT_TEMPLATES } from "../config/templates.js";
 import { F, T } from "../utils/localization.js";
 import { getFearTn, isCatastrophicFear } from "../utils/fear.js";
+import { hasActivePlayer } from "../utils/ownership.js";
 import { canActFor, getFreshRoll, registerFlow, requestStep, startFlow } from "./combat/flow.js";
 import { rollFearTest } from "./fear.js";
 
@@ -207,11 +208,8 @@ async function rollFearForUnplayed(card) {
   const state = card.getFlag(SYS_ID, "flow").state;
   for (const [i, uuid] of state.characters.entries()) {
     const character = fromUuidSync(uuid);
-    const played = game.users.some(
-      user => user.active && !user.isGM && character?.testUserPermission(user, "OWNER")
-    );
     const message =
-      character && !played
+      character && !hasActivePlayer(character, game.users)
         ? await rollFearTest({ character, ...state, askForOptions: false })
         : null;
     if (message) {

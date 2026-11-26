@@ -47,7 +47,7 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 
 | Card | Button | `data-action` | Shown when | Who may use it |
 | --- | --- | --- | --- | --- |
-| Check card | Contested Strength roll | `combat-contest` | A hit with Knockdown or Disarm on a target | Each side's owner rolls that side (`rollContest` (`module/services/combat/contest.js`)) |
+| Check card | Contested Strength roll | `combat-contest` | A hit with Knockdown or Disarm on a target | Each side's owner rolls that side; a GM rolls a connected player's side only after a "Roll for them" question (`rollContest` (`module/services/combat/contest.js`), #165) |
 | Check card | Grapple | `grapple-start` | A hit that declared a grapple | The attacker's owner (`startGrapple` (`module/services/combat/grapple-start.js`)) |
 | Check card | Apply to the target | `damage-apply-target` | A damage roll with a target | The roller or the GM, through the GM's client |
 | Check card | Apply to selected | `damage-apply-selected` | Every damage roll | As above |
@@ -59,6 +59,7 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 | Effect prompt | Roll | `effect-prompt` | Always | The actor's owner |
 | Flow card | Each step of a duel, grapple, or group Fear test | `data-flow-action` with `data-duelist`, `data-side` | The flow's state offers it | Checked on the GM's client per step; a Fear roll through the dialog, Shift skipping it |
 | Request card | Roll with my character | `check-request-roll` | Always | Any user with a character or a controlled token |
+| Request card | Roll Initiative for a PC | `initiative-request-roll` | A card a GM posted | The PC's owners and the GMs; removed for others |
 
 The check card's context menu adds "re-roll and keep the better" (the message's author) and "contest the previous roll" (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)). Those entries are core's context menu, not card markup.
 
@@ -72,7 +73,7 @@ Posted messages store their HTML, so these names never change and every check ex
 | --- | --- |
 | Card classes | `chat-card`, `card-content`, `dice-flavor`, `check-note`, `check-applied`, `check-free-raises`, `check-conditions`, `damage-actions`, `flow-actions`, `healing-card`, `weapon`, `l5r4-roll`, `l5r4-check`, `l5r4-tn-result`, `l5r4-check-damage`, `l5r4-check-request`, `l5r4-check-request-text`, `l5r4-damage-result`, `l5r4-effect-prompt`, `l5r4-flow-card`, `l5r4-contest`, `l5r4-item-summary`, `l5r4-rule-lines`, `l5r4-citation`, `l5r4-damage-button`, `l5r4-damage-roll`, `apply-wounds-btn`, `reduce-wounds-btn` |
 | Card modifiers | `-undone`, `-gap-sm`; on posted item cards `item`, `title`, `-bio`, `-expandable`, `-<subtype>` |
-| Card actions | `apply-wounds`, `reduce-wounds-void`, `check-damage`, `apply-condition`, `honor-roll`, `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `damage-void`, `damage-undo`, `effect-prompt`, `check-request-roll` |
+| Card actions | `apply-wounds`, `reduce-wounds-void`, `check-damage`, `apply-condition`, `honor-roll`, `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `damage-void`, `damage-undo`, `effect-prompt`, `check-request-roll`, `initiative-request-roll` |
 | Flow actions and attributes | `data-flow-action` values `control`, `hit`, `throw`, `break`, `pass`, `roll`, `concede`; `data-side`, `data-duelist`, `data-index`, `data-item-id`, `data-document-id`, `data-document-type` |
 | Cards posted before 4.0.0 | `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id`, `data-actor-id`, `data-damage` on `l5r4-damage-button`, `apply-wounds`, and `reduce-wounds-void` (`validateLegacyDamageClick` (`module/services/chat.js`), `bindLegacyDamageCard` (`module/services/combat/legacy-damage.js`)) |
 

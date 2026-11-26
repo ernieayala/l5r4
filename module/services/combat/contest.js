@@ -3,21 +3,27 @@
  * @description The Contested Strength roll a Knockdown or Disarm calls for after a hit. Each side's owner rolls
  * Strength from the attack card; the roll is marked with the attack and its side, and whoever rolls second settles
  * it as a Contested Roll: the attacker winning knocks the target Prone, or makes him drop the weapon, which the card
- * tells the GM. A tie is rolled again.
+ * tells the GM. A tie is rolled again. A GM's press rolls only the sides no connected player owns, and offers to roll a
+ * player's side once nothing else is left (#165).
  * game-rules/38_maneuvers.md, p.86-87
  * game-rules/29_types_of_rolls.md, p.80
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { CHAT_TEMPLATES } from "../../config/templates.js";
+import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
+import { hasActivePlayer } from "../../utils/ownership.js";
+import { askConfirm } from "../dialog.js";
 import { rollTrait } from "../dice/rolls/trait-roll.js";
 import { applyEffectAnywhere } from "../effects/apply.js";
 import { contestRollsOf, getContestOutcome } from "./contest-rolls.js";
 
 /**
- * Roll Strength for each side of the contest the user owns and that has not rolled, then settle it when both have.
+ * Roll Strength for each side of the contest the user may roll and that has not rolled, then settle it when both have.
+ * A side a connected player owns is that player's to roll, Void Point and Raises included, so a GM's press skips it;
+ * with nothing else to roll, the GM is asked whether to roll it for them (#165).
+ * game-rules/25_rings_and_traits.md, p.78
  * @param {ChatMessage} attack - The attack message (kind "attack", a hit with Knockdown or Disarm)
  * @returns {Promise<void>}
  */
@@ -26,11 +32,12 @@ export async function rollContest(attack) {
     attacker: fromUuidSync(attack.system.actorUuid),
     target: fromUuidSync(attack.system.target.uuid)
   };
-  let rolled = false;
-  for (const [side, actor] of Object.entries(sides)) {
-    if (!actor?.isOwner || contestRollsOf(attack)[side]) {
-      continue;
-    }
+  const rolls = contestRollsOf(attack);
+  const open = Object.keys(sides).filter(side => sides[side]?.isOwner && !rolls[side]);
+  const own = open.filter(side => !game.user.isGM || !hasActivePlayer(sides[side], game.users));
+  const rolling = own.length ? own : await askRollForPlayers(open, sides);
+  for (const side of rolling) {
+    const actor = sides[side];
     const message = await rollTrait({
       actor,
       traitName: "str",
@@ -40,13 +47,38 @@ export async function rollContest(attack) {
       return;
     }
     await message.setFlag(SYS_ID, "contest", { attackId: attack.id, side });
-    rolled = true;
   }
-  if (!rolled) {
+  if (!rolling.length) {
     ui.notifications?.info(formatContestState(attack, sides));
     return;
   }
   await postContestResult(attack, sides);
+}
+
+/**
+ * The GM's fallback when every side left to roll is a connected player's: ask, for each, whether to roll it here, so a
+ * player who stepped away never stalls the table (#165).
+ * @param {string[]} waiting - The sides left to roll, each owned by a connected player
+ * @param {{attacker: Actor, target: Actor}} sides
+ * @returns {Promise<string[]>} The sides the GM chose to roll
+ */
+async function askRollForPlayers(waiting, sides) {
+  const chosen = [];
+  for (const side of waiting) {
+    const name = sides[side].name;
+    const yes = await askConfirm({
+      window: { title: F("l5r4.ui.combat.contestRollForTitle", { name }) },
+      content: await R(DIALOG_TEMPLATES.confirm, {
+        question: F("l5r4.ui.combat.contestRollForQuestion", { name })
+      }),
+      yes: { label: T("l5r4.ui.combat.rollForThem") },
+      no: { label: T("l5r4.ui.combat.waitForPlayer") }
+    });
+    if (yes) {
+      chosen.push(side);
+    }
+  }
+  return chosen;
 }
 
 /**

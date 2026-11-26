@@ -30,6 +30,7 @@ import L5R4Combat from "../module/documents/combat.js";
 import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import { spendInitiativeVoidPoints } from "../module/services/initiative.js";
+import { postInitiativeRequests } from "../module/services/initiative-request.js";
 import L5R4Die from "../module/services/dice/roll-keep-die.js";
 import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
@@ -160,8 +161,10 @@ function registerCoreConfig() {
   // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
+  // Documents do not import services, so the Void Point prompt, the requests that send it to a player, and the effect
+  // services reach L5R4Combat here
   L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints;
+  L5R4Combat.postInitiativeRequests = postInitiativeRequests;
   L5R4Combat.EVENTS = COMBAT_EVENTS;
 }
 

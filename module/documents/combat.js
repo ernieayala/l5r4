@@ -2,7 +2,7 @@
  * @module documents/combat
  * @description The system's Combat:
  * - before an Initiative roll, each combatant's player may spend a Void Point for +10, which applies to that roll
- *   only;
+ *   only; a GM's roll sends that choice to a connected player (#165);
  * - turn and round events reach the effect services: saves rolled in the Reactions stage, Full Defense declared
  *   again each Turn, Concentration upkeep;
  * - before each new Round, Center Stance gives its next-Round bonus and +10 Initiative for that Round;
@@ -31,6 +31,14 @@ export default class L5R4Combat extends foundry.documents.Combat {
   static askInitiativeBonuses = async () => new Map();
 
   /**
+   * Posts a request card to their players for the combatants whose Initiative holds a player's choice, before the
+   * roll, and returns their ids, which the roll leaves out. The entry module sets this at init to the initiative
+   * request service (#165).
+   * @type {(combatants: foundry.documents.Combatant[]) => Promise<Set<string>>}
+   */
+  static postInitiativeRequests = async () => new Set();
+
+  /**
    * The effect services' handlers for combat events, set by the entry module at init (documents do not import
    * services).
    * @type {{
@@ -47,14 +55,22 @@ export default class L5R4Combat extends foundry.documents.Combat {
 
   /**
    * Rolls Initiative, giving each combatant with a bonus a formula of its own. Core rolls every id with one formula
-   * [src: client/documents/combat.mjs:388-441], so those combatants roll in calls of their own.
+   * [src: client/documents/combat.mjs:388-441], so those combatants roll in calls of their own. A combatant whose
+   * choice is a connected player's goes to that player instead, unless this roll answers their request card (#165).
+   * @param {string|string[]} ids
+   * @param {object} [options] - Core's options
+   * @param {boolean} [options.answeringRequest=false] - Whether this roll answers a request card, so it is not sent on
    * @override
    */
-  async rollInitiative(ids, options = {}) {
+  async rollInitiative(ids, { answeringRequest = false, ...options } = {}) {
     ids = typeof ids === "string" ? [ids] : ids;
-    const combatants = ids.map(id => this.combatants.get(id)).filter(c => c?.isOwner);
+    const owned = ids.map(id => this.combatants.get(id)).filter(c => c?.isOwner);
+    const sent = answeringRequest
+      ? new Set()
+      : await this.constructor.postInitiativeRequests(owned);
+    const combatants = owned.filter(c => !sent.has(c.id));
     const bonuses = await this.constructor.askInitiativeBonuses(combatants);
-    const plain = ids.filter(id => !bonuses.has(id));
+    const plain = ids.filter(id => !bonuses.has(id) && !sent.has(id));
     if (plain.length) {
       await super.rollInitiative(plain, options);
     }

@@ -33,6 +33,7 @@ import {
 } from "../services/dice/check/chat-actions.js";
 import { bindPromptCard } from "../services/effects/prompts.js";
 import { bindCheckRequestCard } from "../services/check-request.js";
+import { bindInitiativeRequestCard } from "../services/initiative-request.js";
 import {
   onPreUpdateActorScrollingText,
   onUpdateActorScrollingText
@@ -184,12 +185,14 @@ function registerInterfaceHooks() {
 
 /**
  * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple, Fear),
- * the duel and Guard token controls, and the GM's "New session" control for once-per-session abilities.
+ * Initiative request cards, the duel and Guard token controls, and the GM's "New session" control for once-per-session
+ * abilities.
  */
 function registerCombatHooks() {
   Hooks.on("renderChatMessageHTML", bindAttackCard);
   Hooks.on("renderChatMessageHTML", bindDamageCards);
   Hooks.on("renderChatMessageHTML", bindFlowCards);
+  Hooks.on("renderChatMessageHTML", bindInitiativeRequestCard);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsDuel);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsGuard);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsSession);

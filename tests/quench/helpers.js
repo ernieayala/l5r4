@@ -74,6 +74,27 @@ export async function withGmAnswer(answer, body) {
 }
 
 /**
+ * Run a function while a player owns an actor and counts as connected on this client, so a GM's roll treats the actor
+ * as that player's (module/utils/ownership.js, #165). Core sets `User#active` from the server; this client's copy is
+ * set for the function's run and restored after. The ownership stays with the actor, which the test deletes.
+ * @template T
+ * @param {Actor} actor
+ * @param {function(User): Promise<T>} fn - Gets the player
+ * @returns {Promise<T>}
+ */
+export async function withConnectedPlayer(actor, fn) {
+  const player = game.users.players[0];
+  const wasActive = player.active;
+  await actor.update({ [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER });
+  player.active = true;
+  try {
+    return await fn(player);
+  } finally {
+    player.active = wasActive;
+  }
+}
+
+/**
  * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
  * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes).
  * game-rules/36_stances.md, p.84

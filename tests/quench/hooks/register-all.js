@@ -39,6 +39,7 @@ import {
   onGetChatMessageContextOptions
 } from "../../../module/services/dice/check/chat-actions.js";
 import { bindCheckRequestCard } from "../../../module/services/check-request.js";
+import { bindInitiativeRequestCard } from "../../../module/services/initiative-request.js";
 import {
   onPreUpdateActorScrollingText,
   onUpdateActorScrollingText
@@ -145,6 +146,7 @@ export function registerHookWiringTests(quench) {
             bindAttackCard,
             bindDamageCards,
             bindFlowCards,
+            bindInitiativeRequestCard,
             bindLegacyDamageCard
           ]);
         });
