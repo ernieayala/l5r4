@@ -162,6 +162,17 @@ describe("migrateSkillSource", () => {
     migrateSkillSource(source);
     expect(source).toEqual({ mastery3: "legacy" });
   });
+
+  // #160: a Skill granted twice was stored with more free ranks than ranks
+  // game-rules/48_character_creation_expanded.md, p.103
+  it("should keep free ranks and free Emphases within what the Skill holds", () => {
+    const source = { rank: 1, freeRanks: 2, trainedEmphases: ["Katana", ""], freeEmphasis: 2 };
+    migrateSkillSource(source);
+    expect(source).toMatchObject({ freeRanks: 1, freeEmphasis: 1 });
+    const update = { freeRanks: 2 };
+    migrateSkillSource(update);
+    expect(update).toEqual({ freeRanks: 2 }, "an update carrying one number is left alone");
+  });
 });
 
 describe("migrateArmorSource", () => {

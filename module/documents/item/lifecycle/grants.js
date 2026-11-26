@@ -15,13 +15,13 @@ import {
   buildEmptyGrantRecord,
   buildGrantedSkill,
   getPendingGrants,
-  buildUngrantedSkill,
   isSecondSchool
 } from "../../../utils/grants.js";
 import { F } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
 import { postGrantNote, postGrantProblem } from "./grant-notes.js";
+import { buildUngrantChanges, recordsOf } from "./grant-records.js";
 import { getSecondSchoolGrants } from "./second-school.js";
 
 /**
@@ -151,15 +151,6 @@ function rankOf(giver) {
 }
 
 /**
- * A giver's grant records.
- * @param {Item} giver
- * @returns {import("../../../utils/grants.js").GrantRecord[]}
- */
-function recordsOf(giver) {
-  return giver.getFlag(SYS_ID, "grants") ?? [];
-}
-
-/**
  * Give one granted item to the actor: a Skill it already has becomes a School Skill with the free ranks; anything
  * else is copied with its giver's id.
  * @param {Actor} actor
@@ -227,38 +218,6 @@ async function createDueGrants(actor) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
-}
-
-/**
- * The changes that take back what a deleted giver granted: the granted items to delete, and the Skills with ranks or
- * Emphases bought on top, each losing only what the grant gave.
- * @param {Actor} actor
- * @param {Item} giver - The deleted item, its flags still readable
- * @returns {{deletes: string[], updates: object[]}} Item ids to delete, and item updates
- */
-function buildUngrantChanges(actor, giver) {
-  const deletes = [];
-  const updates = [];
-  for (const record of recordsOf(giver)) {
-    const target = record.itemId ? actor.items.get(record.itemId) : null;
-    if (!target) {
-      continue;
-    }
-    const plan =
-      target.type === "skill"
-        ? buildUngrantedSkill(target._source.system, record)
-        : { delete: record.created };
-    if (plan.delete) {
-      deletes.push(target.id);
-    } else if (plan.update) {
-      updates.push({
-        _id: target.id,
-        system: plan.update,
-        [`flags.${SYS_ID}.grantedBy`]: new foundry.data.operators.ForcedDeletion()
-      });
-    }
-  }
-  return { deletes, updates };
 }
 
 /**

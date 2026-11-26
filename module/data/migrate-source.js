@@ -97,6 +97,7 @@ export function migrateSkillSource(source) {
   migrateKey(source, "roll_bonus", "rollBonus");
   migrateKey(source, "keep_bonus", "keepBonus");
   migrateKey(source, "total_bonus", "totalBonus");
+  migrateSkillFreeSource(source);
 }
 
 /**
@@ -137,4 +138,23 @@ function migrateKey(object, from, to) {
     object[to] = object[from];
   }
   delete object[from];
+}
+
+/**
+ * A Skill's free ranks and free Emphases kept within what it holds: a Skill granted twice once got more free ranks
+ * than ranks, which made its next rank cost no XP (#160). Only a source holding both numbers is read, since an update
+ * may carry one alone.
+ * game-rules/48_character_creation_expanded.md, p.103
+ * @param {object} source - Skill system source (mutated).
+ */
+function migrateSkillFreeSource(source) {
+  if (typeof source.rank === "number" && source.freeRanks > source.rank) {
+    source.freeRanks = source.rank;
+  }
+  if (Array.isArray(source.trainedEmphases) && typeof source.freeEmphasis === "number") {
+    source.freeEmphasis = Math.min(
+      source.freeEmphasis,
+      source.trainedEmphases.filter(Boolean).length
+    );
+  }
 }

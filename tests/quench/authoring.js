@@ -204,6 +204,46 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #160: a second giver of a Skill adds no free rank, and removing either leaves the other's (Ernie's ruling)
+        // game-rules/48_character_creation_expanded.md, p.103
+        it(
+          "should give a Skill two givers grant one free rank, the next one bought, and keep it while one stays",
+          clean(async () => {
+            const { actor, kenjutsu } = await schooled();
+            const [advantage] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Sword Gift",
+                type: "advantage",
+                system: { rules: [{ key: "GrantItem", uuid: kenjutsu.uuid }] }
+              }
+            ]);
+            assert.isTrue(
+              await waitFor(() => advantage.getFlag(SYS_ID, "grants")?.length === 1),
+              "the Advantage's grant ran"
+            );
+            const skill = () => named(actor, "Kenjutsu");
+            assert.deepInclude(
+              skill().system,
+              { rank: 1, freeRanks: 1 },
+              "granted twice: one free rank"
+            );
+            const before = actor.system._xp.spent;
+            await skill().update({ "system.rank": 2 });
+            assert.equal(actor.system._xp.spent - before, 2, "rank 2 costs 2 XP");
+            await named(actor, "Quench Bushi School").delete();
+            assert.isTrue(
+              await waitFor(() => skill().getFlag(SYS_ID, "grantedBy") === advantage.id),
+              "the Advantage is now its giver"
+            );
+            assert.deepInclude(
+              skill().system,
+              { rank: 2, freeRanks: 1, school: true },
+              "the Advantage still grants it"
+            );
+            await advantage.delete();
+          })
+        );
+
         it(
           "should not grant again a granted item the owner removes",
           clean(async () => {

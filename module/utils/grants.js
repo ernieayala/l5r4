@@ -22,9 +22,11 @@ import { hasOpenChoice } from "./choices.js";
  * @property {string} uuid         The GrantItem rule's uuid
  * @property {string|null} itemId  The granted item; null once the owner removed it, so it is not granted again
  * @property {boolean} created     The grant made the item, rather than marking a Skill the actor had
- * @property {number} freeRanks    Free ranks the grant gave a Skill
+ * @property {number} freeRanks    Free ranks the grant added to a Skill's
  * @property {string} emphasis     The Emphasis the grant added to the trained list, or ""
- * @property {number} freeEmphasis Free Emphases the grant gave a Skill, 0 or 1
+ * @property {number} freeEmphasis Free Emphases the grant added, 0 or 1
+ * @property {number} [rank]       The ranks the grant gives a Skill, whatever it added; records made before #160 lack it
+ * @property {string} [grantEmphasis] The Emphasis the grant gives, whatever it added
  */
 
 /**
@@ -78,58 +80,76 @@ export function getMissingSchoolSkills(schoolSkills, ranks) {
 
 /**
  * A Skill's data once a grant gives it free ranks and an Emphasis: a School Skill, at least `skillRank`
- * ranks, those ranks free, and the Emphasis available, trained, and free. A rank 0 Skill granted 1 rank and the
- * Emphasis "Void Recovery" becomes rank 1 with 1 free rank, a School Skill, with that Emphasis trained and free.
- * game-rules/48_character_creation_expanded.md, p.102
+ * ranks, at least that many free, and the Emphasis available, trained, and free. A grant gives a Skill at a rank, so
+ * a second grant of a rank the Skill has adds nothing, and free ranks and Emphases never pass what the Skill holds
+ * (Ernie's ruling, #160). A rank 0 Skill granted 1 rank and the Emphasis "Void Recovery" becomes rank 1 with 1 free
+ * rank, a School Skill, with that Emphasis trained and free; granted rank 1 again, it stays so.
+ * game-rules/48_character_creation_expanded.md, p.102-103
  * @param {{rank: number, freeRanks: number, availableEmphases: string[], trainedEmphases: string[],
  *   freeEmphasis: number}} system
  * @param {GrantRule} rule
- * @returns {{update: object, record: {freeRanks: number, emphasis: string, freeEmphasis: number}}}
+ * @returns {{update: object, record: Omit<GrantRecord, "uuid"|"itemId"|"created">}}
  */
 export function buildGrantedSkill(system, rule) {
   const trained = system.trainedEmphases.filter(Boolean);
   const addEmphasis = Boolean(rule.emphasis) && !trained.includes(rule.emphasis);
   const available = system.availableEmphases.filter(Boolean);
   const addAvailable = Boolean(rule.emphasis) && !available.includes(rule.emphasis);
+  const trainedEmphases = addEmphasis ? [...trained, rule.emphasis] : trained;
+  const freeRanks = Math.max(system.freeRanks, rule.skillRank);
+  const freeEmphasis = Math.min(
+    trainedEmphases.length,
+    system.freeEmphasis + (rule.emphasis ? 1 : 0)
+  );
   return {
     update: {
       rank: Math.max(system.rank, rule.skillRank),
-      freeRanks: system.freeRanks + rule.skillRank,
+      freeRanks,
       school: true,
       // A trained Emphasis is one the Skill offers, so the Emphasis manager lists it checked (#187)
       availableEmphases: addAvailable ? [...available, rule.emphasis] : available,
-      trainedEmphases: addEmphasis ? [...trained, rule.emphasis] : trained,
-      freeEmphasis: system.freeEmphasis + (rule.emphasis ? 1 : 0)
+      trainedEmphases,
+      freeEmphasis
     },
     record: {
-      freeRanks: rule.skillRank,
+      freeRanks: freeRanks - system.freeRanks,
       emphasis: addEmphasis ? rule.emphasis : "",
-      freeEmphasis: rule.emphasis ? 1 : 0
+      freeEmphasis: freeEmphasis - system.freeEmphasis,
+      rank: rule.skillRank,
+      grantEmphasis: rule.emphasis ?? ""
     }
   };
 }
 
 /**
  * What removing a grant's giver does to a granted Skill (decision 7): a Skill the grant made, with no ranks or
- * Emphases bought on top, is deleted; otherwise the Skill stays without the free ranks and Emphasis the grant gave.
+ * Emphases bought on top and no other giver granting it, is deleted; otherwise the Skill stays without the free ranks
+ * and Emphasis the grant gave, keeping what the other givers grant (#160).
  * @param {{rank: number, freeRanks: number, trainedEmphases: string[], freeEmphasis: number}} system
  * @param {GrantRecord} record
+ * @param {GrantRecord[]} [others=[]] - The other givers' records for the same Skill
  * @returns {{delete: true}|{update: object}}
  */
-export function buildUngrantedSkill(system, record) {
+export function buildUngrantedSkill(system, record, others = []) {
   const trained = system.trainedEmphases.filter(Boolean);
   const bought = system.rank > system.freeRanks || trained.length > system.freeEmphasis;
-  if (record.created && !bought) {
+  if (record.created && !bought && !others.length) {
     return { delete: true };
   }
-  const freeRanks = Math.max(0, system.freeRanks - record.freeRanks);
-  const emphases = record.emphasis ? trained.filter(e => e !== record.emphasis) : trained;
+  const keptRank = Math.max(0, ...others.map(other => other.rank ?? other.freeRanks));
+  const keptEmphases = others.map(other => other.grantEmphasis ?? other.emphasis).filter(Boolean);
+  const freeRanks = Math.max(keptRank, system.freeRanks - record.freeRanks);
+  const keepsEmphasis = keptEmphases.includes(record.emphasis);
+  const emphases =
+    record.emphasis && !keepsEmphasis ? trained.filter(e => e !== record.emphasis) : trained;
   return {
     update: {
       freeRanks,
       school: freeRanks > 0,
       trainedEmphases: emphases,
-      freeEmphasis: Math.max(0, system.freeEmphasis - record.freeEmphasis)
+      freeEmphasis: keepsEmphasis
+        ? system.freeEmphasis
+        : Math.max(0, system.freeEmphasis - record.freeEmphasis)
     }
   };
 }
