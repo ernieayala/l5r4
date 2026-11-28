@@ -12,6 +12,16 @@ import { logError } from "../utils/error-logging.js";
 import { STANCE_IDS } from "../utils/stances.js";
 import { getWindowId } from "../utils/window-id.js";
 import { applyEffect } from "../services/effects/apply.js";
+import { queueActorWrite } from "../services/write-queue.js";
+
+/**
+ * The conditions the window offers: every status effect but the stances. It reads and changes only these, so a
+ * status a module or another effect adds is left alone (#191).
+ * @type {ReadonlySet<string>}
+ */
+const CONDITION_IDS = Object.freeze(
+  new Set(STATUS_EFFECTS.filter(status => !STANCE_IDS.has(status.id)).map(status => status.id))
+);
 
 /**
  * The condition manager window for one actor.
@@ -89,7 +99,7 @@ export default class ConditionManagerApplication extends foundry.applications.ap
 
       const activeConditions = getActiveConditions(this.actor);
 
-      const conditionList = STATUS_EFFECTS.filter(status => !STANCE_IDS.has(status.id)).map(
+      const conditionList = STATUS_EFFECTS.filter(status => CONDITION_IDS.has(status.id)).map(
         status => ({
           id: status.id,
           name: status.name,
@@ -186,23 +196,36 @@ export default class ConditionManagerApplication extends foundry.applications.ap
   }
 
   /**
-   * Handle multi-checkbox change events to add or remove conditions.
-   * Compares selected conditions with currently active conditions,
-   * creates ActiveEffect documents for new conditions,
-   * and deletes ActiveEffect documents for removed conditions.
+   * Handle multi-checkbox change events to add or remove conditions. Each change waits for the one before it, then
+   * compares the ticked conditions with the actor's as that change left them, so ticking two quickly adds each once
+   * (#191).
    *
    * @param {Event} event - The change event from multi-checkbox component
+   * @returns {Promise<void>}
    */
   async _onCheckboxChange(event) {
-    const selectedValues = toConditionSet(event.target.value);
+    const selected = toConditionSet(event.target.value);
+    await queueActorWrite(this.actor, () => this.#applySelection(selected));
+  }
 
-    const previouslyActive = getActiveConditions(this.actor);
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("condition-manager", actor.uuid);
+  }
 
-    // Determine which conditions need to be added (selected but not currently active)
-    const toAdd = Array.from(selectedValues).filter(id => !previouslyActive.has(id));
-
-    // Determine which conditions need to be removed (currently active but not selected)
-    const toRemove = Array.from(previouslyActive).filter(id => !selectedValues.has(id));
+  /**
+   * Add each ticked condition the actor lacks and remove each one it holds that is no longer ticked.
+   * @param {Set<string>} selected - The conditions ticked
+   * @returns {Promise<void>}
+   */
+  async #applySelection(selected) {
+    const active = getActiveConditions(this.actor);
+    const toAdd = [...selected].filter(id => CONDITION_IDS.has(id) && !active.has(id));
+    const toRemove = [...active].filter(id => !selected.has(id));
 
     try {
       await applyConditions(this.actor, toAdd);
@@ -221,44 +244,26 @@ export default class ConditionManagerApplication extends foundry.applications.ap
       ui.notifications?.error(T("l5r4.apps.conditionManager.errors.updateFailed"));
     }
   }
-
-  /**
-   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
-   * @param {Actor} actor
-   * @returns {string}
-   */
-  static getWindowId(actor) {
-    return getWindowId("condition-manager", actor.uuid);
-  }
 }
 
 /**
- * Get all active non-stance conditions from an actor.
- * Filters out disabled effects and stance effects.
+ * The conditions the window offers that the actor holds on an enabled effect.
  *
  * @param {Actor} actor - The actor to check for conditions
  * @returns {Set<string>} Set of active condition IDs
  */
 function getActiveConditions(actor) {
   const conditions = new Set();
-
-  if (!actor?.effects) {
-    return conditions;
-  }
-
   for (const effect of actor.effects) {
     if (effect.disabled) {
       continue;
     }
-
-    const statuses = effect.statuses || new Set();
-    for (const statusId of statuses) {
-      if (!STANCE_IDS.has(statusId)) {
+    for (const statusId of effect.statuses) {
+      if (CONDITION_IDS.has(statusId)) {
         conditions.add(statusId);
       }
     }
   }
-
   return conditions;
 }
 
@@ -278,14 +283,18 @@ function toConditionSet(value) {
 }
 
 /**
- * Create the status effect for each newly selected condition, with its rules and duration.
+ * Put on each newly ticked condition: an effect the actor holds disabled for it is enabled, so no second copy is
+ * made (#191); otherwise its status effect is created, with its rules and duration.
  * @param {Actor} actor
- * @param {string[]} conditionIds - Ids not yet active; one that is not a status effect is skipped
+ * @param {string[]} conditionIds - Offered condition ids the actor holds on no enabled effect
  * @returns {Promise<void>}
  */
 async function applyConditions(actor, conditionIds) {
   for (const conditionId of conditionIds) {
-    if (STATUS_EFFECTS.some(s => s.id === conditionId)) {
+    const disabled = actor.effects.find(e => e.disabled && e.statuses.has(conditionId));
+    if (disabled) {
+      await disabled.update({ disabled: false });
+    } else {
       await applyEffect(actor, conditionId);
     }
   }
