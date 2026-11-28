@@ -4,7 +4,8 @@
  *
  * A schema drops stored keys it does not define [src: common/data/fields.mjs:1143-1146], so legacy shapes are
  * reshaped here, on raw source, before cleaning. The ready-hook migrations in module/setup/migrations/ read
- * documents after that cleaning and so never see these keys (roadmap/STAGE-02-DATA-MODELS.md decision 7).
+ * documents after that cleaning and so never see these keys (roadmap/STAGE-02-DATA-MODELS.md decision 7); their
+ * last step writes the reshaped data back, which removes the legacy keys from the database (#182).
  * Pure functions on plain objects; `source` may be a full source or an update delta.
  */
 
@@ -30,7 +31,7 @@ export function migrateCommonActorSource(source) {
 }
 
 /**
- * PC snake_case keys from before 3.0 (module/setup/migrations/schema/map.js).
+ * PC snake_case keys from before 3.0.
  * @param {object} source - PC system source (mutated).
  */
 export function migratePcSource(source) {
@@ -50,11 +51,16 @@ export function migratePcSource(source) {
 /**
  * NPC Armor TN key and legacy wound levels. `wound_lvl` (pre-3.0), or a stored `woundLevels` with no
  * `manualWoundLevels`, becomes `manualWoundLevels`: values as integers, penalties as positive TN increases,
- * a level active when its threshold is above 0 (module/setup/migrations/actors/npc-wounds.js).
+ * a level active when its threshold is above 0. 3.2.1's template stored a default `armorTn` and
+ * `manualWoundLevels` beside the legacy keys, so the legacy keys win, as 3.2.1's NPC migration had them (#182); the
+ * world migration then writes the result back without them, so a later edit is never undone.
  * @param {object} source - NPC system source (mutated).
  */
 export function migrateNpcSource(source) {
-  migrateKey(source.armor, "armor_tn", "armorTn");
+  if (source.armor && "armor_tn" in source.armor) {
+    source.armor.armorTn = source.armor.armor_tn ?? source.armor.armorTn;
+    delete source.armor.armor_tn;
+  }
 
   const legacy = source.wound_lvl ?? (source.manualWoundLevels ? undefined : source.woundLevels);
   delete source.wound_lvl;
@@ -83,7 +89,7 @@ export function migrateKeywordsSource(source) {
 }
 
 /**
- * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/map.js). The Insight bonus field is
+ * Skill snake_case keys from before 3.0. The Insight bonus field is
  * dropped: Insight comes from Rings and Skill ranks only, and nothing ever counted it (#75).
  * game-rules/49_improving_your_character.md, p.104
  * @param {object} source - Skill system source (mutated).
@@ -115,7 +121,7 @@ export function migrateWeaponSource(source) {
 }
 
 /**
- * Armor misspellings from before 3.0 (module/setup/migrations/schema/map.js).
+ * Armor misspellings from before 3.0.
  * @param {object} source - Armor system source (mutated).
  */
 export function migrateArmorSource(source) {
@@ -124,8 +130,8 @@ export function migrateArmorSource(source) {
 }
 
 /**
- * Move `object[from]` to `object[to]` when the target is empty, then drop `from`. Matches the 3.2.1
- * schema-map rule: an existing target value wins (module/setup/migrations/schema/apply.js).
+ * Move `object[from]` to `object[to]` when the target is empty, then drop `from`: an existing target value wins, as
+ * it did in 3.2.1's own schema map.
  * @param {object} object - Mutated.
  * @param {string} from
  * @param {string} to

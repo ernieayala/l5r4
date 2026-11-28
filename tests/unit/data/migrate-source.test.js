@@ -97,6 +97,27 @@ describe("migrateNpcSource", () => {
     expect(source.manualWoundLevels).toBe(manual);
   });
 
+  // #182: 3.2.1's NPC migration took armor_tn over the template's default armorTn
+  it("should take armor.armor_tn over the template's default armorTn, and keep armorTn when it is null", () => {
+    const source = { armor: { armorTn: 10, armor_tn: 25 } };
+    migrateNpcSource(source);
+    expect(source.armor).toEqual({ armorTn: 25 });
+    const empty = { armor: { armorTn: 10, armor_tn: null } };
+    migrateNpcSource(empty);
+    expect(empty.armor).toEqual({ armorTn: 10 });
+  });
+
+  // #182: 3.2.1's template stored default manualWoundLevels beside a pre-3.0 wound_lvl
+  it("should take wound_lvl over the template's default manualWoundLevels", () => {
+    const source = {
+      manualWoundLevels: { nicked: { value: 20, penalty: 3, active: true } },
+      wound_lvl: { nicked: { value: "40", penalty: "-5" } }
+    };
+    migrateNpcSource(source);
+    expect(source.manualWoundLevels.nicked).toEqual({ value: 40, penalty: 5, active: true });
+    expect(source.wound_lvl).toBeUndefined();
+  });
+
   it("should leave a delta without wound data alone", () => {
     const source = { fear: { rank: 2 } };
     migrateNpcSource(source);

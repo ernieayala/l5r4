@@ -739,10 +739,14 @@
           "one": "{count} document could not be migrated and is tried again the next time a GM loads the world. The console (F12) names it",
           "other": "{count} documents could not be migrated and are tried again the next time a GM loads the world. The console (F12) names them"
         },
+        "freeRaisesNarrowed": "{name}: {item}'s Free Raises applied to every roll before 4.0; they now apply only while it is in use, as its other rules do",
+        "kihoSchool": "{name}: {item} is now a School kiho, costing no XP, as its 3.2.1 cost was 0. Untick School kiho on it if {name} is no monk",
         "migrated": {
           "one": "Brought {count} document up to date with this version",
           "other": "Brought {count} documents up to date with this version"
-        }
+        },
+        "notesTitle": "The upgrade changed these; check each one:",
+        "xpChanged": "{name}: {item} cost {before} XP in 3.2.1 and now costs {after}, its Mastery Level"
       },
       "settings": {
         "designGallery": {

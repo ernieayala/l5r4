@@ -21,7 +21,6 @@ import { migrateWoundLevelData } from "../utils/helpers.js";
  * - Sets woundMode: "manual" if missing (GM-controlled wounds for NPCs)
  * - Sets woundsMultiplier: 2 (default Earth ×2 lethality per core rules)
  * - Sets woundsPenaltyMod: 0 (no modifier to standard wound penalties)
- * - Migrates armor_tn → armorTn (camelCase normalization)
  * - Converts string nrWoundLvls → number
  * - Normalizes manualWoundLevels penalties to positive absolute values (TN increases)
  *
@@ -35,9 +34,11 @@ export async function migrateLegacyNpcWounds(actor) {
   if (actor.type !== "npc") {
     return;
   }
+  // The stored data, never the prepared: an Active Effect on the Armor TN or wounds is not written back (#182)
+  const stored = actor._source.system;
   const updates = {
-    ...buildWoundSettingDefaults(actor.system),
-    ...buildLegacyWoundValues(actor.system)
+    ...buildWoundSettingDefaults(stored),
+    ...buildLegacyWoundValues(stored)
   };
   if (Object.keys(updates).length > 0) {
     await actor.update(updates, { diff: true, render: false });
@@ -46,7 +47,7 @@ export async function migrateLegacyNpcWounds(actor) {
 
 /**
  * The wound settings an NPC lacks, at their defaults: manual mode, the ×2 Earth multiplier, no penalty modifier.
- * @param {object} system - The NPC's system data
+ * @param {object} system - The NPC's stored system data
  * @returns {object} Update entries; empty when every setting is present
  */
 function buildWoundSettingDefaults(system) {
@@ -64,23 +65,14 @@ function buildWoundSettingDefaults(system) {
 }
 
 /**
- * Legacy wound values in their current shape: the Armor TN under `armorTn`, a numeric `nrWoundLvls`, and manual
- * Wound Rank penalties as positive numbers.
- * @param {object} system - The NPC's system data
+ * Legacy wound values in their current shape: a numeric `nrWoundLvls`, and manual Wound Rank penalties as positive
+ * numbers. The Armor TN's legacy key moves in NpcData.migrateData, and the migrated data is written back in the
+ * persist step (module/setup/migrations/schema/persist.js).
+ * @param {object} system - The NPC's stored system data
  * @returns {object} Update entries; empty when nothing needs normalizing
  */
 function buildLegacyWoundValues(system) {
   const updates = {};
-  const legacyArmorTn = system.armor?.armor_tn;
-  const currentArmorTn = system.armor?.armorTn;
-
-  const armorTnValue =
-    legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
-
-  if (armorTnValue !== undefined && armorTnValue !== null) {
-    updates["system.armor.armorTn"] = armorTnValue;
-  }
-
   if (typeof system.nrWoundLvls === "string") {
     updates["system.nrWoundLvls"] = parseInt(system.nrWoundLvls) || 1;
   }

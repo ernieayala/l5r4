@@ -87,15 +87,24 @@ export function registerTokenEffects() {
 }
 
 /**
- * Remember the stored Wounds before an update, to measure what one update inflicts.
+ * Remember the stored Wounds before an update, to measure what one update inflicts, and whether it changes the
+ * Wounds or their settings at all: an update that writes them back unchanged, as the world migration's write-back
+ * does (module/setup/migrations/schema/persist.js), is no Wounds change (#182).
  * @param {Actor} actor
  * @param {object} changes
  * @param {object} options
  */
 export function onPreUpdateActorWounds(actor, changes, options) {
-  if (foundry.utils.hasProperty(changes, "system.suffered")) {
-    options[`${SYS_ID}SufferedBefore`] = toInt(actor._source.system.suffered);
+  const stored = actor._source.system;
+  const hasSuffered = foundry.utils.hasProperty(changes, "system.suffered");
+  if (hasSuffered) {
+    options[`${SYS_ID}SufferedBefore`] = toInt(stored.suffered);
   }
+  const wounds = changes.system?.wounds;
+  options[`${SYS_ID}WoundsChanged`] =
+    (hasSuffered && toInt(changes.system.suffered) !== toInt(stored.suffered)) ||
+    (wounds !== undefined &&
+      !foundry.utils.isEmpty(foundry.utils.diffObject(stored.wounds ?? {}, wounds)));
 }
 
 /**
@@ -109,7 +118,7 @@ export async function onUpdateActorWounds(actor, changes, options) {
   if (!game.users.activeGM?.isSelf || !isAnsweringGmClient()) {
     return;
   }
-  if (!foundry.utils.hasProperty(changes, "system.suffered") && !changes.system?.wounds) {
+  if (!options[`${SYS_ID}WoundsChanged`]) {
     return;
   }
   await updateProne(actor);

@@ -793,13 +793,16 @@ export function registerRulesTests(quench) {
       };
 
       /**
-       * Run migrateItemRules on each item.
+       * Run migrateItemRules on each item, in one migration run.
        * @param {Item[]} items
+       * @returns {Promise<string[]>} What the run noted for the GM
        */
       const migrateItems = async items => {
+        const run = { force: false, migrated: 0, failed: 0, notes: [] };
         for (const item of items) {
-          await migrateItemRules(item);
+          await migrateItemRules(item, run);
         }
+        return run.notes;
       };
 
       /**

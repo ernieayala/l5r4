@@ -27,7 +27,7 @@ const oldLuckyCharm = name => ({
 });
 
 /** A fresh run, as migrateWorld starts one. */
-const newRun = (force = false) => ({ force, migrated: 0, failed: 0 });
+const newRun = (force = false) => ({ force, migrated: 0, failed: 0, notes: [] });
 
 /**
  * Run `body` with runMigration off, so the create hook leaves the documents it makes for the test to migrate.

@@ -19,6 +19,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "../config/item-types.js";
 import { isOwnChange } from "../utils/change-origin.js";
+import { migrateLegacyCostSource } from "../utils/item-source.js";
 import { onItemPreCreate, onItemCreate } from "./item/lifecycle/item-creation.js";
 import { updateGrantRecords, applyGrants, deleteGrantedItems } from "./item/lifecycle/grants.js";
 import { onItemPreUpdate } from "./item/lifecycle/item-updates.js";
@@ -36,6 +37,16 @@ export default class L5R4Item extends Item {
 
   /** @type {Record<string, string>} Map of item types to default icon paths */
   static DEFAULT_ICONS = DEFAULT_ICONS;
+
+  /**
+   * A 3.2.1 kata's or kiho's XP cost moves into a flag before the schema drops it: only the whole item source holds
+   * both (module/utils/item-source.js, #182).
+   * @override
+   */
+  static migrateData(source) {
+    migrateLegacyCostSource(source);
+    return super.migrateData(source);
+  }
 
   /**
    * Configure item defaults before creation.

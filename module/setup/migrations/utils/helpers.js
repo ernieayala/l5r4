@@ -1,7 +1,7 @@
 /**
  * @module setup/migrations/utils/helpers
- * @description Shared helpers for the data migration steps: dot-path reads and writes, Wound Rank data
- * normalization, and the migration schema a document is at.
+ * @description Shared helpers for the data migration steps: Wound Rank data normalization, and the migration schema
+ * a document is at.
  */
 import {
   SYS_ID,
@@ -12,78 +12,6 @@ import {
 
 /** The first system version whose migration brought documents to schema 1. */
 const SCHEMA_1_VERSION = "4.0.0";
-
-/**
- * Retrieves a nested property value from an object using dot notation path.
- *
- * Walks the nested object structure and returns undefined, without throwing, when an
- * intermediate property is missing. Used by schema migration
- * functions to read legacy field locations before transformation.
- *
- * @param {object} obj - Source object to traverse
- * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
- * @returns {*} The value at the specified path, or undefined if path doesn't exist
- */
-export function getByPath(obj, path) {
-  try {
-    return path
-      .split(".")
-      .reduce((acc, key) => (acc !== undefined && acc !== null ? acc[key] : undefined), obj);
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Sets a nested property value on an object using dot notation path.
- *
- * Creates intermediate objects as needed when traversing the path, and mutates the
- * original object. Used by schema migrations to write transformed values to new field
- * locations while building update payloads.
- *
- * @param {object} obj - Target object to modify (mutated in place)
- * @param {string} path - Dot-delimited property path (e.g., "system.armor.armorTn")
- * @param {*} value - Value to assign at the target path
- * @returns {void}
- */
-export function updateByPath(obj, path, value) {
-  const parts = path.split(".");
-  const last = parts.pop();
-  let cur = obj;
-  for (const k of parts) {
-    if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object") {
-      cur[k] = {};
-    }
-    cur = cur[k];
-  }
-  cur[last] = value;
-}
-
-/**
- * Deletes a nested property from an object using dot notation path.
- *
- * Safely removes a property at any nesting level. Handles missing intermediate paths
- * gracefully without throwing errors. Used by schema migrations to clean up legacy
- * field names after copying their values to new locations.
- *
- * @param {object} obj - Target object to modify (mutated in place)
- * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
- * @returns {void}
- */
-export function deleteByPath(obj, path) {
-  const parts = path.split(".");
-  const last = parts.pop();
-  let cur = obj;
-  for (const k of parts) {
-    if (cur?.[k] === undefined) {
-      return;
-    }
-    cur = cur[k];
-  }
-  if (cur && Object.prototype.hasOwnProperty.call(cur, last)) {
-    delete cur[last];
-  }
-}
 
 /**
  * Normalizes wound level data types and ensures penalties are positive values.

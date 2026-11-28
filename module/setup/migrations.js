@@ -14,15 +14,16 @@
  * update with `render: false`, read `_source`, and keep a field that already holds a value.
  */
 import { SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA } from "../config/constants.js";
+import { CHAT_TEMPLATES } from "../config/templates.js";
 import { pluralKeyOf } from "../utils/localization.js";
 import { getMigrationSchema } from "./migrations/utils/helpers.js";
 import { getTokenDeltaDocuments } from "./migrations/actors/unlinked-tokens.js";
 import { ACTOR_STEPS, EFFECT_STEPS, ITEM_STEPS } from "./migrations/steps.js";
 
 /**
- * One migration run: whether every step runs again whatever a document's schema, and the documents it brought up to
- * date or could not.
- * @typedef {{force: boolean, migrated: number, failed: number}} MigrationRun
+ * One migration run: whether every step runs again whatever a document's schema, the documents it brought up to date
+ * or could not, and what the steps tell the GM (#182).
+ * @typedef {{force: boolean, migrated: number, failed: number, notes: string[]}} MigrationRun
  */
 
 /**
@@ -34,7 +35,7 @@ import { ACTOR_STEPS, EFFECT_STEPS, ITEM_STEPS } from "./migrations/steps.js";
  * @returns {Promise<MigrationRun>}
  */
 export async function migrateWorld({ force = false } = {}) {
-  const run = { force, migrated: 0, failed: 0 };
+  const run = { force, migrated: 0, failed: 0, notes: [] };
   for (const item of game.items) {
     await migrateDocument(item, ITEM_STEPS, { run, schema: getRunSchema(item._source, run) });
   }
@@ -47,7 +48,7 @@ export async function migrateWorld({ force = false } = {}) {
   for (const pack of game.packs) {
     await migratePack(pack, run);
   }
-  warnMigrationResult(run);
+  await warnMigrationResult(run);
   return run;
 }
 
@@ -65,7 +66,7 @@ export async function migrateDocument(doc, steps, { run, schema }) {
   }
   try {
     for (const step of steps.filter(s => s.schema > schema)) {
-      await step.migrate(doc);
+      await step.migrate(doc, run);
     }
     await doc.setFlag(SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA);
     run.migrated++;
@@ -115,9 +116,9 @@ export async function onCreateMigrateDocument(doc) {
   if (!game.users.activeGM?.isSelf || !game.settings.get(SYS_ID, "runMigration")) {
     return;
   }
-  const run = { force: false, migrated: 0, failed: 0 };
+  const run = { force: false, migrated: 0, failed: 0, notes: [] };
   await migrateAnyDocument(doc, run);
-  warnMigrationResult({ ...run, migrated: 0 });
+  await warnMigrationResult({ ...run, migrated: 0 });
 }
 
 /**
@@ -214,11 +215,12 @@ async function migrateAnyDocument(doc, run) {
 
 /**
  * Tell the GM what a run brought up to date, as an info notice, and warn of what failed; nothing when it did
- * neither.
+ * neither. What the steps noted (an XP change, Free Raises that now wait for their item) goes to the GMs as one chat
+ * note, which stays where a notice would fade (#182).
  * @param {MigrationRun} run
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function warnMigrationResult({ migrated, failed }) {
+async function warnMigrationResult({ migrated, failed, notes }) {
   for (const [count, kind, level] of [
     [migrated, "migrated", "info"],
     [failed, "failed", "warn"]
@@ -227,5 +229,13 @@ function warnMigrationResult({ migrated, failed }) {
       const key = pluralKeyOf(game.i18n, count, c => `l5r4.system.migration.${kind}.${c}`);
       ui.notifications[level](game.i18n.localize(key, { count }));
     }
+  }
+  if (notes.length) {
+    await ChatMessage.create({
+      content: await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.note, {
+        lines: [game.i18n.localize("l5r4.system.migration.notesTitle"), ...notes]
+      }),
+      whisper: game.users.filter(user => user.isGM).map(user => user.id)
+    });
   }
 }

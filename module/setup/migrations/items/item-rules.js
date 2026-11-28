@@ -3,6 +3,8 @@
  * @description Moves 3.2.1 item mechanics into `system.rules` (roadmap/STAGE-07-RULE-ENGINE.md, Conversions).
  */
 
+import { WEAPON_TYPES } from "../../../config/constants.js";
+
 const TRAIT_CHANGE = /^system\.traits\.(sta|wil|str|per|ref|awa|agi|int)$/;
 const voidChangeKeys = new Set(["system.rings.void.rank", "system.rings.void.value"]);
 const MASTER_OF_BLOOD = "master-of-blood";
@@ -29,10 +31,11 @@ const MASTER_OF_BLOOD_RULES = Object.freeze([
  * (#181), so a rule a GM deletes afterwards stays deleted.
  *
  * @param {Item} item
+ * @param {import("../../migrations.js").MigrationRun} run - Its notes are extended
  * @returns {Promise<void>}
  */
-export async function migrateItemRules(item) {
-  await migrateFreeRaises(item);
+export async function migrateItemRules(item, run) {
+  await migrateFreeRaises(item, run);
   if (item.type === "family" || item.type === "school") {
     await migrateCreationBonusEffects(item);
   } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
@@ -153,11 +156,13 @@ async function migrateMasterOfBloodRules(item) {
 /**
  * An item's `freeRaises` value, which 3.2.1 added to every roll its owner made, becomes a FreeRaise rule on "any"
  * roll, which the GM can see and narrow in the rules editor (Ernie's ruling). The field is set to 0, so running
- * again changes nothing.
+ * again changes nothing. On an item whose rules wait for it to be in use (worn armor, a weapon's own rolls, an
+ * activated kata or kiho, a tattoo not passive), the Free Raises now wait too, and the GM is told (#182).
  * @param {Item} item
+ * @param {import("../../migrations.js").MigrationRun} run - Its notes are extended
  * @returns {Promise<void>}
  */
-async function migrateFreeRaises(item) {
+async function migrateFreeRaises(item, run) {
   const value = Number(item._source.system.freeRaises);
   if (!(value > 0)) {
     return;
@@ -169,4 +174,14 @@ async function migrateFreeRaises(item) {
     },
     { render: false }
   );
+  const narrowed =
+    item.type === "armor" || WEAPON_TYPES.includes(item.type) || !item.system.rulesActive;
+  if (item.actor && narrowed) {
+    run.notes.push(
+      game.i18n.localize("l5r4.system.migration.freeRaisesNarrowed", {
+        name: item.actor.name,
+        item: item.name
+      })
+    );
+  }
 }
