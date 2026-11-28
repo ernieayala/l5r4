@@ -10,6 +10,7 @@
 import { CHOICE_LIST_VALUES } from "../config/rule-keys.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
+import { toSkillType } from "../utils/selectors.js";
 import {
   openChoices,
   getFixedGrantUuids,
@@ -105,7 +106,8 @@ async function getChoiceOptions(choice) {
  * @returns {Promise<Array<{value: string, label: string, name: string}>>}
  */
 async function getSkillOptions(filter) {
-  const isAllowedType = type => filter.length === 0 || filter.includes(type);
+  // The filter holds types as toSkillType gives them; a Skill's stored type is compared the same way (#173)
+  const isAllowedType = type => filter.length === 0 || filter.includes(toSkillType(type));
   const options = game.items
     .filter(item => item.type === "skill" && isAllowedType(item.system.type))
     .map(item => ({ value: item.uuid, label: item.name, name: item.name }));

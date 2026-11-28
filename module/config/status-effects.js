@@ -24,12 +24,19 @@ const UNTIL_NEXT_TURN = Object.freeze({ value: 1, units: "rounds", expiry: "turn
 
 /**
  * TNModifier rules raising by 5 per level the TN of Skill rolls (attacks included), Spell Casting Rolls (maho reads
- * "spell" rules too), and physical Trait rolls (Fatigued and Fasting). A Skill roll also reads its Trait's
- * selector, so the Trait rules hold only on a Trait roll. Each status takes its own copy of the list.
+ * "spell" rules too), and physical Trait rolls (Fatigued and Fasting). An attack with a Weapon Skill reads both the
+ * "skill" and the "attack" selector, and a stat block's attack only "attack", so every attack takes the "attack"
+ * rule and the "skill" rule leaves attacks out (#173). A Skill roll also reads its Trait's selector, so the Trait
+ * rules hold only on a Trait roll. Each status takes its own copy of the list.
  * game-rules/41_conditional_effects.md, p.89
  */
 const PHYSICAL_TN_RULES = Object.freeze([
-  { key: "TNModifier", selector: "skill", value: "5 * @level" },
+  {
+    key: "TNModifier",
+    selector: "skill",
+    value: "5 * @level",
+    predicate: [{ not: "check:attack" }]
+  },
   { key: "TNModifier", selector: "attack", value: "5 * @level" },
   { key: "TNModifier", selector: "spell", value: "5 * @level" },
   { key: "TNModifier", selector: "trait:sta", value: "5 * @level", predicate: ["check:trait"] },

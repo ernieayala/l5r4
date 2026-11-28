@@ -52,6 +52,14 @@ describe("getUnmetPrerequisites", () => {
 });
 
 describe("openChoices", () => {
+  // #173: a filter is read as the Skill types Skills store
+  it("should give a ChoiceSet's filter by stored Skill type", () => {
+    const [choice] = openChoices([
+      { key: "ChoiceSet", flag: "skill", list: "skills", filter: ["Merchant", " bugei "] }
+    ]);
+    expect(choice.filter).toEqual(["merch", "bugei"]);
+  });
+
   it("should return ChoiceSets without a selection, with their index and checked options", () => {
     const rules = [
       { key: "Note", text: "x" },

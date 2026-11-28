@@ -12,6 +12,7 @@ import { ARROW_ARMOR_FACTOR, RANGED_IN_MELEE_PENALTY } from "../../../config/gam
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getBagEntries } from "../../../utils/rule-bag.js";
+import { getSkillItem, toSkillKey, toSkillType } from "../../../utils/selectors.js";
 import { getArmorTnPenalty } from "../../../utils/armor-penalties.js";
 
 /**
@@ -49,10 +50,13 @@ import { getArmorTnPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * The selectors a check reads rules for: "any" (every roll), its kind, and what it rolls. A Skill's item adds its type
- * (`skill-type:<type>`) and tags (`skill-tag:social`, `skill-tag:school`; roadmap/STAGE-11 decision 9).
+ * (`skill-type:<type>`) and tags (`skill-tag:social`, `skill-tag:school`; roadmap/STAGE-11 decision 9). An attack with
+ * a Weapon Skill is a Skill roll too, so it reads `skill` rules (Ernie's ruling, #173); a stat block's attack has none.
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/32_attack_and_defense.md, p.82
  * @param {object} spec
  * @param {string} spec.kind - skill, trait, ring, spell, maho, attack, damage, or roll
- * @param {string} [spec.skill] - Skill name in lower case
+ * @param {string} [spec.skill] - Skill name
  * @param {string} [spec.trait] - Trait key
  * @param {string} [spec.ring] - Ring key
  * @param {{type: string, social: boolean, school: boolean}} [spec.skillData] - The Skill item's data
@@ -63,11 +67,14 @@ export function buildCheckSelectors({ kind, skill, trait, ring, skillData }) {
   if (kind === "maho") {
     selectors.push("spell");
   }
+  if (kind === "attack" && skill) {
+    selectors.push("skill");
+  }
   if (skill) {
-    selectors.push(`skill:${skill}`);
+    selectors.push(`skill:${toSkillKey(skill)}`);
   }
   if (skillData) {
-    selectors.push(`skill-type:${skillData.type}`);
+    selectors.push(`skill-type:${toSkillType(skillData.type)}`);
     if (skillData.social) {
       selectors.push("skill-tag:social");
     }
@@ -114,7 +121,7 @@ export function buildCheckOptions(actor, kind, { target = null, weapon = null, e
       }
     }
     if (weapon.system.associatedSkill) {
-      options.add(`weapon:skill:${weapon.system.associatedSkill.toLowerCase().trim()}`);
+      options.add(`weapon:skill:${toSkillKey(weapon.system.associatedSkill)}`);
     }
   }
   if (target) {
@@ -179,9 +186,7 @@ export function getCheckContext(actor, { kind, target = null, weapon = null, ...
  */
 function buildRuleQuery(actor, spec) {
   const { kind, skill, trait, ring, target, weapon } = spec;
-  const skillItem = skill
-    ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
-    : null;
+  const skillItem = skill ? getSkillItem(actor.items, skill) : null;
   const selectors = buildCheckSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
   const options = buildCheckOptions(actor, kind, { target, weapon, extra: spec.options });
   const entriesOf = bagKind =>

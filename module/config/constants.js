@@ -63,7 +63,7 @@ export const LEGACY_MIGRATION_FLAG = "migratedVersion";
  * @type {number}
  * @constant
  */
-export const MIGRATION_SCHEMA = 2;
+export const MIGRATION_SCHEMA = 3;
 
 /**
  * The system hook L5R4ActiveEffect fires with `(actor, effect)` for each effect it drops because the actor is immune

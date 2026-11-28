@@ -348,14 +348,6 @@
           },
           {
             "key": "TNModifier",
-            "selector": "attack",
-            "value": 5,
-            "predicate": [
-              "consumed-perfection"
-            ]
-          },
-          {
-            "key": "TNModifier",
             "selector": "spell",
             "value": 5,
             "predicate": [
@@ -365,14 +357,6 @@
           {
             "key": "RaiseRule",
             "selector": "skill",
-            "cap": -1,
-            "predicate": [
-              "consumed-perfection"
-            ]
-          },
-          {
-            "key": "RaiseRule",
-            "selector": "attack",
             "cap": -1,
             "predicate": [
               "consumed-perfection"

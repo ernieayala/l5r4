@@ -13,6 +13,7 @@ import {
 } from "../../utils/mechanics.js";
 import { toTraitKey } from "../../utils/trait-keys.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { F, T } from "../../utils/localization.js";
 import { rollSkill } from "../../services/dice/rolls/skill-roll.js";
 import { rollPool } from "../../services/dice/rolls/simple-roll.js";
@@ -175,7 +176,7 @@ export class RollHandler {
     const id = weapon.id;
     const weaponSkill = getWeaponSkillTrait(actor, weapon);
     const associatedSkill = weapon.system.associatedSkill || null;
-    const skillItem = RollHandler.#skillItemOf(actor, associatedSkill);
+    const skillItem = associatedSkill ? getSkillItem(actor.items, associatedSkill) : null;
     const skillTrait = skillItem?.system.trait || weapon.system.fallbackTrait || "agi";
 
     return RollHandler.#rollOnce(`${actor.id}-weapon-attack-${id}`, () =>
@@ -334,20 +335,6 @@ export class RollHandler {
     const row = element.closest("[data-item-id]");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     return id ? actor.items.get(id) : null;
-  }
-
-  /**
-   * The actor's skill item with this name, matched without regard to case.
-   * @param {Actor} actor
-   * @param {string|null} skillName - A weapon's associated Skill
-   * @returns {Item|null|undefined} The skill; null when the weapon names none
-   */
-  static #skillItemOf(actor, skillName) {
-    return skillName
-      ? actor.items.find(
-          i => i.type === "skill" && i.name.toLowerCase() === skillName.toLowerCase()
-        )
-      : null;
   }
 
   /**

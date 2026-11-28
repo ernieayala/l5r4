@@ -22,6 +22,7 @@ import { CONTEST_MARGIN_PER_RAISE } from "../../config/game-mechanics.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { askGmAllow } from "../gm-allow.js";
 import { registerFlow, canActFor, buildSkillRequest, getFreshRoll, startFlow } from "./flow.js";
@@ -119,7 +120,7 @@ export function onGetSceneControlButtonsDuel(controls) {
  * @returns {{focusTotal: number, edge: number}} Flat bonus on Focus; rolled and kept dice the edge gives
  */
 function iaijutsuMasteryOf(actor) {
-  const skill = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "iaijutsu");
+  const skill = getSkillItem(actor.items, "iaijutsu");
   const rank = toInt(skill?.system.rank);
   return { focusTotal: rank >= 5 ? FOCUS_STEP : 0, edge: rank >= 7 ? 2 : 1 };
 }

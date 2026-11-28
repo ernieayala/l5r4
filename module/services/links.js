@@ -14,6 +14,7 @@
 
 import { F, T } from "../utils/localization.js";
 import { getEffectiveTrait, ringRankOf } from "../utils/mechanics.js";
+import { getSkillItem, toSkillKey } from "../utils/selectors.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { getRollActor } from "./dice/resources/void-points.js";
 import { formatSkillLabel } from "./dice/rolls/skill-roll.js";
@@ -62,8 +63,8 @@ export function checkRequestOf(actor, spec) {
   const label = formatLinkText({ ...spec, type: "Check" });
   const common = { label, askForOptions: true, ...(spec.tn ? { tn: spec.tn } : {}) };
   if (spec.skill) {
-    const key = spec.skill.toLowerCase().trim();
-    const item = actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === key);
+    const key = toSkillKey(spec.skill);
+    const item = getSkillItem(actor.items, key);
     const trait = spec.trait || item?.system.trait;
     if (!trait) {
       ui.notifications?.warn(F("l5r4.ui.links.needTrait", { skill: spec.skill, name: actor.name }));

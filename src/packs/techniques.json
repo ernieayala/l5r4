@@ -4964,13 +4964,6 @@
             "label": "Toku's Lesson: TN 25 or higher"
           },
           {
-            "key": "RollModifier",
-            "selector": "attack",
-            "roll": 1,
-            "optional": true,
-            "label": "Toku's Lesson: TN 25 or higher"
-          },
-          {
             "key": "Wounds",
             "penalty": "0 - @traits.wil - 2 * @school.rank"
           }

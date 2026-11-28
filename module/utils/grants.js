@@ -8,6 +8,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { hasOpenChoice } from "./choices.js";
+import { toSkillKey } from "./selectors.js";
 
 /**
  * @typedef {object} GrantRule
@@ -71,11 +72,11 @@ export function buildEmptyGrantRecord(uuid) {
  * Skills, and its Techniques wait until this list is empty.
  * game-rules/64_advantages.md, p.151
  * @param {string[]} schoolSkills - The names of the Skills the School teaches
- * @param {Map<string, number>} ranks - The character's Skill ranks, by lower-case name
+ * @param {Map<string, number>} ranks - The character's Skill ranks, by toSkillKey name
  * @returns {string[]} The missing names, as given
  */
 export function getMissingSchoolSkills(schoolSkills, ranks) {
-  return schoolSkills.filter(name => (ranks.get(name.toLowerCase().trim()) ?? 0) < 1);
+  return schoolSkills.filter(name => (ranks.get(toSkillKey(name)) ?? 0) < 1);
 }
 
 /**

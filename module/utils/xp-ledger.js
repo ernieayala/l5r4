@@ -15,6 +15,7 @@ import {
 } from "../config/game-mechanics.js";
 import { getBagEntries } from "./rule-bag.js";
 import { buildRuleRollData, getRuleValue } from "./rule-values.js";
+import { toSkillKey, toSkillType } from "./selectors.js";
 
 /** The breakdown categories XP is spent on; Disadvantages give XP, so they are not among them. */
 const SPENT_CATEGORIES = Object.freeze([
@@ -227,7 +228,7 @@ function getRankEntries(rank, { type, name, multiplier, selector }, price) {
 function getSkillEntries(skills, price) {
   const entries = [];
   for (const skill of skills) {
-    const selectors = [`skill:${skill.name.toLowerCase().trim()}`, `skill-type:${skill.type}`];
+    const selectors = [`skill:${toSkillKey(skill.name)}`, `skill-type:${toSkillType(skill.type)}`];
     for (let r = Math.max(0, skill.freeRanks) + 1; r <= skill.rank; r++) {
       entries.push({
         type: "skill",

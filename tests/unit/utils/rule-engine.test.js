@@ -185,6 +185,16 @@ describe("getDerivedRuleOutputs", () => {
     expect(result.movementWater).toBe(-2);
   });
 
+  // #173
+  it("should key the bag by selector in the form rolls build theirs", () => {
+    const result = out([
+      rule("RollModifier", { selector: "skill:Kenjutsu ", roll: 1, type: "untyped" }),
+      rule("TNModifier", { selector: "skill-type:merchant", value: 5, type: "untyped" })
+    ]);
+    expect(Object.keys(result.bag.rollModifiers)).toEqual(["skill:kenjutsu"]);
+    expect(Object.keys(result.bag.tnModifiers)).toEqual(["skill-type:merch"]);
+  });
+
   // #172
   it("should report a rule whose value is not a finite number and leave it out", () => {
     const result = out([

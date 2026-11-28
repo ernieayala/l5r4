@@ -8,6 +8,7 @@
 import { CHOICE_LISTS } from "../config/rule-keys.js";
 import { hasOpenChoice } from "./choices.js";
 import { testPredicate } from "./predicate.js";
+import { toSkillKey, toSkillType } from "./selectors.js";
 
 /**
  * The Prerequisite rules an actor does not meet: each rule whose own predicate holds (when it applies) and whose
@@ -37,7 +38,7 @@ export function getUnmetPrerequisites(rules, options) {
  * @property {string} prompt
  * @property {Array<{value: string, label: string}>} options  The rule's own options
  * @property {string|null} list  A built-in list instead: traits, rings, or skills
- * @property {string[]} filter   Skill types the skills list keeps; empty keeps all
+ * @property {string[]} filter   Skill types the skills list keeps, as Skills store them (toSkillType); empty keeps all
  */
 
 /**
@@ -60,7 +61,8 @@ export function openChoices(rules) {
       prompt: String(rule.prompt ?? ""),
       options,
       list: CHOICE_LISTS.includes(rule.list) ? rule.list : null,
-      filter: Array.isArray(rule.filter) ? rule.filter.map(String) : []
+      // By the type Skills store, so a filter of "merchant" keeps the "merch" Skills (#173)
+      filter: Array.isArray(rule.filter) ? rule.filter.map(toSkillType) : []
     });
   });
   return open;
@@ -88,9 +90,9 @@ export function getFixedGrantUuids(rules) {
  */
 export function getUngrantedOptions(options, granted) {
   const uuids = new Set(granted.uuids);
-  const names = new Set(granted.names.map(name => name.toLowerCase()));
+  const names = new Set(granted.names.map(toSkillKey));
   return options.filter(
-    option => !uuids.has(option.value) && !names.has(option.name?.toLowerCase())
+    option => !uuids.has(option.value) && !(option.name && names.has(toSkillKey(option.name)))
   );
 }
 

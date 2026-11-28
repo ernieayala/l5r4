@@ -9,6 +9,7 @@ import {
   ADJUSTABLE_TRAITS,
   ARMOR_TN_MODES,
   ATTACK_RANGES,
+  CHOICE_LIST_VALUES,
   CHOICE_LISTS,
   LEDGER_DIRECTIONS,
   LEDGER_TRACKS,
@@ -261,11 +262,11 @@ export class MovementRule extends RuleData {
 export class ApplyConditionRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { NumberField, StringField } = getDataFields();
+    const { NumberField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
-      condition: new StringField({ required: true, blank: false }),
+      condition: statusField(),
       // The condition's level, as a Fear Rank; null for a condition without one
       level: new NumberField({
         required: true,
@@ -282,11 +283,7 @@ export class ApplyConditionRule extends RuleData {
 export class ConditionImmunityRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = getDataFields();
-    return {
-      ...super.defineSchema(),
-      condition: new StringField({ required: true, blank: false })
-    };
+    return { ...super.defineSchema(), condition: statusField() };
   }
 }
 
@@ -304,10 +301,15 @@ export class PeriodicSaveRule extends RuleData {
       ...super.defineSchema(),
       event: new StringField({ required: true, initial: "roundEnd", choices: SAVE_EVENTS }),
       // "ring:earth" or "trait:wil"
+      // One of the Rings or Traits by key, so "trait:xyz" is an error rather than a roll that never happens (#173)
       roll: new StringField({
         required: true,
         blank: false,
-        validate: value => /^(ring:(air|earth|fire|water|void)|trait:[a-z]{3})$/.test(value),
+        validate: value =>
+          [
+            ...CHOICE_LIST_VALUES.rings.map(ring => `ring:${ring}`),
+            ...CHOICE_LIST_VALUES.traits.map(trait => `trait:${trait}`)
+          ].includes(value),
         validationError:
           'must be "ring:" and a Ring, such as "ring:earth", or "trait:" and a Trait, such as "trait:wil"'
       }),
@@ -606,6 +608,20 @@ function rangeField() {
     nullable: true,
     initial: null,
     choices: ATTACK_RANGES
+  });
+}
+
+/**
+ * A status id, as `CONFIG.statusEffects` registers it: "prone", "fullDefenseStance". Ids are compared as written, so
+ * "Prone" is an error the editor shows rather than a status that never matches (#173).
+ * @returns {foundry.data.fields.StringField}
+ */
+function statusField() {
+  return new (getDataFields().StringField)({
+    required: true,
+    blank: false,
+    validate: value => CONFIG.statusEffects.some(status => status.id === value),
+    validationError: 'must be a status id, such as "prone" or "fatigued"'
   });
 }
 

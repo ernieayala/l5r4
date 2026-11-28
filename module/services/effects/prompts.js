@@ -22,6 +22,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { F, T } from "../../utils/localization.js";
 import { getNextSaveTn } from "../../utils/effects.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
@@ -112,7 +113,7 @@ export function postConcentrationPrompt(actor, effect) {
  * @returns {Promise<ChatMessage|null>}
  */
 export async function rollFullDefense(actor) {
-  const defense = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "defense");
+  const defense = getSkillItem(actor.items, "defense");
   const message = await rollSkill({
     actor,
     skillName: defense?.name ?? "Defense",

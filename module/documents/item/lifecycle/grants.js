@@ -19,6 +19,7 @@ import {
 } from "../../../utils/grants.js";
 import { F } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { getSkillItem } from "../../../utils/selectors.js";
 import { createRule } from "../../../data/rules/rule-models.js";
 import { postGrantNote, postGrantProblem } from "./grant-notes.js";
 import { buildUngrantChanges, recordsOf } from "./grant-records.js";
@@ -163,8 +164,7 @@ function rankOf(giver) {
 async function createGrantedItem(actor, rule, { giver, source }) {
   const link = { [`flags.${SYS_ID}.grantedBy`]: giver.id };
   if (source.type === "skill") {
-    const name = source.name.toLowerCase().trim();
-    const owned = actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === name);
+    const owned = getSkillItem(actor.items, source.name);
     if (owned) {
       const { update, record } = buildGrantedSkill(owned._source.system, rule);
       await owned.update({ system: update, ...link });

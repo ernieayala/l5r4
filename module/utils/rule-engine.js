@@ -10,6 +10,7 @@
 import { BAG_KINDS } from "../config/rule-keys.js";
 import { testPredicate } from "./predicate.js";
 import { buildRuleRollData, getRuleValue } from "./rule-values.js";
+import { toSelector } from "./selectors.js";
 
 /**
  * @typedef {object} RuleEntry
@@ -326,7 +327,8 @@ function buildRuleBag(pass) {
       value: v => value(v, entry),
       whole: v => whole(v, entry)
     });
-    (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
+    // Keyed in the form rolls build their selectors, so "skill:Kenjutsu " reaches Kenjutsu rolls (#173)
+    (bag[BAG_KINDS[rule.key]][toSelector(rule.selector)] ??= []).push(output);
   });
   return bag;
 }

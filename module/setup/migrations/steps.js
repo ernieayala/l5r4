@@ -18,6 +18,10 @@ import { migrateArmorType } from "./items/armor-types.js";
 import { migrateFreeRaisesDefault } from "./items/free-raises.js";
 import { migrateWeaponSize } from "./items/normalize.js";
 import { migrateItemRules } from "./items/item-rules.js";
+import {
+  migrateEffectSkillAttackRules,
+  migrateItemSkillAttackRules
+} from "./items/skill-attack-rules.js";
 import { migrateActorIcon, migrateItemIcon } from "./icons/icon-paths.js";
 
 /**
@@ -38,14 +42,18 @@ export const ITEM_STEPS = Object.freeze([
   { schema: 1, migrate: migrateFreeRaisesDefault },
   { schema: 1, migrate: migrateItemIcon },
   { schema: 1, migrate: migrateWeaponSize },
-  { schema: 1, migrate: migrateItemRules }
+  { schema: 1, migrate: migrateItemRules },
+  { schema: 3, migrate: migrateItemSkillAttackRules }
 ]);
 
 /**
  * The steps an actor's or a token delta's effect runs.
  * @type {ReadonlyArray<MigrationStep>}
  */
-export const EFFECT_STEPS = Object.freeze([{ schema: 1, migrate: migrateStatusEffectRules }]);
+export const EFFECT_STEPS = Object.freeze([
+  { schema: 1, migrate: migrateStatusEffectRules },
+  { schema: 3, migrate: migrateEffectSkillAttackRules }
+]);
 
 /**
  * The steps an actor runs, after its items and effects: the free Trait rank flags read the rules the item steps add.

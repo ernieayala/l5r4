@@ -12,6 +12,10 @@ import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
+import {
+  migrateEffectSkillAttackRules,
+  migrateItemSkillAttackRules
+} from "../../module/setup/migrations/items/skill-attack-rules.js";
 import { getTokenDeltaDocuments } from "../../module/setup/migrations/actors/unlinked-tokens.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
@@ -1109,6 +1113,119 @@ export function registerRulesTests(quench) {
         it("should flag a Resource for anything but the Round's Void Points", () => {
           assert.throws(() => createRule({ key: "Resource", slug: "focus" }), /slug/);
           assert.throws(() => createRule({ key: "Resource", slug: "void", per: "day" }), /per/);
+        });
+      });
+
+      // #173: selectors reach the rolls they name, whatever the case and spacing
+      describe("Rule selectors", () => {
+        /** The flat bonus a check's modifiers give, by label. */
+        const bonusesOf = (actor, spec) =>
+          Object.fromEntries(getCheckContext(actor, spec).modifiers.map(m => [m.label, m.total]));
+
+        it("should give an attack with a Weapon Skill the skill rules, and a stat block's attack none", async () => {
+          const actor = track(await createTestPC({ name: "Rules: skill selector" }));
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Kenjutsu", 2, "agi"),
+            {
+              name: "Rules: every Skill roll",
+              type: "commonItem",
+              system: {
+                rules: [{ key: "RollModifier", selector: "skill", total: 3, label: "All" }]
+              }
+            }
+          ]);
+          assert.equal(bonusesOf(actor, { kind: "skill", skill: "kenjutsu" }).All, 3);
+          assert.equal(bonusesOf(actor, { kind: "attack", skill: "kenjutsu" }).All, 3);
+          assert.notProperty(bonusesOf(actor, { kind: "attack" }), "All");
+        });
+
+        it("should read selectors and Skill names in any case and spacing, and merchant as merch", async () => {
+          const actor = track(await createTestPC({ name: "Rules: selector case" }));
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Commerce ", 2, "int", { system: { type: "merch", rollBonus: 1 } }),
+            {
+              name: "Rules: written loosely",
+              type: "commonItem",
+              system: {
+                rules: [
+                  { key: "RollModifier", selector: " Skill:COMMERCE", total: 1, label: "Name" },
+                  { key: "RollModifier", selector: "skill-type:merchant", total: 2, label: "Type" }
+                ]
+              }
+            }
+          ]);
+          const bonuses = bonusesOf(actor, { kind: "skill", skill: "Commerce" });
+          assert.equal(bonuses.Name, 1);
+          assert.equal(bonuses.Type, 2);
+          assert.isTrue(
+            getCheckContext(actor, { kind: "skill", skill: "commerce" }).modifiers.some(
+              m => m.label === "Commerce" && m.roll === 1
+            ),
+            "the Skill's own roll bonus"
+          );
+        });
+
+        it("should flag a condition that is no status id and a save naming no Ring or Trait", () => {
+          assert.throws(
+            () => createRule({ key: "ConditionImmunity", condition: "Prone" }),
+            /status id/
+          );
+          assert.throws(
+            () => createRule({ key: "ApplyCondition", selector: "attack", condition: "dazd" }),
+            /status id/
+          );
+          assert.equal(
+            createRule({ key: "ConditionImmunity", condition: "prone" }).condition,
+            "prone"
+          );
+          assert.throws(() => createRule({ key: "PeriodicSave", roll: "trait:xyz" }), /roll/);
+          assert.equal(createRule({ key: "PeriodicSave", roll: "trait:wil" }).roll, "trait:wil");
+        });
+      });
+
+      // #173: an attack now reads "skill" rules, so the world's copies of a rule written for both lose the double
+      describe("Skill and attack rules in stored data", () => {
+        const twins = [
+          { key: "TNModifier", selector: "skill", value: 5, predicate: ["consumed-perfection"] },
+          { key: "TNModifier", selector: "attack", value: 5, predicate: ["consumed-perfection"] },
+          { key: "TNModifier", selector: "spell", value: 5, predicate: ["consumed-perfection"] }
+        ];
+
+        it("should drop an item's attack copy and leave its other rules", async () => {
+          const actor = track(await createTestPC({ name: "Rules: twin item" }));
+          const [item] = await actor.createEmbeddedDocuments("Item", [
+            { name: "Rules: written twice", type: "disadvantage", system: { rules: twins } }
+          ]);
+          await migrateItemSkillAttackRules(item);
+          assert.deepEqual(
+            item._source.system.rules.map(r => r.selector),
+            ["skill", "spell"]
+          );
+          await migrateItemSkillAttackRules(item);
+          assert.lengthOf(item._source.system.rules, 2, "a second run changes nothing");
+        });
+
+        it("should keep a stored Fatigued's skill rule off attacks, so an attack takes the penalty once", async () => {
+          const actor = track(await createTestPC({ name: "Rules: old Fatigued" }));
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
+          const old = [
+            { key: "TNModifier", selector: "skill", value: "5 * @level" },
+            { key: "TNModifier", selector: "attack", value: "5 * @level" }
+          ];
+          const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Rules: Fatigued from 4.0.0",
+              statuses: ["fatigued"],
+              system: { level: 1, rules: old }
+            }
+          ]);
+          const tnOf = spec =>
+            getCheckContext(actor, spec).tnModifiers.reduce((sum, m) => sum + m.value, 0);
+          assert.equal(tnOf({ kind: "attack", skill: "kenjutsu" }), 10, "before: counted twice");
+          await migrateEffectSkillAttackRules(effect);
+          assert.equal(tnOf({ kind: "attack", skill: "kenjutsu" }), 5);
+          assert.equal(tnOf({ kind: "attack" }), 5, "a stat block's attack");
+          assert.equal(tnOf({ kind: "skill", skill: "kenjutsu" }), 5);
         });
       });
     },

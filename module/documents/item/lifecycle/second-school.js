@@ -13,6 +13,7 @@ import { hasOpenChoice } from "../../../utils/choices.js";
 import { getMissingSchoolSkills } from "../../../utils/grants.js";
 import { F, R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { toSkillKey } from "../../../utils/selectors.js";
 
 /**
  * A second School's due grants: its Skills are recorded but not given, and the rest wait until each of its School
@@ -34,7 +35,7 @@ export async function getSecondSchoolGrants(actor, giver, { rules, due }) {
   const ranks = new Map(
     actor.items
       .filter(item => item.type === "skill")
-      .map(item => [item.name.toLowerCase().trim(), toInt(item.system.rank)])
+      .map(item => [toSkillKey(item.name), toInt(item.system.rank)])
   );
   const skillNames = rules.filter(isSkill).map(rule => sources.get(rule.uuid).name);
   const missing = getMissingSchoolSkills(skillNames, ranks);

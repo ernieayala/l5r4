@@ -82,17 +82,19 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | Selector | Rolls |
 | --- | --- |
 | `any` | Every roll |
-| `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
+| `skill:<skill name>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
 | `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
 | `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
-| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
-| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant`, `low` |
+| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll. An attack with a Weapon Skill is a Skill roll (p.80), so `skill` reaches it; add the predicate `[{ "not": "check:attack" }]` to leave attacks out |
+| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant` (or `merch`, as Skills store it), `low` |
 | `skill-tag:social` | Rolls of Skills marked **Social Skill** on their Details tab (p.134) |
 | `skill-tag:school` | Rolls of School Skills |
-| `attack` | Every attack roll, with or without a Skill |
+| `attack` | Every attack roll, with or without a Skill; a stat block's attack, which has none, reads this one and not `skill` |
 | `damage` | Every damage roll |
 | `spell` | Every Spell Casting Roll, maho included |
 | `maho` | Maho casting rolls |
+
+Selectors are read in lower case with spaces around the colon and the name trimmed, so `Skill:Kenjutsu ` is `skill:kenjutsu`. A `ConditionImmunity` or `ApplyCondition` condition is a status id as written (`prone`, `fullDefenseStance`), and a `PeriodicSave` roll names a Ring or Trait by key; anything else shows as an error in the Rules tab.
 
 ### The roll dialog
 
@@ -226,7 +228,7 @@ Removing the School takes back what it gave. A granted Skill with ranks or Empha
 
 ### Choices
 
-A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`). Every other rule on the item can use the answer as `{choice:<flag>}`:
+A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`: `high`, `bugei`, `merchant` or `merch`, `low`). Every other rule on the item can use the answer as `{choice:<flag>}`:
 
 ```json
 [

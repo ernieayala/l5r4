@@ -10,6 +10,7 @@
 
 import { getHighestSchoolRank } from "../../utils/mechanics.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { toSkillKey } from "../../utils/selectors.js";
 
 /** Item types an `item:<type>:<name>` roll option names, for prerequisites such as owning an Advantage. */
 const optionItemTypes = new Set([
@@ -83,7 +84,7 @@ export function prepareWoundRollOption(actor, sys, current) {
  */
 function prepareItemRollOptions(actor, options) {
   for (const item of actor.items) {
-    const name = item.name.toLowerCase().trim();
+    const name = toSkillKey(item.name);
     if (item.type === "skill") {
       options.add(`skill:${name}:${toInt(item.system.rank)}`);
     } else if (["clan", "family", "school"].includes(item.type)) {

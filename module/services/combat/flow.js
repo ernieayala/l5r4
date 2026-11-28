@@ -14,6 +14,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
@@ -58,7 +59,7 @@ const flows = new Map();
  * @returns {object}
  */
 export function buildSkillRequest(actor, skill, trait) {
-  const item = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === skill);
+  const item = getSkillItem(actor.items, skill);
   const rank = toInt(item?.system.rank);
   const value =
     trait === "void" ? toInt(actor.system.rings.void.rank) : getEffectiveTrait(actor, trait);

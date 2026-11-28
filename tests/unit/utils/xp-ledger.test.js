@@ -248,6 +248,20 @@ describe("getCostPricer", () => {
     expect(entries[0].delta).toBe(10);
   });
 
+  // #173: a Merchant Skill is stored as "merch"; a trailing space in its name changes nothing
+  it("should price a Merchant Skill's rank under its type and trimmed name", () => {
+    const price = pricer({
+      "skill-type:merch": [cost("skill-type:merch", "@cost - 1")],
+      "skill:commerce": [cost("skill:commerce", "@cost - 1")]
+    });
+    // Rank 3 costs 3, less 1 for the type and 1 for the Skill
+    const entries = getXpEntries(
+      build({ skills: [skill("Commerce ", 3, { type: "Merch", freeRanks: 2 })] }),
+      price
+    );
+    expect(entries.find(e => e.type === "skill").delta).toBe(1);
+  });
+
   // #172: a Cost rule on an effect reads the effect's level
   it("should read @level from the effect carrying the rule", () => {
     const price = pricer({ emphasis: [cost("emphasis", "@cost - @level", { level: 1 })] });
