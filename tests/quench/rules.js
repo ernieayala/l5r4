@@ -1183,6 +1183,78 @@ export function registerRulesTests(quench) {
         });
       });
 
+      // #175: the Wound Rank is found after the Wounds rules and before every other rule
+      describe("Rule timing", () => {
+        /** A PC with Earth 2 (Healthy holds 10 Wounds) and `rules` on an item. */
+        const wounded = async (suffered, rules) => {
+          const actor = track(
+            await createTestPC({
+              name: "Rules: wound timing",
+              system: { traits: { sta: 2, wil: 2 }, suffered }
+            })
+          );
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Rules: wound timing", type: "commonItem", system: { rules } }
+          ]);
+          return actor;
+        };
+        const whileNicked = {
+          key: "ArmorTN",
+          value: 5,
+          label: "Nicked",
+          predicate: ["wound:nicked"]
+        };
+
+        it("should let an Armor TN rule test the Wound Rank", async () => {
+          const healthy = await wounded(0, [whileNicked]);
+          const nicked = await wounded(12, [whileNicked]);
+          assert.isTrue(nicked.rollOptions.has("wound:nicked"));
+          assert.equal(
+            nicked.system.armorTn.current,
+            healthy.system.armorTn.current + 5,
+            "+5 while Nicked"
+          );
+        });
+
+        it("should find the Wound Rank with the Wounds rules counted", async () => {
+          const actor = await wounded(12, [
+            { key: "Wounds", perRank: 5 },
+            { ...whileNicked, predicate: ["wound:healthy"], label: "Healthy" }
+          ]);
+          assert.isTrue(actor.rollOptions.has("wound:healthy"), "Healthy holds 15 with the rule");
+          assert.include(
+            actor.armorRules.map(r => r.value),
+            5,
+            "the rule testing it sees Healthy"
+          );
+        });
+
+        it("should flag what a Wounds or TraitAdjust rule can never see", () => {
+          assert.throws(
+            () => createRule({ key: "Wounds", perRank: 1, predicate: ["wound:nicked"] }),
+            /cannot test wound:/
+          );
+          assert.throws(
+            () =>
+              createRule({
+                key: "TraitAdjust",
+                trait: "str",
+                value: 1,
+                predicate: [{ gte: ["ring:fire", 3] }]
+              }),
+            /cannot test ring:/
+          );
+          assert.throws(
+            () => createRule({ key: "TraitAdjust", trait: "str", value: "@rings.air" }),
+            /runs before/
+          );
+          assert.equal(
+            createRule({ key: "TraitAdjust", trait: "void", value: "@rings.void.rank" }).value,
+            "@rings.void.rank"
+          );
+        });
+      });
+
       // #173: an attack now reads "skill" rules, so the world's copies of a rule written for both lose the double
       describe("Skill and attack rules in stored data", () => {
         const twins = [

@@ -7,6 +7,7 @@
  * falls back to the field's initial value when the document loads [src: common/abstract/data.mjs:79-83].
  */
 
+import { hasOptionPrefix } from "../utils/predicate.js";
 import { isRuleFormula } from "../utils/rule-values.js";
 
 /**
@@ -90,19 +91,45 @@ export function spellSlotsField(initial) {
 
 /**
  * A rule value: a number, or a formula over the actor's roll data that parses (module/utils/rule-values.js), so the
- * rules editor marks "abc" as an error before the rule ever reaches a roll (#172).
+ * rules editor marks "abc" as an error before the rule ever reaches a roll (#172). A rule that runs before part of
+ * the roll data is worked out refuses a formula reading it (#175).
  * @param {number|string} initial
+ * @param {RegExp|null} [unseen=null] - The `@` paths the rule's formula cannot read
  * @returns {foundry.data.fields.AnyField}
  */
-export function valueField(initial) {
+export function valueField(initial, unseen = null) {
   return new foundry.data.fields.AnyField({
     serializable: true,
     nullable: false,
     initial,
-    validate: value =>
-      (typeof value === "number" && Number.isFinite(value)) ||
-      (typeof value === "string" && value.trim() !== "" && isRuleFormula(value)),
+    validate: value => {
+      if (typeof value === "string" && unseen?.test(value)) {
+        throw new Error("reads a value this rule runs before (see ACTIVE_EFFECTS.md, Predicates)");
+      }
+      return (
+        (typeof value === "number" && Number.isFinite(value)) ||
+        (typeof value === "string" && value.trim() !== "" && isRuleFormula(value))
+      );
+    },
     validationError: "must be a number or a formula"
+  });
+}
+
+/**
+ * A rule's predicate: terms of module/utils/predicate.js, option strings and `{ not | or | and | gte | ... }` objects.
+ * A rule that runs before some roll options are prepared refuses a predicate testing them (#175).
+ * @param {string[]} [unseen=[]] - Option prefixes the rule can never see, each ending in ":"
+ * @returns {foundry.data.fields.ArrayField}
+ */
+export function predicateField(unseen = []) {
+  const { AnyField, ArrayField } = foundry.data.fields;
+  return new ArrayField(new AnyField({ serializable: true, nullable: false }), {
+    validate: value => {
+      if (unseen.length && hasOptionPrefix(value, unseen)) {
+        throw new Error(`cannot test ${unseen.join(" ")}: this rule runs before they are known`);
+      }
+      return true;
+    }
   });
 }
 

@@ -8,7 +8,7 @@
  */
 
 import { BAG_KINDS } from "../config/rule-keys.js";
-import { testPredicate } from "./predicate.js";
+import { hasOptionPrefix, testPredicate } from "./predicate.js";
 import { buildRuleRollData, getRuleValue } from "./rule-values.js";
 import { toSelector } from "./selectors.js";
 
@@ -28,6 +28,12 @@ import { toSelector } from "./selectors.js";
  * @property {string} key
  * @property {string} message
  */
+
+/**
+ * The option prefix of the Wound Rank, which preparation finds after the Wounds rules and before the other rules
+ * (#175).
+ */
+const WOUND_OPTION_PREFIX = "wound:";
 
 /**
  * The fields each rule key's bag entry adds to the shared ones (buildBagEntry): the rule, its entry, and its value
@@ -123,13 +129,42 @@ export function getTraitAdjustTotal(rules, trait) {
 }
 
 /**
+ * Whether a rule tests the Wound Rank, so it runs once the Wound Rank is known.
+ * @param {RuleEntry} entry
+ * @returns {boolean}
+ */
+export function isAfterWoundLevel(entry) {
+  return hasOptionPrefix(entry.rule.predicate, [WOUND_OPTION_PREFIX]);
+}
+
+/**
+ * The Wounds rules' outputs: Wounds added to each Wound Rank and to every Wound Rank's TN penalty. They run before
+ * the Wound Rank is found, as it depends on them; a Wounds rule cannot test the Wound Rank (WoundsRule, #175).
+ * @param {RuleEntry[]} entries
+ * @param {object} rollData
+ * @param {Set<string>} options
+ * @returns {{woundsPerRank: number, woundPenalty: number, errors: RuleError[]}}
+ */
+export function getWoundRuleOutputs(entries, rollData, options) {
+  const errors = [];
+  const value = getValueResolver(rollData);
+  let woundsPerRank = 0;
+  let woundPenalty = 0;
+  applyMatchingRules({ entries, keys: ["Wounds"], options, errors }, (rule, entry) => {
+    // Resolve both before adding either, so a bad formula changes neither total.
+    const [perRank, penalty] = [value(rule.perRank, entry), value(rule.penalty, entry)];
+    woundsPerRank += perRank;
+    woundPenalty += penalty;
+  });
+  return { woundsPerRank, woundPenalty, errors };
+}
+
+/**
  * @typedef {object} DerivedRuleOutputs
  * @property {import("./effects.js").ArmorRule[]} armor  ArmorTN rules, resolved
  * @property {number} reduction       Reduction rules
  * @property {Array<{value: number, except: string[]}>} reductionParts  Each Reduction rule with its exceptions
  * @property {{invulnerable: object|null, spirit: object|null}} defenses  Invulnerability and Spirit rules
- * @property {number} woundsPerRank   Wounds rules: Wounds added to each Wound Rank
- * @property {number} woundPenalty    Wounds rules: added to every Wound Rank's TN penalty
  * @property {number} movementWater   Movement rules: Water Ring ranks for movement
  * @property {{roll: number, keep: number, total: number}} initiative
  * @property {Set<string>} immunities Statuses the actor cannot gain (ConditionImmunity)
@@ -142,8 +177,8 @@ export function getTraitAdjustTotal(rules, trait) {
  */
 
 /**
- * Outputs of the rules that run once Traits and Rings are known. Each group of rule keys runs in turn, so value errors
- * are reported in that order.
+ * Outputs of the rules that run once Traits, Rings, and the Wound Rank are known; the Wounds rules run before, in
+ * getWoundRuleOutputs. Each group of rule keys runs in turn, so value errors are reported in that order.
  * @param {RuleEntry[]} entries
  * @param {object} rollData
  * @param {Set<string>} options
@@ -224,23 +259,15 @@ function getDefenseRuleOutputs(pass) {
 }
 
 /**
- * The Movement, Wounds, and Initiative rules' outputs.
+ * The Movement and Initiative rules' outputs.
  * @param {RulePass} pass
- * @returns {{movementWater: number, woundsPerRank: number, woundPenalty: number, initiative: object}}
+ * @returns {{movementWater: number, initiative: object}}
  */
 function getActorRuleOutputs(pass) {
   const { value, whole } = pass;
   let movementWater = 0;
   applyMatchingRules({ ...pass, keys: ["Movement"] }, (rule, entry) => {
     movementWater += whole(rule.water, entry);
-  });
-  let woundsPerRank = 0;
-  let woundPenalty = 0;
-  applyMatchingRules({ ...pass, keys: ["Wounds"] }, (rule, entry) => {
-    // Resolve both before adding either, so a bad formula changes neither total.
-    const [perRank, penalty] = [value(rule.perRank, entry), value(rule.penalty, entry)];
-    woundsPerRank += perRank;
-    woundPenalty += penalty;
   });
   const initiative = { roll: 0, keep: 0, total: 0 };
   applyMatchingRules({ ...pass, keys: ["Initiative"] }, (rule, entry) => {
@@ -253,7 +280,7 @@ function getActorRuleOutputs(pass) {
     initiative.keep += keep;
     initiative.total += total;
   });
-  return { movementWater, woundsPerRank, woundPenalty, initiative };
+  return { movementWater, initiative };
 }
 
 /**

@@ -145,6 +145,8 @@ A predicate is a list of conditions, all of which must hold:
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
 | `{ "gte": ["ring:fire", 3] }` | The Ring, Trait, Skill, or rank is at least 3, as `{ "gte": ["skill:kenjutsu", 3] }`; also `gt`, `lte`, `lt`, `eq` |
 
+Rules are worked out in steps, and a rule sees only what the steps before it have found. `TraitAdjust` runs first, before the Rings, Insight, School Rank, and Wound Rank: it cannot test `ring:`, `trait:`, `insight:`, `school-rank:`, `wound:`, or a `RollOption`, and its value cannot read `@rings.air` (or another of the four Rings) or `@insight`. `Wounds` rules run next, since the Wound Rank comes from them, so they cannot test `wound:`. Every other rule runs once the Wound Rank is known and can test all of the above. The Rules tab shows an error on a predicate or value a rule can never see.
+
 **Example:** +1k0 on attacks while in Full Attack Stance against a prone target
 
 ```json

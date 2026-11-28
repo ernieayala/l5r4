@@ -3,7 +3,9 @@ import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
   getTraitAdjustTotal,
-  getTraitAdjustments
+  getTraitAdjustments,
+  getWoundRuleOutputs,
+  isAfterWoundLevel
 } from "../../../module/utils/rule-engine.js";
 import { getSelectorBonus } from "../../../module/utils/rule-bag.js";
 
@@ -277,18 +279,41 @@ describe("getDerivedRuleOutputs", () => {
     expect(result.resources).toEqual({ void: { max: 2, per: "round" } });
   });
 
-  it("should add up Reduction, Wounds, and Initiative", () => {
+  it("should add up Reduction and Initiative", () => {
     const result = out([
       rule("Reduction", { value: 2 }),
       rule("Reduction", { value: 1 }),
-      rule("Wounds", { perRank: "@rings.earth", penalty: -1 }),
       rule("Initiative", { roll: 1, keep: 0, total: 5 }),
       rule("Initiative", { roll: 0, keep: 1, total: 0 })
     ]);
     expect(result.reduction).toBe(3);
-    expect(result.woundsPerRank).toBe(2);
-    expect(result.woundPenalty).toBe(-1);
     expect(result.initiative).toEqual({ roll: 1, keep: 1, total: 5 });
+  });
+
+  // #175: the Wounds rules run before the Wound Rank, the others after it
+  it("should leave the Wounds rules to getWoundRuleOutputs", () => {
+    const wounds = [entry(rule("Wounds", { perRank: "@rings.earth", penalty: -1 }))];
+    expect(out(wounds.map(e => e.rule))).not.toHaveProperty("woundsPerRank");
+    expect(getWoundRuleOutputs(wounds, rollData, new Set())).toEqual({
+      woundsPerRank: 2,
+      woundPenalty: -1,
+      errors: []
+    });
+  });
+
+  // #175
+  it("should let a rule test the Wound Rank once it is known", () => {
+    const armor = rule("ArmorTN", {
+      value: 5,
+      type: "untyped",
+      mode: "add",
+      range: null,
+      predicate: [{ or: ["wound:grazed", "wound:hurt"] }]
+    });
+    expect(isAfterWoundLevel(entry(armor))).toBe(true);
+    expect(isAfterWoundLevel(entry(rule("ArmorTN", { value: 5 })))).toBe(false);
+    const grazed = getDerivedRuleOutputs([entry(armor)], rollData, new Set(["wound:grazed"]));
+    expect(grazed.armor).toHaveLength(1);
   });
 
   it("should skip derived rules whose predicate fails", () => {
@@ -490,13 +515,18 @@ describe("getDerivedRuleOutputs", () => {
   });
 
   it("should report a bad formula and leave its rule out", () => {
+    const wounds = getWoundRuleOutputs(
+      [entry(rule("Wounds", { perRank: 2, penalty: "bad(" }))],
+      rollData,
+      new Set()
+    );
+    expect(wounds.woundsPerRank).toBe(0);
+    expect(wounds.woundPenalty).toBe(0);
+    expect(wounds.errors.map(e => e.key)).toEqual(["Wounds"]);
     const result = out([
-      rule("Wounds", { perRank: 2, penalty: "bad(" }),
       rule("RollModifier", { selector: "attack", roll: "bad(", keep: 0, total: 0, type: "untyped" })
     ]);
-    expect(result.woundsPerRank).toBe(0);
-    expect(result.woundPenalty).toBe(0);
     expect(result.bag.rollModifiers).toEqual({});
-    expect(result.errors.map(e => e.key)).toEqual(["Wounds", "RollModifier"]);
+    expect(result.errors.map(e => e.key)).toEqual(["RollModifier"]);
   });
 });

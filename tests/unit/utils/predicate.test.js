@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { testPredicate } from "../../../module/utils/predicate.js";
+import { hasOptionPrefix, testPredicate } from "../../../module/utils/predicate.js";
+
+// #175: which preparation step a rule must wait for
+describe("hasOptionPrefix", () => {
+  it("should find a prefix in a plain, negated, nested, or compared term", () => {
+    expect(hasOptionPrefix(["wound:nicked"], ["wound:"])).toBe(true);
+    expect(hasOptionPrefix([{ not: "wound:out" }], ["wound:"])).toBe(true);
+    expect(hasOptionPrefix([{ or: ["status:prone", { and: ["wound:hurt"] }] }], ["wound:"])).toBe(
+      true
+    );
+    expect(hasOptionPrefix([{ gte: ["ring:fire", 3] }], ["ring:"])).toBe(true);
+  });
+
+  it("should find nothing in a predicate without the prefix", () => {
+    expect(
+      hasOptionPrefix(["status:prone", { gte: ["skill:kenjutsu", 3] }], ["wound:", "ring:"])
+    ).toBe(false);
+    expect(hasOptionPrefix(undefined, ["wound:"])).toBe(false);
+  });
+});
 
 const options = new Set([
   "status:defenseStance",

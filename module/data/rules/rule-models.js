@@ -18,8 +18,27 @@ import {
   SAVE_EVENTS,
   SAVE_FAILURES
 } from "../../config/rule-keys.js";
-import { selectorField, typeField, valueField } from "../fields.js";
+import { predicateField, selectorField, typeField, valueField } from "../fields.js";
 import RuleData from "./rule-data.js";
+
+/**
+ * Roll options a TraitAdjust rule can never see: it runs at the end of the "initial" effect phase, before the Rings,
+ * Traits with their changes, Insight, School Rank, and Wound Rank are worked out (#175).
+ * @type {ReadonlyArray<string>}
+ */
+const TRAIT_ADJUST_UNSEEN_OPTIONS = Object.freeze([
+  "ring:",
+  "trait:",
+  "insight:",
+  "school-rank:",
+  "wound:"
+]);
+
+/**
+ * Formula paths a TraitAdjust value reads before they are worked out: the four Rings (`@rings.air`, `@air`) and
+ * Insight. `@rings.void.rank` is stored, so it reads as it should (#175).
+ */
+const TRAIT_ADJUST_UNSEEN_PATHS = /@(rings\.)?(air|earth|fire|water)\b|@insight\b/;
 
 /**
  * +XkY or +N on rolls matching `selector`. With `range`, only attacks of that range. An `optional` modifier is
@@ -136,11 +155,19 @@ export class SpiritRule extends RuleData {
   }
 }
 
-/** Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. */
+/**
+ * Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. The Wound Rank is found from these,
+ * so a Wounds rule cannot test it (module/documents/actor/rules.js, #175).
+ */
 export class WoundsRule extends RuleData {
   /** @override */
   static defineSchema() {
-    return { ...super.defineSchema(), perRank: valueField(0), penalty: valueField(0) };
+    return {
+      ...super.defineSchema(),
+      predicate: predicateField(["wound:"]),
+      perRank: valueField(0),
+      penalty: valueField(0)
+    };
   }
 }
 
@@ -201,15 +228,20 @@ export class SubstituteRule extends RuleData {
   }
 }
 
-/** A Trait or the Void Ring raised or lowered, with everything derived from it. */
+/**
+ * A Trait or the Void Ring raised or lowered, with everything derived from it. It runs before the Rings, Insight, and
+ * Wound Rank are worked out from the Traits, so it cannot test them or read the four Rings or Insight in its value
+ * (module/documents/actor/rules.js, #175).
+ */
 export class TraitAdjustRule extends RuleData {
   /** @override */
   static defineSchema() {
     const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
+      predicate: predicateField([...TRAIT_ADJUST_UNSEEN_OPTIONS]),
       trait: new StringField({ required: true, blank: false, choices: ADJUSTABLE_TRAITS }),
-      value: valueField(0)
+      value: valueField(0, TRAIT_ADJUST_UNSEEN_PATHS)
     };
   }
 }

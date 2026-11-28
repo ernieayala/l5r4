@@ -5,10 +5,10 @@
  *
  * 1. `applyInitialRules`, right after core applies "initial"-phase effects: roll options from statuses and worn
  *    armor; TraitAdjust, so Rings and derived values see it as they see a Trait effect.
- * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
- *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
- * 3. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
- * 4. `prepareWoundRollOption` (roll-options.js), once the Wound Rank is known.
+ * 2. `applyWoundRules`, once Traits and Rings are known: rank roll options, the RollOption rules not testing `wound:`,
+ *    and the Wounds rules the Wound Rank comes from; `prepareWoundRollOption` (roll-options.js) then adds it.
+ * 3. `applyDerivedRules`: every other rule, so each can test `wound:`, the modifier bag included (#175).
+ * 4. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
  *
  * The roll options themselves are module/documents/actor/roll-options.js.
  */
@@ -17,7 +17,9 @@ import { SYS_ID, WEAPON_TYPES } from "../../config/constants.js";
 import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
-  getTraitAdjustments
+  getTraitAdjustments,
+  getWoundRuleOutputs,
+  isAfterWoundLevel
 } from "../../utils/rule-engine.js";
 import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
@@ -88,16 +90,36 @@ export function applyInitialRules(actor) {
 }
 
 /**
- * Run the rules that need Traits and Rings: add their roll options, write the Initiative and Wounds outputs onto the
- * prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * Run the rules the Wound Rank depends on, once Traits and Rings are known: the rank roll options, the RollOption
+ * rules not testing it, then the Wounds rules' Wounds per rank and TN penalty onto the prepared data (#175).
  * @param {Actor} actor
  * @param {object} sys - The actor's prepared system data, after prepareTraitsAndRings.
  */
-export function applyDerivedRules(actor, sys) {
+export function applyWoundRules(actor, sys) {
   const options = actor.rollOptions;
   prepareRankRollOptions(actor, sys);
-  applyRollOptionRules(actor.rules, options);
+  applyRollOptionRules(
+    actor.rules.filter(e => !isAfterWoundLevel(e)),
+    options
+  );
+  const out = getWoundRuleOutputs(actor.rules, actor.getRollData(), options);
+  for (const { source, message } of out.errors) {
+    onRuleProblem(actor, source, message);
+  }
+  sys.woundsMod += out.woundsPerRank;
+  sys.woundsPenaltyMod += out.woundPenalty;
+}
 
+/**
+ * Run the rules that may test the Wound Rank, once it is known: the RollOption rules again, so those testing it, and
+ * those testing an option one of them adds, add theirs; then write the Initiative, Reduction, and movement outputs onto
+ * the prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * @param {Actor} actor
+ * @param {object} sys - The actor's prepared system data, after the Wound Rank (_finalizeWoundPenalties)
+ */
+export function applyDerivedRules(actor, sys) {
+  const options = actor.rollOptions;
+  applyRollOptionRules(actor.rules, options);
   const out = getDerivedRuleOutputs(actor.rules, actor.getRollData(), options);
   for (const { source, message } of out.errors) {
     onRuleProblem(actor, source, message);
@@ -228,7 +250,7 @@ function taintRuleSourcesOf(actor) {
 }
 
 /**
- * Add the Initiative, Wounds, Reduction, and movement outputs onto the prepared data.
+ * Add the Initiative, Reduction, and movement outputs onto the prepared data.
  * @param {object} sys - The actor's prepared system data
  * @param {object} out - From getDerivedRuleOutputs
  */
@@ -236,8 +258,6 @@ function applyRuleModifiers(sys, out) {
   sys.initiative.rollMod += out.initiative.roll;
   sys.initiative.keepMod += out.initiative.keep;
   sys.initiative.totalMod += out.initiative.total;
-  sys.woundsMod += out.woundsPerRank;
-  sys.woundsPenaltyMod += out.woundPenalty;
   sys.armorTn.ruleReduction = out.reduction;
   sys.movementWater = out.movementWater;
 }

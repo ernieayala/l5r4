@@ -1,8 +1,8 @@
 /**
  * @module documents/actor/preparation/pc-preparation
- * @description Prepares a PC's derived data in dependency order: Traits and Rings, Insight, the rules that need
- * them, Armor TN from its base (Reflexes × 5 + 5) and the equipped armor with its rules, movement, Wound Ranks from
- * the Earth Ring, Initiative (Insight Rank + Reflexes), healing, the owned items' formulas, and XP. Modifies the
+ * @description Prepares a PC's derived data in dependency order: Traits and Rings, Insight, the Wounds rules and the
+ * Wound Ranks from the Earth Ring, the other rules, Armor TN from its base (Reflexes × 5 + 5) and the equipped armor
+ * with its rules, movement, Initiative (Insight Rank + Reflexes), healing, the owned items' formulas, and XP. Modifies the
  * actor's system data in place; reads the actor's items and its armor-stacking flag.
  */
 
@@ -27,7 +27,7 @@ import {
 import { getWoundThreshold, prepareHealRate } from "../calculations/wound-system.js";
 import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
 import { getInsightRank, preparePcExperience } from "../calculations/xp-system.js";
-import { applyArmorRules, applyDerivedRules } from "../rules.js";
+import { applyArmorRules, applyDerivedRules, applyWoundRules } from "../rules.js";
 
 /**
  * Prepares derived data for PC actors.
@@ -52,18 +52,19 @@ export function preparePcData(actor, sys) {
   // game-rules/49_improving_your_character.md, p.104
   prepareInsight(actor, sys, getInsightRank);
 
-  // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
+  // The Wounds rules, then the Wound Rank, so every other rule can test `wound:` (#175)
+  applyWoundRules(actor, sys);
+  preparePcWoundLevels(actor, sys);
+  actor._finalizeWoundPenalties(sys, WOUND_LEVEL_ORDER);
+
+  // Rules that need Traits, Rings, and the Wound Rank, before the values their outputs feed (Initiative, Armor TN,
+  // roll bonuses)
   applyDerivedRules(actor, sys);
 
   preparePcArmorTn(actor, sys);
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);
-
-  preparePcWoundLevels(actor, sys);
-
-  // Apply wound penalties to traits/rings
-  actor._finalizeWoundPenalties(sys, WOUND_LEVEL_ORDER);
 
   preparePcInitiative(sys);
 
