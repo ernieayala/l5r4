@@ -2862,7 +2862,12 @@
             "selector": "attack",
             "action": "simple",
             "predicate": [
-              "weapon:skill:ninjutsu"
+              {
+                "or": [
+                  "weapon:skill:ninjutsu",
+                  "weapon:keyword:ninja"
+                ]
+              }
             ]
           }
         ],

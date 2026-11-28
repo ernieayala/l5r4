@@ -753,6 +753,22 @@
       }
     },
     {
+      "name": "Togashi",
+      "type": "family",
+      "folder": "Dragon",
+      "page": 112,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
       "name": "Toku",
       "type": "family",
       "folder": "Monkey",
