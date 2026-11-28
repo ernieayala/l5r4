@@ -42,6 +42,7 @@ import { registerGuardQueries } from "../module/services/combat/guard.js";
 import { registerContestQueries } from "../module/services/combat/contest.js";
 import { registerGmAllowQueries } from "../module/services/gm-allow.js";
 import { registerVoidQueries } from "../module/services/dice/resources/void-points.js";
+import { registerCustomEmphasisQueries } from "../module/services/custom-emphases.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
@@ -187,6 +188,7 @@ function registerQueries() {
   registerContestQueries();
   registerGmAllowQueries();
   registerVoidQueries();
+  registerCustomEmphasisQueries();
 }
 
 /**

@@ -57,9 +57,9 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `get` | Read or compute a value; no side effects | `getEffectiveTrait` (`module/utils/mechanics.js`) |
 | `*Of` | Read a value that belongs to the first argument; no side effects | `effectsOf` (`module/services/effects/apply.js`), `activationOf` (`module/services/effects/activation.js`), `defensesOf` |
 | `create` | Make a document, an embedded document, or a data model instance | `createRule` (`module/data/rules/rule-models.js`) |
-| `update` | Change stored data | `updateWorldCustomEmphasis` (`module/apps/emphasis-manager.js`) |
+| `update` | Change stored data | `updateCustomEmphases` (`module/services/custom-emphases.js`) |
 | `apply` | Change a document by a game result: damage, an effect, healing | `applyEffect` (`module/services/effects/apply.js`), `applyDamage` (`module/services/combat/damage.js`) |
-| `delete` | Remove a document, an entry, or a stored value | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`), `deleteWorldCustomEmphasis` |
+| `delete` | Remove a document, an entry, or a stored value | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) |
 | `roll` | Roll dice | `rollCheck` (`module/services/dice/check/roll-check.js`), `rollContest` |
 | `post` | Post a chat card | `postCheckRequest` (`module/services/check-request.js`) |
 | `request` | Ask the GM's client to run an operation through a GM query | `requestStep` (`module/services/combat/flow.js`), `requestDamageAction` |

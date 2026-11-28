@@ -376,7 +376,6 @@
         "custom": "Personalizado",
         "emphasisName": "Nome da Ênfase",
         "errors": {
-          "saveFailed": "Falha ao salvar a Ênfase personalizada",
           "updateFailed": "Falha ao atualizar o gerenciador de Ênfases"
         },
         "hint": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",

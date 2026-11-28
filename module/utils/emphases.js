@@ -6,6 +6,35 @@
  * game-rules/58_skills_overview.md, p.133
  */
 
+import { validateEmphasisName } from "./validators.js";
+
+/**
+ * The world's custom Emphases after one change, or null when the change does not fit the list: an added or new name
+ * that is invalid or already listed, or a renamed or deleted name the list no longer holds. The GM's client checks a
+ * player's change with it before writing the setting (#188).
+ * @param {string[]} list - The world's custom Emphases
+ * @param {{kind: "add"|"rename"|"delete", name: string, newName?: string}} change
+ * @returns {string[]|null}
+ */
+export function getChangedEmphases(list, { kind, name, newName }) {
+  if (kind === "add") {
+    const { sanitized } = validateEmphasisName(String(name ?? ""), list);
+    return sanitized ? [...list, sanitized] : null;
+  }
+  if (!list.includes(name)) {
+    return null;
+  }
+  if (kind === "delete") {
+    return list.filter(listed => listed !== name);
+  }
+  if (kind === "rename") {
+    const others = list.filter(listed => listed !== name);
+    const { sanitized } = validateEmphasisName(String(newName ?? ""), others);
+    return sanitized ? list.map(listed => (listed === name ? sanitized : listed)) : null;
+  }
+  return null;
+}
+
 /**
  * Every Emphasis a Skill holds: its available ones, then each trained one not among them, once each.
  * @param {{availableEmphases: string[], trainedEmphases: string[]}} system - A Skill's system data

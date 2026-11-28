@@ -1,7 +1,8 @@
 /**
  * @module apps/emphasis-manager
  * @description A form window that picks a skill item's available Emphases from the official list and the world's
- * custom Emphases, and adds, renames, and deletes the custom ones in a world setting. It uses no FieldSaveMixin:
+ * custom Emphases, and adds, renames, and deletes the custom ones in a world setting, through the GM for a player
+ * (module/services/custom-emphases.js, #188). It uses no FieldSaveMixin:
  * the checkboxes save together on submit, and the window closes then. The constructor takes `options.item` rather
  * than a positional actor, because it works on a skill Item.
  */
@@ -13,6 +14,7 @@ import { buildEmphasisList } from "../utils/emphases.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
 import { askConfirm, askPrompt } from "../services/dialog.js";
+import { updateCustomEmphases, getCustomEmphases } from "../services/custom-emphases.js";
 
 /**
  * The Emphasis manager window for one skill item.
@@ -109,7 +111,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       // Every Emphasis the Skill holds is listed, so saving keeps one outside the official and custom lists (#187)
       const emphasisList = buildEmphasisList({
         official: OFFICIAL_EMPHASES,
-        custom: getWorldCustomEmphases(),
+        custom: getCustomEmphases(),
         skill: this.item.system
       });
 
@@ -171,22 +173,15 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     const name = await askEmphasisName({
       title: "l5r4.apps.emphasisManager.addCustom",
       label: "l5r4.ui.common.add",
-      existing: getWorldCustomEmphases()
+      existing: getCustomEmphases()
     });
     if (!name) {
       return;
     }
 
-    this.#ticked = tickedOf(this.form);
-    try {
-      await createWorldCustomEmphasis(name);
-    } catch {
-      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
-      return;
-    }
-
-    if (this.rendered) {
-      this.render();
+    const ticked = tickedOf(this.form);
+    if (await updateCustomEmphases({ kind: "add", name })) {
+      this.#renderWithTicks(ticked);
     }
   }
 
@@ -221,11 +216,9 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       return;
     }
 
-    this.#ticked = tickedOf(this.form);
-    await deleteWorldCustomEmphasis(emphasisName);
-
-    if (this.rendered) {
-      this.render();
+    const ticked = tickedOf(this.form);
+    if (await updateCustomEmphases({ kind: "delete", name: emphasisName })) {
+      this.#renderWithTicks(ticked);
     }
   }
 
@@ -249,20 +242,24 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       title: "l5r4.ui.common.edit",
       label: "l5r4.ui.common.save",
       currentName: oldName,
-      existing: getWorldCustomEmphases().filter(name => name !== oldName)
+      existing: getCustomEmphases().filter(name => name !== oldName)
     });
     if (!newName || newName === oldName) {
       return;
     }
 
-    this.#ticked = tickedOf(this.form, { [oldName]: newName });
-    try {
-      await updateWorldCustomEmphasis(oldName, newName);
-    } catch {
-      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
-      return;
+    const ticked = tickedOf(this.form, { [oldName]: newName });
+    if (await updateCustomEmphases({ kind: "rename", name: oldName, newName })) {
+      this.#renderWithTicks(ticked);
     }
+  }
 
+  /**
+   * Draw the window again after the custom Emphases changed, with the ticks the user had made.
+   * @param {Set<string>} ticked - The names ticked before the change, a renamed one under its new name
+   */
+  #renderWithTicks(ticked) {
+    this.#ticked = ticked;
     if (this.rendered) {
       this.render();
     }
@@ -338,56 +335,4 @@ function bindEmphasisNameCheck(form, existing) {
   };
   field.addEventListener("input", () => update(true));
   update(false);
-}
-
-/**
- * Retrieve custom emphases from world settings.
- * Returns empty array if setting is not found or invalid.
- *
- * @returns {string[]} Array of custom emphasis names
- */
-function getWorldCustomEmphases() {
-  try {
-    const setting = game.settings.get("l5r4-enhanced", "customEmphases");
-    return Array.isArray(setting) ? setting : [];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Save a new custom emphasis to world settings.
- *
- * @param {string} emphasisName - The name the dialog checked (askEmphasisName)
- */
-async function createWorldCustomEmphasis(emphasisName) {
-  await game.settings.set("l5r4-enhanced", "customEmphases", [
-    ...getWorldCustomEmphases(),
-    emphasisName
-  ]);
-}
-
-/**
- * Delete a custom emphasis from world settings.
- *
- * @param {string} emphasisName - The emphasis name to delete
- */
-async function deleteWorldCustomEmphasis(emphasisName) {
-  const current = getWorldCustomEmphases();
-  const filtered = current.filter(name => name !== emphasisName);
-  await game.settings.set("l5r4-enhanced", "customEmphases", filtered);
-}
-
-/**
- * Update an existing custom emphasis name in world settings.
- *
- * @param {string} oldName - The current emphasis name
- * @param {string} newName - The new name the dialog checked (askEmphasisName)
- */
-async function updateWorldCustomEmphasis(oldName, newName) {
-  await game.settings.set(
-    "l5r4-enhanced",
-    "customEmphases",
-    getWorldCustomEmphases().map(name => (name === oldName ? newName : name))
-  );
 }

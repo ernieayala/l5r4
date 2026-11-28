@@ -376,7 +376,6 @@
         "custom": "Personalizado",
         "emphasisName": "Nombre del Énfasis",
         "errors": {
-          "saveFailed": "Error al guardar el Énfasis personalizado",
           "updateFailed": "Error al actualizar el administrador de Énfasis"
         },
         "hint": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",

@@ -379,10 +379,9 @@
         "custom": "Custom",
         "emphasisName": "Emphasis name",
         "errors": {
-          "nameCharacters": "An Emphasis name may hold letters, numbers, spaces, hyphens, and apostrophes",
+          "nameCharacters": "An Emphasis name may hold letters, numbers, spaces, hyphens, apostrophes, and colons",
           "nameLength": "An Emphasis name has {min} to {max} characters",
           "nameTaken": "A custom Emphasis named {name} already exists",
-          "saveFailed": "Failed to save custom Emphasis",
           "updateFailed": "Failed to update emphasis manager"
         },
         "hint": "Select which Emphases are available for this Skill. Train them on the character sheet.",
@@ -1336,6 +1335,7 @@
         "declined": "The GM did not allow that",
         "effectApplied": "{effect} applied to {name}",
         "effectAsk": "Put {effect} on {name}. No roll or action of theirs allows it",
+        "emphasisChanged": "The custom Emphases changed meanwhile: that name is taken, invalid, or gone",
         "failed": "The GM's client could not do this: {reason}",
         "gmCorrects": "Only the GM redoes or ends a duel, grapple, or Fear card",
         "gmDeclined": "The GM did not allow it: {reason}",

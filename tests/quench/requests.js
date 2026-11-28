@@ -9,6 +9,7 @@ import {
 import { startDuel } from "../../module/services/combat/duel.js";
 import { startFlow } from "../../module/services/combat/flow.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
+import { CUSTOM_EMPHASES_QUERY } from "../../module/services/custom-emphases.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications, withGmAnswer } from "./helpers.js";
 
@@ -698,6 +699,37 @@ export function registerRequestsTests(quench) {
             });
             assert.equal(refusal, "l5r4.ui.requests.declined");
             assert.lengthOf(asked, 1);
+          })
+        );
+      });
+
+      // #188, Ernie's ruling: a player's change to the custom Emphases goes to the GM, who writes it
+      describe("Custom Emphases", () => {
+        it(
+          "should write a player's add, rename, and delete, and refuse one that no longer fits",
+          clean(async () => {
+            const saved = game.settings.get(SYS_ID, "customEmphases");
+            const query = CONFIG.queries[CUSTOM_EMPHASES_QUERY];
+            const list = () => game.settings.get(SYS_ID, "customEmphases");
+            try {
+              await game.settings.set(SYS_ID, "customEmphases", ["Gossip"]);
+              await query({ kind: "add", name: "Défense" }, { user: player });
+              assert.deepEqual(list(), ["Gossip", "Défense"]);
+              await query(
+                { kind: "rename", name: "Gossip", newName: "Lore: Rumor" },
+                { user: player }
+              );
+              assert.deepEqual(list(), ["Lore: Rumor", "Défense"]);
+              await query({ kind: "delete", name: "Défense" }, { user: player });
+              assert.deepEqual(list(), ["Lore: Rumor"]);
+              const refusal = await refusalOf(
+                query({ kind: "delete", name: "Gone" }, { user: player })
+              );
+              assert.equal(refusal, "l5r4.ui.requests.emphasisChanged");
+              assert.deepEqual(list(), ["Lore: Rumor"]);
+            } finally {
+              await game.settings.set(SYS_ID, "customEmphases", saved);
+            }
           })
         );
       });

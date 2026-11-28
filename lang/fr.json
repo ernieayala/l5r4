@@ -376,7 +376,6 @@
         "custom": "Personnalisée",
         "emphasisName": "Nom de l'Emphase",
         "errors": {
-          "saveFailed": "Échec de la sauvegarde de l'Emphase personnalisée",
           "updateFailed": "Échec de la mise à jour du gestionnaire d'Emphases"
         },
         "hint": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",

@@ -376,7 +376,6 @@
         "custom": "Benutzerdefiniert",
         "emphasisName": "Name des Schwerpunkts",
         "errors": {
-          "saveFailed": "Fehler beim Speichern des benutzerdefinierten Schwerpunkts",
           "updateFailed": "Fehler beim Aktualisieren der Schwerpunktverwaltung"
         },
         "hint": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",

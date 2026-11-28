@@ -16,7 +16,14 @@ describe("validateEmphasisName", () => {
     });
   });
 
-  it("should refuse characters outside letters, numbers, spaces, hyphens, and apostrophes", () => {
+  // #188: a table names an Emphasis in its own language; Lore Skills use a colon
+  it("should accept letters in any script, accents, and a colon", () => {
+    for (const name of ["Défense", "Ниндзюцу", "Bō", "Lore: Shadowlands", "Bō"]) {
+      expect(validateEmphasisName(name).valid, name).toBe(true);
+    }
+  });
+
+  it("should refuse characters outside letters, numbers, spaces, hyphens, apostrophes, colons", () => {
     expect(validateEmphasisName("Invalid@Name")).toEqual({
       valid: false,
       error: "l5r4.apps.emphasisManager.errors.nameCharacters",

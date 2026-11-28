@@ -13,11 +13,11 @@ import { MAX_RAISES } from "../config/game-mechanics.js";
 import { toNumber } from "./type-coercion.js";
 
 /**
- * Allowed characters for emphasis names.
- * Permits: letters, numbers, spaces, hyphens, apostrophes.
+ * Allowed characters for emphasis names: letters and numbers in any script with their accents, so a table names one
+ * in its own language, and spaces, hyphens, apostrophes, and colons, which Lore Skills use (#188).
  * @constant {RegExp}
  */
-const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
+const EMPHASIS_NAME_PATTERN = /^[\p{L}\p{M}\p{N}\s\-':]+$/u;
 
 /**
  * Validates skill emphasis name.
@@ -27,7 +27,7 @@ const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
  *
  * Validation rules, on the trimmed name:
  * - Length: 1-100 characters
- * - Characters: letters, numbers, spaces, hyphens, apostrophes only
+ * - Characters: letters and numbers in any script, spaces, hyphens, apostrophes, colons only
  * - Not already among the given names
  *
  * So "Katana" and "Notice" are valid; "", "Invalid@Name", and a name already listed are not, each with its error.
