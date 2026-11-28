@@ -161,10 +161,11 @@ export function registerHookWiringTests(quench) {
           assertWiredInOrder("getChatMessageContextOptions", [onGetChatMessageContextOptions]);
         });
 
-        it("should register the damage and flow GM queries", () => {
+        it("should register the damage, flow, and Void Point GM queries", () => {
           assert.isFunction(CONFIG.queries[`${SYS_ID}.damage`]);
           assert.isFunction(CONFIG.queries[`${SYS_ID}.flow`]);
           assert.isFunction(CONFIG.queries[`${SYS_ID}.replaceContestRoll`]);
+          assert.isFunction(CONFIG.queries[`${SYS_ID}.spendVoid`]);
         });
       });
 

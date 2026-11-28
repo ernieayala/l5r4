@@ -8,7 +8,8 @@
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
-import { buildVoidUseUpdate, startedCombatOf, warnVoidLimit } from "../../services/effects/uses.js";
+import { startedCombatOf } from "../../services/effects/uses.js";
+import { spendVoidPoint } from "../../services/dice/resources/void-points.js";
 import { askConfirm } from "../../services/dialog.js";
 import { askGmAllow } from "../../services/gm-allow.js";
 
@@ -74,12 +75,9 @@ export class PcActionsHandler {
       no: { label: T("l5r4.ui.common.cancel") }
     });
 
-    if (!confirmed) {
+    if (!confirmed || !(await this.#spendArmorVoid(actor))) {
       element.checked = false;
-      return;
     }
-
-    await this.#spendArmorVoid(actor);
   }
 
   /**
@@ -215,20 +213,21 @@ export class PcActionsHandler {
   }
 
   /**
-   * Spend the Void Point, then +10 Armor TN as an effect ending with the Round.
+   * Spend the Void Point, then +10 Armor TN as an effect ending with the Round. The spend goes through the one Void
+   * Point spend, so a spend from another client at the same time cannot take the same point (#170).
    * game-rules/25_rings_and_traits.md, p.78
    * @param {Actor} actor
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} Whether the Void Point was spent
    */
   static async #spendArmorVoid(actor) {
-    // The write starts from the stored value, so an Active Effect on Void Points is never written into storage (B6).
-    warnVoidLimit(actor);
-    await actor.update({
-      "system.rings.void.value": actor._source.system.rings.void.value - 1,
-      ...buildVoidUseUpdate(actor)
-    });
+    const spent = await spendVoidPoint(actor);
+    if (!spent.success) {
+      ui.notifications?.warn(spent.message);
+      return false;
+    }
     await applyEffect(actor, "voidArmor");
 
     ui.notifications?.info(F("l5r4.ui.effects.voidArmorSpent", { name: actor.name }));
+    return true;
   }
 }

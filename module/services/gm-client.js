@@ -63,19 +63,34 @@ export function registerGmQuery(name, handler) {
  * @returns {Promise<*>} The GM side's answer, or undefined when it did not run
  */
 export async function requestGmQuery(name, data, local) {
+  const answer = await askGmQuery(name, data, local);
+  if ("refusal" in answer) {
+    ui.notifications?.warn(answer.refusal);
+    return undefined;
+  }
+  return answer.value;
+}
+
+/**
+ * Run a request on the GM's side as requestGmQuery does, and return why it did not run instead of showing it, for a
+ * caller that reports the outcome itself.
+ * @param {string} name - The query name, in `CONFIG.queries`
+ * @param {object} data - The request
+ * @param {function(object, User): Promise<*>} [local] - Runs the request when this user is a GM
+ * @returns {Promise<{value: *}|{refusal: string}>} The GM side's answer, or the localized reason it did not run
+ */
+export async function askGmQuery(name, data, local) {
   try {
     if (game.user.isGM && local) {
-      return await local(data, game.user);
+      return { value: await local(data, game.user) };
     }
     const gm = game.users.activeGM;
     if (!gm) {
-      ui.notifications?.warn(T("l5r4.ui.effects.noGM"));
-      return undefined;
+      return { refusal: T("l5r4.ui.effects.noGM") };
     }
-    return await gm.query(name, data);
+    return { value: await gm.query(name, data) };
   } catch (err) {
-    ui.notifications?.warn(formatRefusal(name, err));
-    return undefined;
+    return { refusal: formatRefusal(name, err) };
   }
 }
 

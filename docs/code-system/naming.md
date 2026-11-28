@@ -87,6 +87,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `export` | Write documents out to a file the browser saves | `exportItemFolder` (`module/services/item-transfer.js`) |
 | `settle` | Wait until pending asynchronous work has finished | `settleLoads` (`module/services/animations/status-animations.js`) |
 | `refresh` | Bring what this client's canvas shows in line with the current state; no stored data changes | `refreshTokenAnimations` (`module/services/animations/status-animations.js`) |
+| `queue` | Run an operation after the earlier ones on the same key have finished, one at a time | `queueActorWrite` (`module/services/write-queue.js`) |
 | `*Field` | Return a new `foundry.data.fields` instance for a schema | `numberField` (`module/data/fields.js`) |
 
 ### Names the vocabulary rejects
@@ -142,7 +143,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | Module-level or static constant | UPPER_SNAKE_CASE | `TN_PER_RAISE` (`module/config/game-mechanics.js`) | `tnPerRaise` (modeled) | `l5r4/naming` |
 | Duration constant | Ends `_MS` | `UPDATE_TIMEOUT_MS` (`tests/quench/helpers.js`) | `UPDATE_TIMEOUT` (modeled) | Review |
 | GM query name constant | `<NAME>_QUERY` | `DAMAGE_QUERY` (`module/services/combat/damage.js`) | `damageQueryName` (modeled) | Review |
-| Module-level mutable state | camelCase | `actorLocks` (`module/services/dice/resources/void-points.js`) | `FLOWS` → `flows` (modeled) | `l5r4/naming` |
+| Module-level mutable state | camelCase | `chains` (`module/services/write-queue.js`) | `FLOWS` → `flows` (modeled) | `l5r4/naming` |
 | Variable or parameter | camelCase, glossary stems | `ringKey` in `rollRing` (`module/services/dice/rolls/ring-roll.js`) | `ring_key` (modeled) | ESLint `camelcase`, `tests/conventions/glossary.test.js` |
 
 ## Foundry-facing names

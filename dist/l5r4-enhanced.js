@@ -41,6 +41,7 @@ import { registerGrappleQueries } from "../module/services/combat/grapple-start.
 import { registerGuardQueries } from "../module/services/combat/guard.js";
 import { registerContestQueries } from "../module/services/combat/contest.js";
 import { registerGmAllowQueries } from "../module/services/gm-allow.js";
+import { registerVoidQueries } from "../module/services/dice/resources/void-points.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
@@ -173,7 +174,7 @@ function registerCoreConfig() {
 /**
  * Register what a player's client asks the active GM to do: apply a condition to an actor the player does not own,
  * end a Concentration, settle Center Stance when a player ends the Round, apply or undo damage, run a combat flow
- * step, end a Guard, put a replacement roll in a contest.
+ * step, end a Guard, put a replacement roll in a contest, spend Void Points.
  */
 function registerQueries() {
   registerEffectQueries();
@@ -185,6 +186,7 @@ function registerQueries() {
   registerGuardQueries();
   registerContestQueries();
   registerGmAllowQueries();
+  registerVoidQueries();
 }
 
 /**

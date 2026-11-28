@@ -5,7 +5,9 @@
  * offers the target's owner a Void Point for 10 fewer Wounds (decision 5) and lets the damage be undone.
  *
  * Applying, reducing, and undoing change an actor the user may not own; a player's request runs on the active GM
- * (`CONFIG.queries`), which posts the result card, so every card's flags are the GM's to change.
+ * (`CONFIG.queries`), which posts the result card, so every card's flags are the GM's to change. Each runs in the
+ * damaged actor's write queue (module/services/write-queue.js) and reads the actor and the card there, so two hits
+ * landing together both count and a second click on Void or Undo finds the first one's result (#170).
  * game-rules/25_rings_and_traits.md, p.78
  */
 
@@ -24,7 +26,9 @@ import { hideUnusable } from "../../utils/dom.js";
 import { updateCheckCardUse } from "../dice/check/card.js";
 import { askGmFor } from "../gm-allow.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
+import { warnVoidLimit } from "../effects/uses.js";
+import { spendQueuedVoidPoints } from "../dice/resources/void-points.js";
+import { queueActorWrite } from "../write-queue.js";
 
 /** Name of the GM query that carries a player's damage action. */
 const DAMAGE_QUERY = `${SYS_ID}.damage`;
@@ -212,25 +216,28 @@ function buildResultNotes(result) {
 }
 
 /**
- * Spend the damaged actor's Void Point for 10 fewer Wounds from this damage.
+ * Spend the damaged actor's Void Point for 10 fewer Wounds from this damage. Runs in the actor's write queue; a card
+ * whose Void Point is spent or whose damage is undone, as a second click finds it, changes nothing.
  * game-rules/25_rings_and_traits.md, p.78
  * @param {ChatMessage} card - A damage result card
+ * @param {Actor} actor - The damaged actor
  * @returns {Promise<void>}
  */
-async function spendVoidPointOnDamage(card) {
+async function spendVoidPointOnDamage(card, actor) {
   const result = card.getFlag(SYS_ID, "damageResult");
-  const actor = await fromUuid(result.actorUuid);
-  if (!canReduceWithVoid(result, toInt(actor.system.rings.void.value))) {
+  if (result.voidSpent || result.undone) {
+    return;
+  }
+  const spend = await spendQueuedVoidPoints(actor, 1, stored => ({
+    "system.suffered": Math.max(0, stored.suffered - getVoidReduction(result.wounds))
+  }));
+  if (!spend.spent) {
     ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
     return;
   }
-  warnVoidLimit(actor);
-  const stored = actor._source.system;
-  await actor.update({
-    "system.rings.void.value": stored.rings.void.value - 1,
-    "system.suffered": Math.max(0, stored.suffered - getVoidReduction(result.wounds)),
-    ...buildVoidUseUpdate(actor)
-  });
+  if (spend.overLimit) {
+    warnVoidLimit(actor);
+  }
   // Back below the Wounds that kill, the Void Point saves the life this damage took, as Undo would (#117)
   const saved = result.killed && !isDead(toInt(actor.system.suffered), deathThresholdOf(actor));
   if (saved) {
@@ -241,15 +248,16 @@ async function spendVoidPointOnDamage(card) {
 
 /**
  * Undo a damage result: take its Wounds back off, return a Void Point spent on it, and lift a Dead status it gave.
+ * Runs in the actor's write queue; a result already undone changes nothing.
  * @param {ChatMessage} card - A damage result card
+ * @param {Actor} actor - The damaged actor
  * @returns {Promise<void>}
  */
-async function applyDamageUndo(card) {
+async function applyDamageUndo(card, actor) {
   const result = card.getFlag(SYS_ID, "damageResult");
   if (result.undone) {
     return;
   }
-  const actor = await fromUuid(result.actorUuid);
   const stored = actor._source.system;
   const taken = result.wounds - (result.voidSpent ? getVoidReduction(result.wounds) : 0);
   await actor.update({
@@ -287,7 +295,7 @@ async function applyDamageAction({ action, messageId, actorUuid }, user) {
     if (!user.isGM && !actor.testUserPermission(user, "OWNER")) {
       throw new Error("l5r4.ui.requests.onlyOwnerVoid");
     }
-    await spendVoidPointOnDamage(message);
+    await queueActorWrite(actor, () => spendVoidPointOnDamage(message, actor));
   } else if (action === "undo") {
     await applyRequestedUndo(message, { result, actor }, user);
   }
@@ -312,7 +320,7 @@ async function applyRequestedUndo(message, { result, actor }, user) {
   if (!allowed) {
     throw new Error("l5r4.ui.requests.declined");
   }
-  await applyDamageUndo(message);
+  await queueActorWrite(actor, () => applyDamageUndo(message, actor));
 }
 
 /**
@@ -401,7 +409,7 @@ async function applyRequestedDamage(message, actorUuid, user) {
   if (!user.isGM) {
     await validatePlayerDamage(message, actor, user);
   }
-  await applyToActor(message, actor);
+  await queueActorWrite(actor, () => applyToActor(message, actor));
 }
 
 /**

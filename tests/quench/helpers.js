@@ -5,7 +5,7 @@ import { getSlotStatus, spendSlot } from "../../module/services/dice/check/spell
 
 /**
  * Spend a spell slot the way a cast does (module/services/dice/check/spell-slots.js): the slot the choice names,
- * then the spend under the caster's lock, which checks the count again.
+ * then the spend in the caster's write queue, which checks the count again.
  * @param {Actor|object} actor  The caster
  * @param {string} ring  The Ring the spell is cast in
  * @param {{isVoid?: boolean}} [options]  Spend a Void slot in place of the Ring's

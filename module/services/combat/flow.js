@@ -17,6 +17,7 @@ import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
+import { queueWrite } from "../write-queue.js";
 
 /** Name of the GM query that runs a flow step for a player. */
 const FLOW_QUERY = `${SYS_ID}.flow`;
@@ -46,12 +47,6 @@ const GM_ACTIONS = Object.freeze(["redo", "end"]);
  * @type {Map<string, Flow>}
  */
 const flows = new Map();
-
-/**
- * Each card's steps in progress on this GM client, by card id: the next step waits for the one before (#164).
- * @type {Map<string, Promise<void>>}
- */
-const stepQueues = new Map();
 
 /**
  * The parts of a check request for a Skill Roll with a Trait or the Void Ring: the pool, the selectors, the
@@ -238,16 +233,7 @@ async function onFlowClick(event, message, handler) {
  * @returns {Promise<void>}
  */
 function applyFlowStep(request, user) {
-  const id = String(request.messageId);
-  const run = (stepQueues.get(id) ?? Promise.resolve()).then(() => updateFlowCard(request, user));
-  const settled = run.catch(() => {});
-  stepQueues.set(id, settled);
-  settled.then(() => {
-    if (stepQueues.get(id) === settled) {
-      stepQueues.delete(id);
-    }
-  });
-  return run;
+  return queueWrite(`flow:${request.messageId}`, () => updateFlowCard(request, user));
 }
 
 /**

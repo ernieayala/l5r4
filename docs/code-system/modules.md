@@ -81,7 +81,7 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
 | Frozen constant | `DISARM_DAMAGE` (`module/services/combat/damage-roll.js`): `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | An exported constant object left unfrozen (modeled) |
-| Module state | `actorLocks` (`module/services/dice/resources/void-points.js`) | A registry filled at run time and named `FLOWS` (modeled) |
+| Module state | `chains` (`module/services/write-queue.js`) | A registry filled at run time and named `FLOWS` (modeled) |
 | Rule numbers | `module/services/combat/damage-roll.js` imports `TN_PER_RAISE` | `getTn` (`module/utils/check.js`): the literal `5` per Raise where `TN_PER_RAISE` (`module/config/game-mechanics.js`) holds it |
 | Values only | `MANEUVERS` (`module/config/rule-keys.js`) | A function exported from `module/config/` (modeled); `getIconPath` (`module/utils/icons.js`) lives in Utils |
 
@@ -117,7 +117,7 @@ A file does one job its layer owns. A second job, not a line count, is the reaso
 | Conforming | Non-conforming |
 | --- | --- |
 | `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | A file in `module/hooks/` that applies Wounds, spends Void Points, and posts notifications itself, which is Services work (modeled) |
-| `module/services/dice/resources/void-points.js`: one `updateUnderLock` | `updateUnderLock` (`module/services/dice/check/spell-slots.js`): a copy of `updateUnderLock` (`module/services/dice/resources/void-points.js`) with its own lock map |
+| `module/services/write-queue.js`: one queue per key, which spell slots, Void Points, damage, and flow cards all use | A second lock with its own map in the service that needs it, copying the first (modeled) |
 
 ## Size
 

@@ -13,7 +13,7 @@
  */
 import { T, F } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
+import { spendVoidPoint } from "../dice/resources/void-points.js";
 
 /**
  * Wire the damage buttons of a card posted before 4.0.0, which carries its damage in the HTML.
@@ -172,15 +172,16 @@ async function applyWoundsWithVoid(damage) {
   const armorReduction = targetActor.system?.armorTn?.reduction ?? 0;
   const finalDamage = Math.max(0, afterVoid - armorReduction);
 
-  // Apply final damage and spend void point in single atomic update. Both start from the stored values, so an
-  // Active Effect on Void Points or Wounds is never written into storage (B6).
-  const stored = targetActor._source.system;
-
-  warnVoidLimit(targetActor);
+  // The Void Point goes through the one Void Point spend, so a spend from another client at the same time cannot take
+  // the same point (#170); the Wounds follow only once it is spent. The write starts from the stored value, so an
+  // Active Effect on Wounds is never written into storage (B6).
+  const spent = await spendVoidPoint(targetActor);
+  if (!spent.success) {
+    ui.notifications?.warn(spent.message);
+    return;
+  }
   await targetActor.update({
-    "system.rings.void.value": stored.rings.void.value - 1,
-    "system.suffered": stored.suffered + finalDamage,
-    ...buildVoidUseUpdate(targetActor)
+    "system.suffered": targetActor._source.system.suffered + finalDamage
   });
 
   ui.notifications?.info(

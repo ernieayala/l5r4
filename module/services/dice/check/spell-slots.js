@@ -4,26 +4,22 @@
  * choice spends (an elemental slot of the spell's Ring or a Void slot; with none left, only with the GM's leave), taking
  * it before the roll, and giving it back when the cast stops before it rolls (Ernie's ruling: the slot is spent before
  * the roll). A shugenja holds one
- * slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs under a per-actor
- * lock and checks the count again inside it, so two casts that overlap cannot both spend the last slot.
+ * slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs in the caster's write
+ * queue (module/services/write-queue.js) and checks the count again inside it, so two casts that overlap cannot both
+ * spend the last slot.
  * game-rules/66_magic_and_spell_casting.md, p.163
  */
 
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { askGmAllow } from "../../gm-allow.js";
+import { queueActorWrite } from "../../write-queue.js";
 
 /**
  * The Rings a spell slot belongs to.
  * @type {ReadonlyArray<string>}
  */
 const VALID_RINGS = Object.freeze(["water", "air", "fire", "earth", "void"]);
-
-/**
- * Actors whose slot spend is running: a second spend for the same actor waits for the first.
- * @type {Map<string, boolean>}
- */
-const actorLocks = new Map();
 
 /**
  * Dialog data for the slot picker: the counts, and the default choice (a Void slot when only Void slots are left,
@@ -93,9 +89,9 @@ export function getSlotStatus(actor, ringKey, choice) {
 }
 
 /**
- * Spend the slot a choice names, before the roll: the choice is checked, then the slot is spent under the caster's
- * lock, so a cast that overlapped another cannot spend the last slot twice. A cast with no slot to spend goes ahead
- * only with the GM's leave (Ernie's ruling, #158); a GM casting for an NPC needs none.
+ * Spend the slot a choice names, before the roll: the choice is checked, then the slot is spent in the caster's
+ * write queue, so a cast that overlapped another cannot spend the last slot twice. A cast with no slot to spend goes
+ * ahead only with the GM's leave (Ernie's ruling, #158); a GM casting for an NPC needs none.
  * game-rules/66_magic_and_spell_casting.md, p.163
  * @param {Actor} actor - The caster
  * @param {string} ringKey - The Ring the spell is cast in
@@ -117,7 +113,7 @@ export async function spendChosenSlot(actor, ringKey, choice) {
 
 /**
  * Give back a slot a cast took, when the cast stops before it rolls: writes the stored count plus one under the
- * caster's lock, so an Active Effect on slots is never written into storage (AUTOMATION.md B6).
+ * caster's write queue, so an Active Effect on slots is never written into storage (AUTOMATION.md B6).
  * @param {Actor} actor - The caster
  * @param {string|null} path - The slot's path; null gives back nothing
  * @returns {Promise<void>}
@@ -126,13 +122,13 @@ export async function updateReturnedSlot(actor, path) {
   if (!path) {
     return;
   }
-  await updateUnderLock(actor.id, () =>
+  await queueActorWrite(actor, () =>
     actor.update({ [path]: foundry.utils.getProperty(actor._source, path) + 1 })
   );
 }
 
 /**
- * Spend the planned slot, under the caster's lock: the count is checked again first, so a second cast that
+ * Spend the planned slot, in the caster's write queue: the count is checked again first, so a second cast that
  * overlapped the first is refused once the first has spent the last slot. Writes the stored count minus one, so an
  * Active Effect on slots is never written into storage (AUTOMATION.md B6).
  * game-rules/66_magic_and_spell_casting.md, p.163
@@ -145,7 +141,7 @@ export async function spendSlot(actor, path) {
   if (!path) {
     return { success: false, message: null };
   }
-  return updateUnderLock(actor.id, async () => {
+  return queueActorWrite(actor, async () => {
     if (toInt(foundry.utils.getProperty(actor, path)) <= 0) {
       return { success: false, message: T("l5r4.ui.notifications.noSpellSlots") };
     }
@@ -172,23 +168,4 @@ function canCastWithoutSlot(actor, ringKey) {
     reason: F("l5r4.magic.spells.noSlot", { name: actor.name, ring }),
     ask: T("l5r4.magic.spells.noSlotGM")
   });
-}
-
-/**
- * Run a function with an exclusive lock on the actor: a call for an actor already locked waits until the lock is
- * released, so the spends of overlapping casts run one after the other.
- * @param {string} actorId - The actor's id
- * @param {function(): Promise<*>} fn - The work to run under the lock
- * @returns {Promise<*>} What the function returns
- */
-async function updateUnderLock(actorId, fn) {
-  while (actorLocks.get(actorId)) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  actorLocks.set(actorId, true);
-  try {
-    return await fn();
-  } finally {
-    actorLocks.delete(actorId);
-  }
 }

@@ -2,6 +2,10 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { CHAT_TEMPLATES } from "../../module/config/templates.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
+import {
+  SPEND_VOID_QUERY,
+  spendVoidPoint
+} from "../../module/services/dice/resources/void-points.js";
 import { startDuel } from "../../module/services/combat/duel.js";
 import { startFlow } from "../../module/services/combat/flow.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
@@ -254,6 +258,158 @@ export function registerRequestsTests(quench) {
               "l5r4.ui.requests.notDamageResult"
             );
             assert.equal(target._source.system.suffered, 0);
+          })
+        );
+      });
+
+      // #170: GM-side writes to one actor run one at a time, each reading the stored values in its turn
+      describe("Writes to one actor at the same time", () => {
+        const askDamage = request => CONFIG.queries[`${SYS_ID}.damage`](request, { user: player });
+        const askVoid = (actor, count = 1) =>
+          CONFIG.queries[SPEND_VOID_QUERY]({ actorUuid: actor.uuid, count }, { user: player });
+
+        /** A damage roll by a character of the player's against `target`, 2k2 of nines = 18. */
+        const playersDamage = async target =>
+          track(
+            await rollCheck({
+              actor: await playersCharacter(),
+              kind: "damage",
+              label: "Requests damage",
+              base: { roll: 2, keep: 2 },
+              target,
+              askForOptions: false
+            })
+          );
+
+        /** The result card a damage roll's application posted, tracked for deletion. */
+        const resultOf = damage =>
+          track(
+            game.messages.contents.findLast(
+              m => m.getFlag(SYS_ID, "damageResult")?.damageMessageId === damage.id
+            )
+          );
+
+        it(
+          "should keep both of two hits applied together",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: two hits" }));
+            const first = await playersDamage(target);
+            const second = await playersDamage(target);
+            await Promise.all(
+              [first, second].map(damage =>
+                askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid })
+              )
+            );
+            assert.equal(target._source.system.suffered, 36, "18 and 18");
+            resultOf(first);
+            resultOf(second);
+          })
+        );
+
+        it(
+          "should undo one hit while another lands, keeping the other",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: undo and hit" }));
+            const first = await playersDamage(target);
+            const second = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: first.id, actorUuid: target.uuid });
+            await Promise.all([
+              askDamage({ action: "undo", messageId: resultOf(first).id }),
+              askDamage({ action: "apply", messageId: second.id, actorUuid: target.uuid })
+            ]);
+            assert.equal(target._source.system.suffered, 18, "the second hit only");
+            resultOf(second);
+          })
+        );
+
+        it(
+          "should spend two Void Points for a roll's spend and a damage card's spend made together",
+          clean(async () => {
+            const target = await playersCharacter();
+            await target.update({ "system.rings.void.value": 2 });
+            const damage = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
+            const [spend] = await Promise.all([
+              askVoid(target),
+              askDamage({ action: "void", messageId: resultOf(damage).id })
+            ]);
+            assert.isTrue(spend.spent);
+            assert.equal(target._source.system.rings.void.value, 0, "one point each");
+            assert.equal(target._source.system.suffered, 8, "18 - 10");
+          })
+        );
+
+        it(
+          "should spend a damage card's Void Point once for two clicks",
+          clean(async () => {
+            const target = await playersCharacter();
+            await target.update({ "system.rings.void.value": 2 });
+            const damage = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
+            const card = resultOf(damage);
+            let updates = 0;
+            const hook = Hooks.on("updateActor", actor => {
+              if (actor === target) {
+                updates++;
+              }
+            });
+            try {
+              await Promise.all([
+                askDamage({ action: "void", messageId: card.id }),
+                askDamage({ action: "void", messageId: card.id })
+              ]);
+            } finally {
+              Hooks.off("updateActor", hook);
+            }
+            assert.equal(updates, 1, "one spend written");
+            assert.equal(target._source.system.rings.void.value, 1);
+            assert.equal(target._source.system.suffered, 8);
+          })
+        );
+
+        it(
+          "should spend a player's Void Points on the GM, one request after another",
+          clean(async () => {
+            const actor = await playersCharacter();
+            await actor.update({ "system.rings.void.value": 1 });
+            const answers = await Promise.all([askVoid(actor), askVoid(actor)]);
+            assert.deepEqual(
+              answers.map(a => a.spent),
+              [true, false],
+              "the second finds the point gone"
+            );
+            assert.deepEqual(answers[1], { spent: false, current: 0, overLimit: false });
+            assert.equal(actor._source.system.rings.void.value, 0);
+          })
+        );
+
+        it(
+          "should refuse a Void Point spend for a character the player does not own, or a bad count",
+          clean(async () => {
+            const stranger = track(
+              await createTestPC({
+                name: "Requests: stranger's Void",
+                system: { rings: { void: { rank: 2, value: 2 } } }
+              })
+            );
+            const own = await playersCharacter();
+            await own.update({ "system.rings.void.value": 2 });
+            assert.equal(await refusalOf(askVoid(stranger)), "l5r4.ui.requests.notYourVoid");
+            assert.equal(await refusalOf(askVoid(own, 0)), "l5r4.ui.requests.notVoidSpend");
+            assert.equal(await refusalOf(askVoid(own, "1")), "l5r4.ui.requests.notVoidSpend");
+            assert.equal(stranger._source.system.rings.void.value, 2, "the stranger's untouched");
+            assert.equal(own._source.system.rings.void.value, 2, "a bad count takes nothing");
+          })
+        );
+
+        it(
+          "should spend a Void Point through spendVoidPoint and the queue a request uses together",
+          clean(async () => {
+            const actor = await playersCharacter();
+            await actor.update({ "system.rings.void.value": 1 });
+            const [local, asked] = await Promise.all([spendVoidPoint(actor), askVoid(actor)]);
+            assert.deepEqual([local.success, asked.spent], [true, false]);
+            assert.equal(actor._source.system.rings.void.value, 0);
           })
         );
       });
