@@ -6,7 +6,8 @@
  * - turn and round events reach the effect services: saves rolled in the Reactions stage, Full Defense declared
  *   again each Turn, Concentration upkeep;
  * - before each new Round, Center Stance gives its next-Round bonus and +10 Initiative for that Round;
- * - when the combat ends, Fear and other effects lasting the encounter end with it (STAGE-09 decision 4).
+ * - when the combat ends, Fear and other effects lasting the encounter end with it (STAGE-09 decision 4), as do
+ *   effects timed in Rounds or Turns (#178).
  *
  * Core announces turnStart, turnEnd, roundStart, and roundEnd to the Active Effect registry itself
  * [src: client/documents/combat.mjs:1011-1109], after these overrides run, and only on the active GM.
@@ -44,13 +45,15 @@ export default class L5R4Combat extends foundry.documents.Combat {
    * @type {{
    *   turn: (event: string, combat: L5R4Combat, combatant: foundry.documents.Combatant) => Promise<void>,
    *   round: (event: string, combat: L5R4Combat) => Promise<void>,
-   *   beforeNextRound: (combat: L5R4Combat) => Promise<void>
+   *   beforeNextRound: (combat: L5R4Combat) => Promise<void>,
+   *   end: (actors: Set<Actor>) => Promise<void>
    * }}
    */
   static EVENTS = {
     turn: async () => {},
     round: async () => {},
-    beforeNextRound: async () => {}
+    beforeNextRound: async () => {},
+    end: async () => {}
   };
 
   /**
@@ -111,12 +114,14 @@ export default class L5R4Combat extends foundry.documents.Combat {
   }
 
   /**
-   * End the encounter for this combat's actors: effects expiring on `encounterEnd` (Fear) end.
+   * End the encounter for this combat's actors: effects expiring on `encounterEnd` (Fear) end, and so do those timed
+   * in Rounds or Turns (#178). Core's `_onDelete` does not wait, so neither does this.
    * @override
    */
   _onDelete(options, userId) {
     super._onDelete(options, userId);
     const actors = new Set(this.combatants.map(c => c.actor).filter(Boolean));
     foundry.documents.ActiveEffect.registry.refresh("encounterEnd", { combat: this, actors });
+    this.constructor.EVENTS.end(actors);
   }
 }

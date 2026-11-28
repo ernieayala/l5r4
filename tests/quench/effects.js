@@ -460,6 +460,29 @@ export function registerEffectsTests(quench) {
         });
       });
 
+      // #178: effects timed in Rounds or Turns end with their combat
+      // game-rules/25_rings_and_traits.md, p.78
+      // game-rules/38_maneuvers.md, p.87
+      describe("Effects timed in the combat", () => {
+        it("should end Guarded and Void on Armor TN with the combat, and leave a status with no time", async function () {
+          this.timeout(20_000);
+          const actor = track(await createTestPC({ name: "Effects combat end" }));
+          const combat = await startCombat([actor, 10]);
+          await applyEffect(actor, "guarded");
+          await applyEffect(actor, "voidArmor");
+          await applyEffect(actor, "prone");
+          assert.lengthOf(effectsOf(actor, "voidArmor"), 1);
+          await combat.delete();
+          assert.isTrue(
+            await waitFor(
+              () => !actor.statuses.has("guarded") && effectsOf(actor, "voidArmor").length === 0
+            ),
+            "Guarded and Void on Armor TN end"
+          );
+          assert.isTrue(actor.statuses.has("prone"), "Prone has no time and stays");
+        });
+      });
+
       // roadmap/AUTOMATION.md B10
       describe("Prone from Wounds", () => {
         it("should go on at Down and come off above Down", async function () {
