@@ -8,11 +8,17 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
-import { applyEffectAnywhere } from "../effects/apply.js";
+import { applyEffectAnywhere, effectsOf } from "../effects/apply.js";
 import { askGmAllow } from "../gm-allow.js";
+import { registerGmQuery, requestGmQuery } from "../gm-client.js";
+
+/** Name of the GM query that ends a guard's Guard (registered in registerGuardQueries). */
+export const END_GUARD_QUERY = `${SYS_ID}.endGuard`;
 
 /**
- * Guard a character: both statuses count from the guard's Turn.
+ * Guard a character: both statuses count from the guard's Turn. A guard protects one character, so a Guard the guard
+ * already holds ends first, on the same ward or another (#168).
+ * game-rules/38_maneuvers.md, p.87
  * @param {Actor} protector - The guard
  * @param {Actor} ward
  * @returns {Promise<boolean>} Whether the guard was set
@@ -29,6 +35,11 @@ export async function guard(protector, ward) {
   if (!allowed) {
     return false;
   }
+  if (effectsOf(protector, "guarding").length) {
+    await requestGmQuery(END_GUARD_QUERY, { protectorUuid: protector.uuid }, ({ protectorUuid }) =>
+      endGuard(protectorUuid)
+    );
+  }
   await applyEffectAnywhere(protector, "guarding", { turnOf: protector.uuid });
   // The guard the GM's client checks before it guards a ward the user does not own (#162)
   await applyEffectAnywhere(ward, "guarded", {
@@ -37,6 +48,20 @@ export async function guard(protector, ward) {
     proof: { kind: "guard", protectorUuid: protector.uuid }
   });
   return true;
+}
+
+/**
+ * Register the GM side of ending a Guard: a guard's owner ends that guard's Guard, the Guarded on a ward the owner
+ * may not own included.
+ */
+export function registerGuardQueries() {
+  registerGmQuery(END_GUARD_QUERY, async ({ protectorUuid }, { user }) => {
+    const protector = await fromUuid(String(protectorUuid));
+    if (protector?.documentName !== "Actor" || !protector.testUserPermission(user, "OWNER")) {
+      throw new Error("l5r4.ui.requests.notYourGuard");
+    }
+    await endGuard(protector.uuid);
+  });
 }
 
 /**
@@ -70,4 +95,24 @@ export function onGetSceneControlButtonsGuard(controls) {
     button: true,
     onChange: () => guardFromCanvas()
   };
+}
+
+/**
+ * End a guard's Guard: its Guarding, and the Guarded it put on any actor in the world or on the canvas. Runs on the
+ * GM's client, or the GM's own.
+ * game-rules/38_maneuvers.md, p.87
+ * @param {string} protectorUuid
+ * @returns {Promise<void>}
+ */
+async function endGuard(protectorUuid) {
+  const tokenActors = (canvas?.tokens?.placeables ?? []).map(t => t.actor).filter(Boolean);
+  for (const actor of new Set([...game.actors, ...tokenActors])) {
+    const ended = [
+      ...effectsOf(actor, "guarded").filter(e => e.origin === protectorUuid),
+      ...(actor.uuid === protectorUuid ? effectsOf(actor, "guarding") : [])
+    ].map(e => e.id);
+    if (ended.length) {
+      await actor.deleteEmbeddedDocuments("ActiveEffect", ended);
+    }
+  }
 }

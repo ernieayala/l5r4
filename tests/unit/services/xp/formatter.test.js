@@ -20,8 +20,9 @@ import { formatXpEntries } from "../../../../module/services/xp/formatter.js";
 // Mock Foundry's game.i18n.localize()
 global.game = {
   i18n: {
-    localize: vi.fn(key => {
+    localize: vi.fn((key, data = {}) => {
       const translations = {
+        "l5r4.character.experience.emphasisNote": "{skill}: Emphasis {emphasis}",
         "l5r4.character.experience.breakdown.traits": "Traits",
         "l5r4.character.experience.breakdown.void": "Void Ring",
         "l5r4.character.experience.breakdown.skills": "Skills",
@@ -37,7 +38,8 @@ global.game = {
         "l5r4.character.experience.fallbackLabels.skillCreated": "Skill Created",
         "l5r4.character.experience.fallbackLabels.skillIncreased": "Skill Increased"
       };
-      return translations[key] || key;
+      const text = translations[key] || key;
+      return text.replace(/\{(\w+)\}/g, (match, name) => data[name] ?? match);
     }),
     lang: "en"
   }
@@ -257,23 +259,20 @@ describe("formatXpEntries", () => {
       expect(result[0].note).toBe("Iaijutsu 1");
     });
 
-    it("should preserve emphasis note when emphasis flag is true", () => {
-      // ARRANGE
+    // #161: the note is built in the reader's language from the stored Emphasis, never the stored English text
+    it("should localize an Emphasis entry's note from its Skill and Emphasis", () => {
       const entries = [
         createXpEntry({
           type: "skill",
           skillName: "Kenjutsu",
-          emphasis: true,
-          note: "Kenjutsu Emphasis: Katana",
+          emphasis: "Katana",
+          note: "Kenjutsu - Emphasis: Katana",
+          fromValue: 0,
+          toValue: 1,
           delta: 2
         })
       ];
-
-      // ACT
-      const result = formatXpEntries(entries);
-
-      // ASSERT
-      expect(result[0].note).toBe("Kenjutsu Emphasis: Katana");
+      expect(formatXpEntries(entries)[0].note).toBe("Kenjutsu: Emphasis Katana");
     });
 
     it('should preserve note when note contains "Emphasis:"', () => {

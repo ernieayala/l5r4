@@ -11,7 +11,7 @@
  * Each test creates a specific failure condition to verify handling.
  *
  * Each check and spend goes through the casting path: module/services/dice/check/spell-slots.js `getSlotStatus`, and
- * `spendSlot` under the caster's lock through `spendCastSlot`.
+ * `spendSlot` in the caster's write queue through `spendCastSlot`.
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

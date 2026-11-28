@@ -17,9 +17,10 @@ import { PATHS } from "./constants.js";
  * @property {string} weaponCard - Weapon attack roll display
  * @property {string} effectPrompt - A save, Full Defense roll, or Concentration check an effect asks for
  * @property {string} damageResult - Wounds a damage roll dealt, with Void reduction and Undo
- * @property {string} flowCard - A guided combat flow (iaijutsu duel, grapple)
+ * @property {string} flowCard - A guided flow (iaijutsu duel, grapple, a group's Fear test)
  * @property {string} healing - Healing action results
  * @property {string} checkRequest - A GM's request for a roll (module/services/check-request.js)
+ * @property {string} initiativeRequest - A PC's Initiative sent to their player (module/services/initiative-request.js)
  * @property {string} itemSummary - An item card's rule lines and book citation (module/utils/rule-summary.js)
  * @property {string} note - One or more sentences: a grant, a session, a Concentration upkeep, a contest's outcome
  * @property {string} contest - A Contested Roll between two roll messages
@@ -32,6 +33,7 @@ export const CHAT_TEMPLATES = Object.freeze({
   flowCard: `${PATHS.templates}/chat/flow.hbs`,
   healing: `${PATHS.templates}/chat/healing.hbs`,
   checkRequest: `${PATHS.templates}/chat/check-request.hbs`,
+  initiativeRequest: `${PATHS.templates}/chat/initiative-request.hbs`,
   itemSummary: `${PATHS.templates}/chat/item-summary.hbs`,
   note: `${PATHS.templates}/chat/note.hbs`,
   contest: `${PATHS.templates}/chat/contest.hbs`
@@ -180,6 +182,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/actor/_partials/_weapon-section.hbs`,
   `${PATHS.templates}/actor/_partials/_armor-section.hbs`,
   `${PATHS.templates}/actor/_partials/_item-section.hbs`,
+  `${PATHS.templates}/actor/_partials/_item-sections.hbs`,
   `${PATHS.templates}/actor/_partials/_spell-section.hbs`,
   `${PATHS.templates}/actor/_partials/_technique-section.hbs`,
   `${PATHS.templates}/actor/_partials/_kiho-section.hbs`,
@@ -220,6 +223,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/chat/healing.hbs`,
   `${PATHS.templates}/chat/weapon.hbs`,
   `${PATHS.templates}/chat/check-request.hbs`,
+  `${PATHS.templates}/chat/initiative-request.hbs`,
   `${PATHS.templates}/chat/item-summary.hbs`,
   `${PATHS.templates}/chat/note.hbs`,
   `${PATHS.templates}/chat/contest.hbs`,
@@ -251,6 +255,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/apps/compendium-browser-results.hbs`,
   `${PATHS.templates}/apps/compendium-browser-open.hbs`,
   `${PATHS.templates}/apps/_partials/_wealth-change.hbs`,
+  `${PATHS.templates}/apps/_partials/_added-hint.hbs`,
 
   // Design gallery (module/apps/design-gallery.js): its parts include these partials
   `${PATHS.templates}/apps/design-gallery/_partials/_sample.hbs`,

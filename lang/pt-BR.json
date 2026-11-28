@@ -376,7 +376,6 @@
         "custom": "Personalizado",
         "emphasisName": "Nome da Ênfase",
         "errors": {
-          "saveFailed": "Falha ao salvar a Ênfase personalizada",
           "updateFailed": "Falha ao atualizar o gerenciador de Ênfases"
         },
         "hint": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",
@@ -501,7 +500,7 @@
         "errors": {
           "toggleFailed": "Falha ao alternar o tipo de movimento"
         },
-        "feet": "pés",
+        "feetValue": "{n} pés",
         "maximum": "Movimento Máximo",
         "title": "Movimento"
       },
@@ -625,7 +624,6 @@
         "explodes": "Dados explodem",
         "explodesHint": "Desligado para armas cujos dados de dano nunca explodem, como shuriken.",
         "fallbackTrait": "Atributo alternativo",
-        "meleeRange": "Arco contra um alvo ao alcance corpo a corpo",
         "minStrength": "Força mínima",
         "range": "Alcance",
         "rangedAttack": "Ataque à Distância",
@@ -709,16 +707,6 @@
         "createEffect": "Falha ao criar o efeito",
         "deleteEffect": "Falha ao excluir efeito.",
         "toggleEffect": "Falha ao alternar o efeito"
-      },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem.",
-          "other": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem."
-        },
-        "iconsUpdated": {
-          "one": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo.",
-          "other": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo."
-        }
       },
       "settings": {
         "designGallery": {

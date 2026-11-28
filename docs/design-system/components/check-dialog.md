@@ -43,6 +43,7 @@ Each part renders only when the roll offers it (`buildDialogContext` (`module/se
 | With modifiers | The modifiers fieldset; substitutions when a Substitute rule applies |
 | Not damage | TN, TN changes as a hint, wound penalty toggle, Void Point toggle |
 | Raises allowed | Raises, with their range as a hint under the field; Free Raises spent on the TN, with what they do and how many as a hint (`game-rules/28_raises.md, p.79`) |
+| Damage that takes Free Raises | A grapple Hit: Free Raises in place of Raises, starting at those offered and changeable, each +1k0, with that as a hint (`game-rules/40_grappling.md, p.88`) |
 | Unskilled Roll | The Unskilled hint in place of Raises; the Void Point to count as Rank 1 |
 | Trained Emphases | Emphasis select (`game-rules/58_skills_overview.md, p.133`) |
 | Attack | Ranged toggle; maneuvers when Raises are allowed, Grapple always |
@@ -60,6 +61,7 @@ Each part renders only when the roll offers it (`buildDialogContext` (`module/se
 | No Void Points | Void toggles disabled, with the reason in `data-tooltip` (states.md rule 5, key `l5r4.ui.check.noVoidPoints`) | `{{disabled (not voidPoints)}}` and the tooltip while `voidPoints` is 0 (`templates/dialogs/check-dialog.hbs`) |
 | Void Point already spent this Round | Warning line: `fa-triangle-exclamation` in the warning color, the words in the text color (states.md Warning) | A `<p>` of class `l5r4-check-dialog-warning` holding `l5r4.ui.effects.voidSpentThisRound` (`templates/dialogs/check-dialog.hbs`) |
 | Maho | Warning line, as above | A `<p>` of class `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`) |
+| No spell slot left | The slot options are disabled and a warning line says casting asks the GM (`l5r4.magic.spells.noSlotLeft`); Roll stays enabled, and the cast asks the GM's leave before it rolls (`spendChosenSlot` (`module/services/dice/check/spell-slots.js`)) | A `<p>` of class `l5r4-check-dialog-warning` while neither slot count is above 0 (`templates/dialogs/check-extras/slot.hbs`) |
 | Out of range | The number field's `min` and `max` stop the spinner; the pipeline bounds whatever is typed | `min`, `max` on Raises, Free Raises, Keep only |
 | Maneuver picked | The declared Raises rise to cover what the Free Raises do not, up to the cap; the roller may change them after | `updateRaisesToCover` (`module/services/dice/check/maneuver-cost.js`) |
 | Maneuver over the cap | For a player, the checkbox or Called Shot option disabled, with the reason (`l5r4.ui.combat.maneuverOverCap`) in `data-tooltip`, or `title` on an option; a picked one stays enabled. Never for a GM | `updateManeuverChoices` (`module/services/dice/check/maneuver-cost.js`) |
@@ -77,6 +79,7 @@ Context from `buildDialogContext` (`module/services/dice/check/terms.js`):
 | `substitutes` | `{ label, text }[]` | Trait substitutions, `text` as `from → to` |
 | `hasTn`, `tn`, `tnModifiers`, `woundPenalty` | boolean, number, `{ label, value }[]`, number | TN fields |
 | `raisesAllowed`, `maxRaises`, `minRaises`, `freeRaises` | boolean, numbers | Raise fields |
+| `damageFreeRaises` | boolean | A damage roll that takes Free Raises (a grapple Hit); `freeRaises` is the field's start |
 | `unskilled`, `voidSkill` | boolean | Unskilled hint; Void Point as Rank 1 |
 | `voidAllowed`, `voidPoints`, `voidOverLimit` | boolean, number, boolean | Void Point fields |
 | `emphases` | string[] | Trained Emphases |

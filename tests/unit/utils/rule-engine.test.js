@@ -3,7 +3,9 @@ import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
   getTraitAdjustTotal,
-  getTraitAdjustments
+  getTraitAdjustments,
+  getWoundRuleOutputs,
+  isAfterWoundLevel
 } from "../../../module/utils/rule-engine.js";
 import { getSelectorBonus } from "../../../module/utils/rule-bag.js";
 
@@ -69,6 +71,11 @@ describe("getTraitAdjustTotal", () => {
       { key: "RollModifier", trait: "str", value: 5 }
     ];
     expect(getTraitAdjustTotal(rules, "str")).toBe(3);
+  });
+
+  // #172
+  it("should count a fractional value as whole ranks, rounded down", () => {
+    expect(getTraitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: 1.5 }], "str")).toBe(1);
   });
 
   it("should skip a formula and anything that is not a rule", () => {
@@ -155,6 +162,72 @@ describe("getDerivedRuleOutputs", () => {
     expect(modifier.roll).toBe(-3);
   });
 
+  // #172: counts of dice, Raises, and ranks are whole; flat amounts are left as they come
+  it("should round counts of dice, Raises, and ranks down", () => {
+    const result = out([
+      rule("RollModifier", {
+        selector: "any",
+        roll: "@rings.air / 2",
+        keep: "-@rings.air / 2",
+        total: "@rings.air / 2",
+        type: "untyped"
+      }),
+      rule("FreeRaise", { selector: "any", value: "@rings.air / 2" }),
+      rule("RaiseRule", { selector: "any", maneuver: null, cost: 0.5, cap: 1.5, minimum: 0 }),
+      rule("UnskilledAs", { selector: "any", rank: 1.9 }),
+      rule("Initiative", { roll: 1.5, keep: 1.5, total: 1.5 }),
+      rule("Movement", { water: -1.5 })
+    ]);
+    const [modifier] = result.bag.rollModifiers.any;
+    expect([modifier.roll, modifier.keep, modifier.total]).toEqual([1, -2, 1.5]);
+    expect(result.bag.freeRaises.any[0].value).toBe(1);
+    expect(result.bag.raiseRules.any[0]).toMatchObject({ cost: 0, cap: 1, minimum: 0 });
+    expect(result.bag.unskilledAs.any[0].rank).toBe(1);
+    expect(result.initiative).toEqual({ roll: 1, keep: 1, total: 1.5 });
+    expect(result.movementWater).toBe(-2);
+  });
+
+  // #173
+  it("should key the bag by selector in the form rolls build theirs", () => {
+    const result = out([
+      rule("RollModifier", { selector: "skill:Kenjutsu ", roll: 1, type: "untyped" }),
+      rule("TNModifier", { selector: "skill-type:merchant", value: 5, type: "untyped" })
+    ]);
+    expect(Object.keys(result.bag.rollModifiers)).toEqual(["skill:kenjutsu"]);
+    expect(Object.keys(result.bag.tnModifiers)).toEqual(["skill-type:merch"]);
+  });
+
+  // #172
+  it("should report a rule whose value is not a finite number and leave it out", () => {
+    const result = out([
+      rule("TNModifier", { selector: "any", value: "1/0", type: "untyped" }),
+      rule("ArmorTN", { value: "0/0", type: "untyped", mode: "add", range: null })
+    ]);
+    expect(result.bag.tnModifiers.any).toBeUndefined();
+    expect(result.armor).toEqual([]);
+    expect(result.errors.map(e => e.key)).toEqual(["ArmorTN", "TNModifier"]);
+  });
+
+  // #172: a Cost or Ledger rule on an effect resolves later, and keeps the effect's level for it
+  it("should carry the effect's level to Cost and Ledger rules", () => {
+    const onEffect = r => ({
+      rule: r,
+      source: "Effect",
+      effectUuid: "Actor.a.ActiveEffect.e",
+      level: 2
+    });
+    const result = getDerivedRuleOutputs(
+      [
+        onEffect(rule("Cost", { selector: "emphasis", value: "@cost - @level" })),
+        onEffect(rule("Ledger", { track: "honor", direction: "gain", value: "@points * @level" }))
+      ],
+      rollData,
+      new Set()
+    );
+    expect(result.bag.costs.emphasis[0].level).toBe(2);
+    expect(result.ledger[0].level).toBe(2);
+  });
+
   // Blinded
   // game-rules/41_conditional_effects.md, p.89
   it("should add Water Ring ranks for movement through Movement", () => {
@@ -206,18 +279,41 @@ describe("getDerivedRuleOutputs", () => {
     expect(result.resources).toEqual({ void: { max: 2, per: "round" } });
   });
 
-  it("should add up Reduction, Wounds, and Initiative", () => {
+  it("should add up Reduction and Initiative", () => {
     const result = out([
       rule("Reduction", { value: 2 }),
       rule("Reduction", { value: 1 }),
-      rule("Wounds", { perRank: "@rings.earth", penalty: -1 }),
       rule("Initiative", { roll: 1, keep: 0, total: 5 }),
       rule("Initiative", { roll: 0, keep: 1, total: 0 })
     ]);
     expect(result.reduction).toBe(3);
-    expect(result.woundsPerRank).toBe(2);
-    expect(result.woundPenalty).toBe(-1);
     expect(result.initiative).toEqual({ roll: 1, keep: 1, total: 5 });
+  });
+
+  // #175: the Wounds rules run before the Wound Rank, the others after it
+  it("should leave the Wounds rules to getWoundRuleOutputs", () => {
+    const wounds = [entry(rule("Wounds", { perRank: "@rings.earth", penalty: -1 }))];
+    expect(out(wounds.map(e => e.rule))).not.toHaveProperty("woundsPerRank");
+    expect(getWoundRuleOutputs(wounds, rollData, new Set())).toEqual({
+      woundsPerRank: 2,
+      woundPenalty: -1,
+      errors: []
+    });
+  });
+
+  // #175
+  it("should let a rule test the Wound Rank once it is known", () => {
+    const armor = rule("ArmorTN", {
+      value: 5,
+      type: "untyped",
+      mode: "add",
+      range: null,
+      predicate: [{ or: ["wound:grazed", "wound:hurt"] }]
+    });
+    expect(isAfterWoundLevel(entry(armor))).toBe(true);
+    expect(isAfterWoundLevel(entry(rule("ArmorTN", { value: 5 })))).toBe(false);
+    const grazed = getDerivedRuleOutputs([entry(armor)], rollData, new Set(["wound:grazed"]));
+    expect(grazed.armor).toHaveLength(1);
   });
 
   it("should skip derived rules whose predicate fails", () => {
@@ -419,13 +515,18 @@ describe("getDerivedRuleOutputs", () => {
   });
 
   it("should report a bad formula and leave its rule out", () => {
+    const wounds = getWoundRuleOutputs(
+      [entry(rule("Wounds", { perRank: 2, penalty: "bad(" }))],
+      rollData,
+      new Set()
+    );
+    expect(wounds.woundsPerRank).toBe(0);
+    expect(wounds.woundPenalty).toBe(0);
+    expect(wounds.errors.map(e => e.key)).toEqual(["Wounds"]);
     const result = out([
-      rule("Wounds", { perRank: 2, penalty: "bad(" }),
       rule("RollModifier", { selector: "attack", roll: "bad(", keep: 0, total: 0, type: "untyped" })
     ]);
-    expect(result.woundsPerRank).toBe(0);
-    expect(result.woundPenalty).toBe(0);
     expect(result.bag.rollModifiers).toEqual({});
-    expect(result.errors.map(e => e.key)).toEqual(["Wounds", "RollModifier"]);
+    expect(result.errors.map(e => e.key)).toEqual(["RollModifier"]);
   });
 });

@@ -2,8 +2,8 @@
  * @module sheets/handlers/item-effects-handler
  * @description Creates, opens, toggles, and deletes the ActiveEffects embedded on an Item, for the Item sheet's
  * create-effect, edit-effect, toggle-effect, and delete-effect actions. An effect created with transfer: true applies
- * to the Item's owning Actor; editing opens foundry.applications.sheets.ActiveEffectConfig, and a busy flag keeps a
- * double click from deleting twice.
+ * to the Item's owning Actor; editing opens the effect's registered sheet (`effect.sheet`, the system's with its Rules
+ * tab), and a busy flag keeps a double click from deleting twice.
  */
 
 /**
@@ -23,7 +23,7 @@ export class ItemEffectsHandler {
    * - transfer: true (effect applies to owning Actor when Item is owned)
    * - system.changes: [] (empty attribute modifications array)
    *
-   * Automatically opens Foundry's ActiveEffectConfig sheet for immediate editing.
+   * Opens the effect's sheet for immediate editing.
    * If creation fails, displays error notification and logs to console.
    *
    * @param {object} context - Sheet context object
@@ -52,7 +52,8 @@ export class ItemEffectsHandler {
       ]);
 
       if (eff) {
-        new foundry.applications.sheets.ActiveEffectConfig({ document: eff }).render(true);
+        // The effect's registered sheet, the system's with its Rules tab (#179)
+        eff.sheet.render(true);
       }
     } catch (err) {
       console.error("L5R4 ItemEffectsHandler: Failed to create effect", err);
@@ -64,8 +65,7 @@ export class ItemEffectsHandler {
    * Open the configuration sheet for an existing ActiveEffect.
    *
    * Resolves the effect ID from the closest ancestor with [data-effect-id] attribute,
-   * retrieves the effect from the Item's effects collection, and renders Foundry's
-   * standard ActiveEffectConfig application.
+   * retrieves the effect from the Item's effects collection, and renders its registered sheet.
    *
    * Silently fails if element lacks data-effect-id or effect is not found.
    *
@@ -87,7 +87,7 @@ export class ItemEffectsHandler {
     const eff = id ? item.effects.get(id) : null;
 
     if (eff) {
-      new foundry.applications.sheets.ActiveEffectConfig({ document: eff }).render(true);
+      eff.sheet.render(true);
     }
   }
 

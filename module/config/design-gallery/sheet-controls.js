@@ -128,7 +128,8 @@ export const GALLERY_SHEET_CONTROLS = Object.freeze([
       `${T}/item/_partials/_tab-modifiers.hbs`,
       `${T}/item/_partials/_advantage-details.hbs`,
       `${T}/item/_partials/_mastery-details.hbs`,
-      `${T}/apps/_partials/_wealth-change.hbs`
+      `${T}/apps/_partials/_wealth-change.hbs`,
+      `${T}/apps/_partials/_added-hint.hbs`
     ],
     scss: ["scss/components/_form-field.scss"],
     samples: [
@@ -151,6 +152,12 @@ export const GALLERY_SHEET_CONTROLS = Object.freeze([
         partial: `${T}/apps/_partials/_wealth-change.hbs`,
         context: "plain",
         with: { field: "add" }
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.fieldAddedRules",
+        partial: `${T}/apps/_partials/_added-hint.hbs`,
+        context: "plain",
+        with: { added: { value: 3, total: 5 } }
       },
       {
         label: "l5r4.apps.designGallery.samples.coreFields",

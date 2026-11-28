@@ -2862,7 +2862,12 @@
             "selector": "attack",
             "action": "simple",
             "predicate": [
-              "weapon:skill:ninjutsu"
+              {
+                "or": [
+                  "weapon:skill:ninjutsu",
+                  "weapon:keyword:ninja"
+                ]
+              }
             ]
           }
         ],
@@ -4959,13 +4964,6 @@
           {
             "key": "RollModifier",
             "selector": "skill",
-            "roll": 1,
-            "optional": true,
-            "label": "Toku's Lesson: TN 25 or higher"
-          },
-          {
-            "key": "RollModifier",
-            "selector": "attack",
             "roll": 1,
             "optional": true,
             "label": "Toku's Lesson: TN 25 or higher"

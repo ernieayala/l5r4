@@ -11,11 +11,11 @@ import {
   onPreUpdateChangeOrigin
 } from "../services/change-origin.js";
 import {
-  onCreateActiveEffectAnimation,
+  onActiveEffectAnimation,
+  onCanvasReadyAnimation,
   onCreateChatMessageAnimation,
-  onDeleteActiveEffectAnimation,
   onDeleteActorAnimation,
-  onUpdateActiveEffectAnimation
+  onDrawTokenAnimation
 } from "../services/animations/hooks.js";
 import { hasAnimationModules } from "../services/animations/asset-library.js";
 import {
@@ -31,8 +31,10 @@ import {
   bindCheckCard,
   onGetChatMessageContextOptions
 } from "../services/dice/check/chat-actions.js";
+import { onUpdateActorHonorRoll } from "../services/dice/check/honor-roll.js";
 import { bindPromptCard } from "../services/effects/prompts.js";
 import { bindCheckRequestCard } from "../services/check-request.js";
+import { bindInitiativeRequestCard } from "../services/initiative-request.js";
 import {
   onPreUpdateActorScrollingText,
   onUpdateActorScrollingText
@@ -50,6 +52,7 @@ import { registerGmClient } from "../services/gm-client.js";
 import EffectPanelApplication from "../apps/effect-panel.js";
 import CompendiumBrowserApplication from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
+import { onCreateMigrateDocument, onPreCreateMigrationSchema } from "../setup/migrations.js";
 
 /** The hooks after which the open effect panel redraws: control changes, and effects or the actor change. */
 const EFFECT_PANEL_REDRAWS = Object.freeze([
@@ -80,6 +83,7 @@ export function registerAllHooks() {
   registerChatCardHooks();
   registerInterfaceHooks();
   registerCombatHooks();
+  registerMigrationHooks();
 
   // Item folders: export and import items with their rules
   Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
@@ -103,13 +107,29 @@ function registerChangeOriginHooks() {
   }
 }
 
-/** Animation system: visual effects for stances and conditions, when Sequencer and JB2A are both active. */
+/**
+ * Migration (#181): a created Actor, Item, or Scene records the schema its data had, and the active GM brings one
+ * from an older version up to date.
+ */
+function registerMigrationHooks() {
+  for (const documentName of ["Actor", "Item", "Scene"]) {
+    Hooks.on(`preCreate${documentName}`, onPreCreateMigrationSchema);
+    Hooks.on(`create${documentName}`, onCreateMigrateDocument);
+  }
+}
+
+/**
+ * Animation system, when Sequencer and JB2A are both active: each client keeps its tokens' stance and condition auras
+ * in line with their statuses, and plays the attack animations of the hits it can read.
+ */
 function registerAnimationHooks() {
   if (hasAnimationModules()) {
-    Hooks.on("createActiveEffect", onCreateActiveEffectAnimation);
-    Hooks.on("updateActiveEffect", onUpdateActiveEffectAnimation);
-    Hooks.on("deleteActiveEffect", onDeleteActiveEffectAnimation);
+    for (const action of ["create", "update", "delete"]) {
+      Hooks.on(`${action}ActiveEffect`, onActiveEffectAnimation);
+    }
     Hooks.on("deleteActor", onDeleteActorAnimation);
+    Hooks.on("canvasReady", onCanvasReadyAnimation);
+    Hooks.on("drawToken", onDrawTokenAnimation);
     Hooks.on("createChatMessage", onCreateChatMessageAnimation);
   }
 }
@@ -135,6 +155,8 @@ function registerChatCardHooks() {
   Hooks.on("chatMessage", onChatMessage);
   Hooks.on("renderChatMessageHTML", bindCheckCard);
   Hooks.on("getChatMessageContextOptions", onGetChatMessageContextOptions);
+  // A used Honor Roll leaves every card of its actor (#169)
+  Hooks.on("updateActor", onUpdateActorHonorRoll);
 
   // Effect prompt cards: the owner's roll button
   Hooks.on("renderChatMessageHTML", bindPromptCard);
@@ -165,13 +187,15 @@ function registerInterfaceHooks() {
 }
 
 /**
- * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple),
- * the duel and Guard token controls, and the GM's "New session" control for once-per-session abilities.
+ * Combat loop and sessions: the attack card's maneuver buttons, damage and result cards, flow cards (duel, grapple, Fear),
+ * Initiative request cards, the duel and Guard token controls, and the GM's "New session" control for once-per-session
+ * abilities.
  */
 function registerCombatHooks() {
   Hooks.on("renderChatMessageHTML", bindAttackCard);
   Hooks.on("renderChatMessageHTML", bindDamageCards);
   Hooks.on("renderChatMessageHTML", bindFlowCards);
+  Hooks.on("renderChatMessageHTML", bindInitiativeRequestCard);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsDuel);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsGuard);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsSession);

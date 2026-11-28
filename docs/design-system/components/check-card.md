@@ -29,7 +29,7 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 
 | Button | Action | Shown when | Runs |
 | --- | --- | --- | --- |
-| Roll Contested Strength | `combat-contest` | A hit with a target and Knockdown or Disarm | `rollContest` (`module/services/combat/contest.js`) |
+| Roll Contested Strength | `combat-contest` | A hit with a target and Knockdown or Disarm | `rollContest` (`module/services/combat/contest.js`): each side its owner rolls; a GM's press skips a connected player's side and, with nothing else left, asks whether to roll it for them (#165) |
 | Start grapple with {target} | `grapple-start` | A hit with a target and the Grapple maneuver; while the grapple it started runs, a press says so and starts none | `startGrapple` (`module/services/combat/grapple-start.js`) |
 | Apply to {target} | `damage-apply-target` | A damage roll with a target | `applyDamage` (`module/services/combat/damage.js`) |
 | Apply to selected | `damage-apply-selected` | Every damage roll | `applyDamage` (`module/services/combat/damage.js`) |

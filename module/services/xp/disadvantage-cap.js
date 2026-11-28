@@ -7,7 +7,7 @@
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { askPrompt } from "../dialog.js";
+import { askPrompt, bindSubmitCheck } from "../dialog.js";
 
 /**
  * Ask for a character's new Disadvantage XP cap.
@@ -23,6 +23,14 @@ export async function askDisadvantageCap(currentCap) {
       label: T("l5r4.apps.xpManager.setDisadvantageCap"),
       callback: (_event, button) => toInt(button.form.elements.disadvantageCap.value, null)
     },
+    // Set waits for a whole number of 0 or more, so the dialog never closes on a value it would ignore (#142)
+    render: (_event, dialog) =>
+      bindSubmitCheck(dialog.element.querySelector("form"), form => {
+        const cap = toInt(form.elements.disadvantageCap.value, null);
+        return Number.isFinite(cap) && cap >= 0
+          ? ""
+          : T("l5r4.apps.xpManager.disadvantageCapInvalid");
+      }),
     rejectClose: false,
     modal: true
   });

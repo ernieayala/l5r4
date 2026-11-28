@@ -14,14 +14,16 @@ import { MANEUVER_RAISES, getFeintBonus } from "../../utils/damage.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 
 /**
- * Disarm damage, without Strength.
+ * Disarm damage, without Strength, regardless of the weapon used: 2k1, tens exploding as on any roll.
  * game-rules/38_maneuvers.md, p.86
+ * game-rules/26_special_dice_rules.md, p.77
  */
-const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });
+const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1, explode: 10 });
 
 /**
  * Roll damage for a hit from its attack message: the damage pool stored at the attack, Increased Damage +1k0 per
- * Raise left, the Feint bonus, 2k1 for a Disarm, the weapon's own rules, and the attack's target.
+ * Raise left, the Feint bonus, the weapon's own rules, and the attack's target; a Disarm rolls 2k1 with none of the
+ * weapon's rules or its "Explodes on".
  * game-rules/32_attack_and_defense.md, p.82
  * game-rules/38_maneuvers.md, p.86-87
  * @param {ChatMessage} message - A `roll` message of kind "attack" that hit
@@ -36,8 +38,9 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   }
   const weapon = attack.weaponUuid ? fromUuidSync(attack.weaponUuid) : null;
   const spec = damageSpecOf(attack, weapon);
-  const base = attack.maneuvers.disarm
-    ? { ...DISARM_DAMAGE, bonus: 0 }
+  const disarm = attack.maneuvers.disarm;
+  const base = disarm
+    ? { roll: DISARM_DAMAGE.roll, keep: DISARM_DAMAGE.keep, bonus: 0 }
     : { roll: spec.roll, keep: spec.keep, bonus: spec.bonus };
   const modifiers = buildDamageModifiers(attack, actor);
   const target = attack.target.uuid ? (fromUuidSync(attack.target.uuid) ?? null) : null;
@@ -46,11 +49,14 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
     kind: "damage",
     label: F("l5r4.ui.check.damageLabel", { weapon: spec.label }),
     base,
-    weapon,
-    explode: spec.explode ?? null,
+    // A Disarm's 2k1 is the same whatever the weapon: no weapon rules, and it explodes on 10 (#148)
+    weapon: disarm ? null : weapon,
+    explode: disarm ? DISARM_DAMAGE.explode : (spec.explode ?? null),
     modifiers,
     target,
     attackOf: message.id,
+    // The attack's range, so a rule limited to ranged damage applies to a bow's (#171)
+    range: attack.range,
     askForOptions
   });
 }

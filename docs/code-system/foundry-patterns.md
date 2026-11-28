@@ -162,7 +162,7 @@ Documents import no service (CLAUDE.md **Layers**). Two shapes carry what a docu
 | Need | Shape | Example |
 | --- | --- | --- |
 | A one-way event the document reports | A system hook: the document calls `Hooks.callAll("l5r4-enhanced.<event>", ...)` with the name from `module/config/`, and `module/hooks/register-all.js` wires the service's handler | `L5R4ActiveEffect._preCreateOperation` fires `IMMUNE_STATUS_HOOK` (`module/config/constants.js`); `registerAllHooks` wires `onImmuneStatus` (`module/services/effects/apply.js`) |
-| A value the document needs back | A static slot on the document class that `dist/l5r4-enhanced.js` fills during `init` | `L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints` (`module/documents/combat.js`, `module/services/initiative.js`) |
+| A value the document needs back | A static slot on the document class that `dist/l5r4-enhanced.js` fills during `init` | `L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints` (`module/documents/combat.js`, `module/services/initiative.js`); `L5R4Combat.postInitiativeRequests = postInitiativeRequests` (`dist/l5r4-enhanced.js`) |
 
 A hook handler's return value is ignored, so anything the document waits for or reads back is a slot.
 
@@ -268,7 +268,8 @@ A player's client asks the active GM to change a document the player does not ow
 | One `register<Feature>Queries()` per service registers each query with `registerGmQuery` (`module/services/gm-client.js`), never by assigning `CONFIG.queries` itself: core sends a query to every client of the GM user and takes the first answer, so only the answering client runs it; `init` calls it | review |
 | The handler treats its payload as untrusted: it resolves documents by UUID, checks ids against known lists, and throws on bad input, with an i18n key under `l5r4.ui.requests` as the message | review |
 | The handler checks the requesting user (`context.user`, which the server sets) against what it changes. A change to an actor the user does not own needs a proof the GM's client checks itself, such as the user's own roll against that actor, and takes its values from the proof, never from the request: any player can write a chat message with any content (#162). `getProvenEffectOptions` (`module/services/effects/effect-proofs.js`) is the effect query's. A request no proof covers is a ruling, not a refusal: the handler asks the GM with `askGmFor` (`module/services/gm-allow.js`), naming the requester, and refuses only when the GM declines; a tampered request (a damage total that is not its roll's) is refused (#223) | Quench `l5r4-enhanced.requests` |
-| The caller changes the document itself when `document.isOwner`; otherwise it calls `requestGmQuery(name, data, local)` (`module/services/gm-client.js`), which runs `local` on a GM's own client, warns when no GM is active, and shows the requester why the GM side refused, so no refusal is lost in the console (#139) | ESLint `no-restricted-syntax` (no `.query(` outside `module/services/gm-client.js`) |
+| The caller changes the document itself when `document.isOwner`; otherwise it calls `requestGmQuery(name, data, local)` (`module/services/gm-client.js`), which runs `local` on a GM's own client, warns when no GM is active, and shows the requester why the GM side refused, so no refusal is lost in the console (#139). A caller that reports the outcome itself, such as `spendVoidPoint` returning its reason to the roll, calls `askGmQuery`, which returns the reason instead of showing it | ESLint `no-restricted-syntax` (no `.query(` outside `module/services/gm-client.js`) |
+| A handler's write that starts from a stored value runs in that document's queue on the answering client and reads the document inside it: `queueActorWrite` for an actor, `queueWrite` with the card's key for a flow card (`module/services/write-queue.js`). Socket events are not queued, so two requests for one document would otherwise both read the old value and one write would be lost (#170). A Void Point spend goes through `spendVoidPoint`, or `spendQueuedVoidPoints` inside an actor's queue (`module/services/dice/resources/void-points.js`) | Quench `l5r4-enhanced.requests` |
 | The caller is named `request*` (`naming.md`) | Local ESLint verb rule (`naming.md`) |
 | Payloads are JSON-serializable: UUIDs and plain values, never documents (§10.5) | review |
 | Query names are fixed (Stage 17 decision 2) | review |
@@ -319,14 +320,14 @@ Two kinds, each with one job.
 | Kind | Where | Runs | Shape |
 | --- | --- | --- | --- |
 | Source shape | `module/data/migrate-source.js`, called from `migrateData` | Each time stored data is read; changes nothing on disk | `migrate<Shape>Source(source)`, changes `source` in place |
-| World data | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per version, from `migrateWorld` in `module/setup/migrations.js`, in `ready` | `async migrate<What>(docs, label)` |
+| World data | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per document: on the active GM's world load, from `migrateWorld` in `module/setup/migrations.js`, and when a document is created or imported | `async migrate<What>(doc)`, listed with its schema number in `ITEM_STEPS`, `EFFECT_STEPS`, or `ACTOR_STEPS` |
 
 | Rule | Check |
 | --- | --- |
 | A schema change ships with its migration in the same change (CLAUDE.md **Change Control**) | review |
-| A world step reads `document._source`, skips documents it does not match, and updates with `{ render: false }` | review |
-| A world step runs for world documents and for each pack, listed in both `migrateWorldDocuments` and `migratePackDocuments` | review |
-| Stored world data is a trust boundary: a step may guard and catch per document, and logs one count line | review |
+| A world step reads `document._source`, leaves alone a document it does not match, and updates with `{ render: false }` | review |
+| A new world step takes the next schema number and raises `MIGRATION_SCHEMA` (`module/config/constants.js`); a step already shipped keeps its number | review |
+| A world step throws when it fails: `migrateDocument` catches per document, logs it, and leaves it unmarked so the next run tries it again | review |
 | History words that describe the old stored shape are allowed in migration code (`documentation.md` **Comments**) | review |
 | Old stored keys a migration reads are fixed names | review |
 | Each step has a Vitest case for the shape it changes and runs in the `world-upgrade` Quench batch in the 3.2.1 fixture world | `tests/unit/data/migrate-source.test.js`, `tests/quench/world-upgrade.js` |

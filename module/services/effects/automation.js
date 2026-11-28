@@ -22,7 +22,7 @@ import { toInt } from "../../utils/type-coercion.js";
 import { isAnsweringGmClient } from "../gm-client.js";
 import { askConfirm } from "../dialog.js";
 import { applyEffect, effectsOf } from "./apply.js";
-import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
+import { postConcentrationPrompt, postFullDefensePrompt, rollFullDefense } from "./prompts.js";
 
 /**
  * Put Prone on an actor that is Down and not dead, and take the automatic Prone off one that is not Down.
@@ -87,15 +87,24 @@ export function registerTokenEffects() {
 }
 
 /**
- * Remember the stored Wounds before an update, to measure what one update inflicts.
+ * Remember the stored Wounds before an update, to measure what one update inflicts, and whether it changes the
+ * Wounds or their settings at all: an update that writes them back unchanged, as the world migration's write-back
+ * does (module/setup/migrations/schema/persist.js), is no Wounds change (#182).
  * @param {Actor} actor
  * @param {object} changes
  * @param {object} options
  */
 export function onPreUpdateActorWounds(actor, changes, options) {
-  if (foundry.utils.hasProperty(changes, "system.suffered")) {
-    options[`${SYS_ID}SufferedBefore`] = toInt(actor._source.system.suffered);
+  const stored = actor._source.system;
+  const hasSuffered = foundry.utils.hasProperty(changes, "system.suffered");
+  if (hasSuffered) {
+    options[`${SYS_ID}SufferedBefore`] = toInt(stored.suffered);
   }
+  const wounds = changes.system?.wounds;
+  options[`${SYS_ID}WoundsChanged`] =
+    (hasSuffered && toInt(changes.system.suffered) !== toInt(stored.suffered)) ||
+    (wounds !== undefined &&
+      !foundry.utils.isEmpty(foundry.utils.diffObject(stored.wounds ?? {}, wounds)));
 }
 
 /**
@@ -109,7 +118,7 @@ export async function onUpdateActorWounds(actor, changes, options) {
   if (!game.users.activeGM?.isSelf || !isAnsweringGmClient()) {
     return;
   }
-  if (!foundry.utils.hasProperty(changes, "system.suffered") && !changes.system?.wounds) {
+  if (!options[`${SYS_ID}WoundsChanged`]) {
     return;
   }
   await updateProne(actor);
@@ -124,17 +133,22 @@ export async function onUpdateActorWounds(actor, changes, options) {
 }
 
 /**
- * Ask for the Full Defense roll on the client that took the stance (module/utils/change-origin.js).
+ * Ask for the Full Defense roll on the client that took the stance (module/utils/change-origin.js). A roll dialog
+ * closed without rolling leaves the stance with no Armor TN bonus, so the Full Defense card is posted for the roll to
+ * be made from chat (#142).
+ * game-rules/36_stances.md, p.84
  * @param {ActiveEffect} effect
  * @param {object} options - The creation's options
+ * @returns {Promise<void>}
  */
-export function onCreateActiveEffectFullDefense(effect, options) {
+export async function onCreateActiveEffectFullDefense(effect, options) {
   if (
     isOwnChange(options, game.socket.id) &&
     effect.parent?.documentName === "Actor" &&
-    effect.statuses.has("fullDefenseStance")
+    effect.statuses.has("fullDefenseStance") &&
+    !(await rollFullDefense(effect.parent))
   ) {
-    rollFullDefense(effect.parent);
+    await postFullDefensePrompt(effect.parent);
   }
 }
 

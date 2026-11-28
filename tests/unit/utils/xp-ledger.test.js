@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  getCostPricer,
-  getKihoLimits,
-  getXpEntries,
-  getXpTotals
-} from "../../../module/utils/xp-ledger.js";
+import { getCostPricer, getXpEntries, getXpTotals } from "../../../module/utils/xp-ledger.js";
 
 /**
  * Every Trait at the starting rank 2, no bonus, no discount.
@@ -16,6 +11,7 @@ const traits = (overrides = {}) =>
     stored: 2,
     freeBase: 0,
     bonus: 0,
+    legacy: 0,
     discount: 0,
     ...overrides[key]
   }));
@@ -30,7 +26,7 @@ const build = (extra = {}) => ({
   manual: 0,
   disadvantageCap: 10,
   traits: traits(),
-  void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
+  void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
   skills: [],
   items: [],
   ...extra
@@ -53,7 +49,7 @@ describe("Book example: character creation (p.103-104)", () => {
   // rank 2. School Skills at rank 1 for free, Meditation with its free Emphasis, Iaijutsu as the chosen Skill.
   const gyukaro = build({
     traits: traits({ per: { bonus: 1 }, agi: { bonus: 1 }, ref: { stored: 3 } }),
-    void: { stored: 3, freeBase: 0, bonus: 0, discount: 0 },
+    void: { stored: 3, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
     skills: [
       skill("Defense", 2),
       skill("Kenjutsu", 3),
@@ -111,16 +107,28 @@ describe("getXpEntries", () => {
   it("should price and name a Void rank on top of its Family or School bonus, as a Trait", () => {
     // Stored 3 with a +1 Void bonus: the Void Ring goes from 3 to 4, which costs 6 × 4
     const entries = getXpEntries(
-      build({ void: { stored: 3, freeBase: 0, bonus: 1, discount: 0 } })
+      build({ void: { stored: 3, freeBase: 0, bonus: 1, legacy: 0, discount: 0 } })
     );
     expect(entries).toEqual([{ type: "void", name: "void", from: 3, to: 4, delta: 24 }]);
   });
 
   it("should start above a legacy free rank and then ignore the bonus", () => {
     const entries = getXpEntries(
-      build({ traits: traits({ str: { stored: 4, freeBase: 1, bonus: 1 } }) })
+      build({ traits: traits({ str: { stored: 4, freeBase: 1, bonus: 1, legacy: 1 } }) })
     );
     expect(entries.map(e => [e.to, e.delta])).toEqual([[4, 16]]);
+  });
+
+  // #154
+  it("should keep a School rule's bonus beside a legacy free rank, for a Trait and the Void Ring", () => {
+    const trait = { stored: 4, freeBase: 1, bonus: 2, legacy: 1 };
+    const entries = getXpEntries(
+      build({ traits: traits({ agi: trait }), void: { ...trait, discount: 0 } })
+    );
+    expect(entries).toEqual([
+      { type: "trait", name: "agi", from: 4, to: 5, delta: 20 },
+      { type: "void", name: "void", from: 4, to: 5, delta: 30 }
+    ]);
   });
 
   it("should apply a flat Trait discount, never below 0", () => {
@@ -172,41 +180,50 @@ describe("getXpTotals", () => {
   });
 });
 
-// game-rules/80_brotherhood_of_shinsei.md, p.231
-describe("getKihoLimits", () => {
-  const kiho = (school, other) => [
-    ...Array.from({ length: school }, () => ({ schoolKiho: true })),
-    ...Array.from({ length: other }, () => ({ schoolKiho: false }))
-  ];
-
-  it("should give a Monk School its starting kiho, two more a Rank, and a bonus kiho a Rank", () => {
-    expect(getKihoLimits([{ kiho: 3, rank: 1 }], kiho(3, 1))).toEqual({
-      school: 3,
-      schoolAllowed: 3,
-      bonus: 1,
-      bonusAllowed: 1
-    });
-    expect(getKihoLimits([{ kiho: 3, rank: 3 }], kiho(7, 0))).toMatchObject({
-      schoolAllowed: 7,
-      bonusAllowed: 3
-    });
+// #145
+// game-rules/63_advantages_and_disadvantages.md, p.145
+describe("Disadvantage XP past the cap", () => {
+  const build = (costs, cap = 10) => ({
+    base: 40,
+    manual: 0,
+    disadvantageCap: cap,
+    traits: [],
+    void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
+    skills: [],
+    items: costs.map((cost, i) => ({ id: `d${i}`, type: "disadvantage", name: `D${i}`, cost }))
   });
 
-  it("should give the Temples of the Thousand Fortunes four starting kiho", () => {
-    expect(getKihoLimits([{ kiho: 4, rank: 1 }], kiho(4, 0)).schoolAllowed).toBe(4);
+  it("should mark the XP each Disadvantage gives past the cap, in order", () => {
+    const entries = getXpEntries(build([6, 8]));
+    expect(entries.map(e => e.overCap)).toEqual([undefined, 4]);
+    expect(getXpTotals(build([6, 8]), entries).breakdown.disadvantagesGranted).toBe(10);
   });
 
-  it("should count only Monk Schools, and none for a character without one", () => {
-    expect(getKihoLimits([{ kiho: 0, rank: 2 }], kiho(0, 1))).toBeNull();
-    expect(
-      getKihoLimits(
-        [
-          { kiho: 3, rank: 2 },
-          { kiho: 0, rank: 1 }
-        ],
-        kiho(5, 2)
-      )
-    ).toMatchObject({ schoolAllowed: 5, bonusAllowed: 2 });
+  it("should mark a whole Disadvantage once the cap is reached", () => {
+    expect(getXpEntries(build([10, 3])).map(e => e.overCap)).toEqual([undefined, 3]);
+  });
+
+  it("should mark nothing at or under the cap", () => {
+    expect(getXpEntries(build([4, 6])).some(e => e.overCap)).toBe(false);
+  });
+});
+
+describe("XP spent past the total", () => {
+  it("should give how far spending goes past the total, and 0 within it", () => {
+    const traits = [{ key: "agi", stored: 5, freeBase: 0, bonus: 0, legacy: 0, discount: 0 }];
+    const b = {
+      base: 40,
+      manual: 0,
+      disadvantageCap: 10,
+      traits,
+      void: { stored: 2, freeBase: 0, bonus: 0, legacy: 0, discount: 0 },
+      skills: [],
+      items: []
+    };
+    // Agility 2 to 5 costs 12 + 16 + 20 = 48 against 40
+    expect(getXpTotals(b, getXpEntries(b))).toMatchObject({ spent: 48, overspent: 8 });
+    b.manual = 10;
+    expect(getXpTotals(b, getXpEntries(b)).overspent).toBe(0);
   });
 });
 
@@ -231,6 +248,26 @@ describe("getCostPricer", () => {
     expect(entries[0].delta).toBe(10);
   });
 
+  // #173: a Merchant Skill is stored as "merch"; a trailing space in its name changes nothing
+  it("should price a Merchant Skill's rank under its type and trimmed name", () => {
+    const price = pricer({
+      "skill-type:merch": [cost("skill-type:merch", "@cost - 1")],
+      "skill:commerce": [cost("skill:commerce", "@cost - 1")]
+    });
+    // Rank 3 costs 3, less 1 for the type and 1 for the Skill
+    const entries = getXpEntries(
+      build({ skills: [skill("Commerce ", 3, { type: "Merch", freeRanks: 2 })] }),
+      price
+    );
+    expect(entries.find(e => e.type === "skill").delta).toBe(1);
+  });
+
+  // #172: a Cost rule on an effect reads the effect's level
+  it("should read @level from the effect carrying the rule", () => {
+    const price = pricer({ emphasis: [cost("emphasis", "@cost - @level", { level: 1 })] });
+    expect(price(["emphasis"], 2)).toBe(1);
+  });
+
   it("should chain rules in order, each seeing the price before it", () => {
     const price = pricer({
       "item:advantage": [cost("item:advantage", "@cost * 2"), cost("item:advantage", "@cost - 1")]
@@ -245,6 +282,13 @@ describe("getCostPricer", () => {
       price
     );
     expect(entries.map(e => e.delta)).toEqual([1, 4]);
+  });
+
+  // #174: an effect's `self` rule carries no item id, and a Trait's or Skill's price passes none
+  it("should never price a Trait or Skill rank with a `self` rule that names no item", () => {
+    const price = pricer({ self: [cost("self", "@cost * 0")] });
+    expect(price(["trait:ref"], 16)).toBe(16);
+    expect(price(["skill:kenjutsu"], 3, null)).toBe(3);
   });
 
   it("should reach Skills by name or type, and Emphases", () => {

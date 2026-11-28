@@ -22,7 +22,7 @@ Callers that fix an arity: Foundry overrides (`_prepareSubmitData(event, form, f
 | Two positional, then options | `applyEffect` (`module/services/effects/apply.js`): `applyEffect(actor, id, { turnOf, ...options } = {})` | `getArmorTnPenalty` (`module/utils/armor-penalties.js`): `getArmorTnPenalty(actor, skillName = null, traitName = null)`, a third positional parameter that is not the options object |
 | Options last | `rollDamageFromAttack` (`module/services/combat/damage-roll.js`): `rollDamageFromAttack(message, { askForOptions = true } = {})` | `makeExamplePool(roll, keep, bonus, { label } = {})`, three positional before the options (modeled) |
 | Options only | `testFear` (`module/services/fear.js`): `testFear({ npc, character } = {})` | A builder with five positional parameters (modeled) |
-| Fixed arity | `onUpdateActiveEffectAnimation` (`module/services/animations/hooks.js`) takes core's four `updateActiveEffect` arguments | A function of the system's own with five positional parameters and no caller fixing them (modeled) |
+| Fixed arity | `_prepareSubmitData` (`module/sheets/npc-sheet.js`) takes core's four `DocumentSheetV2#_prepareSubmitData` arguments | A function of the system's own with five positional parameters and no caller fixing them (modeled) |
 
 ## Boolean parameters
 
@@ -35,7 +35,6 @@ A positional boolean that picks what a function does is two jobs in one signatur
 
 Positional booleans in the code:
 
-- `isStance` in `startAnimation` (`module/services/animations/status-animations.js`)
 - `duplicate` in `XpManagerApplication#_getXpManual` (`module/apps/xp-manager.js`)
 - `unskilled` in `getMaxRaises` (`module/utils/check.js`)
 - `askForOptions` in `RollHandler.rollSkill`, `RollHandler.rollWeaponAttack`, `RollHandler.rollTrait`, and `RollHandler.rollRing`, and `showDialog` in `RollHandler.rollSpellCast` (`module/sheets/handlers/roll-handler.js`)
@@ -45,7 +44,7 @@ The last is the initial value of a boolean field, a value and not a switch, so i
 
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
-| Two functions | `getStanceAnimation` and `getConditionAnimation` (`module/services/animations/asset-library.js`): `getStanceAnimation(stanceId)` and `getConditionAnimation(conditionId)` | `startAnimation` (`module/services/animations/status-animations.js`): `startAnimation(actor, statusId, isStance = false)` picks the stance or the condition table in its body |
+| Two functions | `getStanceAnimation` and `getConditionAnimation` (`module/services/animations/asset-library.js`): `getStanceAnimation(stanceId)` and `getConditionAnimation(conditionId)` | `startAnimation(actor, statusId, isStance = false)` picking the stance or the condition table in its body (modeled) |
 | Fact by name | `applyTenDiceRule` (`module/utils/ten-dice.js`): `{ littleTruths = false }` in the options object | `getMaxRaises` (`module/utils/check.js`): `getMaxRaises(voidRing, unskilled = false)` |
 
 ## Function length
@@ -91,8 +90,8 @@ A pure read with no answer (a roll with no TN) returns `null` too; that is a val
 
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
-| Utils shape | `validateAttackRaises` (`module/utils/validators.js`) returns `{ valid, error }` with an i18n key in `error` | `validateEmphasisName` (`module/utils/validators.js`): `error` holds English text, not a key; `parseDamage` (`module/utils/link-syntax.js`): `{ ok: false, error: "l5r4.ui.links.errors.pool" }` uses `ok` |
-| Warn, then `null` | `getSlotToSpend` (`module/services/dice/check/spell-slots.js`) warns and returns `null` | `spendVoidPoint` (`module/services/dice/resources/void-points.js`) returns `{ success, rollBonus, keepBonus, message }` and leaves the warning to its caller |
+| Utils shape | `validateAttackRaises` (`module/utils/validators.js`) returns `{ valid, error }` with an i18n key in `error` | `parseDamage` (`module/utils/link-syntax.js`): `{ ok: false, error: "l5r4.ui.links.errors.pool" }` uses `ok` |
+| Warn, then `null` | `rollFearTest` (`module/services/fear.js`) warns and returns `null` for a character with no Willpower | `spendVoidPoint` (`module/services/dice/resources/void-points.js`) returns `{ success, rollBonus, keepBonus, message }` and leaves the warning to its caller |
 | GM side throws | `applyDamageAction` (`module/services/combat/damage.js`) throws on a request it refuses | none found |
 | Dismissed prompt | `askChoices` (`module/services/dice/check/dialog.js`): `DialogV2.prompt` with `rejectClose: false` | none found |
 
@@ -111,10 +110,10 @@ ESLint core `require-await` reports 73 `async` functions with no `await`; many a
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
 | `.then` for a queue | `updateGrantQueue` (`module/documents/item/lifecycle/grants.js`): `previous.then(task)` chains one grant after another | none found |
-| Await or return | `spendSlot` (`module/services/dice/check/spell-slots.js`) awaits `actor.update` under the lock and returns the lock's promise | `registerTemplates` (`dist/l5r4-enhanced.js`): `registerTemplates()` is called without `await`, so its errors become unhandled rejections |
+| Await or return | `spendSlot` (`module/services/dice/check/spell-slots.js`) awaits `actor.update` in the caster's write queue and returns the queue's promise | `registerTemplates` (`dist/l5r4-enhanced.js`): `registerTemplates()` is called without `await`, so its errors become unhandled rejections |
 | `async` only when awaiting | `applyEffect` (`module/services/effects/apply.js`) awaits | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`): `async` and awaits nothing |
 | `Promise.all` | `formatEnrichedFields` (`module/sheets/item-sheet.js`) enriches every field at once | none found |
-| No timer ordering | `applyEffectAnywhere` (`module/services/effects/apply.js`) awaits the write or the GM query that makes it | `updateUnderLock` (`module/services/dice/resources/void-points.js`) and `updateUnderLock` (`module/services/dice/check/spell-slots.js`) poll a lock every 10 ms where a promise queue like `updateGrantQueue` (`module/documents/item/lifecycle/grants.js`) would order the work |
+| No timer ordering | `applyEffectAnywhere` (`module/services/effects/apply.js`) awaits the write or the GM query that makes it | A lock polled every 10 ms (`while (locked) await setTimeout(10)`) where a promise queue like `queueActorWrite` (`module/services/write-queue.js`) orders the work (modeled) |
 
 ## Early returns
 
@@ -131,5 +130,5 @@ ESLint core `no-else-return` reports no departure in `module/` or `dist/l5r4-enh
 
 | Rule | Conforming | Non-conforming |
 | --- | --- | --- |
-| Guard clauses | `startAnimation` (`module/services/animations/status-animations.js`): three guards return before the token loop | `validateVoidPoints` (`module/services/dice/resources/void-points.js`): a fallback on `actor.system?.rings?.void?.value ?? 0`, a schema field that always exists |
+| Guard clauses | `startAttackAnimation` (`module/services/animations/attack-animations.js`): two guards return before it picks the animation | `validateVoidPoints` (`module/services/dice/resources/void-points.js`): a fallback on `actor.system?.rings?.void?.value ?? 0`, a schema field that always exists |
 | No `else` after `return` | `getSlotStatus` (`module/services/dice/check/spell-slots.js`): each branch returns and the last path needs no `else` | An `if` branch that returns, then an `else` holding the rest of the function (modeled) |

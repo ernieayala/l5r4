@@ -97,6 +97,27 @@ describe("migrateNpcSource", () => {
     expect(source.manualWoundLevels).toBe(manual);
   });
 
+  // #182: 3.2.1's NPC migration took armor_tn over the template's default armorTn
+  it("should take armor.armor_tn over the template's default armorTn, and keep armorTn when it is null", () => {
+    const source = { armor: { armorTn: 10, armor_tn: 25 } };
+    migrateNpcSource(source);
+    expect(source.armor).toEqual({ armorTn: 25 });
+    const empty = { armor: { armorTn: 10, armor_tn: null } };
+    migrateNpcSource(empty);
+    expect(empty.armor).toEqual({ armorTn: 10 });
+  });
+
+  // #182: 3.2.1's template stored default manualWoundLevels beside a pre-3.0 wound_lvl
+  it("should take wound_lvl over the template's default manualWoundLevels", () => {
+    const source = {
+      manualWoundLevels: { nicked: { value: 20, penalty: 3, active: true } },
+      wound_lvl: { nicked: { value: "40", penalty: "-5" } }
+    };
+    migrateNpcSource(source);
+    expect(source.manualWoundLevels.nicked).toEqual({ value: 40, penalty: 5, active: true });
+    expect(source.wound_lvl).toBeUndefined();
+  });
+
   it("should leave a delta without wound data alone", () => {
     const source = { fear: { rank: 2 } };
     migrateNpcSource(source);
@@ -161,6 +182,17 @@ describe("migrateSkillSource", () => {
     const source = { mastery3: "", mastery_3: "legacy" };
     migrateSkillSource(source);
     expect(source).toEqual({ mastery3: "legacy" });
+  });
+
+  // #160: a Skill granted twice was stored with more free ranks than ranks
+  // game-rules/48_character_creation_expanded.md, p.103
+  it("should keep free ranks and free Emphases within what the Skill holds", () => {
+    const source = { rank: 1, freeRanks: 2, trainedEmphases: ["Katana", ""], freeEmphasis: 2 };
+    migrateSkillSource(source);
+    expect(source).toMatchObject({ freeRanks: 1, freeEmphasis: 1 });
+    const update = { freeRanks: 2 };
+    migrateSkillSource(update);
+    expect(update).toEqual({ freeRanks: 2 }, "an update carrying one number is left alone");
   });
 });
 

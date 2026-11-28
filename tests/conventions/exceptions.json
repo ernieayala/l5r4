@@ -1,5 +1,6 @@
 {
   "module/apps/xp-manager.js": "One window class: its options, the context it renders with its fallback on an error, and its action handlers, which core calls as the class's own static #on<Action> members (foundry-patterns.md, Actions); rebuilding the XP history it shows is services/xp/versioning.js",
+  "module/config/status-effects.js": "One registry of every status and system effect, each entry's rules with its book citation, split by nothing but size",
   "module/data/rules/rule-models.js": "One registry of every rule model, split by nothing but size",
   "module/hooks/register-all.js": "The one place the system's Foundry hooks are wired (Stage 17 decision 16): one registration step per feature, run in the order handlers on a shared hook fire, split by nothing but size",
   "module/services/combat/damage.js": "One damage flow: applying a damage roll through Reduction and the target's rules, the result card's Reduce with Void and Undo, the GM query a player's click goes through with the checks it makes, and the card bindings that request them; the bindings and the GM side call each other, so they share the file; the arithmetic is utils/damage.js and the damage roll combat/damage-roll.js",

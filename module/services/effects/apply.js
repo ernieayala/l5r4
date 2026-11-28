@@ -49,8 +49,9 @@ export async function buildEffectData(
   if (level !== undefined) {
     data.system.level = level;
   }
-  if (name) {
-    data.name = name;
+  const leveledName = name ?? formatLeveledName(id, level);
+  if (leveledName) {
+    data.name = leveledName;
   }
   if (rules) {
     data.system.rules = rules;
@@ -102,7 +103,10 @@ export async function applyEffectAnywhere(actor, id, options = {}) {
   if (!answer) {
     return;
   }
-  const effect = options.name ?? T(CONFIG.statusEffects[id]?.name ?? SYSTEM_EFFECTS[id].name);
+  const effect =
+    options.name ??
+    formatLeveledName(id, options.level) ??
+    T(CONFIG.statusEffects[id]?.name ?? SYSTEM_EFFECTS[id].name);
   const key = answer.applied ? "l5r4.ui.requests.effectApplied" : "l5r4.ui.effects.immune";
   ui.notifications?.info(F(key, { name: actor.name, effect }));
 }
@@ -225,6 +229,21 @@ async function updateHeldStatus(held, data) {
     ...(higher ? { name: data.name, "system.level": level } : {})
   });
   return held;
+}
+
+/**
+ * The name a status carries at a level, where its name shows the level: Feared at Fear Rank 2 is "Fear 2". Every
+ * client derives it from the level, so the effect the GM's client makes for a player is named as the player's own
+ * would be (#144). Null for any other status, or without a level.
+ * game-rules/42_fear.md, p.90
+ * @param {string} id - A status or system effect id
+ * @param {number|null|undefined} level
+ * @returns {string|null}
+ */
+function formatLeveledName(id, level) {
+  return id === "feared" && Number.isInteger(level)
+    ? F("l5r4.ui.mechanics.fear.label", { rank: level })
+    : null;
 }
 
 /**

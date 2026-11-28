@@ -7,6 +7,7 @@ import { rollWeaponDamage } from "../../module/services/dice/rolls/weapon-roll.j
 import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
 import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { getCastingSchoolRank } from "../../module/utils/spell-casting.js";
 import {
   postContestedRoll,
   rollAgainKeepBetter,
@@ -21,7 +22,8 @@ import {
   answerCheckDialog,
   buttonLabelsOf,
   cleanTest,
-  settleChatNotifications
+  settleChatNotifications,
+  withGmAnswer
 } from "./helpers.js";
 
 /**
@@ -248,7 +250,8 @@ export function registerRollPipelineTests(quench) {
               const [spell] = await actor.createEmbeddedDocuments("Item", [
                 { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
               ]);
-              const { result, warnings } = await withWarnings(() =>
+              // With no slot left the other cast asks the GM (#158), who refuses here
+              const { result, asked } = await withGmAnswer(false, () =>
                 Promise.all([
                   rollSpellCast({ actor, spell, showDialog: false }),
                   rollSpellCast({ actor, spell, showDialog: false })
@@ -257,12 +260,7 @@ export function registerRollPipelineTests(quench) {
               const posted = result.filter(Boolean);
               posted.forEach(keep);
               const key = slot === "Void" ? "void" : "fire";
-              const refused = game.i18n.localize("l5r4.ui.notifications.noSpellSlots");
-              assert.equal(
-                warnings.filter(message => message === refused).length,
-                1,
-                "the other cast is refused"
-              );
+              assert.lengthOf(asked, 1, "the other cast asks the GM");
               assert.equal(posted.length, 1, "the refused cast never rolls or posts a card");
               assert.equal(actor._source.system.spellSlots[key], 0, "one slot spent");
               assert.isAtLeast(actor.system.spellSlots[key], 0, "never negative");
@@ -410,6 +408,58 @@ export function registerRollPipelineTests(quench) {
           })
         );
 
+        // #158: a cast spends a slot; with none left the GM may allow it, and a GM's NPC needs no leave
+        // game-rules/66_magic_and_spell_casting.md, p.163
+        it(
+          "should say no slot is left, cast only with the GM's leave, and let a GM's NPC cast",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.spellSlots": { fire: 0, void: 0 } });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const shown = new Promise(resolve =>
+              Hooks.once("renderDialogV2", app => {
+                resolve({
+                  none: app.element.querySelector("select[name='slot'] option[value='none']"),
+                  warning: app.element.querySelector("[data-no-slot]")?.textContent
+                });
+                app.element.querySelector('[data-action="ok"]').click();
+              })
+            );
+            const { result, asked } = await withGmAnswer(true, () =>
+              rollSpellCast({ actor, spell })
+            );
+            if (result) {
+              keep(result);
+            }
+            const dialog = await shown;
+            assert.notExists(dialog.none, "no none choice");
+            assert.include(
+              dialog.warning,
+              game.i18n.localize("l5r4.magic.spells.noSlotLeft", {
+                ring: game.i18n.localize("l5r4.ui.mechanics.rings.fire")
+              })
+            );
+            assert.lengthOf(asked, 1, "the GM is asked");
+            assert.exists(result, "allowed: the cast rolls");
+            assert.deepInclude(actor._source.system.spellSlots, { fire: 0, void: 0 }, "none spent");
+
+            const npc = track(await createTestNPC({ name: "Roll pipeline: NPC caster" }));
+            const [npcSpell] = await npc.createEmbeddedDocuments("Item", [
+              { name: "Quench NPC Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const npcCast = await withGmAnswer(false, () =>
+              rollSpellCast({ actor: npc, spell: npcSpell, showDialog: false })
+            );
+            if (npcCast.result) {
+              keep(npcCast.result);
+            }
+            assert.lengthOf(npcCast.asked, 0, "a GM's NPC casts without asking");
+            assert.exists(npcCast.result);
+          })
+        );
+
         it(
           "should refuse a spell of an unknown Ring, naming the Ring",
           clean(async () => {
@@ -554,6 +604,87 @@ export function registerRollPipelineTests(quench) {
             await answered;
             assert.equal(poolOf(message), `${3 + rank}k3`);
             assert.equal(actor._source.system.spellSlots.void, voidSlots - 1);
+          })
+        );
+
+        /** The next dialog, once rendered, with its form and its Roll button. */
+        const nextDialog = () =>
+          new Promise(resolve =>
+            Hooks.once("renderDialogV2", app =>
+              resolve({
+                app,
+                form: app.element.querySelector("form"),
+                ok: app.element.querySelector('[data-action="ok"]')
+              })
+            )
+          );
+
+        /** Tick or untick a checkbox as the user would, so the dialog's live parts see it. */
+        const setBox = (form, name, checked) => {
+          form.elements[name].checked = checked;
+          form.elements[name].dispatchEvent(new Event("change", { bubbles: true }));
+        };
+
+        // #141
+        // game-rules/66_magic_and_spell_casting.md, p.163
+        it(
+          "should offer no slot type with none left in the cast dialog",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.spellSlots": { fire: 0, void: 2 } });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const opened = nextDialog();
+            const cast = rollSpellCast({ actor, spell, showDialog: true });
+            const { form, ok } = await opened;
+            const slot = form.elements.slot;
+            assert.isTrue(slot.querySelector('[value="elemental"]').disabled, "no Fire slot left");
+            assert.isFalse(slot.querySelector('[value="void"]').disabled);
+            assert.equal(slot.value, "void", "the slot left is picked");
+            ok.click();
+            keep(await cast);
+            assert.equal(actor._source.system.spellSlots.void, 1);
+          })
+        );
+
+        // #141
+        // game-rules/66_magic_and_spell_casting.md, p.163-164
+        it(
+          "should hold a Ring Roll's cast in its dialog while the School Rank cannot make it",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const rank = actor.system.insight.rank;
+            const opened = nextDialog();
+            const roll = rollRing({
+              actor,
+              ringName: "Air",
+              ringRank: 3,
+              ringKey: "air",
+              askForOptions: true
+            });
+            const { app, form, ok } = await opened;
+            assert.equal(
+              getCastingSchoolRank(actor),
+              1,
+              "a Deficiency takes this School Rank to 0"
+            );
+            const warning = form.querySelector("[data-casting-blocked]");
+            setBox(form, "spellCasting", true);
+            setBox(form, "deficiency", true);
+            assert.isFalse(warning.hidden, "the reason shows while the cast cannot be made");
+            assert.isTrue(ok.disabled, "Roll waits");
+            assert.equal(
+              warning.textContent.trim(),
+              game.i18n.localize("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: "Air" })
+            );
+            setBox(form, "deficiency", false);
+            assert.isTrue(warning.hidden);
+            assert.isFalse(ok.disabled, "the dialog is still open, with the choices made");
+            assert.isTrue(app.rendered);
+            ok.click();
+            const message = keep(await roll);
+            assert.equal(poolOf(message), `${3 + rank}k3`, "cast with the School Rank");
           })
         );
 
@@ -950,7 +1081,11 @@ export function registerRollPipelineTests(quench) {
               trait: "agi",
               target
             });
-            assert.lengthOf(mounted.modifiers, 0);
+            assert.notDeepInclude(
+              mounted.modifiers.map(m => [m.roll, m.keep]),
+              [1, 0],
+              "no Mounted +1k0 against a mounted target"
+            );
           })
         );
 

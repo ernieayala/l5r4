@@ -6,6 +6,7 @@
  */
 
 import { MASTERY_INSIGHT } from "../config/game-mechanics.js";
+import { toSkillKey } from "./selectors.js";
 
 /**
  * The Insight the Skills' Mastery Abilities add: Courtier 3 gives 3, Courtier 7 gives 10, and Courtier 3 with
@@ -17,7 +18,7 @@ import { MASTERY_INSIGHT } from "../config/game-mechanics.js";
 export function getMasteryInsight(skills) {
   let total = 0;
   for (const { name, rank } of skills) {
-    for (const step of MASTERY_INSIGHT[name.toLowerCase().trim()] ?? []) {
+    for (const step of MASTERY_INSIGHT[toSkillKey(name)] ?? []) {
       total += rank >= step.rank ? step.insight : 0;
     }
   }

@@ -7,7 +7,7 @@ How the system asks the user something and waits: the check dialog with its modi
 | API | `askPrompt`, `askConfirm`, `askButtons`, `openDialog` (`module/services/dialog.js`), which call core's `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, and the constructor (`resources/app/client/applications/api/dialog.mjs:346-405`) with the `l5r4-dialog` class added |
 | Templates | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `confirm-dialog.hbs`, `choice-dialog.hbs`, `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs` |
 | Paths | `DIALOG_TEMPLATES` (`module/config/templates.js`) |
-| Callers | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/dialog.js`), `askChoice` (`module/services/purchase.js`), `askSchool` (`module/services/purchase.js`), `askGmAllow` (`module/services/gm-allow.js`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
+| Callers | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/dialog.js`), `askChoice` (`module/services/item-choices.js`), `askSchool` (`module/services/purchase.js`), `askGmAllow` (`module/services/gm-allow.js`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
 | SCSS | `.l5r4-dialog` (`scss/layout/_dialog-layout.scss`); `.l5r4-check-dialog` (`scss/components/_check-dialog.scss`); `scss/components/_ledger-dialog.scss` |
 | Tokens | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity` |
 | Components | Check dialog, ledger dialog, form field, button |
@@ -29,7 +29,7 @@ Core wraps the content in `div.dialog-content` inside `form.dialog-form` and ren
 | Variant | Helper | Resolves to | Used for |
 | --- | --- | --- | --- |
 | Check dialog | `prompt`, modal | The form's values, or `null` when closed | Every roll the pipeline makes, unless Shift skips it: `askCheck` (`module/services/dice/check/roll-check.js`) |
-| Choice prompt | `prompt` or `input` | The chosen value, or `null` | A rule's open choice, `askChoice` (`module/services/purchase.js`); the ledger change; a name |
+| Choice prompt | `prompt` or `input` | The chosen value, or `null` | A rule's open choice, `askChoice` (`module/services/item-choices.js`); the ledger change; a name |
 | Choice of two | `wait` with buttons | The pressed button's action, or `null` | Add a School beside the others or replace them: `askSchool` (`module/services/purchase.js`) |
 | Confirmation | `confirm` | `true`, `false`, or `null` when closed | End the encounter, start a session, a GM allowing what the rules forbid: `askGmAllow` (`module/services/gm-allow.js`), which a player's attempt reaches on the GM's screen as "{name} asks to go ahead" (`foundations/states.md` rule 10) |
 | Destructive | `confirm` | As above | Removing an item, an NPC attack, a custom Emphasis (rule 3) |
@@ -48,6 +48,7 @@ One dialog for every roll (`templates/dialogs/check-dialog.hbs`), 420 px wide an
 | TN | Number input, the TN changes as a hint, Wound penalty checkbox (`name="tn"`, `name="woundPenalty"`) | The roll has a TN |
 | Raises | Number input bounded by the allowed minimum and maximum (`name="raises"`) | Raises are allowed |
 | Free Raises to the TN | Number input up to the Free Raises held (`name="freeRaisesToTn"`) | The roller holds Free Raises |
+| Free Raises to damage | Number input from 0, starting at the Free Raises offered, each +1k0 (`name="damageFreeRaises"`) | A damage roll with no attack roll (a grapple Hit) |
 | Unskilled hint | One line (`l5r4.ui.check.unskilled`) | An Unskilled Roll |
 | Void Point | Checkbox, the Void Points left in its label; disabled at none (`name="void"`, `name="voidSkill"`). Each use takes its own point, so once every point is chosen the other use disables and says why (`bindVoidUses`, `module/services/dice/check/dialog.js`) | A Void Point may be spent |
 | Embrace Taint | Checkbox (`name="embraceTaint"`) | The rules allow it |
@@ -124,7 +125,7 @@ Anything the user can drag onto a sheet can also be chosen from a control. The r
 | A creature into the world | The browser row's "Import" button, GM only: `CompendiumBrowserApplication.#onImportEntry` (`module/apps/compendium-browser.js`) |
 | A new item of a type | The section's add control, which opens the item creation dialog (`templates/dialogs/unified-item-create-dialog.hbs`) |
 | A status effect onto a token | The condition manager's checkboxes (`templates/apps/condition-manager.hbs`) |
-| A rule's choice | The choice prompt, `askChoice` (`module/services/purchase.js`), a select of the options |
+| A rule's choice | The choice prompt, `askChoice` (`module/services/item-choices.js`), a select of the options |
 
 A new drag target ships with its control. Enforced by review.
 
@@ -134,9 +135,9 @@ Non-conforming, modeled: a field that fills only when an item is dropped on it.
 
 ### 7. A choice prompt lists every option it can offer
 
-A choice prompt shows a select of the options, a label that says what is chosen, and nothing else. When there are no options it does not open; `askChoice` (`module/services/purchase.js`) warns instead. The title names the item and the choice. Enforced by review.
+A choice prompt shows a select of the options, a label that says what is chosen, and nothing else. When any of an item's choices has no options, none opens: `askOpenChoices` (`module/services/item-choices.js`) checks them all first and warns instead, so the buyer answers nothing that is then thrown away. The title names the item and the choice. Enforced by review.
 
-Conforming, `askChoice` (`module/services/purchase.js`): `DIALOG_TEMPLATES.choice` with the choice's prompt as its label and a select of the options, titled with the item and the prompt.
+Conforming, `askChoice` (`module/services/item-choices.js`): `DIALOG_TEMPLATES.choice` with the choice's prompt as its label and a select of the options, titled with the item and the prompt.
 
 Non-conforming, modeled: a prompt with a free-text field for a choice the rules restrict to a list.
 
@@ -158,6 +159,7 @@ Non-conforming, modeled: `foundry.applications.api.DialogV2.prompt({ ... })` fro
 | Submitting | Core disables every footer button until the callback returns | `client/applications/api/dialog.mjs:266-275` |
 | Closed | Resolves `null` (`rejectClose: false`); the caller treats it as cancel and changes nothing | `client/applications/api/dialog.mjs:405`; `askChoices` (`module/services/dice/check/dialog.js`) |
 | Invalid input | The field's own `min`, `max`, and `step`; a value past them is user input the caller validates (`docs/code-system/foundry-patterns.md`, Forms) | `name="raises"` and `name="freeRaisesToTn"` in `templates/dialogs/check-dialog.hbs` |
+| Unusable input | The submit button disabled, its `data-tooltip` saying what the form still needs, until the form holds input the caller can use, so a press never closes the dialog on input it would throw away | `bindSubmitCheck` (`module/services/dialog.js`): the Add item name, the ledger's points, the Disadvantage cap |
 
 ## Keyboard and screen reader
 

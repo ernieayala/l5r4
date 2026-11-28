@@ -33,7 +33,7 @@ export function contestRollsOf(attack) {
 }
 
 /**
- * The side that won an attack's contest, once both sides have rolled.
+ * The side that won an attack's contest, once both sides have rolled: each side's declared Raises count (#166).
  * game-rules/29_types_of_rolls.md, p.80
  * @param {ChatMessage} attack - The attack message
  * @returns {{winner: string|null, tie: boolean}|null} null until both sides have rolled
@@ -43,8 +43,11 @@ export function getContestOutcome(attack) {
   if (!rolls.attacker || !rolls.target) {
     return null;
   }
-  return getContestResult([
-    { id: "attacker", total: rolls.attacker.system.outcome.total },
-    { id: "target", total: rolls.target.system.outcome.total }
-  ]);
+  return getContestResult(
+    ["attacker", "target"].map(side => ({
+      id: side,
+      total: rolls[side].system.outcome.total,
+      raises: rolls[side].system.tn.raises
+    }))
+  );
 }

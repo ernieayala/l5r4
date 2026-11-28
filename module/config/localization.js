@@ -241,6 +241,21 @@ export const KIHO_TYPES = Object.freeze({
 });
 
 /**
+ * Localization keys for how a School lets its student learn kiho (#159), in the order the most open comes first:
+ * a School's blank value reads it from the School's data instead (module/utils/kiho.js).
+ * game-rules/87_kiho.md, p.266
+ * @type {Readonly<Record<string, string>>}
+ * @constant
+ */
+export const KIHO_ACCESS_TYPES = Object.freeze({
+  brotherhood: "l5r4.magic.kiho.access.brotherhood",
+  monk: "l5r4.magic.kiho.access.monk",
+  shugenja: "l5r4.magic.kiho.access.shugenja",
+  ninja: "l5r4.magic.kiho.access.ninja",
+  none: "l5r4.magic.kiho.access.none"
+});
+
+/**
  * Localization keys for advantage categories.
  * Used for organizing and filtering character advantages.
  *

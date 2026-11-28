@@ -8,9 +8,11 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
 import { FamilyBonusService } from "../../services/family-bonus.js";
 import { RollHandler } from "./roll-handler.js";
+import { warnAtLimit } from "./trait-handler.js";
 
 /**
  * Handler class for PC-specific trait adjustments.
@@ -116,8 +118,9 @@ export class PcTraitHandler {
 
     const change = this.#getBaseTraitChange(context.actor, key, delta);
 
-    // No-op if already at boundary
+    // At its bound: say so, rather than a click that does nothing (#142)
     if (!change) {
+      warnAtLimit(T(`l5r4.ui.mechanics.traits.${key}`), delta);
       return;
     }
     const { base, nextBase } = change;

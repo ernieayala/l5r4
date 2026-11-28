@@ -59,12 +59,16 @@ import { buildCheck, buildChosenTerms, buildPreparedTerms, getManeuverPayment } 
  * @property {string[]} [options=[]]     Roll options the caller adds for predicates (a duel stage: `duel:focus`)
  * @property {number} [freeRaises=0]     Free Raises the caller grants before the dialog, offered with those of rules
  *   (a duel's Focus winner)
+ * @property {boolean} [takesFreeRaises=false] A damage roll with no attack roll before it (a grapple Hit): no Raises,
+ *   but its Free Raises add +1k0 each, as many as the roller sets (terms.js)
  * @property {{label: string, roll: number, keep: number, bonus?: number, explode?: number|null}} [damage]
  *   An attack's damage pool, stored on its message for the damage button
  * @property {string} [attackOf]         The attack message a damage roll belongs to
  * @property {boolean} [ranged=false]    An attack starts as ranged
+ * @property {"melee"|"ranged"|""} [range] A damage roll's attack range; empty or absent for none (#171)
  * @property {boolean} [askForOptions=true] Show the dialog; without it every default applies
- * @property {{template: string, data: object}} [extras] Extra dialog fields for the caller
+ * @property {{template: string, data: object, bind?: function(HTMLFormElement): void}} [extras] Extra dialog fields
+ *   for the caller, and what wires their live parts once the dialog renders (a Ring Roll's School Rank check)
  * @property {function(object): Promise<object|null>} [prepare] Runs on the dialog's choices before the roll; may
  *   add `labelSuffix`, `modifiers`, `freeRaises` and the `freeRaisesToTn` of them spent on the TN, or return null
  *   to stop

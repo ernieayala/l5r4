@@ -7,7 +7,15 @@
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
+import { buildAddedValues } from "../utils/added-values.js";
+import { getWindowId } from "../utils/window-id.js";
 import { FieldSaveMixin } from "../mixins/field-save-mixin.js";
+
+/**
+ * The number fields Active Effects can add to, by their form names.
+ * @constant {string[]}
+ */
+const ADDED_FIELDS = Object.freeze(["armorTn.mod", "armorTn.reductionMod"]);
 
 /**
  * The armor configuration window for one actor.
@@ -55,7 +63,7 @@ export default class ArmorConfigApplication extends FieldSaveMixin(
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `armor-config-${actor.id}`
+      id: ArmorConfigApplication.getWindowId(actor)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -73,11 +81,12 @@ export default class ArmorConfigApplication extends FieldSaveMixin(
   }
 
   /**
-   * Prepare context data for rendering the armor configuration form.
-   * Retrieves armor TN values, reduction modifiers, and stacking flag from actor.
+   * Prepare context data for rendering the armor configuration form. The form edits the stored modifiers (`source`):
+   * the prepared ones hold what Active Effects add, and writing them back would count that twice. What they add
+   * shows as a hint under each field (`added`, #184).
    *
    * @param {object} _options - Render options (unused)
-   * @returns {Promise<object>} Context object with actor, system data, and allowArmorStacking flag
+   * @returns {Promise<object>} Context object with actor, stored system data, additions, and allowArmorStacking flag
    * @override
    */
   async _prepareContext(_options) {
@@ -89,9 +98,11 @@ export default class ArmorConfigApplication extends FieldSaveMixin(
     try {
       const allowArmorStacking = this.actor?.getFlag?.(SYS_ID, "allowArmorStacking") ?? false;
 
+      const source = this.actor._source.system;
       return {
         actor: this.actor,
-        system: this.actor?.system ?? {},
+        source,
+        added: buildAddedValues(source, this.actor.system, ADDED_FIELDS),
         allowArmorStacking
       };
     } catch (err) {
@@ -111,9 +122,10 @@ export default class ArmorConfigApplication extends FieldSaveMixin(
   _getFallbackContext() {
     return {
       actor: this.actor,
-      system: {
+      source: {
         armorTn: { mod: 0, reductionMod: 0 }
       },
+      added: {},
       allowArmorStacking: false
     };
   }
@@ -164,5 +176,14 @@ export default class ArmorConfigApplication extends FieldSaveMixin(
     if (event) {
       event.preventDefault();
     }
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("armor-config", actor.uuid);
   }
 }

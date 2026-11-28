@@ -12,7 +12,7 @@
 import { VOID_INITIATIVE_BONUS } from "../config/game-mechanics.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { F, R, T } from "../utils/localization.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "./effects/uses.js";
+import { spendVoidPoint } from "./dice/resources/void-points.js";
 import { askConfirm } from "./dialog.js";
 
 /**
@@ -63,14 +63,13 @@ async function spendInitiativeVoidPoint(actor) {
     return false;
   }
 
-  // Availability was checked on the prepared pool; the write starts from the stored value, so an Active Effect
-  // on Void Points is never written into storage (B6)
-  warnVoidLimit(actor);
-  await actor.update({
-    "system.rings.void.value": actor._source.system.rings.void.value - 1,
-    "system.initiative.useVoid": false,
-    ...buildVoidUseUpdate(actor)
-  });
+  // Through the one Void Point spend, so a spend from another client at the same time cannot take the same point (#170)
+  const spent = await spendVoidPoint(actor);
+  await actor.update({ "system.initiative.useVoid": false });
+  if (!spent.success) {
+    ui.notifications?.warn(spent.message);
+    return false;
+  }
   ui.notifications?.info(F("l5r4.ui.combat.initiativeVoidSpent", { name: actor.name }));
   return true;
 }

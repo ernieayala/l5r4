@@ -11,6 +11,7 @@ import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
+import { getWindowId } from "../utils/window-id.js";
 import { getSortPref, getSortPrefs, updateSortPref } from "../services/sort-preferences.js";
 import { askDisadvantageCap } from "../services/xp/disadvantage-cap.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
@@ -63,7 +64,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `xp-manager-${actor.id}`
+      id: XpManagerApplication.getWindowId(actor)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -90,11 +91,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * @override
    */
   async _prepareContext(_options) {
-    if (!this.actor) {
-      console.warn(`${SYS_ID}`, "XpManager: No actor reference");
-      return this._getFallbackContext();
-    }
-
     try {
       if (await isRetroactiveUpdateDue(this.actor)) {
         await updateXpHistory(this.actor);
@@ -114,46 +110,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         sortState: getSortPrefs(this.actor.id)
       };
     } catch (err) {
+      // An error state, never numbers that look like the character's own (#145)
       logError("Failed to prepare XP manager context", err, {
         actorId: this.actor?.id
       });
-      return this._getFallbackContext();
+      return { error: F("l5r4.apps.xpManager.errors.calculateFailed", { error: err.message }) };
     }
-  }
-
-  /**
-   * Provide fallback context when actor data is unavailable or errors occur.
-   * Returns safe default values to prevent rendering failures.
-   *
-   * @returns {object} Fallback context with default values
-   */
-  _getFallbackContext() {
-    return {
-      isGM: game.user.isGM,
-      xp: {
-        spent: 0,
-        total: 40,
-        available: 40,
-        breakdown: {
-          base: 40,
-          disadvantagesGranted: 0,
-          manual: 0,
-          traits: 0,
-          void: 0,
-          skills: 0,
-          advantages: 0,
-          kata: 0,
-          kiho: 0,
-          spells: 0
-        }
-      },
-      disadvantageCap: 10,
-      manualEntries: [],
-      spentEntries: [],
-      manualTotal: 0,
-      spentTotal: 0,
-      sortColumns: SORT_COLUMNS
-    };
   }
 
   /**
@@ -191,6 +153,15 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
       return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
     }, 0);
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("xp-manager", actor.uuid);
   }
 
   /**
@@ -232,9 +203,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         this.render();
       }
     } catch (err) {
-      logError("actor.setFlag failed in XpManagerApplication", err, {
-        actorId: this.actor?.id
-      });
+      warnXpWriteFailed(this.actor, err);
     }
   }
 
@@ -266,9 +235,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         this.render();
       }
     } catch (err) {
-      logError("actor.setFlag failed in XpManagerApplication", err, {
-        actorId: this.actor?.id
-      });
+      warnXpWriteFailed(this.actor, err);
     }
   }
 
@@ -323,9 +290,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         this.render();
       }
     } catch (err) {
-      logError("Failed to recalculate XP purchases", err, {
-        actorId: this.actor?.id
-      });
+      warnXpWriteFailed(this.actor, err);
     }
   }
 
@@ -355,11 +320,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         }
       }
     } catch (err) {
-      if (err) {
-        logError("Failed to set disadvantage cap", err, {
-          actorId: this.actor?.id
-        });
-      }
+      warnXpWriteFailed(this.actor, err);
     }
   }
 
@@ -381,6 +342,17 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       spentTotal: this._calculateTotal(spent)
     };
   }
+}
+
+/**
+ * Tell the user an XP manager change was not saved, with the reason, and log it: a failed write shows in the window,
+ * not only the console (#145).
+ * @param {Actor} actor
+ * @param {Error} err
+ */
+function warnXpWriteFailed(actor, err) {
+  logError("XP manager write failed", err, { actorId: actor.id });
+  ui.notifications?.error(F("l5r4.apps.xpManager.errors.writeFailed", { error: err.message }));
 }
 
 /**
@@ -414,6 +386,8 @@ function buildXpSummary(xp) {
     spent: xp.spent ?? 0,
     total: xp.total ?? 40,
     available: xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0),
+    // XP spent past the total, shown as a warning: spending stays the player's and GM's call (#145)
+    overspent: xp.overspent,
     breakdown: {
       base: xp?.breakdown?.base ?? 40,
       disadvantagesGranted: xp?.breakdown?.disadvantagesGranted ?? 0,

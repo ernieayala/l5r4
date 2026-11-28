@@ -1,15 +1,19 @@
 /**
  * @module services/dice/check/spell-slots
  * @description Spell slots for a Spell Casting Roll: whether the caster and the Ring can cast, the slot the dialog's
- * choice spends (an elemental slot of the spell's Ring, a Void slot, or none), taking it before the roll, and giving it
- * back when the cast stops before it rolls (Ernie's ruling: the slot is spent before the roll). A shugenja holds one
- * slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs under a per-actor
- * lock and checks the count again inside it, so two casts that overlap cannot both spend the last slot.
+ * choice spends (an elemental slot of the spell's Ring or a Void slot; with none left, only with the GM's leave), taking
+ * it before the roll, and giving it back when the cast stops before it rolls (Ernie's ruling: the slot is spent before
+ * the roll). A shugenja holds one
+ * slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs in the caster's write
+ * queue (module/services/write-queue.js) and checks the count again inside it, so two casts that overlap cannot both
+ * spend the last slot.
  * game-rules/66_magic_and_spell_casting.md, p.163
  */
 
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { askGmAllow } from "../../gm-allow.js";
+import { queueActorWrite } from "../../write-queue.js";
 
 /**
  * The Rings a spell slot belongs to.
@@ -18,14 +22,8 @@ import { toInt } from "../../../utils/type-coercion.js";
 const VALID_RINGS = Object.freeze(["water", "air", "fire", "earth", "void"]);
 
 /**
- * Actors whose slot spend is running: a second spend for the same actor waits for the first.
- * @type {Map<string, boolean>}
- */
-const actorLocks = new Map();
-
-/**
- * Dialog data for the slot picker: the counts, and the default choice (an elemental slot while any are left,
- * else a Void slot, else none).
+ * Dialog data for the slot picker: the counts, and the default choice (a Void slot when only Void slots are left,
+ * else an elemental slot). With none of either left, the dialog says the GM will be asked (#158).
  * @param {Actor} actor
  * @param {string} ringKey
  * @returns {{ringName: string, elementalSlots: number, voidSlots: number, slot: string}}
@@ -37,7 +35,7 @@ export function getSlotDialogData(actor, ringKey) {
     ringName: T(`l5r4.ui.mechanics.rings.${ringKey}`),
     elementalSlots,
     voidSlots,
-    slot: elementalSlots > 0 ? "elemental" : voidSlots > 0 ? "void" : "none"
+    slot: elementalSlots <= 0 && voidSlots > 0 ? "void" : "elemental"
   };
 }
 
@@ -59,9 +57,10 @@ export function getCastingRefusal(actor, ringKey) {
 
 /**
  * The slot a choice spends and whether one is left: its path, the label it puts on the card, and the count left.
+ * Anything but "void" picks the spell's own Ring: every cast spends a slot (#158).
  * @param {Actor|null} actor - The caster
  * @param {string} ringKey - The Ring the spell is cast in
- * @param {string} choice - "elemental", "void", or "none" (dialog input)
+ * @param {string} choice - "elemental" or "void" (dialog input)
  * @returns {{valid: boolean, current: number, path: string|null, label: string, message: string|null}} `valid` is
  *   false, with the localized reason, when the cast cannot spend the chosen slot
  */
@@ -69,9 +68,6 @@ export function getSlotStatus(actor, ringKey, choice) {
   const refusal = getCastingRefusal(actor, ringKey);
   if (refusal) {
     return { valid: false, current: 0, path: null, label: "", message: refusal };
-  }
-  if (choice !== "elemental" && choice !== "void") {
-    return { valid: true, current: 0, path: null, label: "", message: null };
   }
   const ring = String(ringKey).toLowerCase();
   const path = `system.spellSlots.${choice === "void" ? "void" : ring}`;
@@ -93,26 +89,31 @@ export function getSlotStatus(actor, ringKey, choice) {
 }
 
 /**
- * Spend the slot a choice names, before the roll: the choice is checked, then the slot is spent under the caster's
- * lock, so a cast that overlapped another is refused before it rolls once the other took the last slot.
+ * Spend the slot a choice names, before the roll: the choice is checked, then the slot is spent in the caster's
+ * write queue, so a cast that overlapped another cannot spend the last slot twice. A cast with no slot to spend goes
+ * ahead only with the GM's leave (Ernie's ruling, #158); a GM casting for an NPC needs none.
  * game-rules/66_magic_and_spell_casting.md, p.163
  * @param {Actor} actor - The caster
  * @param {string} ringKey - The Ring the spell is cast in
- * @param {string} choice - "elemental", "void", or "none" (dialog input)
- * @returns {Promise<{path: string|null, label: string}|null>} The slot spent (a null path for none) and its label
- *   suffix; null, after a warning, when the cast cannot spend the chosen slot
+ * @param {string} choice - "elemental" or "void" (dialog input)
+ * @returns {Promise<{path: string|null, label: string}|null>} The slot spent (a null path for a cast the GM allowed
+ *   without one) and its label suffix; null when the cast does not go ahead
  */
 export async function spendChosenSlot(actor, ringKey, choice) {
-  const slot = getSlotToSpend(actor, ringKey, choice);
-  if (!slot || (slot.path && !(await spendSlot(actor, slot.path)).success)) {
+  const slot = getSlotStatus(actor, ringKey, choice);
+  if (slot.valid && (await spendSlot(actor, slot.path)).success) {
+    return { path: slot.path, label: slot.label };
+  }
+  if (getCastingRefusal(actor, ringKey)) {
+    ui.notifications?.warn(slot.message);
     return null;
   }
-  return slot;
+  return (await canCastWithoutSlot(actor, ringKey)) ? { path: null, label: "" } : null;
 }
 
 /**
  * Give back a slot a cast took, when the cast stops before it rolls: writes the stored count plus one under the
- * caster's lock, so an Active Effect on slots is never written into storage (AUTOMATION.md B6).
+ * caster's write queue, so an Active Effect on slots is never written into storage (AUTOMATION.md B6).
  * @param {Actor} actor - The caster
  * @param {string|null} path - The slot's path; null gives back nothing
  * @returns {Promise<void>}
@@ -121,30 +122,28 @@ export async function updateReturnedSlot(actor, path) {
   if (!path) {
     return;
   }
-  await updateUnderLock(actor.id, () =>
+  await queueActorWrite(actor, () =>
     actor.update({ [path]: foundry.utils.getProperty(actor._source, path) + 1 })
   );
 }
 
 /**
- * Spend the planned slot, under the caster's lock: the count is checked again first, so a second cast that
+ * Spend the planned slot, in the caster's write queue: the count is checked again first, so a second cast that
  * overlapped the first is refused once the first has spent the last slot. Writes the stored count minus one, so an
  * Active Effect on slots is never written into storage (AUTOMATION.md B6).
  * game-rules/66_magic_and_spell_casting.md, p.163
  * @param {Actor} actor
  * @param {string|null} path - The slot's path; null spends nothing
- * @returns {Promise<{success: boolean, message: string|null}>} Whether a slot was spent; the localized reason, after
- *   a warning, when none was left
+ * @returns {Promise<{success: boolean, message: string|null}>} Whether a slot was spent; the localized reason when
+ *   none was left
  */
 export async function spendSlot(actor, path) {
   if (!path) {
     return { success: false, message: null };
   }
-  return updateUnderLock(actor.id, async () => {
+  return queueActorWrite(actor, async () => {
     if (toInt(foundry.utils.getProperty(actor, path)) <= 0) {
-      const message = T("l5r4.ui.notifications.noSpellSlots");
-      ui.notifications?.warn(message);
-      return { success: false, message };
+      return { success: false, message: T("l5r4.ui.notifications.noSpellSlots") };
     }
     await actor.update({ [path]: foundry.utils.getProperty(actor._source, path) - 1 });
     return { success: true, message: null };
@@ -152,37 +151,21 @@ export async function spendSlot(actor, path) {
 }
 
 /**
- * The slot a choice spends, checked against what is left.
- * @param {Actor} actor
- * @param {string} ringKey
- * @param {string} choice - "elemental", "void", or "none" (dialog input)
- * @returns {{path: string|null, label: string}|null} The slot's path and its label suffix ("" for none); null,
- *   after a warning, when the cast cannot spend the chosen slot
+ * Whether a cast with no slot to spend goes ahead: the book allows a set number of casts a day, so the GM is asked
+ * (Ernie's ruling, #158). A GM casting for an NPC is that ruling, so no question is asked.
+ * game-rules/66_magic_and_spell_casting.md, p.163
+ * @param {Actor} actor - The caster
+ * @param {string} ringKey - The Ring the spell is cast in
+ * @returns {Promise<boolean>}
  */
-function getSlotToSpend(actor, ringKey, choice) {
-  const slot = getSlotStatus(actor, ringKey, choice);
-  if (!slot.valid) {
-    ui.notifications?.warn(slot.message);
-    return null;
+function canCastWithoutSlot(actor, ringKey) {
+  if (game.user.isGM && actor.type === "npc") {
+    return Promise.resolve(true);
   }
-  return { path: slot.path, label: slot.label };
-}
-
-/**
- * Run a function with an exclusive lock on the actor: a call for an actor already locked waits until the lock is
- * released, so the spends of overlapping casts run one after the other.
- * @param {string} actorId - The actor's id
- * @param {function(): Promise<*>} fn - The work to run under the lock
- * @returns {Promise<*>} What the function returns
- */
-async function updateUnderLock(actorId, fn) {
-  while (actorLocks.get(actorId)) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  actorLocks.set(actorId, true);
-  try {
-    return await fn();
-  } finally {
-    actorLocks.delete(actorId);
-  }
+  const ring = T(`l5r4.ui.mechanics.rings.${String(ringKey).toLowerCase()}`);
+  return askGmAllow({
+    title: actor.name,
+    reason: F("l5r4.magic.spells.noSlot", { name: actor.name, ring }),
+    ask: T("l5r4.magic.spells.noSlotGM")
+  });
 }

@@ -153,7 +153,9 @@ describe("Conditions", () => {
           options: new Set([`check:${kind}`])
         }).map(e => e.value);
       expect(tn(["skill:kenjutsu", "trait:agi"], "skill")).toEqual([10]);
-      expect(tn(["skill:kenjutsu", "trait:agi"], "attack")).toEqual([10]);
+      // An attack with a Weapon Skill reads "skill" too (#173); a stat block's attack has no Skill
+      expect(tn(["skill", "skill:kenjutsu", "trait:agi"], "attack")).toEqual([10]);
+      expect(tn([], "attack")).toEqual([10]);
       expect(tn(["trait:str"], "trait")).toEqual([10]);
       expect(tn(["trait:int"], "trait")).toEqual([]);
       expect(tn(["ring:fire"], "spell")).toEqual([10]);

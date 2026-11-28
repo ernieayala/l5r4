@@ -14,12 +14,13 @@
 
 import { F, T } from "../utils/localization.js";
 import { getEffectiveTrait, ringRankOf } from "../utils/mechanics.js";
+import { getSkillItem, toSkillKey } from "../utils/selectors.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { getRollActor } from "./dice/resources/void-points.js";
 import { formatSkillLabel } from "./dice/rolls/skill-roll.js";
 import { buildSkillRequest } from "./combat/flow.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
-import { testFearRank } from "./fear.js";
+import { startFearTest } from "./fear-card.js";
 
 /**
  * The text a link shows when it has no `{label}`.
@@ -62,8 +63,8 @@ export function checkRequestOf(actor, spec) {
   const label = formatLinkText({ ...spec, type: "Check" });
   const common = { label, askForOptions: true, ...(spec.tn ? { tn: spec.tn } : {}) };
   if (spec.skill) {
-    const key = spec.skill.toLowerCase().trim();
-    const item = actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === key);
+    const key = toSkillKey(spec.skill);
+    const item = getSkillItem(actor.items, key);
     const trait = spec.trait || item?.system.trait;
     if (!trait) {
       ui.notifications?.warn(F("l5r4.ui.links.needTrait", { skill: spec.skill, name: actor.name }));
@@ -117,7 +118,7 @@ async function rollLink(spec) {
 }
 
 /**
- * Run a Condition or Fear link on its targets (getLinkTargets): the status applied, or a Fear test at the link's
+ * Run a Condition or Fear link on its targets (getLinkTargets): the status applied, or one Fear card at the link's
  * Rank.
  * @param {import("../utils/link-syntax.js").LinkSpec} spec - A Condition or Fear link
  * @returns {Promise<null>}
@@ -128,12 +129,13 @@ async function applyLinkToTargets(spec) {
     ui.notifications?.warn(T("l5r4.ui.links.noTargets"));
     return null;
   }
+  if (spec.type === "Fear") {
+    // One Fear card for every target, each owner rolling through the check dialog (#151)
+    await startFearTest({ characters: actors, fearRank: spec.rank });
+    return null;
+  }
   for (const actor of actors) {
-    if (spec.type === "Condition") {
-      await applyEffectAnywhere(actor, spec.condition);
-    } else {
-      await testFearRank({ character: actor, fearRank: spec.rank });
-    }
+    await applyEffectAnywhere(actor, spec.condition);
   }
   return null;
 }

@@ -7,7 +7,7 @@
  *   duelist may concede here.
  * - Focus: a Contested Iaijutsu / Void roll (+5 at Iaijutsu 5, a Mastery Ability); beating the opponent by 5 or
  *   more wins the first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic
- *   (simultaneous).
+ *   (simultaneous). Raises declared on Focus must be beaten by 5 each too, or the strike is kharmic (#166).
  * - Strike: Iaijutsu / Reflexes attacks against the opponent's Armor TN, posted as attacks, so damage follows
  *   through the attack card. Once a first strike hits, the struck duelist may yield, which ends the duel, or strike
  *   back, which a duel to first blood counts dishonorable (Ernie's ruling, Stage 18 decision 18).
@@ -18,9 +18,11 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { CONTEST_MARGIN_PER_RAISE } from "../../config/game-mechanics.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { askGmAllow } from "../gm-allow.js";
 import { registerFlow, canActFor, buildSkillRequest, getFreshRoll, startFlow } from "./flow.js";
@@ -36,6 +38,9 @@ const ASSESSMENT_EDGE = 10;
  * game-rules/39_iaijutsu_dueling.md, p.87
  */
 const FOCUS_STEP = 5;
+
+/** The duel's stages in order. */
+const STAGES = Object.freeze(["assessment", "focus", "strike", "done"]);
 
 /**
  * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel; the GM may let one
@@ -115,7 +120,7 @@ export function onGetSceneControlButtonsDuel(controls) {
  * @returns {{focusTotal: number, edge: number}} Flat bonus on Focus; rolled and kept dice the edge gives
  */
 function iaijutsuMasteryOf(actor) {
-  const skill = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "iaijutsu");
+  const skill = getSkillItem(actor.items, "iaijutsu");
   const rank = toInt(skill?.system.rank);
   return { focusTotal: rank >= 5 ? FOCUS_STEP : 0, edge: rank >= 7 ? 2 : 1 };
 }
@@ -206,6 +211,20 @@ function sidesOf(state, i) {
 }
 
 /**
+ * A duel roll as the state records it: its message, total, outcome, and declared Raises.
+ * @param {ChatMessage} roll
+ * @returns {{id: string, total: number, success: boolean|null, raises: number}}
+ */
+function recordOf(roll) {
+  return {
+    id: roll.id,
+    total: roll.system.outcome.total,
+    success: roll.system.outcome.success,
+    raises: roll.system.tn.raises
+  };
+}
+
+/**
  * Settle a stage once both duelists have rolled it.
  * @param {object} state
  * @returns {object}
@@ -221,20 +240,30 @@ function updateStage(state) {
     state.facts = totals.map(t => (t.success ? 1 + t.raises : 0));
     state.stage = "focus";
   } else if (state.stage === "focus") {
-    const [a, b] = totals.map(t => t.total);
-    const margin = Math.abs(a - b);
-    if (margin < FOCUS_STEP) {
-      state.firstStrike = null;
-      state.freeRaises = 0;
-    } else {
-      state.firstStrike = a > b ? 0 : 1;
-      state.freeRaises = Math.floor((margin - FOCUS_STEP) / FOCUS_STEP);
-    }
+    applyFocusResult(state, totals);
     state.stage = "strike";
   } else {
     state.stage = "done";
   }
   return state;
+}
+
+/**
+ * Settle Focus: the duelist ahead by 5 or more strikes first, with a Free Raise per further 5. A duelist who declared
+ * Raises must also be ahead by 5 per Raise, or he fails and the strike is kharmic; his Free Raises still count from
+ * the whole margin (Ernie's ruling, #166).
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ * game-rules/29_types_of_rolls.md, p.80
+ * @param {object} state - The duel's state, changed in place
+ * @param {Array<{total: number, raises: number}>} focus - Each duelist's Focus roll
+ */
+function applyFocusResult(state, focus) {
+  const ahead = focus[0].total >= focus[1].total ? 0 : 1;
+  const margin = focus[ahead].total - focus[1 - ahead].total;
+  const needed = Math.max(FOCUS_STEP, CONTEST_MARGIN_PER_RAISE * toInt(focus[ahead].raises));
+  const won = margin >= needed;
+  state.firstStrike = won ? ahead : null;
+  state.freeRaises = won ? Math.floor((margin - FOCUS_STEP) / FOCUS_STEP) : 0;
 }
 
 registerFlow("duel", {
@@ -252,10 +281,10 @@ registerFlow("duel", {
    * A button on the duel card: roll this stage for the duelist the user owns, or concede.
    * @param {ChatMessage} _card
    * @param {object} state
-   * @param {DOMStringMap} dataset
+   * @param {{dataset: DOMStringMap}} press - The button pressed
    * @returns {Promise<object|null>}
    */
-  async click(_card, state, dataset) {
+  async click(_card, state, { dataset }) {
     const i = Number(dataset.duelist);
     const { actor, opponent } = sidesOf(state, i);
     if (!actor?.isOwner) {
@@ -303,12 +332,57 @@ registerFlow("duel", {
     }
     const kinds = state.stage === "strike" ? ["attack"] : ["skill"];
     const roll = getFreshRoll(card, state, { rollId: data.rollId, actor, kinds });
-    state.rolls[state.stage][i] = {
-      total: roll.system.outcome.total,
-      success: roll.system.outcome.success,
-      raises: roll.system.tn.raises
-    };
+    state.rolls[state.stage][i] = recordOf(roll);
     return updateStage(state);
+  },
+
+  /**
+   * A roll that replaces a duelist's recorded one (on the GM): it takes the original's place, and its stage settles
+   * again, while the stage is open or the next has no roll yet and no one has conceded (#169, Ernie's ruling).
+   * game-rules/43_honor.md, p.92
+   * @param {object} state
+   * @param {{originalId: string, roll: ChatMessage}} replacement
+   * @returns {Promise<object|null>} null when a later step depends on the original
+   */
+  async replace(state, { originalId, roll }) {
+    const stage = STAGES.find(s => s !== "done" && state.rolls[s].some(r => r?.id === originalId));
+    const next = STAGES[STAGES.indexOf(stage) + 1];
+    // Settled, not ended by the GM: both rolled it, and the stage after it has no roll
+    const settled =
+      state.stage === next &&
+      state.rolls[stage].every(r => r !== null) &&
+      (next === "done" || state.rolls[next].every(r => r === null));
+    const open = stage === state.stage || settled;
+    if (!stage || !open || state.conceded !== null) {
+      return null;
+    }
+    const i = state.rolls[stage].findIndex(r => r?.id === originalId);
+    state.rolls[stage][i] = recordOf(roll);
+    state.stage = stage;
+    return updateStage(state);
+  },
+
+  /**
+   * The GM's Redo (#164): clear the stage in play, or after the duel ends, reopen its last stage. A concession is
+   * taken back.
+   * @param {object} state
+   * @returns {object}
+   */
+  redo(state) {
+    state.stage = state.stage === "done" ? lastStageOf(state) : state.stage;
+    state.rolls[state.stage] = [null, null];
+    state.conceded = null;
+    return state;
+  },
+
+  /**
+   * The GM's End (#164): the duel is over where it stands.
+   * @param {object} state
+   * @returns {Promise<object>}
+   */
+  async end(state) {
+    state.stage = "done";
+    return state;
   },
 
   /**
@@ -325,10 +399,35 @@ registerFlow("duel", {
           ? T("l5r4.ui.combat.duel.done")
           : T(`l5r4.ui.combat.duel.${state.stage}`),
       lines: buildDuelLines(state, duelists),
-      buttons: buildDuelButtons(state, duelists)
+      buttons: buildDuelButtons(state, duelists),
+      gm: { redo: true, end: state.stage !== "done" }
     });
   }
 });
+
+/**
+ * The stage a finished duel ended in: the strike once Focus settled, Focus once Assessment settled, else Assessment.
+ * @param {object} state
+ * @returns {string}
+ */
+function lastStageOf(state) {
+  const isSettled = stage => state.rolls[stage].every(roll => roll !== null);
+  if (isSettled("focus")) {
+    return "strike";
+  }
+  return isSettled("assessment") ? "focus" : "assessment";
+}
+
+/**
+ * Whether a duelist is out of the fight: Dead, or at the Out Wound Rank. Such a duelist does not strike; the second
+ * strike happens only while the duelist still stands (#164).
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ * @param {Actor|null} actor
+ * @returns {boolean}
+ */
+function isOutOfFight(actor) {
+  return Boolean(actor?.statuses.has("dead") || actor?.system.woundLevels?.out?.current);
+}
 
 /**
  * Each duelist as the card shows it: name, and whether they may roll this stage or concede. In the strike, the
@@ -345,11 +444,13 @@ function buildDuelists(state) {
       (state.firstStrike === null ||
         state.firstStrike === i ||
         state.rolls.strike[state.firstStrike] !== null);
+    const standing = !isOutOfFight(actor);
     return {
       index: i,
       name: actor?.name ?? "?",
-      canRoll: state.stage !== "done" && !rolled && (state.stage !== "strike" || strikesNow),
-      canConcede: canConcede(state, i)
+      canRoll:
+        state.stage !== "done" && !rolled && (state.stage !== "strike" || (strikesNow && standing)),
+      canConcede: standing && canConcede(state, i)
     };
   });
 }

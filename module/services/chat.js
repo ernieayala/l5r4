@@ -15,7 +15,7 @@ import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
 import { hideUnusable } from "../utils/dom.js";
 import { rollWeaponDamage } from "./dice/rolls/weapon-roll.js";
-import { askPrompt } from "./dialog.js";
+import { askPrompt, bindSubmitCheck } from "./dialog.js";
 
 /**
  * Item creation result object
@@ -27,10 +27,9 @@ import { askPrompt } from "./dialog.js";
 /**
  * Display unified item creation dialog and return user selections.
  *
- * Prompts the user with a dialog to create a new item for an actor. The dialog
- * adjusts available item types based on actor type:
- * - PC actors: All item types (skills, advantages, disadvantages, equipment, spells, etc.)
- * - NPC actors: Skills only (simplified NPC sheet)
+ * Prompts the user with a dialog to create a new item for a PC or an NPC, of any type a sheet section lists
+ * (skills, advantages, disadvantages, spells, techniques, kata, kiho, tattoos, and equipment): an NPC's sheet shows
+ * every section it has items for (#183).
  *
  * Closing the dialog resolves null (`rejectClose: false`, docs/code-system/functions.md, Result or problem).
  *
@@ -39,20 +38,12 @@ import { askPrompt } from "./dialog.js";
  * - Item type defaults to "commonItem" if not provided
  * - Form element access uses fallback pattern: button.form ?? dialog.form.
  *
- * @param {string} actorType - Actor type ("pc" or "npc") to determine available item types
  * @param {string|null} [preferredType=null] - Item type to pre-select in dialog (e.g., "skill", "advantage")
  * @returns {Promise<ItemCreateResult|null>} The name and type, or null when the dialog is closed or the name is
  *   empty
  */
-export async function getUnifiedItemOptions(actorType, preferredType = null) {
-  const showCharacterItems = actorType === "pc";
-  const npcSkillsOnly = actorType === "npc";
-
-  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, {
-    showCharacterItems,
-    npcSkillsOnly,
-    preferredType
-  });
+export async function getUnifiedItemOptions(preferredType = null) {
+  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, { preferredType });
 
   return askPrompt({
     window: { title: T("l5r4.ui.sheets.addItem") },
@@ -61,6 +52,11 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
       label: T("l5r4.ui.sheets.addItem"),
       callback: getItemCreateResult
     },
+    // Add waits for a name, so the dialog never closes on one it would drop (#142)
+    render: (_event, dialog) =>
+      bindSubmitCheck(dialog.element.querySelector("form"), form =>
+        form.elements.itemName.value.trim() ? "" : T("l5r4.ui.sheets.nameRequired")
+      ),
     rejectClose: false,
     modal: true
   });

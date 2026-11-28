@@ -4,6 +4,7 @@
  */
 
 import { TRAIT_KEYS } from "../../config/reference-data.js";
+import { getKihoBuyer } from "../../utils/kiho.js";
 import { booleanField, htmlField, numberField, rankPointsField } from "../fields.js";
 import { migrateCommonActorSource } from "../migrate-source.js";
 
@@ -56,6 +57,17 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
   static migrateData(source) {
     migrateCommonActorSource(source);
     return super.migrateData(source);
+  }
+
+  /**
+   * How the character learns kiho, from its Schools (#159); null when none gives kiho.
+   * game-rules/87_kiho.md, p.266
+   * @type {{access: string, rank: number, totalRank: number}|null}
+   */
+  get kihoBuyer() {
+    return getKihoBuyer(
+      this.parent.items.filter(item => item.type === "school").map(item => item.system)
+    );
   }
 
   /**

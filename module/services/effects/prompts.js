@@ -22,6 +22,7 @@ import { SYS_ID } from "../../config/constants.js";
 import { F, T } from "../../utils/localization.js";
 import { getNextSaveTn } from "../../utils/effects.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { hideUnusable } from "../../utils/dom.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
@@ -29,7 +30,8 @@ import { rollSkill } from "../dice/rolls/skill-roll.js";
 import { askGmFor } from "../gm-allow.js";
 import { registerGmQuery, requestGmQuery } from "../gm-client.js";
 import { applyEffect, ownTurnStartOf } from "./apply.js";
-import { formatRollLabel, postPrompt, promptOf } from "./prompt-card.js";
+import { startedCombatOf } from "./uses.js";
+import { canAnswerPrompt, formatRollLabel, postPrompt, promptOf } from "./prompt-card.js";
 
 /** Name of the GM query that ends a Concentration for a player. */
 const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
@@ -53,9 +55,12 @@ export async function postSavePrompts(actor, event) {
       continue;
     }
     const tn = effect?.getFlag(SYS_ID, "saveTn") ?? save.tn;
+    // The Round the save belongs to: core runs combat events after the update, so this is the Round now running; a
+    // card from an earlier one has lapsed (#179)
+    const combat = startedCombatOf(actor);
     await postPrompt(
       actor,
-      { kind: "save", ...save, tn },
+      { kind: "save", ...save, tn, combatId: combat?.id ?? null, round: combat?.round ?? null },
       {
         title: F("l5r4.ui.effects.saveTitle", { effect: save.source }),
         text: F("l5r4.ui.effects.saveText", { roll: formatRollLabel(save.roll), tn }),
@@ -112,7 +117,7 @@ export function postConcentrationPrompt(actor, effect) {
  * @returns {Promise<ChatMessage|null>}
  */
 export async function rollFullDefense(actor) {
-  const defense = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "defense");
+  const defense = getSkillItem(actor.items, "defense");
   const message = await rollSkill({
     actor,
     skillName: defense?.name ?? "Defense",
@@ -198,12 +203,7 @@ export function registerPromptQueries() {
 export async function onPromptClick(message) {
   const request = promptOf(message);
   const actor = request ? await fromUuid(request.actorUuid) : null;
-  if (!actor?.isOwner) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
-    return;
-  }
-  if (message.getFlag(SYS_ID, "promptAnswered")) {
-    ui.notifications?.info(T("l5r4.ui.effects.promptAnswered"));
+  if (!(await canAnswerPrompt(message, actor))) {
     return;
   }
   if (request.kind === "fullDefense") {

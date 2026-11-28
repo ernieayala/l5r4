@@ -328,7 +328,19 @@ export const PCS = [
         type: "martial",
         cost: 2
       }),
-      item("fxPiOldShapeArm1", "armor", "Fixture Old Robe", { equiped: true, specialRues: "" })
+      // A monk's free School kiho: 3.2.1 charged the typed cost, left at 0 (#182)
+      item("fxPiOldShapeKih2", "kiho", "Fixture Empty Hand", {
+        ring: "water",
+        mastery: 1,
+        type: "internal",
+        cost: 0
+      }),
+      // 3.2.1 added these Free Raises to every roll, worn or not (#182)
+      item("fxPiOldShapeArm1", "armor", "Fixture Old Robe", {
+        equiped: true,
+        specialRues: "",
+        freeRaises: 1
+      })
     ],
     effects: [],
     flags: pcFlags()
@@ -397,6 +409,12 @@ export const PCS = [
         ring: "water",
         mastery: 3,
         cost: 3
+      }),
+      // A typed cost below the Mastery Level 4.0 charges (#182)
+      item("fxPiShugenjaKat2", "kata", "Fixture Iron Stance", {
+        ring: "earth",
+        mastery: 3,
+        cost: 1
       })
     ],
     effects: [
@@ -464,6 +482,11 @@ export const NPCS = [
         img: `${ICONS}/prone.webp`,
         statuses: ["prone"],
         flags: { "l5r4-enhanced": { autoApplied: true, appliedReason: "maxWounds" } }
+      }),
+      // An effect on the stored Armor TN, which a migration must not write back into it (#182)
+      effect("fxNeLegacyArmor1", {
+        name: "Fixture Hardened Hide",
+        changes: [{ key: "system.armor.armorTn", value: "5", mode: 2, priority: null }]
       })
     ],
     flags: npcFlags()

@@ -376,7 +376,6 @@
         "custom": "Personalizado",
         "emphasisName": "Nombre del Énfasis",
         "errors": {
-          "saveFailed": "Error al guardar el Énfasis personalizado",
           "updateFailed": "Error al actualizar el administrador de Énfasis"
         },
         "hint": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
@@ -501,7 +500,7 @@
         "errors": {
           "toggleFailed": "Error al cambiar el tipo de movimiento"
         },
-        "feet": "pies",
+        "feetValue": "{n} pies",
         "maximum": "Movimiento Máximo",
         "title": "Movimiento"
       },
@@ -625,7 +624,6 @@
         "explodes": "Los dados explotan",
         "explodesHint": "Desactivado para armas cuyos dados de daño nunca explotan, como los shuriken.",
         "fallbackTrait": "Atributo de respaldo",
-        "meleeRange": "Arco contra un objetivo a alcance cuerpo a cuerpo",
         "minStrength": "Fuerza mínima",
         "range": "Alcance",
         "rangedAttack": "Ataque a Distancia",
@@ -709,16 +707,6 @@
         "createEffect": "Error al crear el efecto",
         "deleteEffect": "Error al eliminar efecto.",
         "toggleEffect": "Error al activar o desactivar el efecto"
-      },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen.",
-          "other": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
-        },
-        "iconsUpdated": {
-          "one": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
-          "other": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo."
-        }
       },
       "settings": {
         "designGallery": {

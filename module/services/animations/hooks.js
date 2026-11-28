@@ -1,139 +1,82 @@
 /**
  * @module services/animations/hooks
- * @description Hook handlers that play, toggle, and end stance and condition animations as Active Effects are
- * created, enabled or disabled, and deleted, end every animation when an actor is deleted, and play the attack
- * animation for a hit. Each runs after the effect's own rules and the actor's derived data (deferred with
- * queueMicrotask), changes no game mechanic, and does nothing without Sequencer and JB2A.
+ * @description Hook handlers for the Sequencer and JB2A animations. Every client runs them and plays what it shows on
+ * its own (#198): a token's stance and condition auras follow its actor's statuses whenever an Active Effect changes,
+ * the canvas loads, or a token is drawn, and a hit plays the attack animation for each user who can read the roll.
+ * Each defers with queueMicrotask until the change and the actor's derived data are in place, changes no game
+ * mechanic, and is wired only when Sequencer and JB2A are active.
  */
 
-import { isOwnChange } from "../../utils/change-origin.js";
-import { STANCE_IDS } from "../../utils/stances.js";
-import { startAnimation, deleteAnimation, deleteAllAnimations } from "./status-animations.js";
-import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
+import {
+  endStoredAnimations,
+  refreshActorAnimations,
+  refreshSceneAnimations,
+  refreshTokenAnimations
+} from "./status-animations.js";
 import { startAttackAnimation } from "./attack-animations.js";
 
 /**
- * Hook handler for ActiveEffect create event.
- *
- * Triggers animations when stances or conditions are applied to an actor.
- * Deferred via queueMicrotask to ensure effect is fully applied before animation.
- *
- * @param {ActiveEffect} effect - The newly created effect
- * @param {object} options - Creation options
+ * Hook handler for an Active Effect created, updated, or deleted: the auras of the actor it applies to follow the
+ * actor's statuses, on the actor itself or through an item the actor holds.
+ * @param {ActiveEffect} effect
  * @returns {void}
  */
-export function onCreateActiveEffectAnimation(effect, options) {
-  const actor = effect?.parent;
-
-  // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
+export function onActiveEffectAnimation(effect) {
+  const actor = effect.parent?.documentName === "Item" ? effect.parent.parent : effect.parent;
+  if (actor?.documentName !== "Actor") {
     return;
   }
-
-  // Defer animation to ensure effect is fully applied
-  queueMicrotask(async () => {
-    for (const { statusId, isStance } of animatedStatusesOf(effect)) {
-      await startAnimation(actor, statusId, isStance);
-    }
-  });
+  queueMicrotask(() => refreshActorAnimations(actor));
 }
 
 /**
- * Hook handler for ActiveEffect update event.
- *
- * Handles animation toggling when effects are enabled/disabled.
- * - Disabled → Enabled: Play animation
- * - Enabled → Disabled: Remove animation.
- *
- * @param {ActiveEffect} effect - The updated effect
- * @param {object} changes - Changed fields
- * @param {object} options - Update options
- * @returns {void}
- */
-export function onUpdateActiveEffectAnimation(effect, changes, options) {
-  // Early return: Only handle disabled state changes
-  if (changes?.disabled === undefined) {
-    return;
-  }
-
-  const actor = effect?.parent;
-
-  // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
-    return;
-  }
-
-  // Defer animation to ensure effect state is updated
-  queueMicrotask(async () => {
-    for (const { statusId, isStance } of animatedStatusesOf(effect)) {
-      if (changes.disabled === true) {
-        // Effect disabled: Remove animation
-        await deleteAnimation(actor, statusId);
-      } else if (changes.disabled === false) {
-        // Effect enabled: Play animation
-        await startAnimation(actor, statusId, isStance);
-      }
-    }
-  });
-}
-
-/**
- * Hook handler for ActiveEffect delete event.
- *
- * Cleans up animations when stances or conditions are removed from an actor.
- *
- * @param {ActiveEffect} effect - The deleted effect
- * @param {object} options - Deletion options
- * @returns {void}
- */
-export function onDeleteActiveEffectAnimation(effect, options) {
-  const actor = effect?.parent;
-
-  // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !isPlayedHere(options)) {
-    return;
-  }
-
-  // Defer animation cleanup
-  queueMicrotask(async () => {
-    for (const { statusId } of animatedStatusesOf(effect)) {
-      await deleteAnimation(actor, statusId);
-    }
-  });
-}
-
-/**
- * Hook handler for Actor delete event.
- *
- * Cleans up all animations when an actor is deleted.
- * Prevents orphaned Sequencer effects.
- *
+ * Hook handler for an Actor deleted: the tokens left on this client's canvas have no actor, so their auras end.
  * @param {Actor} actor - The deleted actor
- * @param {object} options - Deletion options
  * @returns {void}
  */
-export function onDeleteActorAnimation(actor, options) {
-  if (!isPlayedHere(options)) {
-    return;
-  }
-  // Defer animation cleanup
+export function onDeleteActorAnimation(actor) {
   queueMicrotask(async () => {
-    await deleteAllAnimations(actor);
+    const tokens = canvas.tokens?.placeables.filter(token => token.document.actorId === actor.id);
+    await Promise.all((tokens ?? []).map(refreshTokenAnimations));
   });
 }
 
 /**
- * Hook handler for chat message creation: a hit with a weapon against a target plays the attack animation.
+ * Hook handler for the canvas ready: the GM ends the auras an earlier version stored on this scene's tokens, then each
+ * token's auras follow its statuses.
+ * @returns {Promise<void>}
+ */
+export async function onCanvasReadyAnimation() {
+  if (game.user.isGM) {
+    await endStoredAnimations();
+  }
+  await refreshSceneAnimations();
+}
+
+/**
+ * Hook handler for a token drawn on a ready canvas (one placed, or redrawn): its auras follow its statuses. The tokens
+ * of a scene as it loads wait for the canvas ready.
+ * @param {Token} token
+ * @returns {void}
+ */
+export function onDrawTokenAnimation(token) {
+  if (canvas.ready) {
+    // Left running: core's draw hook does not wait for it, and the refresh reports its own failure
+    refreshTokenAnimations(token);
+  }
+}
+
+/**
+ * Hook handler for chat message creation: a hit with a weapon against a target plays the attack animation for each
+ * user who can read the roll (a whisper's recipients and the GM; not the roller of a blind roll).
  *
- * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/roll-message-data.js). The
- * client that posted it plays the animation, and Sequencer shows it to everyone.
+ * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/roll-message-data.js).
  *
  * @param {ChatMessage} message - The newly created chat message
- * @param {object} options - Creation options
  * @returns {void}
  */
-export function onCreateChatMessageAnimation(message, options) {
-  if (message.type !== "roll" || !isPlayedHere(options)) {
+export function onCreateChatMessageAnimation(message) {
+  if (message.type !== "roll" || !message.isContentVisible) {
     return;
   }
   const { kind, outcome, actorUuid, weaponUuid, target } = message.system;
@@ -150,29 +93,4 @@ export function onCreateChatMessageAnimation(message, options) {
     }
     await startAttackAnimation(actor, targetActor, weapon);
   });
-}
-
-/**
- * The statuses of an effect that have an animation (module/services/animations/asset-library.js), each marked
- * stance or not.
- *
- * @param {ActiveEffect} effect
- * @returns {Array<{statusId: string, isStance: boolean}>}
- */
-function animatedStatusesOf(effect) {
-  return [...effect.statuses]
-    .filter(statusId => getStanceAnimation(statusId) || getConditionAnimation(statusId))
-    .map(statusId => ({ statusId, isStance: STANCE_IDS.has(statusId) }));
-}
-
-/**
- * Whether this client plays the animation for a change: only the client that sent it (module/utils/change-origin.js).
- * Every client runs these hooks, and Sequencer sends each effect to every connected client, so playing it everywhere
- * would show it once per client.
- *
- * @param {object} options - The change's options
- * @returns {boolean}
- */
-function isPlayedHere(options) {
-  return isOwnChange(options, game.socket.id);
 }

@@ -11,25 +11,32 @@
  * game-rules/36_stances.md, p.84
  * game-rules/41_conditional_effects.md, p.89
  * game-rules/42_fear.md, p.90
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  */
 
 import { PATHS } from "./constants.js";
 
 /**
  * Until the start of the Turn of the combatant whose Turn it was when the effect began (Guard).
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  */
 const UNTIL_NEXT_TURN = Object.freeze({ value: 1, units: "rounds", expiry: "turnStart" });
 
 /**
  * TNModifier rules raising by 5 per level the TN of Skill rolls (attacks included), Spell Casting Rolls (maho reads
- * "spell" rules too), and physical Trait rolls (Fatigued and Fasting). A Skill roll also reads its Trait's
- * selector, so the Trait rules hold only on a Trait roll. Each status takes its own copy of the list.
+ * "spell" rules too), and physical Trait rolls (Fatigued and Fasting). An attack with a Weapon Skill reads both the
+ * "skill" and the "attack" selector, and a stat block's attack only "attack", so every attack takes the "attack"
+ * rule and the "skill" rule leaves attacks out (#173). A Skill roll also reads its Trait's selector, so the Trait
+ * rules hold only on a Trait roll. Each status takes its own copy of the list.
  * game-rules/41_conditional_effects.md, p.89
  */
 const PHYSICAL_TN_RULES = Object.freeze([
-  { key: "TNModifier", selector: "skill", value: "5 * @level" },
+  {
+    key: "TNModifier",
+    selector: "skill",
+    value: "5 * @level",
+    predicate: [{ not: "check:attack" }]
+  },
   { key: "TNModifier", selector: "attack", value: "5 * @level" },
   { key: "TNModifier", selector: "spell", value: "5 * @level" },
   { key: "TNModifier", selector: "trait:sta", value: "5 * @level", predicate: ["check:trait"] },
@@ -167,7 +174,7 @@ export const STATUS_EFFECTS = Object.freeze([
     name: "l5r4.ui.statusEffects.guarded",
     img: `${PATHS.icons}/guarded.webp`,
     // +10 Armor TN until the guard's next Turn
-    // game-rules/38_maneuvers.md, p.86
+    // game-rules/38_maneuvers.md, p.87
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: 10 }] }
   },
@@ -176,7 +183,7 @@ export const STATUS_EFFECTS = Object.freeze([
     name: "l5r4.ui.statusEffects.guarding",
     img: `${PATHS.icons}/guarding.webp`,
     // -5 Armor TN until the guard's next Turn
-    // game-rules/38_maneuvers.md, p.86
+    // game-rules/38_maneuvers.md, p.87
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: -5 }] }
   },
@@ -246,7 +253,7 @@ export const STATUS_EFFECTS = Object.freeze([
 /**
  * Statuses an actor can hold once per origin: a Concentration per spell held, a Guard per protector. Every other
  * status is held once, so applying it again updates the one held (applyEffect, #177).
- * game-rules/38_maneuvers.md, p.86
+ * game-rules/38_maneuvers.md, p.87
  * game-rules/67_universal_spells.md, p.166
  */
 export const PER_ORIGIN_STATUSES = Object.freeze(["concentration", "guarded"]);

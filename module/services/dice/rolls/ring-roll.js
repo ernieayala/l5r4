@@ -50,7 +50,12 @@ export async function rollRing({
     askForOptions,
     extras: {
       template: DIALOG_TEMPLATES.checkRing,
-      data: { ...getSlotDialogData(roller, ring), affinity: affinity > 0, deficiency: affinity < 0 }
+      data: {
+        ...getSlotDialogData(roller, ring),
+        affinity: affinity > 0,
+        deficiency: affinity < 0
+      },
+      bind: form => bindCastingRank(form, roller, { ringName })
     },
     ...buildCastingHooks(roller, { ring, ringName })
   });
@@ -88,8 +93,33 @@ function buildCastingHooks(roller, { ring, ringName }) {
 }
 
 /**
+ * Keep the dialog's cast possible while it is open (#141): while "Cast a spell" is ticked and the School Rank, with
+ * the Affinity or Deficiency ticked, is 0 or less, the reason shows and Roll is disabled until either changes.
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * @param {HTMLFormElement} form - The roll dialog's form
+ * @param {L5R4Actor} roller - The roller
+ * @param {{ringName: string}} ringData - The Ring's display name
+ */
+function bindCastingRank(form, roller, { ringName }) {
+  const schoolRank = getCastingSchoolRank(roller);
+  const warning = form.querySelector("[data-casting-blocked]");
+  const roll = form.querySelector("[data-action='ok']");
+  const update = () => {
+    const { spellCasting, affinity, deficiency } = form.elements;
+    const shift = getCastingShift({ affinity: affinity.checked, deficiency: deficiency.checked });
+    const reason = spellCasting.checked ? getCastingRankRefusal(schoolRank, shift, ringName) : "";
+    warning.hidden = !reason;
+    warning.querySelector("[data-casting-blocked-text]").textContent = reason;
+    roll.disabled = Boolean(reason);
+  };
+  form.addEventListener("change", update);
+  update();
+}
+
+/**
  * The School Rank a Spell Casting Roll adds, shifted by the Affinity or Deficiency the dialog marks; a rank of 0 or
- * less blocks the cast with a warning.
+ * less blocks the cast with a warning. The dialog keeps Roll disabled for such a cast (bindCastingRank), so this
+ * guards the form's values as they arrive.
  * game-rules/66_magic_and_spell_casting.md, p.163-164
  * @param {L5R4Actor} roller - The roller
  * @param {object} choices - The roll dialog's choices
@@ -98,16 +128,40 @@ function buildCastingHooks(roller, { ring, ringName }) {
  */
 function validateCastingRank(roller, choices, { ringName }) {
   const schoolRank = getCastingSchoolRank(roller);
-  const shift = (choices.affinity ? 1 : 0) - (choices.deficiency ? 1 : 0);
-  if (schoolRank + shift <= 0) {
-    ui.notifications?.warn(
-      shift < 0
-        ? F("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
-        : T("l5r4.ui.notifications.schoolRankZero")
-    );
+  const shift = getCastingShift(choices);
+  const refusal = getCastingRankRefusal(schoolRank, shift, ringName);
+  if (refusal) {
+    ui.notifications?.warn(refusal);
     return null;
   }
   return { schoolRank, shift };
+}
+
+/**
+ * The School Rank shift the dialog's Affinity and Deficiency make: +1, -1, or 0 with both or neither.
+ * game-rules/66_magic_and_spell_casting.md, p.163
+ * @param {{affinity?: boolean, deficiency?: boolean}} choices
+ * @returns {number}
+ */
+function getCastingShift({ affinity, deficiency }) {
+  return (affinity ? 1 : 0) - (deficiency ? 1 : 0);
+}
+
+/**
+ * Why a Spell Casting Roll cannot be made at this School Rank and shift: the rank is 0 or less. Empty when it can.
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * @param {number} schoolRank - The caster's School Rank
+ * @param {number} shift - The Affinity or Deficiency shift
+ * @param {string} ringName - The Ring's display name
+ * @returns {string}
+ */
+function getCastingRankRefusal(schoolRank, shift, ringName) {
+  if (schoolRank + shift > 0) {
+    return "";
+  }
+  return shift < 0
+    ? F("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+    : T("l5r4.ui.notifications.schoolRankZero");
 }
 
 /**

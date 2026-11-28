@@ -9,9 +9,11 @@
 import { SYS_ID } from "../config/constants.js";
 import { F } from "../utils/localization.js";
 import { getSkillEmphases } from "../utils/emphases.js";
+import { getWeaponSkillChoices } from "../utils/mechanics.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import EmphasisManagerApplication from "../apps/emphasis-manager.js";
+import { openWindow } from "./handlers/app-launcher-handler.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import { RULES_EDITOR_ACTIONS, parseRulesForm, buildRulesEditorContext } from "./rules-editor.js";
 
@@ -403,12 +405,12 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       return;
     }
 
-    const manager = new EmphasisManagerApplication({ item: this.item });
-    await manager.render(true);
-
-    // Wait for dialog to close, then refresh this sheet
-    manager.addEventListener("close", () => {
-      this.render(false);
+    // An Emphasis manager already open for this Skill comes to the front (#189); once one closes, this sheet redraws
+    const id = EmphasisManagerApplication.getWindowId(this.item);
+    await openWindow(id, () => {
+      const manager = new EmphasisManagerApplication({ item: this.item });
+      manager.addEventListener("close", () => this.render(false));
+      return manager;
     });
   }
 
@@ -525,7 +527,8 @@ async function formatEnrichedFields(system, { secrets }) {
 
 /**
  * A weapon a PC owns lists the PC's skills, after "None", to associate one with the weapon for its attack rolls
- * (Kenjutsu with a katana, Kyujutsu with a yumi); any other item lists none.
+ * (Kenjutsu with a katana, Kyujutsu with a yumi), keeping the weapon's stored Skill (getWeaponSkillChoices); any
+ * other item lists none.
  * @param {Item} item
  * @returns {{skillOptions: Record<string, string>, hasCharacterSkills: boolean, isOwnedByCharacter: boolean}}
  */
@@ -533,15 +536,13 @@ function buildSkillOptions(item) {
   if (item.type !== "weapon" || item.parent?.type !== "pc") {
     return { hasCharacterSkills: false, isOwnedByCharacter: false, skillOptions: {} };
   }
-  const skills = item.parent.items.filter(i => i.type === "skill");
-  const skillOptions = {};
-  skillOptions[""] = game.i18n.localize("l5r4.ui.common.none");
+  const skillNames = item.parent.items.filter(i => i.type === "skill").map(i => i.name);
+  const skillOptions = {
+    "": game.i18n.localize("l5r4.ui.common.none"),
+    ...getWeaponSkillChoices(skillNames, item.system.associatedSkill)
+  };
 
-  for (const skill of skills) {
-    skillOptions[skill.name] = skill.name;
-  }
-
-  return { skillOptions, hasCharacterSkills: skills.length > 0, isOwnedByCharacter: true };
+  return { skillOptions, hasCharacterSkills: skillNames.length > 0, isOwnedByCharacter: true };
 }
 
 /**

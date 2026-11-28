@@ -1,21 +1,31 @@
 /**
  * @module services/dice/resources/void-points
- * @description Void Point spending for rolls: the actor a roll belongs to when the caller names none, whether it has
- * a Void Point left, and spending one under a per-actor lock. A Void Point adds +1k1 to the roll. Callers decide
- * which rolls may take one (never damage) and how many a round allows. A failed spend returns a message for the
- * caller to show instead of throwing.
+ * @description Void Point spending: the actor a roll belongs to when the caller names none, whether it has a Void
+ * Point left, and spending them. A Void Point adds +1k1 to a roll. Callers decide which rolls may take one (never
+ * damage) and how many a round allows. A failed spend returns a message for the caller to show instead of throwing.
+ *
+ * Every spend runs on the answering GM client, in the actor's write queue (module/services/write-queue.js), so two
+ * spends from different clients never both take the same point: a player's spend is a GM query, and only with no GM
+ * connected does a player spend on their own client (Ernie's ruling, #170).
  * game-rules/25_rings_and_traits.md, p.78
  */
 
+import { SYS_ID } from "../../../config/constants.js";
 import { F, T } from "../../../utils/localization.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "../../effects/uses.js";
+import { buildVoidUseUpdate, isVoidOverLimit, warnVoidLimit } from "../../effects/uses.js";
+import { askGmQuery, registerGmQuery } from "../../gm-client.js";
+import { queueActorWrite } from "../../write-queue.js";
+
+/** Name of the GM query that spends a player's Void Points. */
+export const SPEND_VOID_QUERY = `${SYS_ID}.spendVoid`;
 
 /**
- * In-memory locks for preventing concurrent Void Point spending on the same actor.
- * Maps actor ID to lock status (true = locked, undefined = unlocked).
- * @type {Map<string, boolean>}
+ * What a spend did, as the GM side answers it.
+ * @typedef {object} VoidSpend
+ * @property {boolean} spent - Whether the points were taken
+ * @property {number} current - Void Points left
+ * @property {boolean} overLimit - Whether the spend passed the Round's limit, for the warning
  */
-const actorLocks = new Map();
 
 /**
  * Validation result from Void Point availability check.
@@ -120,10 +130,10 @@ export function validateVoidPoints(actor, count = 1) {
  * Spend Void Points, one per use, and return the +1k1 one gives: one more die rolled and one more kept, so a 3k2 roll
  * becomes 4k3.
  *
- * The actor resolves through getRollActor, so the parameter may be left out. Inside the actor's lock the pool is
- * checked for every point the roll needs, then all of them are taken in one `actor.update` with `diff: true`, so a
- * roll never takes one point and stops for want of the next. The one-per-round limit is the callers' to enforce, as
- * are the techniques and spells that lift it.
+ * The actor resolves through getRollActor, so the parameter may be left out. The spend runs on the answering GM client
+ * in the actor's write queue (spendQueuedVoidPoints): the pool is checked for every point the roll needs, then all of
+ * them are taken in one write, so a roll never takes one point and stops for want of the next. The one-per-round
+ * limit warns here, on the spender's client; the techniques and spells that lift it are counted in it.
  *
  * A failed spend takes nothing and returns `success: false`, zero bonuses, and a localized message, which callers show
  * through `ui.notifications.warn`, instead of throwing.
@@ -134,44 +144,94 @@ export function validateVoidPoints(actor, count = 1) {
  * @returns {Promise<VoidSpendResult>} Result with success status, bonuses, and optional error
  */
 export async function spendVoidPoint(actor, count = 1) {
-  // Step 1: Resolve actor using fallback chain (supports optional actor)
   const resolvedActor = getRollActor(actor);
-
-  // Early validation: actor must exist before acquiring lock
   if (!resolvedActor) {
     return buildVoidRefusal(T("l5r4.ui.notifications.noActorForVoid"));
   }
+  const answer = await requestVoidSpend(resolvedActor, count);
+  if ("refusal" in answer) {
+    return buildVoidRefusal(answer.refusal);
+  }
+  const spend = answer.value;
+  if (!spend.spent) {
+    return buildVoidRefusal(formatVoidShortage(resolvedActor, spend.current, count));
+  }
+  if (spend.overLimit) {
+    warnVoidLimit(resolvedActor);
+  }
+  return {
+    success: true,
+    rollBonus: 1, // +1 rolled die (XkY: increase X)
+    keepBonus: 1, // +1 kept die (XkY: increase Y)
+    message: null
+  };
+}
 
-  // Step 2: Execute spending with exclusive lock to prevent race conditions
-  return updateUnderLock(resolvedActor.id, async () => {
-    // Step 3: Validate Void Point availability (inside lock)
-    const validation = validateVoidPoints(resolvedActor, count);
+/**
+ * Spend Void Points inside a write already queued on the actor (queueActorWrite): check the pool for all of them, then
+ * take them in one `actor.update` with `diff: true`, together with any other change the caller's write makes from the
+ * same stored values (a damage result's Wounds). Availability is checked on the prepared pool; the write starts from
+ * the stored value, so an Active Effect on Void Points is never written into storage (B6).
+ * game-rules/25_rings_and_traits.md, p.78
+ * @param {Actor} actor
+ * @param {number} count - Void Points to spend together
+ * @param {function(object): object} [buildChange] - Gets the actor's stored `system` and returns more of the update
+ * @returns {Promise<VoidSpend>}
+ */
+export async function spendQueuedVoidPoints(actor, count, buildChange = () => ({})) {
+  const { valid, current } = validateVoidPoints(actor, count);
+  if (!valid) {
+    return { spent: false, current, overLimit: false };
+  }
+  const overLimit = isVoidOverLimit(actor, count);
+  const stored = actor._source.system;
+  await actor.update(
+    {
+      "system.rings.void.value": stored.rings.void.value - count,
+      ...buildVoidUseUpdate(actor, count),
+      ...buildChange(stored)
+    },
+    { diff: true }
+  );
+  return { spent: true, current: current - count, overLimit };
+}
 
-    // Step 4: Early return if validation failed (not enough Void Points)
-    if (!validation.valid) {
-      return buildVoidRefusal(validation.message);
-    }
+/** Register the GM side of a player's Void Point spend. */
+export function registerVoidQueries() {
+  registerGmQuery(SPEND_VOID_QUERY, (request, { user }) => applyVoidSpendRequest(request, user));
+}
 
-    warnVoidLimit(resolvedActor, count);
+/**
+ * Spend Void Points where every spend for the actor is queued: on this client when it is the GM's, or when no GM is
+ * connected and the player spends their own character's (Ernie's ruling, #170); otherwise on the active GM's.
+ * @param {Actor} actor
+ * @param {number} count
+ * @returns {Promise<{value: VoidSpend}|{refusal: string}>} The spend, or the localized reason the GM side refused
+ */
+async function requestVoidSpend(actor, count) {
+  const spendHere = () => queueActorWrite(actor, () => spendQueuedVoidPoints(actor, count));
+  if (!game.user.isGM && !game.users.activeGM) {
+    return { value: await spendHere() };
+  }
+  return askGmQuery(SPEND_VOID_QUERY, { actorUuid: actor.uuid, count }, spendHere);
+}
 
-    // Step 5: Spend the Void Points in one write. Availability was checked on the prepared pool; the write starts
-    // from the stored value, so an Active Effect on Void Points is never written into storage (B6).
-    await resolvedActor.update(
-      {
-        "system.rings.void.value": resolvedActor._source.system.rings.void.value - count,
-        ...buildVoidUseUpdate(resolvedActor, count)
-      },
-      { diff: true }
-    );
-
-    // Step 6: Return success with L5R4 +1k1 bonuses
-    return {
-      success: true,
-      rollBonus: 1, // +1 rolled die (XkY: increase X)
-      keepBonus: 1, // +1 kept die (XkY: increase Y)
-      message: null
-    };
-  });
+/**
+ * A player's Void Point spend, on the GM: the request came from another client, so the actor must exist, the count be
+ * a whole number of at least one, and the player own the actor.
+ * @param {{actorUuid: string, count: number}} request
+ * @param {User} user - The requesting user
+ * @returns {Promise<VoidSpend>}
+ */
+async function applyVoidSpendRequest({ actorUuid, count }, user) {
+  const actor = await fromUuid(String(actorUuid));
+  if (actor?.documentName !== "Actor" || !Number.isInteger(count) || count < 1) {
+    throw new Error("l5r4.ui.requests.notVoidSpend");
+  }
+  if (!actor.testUserPermission(user, "OWNER")) {
+    throw new Error("l5r4.ui.requests.notYourVoid");
+  }
+  return queueActorWrite(actor, () => spendQueuedVoidPoints(actor, count));
 }
 
 /**
@@ -200,34 +260,4 @@ function buildVoidRefusal(message) {
     keepBonus: 0,
     message
   };
-}
-
-/**
- * Execute a function with an exclusive lock on the specified actor.
- * Prevents race conditions when multiple operations attempt to modify
- * the same actor's resources simultaneously.
- *
- * Uses a simple spin-lock pattern: waits until lock is available,
- * acquires lock, executes function, releases lock in finally block.
- *
- * @param {string} actorId - Actor ID to lock
- * @param {Function} fn - Async function to execute with lock held
- * @returns {Promise<*>} Result of the function execution
- */
-async function updateUnderLock(actorId, fn) {
-  // Spin-lock: wait until actor is unlocked
-  while (actorLocks.get(actorId)) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-
-  // Acquire lock
-  actorLocks.set(actorId, true);
-
-  try {
-    // Execute function with lock held
-    return await fn();
-  } finally {
-    // Always release lock, even if function throws
-    actorLocks.delete(actorId);
-  }
 }

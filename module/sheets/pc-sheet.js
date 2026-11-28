@@ -2,19 +2,16 @@
  * @module sheets/pc-sheet
  * @description The player character sheet. On top of BaseActorSheet it routes the PC's actions to the handlers
  * (PcAdjustmentHandler for spell slots and rank tracks; PcTraitHandler for Traits; TraitHandler for the Void Ring;
- * AppLauncherHandler for the configuration windows; StanceHandler; PcRollHandler and RollHandler; PcActionsHandler;
- * RestHandler), builds the sorted item lists and
- * Mastery Abilities through PcContextBuilder, enriches the notes with TextEditor.enrichHTML, and shows a limited view
- * (pc-limited.hbs) to a player who does not own the character.
+ * AppLauncherHandler for the configuration windows; StanceHandler; PcRollHandler; PcActionsHandler), builds the
+ * sorted item lists and Mastery Abilities through PcContextBuilder, and shows a limited view (pc-limited.hbs) to a
+ * player who does not own the character.
  */
 import { SYS_ID } from "../config/constants.js";
 import { STANCES } from "../config/localization.js";
-import { on } from "../utils/dom.js";
 import { F } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { effectsOf } from "../services/effects/apply.js";
 import { openLedgerDialog } from "../services/ledger.js";
-import { activeItemIdsOf, updateActivation } from "../services/effects/activation.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
@@ -24,8 +21,6 @@ import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
-
-const { TextEditor } = foundry.applications.ux;
 
 /**
  * L5R4 Player Character Sheet
@@ -79,9 +74,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
   };
 
   /**
-   * The PC sheet's click actions: the shared ones (BaseActorSheet.CLICK_ACTIONS) and the PC's own, the Ring and
-   * weapon damage rolls, rank points and spell slots, Traits with the family bonus, the Void Point uses, the PC's
-   * windows, item activation, and the GM's recalculation and Insight Rank mode.
+   * The PC sheet's click actions: the shared ones (BaseActorSheet.CLICK_ACTIONS) and the PC's own, the Ring roll,
+   * rank points, Traits with the family bonus, the Void Point uses, the PC's windows, and the GM's recalculation and
+   * Insight Rank mode.
    *
    * @type {Readonly<Record<string, function(L5R4PcSheet, Event, HTMLElement): unknown>>}
    */
@@ -89,12 +84,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     ...super.CLICK_ACTIONS,
     "roll-ring": (sheet, event, element) =>
       PcRollHandler.rollClickedRing(sheet._getHandlerContext(), event, element),
-    "roll-weapon-damage": (sheet, event, element) =>
-      PcRollHandler.rollWeaponDamage(sheet._getHandlerContext(), event, element),
     "adjust-rank-points": (sheet, event, element) =>
       PcAdjustmentHandler.updateRankPoints(sheet._getHandlerContext(), event, element, +0.1),
-    "adjust-spell-slot": (sheet, event, element) =>
-      PcAdjustmentHandler.updateSpellSlot(sheet._getHandlerContext(), event, element, +1),
     "adjust-trait": (sheet, event, element) =>
       PcTraitHandler.updateTraitRank(sheet._getHandlerContext(), event, element, +1),
     "increase-trait": (sheet, event, element) =>
@@ -112,30 +103,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
     "open-wealth-manager": (sheet, event, element) =>
       AppLauncherHandler.openWealthManager(sheet._getHandlerContext(), event, element),
     "open-ledger": sheet => openLedgerDialog(sheet.actor),
-    "toggle-activation": (sheet, _event, element) => {
-      const item = sheet.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
-      return item ? updateActivation(sheet.actor, item) : undefined;
-    },
     "recalculate-sheet": (sheet, event, element) => sheet._onRecalcSheet(event, element),
     "toggle-rank-mode": (sheet, event, element) =>
       PcActionsHandler.updateRankMode(sheet._getHandlerContext(), event, element)
   });
 
   /**
-   * Tracks bound root element for extra event listeners.
-   *
-   * Used to prevent duplicate binding of non-delegated event listeners
-   * (image edit click) during re-renders.
-   *
-   * @type {HTMLElement|null}
-   */
-  #boundExtraRoot = null;
-
-  /**
    * Prepares template context data for PC sheet rendering.
    *
    * Builds comprehensive context object with:
-   * - Enriched HTML (notes with @UUID, inline rolls)
    * - Sorted item collections (skills, spells, weapons, etc.) with roll formulas
    * - Bio items (clan, family, school)
    * - Effective traits (includes wound penalties)
@@ -160,7 +136,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _prepareContext(_options) {
     const base = await super._prepareContext(_options);
     const actorObj = this.document;
-    const { system, enrichedNotes } = await this.#prepareNotes(actorObj);
 
     const all = actorObj.items.contents ?? actorObj.items;
     const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
@@ -168,12 +143,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const context = {
       ...base,
       actor: this.actor,
-      system,
-      ...buildBioFields(all),
+      system: foundry.utils.deepClone(actorObj.system),
+      ...PcContextBuilder.buildBioFields(all),
       editable: this.isEditable,
       // The Insight Rank's computed or typed switch shows to a GM only
       isGM: game.user.isGM,
-      enriched: { notes: enrichedNotes },
       ...buildStatusFields(actorObj),
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {
@@ -320,83 +294,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const form = foundry.utils.parseHTML(html);
     return { form };
   }
-
-  /**
-   * Post-render lifecycle hook for DOM manipulation and event binding.
-   *
-   * Binds the image edit click handler (non-delegated).
-   *
-   * **Guard Logic:**
-   * Tracks #boundExtraRoot to prevent duplicate event binding on re-renders.
-   * Only binds events if actor is owned by current user.
-   *
-   * @param {object} context - Template context from _prepareContext
-   * @param {object} options - Render options from Application v2
-   * @returns {Promise<void>}
-   * @override
-   */
-  async _onRender(context, options) {
-    await super._onRender(context, options);
-    const root = this.element;
-
-    // Guard: Only bind non-delegated events once per root element
-    if (this.#boundExtraRoot === root) {
-      return;
-    }
-    this.#boundExtraRoot = root;
-    if (!this.actor.isOwner) {
-      return;
-    }
-
-    on(root, "click", {
-      selector: "[data-edit='img']",
-      handler: ev => this._onEditImage(ev, ev.currentTarget)
-    });
-  }
-
-  /**
-   * The sheet's copy of the system data, its notes as a string, and the notes enriched with core's links, `@UUID`
-   * references, and inline rolls; secrets show to a user who can edit the character.
-   * @param {Actor} actorObj
-   * @returns {Promise<{system: object, enrichedNotes: string}>}
-   */
-  async #prepareNotes(actorObj) {
-    const system = foundry.utils.deepClone(actorObj.system ?? {});
-    if (typeof system.notes !== "string") {
-      system.notes = String(system.notes ?? "");
-    }
-    const enrichedNotes = await TextEditor.enrichHTML(system.notes ?? "", {
-      async: true,
-      secrets: this.isEditable,
-      documents: true,
-      links: true
-    });
-    return { system, enrichedNotes };
-  }
 }
 
 /**
- * The character's Clan, Family, and School items, for the Bio rows. Each School comes with the School Skills its
- * Techniques wait for, which a second School keeps in `flags.l5r4-enhanced.waitingFor`
- * (module/documents/item/lifecycle/second-school.js).
- * @param {Item[]} all - The character's items
- * @returns {{bioClan: Item|null, bioFamily: Item|null, bioSchools: Array<{item: Item, waitingFor: string[]}>}}
- */
-function buildBioFields(all) {
-  const bioItems = PcContextBuilder.getBioItems(all);
-  return {
-    bioClan: bioItems.clan,
-    bioFamily: bioItems.family,
-    bioSchools: bioItems.schools.map(item => ({
-      item,
-      waitingFor: item.getFlag(SYS_ID, "waitingFor") ?? []
-    }))
-  };
-}
-
-/**
- * The character's state the sheet shows: effective Traits, stance, Void for Armor TN, the activated items, and the
- * collapsed sections.
+ * The character's state the sheet shows: effective Traits, stance, Void for Armor TN, and the collapsed sections.
  * @param {Actor} actorObj
  * @returns {object}
  */
@@ -405,7 +306,6 @@ function buildStatusFields(actorObj) {
     traitsEff: PcContextBuilder.getEffectiveTraits(actorObj),
     currentStance: PcContextBuilder.getStance(actorObj),
     voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
-    activeItemIds: activeItemIdsOf(actorObj),
     collapsedSections: PcContextBuilder.getCollapsedSections(actorObj.id)
   };
 }

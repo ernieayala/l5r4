@@ -9,6 +9,7 @@ import { SYS_ID } from "../config/constants.js";
 import { ACTION_TYPES } from "../config/localization.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
+import { getWindowId } from "../utils/window-id.js";
 
 /**
  * The attack configuration window for one NPC attack slot.
@@ -66,7 +67,7 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `npc-attack-config-${actor.id}-${attackKey}`
+      id: NpcAttackConfigApplication.getWindowId(actor, attackKey)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -145,7 +146,8 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
 
   /**
    * Handle form submission to update NPC attack and damage data.
-   * Expands form data and updates both attack and damage keys on actor.
+   * Expands form data and updates both attack and damage keys on actor. A failed update throws, so core shows the
+   * reason and keeps the window open with what was entered (#141); a successful one closes it (`closeOnSubmit`).
    *
    * @param {Event} _event - The submit event (unused)
    * @param {HTMLFormElement} _form - The form element (unused)
@@ -163,16 +165,19 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
         [`system.${this.attackKey}`]: data[this.attackKey],
         [`system.${this.damageKey}`]: data[this.damageKey]
       });
-
-      this.close();
     } catch (err) {
-      logError("Failed to update NPC attack", err, {
-        actorId: this.actor?.id,
-        attackKey: this.attackKey,
-        damageKey: this.damageKey
-      });
-      ui.notifications?.error(T("l5r4.apps.npcAttackConfig.errors.updateFailed"));
+      throw new Error(T("l5r4.apps.npcAttackConfig.errors.updateFailed"), { cause: err });
     }
+  }
+
+  /**
+   * The id of the actor's window for one attack slot, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @param {string} attackKey - "attack1" to "attack3"
+   * @returns {string}
+   */
+  static getWindowId(actor, attackKey) {
+    return getWindowId("npc-attack-config", actor.uuid, attackKey);
   }
 
   /**

@@ -8,6 +8,7 @@ import WealthManagerApplication from "../../module/apps/wealth-manager.js";
 import WoundConfigApplication from "../../module/apps/wound-config.js";
 import XpManagerApplication from "../../module/apps/xp-manager.js";
 import { ItemCrudHandler } from "../../module/sheets/handlers/item-crud-handler.js";
+import { AppLauncherHandler } from "../../module/sheets/handlers/app-launcher-handler.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import {
   createArmorData,
@@ -22,6 +23,7 @@ import {
   buttonLabelsOf,
   changeThroughSheet,
   cleanTest,
+  createDrawnToken,
   nextUpdate,
   settleChatNotifications,
   waitFor
@@ -820,6 +822,95 @@ export function registerSheetsAndAppsTests(quench) {
           await saved;
         };
 
+        // #189: one window per actor, found among core's open ApplicationV2 windows
+        it(
+          "should bring an actor's open window to the front, not open a second where the first was",
+          clean(async () => {
+            const launchers = {
+              openArmorConfig: ArmorConfigApplication,
+              openCombatConfig: CombatConfigApplication,
+              openConditionManager: ConditionManagerApplication,
+              openWoundConfig: WoundConfigApplication,
+              openXpManager: XpManagerApplication,
+              openWealthManager: WealthManagerApplication
+            };
+            for (const [launch, AppClass] of Object.entries(launchers)) {
+              const id = AppClass.getWindowId(pc);
+              await AppLauncherHandler[launch]({ actor: pc });
+              const first = foundry.applications.instances.get(id);
+              first.setPosition({ left: 50, top: 50 });
+              await AppLauncherHandler[launch]({ actor: pc });
+              try {
+                assert.strictEqual(foundry.applications.instances.get(id), first, launch);
+                assert.equal(first.position.left, 50, `${launch}: it stays where it was`);
+              } finally {
+                await first.close({ animate: false });
+              }
+            }
+          })
+        );
+
+        it(
+          "should give each unlinked token of one actor its own window",
+          clean(async () => {
+            const tokens = [];
+            try {
+              for (const x of [100, 300]) {
+                tokens.push(
+                  await createDrawnToken({ actorId: npc.id, actorLink: false, x, y: 100 })
+                );
+              }
+              const [a, b] = tokens.map(token => token.actor);
+              await AppLauncherHandler.openConditionManager({ actor: a });
+              await AppLauncherHandler.openConditionManager({ actor: b });
+              const windows = [a, b].map(actor =>
+                foundry.applications.instances.get(ConditionManagerApplication.getWindowId(actor))
+              );
+              assert.notStrictEqual(windows[0], windows[1]);
+              assert.isTrue(
+                windows.every(app => app?.rendered),
+                "both stay open"
+              );
+              for (const app of windows) {
+                await app.close({ animate: false });
+              }
+            } finally {
+              await canvas.scene.deleteEmbeddedDocuments(
+                "Token",
+                tokens.map(token => token.id)
+              );
+            }
+          })
+        );
+
+        it(
+          "should redraw the Wealth manager on a change from elsewhere, keeping a fraction typed on the sheet",
+          clean(async () => {
+            await pc.update({ "system.wealth": { koku: 2.5, bu: 0, zeni: 0 } });
+            await AppLauncherHandler.openWealthManager({ actor: pc });
+            const app = foundry.applications.instances.get(
+              WealthManagerApplication.getWindowId(pc)
+            );
+            try {
+              // The koku, bu, and zeni shown, each the value after its label
+              const shown = () =>
+                [...app.element.querySelectorAll("label + div")]
+                  .slice(0, 3)
+                  .map(value => value.textContent.trim());
+              assert.deepEqual(shown(), ["2.5", "0", "0"], "the fraction shows as stored");
+              await pc.update({ "system.wealth.bu": 3 });
+              assert.isTrue(await waitFor(() => shown()[1] === "3"), "the window shows the new bu");
+              const saved = nextUpdate(pc);
+              app.element.querySelector("[data-action='convert-down'][data-from='bu']").click();
+              await saved;
+              assert.deepEqual(pc._source.system.wealth, { koku: 2.5, bu: 2, zeni: 10 });
+            } finally {
+              await app.close({ animate: false });
+              await pc.update({ "system.wealth": { koku: 0, bu: 0, zeni: 0 } });
+            }
+          })
+        );
+
         it(
           "should save a combat config field and run every action",
           clean(async function () {
@@ -1235,7 +1326,10 @@ export function registerSheetsAndAppsTests(quench) {
             let labels = {};
             const answered = answerDialog(dialog => {
               labels = buttonLabelsOf(dialog);
-              dialog.element.querySelector('[name="itemName"]').value = "Sheets Lantern";
+              // Typed as a user types it: Add waits for a name (#142)
+              const name = dialog.element.querySelector('[name="itemName"]');
+              name.value = "Sheets Lantern";
+              name.dispatchEvent(new Event("input", { bubbles: true }));
               dialog.element.querySelector('[data-action="ok"]').click();
             });
             const [item] = await create();

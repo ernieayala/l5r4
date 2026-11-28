@@ -12,12 +12,8 @@ import {
   getCreationFreeBonus,
   getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
-import {
-  getCostPricer,
-  getKihoLimits,
-  getXpEntries,
-  getXpTotals
-} from "../../../utils/xp-ledger.js";
+import { getKihoLimits, getKihoPrice } from "../../../utils/kiho.js";
+import { getCostPricer, getXpEntries, getXpTotals } from "../../../utils/xp-ledger.js";
 
 /**
  * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25
@@ -136,12 +132,14 @@ function xpRanksOf(actor, flags) {
       stored: toInt(stored.traits[key]),
       freeBase: toInt(freeTraitBase[key] ?? 0),
       bonus: toInt(getCreationFreeBonus(actor, key)),
+      legacy: toInt(getCreationFreeBonusSources(actor, key).legacy),
       discount: toInt(traitDiscounts[key] ?? 0)
     })),
     void: {
       stored: toInt(stored.rings.void.rank),
       freeBase: toInt(freeTraitBase.void ?? 0),
       bonus: toInt(getCreationFreeBonus(actor, "void")),
+      legacy: toInt(getCreationFreeBonusSources(actor, "void").legacy),
       discount: toInt(traitDiscounts.void ?? 0)
     }
   };
@@ -166,15 +164,17 @@ function xpSkillsOf(actor) {
 }
 
 /**
- * The priced items: Advantages and Disadvantages at their cost; a kata, a kiho, and a memorized spell at their
- * Mastery Level (#43), and a kiho the Monk School gives at 0 (Stage 18 decision 19).
+ * The priced items: Advantages and Disadvantages at their cost; a kata and a memorized spell at their Mastery Level
+ * (#43); a kiho at its buyer's price (getKihoPrice, #159), and one the Monk School gives at 0 (Stage 18 decision 19).
  * game-rules/66_magic_and_spell_casting.md, p.164
  * game-rules/80_brotherhood_of_shinsei.md, p.231
  * game-rules/86_kata.md, p.259
+ * game-rules/87_kiho.md, p.266
  * @param {Actor} actor
  * @returns {import("../../../utils/xp-ledger.js").XpItem[]}
  */
 function xpItemsOf(actor) {
+  const access = actor.system.kihoBuyer?.access;
   const items = [];
   for (const item of actor.items) {
     if (["advantage", "disadvantage"].includes(item.type)) {
@@ -183,13 +183,10 @@ function xpItemsOf(actor) {
       ["kata", "kiho"].includes(item.type) ||
       (item.type === "spell" && item.system.memorized === true)
     ) {
-      const free = item.type === "kiho" && item.system.schoolKiho;
-      items.push({
-        id: item.id,
-        type: item.type,
-        name: item.name,
-        cost: free ? 0 : toInt(item.system.mastery)
-      });
+      const mastery = toInt(item.system.mastery);
+      const cost =
+        item.type !== "kiho" ? mastery : item.system.schoolKiho ? 0 : getKihoPrice(mastery, access);
+      items.push({ id: item.id, type: item.type, name: item.name, cost });
     }
   }
   return items;

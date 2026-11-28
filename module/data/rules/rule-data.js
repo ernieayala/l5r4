@@ -5,6 +5,7 @@
  */
 
 import { RULE_KEYS } from "../../config/rule-keys.js";
+import { predicateField } from "../fields.js";
 
 /**
  * Base DataModel for one entry of `system.rules` (roadmap/AUTOMATION.md §1). Each rule key extends it with its own
@@ -15,14 +16,13 @@ import { RULE_KEYS } from "../../config/rule-keys.js";
 export default class RuleData extends foundry.abstract.DataModel {
   /** @override */
   static defineSchema() {
-    const { ArrayField, AnyField, NumberField, StringField } = foundry.data.fields;
+    const { NumberField, StringField } = foundry.data.fields;
     return {
       key: new StringField({ required: true, blank: false, choices: RULE_KEYS }),
       label: new StringField({ required: true, blank: true, initial: "" }),
       // Lower runs first, as Active Effect change priorities do.
       priority: new NumberField({ required: true, nullable: false, initial: 100 }),
-      // Terms of module/utils/predicate.js: option strings and { not | or | and | gte | ... } objects.
-      predicate: new ArrayField(new AnyField({ serializable: true, nullable: false }))
+      predicate: predicateField()
     };
   }
 }

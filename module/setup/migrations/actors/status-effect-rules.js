@@ -3,31 +3,18 @@
  * @description Gives status effects created before the rule engine the rules, group, and level their status now
  * carries.
  */
-import { SYS_ID } from "../../../config/constants.js";
 import { buildStatusEffectUpdate } from "../../../utils/status-data.js";
 
 /**
- * Bring each actor's stored status effects up to date (module/utils/status-data.js). The code that gave 3.2.1's
- * stances and conditions their mechanics is gone, so their effects carry them as rules.
- *
- * @param {Document[]} docs - Actor documents to scan
- * @param {string} label - Migration context label for console logging
+ * Bring one stored status effect up to date (module/utils/status-data.js). The code that gave 3.2.1's stances and
+ * conditions their mechanics is gone, so their effects carry them as rules. It runs once per effect (#181), so rules
+ * a GM empties afterwards stay empty.
+ * @param {ActiveEffect} effect
  * @returns {Promise<void>}
  */
-export async function migrateStatusEffectRules(docs, label) {
-  for (const actor of docs) {
-    if (actor.documentName !== "Actor") {
-      continue;
-    }
-    try {
-      const updates = actor.effects
-        .map(effect => buildStatusEffectUpdate(effect._source))
-        .filter(Boolean);
-      if (updates.length > 0) {
-        await actor.updateEmbeddedDocuments("ActiveEffect", updates, { render: false });
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to add status effect rules", { label, id: actor.id, err });
-    }
+export async function migrateStatusEffectRules(effect) {
+  const update = buildStatusEffectUpdate(effect._source);
+  if (update) {
+    await effect.update(update, { render: false });
   }
 }

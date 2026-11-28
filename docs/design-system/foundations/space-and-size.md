@@ -93,8 +93,8 @@ Chat card buttons run full width, one per row (`.l5r4-flow-card` (`scss/componen
 | `--l5r4-size-column-60` | 60px | Item list column | `&.-skill` and `&.-spell` (`scss/components/_item-row.scss`) |
 | `--l5r4-size-column-80` | 80px | Item list column | `&.-advantage`, `&.-armor`, `&.-disadvantage`, `&.-kata`, `&.-kiho`, `&.-spell`, `&.-weapon`, and `&.-xp-spent` (`scss/components/_item-row.scss`) |
 | `--l5r4-size-column-100` | 100px | Item list column | `&.-armor` (`scss/components/_item-row.scss`) |
-| `--l5r4-size-column-120` | 120px | Item list column | `&.-skill` and `&.-xp-spent` (`scss/components/_item-row.scss`) |
-| `--l5r4-size-column-150` | 150px | Item list column | `&.-weapon` and `&.-xp` (`scss/components/_item-row.scss`) |
+| `--l5r4-size-column-120` | 120px | Item list column | `&.-xp-spent` (`scss/components/_item-row.scss`) |
+| `--l5r4-size-column-150` | 150px | Item list column | `&.-skill`, `&.-weapon`, and `&.-xp` (`scss/components/_item-row.scss`) |
 | `--l5r4-size-column-controls` | 102px | Item list column holding the row's controls | Every list variant of `.l5r4-item-row-list` (`scss/components/_item-row.scss`) |
 
 Glyph sizes for icons are in `foundations/iconography.md`. Components read core's field height (`--input-height`, 2rem) as core sets it.

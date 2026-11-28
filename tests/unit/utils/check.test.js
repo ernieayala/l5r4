@@ -6,10 +6,25 @@ import {
   getMaxRaises,
   parseRollAndKeep,
   getPoolFormula,
-  getTn
+  getTn,
+  isForRange
 } from "../../../module/utils/check.js";
 
 const pool = spec => buildPool(spec);
+
+// #171
+describe("isForRange", () => {
+  it("should apply an entry with no range at any range, and on a roll with none", () => {
+    expect(isForRange({}, "melee")).toBe(true);
+    expect(isForRange({}, null)).toBe(true);
+  });
+
+  it("should apply a range-limited entry only at its range, never on a roll with none", () => {
+    expect(isForRange({ range: "melee" }, "melee")).toBe(true);
+    expect(isForRange({ range: "melee" }, "ranged")).toBe(false);
+    expect(isForRange({ range: "melee" }, null)).toBe(false);
+  });
+});
 
 describe("buildPool", () => {
   // The book's example: Kyujutsu 4, Reflexes 3 is 7k3
@@ -110,6 +125,22 @@ describe("buildPool", () => {
   it("should let the roller keep fewer dice, never more", () => {
     expect(pool({ roll: 4, keep: 2, keepOverride: 1 })).toMatchObject({ keep: 1 });
     expect(pool({ roll: 4, keep: 2, keepOverride: 3 })).toMatchObject({ keep: 2 });
+  });
+
+  // #150: the Ten Dice Rule's +2s stay when the roller keeps fewer (Ernie's ruling)
+  // game-rules/26_special_dice_rules.md, p.77
+  it("should keep the roller's fewer dice after the Ten Dice Rule, its +2s staying", () => {
+    expect(pool({ roll: 12, keep: 4, keepOverride: 3 })).toMatchObject({
+      roll: 10,
+      keep: 3,
+      bonus: 0
+    });
+    expect(pool({ roll: 12, keep: 4, keepOverride: 6 })).toMatchObject({ roll: 10, keep: 5 });
+    expect(pool({ roll: 14, keep: 12, keepOverride: 3 })).toMatchObject({
+      roll: 10,
+      keep: 3,
+      bonus: 12
+    });
   });
 });
 
@@ -253,6 +284,38 @@ describe("contest", () => {
         { id: "b", total: 17 }
       ])
     ).toMatchObject({ winner: "a", tie: false });
+  });
+
+  // #166, Ernie's ruling: both sides falling short of their Raises is a tie
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should call a tie when both sides fall short of their Raises", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 40, raises: 2 },
+        { id: "b", total: 32, raises: 1 }
+      ])
+    ).toMatchObject({ winner: null, tie: true });
+  });
+
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should give the win to a side that makes its Raises when the other side raised too", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 40, raises: 1 },
+        { id: "b", total: 32, raises: 1 }
+      ])
+    ).toMatchObject({ winner: "a", tie: false });
+  });
+
+  // game-rules/29_types_of_rolls.md, p.80
+  it("should drop a raiser who falls short and give the win to the best of the rest", () => {
+    expect(
+      getContestResult([
+        { id: "a", total: 50, raises: 3 },
+        { id: "b", total: 40 },
+        { id: "c", total: 30 }
+      ]).winner
+    ).toBe("b");
   });
 
   // game-rules/29_types_of_rolls.md, p.80

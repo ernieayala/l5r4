@@ -82,7 +82,31 @@ describe("buildGrantedSkill", () => {
         trainedEmphases: ["Void Recovery"],
         freeEmphasis: 1
       },
-      record: { freeRanks: 1, emphasis: "Void Recovery", freeEmphasis: 1 }
+      record: {
+        freeRanks: 1,
+        emphasis: "Void Recovery",
+        freeEmphasis: 1,
+        rank: 1,
+        grantEmphasis: "Void Recovery"
+      }
+    });
+  });
+
+  // #160: a grant gives a Skill at a rank; a second grant of it adds nothing (Ernie's ruling)
+  // game-rules/48_character_creation_expanded.md, p.103
+  it("should give a Skill granted twice no more free ranks or Emphases than it holds", () => {
+    const once = buildGrantedSkill(skill(), rule("a", 0, { emphasis: "Void Recovery" })).update;
+    const { update, record: rec } = buildGrantedSkill(
+      once,
+      rule("b", 0, { emphasis: "Void Recovery" })
+    );
+    expect(update).toMatchObject({ rank: 1, freeRanks: 1, freeEmphasis: 1 });
+    expect(rec).toEqual({
+      freeRanks: 0,
+      emphasis: "",
+      freeEmphasis: 0,
+      rank: 1,
+      grantEmphasis: "Void Recovery"
     });
   });
 
@@ -97,7 +121,13 @@ describe("buildGrantedSkill", () => {
       availableEmphases: ["Katana"],
       trainedEmphases: ["Katana"]
     });
-    expect(rec).toEqual({ freeRanks: 1, emphasis: "", freeEmphasis: 1 });
+    expect(rec).toEqual({
+      freeRanks: 1,
+      emphasis: "",
+      freeEmphasis: 1,
+      rank: 1,
+      grantEmphasis: "Katana"
+    });
   });
 
   // #187: Lore: Theology granted to a Skill that does not list it
@@ -143,5 +173,38 @@ describe("buildUngrantedSkill", () => {
     expect(
       buildUngrantedSkill(skill({ rank: 1, freeRanks: 1 }), record("u", { created: false }))
     ).toMatchObject({ update: { freeRanks: 0 } });
+  });
+
+  // #160: removing one of two givers keeps what the other grants
+  it("should keep the Skill, its free rank, and its Emphasis another giver still grants", () => {
+    const granted = skill({
+      rank: 1,
+      freeRanks: 1,
+      trainedEmphases: ["Void Recovery"],
+      freeEmphasis: 1
+    });
+    const first = record("a", { emphasis: "Void Recovery", freeEmphasis: 1, rank: 1 });
+    const second = record("b", {
+      created: false,
+      freeRanks: 0,
+      rank: 1,
+      grantEmphasis: "Void Recovery"
+    });
+    expect(buildUngrantedSkill(granted, first, [second])).toEqual({
+      update: {
+        freeRanks: 1,
+        school: true,
+        trainedEmphases: ["Void Recovery"],
+        freeEmphasis: 1
+      }
+    });
+    expect(buildUngrantedSkill(granted, second, [first])).toEqual({
+      update: {
+        freeRanks: 1,
+        school: true,
+        trainedEmphases: ["Void Recovery"],
+        freeEmphasis: 1
+      }
+    });
   });
 });

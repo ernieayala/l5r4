@@ -2,8 +2,6 @@
  * @module setup/migrations/items/bow-to-weapon
  * @description Converts the legacy "bow" item type to the unified "weapon" type with the isBow flag.
  */
-import { SYS_ID } from "../../../config/constants.js";
-
 /**
  * Migrates legacy "bow" item type to unified "weapon" type with isBow flag.
  *
@@ -11,10 +9,6 @@ import { SYS_ID } from "../../../config/constants.js";
  * preserving bow-specific properties (str requirement, range, arrow type) while unifying
  * the item type structure. This migration enables shared weapon systems while maintaining
  * bow-specific mechanics like ranged attacks and arrow compatibility.
- *
- * Idempotency: Called from migrateWorld() which filters out already-migrated documents,
- * so this function only processes documents that haven't been migrated yet. This prevents
- * re-converting already-migrated bows when forceMigration is triggered.
  *
  * Migration Details:
  * - Sets damageKeep: 0 (bows calculate damage differently than melee weapons)
@@ -25,34 +19,17 @@ import { SYS_ID } from "../../../config/constants.js";
  * Uses diff: false because changing document type requires full replacement, not incremental
  * patching. Foundry VTT doesn't support partial updates when document type changes.
  *
- * @param {Document[]} docs - Array of Item documents to scan for bow types
- * @param {string} label - Migration context label for console logging (e.g., "world-items")
+ * @param {Item} item - An item; anything but a bow is left alone
  * @returns {Promise<void>}
  */
-export async function migrateBowsToWeapons(docs, label) {
-  const bowItems = docs.filter(doc => doc.type === "bow");
-  if (bowItems.length === 0) {
+export async function migrateBowToWeapon(item) {
+  if (item.type !== "bow") {
     return;
   }
-
-  console.warn(`${SYS_ID} | Migrating ${bowItems.length} bow items to weapons (${label})`);
-
-  for (const item of bowItems) {
-    try {
-      const updateData = {
-        type: "weapon",
-        system: buildBowWeaponSystem(item)
-      };
-
-      await item.update(updateData, { diff: false, recursive: false, render: false });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate bow item", {
-        id: item.id,
-        name: item.name,
-        err
-      });
-    }
-  }
+  await item.update(
+    { type: "weapon", system: buildBowWeaponSystem(item) },
+    { diff: false, recursive: false, render: false }
+  );
 }
 
 /**

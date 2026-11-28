@@ -57,8 +57,10 @@ async function askChoices(request, context, bind) {
     content,
     ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => formDataOf(button.form) },
     render: (_event, dialog) => {
+      const form = dialog.element.querySelector("form");
       bindVoidUses(dialog.element, context.voidPoints);
-      bind?.(dialog.element.querySelector("form"));
+      bind?.(form);
+      request.extras?.bind?.(form);
     },
     rejectClose: false,
     modal: true

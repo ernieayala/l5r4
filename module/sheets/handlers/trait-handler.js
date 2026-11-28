@@ -7,6 +7,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { F, T } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
 import { RollHandler } from "./roll-handler.js";
 
@@ -62,7 +63,9 @@ export class TraitHandler {
     // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)
     const next = getClamped(cur + (delta > 0 ? 1 : -1), 0, 10);
 
+    // At its bound: say so, rather than a click that does nothing (#142)
     if (next === cur) {
+      warnAtLimit(T(`l5r4.ui.mechanics.traits.${key}`), delta);
       return;
     }
 
@@ -162,8 +165,11 @@ export class TraitHandler {
   static async updateVoidRing(context, event, element, delta) {
     event?.preventDefault?.();
 
-    // Safety: require Shift key to prevent accidental adjustment
+    // Safety: require Shift key to prevent accidental adjustment; a plain click says how (#142)
     if (!event?.shiftKey) {
+      ui.notifications?.info(
+        F("l5r4.ui.notifications.shiftToChange", { name: T("l5r4.ui.mechanics.rings.void") })
+      );
       return;
     }
 
@@ -180,8 +186,9 @@ export class TraitHandler {
     // Calculate next value: delta sign determines direction
     const next = getClamped(cur + (delta > 0 ? 1 : -1), min, max);
     if (next === cur) {
+      warnAtLimit(T("l5r4.ui.mechanics.rings.void"), delta);
       return;
-    } // No-op if already at boundary
+    }
 
     try {
       await context.actor.update({ "system.rings.void.rank": next }, { diff: true });
@@ -189,4 +196,15 @@ export class TraitHandler {
       console.warn(`${SYS_ID} TraitHandler: failed to update void ring rank`, { err });
     }
   }
+}
+
+/**
+ * Tell the user a sheet control is already at its bound, so a click that changes nothing says why (#142).
+ * @param {string} name - What the control changes, localized: "Agility", "Void Points"
+ * @param {number} delta - The step asked for: positive at the highest, else the lowest
+ */
+export function warnAtLimit(name, delta) {
+  ui.notifications?.warn(
+    F(`l5r4.ui.notifications.atLimit.${delta > 0 ? "highest" : "lowest"}`, { name })
+  );
 }

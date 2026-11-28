@@ -76,7 +76,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       // The failed roll this Honor Roll re-rolled
       // game-rules/43_honor.md, p.92
       honorRollOf: stringField(),
-      // An attack's maneuvers; increasedDamage is the declared Raises left for +1k0 each
+      // An attack's maneuvers; cost is the Raises they took, increasedDamage the Raises and unspent Free Raises left
+      // for +1k0 each (#157)
       // game-rules/38_maneuvers.md, p.86-87
       maneuvers: new SchemaField({
         calledShot: numberField(0),
@@ -87,6 +88,7 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
         knockdown: booleanField(false),
         fourLegged: booleanField(false),
         grapple: booleanField(false),
+        cost: numberField(0),
         increasedDamage: numberField(0)
       }),
       // An attack's damage pool at the time of the attack (weapon DR with Strength or arrow, or a stat block's
@@ -103,17 +105,27 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       sources: new ArrayField(stringField()),
       ignoreReduction: numberField(0),
       // The attack a damage roll belongs to
-      attackOf: stringField()
+      attackOf: stringField(),
+      // An attack's range, "melee" or "ranged", which its damage roll keeps; empty for a roll with no range and for an
+      // attack posted before the range was stored (#171)
+      range: stringField()
     };
   }
 
   /**
-   * An attack posted before maneuvers were stored spent all its declared Raises on Increased Damage.
+   * An attack posted before maneuvers were stored spent all its declared Raises on Increased Damage. One posted before
+   * their cost was stored paid it from declared Raises alone: the declared Raises its Increased Damage left (#157).
    * @override
    */
   static migrateData(source) {
     if (source.kind === "attack" && source.maneuvers === undefined && source.tn) {
       source.maneuvers = { increasedDamage: source.tn.raises ?? 0 };
+    }
+    if (source.kind === "attack" && source.maneuvers && source.maneuvers.cost === undefined) {
+      source.maneuvers.cost = Math.max(
+        0,
+        (source.tn?.raises ?? 0) - (source.maneuvers.increasedDamage ?? 0)
+      );
     }
     return super.migrateData(source);
   }

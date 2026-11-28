@@ -95,13 +95,11 @@ export function buildVoidUseUpdate(actor, count = 1) {
 }
 
 /**
- * Warn when Void Points spent now pass the Round's limit; the spending goes ahead.
+ * Warn that a spend passed the Round's Void Point limit; the spend is never blocked. The client that writes the spend
+ * checks the limit (isVoidOverLimit) before writing, and the warning shows on the spender's client.
  * game-rules/25_rings_and_traits.md, p.78
  * @param {Actor} actor
- * @param {number} [count=1] - Void Points about to be spent
  */
-export function warnVoidLimit(actor, count = 1) {
-  if (isVoidOverLimit(actor, count)) {
-    ui.notifications?.warn(game.i18n.localize("l5r4.ui.effects.voidLimit", { name: actor.name }));
-  }
+export function warnVoidLimit(actor) {
+  ui.notifications?.warn(game.i18n.localize("l5r4.ui.effects.voidLimit", { name: actor.name }));
 }

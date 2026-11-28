@@ -2,7 +2,6 @@
  * @module setup/migrations/items/emphasis
  * @description Converts the legacy Emphasis string to the split availableEmphases and trainedEmphases structure.
  */
-import { SYS_ID } from "../../../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../../../config/reference-data.js";
 
 /**
@@ -16,86 +15,34 @@ import { OFFICIAL_EMPHASES } from "../../../config/reference-data.js";
  * - Parse old emphasis string (comma/semicolon delimited)
  * - Merge with existing availableEmphases/trainedEmphases if present (backward compatibility)
  * - For each parsed emphasis:
- *   1. Try to match with official emphases (case-insensitive, singular/plural)
+ *   1. Try to match with official emphases (case-insensitive, singular/plural only)
  *   2. If match found, use official name
  *   3. If no match, create as custom emphasis in world settings
  * - Put matched/created emphasis names into BOTH arrays (deduplicated)
  *   - availableEmphases: Makes them available for selection
  *   - trainedEmphases: Marks them as already trained (they were in old system)
+ * - Clear the old string once its names are in the lists
  * - Skip if no old emphasis data AND already has new format populated
  *
  * Backward Compatibility:
- * - Old "emphasis" field kept in the skill data model (module/data/item/skill-data.js) to prevent data loss
+ * - Old "emphasis" field kept in the skill data model (module/data/item/skill-data.js), empty once migrated
  * - Migration merges old and new data if both exist
- * - Can run multiple times safely (idempotent with deduplication)
  *
  * Examples:
- * Old: system.emphasis = "Dog, Katana, horse, Boogie Woogie"
- * New: system.availableEmphases = ["Dogs", "Katana", "Horses", "Boogie Woogie"]
- *      system.trainedEmphases = ["Dogs", "Katana", "Horses", "Boogie Woogie"]
- *      (Dogs, Katana, Horses matched official; Boogie Woogie created as custom)
+ * Old: system.emphasis = "Dog, Katana, horse, Bokken"
+ * New: system.availableEmphases = ["Dogs", "Katana", "Horses", "Bokken"]
+ *      system.trainedEmphases = ["Dogs", "Katana", "Horses", "Bokken"]
+ *      (Dogs, Katana, Horses matched official; Bokken, which only contains "Bo", created as custom)
  *
- * @param {Document[]} docs - Array of Item documents to scan for skills
- * @param {string} label - Migration context label for console logging
+ * It runs once per skill (#181), so an Emphasis the player untrains afterwards stays untrained.
+ *
+ * @param {Item} item - An item; anything but a skill is left alone
  * @returns {Promise<void>}
  */
-export async function migrateEmphasisStringToArray(docs, label) {
-  const skillItems = docs.filter(doc => doc.type === "skill");
-  if (skillItems.length === 0) {
+export async function migrateEmphasisStringToArray(item) {
+  if (item.type !== "skill") {
     return;
   }
-
-  let migratedCount = 0;
-  const customEmphasisNames = [];
-
-  for (const item of skillItems) {
-    try {
-      if (await migrateSkillEmphasis(item, customEmphasisNames)) {
-        migratedCount++;
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate skill emphasis", {
-        id: item.id,
-        name: item.name,
-        err
-      });
-    }
-  }
-
-  logEmphasisMigration(migratedCount, { customEmphasisNames, label });
-}
-
-/**
- * Log how many skills the migration updated and the custom Emphases it created; nothing when it updated none.
- * @param {number} migratedCount
- * @param {object} details
- * @param {string[]} details.customEmphasisNames
- * @param {string} details.label - Migration context label
- */
-function logEmphasisMigration(migratedCount, { customEmphasisNames, label }) {
-  if (migratedCount === 0) {
-    return;
-  }
-  console.warn(
-    `${SYS_ID} | Migrated ${migratedCount} skill items from emphasis string to split fields (${label})`
-  );
-  if (customEmphasisNames.length > 0) {
-    console.warn(
-      `${SYS_ID} | Created ${customEmphasisNames.length} custom emphases during migration: ${customEmphasisNames.join(
-        ", "
-      )}`
-    );
-  }
-}
-
-/**
- * Migrate one skill's Emphasis string into its available and trained Emphases, merged with any it already has. A
- * skill with no string and available Emphases already is left alone.
- * @param {Item} item - A skill item
- * @param {string[]} customEmphasisNames - The custom Emphases created so far, for the log; extended in place
- * @returns {Promise<boolean>} Whether the item was updated
- */
-async function migrateSkillEmphasis(item, customEmphasisNames) {
   const system = item.system || {};
 
   // Parse old emphasis string
@@ -104,35 +51,30 @@ async function migrateSkillEmphasis(item, customEmphasisNames) {
 
   // Skip if no old emphasis data AND already has new format
   if (!trimmed && Array.isArray(system.availableEmphases) && system.availableEmphases.length > 0) {
-    return false;
+    return;
   }
 
   // If already has availableEmphases but also has old emphasis string, merge them
   const existingAvailable = Array.isArray(system.availableEmphases) ? system.availableEmphases : [];
   const existingTrained = Array.isArray(system.trainedEmphases) ? system.trainedEmphases : [];
 
-  const parsedNames = trimmed
-    ? trimmed
-        .split(/[,;]+/)
-        .map(s => s.trim())
-        .filter(Boolean)
-    : [];
-
+  const parsedNames = parseEmphasisString(trimmed);
   const lists = { available: [...existingAvailable], trained: [...existingTrained] };
-  await migrateEmphasisNames(parsedNames, lists, customEmphasisNames);
+  await migrateEmphasisNames(parsedNames, lists);
 
   // Update only when something was processed
   if (parsedNames.length === 0 && existingAvailable.length > 0) {
-    return false;
+    return;
   }
+  // The old text is cleared once its Emphases are in the lists, so nothing can train them again (#153)
   await item.update(
     {
       "system.availableEmphases": lists.available,
-      "system.trainedEmphases": lists.trained
+      "system.trainedEmphases": lists.trained,
+      "system.emphasis": ""
     },
     { diff: true, render: false }
   );
-  return true;
 }
 
 /**
@@ -140,10 +82,9 @@ async function migrateSkillEmphasis(item, customEmphasisNames) {
  * no official match becomes a custom Emphasis in the world settings.
  * @param {string[]} parsedNames - The names the old string held
  * @param {{available: string[], trained: string[]}} lists - Extended in place
- * @param {string[]} customEmphasisNames - The custom Emphases created so far, for the log; extended in place
  * @returns {Promise<void>}
  */
-async function migrateEmphasisNames(parsedNames, lists, customEmphasisNames) {
+async function migrateEmphasisNames(parsedNames, lists) {
   for (const parsedName of parsedNames) {
     // Try to find official match
     const officialMatch = getOfficialEmphasis(parsedName);
@@ -163,55 +104,41 @@ async function migrateEmphasisNames(parsedNames, lists, customEmphasisNames) {
     // If no official match, create as custom emphasis
     if (!officialMatch) {
       await updateWorldCustomEmphases(emphasisName);
-
-      // Track for logging
-      if (!customEmphasisNames.includes(emphasisName)) {
-        customEmphasisNames.push(emphasisName);
-      }
     }
   }
 }
 
 /**
- * Find best matching official emphasis for a given name.
- * Tries exact match (case-insensitive), then close matches.
+ * The Emphasis names an old comma- or semicolon-separated string holds, trimmed; none for an empty string.
+ * @param {string} text
+ * @returns {string[]}
+ */
+function parseEmphasisString(text) {
+  return text
+    .split(/[,;]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * The official Emphasis a name means: the same name in any case, else its singular or plural ("Dog" is "Dogs").
+ * Nothing looser: a name that only contains an official one is its own Emphasis, so "Bokken" stays "Bokken", never
+ * "Bo" (#153).
  *
  * @param {string} name - Emphasis name to match
  * @returns {string|null} Matched official emphasis name or null
  */
 function getOfficialEmphasis(name) {
-  if (!name) {
-    return null;
-  }
-
-  const normalized = name.trim();
-  const lower = normalized.toLowerCase();
-
-  // Try exact case-insensitive match
-  for (const official of OFFICIAL_EMPHASES) {
-    if (official.toLowerCase() === lower) {
-      return official;
-    }
-  }
-
-  // Try close matches (singular/plural, common variations)
-  for (const official of OFFICIAL_EMPHASES) {
-    const officialLower = official.toLowerCase();
-
-    // Check if one is singular and other is plural
-    // e.g., "Dog" matches "Dogs", "Horse" matches "Horses"
-    if (officialLower === lower + "s" || officialLower + "s" === lower) {
-      return official;
-    }
-
-    // Check if normalized name is contained in official (for compound names)
-    // e.g., "Riding Horse" might match "Gaijin Riding Horse"
-    if (officialLower.includes(lower) || lower.includes(officialLower)) {
-      return official;
-    }
-  }
-
-  return null;
+  const lower = name.trim().toLowerCase();
+  const exact = OFFICIAL_EMPHASES.find(official => official.toLowerCase() === lower);
+  return (
+    exact ??
+    OFFICIAL_EMPHASES.find(official => {
+      const officialLower = official.toLowerCase();
+      return officialLower === `${lower}s` || `${officialLower}s` === lower;
+    }) ??
+    null
+  );
 }
 
 /**

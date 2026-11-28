@@ -29,7 +29,7 @@ export const SACRED = Object.freeze(["jade", "crystal", "obsidian"]);
 /**
  * Raises the chosen maneuvers cost: Called Shot 1-4, Disarm 3, Extra Attack 5, Feint 2, Knockdown 2 (4
  * against a four-legged opponent). A RaiseRule changes one maneuver's cost, never below 0 (roadmap/STAGE-11).
- * Increased Damage is whatever declared Raises are left (see getRaiseAllocation). Feint and Knockdown cost 4; a Feint
+ * Increased Damage is whatever Raises are left (see getRaiseAllocation). Feint and Knockdown cost 4; a Feint
  * with a -1 adjustment costs 1.
  * game-rules/38_maneuvers.md, p.86-87
  * @param {Maneuvers} maneuvers
@@ -52,10 +52,10 @@ export function getManeuverCost(maneuvers, adjust = {}) {
 }
 
 /**
- * Pay for maneuvers out of an attack's Raises. A Free Raise gives the benefit of a Raise, so maneuvers spend
- * the Free Raises not used on the TN first, then declared Raises; the declared Raises left over are Increased
- * Damage, +1k0 each. Three Raises and one Free Raise against a cost of 2 are affordable and leave 2 Increased
- * Damage.
+ * Pay for maneuvers out of an attack's Raises. A Free Raise gives the benefit of a Raise, so declared Raises and the
+ * Free Raises not used on the TN pay for the maneuvers together, and every one left over is Increased Damage, +1k0
+ * each (Ernie's ruling, #157). Three Raises and one Free Raise against a cost of 2 are affordable and leave 2
+ * Increased Damage; two Free Raises and no maneuver leave 2.
  * game-rules/28_raises.md, p.79
  * game-rules/38_maneuvers.md, p.87
  * @param {object} spec - The attack's Raises and the maneuvers' cost
@@ -65,11 +65,8 @@ export function getManeuverCost(maneuvers, adjust = {}) {
  * @returns {{affordable: boolean, increasedDamage: number}}
  */
 export function getRaiseAllocation({ raises, freeRaises, cost }) {
-  const fromDeclared = Math.max(0, cost - freeRaises);
-  return {
-    affordable: fromDeclared <= raises,
-    increasedDamage: Math.max(0, raises - fromDeclared)
-  };
+  const left = raises + freeRaises - cost;
+  return { affordable: left >= 0, increasedDamage: Math.max(0, left) };
 }
 
 /**

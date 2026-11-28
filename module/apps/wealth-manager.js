@@ -8,6 +8,7 @@ import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
+import { getWindowId } from "../utils/window-id.js";
 
 /**
  * The wealth manager window for one actor.
@@ -55,7 +56,7 @@ export default class WealthManagerApplication extends foundry.applications.api.H
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `wealth-manager-${actor.id}`
+      id: WealthManagerApplication.getWindowId(actor)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -101,6 +102,31 @@ export default class WealthManagerApplication extends foundry.applications.api.H
   }
 
   /**
+   * Registers the window with its actor, as core's document sheets do
+   * [src: client/applications/api/document-sheet.mjs:243-246], so a change to the actor's wealth from anywhere, its
+   * sheet or another user's window, re-renders it (#189).
+   *
+   * @param {object} context - Render context
+   * @param {object} options - Render options
+   * @returns {Promise<void>}
+   */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender(context, options);
+    this.actor.apps[this.id] = this;
+  }
+
+  /**
+   * Removes the window from its actor's registered apps
+   * [src: client/applications/api/document-sheet.mjs:259-262].
+   *
+   * @param {object} options - Close options
+   */
+  _onClose(options) {
+    super._onClose(options);
+    delete this.actor.apps[this.id];
+  }
+
+  /**
    * Provide fallback context when actor data is unavailable or errors occur.
    * Returns safe default values to prevent rendering failures.
    *
@@ -113,17 +139,23 @@ export default class WealthManagerApplication extends foundry.applications.api.H
   }
 
   /**
-   * Retrieve current wealth values from actor system data.
-   * Ensures all denominations return valid integers.
+   * The actor's stored koku, bu, and zeni, as stored: the sheet's fields take any number, so a fraction there stays
+   * as it was through a change to another denomination (#189).
    *
-   * @returns {object} Wealth object with koku, bu, and zeni properties
+   * @returns {{koku: number, bu: number, zeni: number}}
    */
   _getWealth() {
-    return {
-      koku: toInt(this.actor.system?.wealth?.koku, 0),
-      bu: toInt(this.actor.system?.wealth?.bu, 0),
-      zeni: toInt(this.actor.system?.wealth?.zeni, 0)
-    };
+    const { koku, bu, zeni } = this.actor._source.system.wealth;
+    return { koku, bu, zeni };
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("wealth-manager", actor.uuid);
   }
 
   /**
@@ -151,9 +183,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
 
     try {
       await this.actor.update({ "system.wealth": wealth });
-      if (this.rendered) {
-        this.render();
-      }
     } catch (err) {
       logError("Failed to add money", err, {
         amount,
@@ -195,9 +224,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
 
     try {
       await this.actor.update({ "system.wealth": wealth });
-      if (this.rendered) {
-        this.render();
-      }
     } catch (err) {
       logError("Failed to remove money", err, {
         amount,
@@ -242,9 +268,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
 
     try {
       await this.actor.update({ "system.wealth": wealth });
-      if (this.rendered) {
-        this.render();
-      }
     } catch (err) {
       logError("Failed to convert currency", err, {
         from,
@@ -288,9 +311,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
 
     try {
       await this.actor.update({ "system.wealth": wealth });
-      if (this.rendered) {
-        this.render();
-      }
     } catch (err) {
       logError("Failed to convert currency", err, {
         from,

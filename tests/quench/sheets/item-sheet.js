@@ -21,6 +21,7 @@ import {
   createArmorData,
   createSpellData
 } from "../../fixtures/item-fixtures.js";
+import L5R4ActiveEffectConfig from "../../../module/sheets/active-effect-config.js";
 import { cleanTest, waitFor } from "../helpers.js";
 
 /**
@@ -174,6 +175,86 @@ export function registerItemSheetTests(quench) {
           assert.equal(item.system.damageRoll, 5, "Damage roll updated");
           assert.equal(item.system.damageKeep, 3, "Damage keep updated");
         });
+      });
+
+      describe("Weapon Skill field", () => {
+        const clean = cleanTest(assert);
+        let actor, sheet;
+
+        /** Render a weapon's sheet, change its Minimum Strength, and wait for the save. */
+        // The server returns created documents in no fixed order, so the weapon is found by type
+        const saveAnotherField = async created => {
+          const weapon = created.find(item => item.type === "weapon");
+          sheet = weapon.sheet;
+          await sheet.render(true);
+          const field = sheet.element.querySelector('[name="system.minStrength"]');
+          field.value = "4";
+          field.dispatchEvent(new Event("change", { bubbles: true }));
+          assert.isTrue(await waitFor(() => weapon.system.minStrength === 4), "the sheet saved");
+          return weapon;
+        };
+
+        afterEach(async () => {
+          if (sheet?.rendered) {
+            await sheet.close({ animate: false });
+          }
+          sheet = null;
+          await actor?.delete();
+          actor = null;
+        });
+
+        it(
+          "should keep a PC weapon's Skill when its case differs from the PC's Skill",
+          clean(async () => {
+            actor = await createTestPC({ name: "Item sheet: Skill case" });
+            const weapon = await saveAnotherField(
+              await actor.createEmbeddedDocuments("Item", [
+                createSkillData("Kenjutsu", 2),
+                createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } })
+              ])
+            );
+            assert.equal(
+              sheet.element.querySelector('[name="system.associatedSkill"]').value,
+              "kenjutsu"
+            );
+            assert.equal(weapon.system.associatedSkill, "kenjutsu");
+          })
+        );
+
+        it(
+          "should keep a PC weapon's Skill the PC lacks",
+          clean(async () => {
+            actor = await createTestPC({ name: "Item sheet: Skill lacked" });
+            const weapon = await saveAnotherField(
+              await actor.createEmbeddedDocuments("Item", [
+                createSkillData("Kyujutsu", 2),
+                createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } })
+              ])
+            );
+            assert.equal(
+              sheet.element.querySelector('[name="system.associatedSkill"]').value,
+              "Kenjutsu"
+            );
+            assert.equal(weapon.system.associatedSkill, "Kenjutsu");
+          })
+        );
+
+        it(
+          "should let a GM set an NPC weapon's Skill",
+          clean(async () => {
+            actor = await Actor.create({ name: "Item sheet: NPC Skill", type: "npc" });
+            const [weapon] = await actor.createEmbeddedDocuments("Item", [
+              createWeaponData("Spear", 3, 2)
+            ]);
+            sheet = weapon.sheet;
+            await sheet.render(true);
+            const field = sheet.element.querySelector('[name="system.associatedSkill"]');
+            assert.isFalse(field.disabled, "the field is editable");
+            field.value = "Spears";
+            field.dispatchEvent(new Event("change", { bubbles: true }));
+            assert.isTrue(await waitFor(() => weapon.system.associatedSkill === "Spears"));
+          })
+        );
       });
 
       describe("Armor item sheet", () => {
@@ -380,6 +461,11 @@ export function registerItemSheetTests(quench) {
             const [effect] = item.effects;
             control('[data-action="edit-effect"]', effect).click();
             assert.isTrue(await waitFor(() => configsOf(effect).some(app => app.rendered)));
+            // The system's sheet, with its Rules tab, as the effect's own sheet opens it (#179)
+            assert.isTrue(
+              configsOf(effect).every(app => app instanceof L5R4ActiveEffectConfig),
+              "the sheet with the Rules tab"
+            );
           })
         );
 

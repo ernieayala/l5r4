@@ -70,7 +70,8 @@ export const BROWSER_FILTERS = Object.freeze({
     path: "system.ring",
     kind: "select",
     label: "l5r4.apps.compendiumBrowser.filters.ring",
-    labels: RING_LABELS
+    // The Universal spells' Ring "all", named apart from the option that clears the filter (#185)
+    labels: { ...RING_LABELS, all: "l5r4.magic.spells.universal" }
   },
   mastery: {
     path: "system.mastery",

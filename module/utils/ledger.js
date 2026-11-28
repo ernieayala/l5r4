@@ -8,7 +8,7 @@
  * game-rules/89_shadowlands_taint.md, p.274
  */
 
-import { getRuleValue } from "./rule-values.js";
+import { buildRuleRollData, getRuleValue } from "./rule-values.js";
 
 /**
  * @typedef {object} LedgerRuleOutput
@@ -16,6 +16,7 @@ import { getRuleValue } from "./rule-values.js";
  * @property {string} direction   gain or loss
  * @property {number|string} value  The new size, a formula over `@points`
  * @property {string} source
+ * @property {number} [level]     The level of the effect carrying the rule, for `@level`
  */
 
 /**
@@ -38,7 +39,7 @@ export function getLedgerChange({ track, points, rules, rollData = {} }) {
   let size = Math.abs(points);
   for (const rule of rules.filter(r => r.track === track && r.direction === direction)) {
     try {
-      size = getRuleValue(rule.value, { ...rollData, points: size });
+      size = getRuleValue(rule.value, { ...buildRuleRollData(rollData, rule.level), points: size });
     } catch (err) {
       errors.push({ source: rule.source, message: err.message });
     }

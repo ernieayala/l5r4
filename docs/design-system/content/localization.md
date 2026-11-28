@@ -121,10 +121,10 @@ All 188 values with placeholders use camelCase or one lowercase word.
 
 |  | Example | Source |
 | --- | --- | --- |
-| Conforming | `"iconsUpdated": { "one": "Migration: updated {count} world image path", "other": "Migration: updated {count} world image paths" }` | `l5r4.system.migration.iconsUpdated` (`lang/en.json`) |
+| Conforming | `"migrated": { "one": "Brought {count} document up to date with this version", "other": "Brought {count} documents up to date with this version" }` | `l5r4.system.migration.migrated` (`lang/en.json`) |
 | Conforming | `"exported": { "one": "Exported {count} item from {folder}", "other": "Exported {count} items from {folder}" }`, read through `pluralKeyOf` | `l5r4.ui.transfer.exported` (`lang/en.json`), `exportItemFolder` (`module/services/item-transfer.js`) |
 | Non-conforming | "Exported {count} items from {folder}" as one leaf (reads "1 items") | modeled on `l5r4.ui.transfer.exported` (`lang/en.json`) |
-| Non-conforming | "Updated {count} world image path(s)." | modeled on `l5r4.system.migration.iconsUpdated` (`lang/en.json`) |
+| Non-conforming | "Brought {count} document(s) up to date." | modeled on `l5r4.system.migration.migrated` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js`: no value contains `(s)`; a group with a `one` leaf has an `other` leaf; a translation's plural category that `en.json` leaves out is accepted under a group with `one` and `other`, and its placeholders match `other`'s. The existing unused-key check, `should hold no key the system never uses` (`tests/lang.test.js`), accepts the built key `` `${prefix}.${category}` ``.
 

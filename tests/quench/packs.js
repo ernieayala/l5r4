@@ -111,17 +111,25 @@ export function registerPacksTests(quench) {
         }
       };
 
-      /** A PC, optionally of a Clan, holding a copy of a pack entry, through the drop path. */
+      /**
+       * A PC, optionally of a Clan or a School (its system data), holding a copy of a pack entry, through the drop
+       * path. A kiho needs a School that teaches it (#159).
+       */
       const holding = async (
         pack,
         name,
-        { traits = { str: 2, ref: 2, agi: 2 }, clan = null, picks = [] } = {}
+        { traits = { str: 2, ref: 2, agi: 2 }, clan = null, school = null, picks = [] } = {}
       ) => {
         const actor = track(
           await createTestPC({ name: `Compendium packs: ${name}`, system: { traits } })
         );
         if (clan) {
           await actor.createEmbeddedDocuments("Item", [{ name: clan, type: "clan" }]);
+        }
+        if (school) {
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Quench Monk School", type: "school", system: school }
+          ]);
         }
         // An unmet prerequisite is refused, so a row fails when its setup misses one
         const item = await drop(actor, pack, name, { picks, confirm: "no" });
@@ -1004,7 +1012,8 @@ export function registerPacksTests(quench) {
             // Air 4 reaches its Mastery Level 4
             // game-rules/87_kiho.md, p.261
             const { actor, item } = await holding("kiho", "Soul of the Four Winds", {
-              traits: { str: 2, ref: 4, awa: 4, agi: 2 }
+              traits: { str: 2, ref: 4, awa: 4, agi: 2 },
+              school: { kiho: 3 }
             });
             const before = actor.system.armorTn.current;
             await updateActivation(actor, item);
@@ -1042,7 +1051,8 @@ export function registerPacksTests(quench) {
           "should take the Air Ring from unarmed damage only while Air Fist is active",
           clean(async () => {
             const { actor, item } = await holding("kiho", "Air Fist", {
-              traits: { str: 2, ref: 3, awa: 3, agi: 2 }
+              traits: { str: 2, ref: 3, awa: 3, agi: 2 },
+              school: { kiho: 3 }
             });
             // Read by name: the server returns created documents in no fixed order
             const created = await actor.createEmbeddedDocuments("Item", [
@@ -1254,6 +1264,28 @@ export function registerPacksTests(quench) {
         );
       });
 
+      // #185
+      describe("Posted item cards", () => {
+        it(
+          "should name a Void Skill's Trait and show a bow's Strength in words",
+          clean(async () => {
+            const { item: meditation } = await holding("skills", "Meditation");
+            const skillCard = await meditation.roll();
+            assert.include(skillCard.content, game.i18n.localize("l5r4.ui.mechanics.rings.void"));
+            assert.notInclude(skillCard.content, "l5r4.");
+            const { item: bow } = await holding("weapons", "Dai-kyu");
+            const bowCard = new DOMParser().parseFromString(
+              (await bow.roll()).content,
+              "text/html"
+            );
+            const strength = [...bowCard.querySelectorAll("p")].find(p =>
+              p.textContent.includes(game.i18n.localize("l5r4.ui.mechanics.traits.str"))
+            );
+            assert.include(strength?.textContent, "4", "the bow's own Strength");
+          })
+        );
+      });
+
       describe("Compendium browser", () => {
         /** The open browser, on a tab. */
         const openOn = async tab => {
@@ -1281,6 +1313,25 @@ export function registerPacksTests(quench) {
               const row = app.element.querySelector("[data-uuid]");
               assert.include(row.textContent, "DR 3k2");
               assert.include(row.textContent, "Core Rulebook p.204");
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        // #185: the Universal spells' Ring "all" reads apart from the option that clears the filter
+        it(
+          "should name the Universal spells' Ring in the Spells tab's Ring filter",
+          clean(async () => {
+            const app = await openOn("spells");
+            try {
+              const option = app.element.querySelector(
+                "[data-browser-filter='ring'] option[value='all']"
+              );
+              assert.equal(
+                option.textContent.trim(),
+                game.i18n.localize("l5r4.magic.spells.universal")
+              );
             } finally {
               await app.close({ animate: false });
             }
@@ -1393,12 +1444,31 @@ export function registerPacksTests(quench) {
             await waitFor(() => token.object);
             token.object.control({ releaseOthers: true });
             const app = await openOn("equipment");
+            const notices = [];
+            const notify = ui.notifications.notify;
+            ui.notifications.notify = function (message, type, options = {}) {
+              notices.push(message);
+              return notify.call(this, message, type, { ...options, console: false });
+            };
             try {
               app.search = "Tetsubo";
               await app.render();
               app.element.querySelector("[data-action='add-entry']").click();
               assert.isTrue(await waitFor(() => actor.items.some(i => i.name === "Tetsubo")));
+              // The actor was picked for the user, so the notice names it (#142)
+              assert.isTrue(
+                await waitFor(() =>
+                  notices.includes(
+                    game.i18n.localize("l5r4.apps.compendiumBrowser.added", {
+                      item: "Tetsubo",
+                      name: actor.name
+                    })
+                  )
+                ),
+                notices.join("\n")
+              );
             } finally {
+              ui.notifications.notify = notify;
               await app.close({ animate: false });
             }
           })

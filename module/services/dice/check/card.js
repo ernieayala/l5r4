@@ -73,20 +73,14 @@ export async function renderCheckCard(system, roll, { actorId = "", used = {} } 
   return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
     ...system,
     ...buildUseContext(system, used),
-    tn: system.tn.effective === null ? null : system.tn,
-    // A roll with no TN still shows the Raises a Contested Roll will count
-    raisesWithoutTn: system.tn.effective === null ? system.tn.raises : 0,
-    tnChanges: system.tn.modifiers?.length
-      ? F("l5r4.ui.check.tnChangesNote", { changes: formatTnChanges(system.tn.modifiers) })
-      : "",
-    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
+    ...buildTnContext(system),
     outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
     appliedModifiers: system.modifiers
       .filter(m => m.enabled && (m.roll || m.keep || m.total))
       .map(m => ({ label: m.label, text: formatModifier(m) })),
     roll: await roll.render(),
     damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
-    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : [],
+    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : formatMissedManeuvers(maneuvers),
     contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
     grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
     applyTarget: system.kind === "damage" ? system.target?.name : "",
@@ -162,6 +156,80 @@ function buildUseContext(system, used) {
     })),
     grappleStarted: Boolean(used.grapple)
   };
+}
+
+/**
+ * What the card shows of its TN: the TN, or for an attack without one the reason it shows no hit or miss and no damage
+ * (#142); the Raises line, and the Raises a roll with no TN still shows for a Contested Roll to count; the TN changes;
+ * and the Free Raises left.
+ * @param {object} system - RollMessageData source
+ * @returns {object} Template context
+ */
+function buildTnContext(system) {
+  const noTn = system.tn.effective === null;
+  return {
+    tn: noTn ? null : system.tn,
+    noTnNote: noTn && system.kind === "attack" ? T("l5r4.ui.combat.attackNoTn") : "",
+    raisesText: formatRaisesNote(system),
+    raisesWithoutTn: noTn ? system.tn.raises : 0,
+    tnChanges: system.tn.modifiers?.length
+      ? F("l5r4.ui.check.tnChangesNote", { changes: formatTnChanges(system.tn.modifiers) })
+      : "",
+    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN
+  };
+}
+
+/**
+ * The card's Raises line: for an attack, what its declared Raises and the Free Raises not spent on the TN paid for,
+ * maneuvers or Increased Damage (#136, #157); for any other roll with a TN, the count. Empty with no Raises to tell
+ * or no TN.
+ * game-rules/38_maneuvers.md, p.87
+ * @param {object} system - RollMessageData source
+ * @returns {string}
+ */
+function formatRaisesNote(system) {
+  const { raises: count, freeRaises, freeRaisesToTN, effective } = system.tn;
+  const free = system.kind === "attack" ? freeRaises - freeRaisesToTN : 0;
+  if (!(count || free) || effective === null) {
+    return "";
+  }
+  if (system.kind !== "attack") {
+    return F("l5r4.ui.check.raisesNote", { count });
+  }
+  const { cost: maneuvers, increasedDamage: damage } = system.maneuvers;
+  return free
+    ? F("l5r4.ui.check.raisesFreeAttackNote", { count, free, maneuvers, damage })
+    : F("l5r4.ui.check.raisesAttackNote", { count, maneuvers, damage });
+}
+
+/**
+ * The line a missed attack's card shows for the maneuvers it declared: they failed with it (#136). None when it
+ * declared none, and on any roll that is not an attack.
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {object} maneuvers
+ * @returns {string[]}
+ */
+function formatMissedManeuvers(maneuvers) {
+  const declared = [];
+  if (maneuvers.calledShot) {
+    declared.push(
+      F("l5r4.ui.combat.calledShotDeclared", {
+        raises: maneuvers.calledShot,
+        location: maneuvers.location || T("l5r4.ui.combat.calledShotUnnamed")
+      })
+    );
+  }
+  for (const key of ["feint", "knockdown", "disarm", "extraAttack"]) {
+    if (maneuvers[key]) {
+      declared.push(T(`l5r4.ui.ruleSummary.maneuver.${key}`));
+    }
+  }
+  if (maneuvers.grapple) {
+    declared.push(T("l5r4.ui.combat.grapple.title"));
+  }
+  return declared.length
+    ? [F("l5r4.ui.combat.maneuversMissed", { maneuvers: declared.join(", ") })]
+    : [];
 }
 
 /**

@@ -4,8 +4,7 @@ import {
   getUnmetPrerequisites,
   buildRulesWithSelections,
   getFixedGrantUuids,
-  getUngrantedOptions,
-  isKihoMasteryMet
+  getUngrantedOptions
 } from "../../../module/utils/purchase.js";
 
 describe("getUnmetPrerequisites", () => {
@@ -28,19 +27,39 @@ describe("getUnmetPrerequisites", () => {
     expect(getUnmetPrerequisites([forNonCrane], new Set())).toHaveLength(1);
   });
 
-  it("should combine requirements with or, and skip rules without a requires list", () => {
+  it("should combine requirements with or", () => {
     const either = {
       key: "Prerequisite",
       requires: [{ or: ["school:kakita bushi", "school:bayushi bushi"] }]
     };
     expect(getUnmetPrerequisites([either], new Set(["school:kakita bushi"]))).toEqual([]);
-    expect(
-      getUnmetPrerequisites([{ key: "Prerequisite", requires: "nope" }, null], new Set())
-    ).toEqual([]);
+  });
+
+  // #172: a Prerequisite that cannot be checked is unmet, so the GM is asked, rather than a pass
+  it("should count a missing, empty, or non-list requires as unmet, and skip what is no rule", () => {
+    const rules = [
+      { key: "Prerequisite", label: "Blank" },
+      { key: "Prerequisite", requires: [] },
+      { key: "Prerequisite", requires: "nope" },
+      null
+    ];
+    expect(getUnmetPrerequisites(rules, new Set())).toEqual([
+      { label: "Blank", requires: null },
+      { label: "", requires: null },
+      { label: "", requires: null }
+    ]);
   });
 });
 
 describe("openChoices", () => {
+  // #173: a filter is read as the Skill types Skills store
+  it("should give a ChoiceSet's filter by stored Skill type", () => {
+    const [choice] = openChoices([
+      { key: "ChoiceSet", flag: "skill", list: "skills", filter: ["Merchant", " bugei "] }
+    ]);
+    expect(choice.filter).toEqual(["merch", "bugei"]);
+  });
+
   it("should return ChoiceSets without a selection, with their index and checked options", () => {
     const rules = [
       { key: "Note", text: "x" },
@@ -114,16 +133,6 @@ describe("The getFixedGrantUuids and getUngrantedOptions helpers", () => {
     expect(getUngrantedOptions(options, { uuids: [kenjutsu], names: ["Kenjutsu"] })).toEqual([
       options[1]
     ]);
-  });
-});
-
-// game-rules/87_kiho.md, p.261
-describe("isKihoMasteryMet", () => {
-  it("should meet a Mastery Level with the kiho's Ring plus the School Rank", () => {
-    // Touch the Void Dragon, Mastery Level 4: Void 3 and School Rank 1 reach it, Void 2 does not
-    expect(isKihoMasteryMet(4, 3, 1)).toBe(true);
-    expect(isKihoMasteryMet(4, 2, 1)).toBe(false);
-    expect(isKihoMasteryMet(3, 2, 1)).toBe(true);
   });
 });
 

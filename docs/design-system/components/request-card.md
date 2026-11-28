@@ -2,6 +2,16 @@
 
 The GM's ask for a roll: a [chat card](chat-card.md) naming the check, with one button that rolls it for whoever clicks, with that player's own character. The GM posts it from the second button on a Check [inline link](inline-link.md).
 
+Its Initiative variant names one PC: a GM's Initiative roll posts it, whispered to that PC's owners and the GMs, for a PC whose connected player marked a Void Point for Initiative and has one, since spending it is the player's choice (#165). Its button rolls that combatant's Initiative on the presser's client, the Void Point question included; a GM's press rolls for the player.
+
+| Item | Initiative variant |
+| --- | --- |
+| Template | `templates/chat/initiative-request.hbs`, `CHAT_TEMPLATES.initiativeRequest` |
+| Posted by | `postInitiativeRequests` (`module/services/initiative-request.js`), through `L5R4Combat.postInitiativeRequests`, on a GM's client only; a combatant whose card is in the log gets no second one |
+| Wired by | `bindInitiativeRequestCard` (`module/services/initiative-request.js`), from `registerCombatHooks` (`module/hooks/register-all.js`) |
+| Rolls | `combat.rollInitiative([id], { answeringRequest: true })`, from the message's `flags.l5r4-enhanced.initiativeRequest` (`combatId`, `combatantId`) |
+| Quench | `l5r4-enhanced.services.initiative` |
+
 | Item | Detail |
 | --- | --- |
 | Template | `templates/chat/check-request.hbs`, `CHAT_TEMPLATES.checkRequest`. The file is named after the `checkRequest` ChatMessage subtype: a fixed name |
@@ -21,6 +31,8 @@ All classes and the action are fixed names ([chat card](chat-card.md#fixed-names
 | Title | `div.dice-flavor` | `l5r4.ui.links.requestTitle` |
 | Request | `p.l5r4-check-request-text`, bold | The check as the link names it: Skill and Trait, or the Trait or Ring, and the TN |
 | Button | `button[data-action="check-request-roll"]` with `fa-solid fa-dice-d10` and a label | `l5r4.ui.links.requestRoll` |
+| Initiative request | `p.l5r4-check-request-text`, bold | `l5r4.ui.combat.initiativeRequest` |
+| Initiative button | `button[data-action="initiative-request-roll"]` with `fa-solid fa-dice-d10` and a label | `l5r4.ui.combat.initiativeRequestRoll` |
 
 ## Variants
 
@@ -39,6 +51,9 @@ All classes and the action are fixed names ([chat card](chat-card.md#fixed-names
 | Clicked with a character | The check dialog opens for the clicker's controlled token, else their assigned character |
 | Clicked with no character | Warning notification `l5r4.ui.links.noActor`; the card does not change |
 | Skill the character lacks, no Trait in the link | Warning `l5r4.ui.links.needTrait`; no roll |
+| Initiative card, viewer neither the PC's owner nor a GM | No button |
+| Initiative card, combatant rolled already | Warning `l5r4.ui.combat.initiativeRequestDone`; no roll. The GM rerolls from the combat tracker |
+| Initiative card, combat or combatant gone | Warning `l5r4.ui.combat.initiativeRequestGone`; no roll |
 
 The card never changes after posting. Each roll posts its own [check card](check-card.md).
 
@@ -73,6 +88,7 @@ A long Skill name or label wraps in the request paragraph and in no other part.
 | --- | --- | --- | --- | --- |
 | RQ1 | The button rolls from the message's `system`, never from the card's text | Quench `l5r4-enhanced.table-tools` | `checkRequestOf(actor, message.system)` in `bindCheckRequestCard` (`module/services/check-request.js`) | Parsing `.l5r4-check-request-text` back into a check (modeled) |
 | RQ2 | Only a GM posts a request card | Quench `l5r4-enhanced.table-tools` | The `game.user.isGM` guard at the top of `postCheckRequest` warns and returns (`module/services/check-request.js`) | Offering the request button to players (modeled) |
+| RQ5 | A request card's button works only on a card a GM posted (#162) | Quench `l5r4-enhanced.services.initiative`, review | `message.author?.isGM` in the `hideUnusable` test of `bindInitiativeRequestCard` (`module/services/initiative-request.js`) | Rolling from a player's own message carrying the flag (modeled) |
 | RQ3 | The button's icon is `fa-dice-d10`, `inert`, before its label | `tests/conventions/templates.test.js` (`inert`, one prefix), review | `<i class="fa-solid fa-dice-d10" inert></i> {{localize "l5r4.ui.links.requestRoll"}}` in `data-action="check-request-roll"` (`templates/chat/check-request.hbs`) | An icon-only roll button (modeled) |
 | RQ4 | The request card's styles live in their own file, under `.l5r4-check-request` | `tests/conventions/styles.test.js` (one component per file) | `scss/components/_request-card.scss` holding `.l5r4-check-request` | The rule inside another component's file (modeled) |
 

@@ -11,6 +11,7 @@
 
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { getSkillItem, toSkillKey } from "../../../utils/selectors.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getRollActor } from "../resources/void-points.js";
 
@@ -90,8 +91,8 @@ function buildSkillTerms(
 ) {
   const trait = toInt(traitRank);
   const rank = toInt(skillRank);
-  const skillKey = String(skillName ?? "").toLowerCase();
-  const skillItem = roller.items.find(i => i.type === "skill" && i.name.toLowerCase() === skillKey);
+  const skillKey = toSkillKey(skillName);
+  const skillItem = getSkillItem(roller.items, skillKey);
   return {
     label: formatSkillRollLabel(skillName, skillTrait),
     base: { roll: trait + rank, keep: trait },

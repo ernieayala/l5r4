@@ -109,6 +109,38 @@ describe("Pack sources", () => {
     expect(referenceProblems(sources)).toEqual([]);
   });
 
+  // #176: an option is the item's name in lower case (module/documents/actor/roll-options.js), so a rule testing a
+  // School, Family, or Clan names one the packs hold, by its full name
+  it("should test only Schools, Families, and Clans the packs hold, by their full names", () => {
+    const names = Object.fromEntries(
+      ["schools", "families", "clans"].map(pack => [
+        pack,
+        new Set(sources.find(s => s.name === pack).entries.map(e => e.name.toLowerCase()))
+      ])
+    );
+    const packOf = { school: "schools", family: "families", clan: "clans" };
+    const termsOf = value =>
+      typeof value === "string"
+        ? [value]
+        : value && typeof value === "object"
+          ? Object.values(value).flatMap(termsOf)
+          : [];
+    const unknown = [];
+    for (const source of sources) {
+      for (const entry of source.entries) {
+        for (const rule of entry.system?.rules ?? []) {
+          for (const term of [...termsOf(rule.predicate ?? []), ...termsOf(rule.requires ?? [])]) {
+            const [prefix, ...rest] = term.split(":");
+            if (packOf[prefix] && !names[packOf[prefix]].has(rest.join(":"))) {
+              unknown.push(`${source.name}: ${entry.name}: ${term}`);
+            }
+          }
+        }
+      }
+    }
+    expect(unknown).toEqual([]);
+  });
+
   it("should turn a reference into the UUID of the entry it names, and catch one naming no entry", () => {
     const skills = {
       name: "skills",

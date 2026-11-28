@@ -5,7 +5,8 @@
  * - each event posts the saves that roll on it (Reactions stage = roundEnd);
  * - at the start of a Turn, an actor in Full Defense is asked for the Defense / Reflexes roll again, and a
  *   concentrating caster is reminded of the upkeep;
- * - before a new Round, Center Stance gives its bonus (decision 7).
+ * - before a new Round, Center Stance gives its bonus (decision 7);
+ * - when the combat ends, its actors' effects timed in Rounds or Turns end (#178).
  * game-rules/31_combat_round.md, p.82
  * game-rules/41_conditional_effects.md, p.89
  * game-rules/36_stances.md, p.84
@@ -25,6 +26,9 @@ import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
  * game-rules/36_stances.md, p.84
  */
 const CENTER_INITIATIVE = 10;
+
+/** Duration units counted in a combat's Rounds and Turns, which end with the combat. */
+const COMBAT_TIME_UNITS = Object.freeze(["rounds", "turns"]);
 
 /** Name of the GM query that settles Center Stance when a player ends the Round. */
 const CENTER_QUERY = `${SYS_ID}.settleCenter`;
@@ -84,6 +88,29 @@ export const COMBAT_EVENTS = Object.freeze({
       await applyCenterStance(combat);
     } else {
       await requestGmQuery(CENTER_QUERY, { combatId: combat.id });
+    }
+  },
+
+  /**
+   * The combat ends: its actors' effects timed in Rounds or Turns end with it (#178). Core ends only those expiring on
+   * `combatEnd`, and with no seconds in a Round (`CONFIG.time.roundTime` 0) the others would never run out outside
+   * combat: Guard and Full Defense last until the next Turn, Void on Armor TN one Round.
+   * game-rules/25_rings_and_traits.md, p.78
+   * game-rules/36_stances.md, p.84
+   * game-rules/38_maneuvers.md, p.87
+   * @param {Set<Actor>} actors - The combat's actors
+   */
+  async end(actors) {
+    if (!isAnsweringGmClient()) {
+      return;
+    }
+    for (const actor of actors) {
+      const timed = actor.effects
+        .filter(effect => COMBAT_TIME_UNITS.includes(effect.duration.units))
+        .map(effect => effect.id);
+      if (timed.length) {
+        await actor.deleteEmbeddedDocuments("ActiveEffect", timed);
+      }
     }
   }
 });

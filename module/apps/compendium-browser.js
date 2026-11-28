@@ -14,7 +14,7 @@ import {
   getFilteredEntries,
   getFilterOptions
 } from "../utils/browser-filter.js";
-import { formatPhrase, T } from "../utils/localization.js";
+import { F, formatPhrase, T } from "../utils/localization.js";
 import { buildSourceCitation } from "../utils/source-citation.js";
 import { createPurchasedItem } from "../services/purchase.js";
 import { getRollActor } from "../services/dice/resources/void-points.js";
@@ -225,8 +225,16 @@ export default class CompendiumBrowserApplication extends HandlebarsApplicationM
       return;
     }
     const item = await fromUuid(element.closest("[data-uuid]").dataset.uuid);
-    if (item) {
-      await createPurchasedItem(actor, item.toObject());
+    if (!item) {
+      ui.notifications?.warn(T("l5r4.ui.notifications.dropNotFound"));
+      return;
+    }
+    // The actor was picked for the user (controlled token, assigned character, or speaker): say which (#142)
+    const created = await createPurchasedItem(actor, item.toObject());
+    if (created) {
+      ui.notifications?.info(
+        F("l5r4.apps.compendiumBrowser.added", { item: created.name, name: actor.name })
+      );
     }
   }
 

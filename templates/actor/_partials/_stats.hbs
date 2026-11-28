@@ -67,6 +67,16 @@
             {{#if system._xp}}
               <div class="l5r4-form-field-group flexrow -gap-md">
                 <span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>
+                {{#if system._xp.overspent}}
+                  {{!-- Spent past the total is the player's and GM's call: marked, never refused (#145) --}}
+                  <span
+                    class="flex0 l5r4-form-field-warning"
+                    role="note"
+                    data-xp-overspent
+                    data-tooltip="{{localize "l5r4.character.experience.overspent" over=system._xp.overspent}}"
+                    aria-label="{{localize "l5r4.character.experience.overspent" over=system._xp.overspent}}"
+                  ><i class="fa-solid fa-triangle-exclamation" inert></i></span>
+                {{/if}}
                 <button type="button" class="inline-control icon" data-action="open-xp-manager" data-tooltip="{{localize "l5r4.apps.xpManager.open"}}" aria-label="{{localize "l5r4.apps.xpManager.open"}}"><i class="fa-solid fa-chart-line" inert></i></button>
               </div>
             {{/if}}
@@ -84,34 +94,7 @@
   {{#if skills.length}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_skill-section.hbs"}}
   {{/if}}
-  {{#if (or weapons.length bows.length)}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_weapon-section.hbs"}}
-  {{/if}}
-  {{#if armors.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_armor-section.hbs"}}
-  {{/if}}
-  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-section.hbs"}}
-  {{#if spells.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_spell-section.hbs"}}
-  {{/if}}
-  {{#if techniques.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_technique-section.hbs"}}
-  {{/if}}
-  {{#if kihos.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_kiho-section.hbs"}}
-  {{/if}}
-  {{#if katas.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_kata-section.hbs"}}
-  {{/if}}
-  {{#if tattoos.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_tattoo-section.hbs"}}
-  {{/if}}
-  {{#if advantages.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_advantage-section.hbs"}}
-  {{/if}}
-  {{#if disadvantages.length}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_disadvantage-section.hbs"}}
-  {{/if}}
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_item-sections.hbs" wealth=true}}
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_bio.hbs"}}
 
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_note-section.hbs" system=system actor=actor enriched=enriched editable=editable}}

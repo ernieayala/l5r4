@@ -60,6 +60,14 @@ export const RIDING_ARMOR_MOUNTED_BONUS = 8;
 export const TN_PER_RAISE = 5;
 
 /**
+ * How much a roller who declared Raises on a Contested Roll must beat each opponent by, per Raise.
+ * game-rules/29_types_of_rolls.md, p.80
+ * @type {number}
+ * @constant
+ */
+export const CONTEST_MARGIN_PER_RAISE = 5;
+
+/**
  * Maximum number of Raises allowed on a single roll.
  * System enforces this limit to prevent excessive Raise calls.
  * @type {number}
@@ -95,20 +103,18 @@ export const ARROW_MODS = Object.freeze({
 export const ARROW_ARMOR_FACTOR = Object.freeze({ armor: 0, flesh: 2 });
 
 /**
- * Change to the total of a bow attack on a target in melee range with the archer.
- * game-rules/74_weapons.md, p.199
+ * Change to the total of any ranged attack on a target within melee range.
+ * game-rules/32_attack_and_defense.md, p.82
  */
-export const BOW_IN_MELEE_PENALTY = -10;
+export const RANGED_IN_MELEE_PENALTY = -10;
 
 /**
- * NPC wound level configuration by rank.
- * Maps NPC rank (1-8) to number of wound levels: a rank 3 NPC has 3.
- * Higher rank NPCs have more wound levels before dying.
- * @type {Readonly<{1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
+ * The counts of Wound Ranks an NPC in formula mode may use, Out included (Ernie's ruling, #155): 2 is Healthy and
+ * Out, 8 every rank.
+ * @type {Readonly<{2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
  * @constant
  */
 export const NPC_NUMBER_WOUND_LEVELS = Object.freeze({
-  1: 1,
   2: 2,
   3: 3,
   4: 4,

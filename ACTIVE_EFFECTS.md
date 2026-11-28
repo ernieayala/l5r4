@@ -28,9 +28,9 @@ A rule the system cannot use shows its error in red above its fields until it is
 ]
 ```
 
-Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
+Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a field the key does not have such as a misspelled `rnage`, a missing selector, a formula that does not parse) shows its error in the Rules tab and is skipped, with a warning in the browser console naming the item. Clearing a number-or-formula field in the form puts back its default.
 
-Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's roll rules (the ones a roll reads, such as `RollModifier` and `TNModifier`) apply only to rolls made with that weapon: its attacks and its damage. Its other rules apply while it is on the character. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
 ### Fields every rule has
 
@@ -48,8 +48,8 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | Key | Fields | What it does |
 | --- | --- | --- |
 | `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` _n/f_ | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
-| `RollModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
-| `ArmorTN` | `value` _n/f_, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
+| `RollModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range and their damage (a bow's damage rolled from its sheet is ranged, any other weapon's melee); no other roll has a range, so it never applies there. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
+| `ArmorTN` | `value` _n/f_, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range, stacks by `type` with the other adds, and the Armor TN against that range never drops below 5 either |
 | `Reduction` | `value` _n/f_, `except` | Adds to Reduction. `except` lists damage sources it does not stop, as `["jade"]` |
 | `DamageSource` | `selector` (default `damage`), `tags`, `ignoreReduction` _n/f_ | Marks the selected damage rolls with sources (`jade`, `crystal`, `obsidian`, `spell`, `nemuranai`, or your own) and lets them ignore that much Reduction |
 | `Invulnerability` | `harmedBy`, `only` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian, spell, nemuranai) deals one Wound after Reduction (p.319). With `only`, it covers damage from those sources alone |
@@ -66,14 +66,14 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | `ApplyCondition` | `selector`, `condition`, `level` | A successful selected roll with a target shows a button that puts the status `condition` (at `level`, for a Fear Rank) on the target |
 | `ConditionImmunity` | `condition` | The character cannot gain that status |
 | `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
-| `Resource` | `slug`, `max` _n/f_, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
+| `Resource` | `slug`, `max` _n/f_, `per` | `max` more Void Points a character may spend each Round. The only slug is `void` and the only `per` is `round`; any other is flagged and skipped |
 | `OpponentModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
 | `RaiseRule` | `selector`, `maneuver`, `cost` _n/f_, `cap` _n/f_, `minimum` _n/f_ | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
 | `UnskilledAs` | `selector`, `rank` _n/f_ | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
 | `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`), `range` | Names on the card of the selected rolls the action they take (p.85); with `range` (`"melee"` or `"ranged"`) only on attacks of that range. The system shows it and does not enforce it |
 | `Cost` | `selector`, `value` _n/f_ | The XP price of what the selector names (see **XP prices**) |
 | `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` _n/f_ | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
-| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
+| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate with at least one term, `label` explains it (see **Character options**). One with an empty `requires` cannot be checked, so it counts as unmet and the GM is asked |
 | `ChoiceSet` | `flag`, `prompt`, `options` or `list`, `filter`, `selection` | A choice asked when the item is added; the item's other rules use the answer as `{choice:<flag>}` (see **Character options**) |
 | `GrantItem` | `uuid`, `rank`, `skillRank`, `emphasis` | An item given with this one: a School's Skills and Techniques (see **Character options**) |
 
@@ -82,17 +82,19 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | Selector | Rolls |
 | --- | --- |
 | `any` | Every roll |
-| `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
+| `skill:<skill name>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
 | `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
 | `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
-| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
-| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant`, `low` |
+| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll. An attack with a Weapon Skill is a Skill roll (p.80), so `skill` reaches it; add the predicate `[{ "not": "check:attack" }]` to leave attacks out |
+| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant` (or `merch`, as Skills store it), `low` |
 | `skill-tag:social` | Rolls of Skills marked **Social Skill** on their Details tab (p.134) |
 | `skill-tag:school` | Rolls of School Skills |
-| `attack` | Every attack roll, with or without a Skill |
+| `attack` | Every attack roll, with or without a Skill; a stat block's attack, which has none, reads this one and not `skill` |
 | `damage` | Every damage roll |
 | `spell` | Every Spell Casting Roll, maho included |
 | `maho` | Maho casting rolls |
+
+Selectors are read in lower case with spaces around the colon and the name trimmed, so `Skill:Kenjutsu ` is `skill:kenjutsu`. A `ConditionImmunity` or `ApplyCondition` condition is a status id as written (`prone`, `fullDefenseStance`), and a `PeriodicSave` roll names a Ring or Trait by key; anything else shows as an error in the Rules tab.
 
 ### The roll dialog
 
@@ -102,7 +104,7 @@ Each roll posts a card holding everything it rolled with. A successful roll with
 
 ### Formulas
 
-A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`.
+A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`. A formula must come to a finite number: one that divides by 0 is an error, and the rule is skipped for as long as it does. A value that counts dice, Raises, or ranks is rounded down: `roll` and `keep` of `RollModifier`, `OpponentModifier`, and `Initiative`; `FreeRaise`; `RaiseRule`'s `cost`, `cap`, and `minimum`; `UnskilledAs`'s `rank`; `TraitAdjust`; and `Movement`. With Reflexes 3, `"@traits.ref / 2"` gives 1 die.
 
 | Path | Value |
 | --- | --- |
@@ -113,7 +115,7 @@ A value can be a formula over the character's data, written as text: `"@rings.ai
 | `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
 | `@insight.rank` | Insight Rank |
 | `@school.rank` | School Rank: the highest of the character's Schools, 0 with none |
-| `@level` | On an Active Effect: its level, such as a Fear Rank |
+| `@level` | On an Active Effect: its level, such as a Fear Rank, in every rule on it, `Cost` and `Ledger` included |
 | `@cost` | In a `Cost` rule: the price before it |
 | `@points` | In a `Ledger` rule: the size of the change before it |
 
@@ -142,6 +144,8 @@ A predicate is a list of conditions, all of which must hold:
 | `{ "not": ... }` | The condition inside does not hold |
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
 | `{ "gte": ["ring:fire", 3] }` | The Ring, Trait, Skill, or rank is at least 3, as `{ "gte": ["skill:kenjutsu", 3] }`; also `gt`, `lte`, `lt`, `eq` |
+
+Rules are worked out in steps, and a rule sees only what the steps before it have found. `TraitAdjust` runs first, before the Rings, Insight, School Rank, and Wound Rank: it cannot test `ring:`, `trait:`, `insight:`, `school-rank:`, `wound:`, or a `RollOption`, and its value cannot read `@rings.air` (or another of the four Rings) or `@insight`. `Wounds` rules run next, since the Wound Rank comes from them, so they cannot test `wound:`. Every other rule runs once the Wound Rank is known and can test all of the above. The Rules tab shows an error on a predicate or value a rule can never see.
 
 **Example:** +1k0 on attacks while in Full Attack Stance against a prone target
 
@@ -226,7 +230,7 @@ Removing the School takes back what it gave. A granted Skill with ranks or Empha
 
 ### Choices
 
-A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`). Every other rule on the item can use the answer as `{choice:<flag>}`:
+A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`: `high`, `bugei`, `merchant` or `merch`, `low`). Every other rule on the item can use the answer as `{choice:<flag>}`:
 
 ```json
 [
@@ -267,7 +271,7 @@ The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four
 | `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type      |
 | `emphasis`                           | Each Emphasis                                           |
 | `item:<type>`                        | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
-| `self`                               | The item carrying the rule                              |
+| `self`                               | The item carrying the rule, whether or not it is active or worn; on an effect, nothing |
 
 An Advantage that costs 1 less for a Crane character:
 

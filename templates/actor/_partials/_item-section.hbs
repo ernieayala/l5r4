@@ -1,26 +1,30 @@
+{{!-- The items section. Parameters: the sheet context (items, collapsedSections, system), and wealth (the PC's money:
+koku, bu, and zeni fields and the wealth manager in the title; an NPC has none). --}}
 <section class="l5r4-section flexcol -gap-sm">
   {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs" scope="items" label="l5r4.ui.sheets.items" collapsed=collapsedSections.items create=true expand=true}}
-    <div class="flexrow flex0 l5r4-wealth">
-      <span>{{localize "l5r4.world.wealth.koku"}}:</span>
-      <input type="number" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" min="0" step="1" />
-    </div>
-    <div class="flexrow flex0 l5r4-wealth">
-      <span>{{localize "l5r4.world.wealth.bu"}}:</span>
-      <input type="number" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" min="0" step="1" />
-    </div>
-    <div class="flexrow flex0 l5r4-wealth">
-      <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
-      <input type="number" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" min="0" step="1" />
-    </div>
-    <button
-      type="button"
-      class="inline-control icon"
-      data-action="open-wealth-manager"
-      data-tooltip="{{localize "l5r4.apps.wealthManager.open"}}"
-      aria-label="{{localize "l5r4.apps.wealthManager.open"}}"
-    >
-      <i class="fa-solid fa-calculator" inert></i>
-    </button>
+    {{#if wealth}}
+      <div class="flexrow flex0 l5r4-wealth">
+        <span>{{localize "l5r4.world.wealth.koku"}}:</span>
+        <input type="number" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" min="0" step="1" />
+      </div>
+      <div class="flexrow flex0 l5r4-wealth">
+        <span>{{localize "l5r4.world.wealth.bu"}}:</span>
+        <input type="number" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" min="0" step="1" />
+      </div>
+      <div class="flexrow flex0 l5r4-wealth">
+        <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
+        <input type="number" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" min="0" step="1" />
+      </div>
+      <button
+        type="button"
+        class="inline-control icon"
+        data-action="open-wealth-manager"
+        data-tooltip="{{localize "l5r4.apps.wealthManager.open"}}"
+        aria-label="{{localize "l5r4.apps.wealthManager.open"}}"
+      >
+        <i class="fa-solid fa-calculator" inert></i>
+      </button>
+    {{/if}}
   {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
   {{#if items.length}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="items" type="commonItem" columns=@root.sortColumns.items sort=@root.sortState.items}}

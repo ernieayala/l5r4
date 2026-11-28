@@ -68,6 +68,12 @@
     color: var(--l5r4-color-warning);
   }
 
+  // The Error state (foundations/states.md): XP that could not be calculated, in the danger color with its icon
+  .l5r4-xp-manager-error {
+    color: var(--l5r4-color-danger);
+    margin: 0;
+  }
+
   // The Empty state (foundations/states.md): one italic line where the list would be
   .l5r4-xp-manager-empty {
     font-style: italic;

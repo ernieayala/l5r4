@@ -8,34 +8,27 @@
 import { CHOICE_LISTS } from "../config/rule-keys.js";
 import { hasOpenChoice } from "./choices.js";
 import { testPredicate } from "./predicate.js";
+import { toSkillKey, toSkillType } from "./selectors.js";
 
 /**
  * The Prerequisite rules an actor does not meet: each rule whose own predicate holds (when it applies) and whose
- * `requires` does not. A "Kenjutsu 3" Prerequisite is unmet for a buyer with Kenjutsu 2.
+ * `requires` does not. A "Kenjutsu 3" Prerequisite is unmet for a buyer with Kenjutsu 2. A rule whose `requires` is
+ * missing, empty, or not a list cannot be checked, so it counts as unmet with `requires` null, rather than letting
+ * anyone add the item (#172).
  * @param {object[]} rules - An item's raw `system.rules`
  * @param {Set<string>} options - The buyer's roll options
- * @returns {Array<{label: string, requires: Array}>}
+ * @returns {Array<{label: string, requires: Array|null}>}
  */
 export function getUnmetPrerequisites(rules, options) {
+  const isReadable = rule => Array.isArray(rule.requires) && rule.requires.length > 0;
   return (rules ?? [])
-    .filter(rule => rule?.key === "Prerequisite" && Array.isArray(rule.requires))
+    .filter(rule => rule?.key === "Prerequisite")
     .filter(rule => testPredicate(Array.isArray(rule.predicate) ? rule.predicate : [], options))
-    .filter(rule => !testPredicate(rule.requires, options))
-    .map(rule => ({ label: String(rule.label ?? ""), requires: rule.requires }));
-}
-
-/**
- * Whether a character may learn a kiho: its Ring plus its School Rank meets the kiho's Mastery Level. This is the
- * Brotherhood monk's test; the optional rules for other characters (Ring alone, or School Rank alone) are never
- * looser, so a kiho this refuses no character may learn, and the GM decides the rest by adding it anyway.
- * game-rules/87_kiho.md, p.261, 266
- * @param {number} mastery - The kiho's Mastery Level
- * @param {number} ring - The character's rank in the kiho's Ring
- * @param {number} schoolRank - The character's School Rank
- * @returns {boolean}
- */
-export function isKihoMasteryMet(mastery, ring, schoolRank) {
-  return ring + schoolRank >= mastery;
+    .filter(rule => !isReadable(rule) || !testPredicate(rule.requires, options))
+    .map(rule => ({
+      label: String(rule.label ?? ""),
+      requires: isReadable(rule) ? rule.requires : null
+    }));
 }
 
 /**
@@ -45,7 +38,7 @@ export function isKihoMasteryMet(mastery, ring, schoolRank) {
  * @property {string} prompt
  * @property {Array<{value: string, label: string}>} options  The rule's own options
  * @property {string|null} list  A built-in list instead: traits, rings, or skills
- * @property {string[]} filter   Skill types the skills list keeps; empty keeps all
+ * @property {string[]} filter   Skill types the skills list keeps, as Skills store them (toSkillType); empty keeps all
  */
 
 /**
@@ -68,7 +61,8 @@ export function openChoices(rules) {
       prompt: String(rule.prompt ?? ""),
       options,
       list: CHOICE_LISTS.includes(rule.list) ? rule.list : null,
-      filter: Array.isArray(rule.filter) ? rule.filter.map(String) : []
+      // By the type Skills store, so a filter of "merchant" keeps the "merch" Skills (#173)
+      filter: Array.isArray(rule.filter) ? rule.filter.map(toSkillType) : []
     });
   });
   return open;
@@ -96,9 +90,9 @@ export function getFixedGrantUuids(rules) {
  */
 export function getUngrantedOptions(options, granted) {
   const uuids = new Set(granted.uuids);
-  const names = new Set(granted.names.map(name => name.toLowerCase()));
+  const names = new Set(granted.names.map(toSkillKey));
   return options.filter(
-    option => !uuids.has(option.value) && !names.has(option.name?.toLowerCase())
+    option => !uuids.has(option.value) && !(option.name && names.has(toSkillKey(option.name)))
   );
 }
 

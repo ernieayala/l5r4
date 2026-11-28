@@ -5,7 +5,7 @@ import { getSlotStatus, spendSlot } from "../../module/services/dice/check/spell
 
 /**
  * Spend a spell slot the way a cast does (module/services/dice/check/spell-slots.js): the slot the choice names,
- * then the spend under the caster's lock, which checks the count again.
+ * then the spend in the caster's write queue, which checks the count again.
  * @param {Actor|object} actor  The caster
  * @param {string} ring  The Ring the spell is cast in
  * @param {{isVoid?: boolean}} [options]  Spend a Void slot in place of the Ring's
@@ -70,6 +70,27 @@ export async function withGmAnswer(answer, body) {
     return { result: await body(), asked };
   } finally {
     foundry.applications.api.DialogV2.confirm = confirm;
+  }
+}
+
+/**
+ * Run a function while a player owns an actor and counts as connected on this client, so a GM's roll treats the actor
+ * as that player's (module/utils/ownership.js, #165). Core sets `User#active` from the server; this client's copy is
+ * set for the function's run and restored after. The ownership stays with the actor, which the test deletes.
+ * @template T
+ * @param {Actor} actor
+ * @param {function(User): Promise<T>} fn - Gets the player
+ * @returns {Promise<T>}
+ */
+export async function withConnectedPlayer(actor, fn) {
+  const player = game.users.players[0];
+  const wasActive = player.active;
+  await actor.update({ [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER });
+  player.active = true;
+  try {
+    return await fn(player);
+  } finally {
+    player.active = wasActive;
   }
 }
 

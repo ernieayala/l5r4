@@ -57,9 +57,9 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `get` | Read or compute a value; no side effects | `getEffectiveTrait` (`module/utils/mechanics.js`) |
 | `*Of` | Read a value that belongs to the first argument; no side effects | `effectsOf` (`module/services/effects/apply.js`), `activationOf` (`module/services/effects/activation.js`), `defensesOf` |
 | `create` | Make a document, an embedded document, or a data model instance | `createRule` (`module/data/rules/rule-models.js`) |
-| `update` | Change stored data | `updateWorldCustomEmphasis` (`module/apps/emphasis-manager.js`) |
+| `update` | Change stored data | `updateCustomEmphases` (`module/services/custom-emphases.js`) |
 | `apply` | Change a document by a game result: damage, an effect, healing | `applyEffect` (`module/services/effects/apply.js`), `applyDamage` (`module/services/combat/damage.js`) |
-| `delete` | Remove a document, an entry, or a stored value | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`), `deleteWorldCustomEmphasis` |
+| `delete` | Remove a document, an entry, or a stored value | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) |
 | `roll` | Roll dice | `rollCheck` (`module/services/dice/check/roll-check.js`), `rollContest` |
 | `post` | Post a chat card | `postCheckRequest` (`module/services/check-request.js`) |
 | `request` | Ask the GM's client to run an operation through a GM query | `requestStep` (`module/services/combat/flow.js`), `requestDamageAction` |
@@ -67,11 +67,11 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `open` | Open a window: an app, a sheet, or a dialog that stays open | `openArmorConfig` (`module/sheets/handlers/app-launcher-handler.js`), `openLedgerDialog` |
 | `ask` | Show a dialog and wait for the user's answer | `askChoices` (`module/services/dice/check/dialog.js`), `askChoice` |
 | `is` | Predicate: a state | `isDead` (`module/utils/damage.js`), `isLost` |
-| `has` | Predicate: owns or contains | `hasOpenChoice` (`module/utils/choices.js`), `hasBeenMigrated` |
+| `has` | Predicate: owns or contains | `hasOpenChoice` (`module/utils/choices.js`), `hasHonorRollLeft` |
 | `can` | Predicate: allowed by permissions or the rules | `canEmbraceTaint` (`module/utils/taint.js`) |
 | `spend`, `test`, `start`, `end`, `guard` | Game verb: the action the book names for a game act (spend a Void Point, test Fear, start a duel, end an effect, guard an ally) | `spendVoidPoint` (`module/services/dice/resources/void-points.js`), `testFear` (`module/services/fear.js`), `startDuel` (`module/services/combat/duel.js`), `endConcentration` (`module/services/effects/prompts.js`), `guardFromCanvas` (`module/services/combat/guard.js`) |
 | `prepare` | Compute derived data during document preparation | `prepareFear` (`module/documents/actor/calculations/fear-system.js`) |
-| `migrate` | Change stored source data to the current shape | `migratePcSource` (`module/data/migrate-source.js`), `migrateArmorTypes` |
+| `migrate` | Change stored source data to the current shape | `migratePcSource` (`module/data/migrate-source.js`), `migrateArmorType` |
 | `register` | Add to a Foundry registry or hook during init | `registerEffectQueries` (`module/services/effects/apply.js`) |
 | `bind` | Attach listeners to a rendered chat card or dialog | `bindCheckCard` (`module/services/dice/check/chat-actions.js`) |
 | `hide` | Remove from rendered HTML a control the viewer may not use | `hideUnusable` (`module/utils/dom.js`) |
@@ -85,7 +85,9 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `log` | Write to the console for debugging; no other side effect | `logError` (`module/utils/error-logging.js`) |
 | `warn` | Show the user a warning notification; the operation goes ahead | `warnVoidLimit` (`module/services/effects/uses.js`) |
 | `export` | Write documents out to a file the browser saves | `exportItemFolder` (`module/services/item-transfer.js`) |
-| `settle` | Wait until pending asynchronous work has finished | `settleStarts` (`module/services/animations/status-animations.js`) |
+| `settle` | Wait until pending asynchronous work has finished | `settleLoads` (`module/services/animations/status-animations.js`) |
+| `refresh` | Bring what this client's canvas shows in line with the current state; no stored data changes | `refreshTokenAnimations` (`module/services/animations/status-animations.js`) |
+| `queue` | Run an operation after the earlier ones on the same key have finished, one at a time | `queueActorWrite` (`module/services/write-queue.js`) |
 | `*Field` | Return a new `foundry.data.fields` instance for a schema | `numberField` (`module/data/fields.js`) |
 
 ### Names the vocabulary rejects
@@ -100,13 +102,13 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | `applyEffectAnywhere` (`module/services/effects/apply.js`) | Asks the GM through a query | `requestEffect` |
 | `chooseElement` (modeled) | Shows a dialog and waits | `askElement` (`module/services/dice/rolls/spell-cast-roll.js`) |
 | `getUnifiedItemOptions` (`module/services/chat.js`) | `get` with a dialog behind it | `askItemOptions` |
-| `removeAnimation` (modeled) | Remove is `delete` | `deleteAnimation` (`module/services/animations/status-animations.js`) |
+| `removeItem` (modeled) | Remove is `delete` | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) |
 | `syncProne` (modeled) | Changes data by another verb | `updateProne` (`module/services/effects/automation.js`) |
 | `mayActFor` (modeled) | `may` is not a predicate prefix | `canActFor` (`module/services/combat/flow.js`) |
 | `needsRetroactiveUpdate` (modeled) | `needs` is not a predicate prefix | `isRetroactiveUpdateDue` (`module/services/xp/versioning.js`) |
 | `initializeCombat` (modeled) | Init entries use `register` | `registerCombatQueries` (`module/services/effects/combat-events.js`) |
-| `runIconPathMigration` (modeled) | Migrations use `migrate` | `migrateIconPaths` (`module/setup/migrations/icons/icon-paths.js`) |
-| `handleFearClick` (modeled) | Event handlers use `on` | `onFearClick` (`module/services/fear.js`) |
+| `runIconPathMigration` (modeled) | Migrations use `migrate` | `migrateItemIcon` (`module/setup/migrations/icons/icon-paths.js`) |
+| `handleFearClick` (modeled) | Event handlers use `on` | `onFearClick` (`module/services/fear-card.js`) |
 | `calculateInsightRank` (modeled) | A read by another verb | `getInsightRank` (`module/documents/actor/calculations/xp-system.js`) |
 | `createSkillData` (`tests/fixtures/item-fixtures.js`) | Returns plain data, not a document | `buildSkillData` |
 
@@ -118,7 +120,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | Init entry | `register<Feature>()` | `registerEffectQueries` (`module/services/effects/apply.js`) | `initializeCombat` (modeled) | `l5r4/naming` |
 | GM query registration | `register<Feature>Queries()` | `registerEffectQueries` | `setupQueries` (modeled) | `l5r4/naming` |
 | Card binding | `bind<Card>Card(message, html)`, singular | `bindCheckCard` (`module/services/dice/check/chat-actions.js`) | `bindDamageCards` (`module/services/combat/damage.js`) | Review |
-| Migration step | `migrate<What>`; a source migration in a data model is `migrate<Shape>Source(source)` | `migrateArmorTypes` (`module/setup/migrations/items/armor-types.js`), `migratePcSource` | `runIconPathMigration` (modeled) | `l5r4/naming` |
+| Migration step | `migrate<What>`; a source migration in a data model is `migrate<Shape>Source(source)` | `migrateArmorType` (`module/setup/migrations/items/armor-types.js`), `migratePcSource` | `runIconPathMigration` (modeled) | `l5r4/naming` |
 | Sheet handler static | `<verb><Object>(context, event, element)`, no `handle` prefix | `ItemCrudHandler.deleteItem` (`module/sheets/handlers/item-crud-handler.js`) | `handleToggleArmorVoid` → `updateArmorVoid` (modeled) | `l5r4/naming` |
 
 ## Members
@@ -141,7 +143,7 @@ A function name is `<verb><Object>` in camelCase: a verb from the table below, t
 | Module-level or static constant | UPPER_SNAKE_CASE | `TN_PER_RAISE` (`module/config/game-mechanics.js`) | `tnPerRaise` (modeled) | `l5r4/naming` |
 | Duration constant | Ends `_MS` | `UPDATE_TIMEOUT_MS` (`tests/quench/helpers.js`) | `UPDATE_TIMEOUT` (modeled) | Review |
 | GM query name constant | `<NAME>_QUERY` | `DAMAGE_QUERY` (`module/services/combat/damage.js`) | `damageQueryName` (modeled) | Review |
-| Module-level mutable state | camelCase | `actorLocks` (`module/services/dice/resources/void-points.js`) | `FLOWS` → `flows` (modeled) | `l5r4/naming` |
+| Module-level mutable state | camelCase | `chains` (`module/services/write-queue.js`) | `FLOWS` → `flows` (modeled) | `l5r4/naming` |
 | Variable or parameter | camelCase, glossary stems | `ringKey` in `rollRing` (`module/services/dice/rolls/ring-roll.js`) | `ring_key` (modeled) | ESLint `camelcase`, `tests/conventions/glossary.test.js` |
 
 ## Foundry-facing names
@@ -255,8 +257,8 @@ Names stored in world data or used outside the system. They keep their spelling,
 | System id | `l5r4-enhanced` (`SYS_ID`) | Worlds store it |
 | Document subtypes | Actor `pc`, `npc`; Item `advantage`, `armor`, `bow`, `clan`, `commonItem`, `disadvantage`, `family`, `kata`, `kiho`, `school`, `skill`, `spell`, `tattoo`, `technique`, `weapon`; ChatMessage `roll`, `checkRequest` | Each document stores its `type`; `system.json` declares them |
 | Templates named after subtypes | `templates/item/_type-details/<type>.hbs`, `templates/item/_type-modifiers/<type>.hbs`, `templates/cards/<type>.hbs` (with `advantage-disadvantage.hbs`), `templates/chat/check-request.hbs` | Loaded by subtype name |
-| `system` fields | Every field a `defineSchema` in `module/data/` declares, and the pre-3.0 and 3.2.1 keys the migrations read (`armor_tn`, `wound_lvl`, `insight_bonus`, `equiped`, `specialRues`, and the rest in `module/data/migrate-source.js` and `module/setup/migrations/schema/map.js`) | Stored in world data |
-| Flags | Every key under `flags.l5r4-enhanced` the code reads or writes, for example `xpFreeTraitBase`, `xpRetroactiveVersion`, `grants`, `damageResult`, `flow`, `ledger`, `migratedVersion`, `macro` | Stored in world data |
+| `system` fields | Every field a `defineSchema` in `module/data/` declares, and the pre-3.0 and 3.2.1 keys the migrations read (`armor_tn`, `wound_lvl`, `insight_bonus`, `equiped`, `specialRues`, a kata's or kiho's `cost`, and the rest in `module/data/migrate-source.js`) | Stored in world data |
+| Flags | Every key under `flags.l5r4-enhanced` the code reads or writes, for example `xpFreeTraitBase`, `xpRetroactiveVersion`, `grants`, `damageResult`, `flow`, `ledger`, `migratedVersion`, `macro`, `legacyCost` | Stored in world data |
 | Setting keys | `LtException`, `customEmphases`, `honorRoll`, `session`, `floatingNumbers`, `runMigration`, `forceMigration`, `lastMigratedVersion` | Stored in world and client settings |
 | Status and system effect ids | `attackStance`, `fullAttackStance`, `defenseStance`, `fullDefenseStance`, `centerStance`, `blinded`, `concentration`, `dazed`, `dead`, `entangled`, `fasting`, `fatigued`, `feared`, `grappled`, `guarded`, `guarding`, `mounted`, `prone`, `stunned`; effect ids `centered`, `fullDefense`, `voidArmor`; effect groups `stance`, `kata`, `tattoo`, `kiho-<type>` | Stored on Active Effects and tokens |
 | Rule data | Rule keys (`RollModifier`, `TNModifier`, `ArmorTN`, `Reduction`, `Wounds`, `Initiative`, `FreeRaise`, `DiceRule`, `Substitute`, `TraitAdjust`, `Note`, `RollOption`, `Movement`, `ApplyCondition`, `ConditionImmunity`, `PeriodicSave`, `Resource`, `DamageSource`, `Invulnerability`, `Spirit`, `OpponentModifier`, `RaiseRule`, `UnskilledAs`, `ActionCost`, `Cost`, `Ledger`, `Prerequisite`, `ChoiceSet`, `GrantItem`), their field names, selector kinds, roll-option strings, and field values (`module/config/rule-keys.js`, `module/data/rules/rule-models.js`) | Stored in `system.rules` on Items and Active Effects |
@@ -264,7 +266,7 @@ Names stored in world data or used outside the system. They keep their spelling,
 | GM query names | `l5r4-enhanced.applyEffect`, `.damage`, `.settleCenter`, `.endConcentration`, `.answerPrompt`, `.flow` | Clients send them to the GM's client by name |
 | `game.system.api` | `rollItem`, `rollTrait` | Hotbar macros store the call in their command |
 | Text link syntax | `@Check[...]`, `@Damage[...]`, `@Condition[...]`, `@Fear[...]`, their parameters `skill`, `trait`, `ring`, `tn`, and the `data-link-type` values `Check`, `Damage`, `Condition`, `Fear` | Stored in journals and descriptions |
-| Chat card actions and attributes | `data-action` `apply-wounds`, `reduce-wounds-void`, `check-damage`, `apply-condition`, `honor-roll`, `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `damage-void`, `damage-undo`, `effect-prompt`, `check-request-roll`; `data-flow-action` `control`, `hit`, `throw`, `break`, `pass`, `roll`, `concede`; `data-side`, `data-duelist`, `data-index`, `data-item-id`, `data-document-id`, `data-document-type`, and the pre-4.0.0 `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id`, `data-actor-id`, `data-damage` | Posted messages store their HTML |
+| Chat card actions and attributes | `data-action` `apply-wounds`, `reduce-wounds-void`, `check-damage`, `apply-condition`, `honor-roll`, `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `damage-void`, `damage-undo`, `effect-prompt`, `check-request-roll`, `initiative-request-roll`; `data-flow-action` `control`, `hit`, `throw`, `break`, `pass`, `roll`, `concede`; `data-side`, `data-duelist`, `data-index`, `data-item-id`, `data-document-id`, `data-document-type`, and the pre-4.0.0 `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id`, `data-actor-id`, `data-damage` | Posted messages store their HTML |
 | Chat card classes | `chat-card`, `card-content`, `dice-flavor`, `check-note`, `check-applied`, `check-free-raises`, `check-conditions`, `damage-actions`, `flow-actions`, `healing-card`, `weapon`, `l5r4-roll`, `l5r4-check`, `l5r4-tn-result`, `l5r4-check-damage`, `l5r4-check-request`, `l5r4-check-request-text`, `l5r4-damage-result`, `l5r4-effect-prompt`, `l5r4-flow-card`, `l5r4-contest`, `l5r4-item-summary`, `l5r4-item-summary-heading`, `l5r4-rule-lines`, `l5r4-citation`, `l5r4-damage-button`, `l5r4-damage-roll`, `l5r4-chat-note`, `apply-wounds-btn`, `reduce-wounds-btn`, `-undone`, `-gap-sm`; on posted item cards `item`, `title`, `-bio`, `-expandable`, and `-<type>` for each Item subtype | Posted messages store their HTML; the styles stay |
 | Item transfer format | `l5r4-enhanced.items` (`TRANSFER_FORMAT`) | Exported files carry it |
 | Dice | The `xa` modifier and `L5R4Die` as `CONFIG.Dice.terms.d` | Stored in roll formulas |

@@ -1,9 +1,9 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { F } from "../../module/utils/localization.js";
+import { F, T } from "../../module/utils/localization.js";
 import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
-import { onPromptClick } from "../../module/services/effects/prompts.js";
+import { onPromptClick, postFullDefensePrompt } from "../../module/services/effects/prompts.js";
 import {
   endEncounter,
   registerTokenEffects,
@@ -19,7 +19,8 @@ import {
   buttonLabelsOf,
   createDrawnToken,
   settleChatNotifications,
-  waitFor
+  waitFor,
+  withGmAnswer
 } from "./helpers.js";
 
 /**
@@ -275,6 +276,37 @@ export function registerEffectsTests(quench) {
           );
         });
 
+        // #179: a save is made once a Round, so a card from an earlier Round asks the GM
+        it("should ask the GM before rolling a save card from an earlier Round", async function () {
+          this.timeout(20_000);
+          const actor = track(await createTestPC({ name: "Effects dazed old card" }));
+          const combat = await startCombat([actor, 10]);
+          const effect = await applyEffect(actor, "dazed");
+          await effect.setFlag(SYS_ID, "saveTn", 200);
+          await combat.nextTurn();
+          await waitFor(() => prompts(actor, "save").length === 1);
+          const old = prompts(actor, "save")[0];
+          await combat.nextTurn();
+          await waitFor(() => prompts(actor, "save").length === 2);
+          const declined = await withGmAnswer(false, () => onPromptClick(old));
+          assert.lengthOf(declined.asked, 1, "the GM is asked");
+          assert.include(declined.asked[0], T("l5r4.ui.effects.promptLapsedRound"));
+          assert.equal(effect.getFlag(SYS_ID, "saveTn"), 200, "declined: no save rolled");
+          await withGmAnswer(true, () => onPromptClick(old));
+          assert.equal(effect.getFlag(SYS_ID, "saveTn"), 195, "allowed: the save rolls");
+        });
+
+        // #179: the Full Defense bonus comes only with the stance
+        // game-rules/36_stances.md, p.84
+        it("should ask the GM before rolling a Full Defense card once the stance is left", async function () {
+          this.timeout(20_000);
+          const actor = track(await createTestPC({ name: "Effects full defense left" }));
+          const card = await postFullDefensePrompt(actor);
+          const declined = await withGmAnswer(false, () => onPromptClick(card));
+          assert.include(declined.asked[0], T("l5r4.ui.effects.promptLapsedStance"));
+          assert.lengthOf(effectsOf(actor, "fullDefense"), 0, "declined: no bonus");
+        });
+
         it("should end Stunned at the end of the next Round on a failed save", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects stunned" }));
@@ -457,6 +489,29 @@ export function registerEffectsTests(quench) {
           } finally {
             await token.delete();
           }
+        });
+      });
+
+      // #178: effects timed in Rounds or Turns end with their combat
+      // game-rules/25_rings_and_traits.md, p.78
+      // game-rules/38_maneuvers.md, p.87
+      describe("Effects timed in the combat", () => {
+        it("should end Guarded and Void on Armor TN with the combat, and leave a status with no time", async function () {
+          this.timeout(20_000);
+          const actor = track(await createTestPC({ name: "Effects combat end" }));
+          const combat = await startCombat([actor, 10]);
+          await applyEffect(actor, "guarded");
+          await applyEffect(actor, "voidArmor");
+          await applyEffect(actor, "prone");
+          assert.lengthOf(effectsOf(actor, "voidArmor"), 1);
+          await combat.delete();
+          assert.isTrue(
+            await waitFor(
+              () => !actor.statuses.has("guarded") && effectsOf(actor, "voidArmor").length === 0
+            ),
+            "Guarded and Void on Armor TN end"
+          );
+          assert.isTrue(actor.statuses.has("prone"), "Prone has no time and stays");
         });
       });
 

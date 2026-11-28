@@ -6,7 +6,7 @@
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-weapon-attack" pool=attackFormula tooltip=(localize "l5r4.ui.mechanics.rolls.attackRoll")}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-weapon-damage" pool=system.derivedDamageFormula tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll")}}
     <div class="l5r4-item-row-cell">
-      {{#if ranged}}
+      {{#if system.isBow}}
         <select
           data-action="update-item-field"
           data-field="system.arrow"
@@ -19,7 +19,7 @@
   {{/if}}
   {{#unless inSheet}}
     <p><strong>{{localize "l5r4.ui.common.damage"}}:</strong> {{system.damageRoll}}k{{system.damageKeep}}</p>
-    {{#if ranged}}
+    {{#if system.isBow}}
       <p><strong> {{localize "l5r4.ui.mechanics.traits.str"}}:</strong> {{system.str}}</p>
     {{/if}}
 {{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.rulesSummary" text=system.specialRules}}

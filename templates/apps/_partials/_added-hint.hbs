@@ -1,0 +1,6 @@
+{{!-- The hint under a configuration field: what rules and Active Effects add to the stored value it edits, and the
+total (form-field.md, Added hint). Parameter: added ({value, total}, module/utils/added-values.js), absent when
+nothing is added. --}}
+{{#if added}}
+  <p class="hint l5r4-form-field-added">{{localize "l5r4.ui.mechanics.addedByRules" value=(numberFormat added.value sign=true) total=added.total}}</p>
+{{/if}}

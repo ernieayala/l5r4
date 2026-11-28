@@ -21,6 +21,7 @@
       },
       "compendiumBrowser": {
         "add": "Add",
+        "added": "{item} added to {name}",
         "clear": "Clear filters",
         "count": "Entries: {count}",
         "filters": {
@@ -262,6 +263,7 @@
           "expandSection": "Section expand control",
           "failureHonorRoll": "Failure, with the Honor Roll",
           "fearLink": "Fear link",
+          "fieldAddedRules": "Field with what rules add",
           "flowOver": "Flow over",
           "formView": "Form view, one rule invalid",
           "fullDefense": "Full Defense roll",
@@ -287,6 +289,7 @@
           "notesSection": "Notes section",
           "noVoidRing": "Void Ring 0: no Void toggle",
           "npcHeader": "NPC header",
+          "npcItemSections": "NPC item sections: only the lists it holds",
           "npcManual": "NPC with a manual track",
           "npcTrack": "NPC track",
           "npcValues": "NPC values",
@@ -376,7 +379,9 @@
         "custom": "Custom",
         "emphasisName": "Emphasis name",
         "errors": {
-          "saveFailed": "Failed to save custom Emphasis",
+          "nameCharacters": "An Emphasis name may hold letters, numbers, spaces, hyphens, apostrophes, and colons",
+          "nameLength": "An Emphasis name has {min} to {max} characters",
+          "nameTaken": "A custom Emphasis named {name} already exists",
           "updateFailed": "Failed to update emphasis manager"
         },
         "hint": "Select which Emphases are available for this Skill. Train them on the character sheet.",
@@ -436,9 +441,12 @@
       },
       "xpManager": {
         "addXp": "Add XP",
+        "disadvantageCapInvalid": "Enter a whole number of 0 or more",
         "disadvantageCapTitle": "Set Disadvantage cap",
         "errors": {
-          "openFailed": "Failed to open XP manager"
+          "calculateFailed": "XP could not be calculated: {error}",
+          "openFailed": "Failed to open XP manager",
+          "writeFailed": "The XP change was not saved: {error}"
         },
         "noAdjustments": "No XP added or taken away by hand.",
         "noPurchases": "No XP spent yet.",
@@ -475,6 +483,7 @@
           "void": "Void"
         },
         "disadvantageCapLabel": "Maximum XP",
+        "emphasisNote": "{skill}: Emphasis {emphasis}",
         "fallbackLabels": {
           "skillCreated": "Skill created",
           "skillIncreased": "Skill increased",
@@ -482,6 +491,8 @@
           "voidIncrease": "Void increase"
         },
         "note": "Note",
+        "overCap": "{name} ({over} XP over the Disadvantage cap, not counted)",
+        "overspent": "{over} XP spent past the total",
         "purchases": "Purchases",
         "reason": "Reason",
         "recalculate": "Recalculate XP purchases from current character state",
@@ -501,7 +512,7 @@
         "errors": {
           "toggleFailed": "Failed to toggle movement type"
         },
-        "feet": "ft",
+        "feetValue": "{n} ft",
         "maximum": "Maximum movement",
         "title": "Movement"
       },
@@ -625,10 +636,10 @@
         "explodes": "Dice explode",
         "explodesHint": "Off for weapons whose damage dice never explode, such as shuriken.",
         "fallbackTrait": "Fallback Trait",
-        "meleeRange": "Bow at a target in melee range",
         "minStrength": "Minimum Strength",
         "range": "Range",
         "rangedAttack": "Ranged attack",
+        "rangedInMelee": "Ranged attack at a target in melee range",
         "size": "Size",
         "sizes": {
           "large": "Large",
@@ -648,6 +659,16 @@
     },
     "magic": {
       "kiho": {
+        "access": {
+          "auto": "As its other fields show",
+          "brotherhood": "Brotherhood monk",
+          "label": "Kiho",
+          "monk": "Other monk school (1½× XP)",
+          "ninja": "Ninja (2× XP)",
+          "none": "None",
+          "shugenja": "Shugenja (2× XP)"
+        },
+        "accessHint": "How a student learns kiho: a monk meets the Mastery Level with Ring and School Rank, a shugenja with the Ring, a ninja with the School Rank (p.266).",
         "internal": "Internal",
         "karmic": "Karmic",
         "martial": "Martial",
@@ -692,6 +713,9 @@
         "duration": "Duration",
         "maho": "Maho",
         "memorized": "Memorized",
+        "noSlot": "{name} has no {ring} or Void spell slot left to cast with (p.163).",
+        "noSlotGM": "Cast it without a slot?",
+        "noSlotLeft": "No {ring} or Void spell slot left: casting asks the GM.",
         "raises": "Raises",
         "range": "Range",
         "shugenja": "Shugenja",
@@ -699,6 +723,7 @@
         "shugenjaSchoolHint": "Spell Casting Rolls add this School's Rank. Without one, they add the Insight Rank.",
         "slotsRestored": "All spell slots restored to maximum",
         "slotSuffix": "[Use spell slot {element}]",
+        "universal": "Universal",
         "useSpellSlot": "Use spell slot",
         "voidSlot": "Use Void spell slot",
         "voidSlotSuffix": "[Use Void spell slot]"
@@ -711,14 +736,18 @@
         "toggleEffect": "Failed to toggle effect"
       },
       "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Compendium migration: updated {count} image path",
-          "other": "Compendium migration: updated {count} image paths"
+        "failed": {
+          "one": "{count} document could not be migrated and is tried again the next time a GM loads the world. The console (F12) names it",
+          "other": "{count} documents could not be migrated and are tried again the next time a GM loads the world. The console (F12) names them"
         },
-        "iconsUpdated": {
-          "one": "Migration: updated {count} world image path",
-          "other": "Migration: updated {count} world image paths"
-        }
+        "freeRaisesNarrowed": "{name}: {item}'s Free Raises applied to every roll before 4.0; they now apply only while it is in use, as its other rules do",
+        "kihoSchool": "{name}: {item} is now a School kiho, costing no XP, as its 3.2.1 cost was 0. Untick School kiho on it if {name} is no monk",
+        "migrated": {
+          "one": "Brought {count} document up to date with this version",
+          "other": "Brought {count} documents up to date with this version"
+        },
+        "notesTitle": "The upgrade changed these; check each one:",
+        "xpChanged": "{name}: {item} cost {before} XP in 3.2.1 and now costs {after}, its Mastery Level"
       },
       "settings": {
         "designGallery": {
@@ -731,7 +760,7 @@
           "name": "Floating Wound and Void numbers"
         },
         "forceMigration": {
-          "hint": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes.",
+          "hint": "Runs every migration step again on every document the next time the world loads, whatever each document records. Turns itself off afterwards.",
           "name": "Force migration on startup"
         },
         "honorRoll": {
@@ -743,7 +772,7 @@
           "name": "Apply Little Truths exception"
         },
         "runMigration": {
-          "hint": "If enabled, pending data migrations will run the next time the world loads. Disable to skip migrations for troubleshooting.",
+          "hint": "Each time a GM loads the world, documents from an older version, including ones imported since, are brought up to date. Disable to skip migrations for troubleshooting.",
           "name": "Run migrations on startup"
         }
       }
@@ -774,6 +803,8 @@
         "damageRolled": "Damage rolled",
         "damageRollPool": "Damage roll ({pool})",
         "effectsFor": "Active effects ({key})",
+        "freeRaisesDamage": "Increased Damage (Free Raises)",
+        "freeRaisesDamageHint": "Each adds +1k0. No Raises: there is no attack roll.",
         "freeRaisesLeft": "Free Raises: {count}",
         "freeRaisesToTnNote": "(Free Raises spent on the TN: {count})",
         "increasedDamage": "Increased Damage (Raises)",
@@ -785,6 +816,8 @@
         "noVoidPoints": "No Void Points left",
         "outcomeAgainstTn": "{outcome} against TN {tn}",
         "pool": "Pool",
+        "raisesAttackNote": "(Raises: {count}; {maneuvers} for maneuvers, {damage} for Increased Damage)",
+        "raisesFreeAttackNote": "(Raises: {count}, Free Raises: {free}; {maneuvers} for maneuvers, {damage} for Increased Damage)",
         "raisesNote": "(Raises: {count})",
         "range": {
           "melee": "melee",
@@ -818,7 +851,9 @@
           "armor": "Armor Piercing arrow ignores armor",
           "flesh": "Flesh Cutter arrow doubles armor"
         },
+        "attackNoTn": "No TN, so no hit or miss: target one token before attacking to use its Armor TN, or enter a TN in the roll dialog.",
         "calledShot": "Called Shot",
+        "calledShotDeclared": "Called Shot ({raises} Raises): {location}",
         "calledShotHand": "Hand or foot (2 Raises)",
         "calledShotHead": "Head (3 Raises)",
         "calledShotLimb": "Limb (1 Raise)",
@@ -826,6 +861,8 @@
         "calledShotNote": "Called Shot ({raises} Raises): {location}. The GM rules any effect on that part.",
         "calledShotSmall": "Eye, ear, finger (4 Raises)",
         "calledShotUnnamed": "unnamed part",
+        "contestRollForQuestion": "{name}'s player has not rolled Strength yet. Roll it for them here?",
+        "contestRollForTitle": "Roll Strength for {name}",
         "contestSettled": "Both sides have rolled; the contest is settled",
         "contestStrength": "Roll Contested Strength",
         "contestWaitingFor": "Waiting for {name}'s Strength roll",
@@ -863,6 +900,8 @@
         "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
         "feint": "Feint (2 Raises)",
         "feintNote": "Feint: half the margin over the TN adds to damage (up to 5 × Insight Rank).",
+        "flowEnd": "End",
+        "flowRedo": "Redo this step",
         "flowTitle": "{flow}: {stage}",
         "fourLegged": "Target has 4 or more legs",
         "grapple": {
@@ -870,6 +909,7 @@
           "broken": "{name} breaks the grapple.",
           "control": "Grapple control",
           "controlLabel": "Grapple control: {name}",
+          "endedByGm": "The GM ends the grapple.",
           "hit": "Hit",
           "hitLabel": "Hit: {weapon}",
           "hitLog": "{name} hits for {total}.",
@@ -892,6 +932,11 @@
         "guardFullAttack": "You cannot Guard in the Full Attack Stance",
         "guardPick": "Select your token and target the one to guard",
         "increasedDamageNote": "Increased Damage: +{dice}k0.",
+        "initiativeRequest": "Initiative for {name}, who marked a Void Point for it",
+        "initiativeRequestDone": "{name} has rolled Initiative already",
+        "initiativeRequestGone": "That combatant is no longer in a combat",
+        "initiativeRequestRoll": "Roll Initiative for {name}",
+        "initiativeRequestSent": "{name}'s Initiative went to their player, whose Void Point it is to spend",
         "initiativeVoidNone": "{name} has no Void Points available",
         "initiativeVoidQuestion": "Spend a Void Point to add +10 to {name}'s initiative roll?",
         "initiativeVoidSpent": "{name} spent Void Point for initiative (+10)",
@@ -907,18 +952,22 @@
         "maneuversAsk": "Maneuvers for {name} beyond what this roll's Raises pay for",
         "maneuversAskGm": "Ask the GM to allow more",
         "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
+        "maneuversMissed": "Declared: {maneuvers}. They fail with the attack.",
         "multipleTargets": "Several targets: set the TN by hand",
         "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them (declared: {raises})",
         "npcInitiative": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",
         "reductionNote": "Reduction {reduction}.",
-        "resultTitle": "{name} takes {wounds} Wounds from {damage} damage",
+        "resultTitle": "{name} takes {damage} damage; Wounds taken: {wounds}",
+        "rollForThem": "Roll for them",
         "sources": "Damage sources: {sources}",
         "spiritNote": "Spirit: the damage is halved.",
+        "targetGone": "The target of this roll no longer exists",
         "unarmed": "Unarmed",
         "undo": "Undo",
         "undoneNote": "Undone.",
         "voidNote": "Void Point spent: {wounds} fewer Wounds.",
-        "vs": "against"
+        "vs": "against",
+        "waitForPlayer": "Wait for their player"
       },
       "common": {
         "action": "Action",
@@ -998,6 +1047,8 @@
         "immune": "{name} is immune to {effect}",
         "noGM": "No GM is connected to apply that effect",
         "promptAnswered": "That roll has already been made",
+        "promptLapsedRound": "That save was for an earlier Round; a save is made once a Round",
+        "promptLapsedStance": "The character has left the Full Defense Stance, so that roll gives no bonus",
         "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
         "saveText": "{roll} roll against TN {tn}.",
         "saveTitle": "{effect}: save",
@@ -1015,7 +1066,10 @@
         "void": "Void Points"
       },
       "grants": {
+        "failed": "Granting items to {name} failed; the console has the details.",
         "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
+        "invalid": "{giver} has a GrantItem rule that is not valid, so it grants nothing: {error}",
+        "missing": "{giver} grants {uuid}, but no item has that UUID, so nothing was granted. It is tried again once the item exists.",
         "waiting": "{name} learns {items} from {giver} once these School Skills reach rank 1: {skills}.",
         "waitingRow": "Its Techniques wait for these School Skills at rank 1: {skills}"
       },
@@ -1037,8 +1091,10 @@
         "used": "{name} has already made an Honor Roll this session"
       },
       "ledger": {
+        "changedByRules": "{track} for {name}: recorded {points}, not {asked}; the character's Ledger rules changed the amount",
         "hint": "Record a gain or loss of Honor, Glory, Status, or Taint with its reason. Ten points make a rank; the character's Ledger rules may change the amount.",
         "points": "Points (negative to lose)",
+        "pointsRequired": "Enter the points gained or lost first",
         "reason": "Reason",
         "record": "Record",
         "title": "Ledger",
@@ -1079,6 +1135,7 @@
         "traitMacro": "{name}: {traitName}"
       },
       "mechanics": {
+        "addedByRules": "Rules and effects add {value}, for {total} in all.",
         "combat": {
           "attack": "Attack",
           "attackSlot": "Attack {slot}",
@@ -1086,14 +1143,21 @@
           "woundPenalty": "Wound penalty"
         },
         "fear": {
+          "cardDone": "all rolled",
+          "cardStage": "Willpower against TN {tn}, Honor Rank added",
           "catastrophicSuffix": "— Penalty: -{penalty}k0 to all rolls Catastrophic failure: the character flees or cowers helplessly.",
+          "feared": "{name} fails with {total}: -{penalty}k0 to all rolls.",
           "label": "Fear {rank}",
           "noFear": "This NPC has no Fear effect configured",
           "noTargets": "No tokens selected for Fear test",
           "noWillpower": "{name} has no Willpower Trait",
+          "overwhelmed": "{name} fails badly with {total}: -{penalty}k0 to all rolls, and flees or cowers helplessly.",
           "penaltySuffix": "— Penalty: -{penalty}k0 to all rolls",
           "rank": "Fear Rank",
-          "rollForSelected": "Roll Fear for the selected tokens",
+          "resisted": "{name} resists with {total}.",
+          "rollFor": "Roll for {name}",
+          "rollForSelected": "Post a Fear test for the selected tokens",
+          "rollRest": "Roll for the rest",
           "testLabel": "Fear {rank} test against {name}",
           "testResult": "Fear {rank} test",
           "title": "Fear"
@@ -1174,6 +1238,8 @@
           "armorReduction": "Reduction",
           "armorTn": "Armor TN",
           "armorTnBase": "Armor TN base",
+          "armorWorn": "From armor",
+          "armorWornHint": "The part of the Armor TN that is armor worn; Grappled and Stunned keep it.",
           "crippled": "Crippled",
           "down": "Down",
           "earthMultiplier": "Earth multiplier",
@@ -1205,6 +1271,7 @@
           "suffered": "Wounds suffered",
           "threshold": "Threshold",
           "thresholdOf": "{rank} threshold",
+          "voidFasting": "Void: none restored while Fasting",
           "voidRestored": "Void: {count}/{count} restored",
           "woundBonus": "Wound bonus",
           "woundHealRate": "Wound heal rate",
@@ -1214,15 +1281,26 @@
       },
       "notifications": {
         "actorNotFound": "Actor not found for damage roll",
+        "atLimit": {
+          "highest": "{name}: already at the highest",
+          "lowest": "{name}: already at the lowest"
+        },
         "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to 0: you cannot cast",
+        "deleteFailed": "{name} could not be deleted; the console has the details",
+        "dropFailed": "{name} could not be added; the console has the details",
+        "dropNotFound": "The dropped item could not be found",
         "invalidRingForSpell": "Invalid Ring for spell slot: {ring}",
         "messageTooLong": "Message too long (maximum 10,000 characters)",
         "noActorForVoid": "No actor available for Void Point spending",
         "noPermission": "You do not have permission to modify this actor",
         "noPermissionDamage": "You do not have permission to roll damage for this actor",
+        "noPermissionRoll": "You do not own the actor who made this roll",
         "noSpellSlots": "You ran out of spell slots for this Ring",
         "noValidWeapon": "No valid weapon found for attack roll",
+        "postFailed": "{name} could not be posted to chat; the console has the details",
         "schoolRankZero": "You cannot cast a spell with School Rank reduced to 0",
+        "shiftToChange": "Hold Shift and click to change {name}",
+        "skillNoTrait": "{skill} has no Trait to roll with: pick one on the Skill",
         "tokenNoActor": "Token has no actor"
       },
       "purchase": {
@@ -1230,7 +1308,11 @@
         "bypass": "Add anyway",
         "choiceTitle": "{item}: {prompt}",
         "choose": "Choose",
+        "kihoCap": "no more kiho than {cap}, the School Rank (p.266)",
         "kihoMastery": "{ring} + School Rank {mastery}",
+        "kihoMasteryRank": "School Rank {mastery}",
+        "kihoMasteryRing": "{ring} {mastery}",
+        "kihoNoSchool": "a School that teaches kiho (p.266)",
         "makeChoice": "Choose",
         "noOptions": "{name} has a choice with nothing to choose from; it was not added",
         "schoolAdd": "Add as another School",
@@ -1238,7 +1320,8 @@
         "schoolReplace": "Replace",
         "schoolTitle": "A second School",
         "unmet": "{name} needs: {list}",
-        "unmetTitle": "Prerequisites not met"
+        "unmetTitle": "Prerequisites not met",
+        "unreadablePrerequisite": "{label} (a Prerequisite rule with nothing in requires, which cannot be checked)"
       },
       "requests": {
         "allowRequest": "Allow it anyway?",
@@ -1252,7 +1335,9 @@
         "declined": "The GM did not allow that",
         "effectApplied": "{effect} applied to {name}",
         "effectAsk": "Put {effect} on {name}. No roll or action of theirs allows it",
+        "emphasisChanged": "The custom Emphases changed meanwhile: that name is taken, invalid, or gone",
         "failed": "The GM's client could not do this: {reason}",
+        "gmCorrects": "Only the GM redoes or ends a duel, grapple, or Fear card",
         "gmDeclined": "The GM did not allow it: {reason}",
         "grappleOver": "The grapple is over",
         "messageGone": "That chat card no longer exists",
@@ -1261,19 +1346,25 @@
         "notDamageResult": "That card is not a damage result",
         "notDamageRoll": "That card is not a damage roll against an actor",
         "notDuelistRoll": "That roll is not the duelist's",
-        "notFlowCard": "That card is not a duel or grapple card",
+        "notFlowCard": "That card is not a duel, grapple, or Fear card",
         "notFreshRoll": "That step needs a new roll of its own, made after the card",
         "notGrappleHit": "That card is not a hit with the Grapple maneuver against a target",
+        "notReplacement": "That roll does not replace one of yours recorded here",
         "notRoundEnd": "Only the owner of the combatant whose Turn ends the Round can end it",
+        "notVoidSpend": "That is not a Void Point spend for a character",
         "notYourCaster": "Only the caster's owner ends that concentration",
         "notYourDuelist": "That duelist is not yours, or the duel is over",
+        "notYourFearTest": "That character is not yours, or has made this Fear test",
+        "notYourGuard": "Only the guard's owner ends that Guard",
         "notYourPrompt": "That prompt is not yours to answer",
         "notYourSide": "That side or roll is not yours",
+        "notYourVoid": "Only the character's owner spends its Void Points",
         "onlyController": "Only the side in control acts",
         "onlyOwnerVoid": "Only the damaged character's owner spends its Void Point",
         "onlyRollerApplies": "Only the one who rolled the damage, or the GM, applies it",
         "onlyRollerUndoes": "Only the one who rolled the damage, or the GM, undoes it",
         "playerAsks": "{name} asks to go ahead: {reason}",
+        "replacedTooLate": "{name}'s new roll came after the next step was taken, so it changes nothing here. The GM can Redo the step.",
         "unknownAction": "That action is not known"
       },
       "rules": {
@@ -1407,6 +1498,7 @@
         "kiho": "Kiho",
         "mastery": "Mastery",
         "masteryHint": "Costs its Mastery Level in XP (pp.231, 259). A Cost rule changes the price: a monk's free kiho, or a non-Brotherhood school's higher one (p.266).",
+        "nameRequired": "Name the item first",
         "noBio": "No Clan, Family, or School yet.",
         "notes": "Notes",
         "recalculated": "Sheet recalculated for {name}",
@@ -1417,6 +1509,7 @@
         "spell": "Spell",
         "spells": "Spells",
         "spellSlots": "Spell slots",
+        "spellSlotsName": "{ring} spell slots",
         "spellSlotsOf": "{ring} spell slots: {count} (click: +1, right-click: -1)",
         "tabs": "Sheet parts",
         "tattoo": "Tattoo",
@@ -1428,6 +1521,7 @@
         "typeInsightRank": "Type the Insight Rank in",
         "weapon": "Weapon",
         "weapons": "Weapons",
+        "woundLevelCount": "Wound Ranks, Out included",
         "woundLevels": "Wound Ranks"
       },
       "sources": {
@@ -1472,6 +1566,7 @@
         "import": "Import items with rules",
         "imported": "Imported items",
         "importedCount": "Imported {count} items into {folder}",
+        "importedSome": "Imported {count} items into {folder}; {skipped} could not be imported, and the console names them",
         "importHint": "Choose a file exported from an Item folder. Its items go into a new folder here.",
         "invalidJson": "That file is not valid JSON.",
         "notExport": "That file is not an export of items with rules."

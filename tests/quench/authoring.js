@@ -204,6 +204,46 @@ export function registerAuthoringTests(quench) {
           })
         );
 
+        // #160: a second giver of a Skill adds no free rank, and removing either leaves the other's (Ernie's ruling)
+        // game-rules/48_character_creation_expanded.md, p.103
+        it(
+          "should give a Skill two givers grant one free rank, the next one bought, and keep it while one stays",
+          clean(async () => {
+            const { actor, kenjutsu } = await schooled();
+            const [advantage] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Sword Gift",
+                type: "advantage",
+                system: { rules: [{ key: "GrantItem", uuid: kenjutsu.uuid }] }
+              }
+            ]);
+            assert.isTrue(
+              await waitFor(() => advantage.getFlag(SYS_ID, "grants")?.length === 1),
+              "the Advantage's grant ran"
+            );
+            const skill = () => named(actor, "Kenjutsu");
+            assert.deepInclude(
+              skill().system,
+              { rank: 1, freeRanks: 1 },
+              "granted twice: one free rank"
+            );
+            const before = actor.system._xp.spent;
+            await skill().update({ "system.rank": 2 });
+            assert.equal(actor.system._xp.spent - before, 2, "rank 2 costs 2 XP");
+            await named(actor, "Quench Bushi School").delete();
+            assert.isTrue(
+              await waitFor(() => skill().getFlag(SYS_ID, "grantedBy") === advantage.id),
+              "the Advantage is now its giver"
+            );
+            assert.deepInclude(
+              skill().system,
+              { rank: 2, freeRanks: 1, school: true },
+              "the Advantage still grants it"
+            );
+            await advantage.delete();
+          })
+        );
+
         it(
           "should not grant again a granted item the owner removes",
           clean(async () => {
@@ -217,6 +257,44 @@ export function registerAuthoringTests(quench) {
             await actor.update({ "system.honor.points": 1 });
             await new Promise(resolve => setTimeout(resolve, 300));
             assert.notOk(named(actor, "Kenjutsu"));
+          })
+        );
+
+        // #143
+        it(
+          "should note a grant whose item is missing, record nothing, and grant it once the item exists",
+          clean(async () => {
+            const [lost] = await Item.createDocuments([createSkillData("Quench Lost Art", 0)]);
+            const lostData = lost.toObject();
+            const uuid = lost.uuid;
+            await lost.delete();
+            const actor = track(await createTestPC({ name: "Character options: lost" }));
+            await createPurchasedItem(actor, {
+              name: "Quench Lost School",
+              type: "school",
+              system: { rules: [{ key: "GrantItem", uuid }] }
+            });
+            const note = () =>
+              posted.find(
+                m => m.content.includes(uuid) && m.content.includes("Quench Lost School")
+              );
+            assert.isTrue(
+              await waitFor(() => Boolean(note())),
+              "a note names the giver and the UUID"
+            );
+            assert.include(note().whisper, game.user.id, "to the GM and the owners");
+            const school = named(actor, "Quench Lost School");
+            assert.notExists(
+              (school.getFlag(SYS_ID, "grants") ?? []).find(record => record.uuid === uuid),
+              "not recorded as granted"
+            );
+            const [back] = await Item.createDocuments([lostData], { keepId: true });
+            worldItems.push(back);
+            await actor.update({ "system.honor.points": 1 });
+            assert.isTrue(
+              await waitFor(() => Boolean(named(actor, "Quench Lost Art"))),
+              "granted once the item exists"
+            );
           })
         );
       });
@@ -261,7 +339,9 @@ export function registerAuthoringTests(quench) {
           "should ask a GM to add a kiho whose Mastery Level the Ring plus School Rank does not reach",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Character options: monk" }));
-            await actor.createEmbeddedDocuments("Item", [createSchoolData("Quench Monk School")]);
+            await actor.createEmbeddedDocuments("Item", [
+              createSchoolData("Quench Monk School", { system: { kiho: 3 } })
+            ]);
             const kiho = {
               name: "Quench Void Kiho",
               type: "kiho",
@@ -278,6 +358,45 @@ export function registerAuthoringTests(quench) {
               "Quench Void Kiho",
               "Void 3 and School Rank 1 reach 4: no question asked"
             );
+          })
+        );
+
+        // #159: a shugenja meets the Mastery Level with the Ring alone, pays twice, and knows no more kiho than the
+        // School Rank; another Monk School pays 1½ times; with no such School the GM is asked (Ernie's ruling)
+        // game-rules/87_kiho.md, p.266
+        it(
+          "should test, price, and cap kiho by the buyer's School",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: kiho buyer" }));
+            const kiho = (name, mastery) => ({
+              name,
+              type: "kiho",
+              system: { ring: "void", mastery, type: "mystical" }
+            });
+            const asked = async (data, answer) => {
+              const answered = answerConfirm(answer);
+              const result = await preparePurchase(actor, data);
+              await answered;
+              return result;
+            };
+            assert.isNull(await asked(kiho("Quench No School", 1), "no"), "no School teaches kiho");
+
+            const [school] = await actor.createEmbeddedDocuments("Item", [
+              createSchoolData("Quench Shugenja School", { system: { shugenja: true, rank: 1 } })
+            ]);
+            assert.isNull(
+              await asked(kiho("Quench Above Void", 3), "no"),
+              "Void 2 does not reach 3"
+            );
+            const [known] = await actor.createEmbeddedDocuments("Item", [
+              await preparePurchase(actor, kiho("Quench Within Void", 2))
+            ]);
+            assert.equal(actor.system._xp.breakdown.kiho, 4, "twice Mastery 2");
+            assert.isNull(await asked(kiho("Quench Second", 1), "no"), "School Rank 1: one kiho");
+
+            await school.update({ "system.kihoAccess": "monk" });
+            assert.equal(actor.system._xp.breakdown.kiho, 3, "1½ × 2, rounded up");
+            await known.delete();
           })
         );
 
@@ -395,6 +514,40 @@ export function registerAuthoringTests(quench) {
             assert.lengthOf(choiceLabels, 1);
             assert.include(choiceLabels[0], "Quench Open");
             assert.notInclude(choiceLabels[0], "Quench Granted", "the School grants it already");
+          })
+        );
+
+        // #141
+        it(
+          "should ask no choice when a later one has no options",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Character options: no options" }));
+            const warnings = [];
+            const warn = ui.notifications.warn;
+            ui.notifications.warn = message => warnings.push(message);
+            let asked;
+            try {
+              asked = await answerPurchaseDialogs(
+                preparePurchase(actor, {
+                  name: "Quench Empty Choice",
+                  type: "advantage",
+                  system: {
+                    rules: [
+                      { key: "ChoiceSet", flag: "first", options: [{ value: "a", label: "A" }] },
+                      { key: "ChoiceSet", flag: "second", list: "skills", filter: ["quench-none"] }
+                    ]
+                  }
+                }),
+                "add"
+              );
+            } finally {
+              ui.notifications.warn = warn;
+            }
+            assert.isNull(asked.result, "nothing is added");
+            assert.deepEqual(asked.titles, [], "no question was asked to be thrown away");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.purchase.noOptions", { name: "Quench Empty Choice" })
+            ]);
           })
         );
 
@@ -889,6 +1042,53 @@ export function registerAuthoringTests(quench) {
               await game.settings.set(SYS_ID, "honorRoll", enabled);
               // The world's own session goes back, so its players' used Honor Rolls stay used (#114)
               await game.settings.set(SYS_ID, "session", session);
+            }
+          })
+        );
+
+        // #169: a second press before the first lands rolls nothing, and every card of the actor is drawn again
+        // game-rules/43_honor.md, p.92
+        it(
+          "should make one Honor Roll for a double press, and redraw the actor's cards once it is used",
+          clean(async function () {
+            this.timeout(15_000);
+            const enabled = game.settings.get(SYS_ID, "honorRoll");
+            const uniform = CONFIG.Dice.randomUniform;
+            const updateMessage = ui.chat.updateMessage;
+            await game.settings.set(SYS_ID, "honorRoll", true);
+            CONFIG.Dice.randomUniform = NINES;
+            const redrawn = [];
+            try {
+              const actor = track(
+                await createTestPC({
+                  name: "Character options: hasty",
+                  system: { honor: { rank: 3 } }
+                })
+              );
+              const failed = await rollCheck({
+                actor,
+                kind: "trait",
+                label: "Agility",
+                base: { roll: 2, keep: 2 },
+                trait: "agi",
+                tn: 100,
+                askForOptions: false
+              });
+              ui.chat.updateMessage = function (message, ...rest) {
+                redrawn.push(message.id);
+                return updateMessage.call(this, message, ...rest);
+              };
+              const [first, second] = await Promise.all([rollHonor(failed), rollHonor(failed)]);
+              assert.ok(first, "the first press rolls");
+              assert.isNull(second, "the second press rolls nothing");
+              const honorRolls = game.messages.filter(m => m.system?.honorRollOf === failed.id);
+              assert.lengthOf(honorRolls, 1, "one Honor Roll posted");
+              assert.equal(actor.system.honor.rank, 2, "one Rank lost, not two");
+              assert.include(redrawn, failed.id, "the failed roll's card is drawn again");
+            } finally {
+              ui.chat.updateMessage = updateMessage;
+              CONFIG.Dice.randomUniform = uniform;
+              await game.settings.set(SYS_ID, "honorRoll", enabled);
             }
           })
         );

@@ -464,8 +464,8 @@
             "predicate": [
               {
                 "or": [
-                  "school:bayushi bushi",
-                  "school:bayushi courtier"
+                  "school:bayushi bushi school",
+                  "school:bayushi courtier school"
                 ]
               }
             ],
@@ -480,8 +480,8 @@
             "predicate": [
               {
                 "or": [
-                  "school:bayushi bushi",
-                  "school:bayushi courtier"
+                  "school:bayushi bushi school",
+                  "school:bayushi courtier school"
                 ]
               }
             ],
@@ -2607,7 +2607,7 @@
             "roll": 2,
             "optional": true,
             "predicate": [
-              "school:mirumoto bushi"
+              "school:mirumoto bushi school"
             ],
             "label": "Mirumoto: Agility roll with a Mirumoto Bushi School Skill (+3k1 in all)"
           },

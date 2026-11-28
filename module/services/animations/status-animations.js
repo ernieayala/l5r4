@@ -1,9 +1,11 @@
 /**
  * @module services/animations/status-animations
- * @description Plays, persists, and ends the Sequencer and JB2A animations for stances and conditions, and does
- * nothing when either module is missing. hooks.js calls it when Active Effects change; asset-library.js supplies the
- * animation settings. Each effect is attached to a token and named so Sequencer.EffectManager can end it later. No
- * game mechanic depends on it.
+ * @description Keeps the stance and condition auras each client shows in line with the statuses of the tokens on its
+ * canvas. Every client plays its own, locally and without storing them on the token (Sequencer `play({ local: true })`
+ * and `temporary()`), so each viewer's canvas and reduced-motion setting decide what it sees, and a scene change or a
+ * reload rebuilds them from the statuses (#198). An aura attaches to its token, so a hidden token's aura shows only to
+ * those who see the token. Auras an earlier version stored on tokens are ended by the GM. asset-library.js supplies
+ * the animation settings; nothing plays without Sequencer and JB2A, and no game mechanic depends on it.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -16,153 +18,118 @@ import {
 } from "./asset-library.js";
 
 /**
- * Animations still starting, by effect name, so a removal that comes first does not miss the effect and leave it
- * playing.
- * @type {Map<string, Promise<unknown>>}
+ * Each token's refresh under way, by token id: a token's refreshes run one after another, so two in a row never start
+ * the same aura twice or end one that is still starting.
+ * @type {Map<string, Promise<void>>}
  */
-const starting = new Map();
+const refreshing = new Map();
 
-/** Longest wait for a started effect to finish loading before it is ended anyway. */
+/** Longest wait for an aura to finish loading before it is ended anyway. */
 const LOAD_WAIT_MS = 5000;
 
 /**
- * Play animation for a stance or condition.
- *
- * Creates a persistent visual effect attached to the actor's token(s).
- * Effect persists until explicitly removed via deleteAnimation().
- *
- * Defensive Coding:
- * - Returns early if Sequencer or JB2A not available, or the user asked for less motion
- * - Returns early if no animation config found for ID
- * - Returns early if actor has no active tokens
- * - Wraps Sequencer API calls in try/catch
- * - Logs warnings on failure (non-fatal)
- *
- * Effect Storage:
- * Effects are named using the pattern: `${SYS_ID}.${statusId}.${token.id}`
- * Sequencer manages cleanup via effect name pattern matching.
- *
- * @param {Actor} actor - The actor to play animation on
- * @param {string} statusId - The stance or condition ID (e.g., "fullAttackStance", "blinded")
- * @param {boolean} [isStance=false] - True if this is a stance, false if condition
+ * Bring the auras of every token on this client's canvas in line with their statuses.
  * @returns {Promise<void>}
  */
-export async function startAnimation(actor, statusId, isStance = false) {
-  // Early return: Check module availability, and play nothing for a user who asked for less motion
-  if (!isSequencerAvailable() || !isJb2aAvailable() || isMotionReduced()) {
+export async function refreshSceneAnimations() {
+  await Promise.all(canvas.tokens.placeables.map(refreshTokenAnimations));
+}
+
+/**
+ * Bring the auras of an actor's tokens on this client's canvas in line with the actor's statuses.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export async function refreshActorAnimations(actor) {
+  await Promise.all(actor.getActiveTokens().map(refreshTokenAnimations));
+}
+
+/**
+ * Bring one token's auras on this client in line with its actor's statuses: start each missing one, end each one
+ * whose status is gone. A token with no actor, or a user who asked for less motion, wants none (motion.md rule 5).
+ * @param {Token} token - The token on this client's canvas
+ * @returns {Promise<void>}
+ */
+export function refreshTokenAnimations(token) {
+  const next = (refreshing.get(token.id) ?? Promise.resolve())
+    .then(() => refreshTokenAnimationsNow(token))
+    .catch(error =>
+      console.warn(`L5R4 | Failed to update the animations of ${token.name}:`, error)
+    );
+  refreshing.set(token.id, next);
+  // Left running: it only clears the queue entry once this refresh is the last
+  next.then(() => {
+    if (refreshing.get(token.id) === next) {
+      refreshing.delete(token.id);
+    }
+  });
+  return next;
+}
+
+/**
+ * End the auras an earlier version of the system stored on the tokens of this client's scene: Sequencer played those
+ * for everyone and kept them after their status ended elsewhere. Ending one removes it for every client, so the GM
+ * does it.
+ * @returns {Promise<void>}
+ */
+export async function endStoredAnimations() {
+  const stored = Sequencer.EffectManager.getEffects({ name: `${SYS_ID}.*` }).filter(
+    effect => !effect.data.temporary
+  );
+  if (stored.length) {
+    await Sequencer.EffectManager.endEffects({ effects: stored });
+  }
+}
+
+/**
+ * Start and end one token's auras so they match what it wants.
+ * @param {Token} token
+ * @returns {Promise<void>}
+ */
+async function refreshTokenAnimationsNow(token) {
+  if (token.destroyed || !isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
-
-  // Get animation configuration
-  const animConfig = isStance ? getStanceAnimation(statusId) : getConditionAnimation(statusId);
-
-  if (!animConfig) {
-    return;
+  const wanted = wantedAnimationsOf(token);
+  const playing = Sequencer.EffectManager.getEffects({ object: token }).filter(
+    effect => effect.data.temporary && effect.data.name?.startsWith(`${SYS_ID}.`)
+  );
+  const ended = playing.filter(effect => !wanted.has(effect.data.name));
+  if (ended.length) {
+    await settleLoads(ended);
+    await Sequencer.EffectManager.endEffects({ effects: ended }, false);
   }
-
-  // Get actor's active tokens
-  const tokens = actor.getActiveTokens();
-
-  if (!tokens || tokens.length === 0) {
-    return;
-  }
-
-  // Play animation on each token
-  for (const token of tokens) {
-    try {
-      // The effect's name, by which a removal finds it
-      const effectName = `${SYS_ID}.${statusId}.${token.id}`;
-      await startSequence(buildAnimationSequence(animConfig, token, effectName), effectName);
-    } catch (error) {
-      console.warn(`L5R4 | Failed to play animation ${statusId} for ${actor.name}:`, error);
+  const playingNames = new Set(playing.map(effect => effect.data.name));
+  for (const [name, config] of wanted) {
+    if (!playingNames.has(name) && !token.destroyed) {
+      await buildAnimationSequence(config, token, name).play({ local: true });
     }
   }
 }
 
 /**
- * Remove animation for a stance or condition.
- *
- * Ends the persistent visual effect created by startAnimation().
- * Uses Sequencer's effect name pattern matching to find and end effects.
- *
- * Defensive Coding:
- * - Returns early if Sequencer not available
- * - Returns early if actor has no active tokens
- * - Wraps Sequencer API calls in try/catch
- * - Logs warnings on failure (non-fatal)
- *
- * @param {Actor} actor - The actor to remove animation from
- * @param {string} statusId - The stance or condition ID
- * @returns {Promise<void>}
+ * The auras a token wants on this client, as settings by effect name: one for each status of its actor that has an
+ * animation, none without an actor or for a user who asked for less motion.
+ * @param {Token} token
+ * @returns {Map<string, object>}
  */
-export async function deleteAnimation(actor, statusId) {
-  // Early return: Check module availability
-  if (!isSequencerAvailable()) {
-    return;
+function wantedAnimationsOf(token) {
+  const wanted = new Map();
+  if (!token.actor || isMotionReduced()) {
+    return wanted;
   }
-
-  // Get actor's active tokens
-  const tokens = actor.getActiveTokens();
-
-  if (!tokens || tokens.length === 0) {
-    return;
-  }
-
-  // Remove animation from each token
-  for (const token of tokens) {
-    try {
-      // Build effect name pattern
-      const effectName = `${SYS_ID}.${statusId}.${token.id}`;
-
-      // End the effect via Sequencer, once it has finished starting
-      await settleStarts(name => name === effectName, effectName);
-      await Sequencer.EffectManager.endEffects({ name: effectName });
-    } catch (error) {
-      console.warn(`L5R4 | Failed to remove animation ${statusId} for ${actor.name}:`, error);
+  for (const statusId of token.actor.statuses) {
+    const config = getStanceAnimation(statusId) ?? getConditionAnimation(statusId);
+    if (config) {
+      wanted.set(`${SYS_ID}.${statusId}.${token.id}`, config);
     }
   }
+  return wanted;
 }
 
 /**
- * Remove all animations from an actor.
- *
- * Cleans up all persistent effects when actor is deleted or all effects are cleared.
- * Uses Sequencer's effect name pattern matching to find and end all system effects.
- *
- * @param {Actor} actor - The actor to remove all animations from
- * @returns {Promise<void>}
- */
-export async function deleteAllAnimations(actor) {
-  // Early return: Check module availability
-  if (!isSequencerAvailable()) {
-    return;
-  }
-
-  // Get actor's active tokens
-  const tokens = actor.getActiveTokens();
-
-  if (!tokens || tokens.length === 0) {
-    return;
-  }
-
-  // Remove all animations from each token
-  for (const token of tokens) {
-    try {
-      // End all effects for this system and token using name pattern, once they have finished starting
-      await settleStarts(
-        name => name.startsWith(`${SYS_ID}.`) && name.endsWith(`.${token.id}`),
-        `${SYS_ID}.*${token.id}`
-      );
-      await Sequencer.EffectManager.endEffects({ name: `${SYS_ID}.*${token.id}` });
-    } catch (error) {
-      console.warn(`L5R4 | Failed to remove all animations for ${actor.name}:`, error);
-    }
-  }
-}
-
-/**
- * Build the Sequencer sequence of one token's animation: the effect file attached to the token, configured by the
- * animation's settings, and named for later cleanup.
+ * Build the Sequencer sequence of one token's aura: the effect file attached to the token, configured by the
+ * animation's settings, named so a later sync finds it, and kept off the token's stored effects.
  * @param {object} animConfig - The animation settings from asset-library.js
  * @param {Token} token - The token the effect attaches to
  * @param {string} effectName - The effect's name
@@ -170,7 +137,7 @@ export async function deleteAllAnimations(actor) {
  */
 function buildAnimationSequence(animConfig, token, effectName) {
   const sequence = new Sequence();
-  let effectSection = sequence.effect().file(animConfig.file).attachTo(token);
+  let effectSection = sequence.effect().file(animConfig.file).attachTo(token).temporary();
   if (animConfig.scale !== undefined) {
     effectSection = effectSection.scale(animConfig.scale);
   }
@@ -191,39 +158,15 @@ function buildAnimationSequence(animConfig, token, effectName) {
 }
 
 /**
- * Play a sequence and wait for it, tracked in `starting` so a removal of this effect waits for it.
- * @param {Sequence} sequence - The sequence to play
- * @param {string} effectName - The name of its effect
+ * Wait until Sequencer has finished loading the given effects. Sequencer 4.2.3 loads an effect's video after `play()`
+ * resolves, then sets the sprite's volume without checking whether the effect was ended meanwhile, so ending one that
+ * is still loading throws inside Sequencer (`PersistentCanvasEffect._createSprite`).
+ * @param {object[]} effects - Sequencer's effects
  * @returns {Promise<void>}
  */
-async function startSequence(sequence, effectName) {
-  const start = sequence.play();
-  starting.set(effectName, start);
-  try {
-    await start;
-  } finally {
-    if (starting.get(effectName) === start) {
-      starting.delete(effectName);
-    }
-  }
-}
-
-/**
- * Wait until the named animations have started and Sequencer has finished loading them. Sequencer 4.2.3 loads an
- * effect's video after `play()` resolves, then sets the sprite's volume without checking whether the effect was ended
- * meanwhile, so ending one that is still loading throws inside Sequencer (`PersistentCanvasEffect._createSprite`).
- * @param {function(string): boolean} matches - Which effect names to wait for
- * @param {string} pattern - The Sequencer name pattern for the same effects
- * @returns {Promise<void>}
- */
-async function settleStarts(matches, pattern) {
-  await Promise.allSettled(
-    [...starting].filter(([name]) => matches(name)).map(([, start]) => start)
-  );
+async function settleLoads(effects) {
   const end = Date.now() + LOAD_WAIT_MS;
-  const isLoading = () =>
-    Sequencer.EffectManager.getEffects({ name: pattern }).some(effect => !effect.ready);
-  while (isLoading() && Date.now() < end) {
+  while (effects.some(effect => !effect.ready) && Date.now() < end) {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
 }

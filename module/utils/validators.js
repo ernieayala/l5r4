@@ -13,11 +13,11 @@ import { MAX_RAISES } from "../config/game-mechanics.js";
 import { toNumber } from "./type-coercion.js";
 
 /**
- * Allowed characters for emphasis names.
- * Permits: letters, numbers, spaces, hyphens, apostrophes.
+ * Allowed characters for emphasis names: letters and numbers in any script with their accents, so a table names one
+ * in its own language, and spaces, hyphens, apostrophes, and colons, which Lore Skills use (#188).
  * @constant {RegExp}
  */
-const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
+const EMPHASIS_NAME_PATTERN = /^[\p{L}\p{M}\p{N}\s\-':]+$/u;
 
 /**
  * Validates skill emphasis name.
@@ -25,41 +25,37 @@ const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
  * In L5R4, skills can have emphases (specializations) that provide bonuses
  * in specific situations. Example: Kenjutsu (Katana), Investigation (Notice).
  *
- * Validation rules:
- * - Must be string
- * - Length: 1-100 characters (after trimming)
- * - Characters: letters, numbers, spaces, hyphens, apostrophes only
+ * Validation rules, on the trimmed name:
+ * - Length: 1-100 characters
+ * - Characters: letters and numbers in any script, spaces, hyphens, apostrophes, colons only
+ * - Not already among the given names
  *
- * So "Katana" and "Notice" are valid; "" and "Invalid@Name" are not, each with its error.
- * @param {string} emphasisName - Emphasis name to validate
- * @returns {{valid: boolean, error?: string}} Validation result: whether it is valid, and the error message if not
+ * So "Katana" and "Notice" are valid; "", "Invalid@Name", and a name already listed are not, each with its error.
+ * @param {string} emphasisName - The name typed (the custom Emphasis dialog's field)
+ * @param {string[]} [existing=[]] - The names it may not repeat: the world's other custom Emphases
+ * @returns {{valid: boolean, error?: string, data?: object, sanitized?: string}} Validation result: whether it is
+ *   valid, the error's i18n key and its placeholder data if not, and the trimmed name if it is
  */
-export function validateEmphasisName(emphasisName) {
-  // Type check
-  if (typeof emphasisName !== "string") {
-    return {
-      valid: false,
-      error: "Emphasis name must be a string"
-    };
-  }
+export function validateEmphasisName(emphasisName, existing = []) {
   const trimmed = emphasisName.trim();
-  // Length check
   if (trimmed.length < MIN_EMPHASIS_LENGTH || trimmed.length > MAX_EMPHASIS_LENGTH) {
     return {
       valid: false,
-      error: `Emphasis name must be ${MIN_EMPHASIS_LENGTH}-${MAX_EMPHASIS_LENGTH} characters`
+      error: "l5r4.apps.emphasisManager.errors.nameLength",
+      data: { min: MIN_EMPHASIS_LENGTH, max: MAX_EMPHASIS_LENGTH }
     };
   }
-  // Character validation
   if (!EMPHASIS_NAME_PATTERN.test(trimmed)) {
+    return { valid: false, error: "l5r4.apps.emphasisManager.errors.nameCharacters", data: {} };
+  }
+  if (existing.includes(trimmed)) {
     return {
       valid: false,
-      error: "Invalid characters in emphasis name"
+      error: "l5r4.apps.emphasisManager.errors.nameTaken",
+      data: { name: trimmed }
     };
   }
-  return {
-    valid: true
-  };
+  return { valid: true, sanitized: trimmed };
 }
 
 /**

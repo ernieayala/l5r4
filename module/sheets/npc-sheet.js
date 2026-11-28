@@ -3,23 +3,22 @@
  * @description The NPC actor sheet, for creatures, adversaries, and supporting cast. On top of BaseActorSheet it
  * adds the Fear test, the NPC's three attack slots, direct Void Ring editing (an NPC's Rings are not derived from
  * its Traits), Void Points shown only when the Void Ring is 1 or more, and a limited view (npc-limited.hbs) for a
- * player who does not own the NPC.
+ * player who does not own the NPC. Every item the NPC holds shows in the PC sheet's section for its type, each
+ * section only when it has items (#183).
  */
 import { SYS_ID } from "../config/constants.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { F, T } from "../utils/localization.js";
-import { on } from "../utils/dom.js";
-import { applySortPref } from "../utils/sorting.js";
 import { getActiveStance } from "../utils/stances.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
-import { getSortPref } from "../services/sort-preferences.js";
-import { getSectionCollapsedMap } from "../services/section-state.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { NpcActionsHandler } from "./handlers/npc-actions-handler.js";
+import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
+import { PcContextBuilder } from "./pc-context-builder.js";
 
 /**
  * NPC Actor Sheet for L5R4 System
@@ -101,18 +100,11 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    *
    * Gathers and organizes all data needed by the Handlebars template:
    * - Actor system data (traits, rings, stats)
-   * - Embedded items sorted by type (skills, weapons, armor, spells)
+   * - Embedded items by type, each list in the user's sort order, and the Clan, Family, and School items, as the
+   *   PC sheet builds them (PcContextBuilder)
    * - Derived values (effective traits with modifiers)
-   * - UI state (current stance, mounted status, sort preferences)
+   * - UI state (current stance, mounted status, collapsed sections)
    * - System settings (Void Points display toggle)
-   *
-   * **Skills Sorting:**
-   * Skills are sorted using user preference (stored per-actor) with sortable columns:
-   * name, rank, trait, roll (skill+trait), emphasis. Default sort is alphabetical by name.
-   *
-   * **Item Type Filtering:**
-   * Separates items into categories for distinct display sections. "item" and "commonItem"
-   * types are combined into generic items list.
    *
    * **Foundry Lifecycle:**
    * Called automatically before rendering. Always call super._prepareContext first to
@@ -127,23 +119,15 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const actorObj = this.actor;
 
     const currentStance = getActiveStance(actorObj.statuses);
-
-    const collapsedSections = getSectionCollapsedMap(actorObj.id, [
-      "skills",
-      "weapons",
-      "armors",
-      "spells",
-      "items"
-    ]);
-
     const attacks = buildAttackSlots(actorObj.system);
+    const all = actorObj.items.contents;
 
     const context = {
       ...base,
       actor: this.actor,
       system: actorObj.system,
       currentStance,
-      collapsedSections,
+      collapsedSections: PcContextBuilder.getCollapsedSections(actorObj.id),
       attacks,
       firstEmptyAttack: attacks.find(slot => slot.empty)?.key ?? null,
       // The book page a creature from the packs cites (roadmap/STAGE-15)
@@ -154,7 +138,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 
-      ...this.#getItemLists()
+      ...PcContextBuilder.buildSortedItems(actorObj, all),
+      ...PcContextBuilder.buildBioFields(all)
     };
 
     prepareItemSheetOptions(context);
@@ -172,6 +157,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * - adjust-trait: Decrement trait (Shift+Right-Click)
    * - adjust-void-ring: Decrement Void Ring (Shift+Right-Click, NPC-specific)
    * - adjust-void-points: Regain Void Point (Right-Click)
+   * - adjust-spell-slot: Use a spell slot (Right-Click)
    *
    * @param {string} action - The data-action attribute value
    * @param {Event} event - The contextmenu event
@@ -184,6 +170,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onTraitAdjust(event, element, -1);
       case "adjust-void-ring":
         return TraitHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
+      case "adjust-spell-slot":
+        return PcAdjustmentHandler.updateSpellSlot(this._getHandlerContext(), event, element, -1);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
       default:
@@ -246,44 +234,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   }
 
   /**
-   * Post-render lifecycle hook for setting up interactive UI elements.
-   *
-   * Initializes UI components that require DOM access:
-   * - Binds simple roll handlers (non-delegated clicks)
-   * - Binds image editor click handler
-   *
-   * **Ownership Check:**
-   * Only binds the click handlers if the current user owns the actor.
-   *
-   * **Foundry Lifecycle:**
-   * Called automatically after template rendering. Always call super._onRender first
-   * to ensure parent class setup (event delegation, image error handling) completes.
-   *
-   * @param {object} context - Template context data used for rendering
-   * @param {object} options - Rendering options
-   * @returns {Promise<void>}
-   * @override
-   */
-  async _onRender(context, options) {
-    await super._onRender(context, options);
-    const root = this.element;
-
-    if (!this.actor.isOwner) {
-      return;
-    }
-
-    on(root, "click", {
-      selector: ".simple-roll",
-      handler: ev => RollHandler.rollNpcPool(this._getHandlerContext(), ev)
-    });
-
-    on(root, "click", {
-      selector: "[data-edit='img']",
-      handler: ev => this._onEditImage(ev, ev.currentTarget)
-    });
-  }
-
-  /**
    * Validates and coerces form data before submitting to actor update.
    *
    * Ensures actor always has a valid name. If name field is empty or whitespace-only,
@@ -308,25 +258,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
     return submit;
   }
-
-  /**
-   * The NPC's item lists by section: its Skills in the user's sort order, weapons, bows, armor, spells, and other
-   * items ("item" and "commonItem").
-   * @returns {{skills: Item[], weapons: Item[], bows: Item[], armors: Item[], spells: Item[], items: Item[]}}
-   */
-  #getItemLists() {
-    const all = this.actor.items.contents;
-    const getItemsOfType = t => all.filter(i => i.type === t);
-    const allowedKeys = this._getAllowedSortKeys("skills");
-    return {
-      skills: getSortedSkills(this.actor.id, getItemsOfType("skill"), allowedKeys),
-      weapons: getItemsOfType("weapon"),
-      bows: getItemsOfType("bow"),
-      armors: getItemsOfType("armor"),
-      spells: getItemsOfType("spell"),
-      items: all.filter(i => i.type === "item" || i.type === "commonItem")
-    };
-  }
 }
 
 /**
@@ -338,41 +269,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
  */
 function openAttackConfig(sheet, event, element) {
   return NpcActionsHandler.openAttackConfig(sheet._getHandlerContext(), event, element);
-}
-
-/**
- * The NPC's Skills in the user's sort order for the actor (name, rank, Trait, roll, or Emphasis), by name when none
- * is stored.
- * @param {string} actorId
- * @param {Item[]} skills - The NPC's skill items
- * @param {string[]} allowedKeys - The sort keys the Skills header offers
- * @returns {Item[]}
- */
-function getSortedSkills(actorId, skills, allowedKeys) {
-  // Define column extractors for sorting
-  const cols = {
-    name: it => String(it?.name ?? ""),
-    rank: it => Number(it?.system?.rank ?? 0) || 0,
-    trait: it => {
-      // Localize trait key if it matches known pattern
-      const raw = String(it?.system?.trait ?? "").toLowerCase();
-      const key =
-        raw && /^l5r4\.mechanics\.traits\./.test(raw)
-          ? raw
-          : raw
-            ? `l5r4.ui.mechanics.traits.${raw}`
-            : "";
-      const loc = key ? game.i18n?.localize?.(key) : "";
-      return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
-    },
-    roll: it => Number(it?.system?.roll ?? it?.system?.rank ?? 0) || 0,
-    emphasis: it => {
-      const trained = Array.isArray(it?.system?.trainedEmphases) ? it.system.trainedEmphases : [];
-      return trained.join(", ");
-    }
-  };
-  const pref = getSortPref(actorId, "skills", { allowedKeys, defaultKey: "name" });
-  return applySortPref(skills, cols, { pref, locale: game.i18n?.lang });
 }
 
 /**

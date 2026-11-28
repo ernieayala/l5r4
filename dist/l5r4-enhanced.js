@@ -3,8 +3,8 @@
  * @description The system's entry module, the one place that wires the system into Foundry. During `init` it
  * registers the settings, the document classes, the Roll & Keep die, the CONFIG values, the GM queries, the data
  * models, CONFIG.l5r4 and the status effects, the sheets, the templates and Handlebars helpers, the text enrichers,
- * and every hook. When Quench is active it loads the test batches; during `ready` a GM runs the data migrations
- * when the system version changed.
+ * and every hook. When Quench is active it loads the test batches; during `ready` the active GM brings documents
+ * below the current migration schema up to date.
  */
 import { SYS_ID } from "../module/config/constants.js";
 import { 
@@ -30,6 +30,7 @@ import L5R4Combat from "../module/documents/combat.js";
 import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import { spendInitiativeVoidPoints } from "../module/services/initiative.js";
+import { postInitiativeRequests } from "../module/services/initiative-request.js";
 import L5R4Die from "../module/services/dice/roll-keep-die.js";
 import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
@@ -37,7 +38,11 @@ import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects
 import { registerDamageQueries } from "../module/services/combat/damage.js";
 import { registerFlowQueries } from "../module/services/combat/flow.js";
 import { registerGrappleQueries } from "../module/services/combat/grapple-start.js";
+import { registerGuardQueries } from "../module/services/combat/guard.js";
+import { registerContestQueries } from "../module/services/combat/contest.js";
 import { registerGmAllowQueries } from "../module/services/gm-allow.js";
+import { registerVoidQueries } from "../module/services/dice/resources/void-points.js";
+import { registerCustomEmphasisQueries } from "../module/services/custom-emphases.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
@@ -113,39 +118,23 @@ Hooks.once("quenchReady", async quench => {
 /**
  * Foundry VTT Ready Hook
  * Executes after Foundry completes initialization and world data is loaded.
- * Executes data migrations for GMs.
  * This hook fires once per session after all modules and systems are ready.
- * 
+ *
  * **Migration System:**
- * Only executes for GM users to prevent concurrent migration conflicts.
- * Compares system.version against lastMigratedVersion setting to detect updates.
- * Respects runMigration and forceMigration settings for migration control.
- * Updates lastMigratedVersion on completion and clears forceMigration flag.
+ * On the active GM's client, while runMigration is on, every world load brings documents below the current
+ * migration schema up to date (module/setup/migrations.js); documents already current are only read. Force
+ * migration runs every step again once, then turns itself off.
  *
  * @listens Hooks#ready
  */
 Hooks.once("ready", async () => {
-  if (game.user?.isGM) {
-    const currentVersion = game.system?.version ?? "0.0.0";
-    const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
-    const runFlag = game.settings.get(SYS_ID, "runMigration") ?? false;
-    const forceFlag = game.settings.get(SYS_ID, "forceMigration") ?? false;
-    const newer = (foundry?.utils?.isNewerVersion?.(currentVersion, last)) ?? (currentVersion !== last);
-
-    if (runFlag && (newer || forceFlag)) {
-      try {
-        await migrateWorld(last, currentVersion);
-      } catch (e) {
-        console.warn(`${SYS_ID}`, "migrateWorld failed", e);
-      } finally {
-        try {
-          await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion);
-          if (forceFlag) {
-            await game.settings.set(SYS_ID, "forceMigration", false);
-          }
-        } catch {}
-      }
-    }
+  if (!game.users.activeGM?.isSelf || !game.settings.get(SYS_ID, "runMigration")) {
+    return;
+  }
+  const force = game.settings.get(SYS_ID, "forceMigration");
+  await migrateWorld({ force });
+  if (force) {
+    await game.settings.set(SYS_ID, "forceMigration", false);
   }
 });
 
@@ -176,15 +165,17 @@ function registerCoreConfig() {
   // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
+  // Documents do not import services, so the Void Point prompt, the requests that send it to a player, and the effect
+  // services reach L5R4Combat here
   L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints;
+  L5R4Combat.postInitiativeRequests = postInitiativeRequests;
   L5R4Combat.EVENTS = COMBAT_EVENTS;
 }
 
 /**
  * Register what a player's client asks the active GM to do: apply a condition to an actor the player does not own,
  * end a Concentration, settle Center Stance when a player ends the Round, apply or undo damage, run a combat flow
- * step.
+ * step, end a Guard, put a replacement roll in a contest, spend Void Points.
  */
 function registerQueries() {
   registerEffectQueries();
@@ -193,7 +184,11 @@ function registerQueries() {
   registerDamageQueries();
   registerFlowQueries();
   registerGrappleQueries();
+  registerGuardQueries();
+  registerContestQueries();
   registerGmAllowQueries();
+  registerVoidQueries();
+  registerCustomEmphasisQueries();
 }
 
 /**

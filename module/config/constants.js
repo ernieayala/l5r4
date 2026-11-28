@@ -13,6 +13,13 @@
 export const SYS_ID = "l5r4-enhanced";
 
 /**
+ * The item types that are weapons: `weapon`, and the legacy `bow` type a world migration turns into one, still valid
+ * in `system.json`.
+ * @type {ReadonlyArray<string>}
+ */
+export const WEAPON_TYPES = Object.freeze(["weapon", "bow"]);
+
+/**
  * Root path to system directory within Foundry's systems folder, `systems/l5r4-enhanced`.
  * Used as base for all asset and template paths.
  * @type {string}
@@ -36,13 +43,27 @@ export const PATHS = Object.freeze({
 });
 
 /**
- * Flag key for tracking system migration version on actors and items, read as
- * `actor.getFlag(SYS_ID, MIGRATION_FLAG)`.
- * Stored in document flags under the system namespace.
+ * Flag key for the migration schema a document is at, read as `doc.getFlag(SYS_ID, MIGRATION_FLAG)`: an integer
+ * that each migration step raises a document past once (module/setup/migrations.js).
  * @type {string}
  * @constant
  */
-export const MIGRATION_FLAG = "migratedVersion";
+export const MIGRATION_FLAG = "migrationSchema";
+
+/**
+ * Flag key of the system version 3.x and 4.0.0 marked a migrated document with; read only, to find the schema of a
+ * document that has no MIGRATION_FLAG.
+ * @type {string}
+ * @constant
+ */
+export const LEGACY_MIGRATION_FLAG = "migratedVersion";
+
+/**
+ * The migration schema the current steps bring a document to. A new step takes the next number and raises this.
+ * @type {number}
+ * @constant
+ */
+export const MIGRATION_SCHEMA = 3;
 
 /**
  * The system hook L5R4ActiveEffect fires with `(actor, effect)` for each effect it drops because the actor is immune

@@ -9,7 +9,6 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { isOwnChange } from "../../utils/change-origin.js";
-import { logError } from "../../utils/error-logging.js";
 import { buildXpHistory } from "./calculator.js";
 
 /**
@@ -91,33 +90,27 @@ export function xpSpentOf(actor) {
 
 /**
  * Rebuild an actor's XP history from its items and store it with the current version. The history is written only
- * when it changed, so an unchanged rebuild re-renders nothing; a failure is logged, and the XP manager still opens.
+ * when it changed, so an unchanged rebuild re-renders nothing. A failure throws, and the XP manager shows it (#145).
  * @param {Actor} actor
  * @returns {Promise<void>}
  */
 export async function updateXpHistory(actor) {
-  try {
-    // Rebuild XP spending history from current actor items
-    // This recalculates all XP costs based on current item data
-    const retroactiveSpent = await buildXpHistory(actor);
-    const existingCache = xpSpentOf(actor);
+  // Rebuild XP spending history from current actor items
+  // This recalculates all XP costs based on current item data
+  const retroactiveSpent = await buildXpHistory(actor);
+  const existingCache = xpSpentOf(actor);
 
-    // Write the cache only when the spending history differs
-    // This prevents unnecessary flag updates and re-renders
-    const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
-    if (changed) {
-      await actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
-    }
-
-    // Update version flag to prevent redundant recalculations
-    // The version is a hash of the XP-relevant Traits, Void Ring, Skills, items, and ledger prices
-    const currentVersion = getXpDataVersion(actor);
-    await actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
-  } catch (err) {
-    logError("Failed to perform retroactive XP update", err, {
-      actorId: actor?.id
-    });
+  // Write the cache only when the spending history differs
+  // This prevents unnecessary flag updates and re-renders
+  const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
+  if (changed) {
+    await actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
   }
+
+  // Update version flag to prevent redundant recalculations
+  // The version is a hash of the XP-relevant Traits, Void Ring, Skills, items, and ledger prices
+  const currentVersion = getXpDataVersion(actor);
+  await actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
 }
 
 /**

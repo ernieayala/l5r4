@@ -8,4 +8,10 @@
       {{/each}}
     </div>
   {{/if}}
+  {{#if (or gm.redo gm.end)}}
+    <div class="flow-actions flexrow -gap-sm">
+      {{#if gm.redo}}<button type="button" data-flow-gm="redo">{{localize "l5r4.ui.combat.flowRedo"}}</button>{{/if}}
+      {{#if gm.end}}<button type="button" data-flow-gm="end">{{#if gm.endLabel}}{{gm.endLabel}}{{else}}{{localize "l5r4.ui.combat.flowEnd"}}{{/if}}</button>{{/if}}
+    </div>
+  {{/if}}
 </div>

@@ -5,29 +5,32 @@
  *
  * 1. `applyInitialRules`, right after core applies "initial"-phase effects: roll options from statuses and worn
  *    armor; TraitAdjust, so Rings and derived values see it as they see a Trait effect.
- * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
- *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
- * 3. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
- * 4. `prepareWoundRollOption` (roll-options.js), once the Wound Rank is known.
+ * 2. `applyWoundRules`, once Traits and Rings are known: rank roll options, the RollOption rules not testing `wound:`,
+ *    and the Wounds rules the Wound Rank comes from; `prepareWoundRollOption` (roll-options.js) then adds it.
+ * 3. `applyDerivedRules`: every other rule, so each can test `wound:`, the modifier bag included (#175).
+ * 4. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
  *
  * The roll options themselves are module/documents/actor/roll-options.js.
  */
 
-import { SYS_ID } from "../../config/constants.js";
+import { SYS_ID, WEAPON_TYPES } from "../../config/constants.js";
 import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
-  getTraitAdjustments
+  getTraitAdjustments,
+  getWoundRuleOutputs,
+  isAfterWoundLevel
 } from "../../utils/rule-engine.js";
 import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
 import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
 import { isSecondSchool } from "../../utils/grants.js";
-import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
+import { getTaintEffects } from "../../utils/taint.js";
 import { getStackedModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { createRule } from "../../data/rules/rule-models.js";
 import { prepareInitialRollOptions, prepareRankRollOptions } from "./roll-options.js";
+import { prepareTaint } from "./calculations/taint-system.js";
 
 /** Rule problems already reported, so a bad rule warns once, not on every preparation. */
 const reported = new Set();
@@ -87,16 +90,36 @@ export function applyInitialRules(actor) {
 }
 
 /**
- * Run the rules that need Traits and Rings: add their roll options, write the Initiative and Wounds outputs onto the
- * prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * Run the rules the Wound Rank depends on, once Traits and Rings are known: the rank roll options, the RollOption
+ * rules not testing it, then the Wounds rules' Wounds per rank and TN penalty onto the prepared data (#175).
  * @param {Actor} actor
  * @param {object} sys - The actor's prepared system data, after prepareTraitsAndRings.
  */
-export function applyDerivedRules(actor, sys) {
+export function applyWoundRules(actor, sys) {
   const options = actor.rollOptions;
   prepareRankRollOptions(actor, sys);
-  applyRollOptionRules(actor.rules, options);
+  applyRollOptionRules(
+    actor.rules.filter(e => !isAfterWoundLevel(e)),
+    options
+  );
+  const out = getWoundRuleOutputs(actor.rules, actor.getRollData(), options);
+  for (const { source, message } of out.errors) {
+    onRuleProblem(actor, source, message);
+  }
+  sys.woundsMod += out.woundsPerRank;
+  sys.woundsPenaltyMod += out.woundPenalty;
+}
 
+/**
+ * Run the rules that may test the Wound Rank, once it is known: the RollOption rules again, so those testing it, and
+ * those testing an option one of them adds, add theirs; then write the Initiative, Reduction, and movement outputs onto
+ * the prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * @param {Actor} actor
+ * @param {object} sys - The actor's prepared system data, after the Wound Rank (_finalizeWoundPenalties)
+ */
+export function applyDerivedRules(actor, sys) {
+  const options = actor.rollOptions;
+  applyRollOptionRules(actor.rules, options);
   const out = getDerivedRuleOutputs(actor.rules, actor.getRollData(), options);
   for (const { source, message } of out.errors) {
     onRuleProblem(actor, source, message);
@@ -105,7 +128,7 @@ export function applyDerivedRules(actor, sys) {
   applyRuleModifiers(sys, out);
   prepareActorRuleOutputs(actor, out);
   applyInitiativeRollModifiers(sys, { bag: out.bag, options });
-  prepareMaxVoidPoints(sys);
+  prepareTaint(sys);
 }
 
 /**
@@ -147,7 +170,9 @@ function onRuleProblem(actor, source, message) {
 
 /**
  * The rule sources of the items whose rules are active, a choice not yet made waiting for it. A second School's
- * TraitAdjust is the creation bonus of the School a character starts in, so it gives none (Ernie's ruling, #156).
+ * TraitAdjust is the creation bonus of the School a character starts in, so it gives none (Ernie's ruling, #156). An
+ * item whose rules are not active (a kata, kiho, or tattoo not in use, armor not worn) still prices itself: its
+ * `self` Cost rules count, since a price does not wait for the item to be used (#174).
  * game-rules/48_character_creation_expanded.md, p.102
  * game-rules/49_improving_your_character.md, p.105
  * @param {Actor} actor
@@ -156,25 +181,35 @@ function onRuleProblem(actor, source, message) {
 function itemRuleSourcesOf(actor) {
   const sources = [];
   for (const item of actor.items) {
-    if (item.system.rulesActive) {
-      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
-      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
-      const secondSchool = isSecondSchool(item);
-      sources.push(
-        ...applyChoices(item.system.ownedRules)
-          .filter(rule => !(secondSchool && rule?.key === "TraitAdjust"))
-          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
-          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
-          .map(rule => ({
-            rule,
-            source: item.name,
-            itemId: item.id,
-            ...extra
-          }))
-      );
-    }
+    // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries); a legacy bow is a
+    // weapon too (#174). Its other rules apply while it is carried (Ernie's ruling, #174)
+    const extra = WEAPON_TYPES.includes(item.type) ? { weaponId: item.id } : {};
+    const active = item.system.rulesActive;
+    const secondSchool = isSecondSchool(item);
+    sources.push(
+      ...applyChoices(item.system.ownedRules)
+        .filter(rule => active || isSelfCost(rule))
+        .filter(rule => !(secondSchool && rule?.key === "TraitAdjust"))
+        // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
+        .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
+        .map(rule => ({
+          rule,
+          source: item.name,
+          itemId: item.id,
+          ...extra
+        }))
+    );
   }
   return sources;
+}
+
+/**
+ * Whether a rule prices the item that carries it.
+ * @param {object} rule
+ * @returns {boolean}
+ */
+function isSelfCost(rule) {
+  return rule?.key === "Cost" && rule.selector === "self";
 }
 
 /**
@@ -215,7 +250,7 @@ function taintRuleSourcesOf(actor) {
 }
 
 /**
- * Add the Initiative, Wounds, Reduction, and movement outputs onto the prepared data.
+ * Add the Initiative, Reduction, and movement outputs onto the prepared data.
  * @param {object} sys - The actor's prepared system data
  * @param {object} out - From getDerivedRuleOutputs
  */
@@ -223,8 +258,6 @@ function applyRuleModifiers(sys, out) {
   sys.initiative.rollMod += out.initiative.roll;
   sys.initiative.keepMod += out.initiative.keep;
   sys.initiative.totalMod += out.initiative.total;
-  sys.woundsMod += out.woundsPerRank;
-  sys.woundsPenaltyMod += out.woundPenalty;
   sys.armorTn.ruleReduction = out.reduction;
   sys.movementWater = out.movementWater;
 }
@@ -264,18 +297,4 @@ function applyInitiativeRollModifiers(sys, { bag, options }) {
   sys.initiative.rollMod += onInitiative.roll;
   sys.initiative.keepMod += onInitiative.keep;
   sys.initiative.totalMod += onInitiative.total;
-}
-
-/**
- * Prepare the maximum Void Points: Taint Level 4 costs a Void Point from the maximum, not from the Void Ring; the
- * Lost have none.
- * game-rules/89_shadowlands_taint.md, p.278-279
- * @param {object} sys - The actor's prepared system data
- */
-function prepareMaxVoidPoints(sys) {
-  sys.rings.void.max = getMaxVoidPoints(
-    toInt(sys.rings.void.rank),
-    toInt(sys.shadowTaint.rank),
-    getHighestRing(sys.rings)
-  );
 }

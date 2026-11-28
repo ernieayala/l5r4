@@ -13,6 +13,7 @@ import {
 } from "../../utils/mechanics.js";
 import { toTraitKey } from "../../utils/trait-keys.js";
 import { toInt } from "../../utils/type-coercion.js";
+import { getSkillItem } from "../../utils/selectors.js";
 import { F, T } from "../../utils/localization.js";
 import { rollSkill } from "../../services/dice/rolls/skill-roll.js";
 import { rollPool } from "../../services/dice/rolls/simple-roll.js";
@@ -91,7 +92,7 @@ export class RollHandler {
   static rollSkill(actor, item, askForOptions) {
     const traitKey = toTraitKey(item.system?.trait);
     if (!traitKey) {
-      console.warn("[L5R4] Skill is missing system.trait; cannot roll:", item?.name);
+      ui.notifications?.warn(F("l5r4.ui.notifications.skillNoTrait", { skill: item.name }));
       return undefined;
     }
     return RollHandler.#rollOnce(`${actor.id}-skill-${item.id}`, () =>
@@ -175,7 +176,7 @@ export class RollHandler {
     const id = weapon.id;
     const weaponSkill = getWeaponSkillTrait(actor, weapon);
     const associatedSkill = weapon.system.associatedSkill || null;
-    const skillItem = RollHandler.#skillItemOf(actor, associatedSkill);
+    const skillItem = associatedSkill ? getSkillItem(actor.items, associatedSkill) : null;
     const skillTrait = skillItem?.system.trait || weapon.system.fallbackTrait || "agi";
 
     return RollHandler.#rollOnce(`${actor.id}-weapon-attack-${id}`, () =>
@@ -325,30 +326,6 @@ export class RollHandler {
   }
 
   /**
-   * Roll an XkY pool from the clicked element's data-roll, data-keep, data-rolllabel, data-trait, and
-   * data-rolltype ("attack", "damage", or a plain roll).
-   * @param {object} context - Sheet context with `actor`
-   * @param {Event} event - Click event
-   * @returns {Promise<ChatMessage|null|undefined>}
-   */
-  static async rollNpcPool(context, event) {
-    event?.preventDefault?.();
-    const ds = event.currentTarget?.dataset || {};
-    const rollType = ds.rolltype || "simple";
-    const rollName = `${ds.rolllabel || ""} ${ds.trait || ""}`.trim();
-    return RollHandler.#rollOnce(`${context.actor.id}-simple-${rollType}-${rollName}`, () =>
-      rollPool({
-        roll: toInt(ds.roll),
-        keep: toInt(ds.keep),
-        rollName,
-        askForOptions: !event.shiftKey,
-        rollType,
-        actor: context.actor
-      })
-    );
-  }
-
-  /**
    * The item of the row the element sits in.
    * @param {Actor} actor
    * @param {HTMLElement} element
@@ -358,20 +335,6 @@ export class RollHandler {
     const row = element.closest("[data-item-id]");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     return id ? actor.items.get(id) : null;
-  }
-
-  /**
-   * The actor's skill item with this name, matched without regard to case.
-   * @param {Actor} actor
-   * @param {string|null} skillName - A weapon's associated Skill
-   * @returns {Item|null|undefined} The skill; null when the weapon names none
-   */
-  static #skillItemOf(actor, skillName) {
-    return skillName
-      ? actor.items.find(
-          i => i.type === "skill" && i.name.toLowerCase() === skillName.toLowerCase()
-        )
-      : null;
   }
 
   /**

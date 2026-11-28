@@ -38,6 +38,19 @@
           aria-label="{{localize "l5r4.ui.mechanics.wounds.armorTn"}}"
         /></div>
     {{/if}}
+    {{#unless (eq actor.type "pc")}}
+      {{!-- The part of the NPC's Armor TN that is armor worn, which Grappled and Stunned keep (#152) --}}
+      <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.armorWorn"}}</span>
+      <div class="flexrow l5r4-grid-value"><input
+          type="number"
+          name="system.armor.bonus"
+          value="{{system.armor.bonus}}"
+          min="0"
+          data-type="Number"
+          aria-label="{{localize "l5r4.ui.mechanics.wounds.armorWorn"}}"
+          data-tooltip="{{localize "l5r4.ui.mechanics.wounds.armorWornHint"}}"
+        /></div>
+    {{/unless}}
     <span class="l5r4-grid-label">{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
     {{#if (eq actor.type "pc")}}
       <div class="flexrow l5r4-grid-value"><span>{{system.armorTn.reduction}}</span></div>

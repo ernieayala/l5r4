@@ -2,7 +2,7 @@
  * @module setup/settings/migration
  * @description Registers the world settings that control the data migration in `module/setup/migrations.js`:
  * `runMigration` turns automatic migration on or off, `forceMigration` runs every step again, and the hidden
- * `lastMigratedVersion` records the version the world last migrated to.
+ * `lastMigratedVersion` keeps the version a world last migrated to under 4.0.0 and before, which no longer write it.
  */
 import { SYS_ID } from "../../config/constants.js";
 
@@ -24,7 +24,7 @@ import { SYS_ID } from "../../config/constants.js";
  */
 export function registerMigrationSettings() {
   // User-visible toggle: Enable/disable automatic migrations on world load
-  // Default: true (migrations run automatically when version changes)
+  // Default: true (each GM world load brings older documents up to date)
   // Use case: Disable for troubleshooting migration issues
   game.settings.register(SYS_ID, "runMigration", {
     scope: "world", // Shared setting across all users in this world
@@ -35,8 +35,8 @@ export function registerMigrationSettings() {
     default: true
   });
 
-  // Developer/troubleshooting toggle: Force re-run all migrations regardless of version
-  // Default: false (only run migrations when version advances)
+  // Developer/troubleshooting toggle: Force re-run every step on every document, whatever schema it records
+  // Default: false (each step runs once per document)
   // Use case: Re-apply migrations after data corruption or testing
   // Note: Automatically resets to false after migration completes
   game.settings.register(SYS_ID, "forceMigration", {
@@ -48,10 +48,8 @@ export function registerMigrationSettings() {
     default: false
   });
 
-  // Internal version tracker: Records last successfully migrated system version
-  // Default: "0.0.0" (triggers migrations on first world load)
-  // Hidden from settings menu (config: false) - managed automatically by migration system
-  // Used to determine which migrations need to run (only runs for version changes)
+  // The version a world last migrated to under 4.0.0 and before, which wrote it; read for Scenes saved before scenes
+  // carried a migration schema (module/setup/migrations.js migrateScene). Hidden from the settings menu
   game.settings.register(SYS_ID, "lastMigratedVersion", {
     scope: "world", // Shared setting across all users in this world
     config: false, // Hidden - internal system setting

@@ -20,4 +20,13 @@
     </div>
     <p class="hint">{{localize "l5r4.magic.kiho.startingKihoHint"}}</p>
   </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.kiho.access.label"}}</label>
+    <div class="form-fields">
+      <select name="system.kihoAccess">
+        {{selectOptions config.kihoAccess selected=system.kihoAccess blank="l5r4.magic.kiho.access.auto" localize=true}}
+      </select>
+    </div>
+    <p class="hint">{{localize "l5r4.magic.kiho.accessHint"}}</p>
+  </div>
 </div>

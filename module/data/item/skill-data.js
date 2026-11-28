@@ -3,6 +3,7 @@
  * @description The data model of the `skill` Item subtype.
  */
 
+import { toSkillKey } from "../../utils/selectors.js";
 import { booleanField, numberField, stringField } from "../fields.js";
 import { migrateSkillSource } from "../migrate-source.js";
 import ItemData from "./base-data.js";
@@ -67,7 +68,7 @@ export default class SkillData extends ItemData {
    */
   get ownedRules() {
     const { rollBonus: roll, keepBonus: keep, totalBonus: total } = this;
-    const selector = `skill:${this.parent.name.toLowerCase().trim()}`;
+    const selector = `skill:${toSkillKey(this.parent.name)}`;
     const own = [];
     if (roll || keep || total) {
       own.push({ key: "RollModifier", selector, roll, keep, total });

@@ -15,36 +15,23 @@ import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
  * 4 × the Trait's new rank with the bonus. Setting the value to 0 reads the same as an absent key in the XP code,
  * and running again changes nothing.
  * game-rules/48_character_creation_expanded.md, p.103
- * @param {Document[]} docs - Actor documents to scan
- * @param {string} label - Migration context label for console logging
+ * @param {Actor} actor - An actor; an NPC is left alone
  * @returns {Promise<void>}
  */
-export async function migrateEffectFreeTraitBase(docs, label) {
-  for (const doc of docs) {
-    try {
-      if (doc.documentName !== "Actor" || doc.type !== "pc") {
-        continue;
-      }
-
-      const freeTraitBase = doc.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
-      const updates = {};
-      for (const [trait, value] of Object.entries(freeTraitBase)) {
-        if (Number(value) > 0 && getCreationFreeBonusSources(doc, trait).rules > 0) {
-          updates[`flags.${SYS_ID}.xpFreeTraitBase.${trait}`] = 0;
-        }
-      }
-
-      if (Object.keys(updates).length > 0) {
-        // The XP history's version hash does not cover this flag; 0 makes the XP Manager rebuild the history
-        updates[`flags.${SYS_ID}.xpRetroactiveVersion`] = 0;
-        await doc.update(updates, { diff: true, render: false });
-      }
-    } catch (e) {
-      console.warn(`${SYS_ID}`, "Free Trait rank migration failed", {
-        label,
-        id: doc.id,
-        error: e
-      });
+export async function migrateEffectFreeTraitBase(actor) {
+  if (actor.type !== "pc") {
+    return;
+  }
+  const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
+  const updates = {};
+  for (const [trait, value] of Object.entries(freeTraitBase)) {
+    if (Number(value) > 0 && getCreationFreeBonusSources(actor, trait).rules > 0) {
+      updates[`flags.${SYS_ID}.xpFreeTraitBase.${trait}`] = 0;
     }
+  }
+  if (Object.keys(updates).length > 0) {
+    // The XP history's version hash does not cover this flag; 0 makes the XP Manager rebuild the history
+    updates[`flags.${SYS_ID}.xpRetroactiveVersion`] = 0;
+    await actor.update(updates, { diff: true, render: false });
   }
 }

@@ -10,12 +10,16 @@
  * 6. Effect removal and recovery
  *
  * @see module/services/fear.js
+ * @see module/services/fear-card.js
  * @see module/documents/actor/calculations/fear-system.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { testFear, testFearMultiple } from "../../../module/services/fear.js";
+import { testFear } from "../../../module/services/fear.js";
+import { startFearTest } from "../../../module/services/fear-card.js";
+import { startFlow } from "../../../module/services/combat/flow.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { answerCheckDialog, waitFor } from "../helpers.js";
 
 /**
  * Register Fear System workflow tests
@@ -545,27 +549,91 @@ export function registerFearWorkflowTests(quench) {
             assert.include(fearRanks, 4, "Fear Rank 4 effect exists");
           });
 
-          it("should test multiple PCs against single NPC", async () => {
+          // #151
+          it("should post one Fear card, the GM rolling at once for characters no player has connected", async () => {
             const characters = [pcLowWillpower, pcMediumWillpower, pcHighWillpower];
-
-            await testFearMultiple({
-              npc: npcWithFear,
-              characters
+            const card = await startFearTest({
+              characters,
+              fearRank: 3,
+              tn: 20,
+              label: "Quench Fear",
+              speaker: npcWithFear
             });
-
-            // All three PCs should have been tested
-            // Effects depend on roll results, which is OK
-            assert.ok(true, "Multiple PC Fear tests executed");
+            const state = card.getFlag(SYS_ID, "flow").state;
+            assert.equal(state.characters.length, 3, "one card for all three");
+            assert.isTrue(
+              state.results.every(result => result !== null),
+              "no player is connected, so the GM rolled for each"
+            );
+            assert.notExists(
+              (await card.renderHTML()).querySelector("[data-flow-action='roll']"),
+              "no Roll buttons are left"
+            );
+            await Promise.all(
+              characters.map(c =>
+                c.deleteEmbeddedDocuments(
+                  "ActiveEffect",
+                  c.effects.map(e => e.id)
+                )
+              )
+            );
           });
 
-          it("should handle empty character array gracefully", async () => {
-            await testFearMultiple({
-              npc: npcWithFear,
-              characters: []
-            });
+          it("should warn and post nothing with no characters", async () => {
+            assert.isNull(await startFearTest({ characters: [], fearRank: 3 }));
+          });
 
-            // Should not throw error
-            assert.ok(true, "Empty array handled gracefully");
+          // #151
+          // game-rules/25_rings_and_traits.md, p.78
+          it("should roll from each button through the dialog, Shift skipping it, and let the GM roll the rest", async () => {
+            const characters = [pcLowWillpower, pcMediumWillpower, pcHighWillpower];
+            const card = await startFlow("fear", {
+              label: "Quench Fear",
+              fearRank: 3,
+              tn: 20,
+              characters: characters.map(c => c.uuid),
+              results: [null, null, null],
+              order: []
+            });
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const button = async selector => (await card.renderHTML()).querySelector(selector);
+
+            const answered = answerCheckDialog({ totalMod: 100 });
+            (await button("[data-flow-action='roll'][data-side='0']")).click();
+            const labels = await answered;
+            assert.include(
+              labels,
+              game.i18n.localize("l5r4.character.ranks.honorRank"),
+              "the dialog offers its parts"
+            );
+            assert.isTrue(
+              await waitFor(() => state().results[0] !== null),
+              "the first character's roll is recorded"
+            );
+            assert.isTrue(
+              state().results[0].success,
+              "the dialog's +100 counts: the roll went through it"
+            );
+
+            (await button("[data-flow-action='roll'][data-side='1']")).dispatchEvent(
+              new MouseEvent("click", { bubbles: true, shiftKey: true })
+            );
+            assert.isTrue(
+              await waitFor(() => state().results[1] !== null),
+              "Shift rolls with no dialog"
+            );
+
+            (await button("[data-flow-gm='end']")).click();
+            assert.isTrue(await waitFor(() => state().results[2] !== null), "Roll for the rest");
+            assert.deepEqual(state().order, [0, 1, 2]);
+            await Promise.all(
+              characters.map(c =>
+                c.deleteEmbeddedDocuments(
+                  "ActiveEffect",
+                  c.effects.map(e => e.id)
+                )
+              )
+            );
           });
         });
 

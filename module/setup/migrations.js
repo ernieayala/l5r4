@@ -1,228 +1,241 @@
 /**
  * @module setup/migrations
- * @description The world data migration that runs once per system version, from the `ready` hook, for a GM. It runs
- * each step in `module/setup/migrations/` over the world's actors and items, the actors' embedded items, unlinked
- * tokens' actor deltas, and every unlocked Actor and Item compendium: legacy field names remapped to the schema
- * (snake_case to camelCase), bows converted to weapons, NPC wounds and Initiative, missing defaults backfilled,
- * values normalized, item mechanics moved into rules, and icon paths moved from .png to .webp. Steps update with
- * `render: false`, read `_source`, keep a field that already holds a value, and catch per document or pack, so a
- * failure is logged and the rest still runs; a marker flag on each document makes a second run skip it.
+ * @description The world data migration (#181). Each Actor, Item, and Scene records the migration schema it is at
+ * (MIGRATION_FLAG; getMigrationSchema reads it, or the version an older document was migrated or saved with). Each
+ * step names the schema it brings a document to and runs on a document below it, so it runs once per document,
+ * however many releases follow. A document is marked only after all its steps succeed: one that fails is logged and
+ * tried again the next time a GM loads the world. An actor's items and effects run first, at their own schema or the
+ * actor's when that is lower; an unlinked token's delta items and effects run at their scene's.
+ *
+ * The active GM's client runs it on every world load (runMigration), over the world, the scenes' unlinked tokens,
+ * and the unlocked Actor and Item compendiums; documents already current cost a read. A locked compendium is never
+ * written: a document created or imported into the world records the schema its data had, and the active GM brings
+ * it up to date (onPreCreateMigrationSchema, onCreateMigrateDocument). The steps are in migrations/steps.js; they
+ * update with `render: false`, read `_source`, and keep a field that already holds a value.
  */
-import { SYS_ID } from "../config/constants.js";
-import { hasBeenMigrated, updateMigratedVersion } from "./migrations/utils/helpers.js";
-import { applySchemaMapToDocs } from "./migrations/schema/apply.js";
-import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
-import { migrateNpcInitiative } from "./migrations/actors/npc-initiative.js";
-import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
-import { deleteLegacyFields } from "./migrations/actors/cleanup.js";
-import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
-import { migrateStatusEffectRules } from "./migrations/actors/status-effect-rules.js";
-import { migrateUnlinkedTokens } from "./migrations/actors/unlinked-tokens.js";
-import { migrateBowsToWeapons } from "./migrations/items/bow-to-weapon.js";
-import { migrateSkillDefaults } from "./migrations/items/skill-defaults.js";
-import { migrateEmphasisStringToArray } from "./migrations/items/emphasis.js";
-import { migrateArmorTypes } from "./migrations/items/armor-types.js";
-import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
-import { migrateWeaponSizes } from "./migrations/items/normalize.js";
-import { migrateItemRules } from "./migrations/items/item-rules.js";
-import { migrateIconPaths, migrateEmbeddedItemIcons } from "./migrations/icons/icon-paths.js";
-import { migrateCompendiumIconPaths } from "./migrations/icons/pack-icon-paths.js";
+import { SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA } from "../config/constants.js";
+import { CHAT_TEMPLATES } from "../config/templates.js";
+import { pluralKeyOf } from "../utils/localization.js";
+import { getMigrationSchema } from "./migrations/utils/helpers.js";
+import { getTokenDeltaDocuments } from "./migrations/actors/unlinked-tokens.js";
+import { ACTOR_STEPS, EFFECT_STEPS, ITEM_STEPS } from "./migrations/steps.js";
 
 /**
- * The item steps world items and every pack run, in order: each step with its log label for world documents and the
- * stem of its label for a pack, which adds `:<pack collection>`.
- * @type {ReadonlyArray<[function(Document[], string): Promise<void>, string, string]>}
+ * One migration run: whether every step runs again whatever a document's schema, the documents it brought up to date
+ * or could not, and what the steps tell the GM (#182).
+ * @typedef {{force: boolean, migrated: number, failed: number, notes: string[]}} MigrationRun
  */
-const ITEM_STEPS = Object.freeze([
-  [migrateBowsToWeapons, "world-bow-migration", "pack-bow-migration"],
-  [migrateSkillDefaults, "world-skill-defaults", "pack-skill-defaults"],
-  [migrateEmphasisStringToArray, "world-emphasis-migration", "pack-emphasis-migration"],
-  [migrateArmorTypes, "world-armor-types", "pack-armor-types"],
-  [migrateFreeRaisesDefaults, "world-free-raises", "pack-free-raises"],
-  [migrateEmbeddedItemIcons, "world-icon-migration", "pack-icon-migration"],
-  [migrateWeaponSizes, "world-items-norm", "pack-norm"],
-  [migrateItemRules, "world-item-rules", "pack-item-rules"]
-]);
 
 /**
- * Main migration orchestration function for system version updates.
- *
- * Executes all migration steps in sequence when system version changes. Processes world
- * documents first, then unlocked compendiums. Only runs for GM users. Handles both schema
- * transformations (field renames, type changes) and content migrations (wound systems,
- * icon paths, defaults).
- *
- * Idempotency: Uses migration markers (flags.l5r4-enhanced.migratedVersion) to track which
- * documents have been migrated. Skips already-migrated documents to prevent overwriting
- * manually-corrected data when forceMigration is triggered.
- *
- * Migration Execution Order:
- * 1. Schema field remapping (world actors/items)
- * 2. NPC wound system migration, and NPCs stored with the old 2k2 Initiative default roll the formula (world actors)
- * 3. Bow → weapon type conversion (world items)
- * 4. Skill default values backfill (world items)
- * 5. Armor type backfill (world items)
- * 6. Free Raises field backfill (world items)
- * 7. Icon path migration (world items) - PNG→WebP + default icon assignment
- * 8. Data normalization (world items)
- * 9. Item mechanics into rules: Family/School Trait bonus effects, Master of Blood (world items)
- * 10. Legacy field cleanup (world actors)
- * 11. Embedded item migrations (all world actors), item rules included
- * 12. Status effect rules: stances, conditions, and Fear made before the rule engine get rules, group, level, and
- *     ending event (world actors)
- * 13. Unlinked tokens: the items and effects in each token's actor delta, through steps 11 and 12
- * 14. Free Trait rank flags set for a rule bonus (world actors)
- * 15. Mark documents as migrated (world actors/items)
- * 16. Compendium migrations (unlocked packs only) - includes icon migration
- * 17. Icon path migrations (world actors + final compendium pass)
- *
- * Foundry VTT Integration:
- * - Called from system ready hook when version mismatch detected
- * - Uses game.actors.contents and game.items.contents for world documents
- * - Uses game.packs to iterate compendium packs
- * - Checks pack.metadata.locked to respect pack permissions.
- *
- * @param {string} fromVersion - Previous system version, logged when the icon migration fails
- * @param {string} toVersion - New system version to mark documents with after migration
- * @returns {Promise<void>}
+ * Bring every document the GM can write up to MIGRATION_SCHEMA: world items, world actors with their items and
+ * effects, the scenes' unlinked tokens, and the unlocked Actor and Item compendiums. A summary notification follows
+ * when it changed or failed anything.
+ * @param {object} [options]
+ * @param {boolean} [options.force] - Run every step again on every document, whatever schema it records
+ * @returns {Promise<MigrationRun>}
  */
-export async function migrateWorld(fromVersion, toVersion) {
-  if (!game.user?.isGM) {
-    return;
+export async function migrateWorld({ force = false } = {}) {
+  const run = { force, migrated: 0, failed: 0, notes: [] };
+  for (const item of game.items) {
+    await migrateDocument(item, ITEM_STEPS, { run, schema: getRunSchema(item._source, run) });
   }
-
-  await migrateWorldDocuments(toVersion);
-
+  for (const actor of game.actors) {
+    await migrateActor(actor, run);
+  }
+  for (const scene of game.scenes) {
+    await migrateScene(scene, run);
+  }
   for (const pack of game.packs) {
-    await migratePack(pack, toVersion);
+    await migratePack(pack, run);
   }
+  await warnMigrationResult(run);
+  return run;
+}
 
+/**
+ * Run the steps above `schema` on one document, then mark it current. A step that throws is logged and leaves the
+ * document unmarked, so the next run tries it again.
+ * @param {Document} doc
+ * @param {ReadonlyArray<import("./migrations/steps.js").MigrationStep>} steps
+ * @param {{run: MigrationRun, schema: number}} context - The run to count it in, and the schema the document is at
+ * @returns {Promise<boolean>} Whether the document is current
+ */
+export async function migrateDocument(doc, steps, { run, schema }) {
+  if (schema >= MIGRATION_SCHEMA) {
+    return true;
+  }
   try {
-    await migrateIconPaths();
-    await migrateCompendiumIconPaths();
+    for (const step of steps.filter(s => s.schema > schema)) {
+      await step.migrate(doc, run);
+    }
+    await doc.setFlag(SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA);
+    run.migrated++;
+    return true;
   } catch (err) {
-    console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
+    run.failed++;
+    console.warn(`${SYS_ID} | Migration failed, to be tried again on the next world load`, {
+      uuid: doc.uuid,
+      err
+    });
+    return false;
   }
 }
 
 /**
- * Migrate the world's actors and items not yet marked with this version, then mark them: their schema, NPC wounds
- * and Initiative, the item steps, legacy fields, the actors' embedded items and status effects, unlinked tokens,
- * and the free Trait rank flags.
- * @param {string} toVersion - The system version to mark documents with
+ * Migrate an actor: its items and effects first, then the actor once they are all current.
+ * @param {Actor} actor
+ * @param {MigrationRun} run
  * @returns {Promise<void>}
  */
-async function migrateWorldDocuments(toVersion) {
-  // Filter out already-migrated documents to ensure true idempotency
-  const unmigratedActors = game.actors.contents.filter(doc => !hasBeenMigrated(doc, toVersion));
-  const unmigratedItems = game.items.contents.filter(doc => !hasBeenMigrated(doc, toVersion));
-
-  await applySchemaMapToDocs(unmigratedActors, "world-actors");
-  await applySchemaMapToDocs(unmigratedItems, "world-items");
-
-  await migrateLegacyNpcWounds(unmigratedActors, "world-legacy-npc-wounds");
-  await migrateNpcInitiative(unmigratedActors, "world-npc-initiative");
-
-  await migrateItemSteps(unmigratedItems, null);
-
-  await deleteLegacyFields(unmigratedActors, "world-actors-cleanup");
-
-  for (const actor of unmigratedActors) {
-    await migrateActorEmbeddedItems(actor, "actor");
-  }
-
-  await migrateStatusEffectRules(unmigratedActors, "world-status-effect-rules");
-
-  // Unlinked tokens' own items and effects live in their actor deltas, which the steps above never reach
-  await migrateUnlinkedTokens(
-    game.scenes.contents.flatMap(scene => scene.tokens.contents),
-    "world-unlinked-tokens"
-  );
-
-  // After the embedded items, because the Trait bonus is read from the actor's Family and School items
-  await migrateEffectFreeTraitBase(unmigratedActors, "world-free-trait-base");
-
-  // Mark all migrated documents with current version to prevent re-migration
-  for (const doc of [...unmigratedActors, ...unmigratedItems]) {
-    await updateMigratedVersion(doc, toVersion);
+export async function migrateActor(actor, run) {
+  const schema = getRunSchema(actor._source, run);
+  const children = { items: actor.items.contents, effects: actor.effects.contents };
+  if (await migrateChildren(children, { run, schema })) {
+    await migrateDocument(actor, ACTOR_STEPS, { run, schema });
   }
 }
 
 /**
- * Migrate one compendium's documents not yet marked with this version, then mark them. Only Actor and Item packs are
- * migrated, and a locked pack is skipped; a failure is logged, and the next pack still runs.
+ * Before an Actor, Item, or Scene is created (#181): record the schema its data had. The server stamps the running
+ * version on a document it creates, so the creation data is the last place an imported document's own version shows.
+ * @param {Document} doc
+ * @returns {void}
+ */
+export function onPreCreateMigrationSchema(doc) {
+  doc.updateSource({ [`flags.${SYS_ID}.${MIGRATION_FLAG}`]: getMigrationSchema(doc._source) });
+}
+
+/**
+ * After an Actor, Item, or Scene is created, on the active GM's client while runMigration is on: bring it up to date
+ * when its data came from an older version, and warn when a step failed. With no GM connected, the next GM's world
+ * load does it.
+ * @param {Document} doc
+ * @returns {Promise<void>}
+ */
+export async function onCreateMigrateDocument(doc) {
+  if (!game.users.activeGM?.isSelf || !game.settings.get(SYS_ID, "runMigration")) {
+    return;
+  }
+  const run = { force: false, migrated: 0, failed: 0, notes: [] };
+  await migrateAnyDocument(doc, run);
+  await warnMigrationResult({ ...run, migrated: 0 });
+}
+
+/**
+ * The schema a run treats a document as at: 0 when forced, else the schema it records.
+ * @param {object} source
+ * @param {MigrationRun} run
+ * @param {string|null} [legacyVersion] - For a Scene, the version the world last migrated to
+ * @returns {number}
+ */
+function getRunSchema(source, run, legacyVersion = null) {
+  return run.force ? 0 : getMigrationSchema(source, legacyVersion);
+}
+
+/**
+ * Migrate a parent's items and effects, each at its own recorded schema or the parent's, whichever is lower: an
+ * actor imported from an older version brings its items along, and an item dropped onto a current actor keeps its own.
+ * @param {{items: Item[], effects: ActiveEffect[]}} children
+ * @param {{run: MigrationRun, schema: number}} context - The run, and the parent's schema
+ * @returns {Promise<boolean>} Whether every child is current
+ */
+async function migrateChildren({ items, effects }, { run, schema }) {
+  const getChildSchema = doc =>
+    Math.min(doc._source.flags?.[SYS_ID]?.[MIGRATION_FLAG] ?? schema, schema);
+  let current = true;
+  for (const item of items) {
+    current =
+      (await migrateDocument(item, ITEM_STEPS, { run, schema: getChildSchema(item) })) && current;
+  }
+  for (const effect of effects) {
+    current =
+      (await migrateDocument(effect, EFFECT_STEPS, { run, schema: getChildSchema(effect) })) &&
+      current;
+  }
+  return current;
+}
+
+/**
+ * Migrate a scene's unlinked tokens' delta items and effects, then mark the scene. A scene saved before any scene was
+ * marked is at the schema of the version the world last migrated to, since that run reached its tokens.
+ * @param {Scene} scene
+ * @param {MigrationRun} run
+ * @returns {Promise<void>}
+ */
+async function migrateScene(scene, run) {
+  const legacyVersion = game.settings.get(SYS_ID, "lastMigratedVersion");
+  const schema = getRunSchema(scene._source, run, legacyVersion);
+  let current = true;
+  for (const token of scene.tokens) {
+    const delta = getTokenDeltaDocuments(token);
+    current = (!delta || (await migrateChildren(delta, { run, schema }))) && current;
+  }
+  if (current && schema < MIGRATION_SCHEMA) {
+    await scene.setFlag(SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA);
+  }
+}
+
+/**
+ * Migrate the documents of an unlocked Actor or Item compendium that are below MIGRATION_SCHEMA, found from the
+ * pack's index; a locked or other pack is left alone. A pack that fails to load is logged and counted once.
  * @param {CompendiumCollection} pack
- * @param {string} toVersion - The system version to mark documents with
+ * @param {MigrationRun} run
  * @returns {Promise<void>}
  */
-async function migratePack(pack, toVersion) {
-  const docType = pack.metadata?.type ?? pack.documentName;
-  if (docType !== "Actor" && docType !== "Item") {
+async function migratePack(pack, run) {
+  if (pack.locked || (pack.documentName !== "Actor" && pack.documentName !== "Item")) {
     return;
   }
-
-  const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
-  if (isLocked) {
-    console.warn(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
-    return;
-  }
-
   try {
-    const docs = await pack.getDocuments();
-
-    // Filter out already-migrated compendium documents
-    const unmigratedDocs = docs.filter(doc => !hasBeenMigrated(doc, toVersion));
-
-    if (unmigratedDocs.length === 0) {
-      return; // All documents in this pack already migrated
+    const index = await pack.getIndex({ fields: ["flags", "_stats"] });
+    for (const entry of index.filter(e => getRunSchema(e, run) < MIGRATION_SCHEMA)) {
+      await migrateAnyDocument(await pack.getDocument(entry._id), run);
     }
-
-    await migratePackDocuments(unmigratedDocs, pack, docType);
-
-    // Mark compendium documents as migrated
-    for (const doc of unmigratedDocs) {
-      await updateMigratedVersion(doc, toVersion);
-    }
-  } catch (e) {
-    console.warn(`${SYS_ID}`, "Schema remap pack failed", { pack: pack.collection, error: e });
+  } catch (err) {
+    run.failed++;
+    console.warn(`${SYS_ID} | Migration of a compendium failed`, { pack: pack.collection, err });
   }
 }
 
 /**
- * Run the migration steps over a pack's documents: the schema, an Actor pack's NPC wounds and Initiative, the item
- * steps, and an Actor pack's embedded items, status effects, and free Trait rank flags.
- * @param {Document[]} docs - The pack's documents not yet migrated
- * @param {CompendiumCollection} pack
- * @param {string} docType - "Actor" or "Item"
+ * Migrate one Actor, Item, or Scene with the steps for its kind.
+ * @param {Document} doc
+ * @param {MigrationRun} run
  * @returns {Promise<void>}
  */
-async function migratePackDocuments(docs, pack, docType) {
-  const { collection } = pack;
-  await applySchemaMapToDocs(docs, `pack:${collection}`);
-
-  if (docType === "Actor") {
-    await migrateLegacyNpcWounds(docs, `pack-legacy-npc-wounds:${collection}`);
-    await migrateNpcInitiative(docs, `pack-npc-initiative:${collection}`);
-  }
-  await migrateItemSteps(docs, pack);
-
-  if (docType === "Actor") {
-    for (const actor of docs) {
-      await migrateActorEmbeddedItems(actor, `compendium-actor:${collection}`);
-    }
-    await migrateStatusEffectRules(docs, `pack-status-effect-rules:${collection}`);
-    await migrateEffectFreeTraitBase(docs, `pack-free-trait-base:${collection}`);
+async function migrateAnyDocument(doc, run) {
+  if (doc.documentName === "Actor") {
+    await migrateActor(doc, run);
+  } else if (doc.documentName === "Scene") {
+    await migrateScene(doc, run);
+  } else {
+    await migrateDocument(doc, ITEM_STEPS, { run, schema: getRunSchema(doc._source, run) });
   }
 }
 
 /**
- * Run each item step (ITEM_STEPS) over documents in order, labelled for the world or for a pack.
- * @param {Document[]} docs
- * @param {CompendiumCollection|null} pack - The pack the documents come from; null for world documents
+ * Tell the GM what a run brought up to date, as an info notice, and warn of what failed; nothing when it did
+ * neither. What the steps noted (an XP change, Free Raises that now wait for their item) goes to the GMs as one chat
+ * note, which stays where a notice would fade (#182).
+ * @param {MigrationRun} run
  * @returns {Promise<void>}
  */
-async function migrateItemSteps(docs, pack) {
-  for (const [step, worldLabel, packLabel] of ITEM_STEPS) {
-    await step(docs, pack ? `${packLabel}:${pack.collection}` : worldLabel);
+async function warnMigrationResult({ migrated, failed, notes }) {
+  for (const [count, kind, level] of [
+    [migrated, "migrated", "info"],
+    [failed, "failed", "warn"]
+  ]) {
+    if (count > 0) {
+      const key = pluralKeyOf(game.i18n, count, c => `l5r4.system.migration.${kind}.${c}`);
+      ui.notifications[level](game.i18n.localize(key, { count }));
+    }
+  }
+  if (notes.length) {
+    await ChatMessage.create({
+      content: await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.note, {
+        lines: [game.i18n.localize("l5r4.system.migration.notesTitle"), ...notes]
+      }),
+      whisper: game.users.filter(user => user.isGM).map(user => user.id)
+    });
   }
 }

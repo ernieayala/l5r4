@@ -97,7 +97,8 @@ function getContestProofOptions(request) {
     return null;
   }
   const outcome = getContestOutcome(attack);
-  return outcome && !outcome.tie && outcome.winner === "attacker" ? {} : null;
+  // The attack is its origin, so a contest settled again removes only the Prone it gave (#169)
+  return outcome && !outcome.tie && outcome.winner === "attacker" ? { origin: attack.uuid } : null;
 }
 
 /**

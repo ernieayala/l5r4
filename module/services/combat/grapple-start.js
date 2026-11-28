@@ -25,8 +25,13 @@ const GRAPPLE_QUERY = `${SYS_ID}.startGrapple`;
  */
 export async function startGrapple(attack) {
   const attacker = fromUuidSync(attack.system.actorUuid);
-  if (!attacker?.isOwner || !fromUuidSync(attack.system.target.uuid)) {
+  if (!attacker?.isOwner) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  // A target deleted since the hit is reported as gone, not as a permission problem (#144)
+  if (!fromUuidSync(attack.system.target.uuid)) {
+    ui.notifications?.warn(T("l5r4.ui.combat.targetGone"));
     return null;
   }
   if (isGrappleRunning(attack)) {

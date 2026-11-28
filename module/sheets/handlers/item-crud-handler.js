@@ -7,6 +7,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
+import { F } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import * as Chat from "../../services/chat.js";
 import { updateSectionCollapsed } from "../../services/section-state.js";
@@ -89,7 +90,7 @@ export class ItemCrudHandler {
 
     const preferredType = this.getSectionItemType(element);
 
-    const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
+    const result = await Chat.getUnifiedItemOptions(preferredType);
 
     if (!result) {
       return [];
@@ -199,7 +200,8 @@ export class ItemCrudHandler {
     try {
       await context.actor.deleteEmbeddedDocuments("Item", [id]);
     } catch (err) {
-      console.warn(`${SYS_ID} ItemCrudHandler: deleteEmbeddedDocuments failed`, { err });
+      console.error(`${SYS_ID} ItemCrudHandler: deleteEmbeddedDocuments failed`, { err });
+      ui.notifications?.error(F("l5r4.ui.notifications.deleteFailed", { name: item.name }));
     }
   }
 
@@ -376,7 +378,8 @@ export class ItemCrudHandler {
     try {
       await item.roll();
     } catch (err) {
-      console.warn(`${SYS_ID} ItemCrudHandler: item.roll() failed`, { err, id });
+      console.error(`${SYS_ID} ItemCrudHandler: item.roll() failed`, { err, id });
+      ui.notifications?.error(F("l5r4.ui.notifications.postFailed", { name: item.name }));
     }
   }
 }

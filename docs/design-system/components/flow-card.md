@@ -1,16 +1,16 @@
 # Flow card
 
-A card that runs a combat flow of several steps, an iaijutsu duel or a grapple: a title with the current stage, the log of what happened, and one button per step the flow allows now. The GM's client re-renders the same message after each step. It is a [chat card](chat-card.md).
+A card that runs a flow of several steps, an iaijutsu duel, a grapple, or a group's Fear test: a title with the current stage, the log of what happened, and one button per step the flow allows now. The GM's client re-renders the same message after each step. It is a [chat card](chat-card.md).
 
 | Item | Detail |
 | --- | --- |
 | Template | `templates/chat/flow.hbs`, `CHAT_TEMPLATES.flowCard`: no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)). Preloaded in `PRELOAD_TEMPLATES` (`module/config/templates.js`) |
-| Flows | `module/services/combat/duel.js` and `module/services/combat/grapple.js`, each with its `render`, registered with `registerFlow` (`module/services/combat/flow.js`) |
+| Flows | `module/services/combat/duel.js`, `module/services/combat/grapple.js`, and `module/services/fear-card.js`, each with its `render`, registered with `registerFlow` (`module/services/combat/flow.js`) |
 | Posted by | `startFlow` (`module/services/combat/flow.js`) |
 | Stored in | `flags.l5r4-enhanced.flow` (fixed flag): the flow's name and state |
-| Wired by | `bindFlowCards` (`module/services/combat/flow.js`): each `[data-flow-action]` calls the flow's `click`, then `requestStep` |
+| Wired by | `bindFlowCards` (`module/services/combat/flow.js`): each `[data-flow-action]` calls the flow's `click` with the button and whether Shift was held, then `requestStep` |
 | SCSS | `.l5r4-flow-card` (`scss/components/_flow-card.scss`); its note lines share the chat card shell's italic (`scss/components/_chat-card.scss`) |
-| Quench | `l5r4-enhanced.combat` |
+| Quench | `l5r4-enhanced.combat`; the Fear card in `l5r4-enhanced.workflows.fear-workflow` |
 
 ## Anatomy
 
@@ -29,6 +29,7 @@ All classes and attributes are fixed names ([chat card](chat-card.md#fixed-names
 | --- | --- |
 | Duel | `roll` "Roll for {name}" and `concede` "{name} concedes" per duelist while the stage allows; at the Strike, `concede` reads "{name} yields" for the duelist a first strike hit (`buildDuelButtons`, `canConcede` (`module/services/combat/duel.js`)) |
 | Grapple | `control` "Control roll: {name}" for each side that has not rolled, and `hit`, `throw`, `break`, `pass` for the side in control, until the grapple is over (`render` (`module/services/combat/grapple.js`)) |
+| Fear | `roll` "Roll for {name}" for each character who has not rolled, through the check dialog, Shift skipping it; the log has one line per result; the GM's End reads "Roll for the rest" and rolls them with no dialog (`render`, `end` (`module/services/fear-card.js`)) |
 | Over | No buttons; the stage reads done or over |
 
 ## States
@@ -50,6 +51,7 @@ Context from each flow's `render(state)`:
 | `stage` | string | The stage, localized |
 | `lines` | string[] | Finished sentences |
 | `buttons` | `{ action, label, data }[]` | `action` fills `data-flow-action`; `data` fills both `data-duelist` and `data-side` |
+| `gm` | `{ redo, end, endLabel? }` | Which of the GM's corrections show; `endLabel` names End when the flow's `end` does more than stop it, as the Fear card's "Roll for the rest" |
 
 ## Tokens
 

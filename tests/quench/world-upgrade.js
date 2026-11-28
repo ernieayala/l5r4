@@ -1,4 +1,4 @@
-import { SYS_ID } from "../../module/config/constants.js";
+import { SYS_ID, MIGRATION_FLAG, MIGRATION_SCHEMA } from "../../module/config/constants.js";
 
 /** The world tests/fixtures/world-3.2.1/build-world.mjs writes. */
 const FIXTURE_WORLD = "l5r4-321-fixture";
@@ -17,16 +17,30 @@ export function registerWorldUpgradeTests(quench) {
       const actor = id => game.actors.get(id);
       const effectWith = (doc, status) => doc.effects.find(e => e.statuses.has(status));
 
+      /**
+       * An actor as the database stores it, its items and effects in it: the server's answer to a get, before any
+       * client builds a document from it, so the data models' migrateData has not reshaped it.
+       * @param {string} id
+       * @returns {Promise<object>}
+       */
+      const storedActor = async id => {
+        const response = await foundry.helpers.SocketInterface.dispatch("modifyDocument", {
+          type: "Actor",
+          action: "get",
+          operation: { query: { _id: id } }
+        });
+        return response.result[0];
+      };
+
       before(function () {
         if (game.world.id !== FIXTURE_WORLD) {
           this.skip();
         }
       });
 
-      it("should have run the migrations for this version", () => {
-        assert.equal(game.settings.get(SYS_ID, "lastMigratedVersion"), game.system.version);
-        for (const doc of [...game.actors, ...game.items]) {
-          assert.equal(doc.getFlag(SYS_ID, "migratedVersion"), game.system.version, doc.name);
+      it("should have brought every actor, item, and scene to the current migration schema", () => {
+        for (const doc of [...game.actors, ...game.items, ...game.scenes]) {
+          assert.equal(doc.getFlag(SYS_ID, MIGRATION_FLAG), MIGRATION_SCHEMA, doc.name);
         }
       });
 
@@ -48,6 +62,14 @@ export function registerWorldUpgradeTests(quench) {
           assert.equal(pc.system.traits.per, 3);
           assert.equal(pc.system.traits.agi, 4);
           assert.equal(pc.system.rings.void.rank, 3);
+        });
+
+        // #182: writing the migrated system back replaces only the system
+        it("should keep every stored flag when the system is written back", async () => {
+          const stored = await storedActor("fxPcLantern00001");
+          assert.lengthOf(stored.flags[SYS_ID].xpManual, 1);
+          assert.equal(stored.flags[SYS_ID].xpBase, 40);
+          assert.property(stored.flags[SYS_ID], "xpFreeTraitBase");
         });
 
         it("should clear the free Family rank flag for a rule bonus and keep the XP history", () => {
@@ -158,6 +180,86 @@ export function registerWorldUpgradeTests(quench) {
           const lucky = game.items.get("fxWiFreeRaise001");
           assert.deepEqual(lucky.system.rules, [{ key: "FreeRaise", selector: "any", value: 1 }]);
           assert.equal(lucky._source.system.freeRaises, 0);
+        });
+
+        // #182: the database keeps nothing older that could win on the next load
+        it("should write the converted data back and remove every legacy key from the database", async () => {
+          const oni = await storedActor("fxNpLegacyWnd001");
+          assert.notProperty(oni.system, "wound_lvl");
+          assert.notProperty(oni.system.armor, "armor_tn");
+          assert.deepInclude(oni.system.manualWoundLevels.nicked, { value: 40, penalty: 5 });
+          assert.equal(oni.system.armor.armorTn, 25, "3.2.1's armor_tn, over its template's 10");
+          const monk = await storedActor("fxPcOldShape0001");
+          for (const key of ["armor_tn", "shadow_taint"]) {
+            assert.notProperty(monk.system, key);
+          }
+          assert.deepInclude(monk.system.shadowTaint, { rank: 0, points: 0 });
+          // 3.2.1's schema map kept its template's camelCase value over the snake_case one
+          assert.deepInclude(monk.system.initiative, { rollMod: 0, totalMod: 0 });
+          assert.notProperty(monk.system.initiative, "roll_mod");
+          const leftover = await storedActor("fxPcLeftover0001");
+          for (const key of ["wound_lvl", "armor_tn", "shadow_taint", "armor"]) {
+            assert.notProperty(leftover.system, key);
+          }
+          const kata = (await storedActor("fxPcShugenja0001")).items.find(
+            i => i._id === "fxPiShugenjaKat2"
+          );
+          assert.notProperty(kata.system, "cost");
+          assert.notProperty(kata.flags[SYS_ID] ?? {}, "legacyCost");
+        });
+
+        // #182: a single-leaf edit after the upgrade survives the next load
+        it("should keep a later edit to a converted value over the old key", async () => {
+          const oni = actor("fxNpLegacyWnd001");
+          await oni.update({ "system.manualWoundLevels.nicked.value": 45 });
+          // Built from the stored data, as the next load builds it
+          const reloaded = new CONFIG.Actor.documentClass(await storedActor(oni.id));
+          assert.equal(reloaded.system.manualWoundLevels.nicked.value, 45);
+          await oni.update({ "system.manualWoundLevels.nicked.value": 40 });
+        });
+
+        // #182: migrations read stored data
+        it("should leave an NPC's stored Armor TN as it was under an Armor TN effect", () => {
+          const oni = actor("fxNpLegacyWnd001");
+          assert.equal(oni._source.system.armor.armorTn, 25);
+          assert.equal(oni.system.armor.armorTn, 30, "the effect's +5 applies once");
+        });
+
+        // #182, Ernie's ruling: a 3.2.1 kiho at cost 0 is a School kiho
+        it("should make a kiho left at cost 0 a School kiho and keep a bought one bought", () => {
+          const monk = actor("fxPcOldShape0001");
+          assert.isTrue(monk.items.get("fxPiOldShapeKih2").system.schoolKiho);
+          assert.isFalse(monk.items.get("fxPiOldShapeKih1").system.schoolKiho);
+        });
+
+        // #182: the GM is told what changed, in one note
+        it("should tell the GM of School kiho, XP changes, and Free Raises that now wait", () => {
+          const note = game.messages.find(m =>
+            m.content.includes(game.i18n.localize("l5r4.system.migration.notesTitle"))
+          );
+          assert.exists(note, "one note for the GM");
+          assert.includeMembers(note.whisper, [game.user.id]);
+          const said = text => assert.include(note.content, text);
+          said(
+            game.i18n.localize("l5r4.system.migration.kihoSchool", {
+              name: "Fixture Old Shape Monk",
+              item: "Fixture Empty Hand"
+            })
+          );
+          said(
+            game.i18n.localize("l5r4.system.migration.xpChanged", {
+              name: "Fixture Ember Shugenja",
+              item: "Fixture Iron Stance",
+              before: 1,
+              after: 3
+            })
+          );
+          said(
+            game.i18n.localize("l5r4.system.migration.freeRaisesNarrowed", {
+              name: "Fixture Old Shape Monk",
+              item: "Fixture Old Robe"
+            })
+          );
         });
 
         it("should give Master of Blood its rules, in the world and on actors", () => {

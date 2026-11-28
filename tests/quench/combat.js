@@ -6,14 +6,19 @@ import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack } from "../../module/services/combat/damage-roll.js";
 import {
   applyConditionFromMessage,
+  rollAgainKeepBetter,
   rollDamageFromMessage
 } from "../../module/services/dice/check/chat-actions.js";
 import { applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
+import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
 import { startGrapple } from "../../module/services/combat/grapple-start.js";
 import { startDuel } from "../../module/services/combat/duel.js";
-import { guard } from "../../module/services/combat/guard.js";
+import { END_GUARD_QUERY, guard } from "../../module/services/combat/guard.js";
+import { effectsOf } from "../../module/services/effects/apply.js";
 import { applyLongRest } from "../../module/services/rest.js";
+import { rollHonor } from "../../module/services/dice/check/honor-roll.js";
+import { startFearTest } from "../../module/services/fear-card.js";
 import { migrateNpcInitiative } from "../../module/setup/migrations/actors/npc-initiative.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
@@ -23,6 +28,7 @@ import {
   cleanTest,
   settleChatNotifications,
   waitFor,
+  withConnectedPlayer,
   withGmAnswer
 } from "./helpers.js";
 
@@ -151,6 +157,20 @@ export function registerCombatTests(quench) {
       };
 
       /**
+       * Run `fn` drawing the next dice from `draws` (CONFIG.Dice.randomUniform values; 0.05 is a 10, which explodes),
+       * then nines again.
+       */
+      const withDice = async (draws, fn) => {
+        const queue = [...draws];
+        CONFIG.Dice.randomUniform = () => queue.shift() ?? 0.15;
+        try {
+          return await fn();
+        } finally {
+          CONFIG.Dice.randomUniform = NINES;
+        }
+      };
+
+      /**
        * Start a grapple bare-handed: Jiujutsu 1 / Agility 4, 5k4 = 36, with the Grapple maneuver.
        */
       const grappleAttack = async (actor, target) => {
@@ -180,6 +200,93 @@ export function registerCombatTests(quench) {
         const html = await message.renderHTML();
         html.querySelector(selector).click();
       };
+
+      // #171: a rule's range applies to attacks of that range and to their damage, and to no other roll
+      describe("Rules limited to one range", () => {
+        const labelsOf = message => message.system.modifiers.map(m => m.label);
+
+        /** The attacker with a melee-only bonus on every roll and a ranged-only bonus on damage. */
+        const rangedAttacker = async () => {
+          const { actor, katana } = await attacker();
+          await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Range rules",
+              type: "commonItem",
+              system: {
+                rules: [
+                  {
+                    key: "RollModifier",
+                    selector: "any",
+                    total: 5,
+                    range: "melee",
+                    label: "Melee only"
+                  },
+                  {
+                    key: "RollModifier",
+                    selector: "damage",
+                    total: 7,
+                    range: "ranged",
+                    label: "Ranged damage"
+                  }
+                ]
+              }
+            }
+          ]);
+          return { actor, katana };
+        };
+
+        it(
+          "should leave a range-limited rule off a Skill roll, which has no range",
+          clean(async () => {
+            const { actor } = await rangedAttacker();
+            const roll = await rollCheck({
+              actor,
+              kind: "skill",
+              label: "Kenjutsu",
+              base: { roll: 6, keep: 4 },
+              skill: "kenjutsu",
+              trait: "agi",
+              askForOptions: false
+            });
+            assert.notInclude(labelsOf(roll), "Melee only");
+            assert.equal(roll.system.range, "");
+          })
+        );
+
+        it(
+          "should give a ranged attack's damage the ranged rules, and a melee attack's the melee ones",
+          clean(async () => {
+            const { actor, katana } = await rangedAttacker();
+            const target = await defender();
+            const ranged = await rollCheck({
+              actor,
+              kind: "attack",
+              label: "Thrown",
+              base: { roll: 6, keep: 4 },
+              skill: "kenjutsu",
+              trait: "agi",
+              weapon: katana,
+              target,
+              tn: target.system.armorTn.current,
+              ranged: true,
+              askForOptions: false
+            });
+            assert.equal(ranged.system.range, "ranged");
+            assert.notInclude(labelsOf(ranged), "Melee only");
+            const rangedDamage = await rollDamageFromAttack(ranged, { askForOptions: false });
+            assert.include(labelsOf(rangedDamage), "Ranged damage");
+            assert.notInclude(labelsOf(rangedDamage), "Melee only");
+            assert.equal(rangedDamage.system.range, "ranged");
+
+            const melee = await attack(actor, katana, target);
+            assert.equal(melee.system.range, "melee");
+            assert.include(labelsOf(melee), "Melee only");
+            const meleeDamage = await rollDamageFromAttack(melee, { askForOptions: false });
+            assert.include(labelsOf(meleeDamage), "Melee only");
+            assert.notInclude(labelsOf(meleeDamage), "Ranged damage");
+          })
+        );
+      });
 
       // game-rules/33_wounds.md, p.82
       // game-rules/25_rings_and_traits.md, p.78
@@ -383,44 +490,23 @@ export function registerCombatTests(quench) {
           })
         );
 
-        // The warning shows on the clicking player's client, not the GM's (#113)
+        // #113, #142: an actor with no Void Point has nothing to spend, so its owner sees no button to press
         it(
-          "should warn a player with no Void Points on the player's own client, asking the GM nothing",
-          clean(async function () {
-            const player = game.users.find(user => !user.isGM);
-            if (!player) {
-              this.skip();
-            }
+          "should show Reduce with Void only while the damaged actor has a Void Point",
+          clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
-            await target.update({
-              "system.rings.void.value": 0,
-              [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-            });
+            await target.update({ "system.rings.void.value": 0 });
             const damage = await rollDamageFromAttack(await attack(actor, katana, target), {
               askForOptions: false
             });
             await applyDamage(damage, [target]);
             const card = resultOf(damage);
-            const gm = game.users.current;
-            const activeGM = game.users.activeGM;
-            const query = activeGM.query;
-            const warn = ui.notifications.warn;
-            const queries = [];
-            const warnings = [];
-            activeGM.query = (...request) => (queries.push(request), Promise.resolve());
-            ui.notifications.warn = message => warnings.push(message);
-            game.users.current = player;
-            try {
-              (await card.renderHTML()).querySelector("[data-action='damage-void']").click();
-              await waitFor(() => warnings.length > 0 || queries.length > 0, 2000);
-            } finally {
-              game.users.current = gm;
-              activeGM.query = query;
-              ui.notifications.warn = warn;
-            }
-            assert.lengthOf(queries, 0, "no request to the GM");
-            assert.deepEqual(warnings, [T("l5r4.ui.mechanics.wounds.noVoidPoints")]);
+            const voidButton = async () =>
+              (await card.renderHTML()).querySelector("[data-action='damage-void']");
+            assert.notExists(await voidButton(), "hidden with no Void Point");
+            await target.update({ "system.rings.void.value": 1 });
+            assert.exists(await voidButton(), "shown once the actor has one");
           })
         );
 
@@ -724,6 +810,40 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #157
+        // game-rules/28_raises.md, p.79
+        it(
+          "should make Free Raises left after the TN and maneuvers Increased Damage, and say so on the card",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              {
+                name: "Free",
+                system: { rules: [{ key: "FreeRaise", selector: "skill:kenjutsu", value: 2 }] }
+              }
+            ]);
+            const target = await defender();
+            const hit = await attack(actor, katana, target, { raises: 0 });
+            assert.deepInclude(hit.system.maneuvers, { cost: 0, increasedDamage: 2 });
+            assert.include(
+              hit.content,
+              F("l5r4.ui.check.raisesFreeAttackNote", {
+                count: 0,
+                free: 2,
+                maneuvers: 0,
+                damage: 2
+              })
+            );
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            const label = T("l5r4.ui.check.increasedDamage");
+            assert.deepInclude(
+              damage.system.modifiers.find(m => m.label === label),
+              { roll: 2 },
+              "+2k0 on the damage"
+            );
+          })
+        );
+
         it(
           "should roll Disarm as 2k1 damage without Strength, and disarm for the winner of Contested Strength",
           clean(async () => {
@@ -758,6 +878,33 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #148
+        // game-rules/38_maneuvers.md, p.86
+        it(
+          "should roll a Disarm's 2k1 exploding on 10, without the weapon's Explodes on or damage rules",
+          clean(async () => {
+            const { actor, katana } = await attacker(
+              [{ key: "RollModifier", selector: "damage", roll: 1 }],
+              3
+            );
+            // The batch rolls every die as a 9, so dice exploding on 9 would never stop
+            await katana.update({ "system.explodesOn": 9 });
+            const target = await defender();
+            const hit = await attack(actor, katana, target, { raises: 3, "maneuver.disarm": true });
+            assert.equal(hit.system.damage.explode, 9, "the attack stores the weapon's");
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            assert.equal(`${damage.system.pool.roll}k${damage.system.pool.keep}`, "2k1");
+            assert.include(damage.rolls[0].formula, "2d10xa10k1");
+            const fromKatana = message =>
+              message.system.modifiers.filter(m => m.label === katana.name).length;
+            assert.equal(fromKatana(damage), 0, "no weapon rule");
+            await katana.update({ "system.explodesOn": 10 });
+            const plain = await attack(actor, katana, target, { raises: 0 });
+            const normal = await rollDamageFromAttack(plain, { askForOptions: false });
+            assert.equal(fromKatana(normal), 1, "a normal hit has the weapon's rule");
+          })
+        );
+
         it(
           "should knock the target Prone on Knockdown when Contested Strength is won",
           clean(async () => {
@@ -775,6 +922,97 @@ export function registerCombatTests(quench) {
               stop();
             }
             assert.isTrue(await waitFor(() => target.statuses.has("prone")));
+          })
+        );
+
+        // #169: a re-roll that replaces a side's Strength roll settles the contest again (Ernie's ruling)
+        it(
+          "should settle Contested Strength again when a re-roll replaces a side's roll",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            const stop = autoAnswerRolls();
+            try {
+              await rollContest(hit);
+            } finally {
+              stop();
+            }
+            assert.isTrue(await waitFor(() => target.statuses.has("prone")), "27 beats 18");
+            const theirs = contestRollsOf(hit).target;
+            // Strength 2, 2k2: 10, 10, 10, 9 and 9 is 48
+            const reroll = await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(theirs));
+            assert.equal(reroll.system.outcome.total, 48);
+            assert.isTrue(await waitFor(() => contestRollsOf(hit).target?.id === reroll.id));
+            assert.isTrue(
+              await waitFor(() => !target.statuses.has("prone")),
+              "48 beats 27: the Prone the contest gave is gone"
+            );
+            const winner = F("l5r4.ui.check.contestWinner", { name: target.name });
+            assert.include(game.messages.contents.at(-1).content, winner);
+          })
+        );
+
+        // #166: a side's declared Raises must be beaten by 5 each, or that side fails the contest
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should count the attacker's declared Raises in Contested Strength",
+          clean(async function () {
+            // Two roll dialogs and the verdict can outrun Mocha's 2 s default
+            this.timeout(10_000);
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            // The attacker's dialog opens first, then the target's
+            const answered = answerCheckDialog({ raises: 2 }).then(() => answerCheckDialog());
+            await rollContest(hit);
+            await answered;
+            assert.equal(contestRollsOf(hit).attacker.system.tn.raises, 2);
+            const loser = F("l5r4.ui.check.contestWinner", { name: target.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(loser)),
+              "Strength 3 (27) beats Strength 2 (18) by 9, short of the 10 two Raises need"
+            );
+            assert.isFalse(target.statuses.has("prone"));
+          })
+        );
+
+        // #165: a connected player's side is theirs to roll, Void Point and Raises included
+        // game-rules/25_rings_and_traits.md, p.78
+        it(
+          "should leave a connected player's Contested Strength to them, and ask the GM before rolling it",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target, {
+              raises: 2,
+              "maneuver.knockdown": true
+            });
+            const stop = autoAnswerRolls();
+            try {
+              await withConnectedPlayer(target, async () => {
+                const first = await withGmAnswer(true, () => rollContest(hit));
+                assert.lengthOf(first.asked, 0, "the GM had a side of its own to roll");
+                assert.exists(contestRollsOf(hit).attacker, "the side no player plays is rolled");
+                assert.notExists(contestRollsOf(hit).target, "the player's side waits");
+                const waited = await withGmAnswer(false, () => rollContest(hit));
+                assert.lengthOf(waited.asked, 1, "a press with nothing else left asks the GM");
+                assert.include(waited.asked[0], target.name);
+                assert.notExists(contestRollsOf(hit).target, "declined, it still waits");
+                await withGmAnswer(true, () => rollContest(hit));
+                assert.exists(contestRollsOf(hit).target, "the GM rolls for them");
+              });
+            } finally {
+              stop();
+            }
+            assert.isTrue(await waitFor(() => target.statuses.has("prone")), "and it settles");
           })
         );
 
@@ -919,6 +1157,56 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #168: a guard protects one character, so Guard used again replaces the guard's Guard
+        // game-rules/38_maneuvers.md, p.87
+        it(
+          "should hold one Guard per guard, on the same ward or a new one",
+          clean(async () => {
+            const { actor } = await attacker();
+            const first = await defender();
+            const second = await defender();
+            const base = [actor, first, second].map(a => a.system.armorTn.current);
+            const armorTns = () => [actor, first, second].map(a => a.system.armorTn.current);
+            await guard(actor, first);
+            await guard(actor, first);
+            assert.deepEqual(
+              armorTns(),
+              [base[0] - 5, base[1] + 10, base[2]],
+              "the same ward again"
+            );
+            await guard(actor, second);
+            assert.deepEqual(armorTns(), [base[0] - 5, base[1], base[2] + 10], "a new ward");
+            assert.equal(effectsOf(actor, "guarding").length, 1);
+            assert.equal(effectsOf(first, "guarded").length, 0);
+          })
+        );
+
+        // #168: the GM ends a Guard for the guard's owner only
+        it(
+          "should end a Guard through the GM only for the guard's owner",
+          clean(async () => {
+            const { actor } = await attacker();
+            const ward = await defender();
+            await guard(actor, ward);
+            const player = game.users.find(u => !u.isGM);
+            const endGuard = CONFIG.queries[END_GUARD_QUERY];
+            let refused = null;
+            try {
+              await endGuard({ protectorUuid: actor.uuid }, { user: player });
+            } catch (err) {
+              refused = err.message;
+            }
+            assert.equal(refused, "l5r4.ui.requests.notYourGuard");
+            assert.isTrue(ward.statuses.has("guarded"), "a refusal ends nothing");
+            await actor.update({
+              [`ownership.${player.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+            });
+            await endGuard({ protectorUuid: actor.uuid }, { user: player });
+            assert.isFalse(ward.statuses.has("guarded"));
+            assert.isFalse(actor.statuses.has("guarding"));
+          })
+        );
+
         // Not in the Full Attack Stance, unless the GM allows it (#223)
         // game-rules/38_maneuvers.md, p.87
         it(
@@ -1018,6 +1306,38 @@ export function registerCombatTests(quench) {
           })
         );
 
+        // #167: a Hit takes no Raises, as no attack roll is made, but Free Raises still apply, each +1k0
+        // game-rules/40_grappling.md, p.88
+        it(
+          "should add the grapple Skill's Free Raises to a Hit, as many as the roller sets",
+          clean(async () => {
+            const { actor } = await attacker();
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              {
+                name: "Free",
+                system: { rules: [{ key: "FreeRaise", selector: "skill:jiujutsu", value: 1 }] }
+              }
+            ]);
+            const target = await defender();
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const hit = async values => {
+              const logged = card.getFlag(SYS_ID, "flow").state.log.length;
+              const answered = answerCheckDialog(values);
+              await click(card, "[data-flow-action='hit']");
+              await answered;
+              assert.isTrue(
+                await waitFor(() => card.getFlag(SYS_ID, "flow").state.log.length > logged)
+              );
+              const { pool } = game.messages.contents.findLast(
+                m => m.type === "roll" && m.system.kind === "damage"
+              ).system;
+              return `${pool.roll}k${pool.keep}`;
+            };
+            assert.equal(await hit(), "4k1", "Strength 3k1 and the Jiujutsu Free Raise's +1k0");
+            assert.equal(await hit({ damageFreeRaises: 3 }), "6k1", "the roller set 3");
+          })
+        );
+
         // game-rules/40_grappling.md, p.89
         it(
           "should deal weapon damage in a weapon grapple; losing control gives two Free Raises to Disarm",
@@ -1072,6 +1392,104 @@ export function registerCombatTests(quench) {
             );
           })
         );
+
+        // #166: Raises declared on a control roll must be beaten by 5 each
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should give control to the other side when the higher roll falls short of its Raises",
+          clean(async () => {
+            const { actor } = await attacker();
+            const target = await defender();
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const raised = answerCheckDialog({ raises: 2 });
+            await click(card, "[data-flow-action='control'][data-side='0']");
+            await raised;
+            await waitFor(() => state().rolls[0] !== null);
+            const plain = answerCheckDialog();
+            await click(card, "[data-flow-action='control'][data-side='1']");
+            await plain;
+            assert.isTrue(await waitFor(() => state().log.length === 2), "the contest settled");
+            assert.equal(
+              state().control,
+              1,
+              "Jiujutsu 1 + Strength 3 (27) beats Strength 2 (18) by 9, short of the 10 two Raises need"
+            );
+          })
+        );
+
+        // #169, Ernie's ruling: a re-roll settles the last control contest again until someone rolls or acts
+        it(
+          "should settle control again from a re-roll, and not once the controller has acted",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor } = await attacker();
+            const target = await defender();
+            await target.createEmbeddedDocuments("Item", [createSkillData("Jiujutsu", 1, "agi")]);
+            const card = await startGrapple(await grappleAttack(actor, target));
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='control'][data-side='0']");
+              await waitFor(() => state().rolls[0] !== null);
+              await click(card, "[data-flow-action='control'][data-side='1']");
+              await waitFor(() => state().log.length === 2);
+            } finally {
+              stop();
+            }
+            assert.equal(state().control, 0, "Jiujutsu 1 + Strength 3 (27) beats 1 + 2 (18)");
+            const [mine, theirs] = state().settled.rolls.map(r => game.messages.get(r.id));
+            // Jiujutsu 1 + Strength 2, 3k2, with exploding 10s: well past 27
+            const reroll = await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(theirs));
+            assert.isAbove(reroll.system.outcome.total, 27);
+            assert.isTrue(await waitFor(() => state().control === 1), "the re-roll beats 27");
+            assert.equal(state().settled.rolls[1].id, reroll.id);
+
+            await click(card, "[data-flow-action='pass']");
+            assert.isTrue(await waitFor(() => state().settled === null), "the controller acted");
+            await withDice([0.05, 0.05, 0.05], () => rollAgainKeepBetter(mine));
+            const tooLate = F("l5r4.ui.requests.replacedTooLate", { name: actor.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(tooLate))
+            );
+            assert.equal(state().control, 1, "control stays with the side that passed");
+          })
+        );
+      });
+
+      // #169: an Honor Roll takes the failed roll's place on a Fear card
+      // game-rules/42_fear.md, p.90
+      // game-rules/43_honor.md, p.92
+      describe("Fear card re-roll", () => {
+        it(
+          "should record a successful Honor Roll on the Fear card and end the Feared it gave",
+          clean(async function () {
+            this.timeout(10_000);
+            const enabled = game.settings.get(SYS_ID, "honorRoll");
+            await game.settings.set(SYS_ID, "honorRoll", true);
+            try {
+              const character = track(
+                await createTestPC({
+                  name: "Combat frightened",
+                  system: { traits: { wil: 2 }, honor: { rank: 4, points: 0 } }
+                })
+              );
+              const card = await startFearTest({ characters: [character], fearRank: 5 });
+              const state = () => card.getFlag(SYS_ID, "flow").state;
+              assert.isTrue(await waitFor(() => state().results[0] !== null));
+              assert.isFalse(state().results[0].success, "2k2 (18) + Honor 4 misses TN 30");
+              assert.isTrue(await waitFor(() => character.statuses.has("feared")));
+              const failed = game.messages.get(state().results[0].id);
+              const honor = await rollHonor(failed);
+              assert.isTrue(honor.system.outcome.success, "Honor Rank 4, 4k4 (36), makes TN 30");
+              assert.isTrue(await waitFor(() => state().results[0].id === honor.id));
+              assert.isTrue(state().results[0].success);
+              assert.isTrue(await waitFor(() => !character.statuses.has("feared")));
+            } finally {
+              await game.settings.set(SYS_ID, "honorRoll", enabled);
+            }
+          })
+        );
       });
 
       // game-rules/39_iaijutsu_dueling.md, p.87-88
@@ -1120,6 +1538,88 @@ export function registerCombatTests(quench) {
               "the strike carries the sword's damage"
             );
             assert.include(strike.content, "check-damage", "5k3 of nines (27) hits Armor TN 20");
+          })
+        );
+
+        // #166, Ernie's ruling: Raises declared on Focus gate the first strike; Free Raises count the whole margin
+        // game-rules/39_iaijutsu_dueling.md, p.87
+        // game-rules/29_types_of_rolls.md, p.80
+        it(
+          "should make a Focus kharmic when the duelist ahead falls short of his declared Raises",
+          clean(async () => {
+            const { actor } = await attacker([], 3);
+            const target = await defender();
+            const card = await startDuel(actor, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.assessment[0] !== null);
+              await click(card, "[data-flow-action='roll'][data-duelist='1']");
+              await waitFor(() => state().stage === "focus");
+            } finally {
+              stop();
+            }
+            const raised = answerCheckDialog({ raises: 2 });
+            await click(card, "[data-flow-action='roll'][data-duelist='0']");
+            await raised;
+            await waitFor(() => state().rolls.focus[0] !== null);
+            const plain = answerCheckDialog();
+            await click(card, "[data-flow-action='roll'][data-duelist='1']");
+            await plain;
+            assert.isTrue(await waitFor(() => state().stage === "strike"));
+            const [a, b] = state().rolls.focus.map(r => r.total);
+            assert.deepEqual(
+              [a, b],
+              [27, 18],
+              "Iaijutsu 2 + Void 3: 5k3; Iaijutsu 1 + Void 2: 3k2"
+            );
+            assert.equal(state().rolls.focus[0].raises, 2);
+            assert.isNull(state().firstStrike, "ahead by 9, short of the 10 two Raises need");
+            assert.equal(state().freeRaises, 0);
+          })
+        );
+
+        // #169, Ernie's ruling: a re-roll settles its stage again while the next stage has no roll; later, the card
+        // stays as it is and the table is told
+        it(
+          "should settle Focus again from a re-roll, and leave a settled Assessment once Focus is rolled",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor } = await attacker();
+            const target = await defender();
+            const card = await startDuel(actor, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              for (const stage of ["assessment", "focus"]) {
+                await click(card, "[data-flow-action='roll'][data-duelist='0']");
+                await waitFor(() => state().rolls[stage][0] !== null);
+                await click(card, "[data-flow-action='roll'][data-duelist='1']");
+                await waitFor(() => state().stage !== stage);
+              }
+            } finally {
+              stop();
+            }
+            assert.isNull(state().firstStrike, "18 against 18 is kharmic");
+            const focus = game.messages.get(state().rolls.focus[0].id);
+            // Iaijutsu 2 + Void 2, 4k2: 10, 9 and 9s keep 19 and 9
+            const reroll = await withDice([0.05], () => rollAgainKeepBetter(focus));
+            assert.isTrue(await waitFor(() => state().rolls.focus[0].id === reroll.id));
+            assert.equal(state().rolls.focus[0].total, 28);
+            assert.equal(state().firstStrike, 0, "ahead by 10 now");
+            assert.equal(state().freeRaises, 1, "a Free Raise for the 5 past the first");
+            assert.equal(state().stage, "strike");
+
+            const assessment = game.messages.get(state().rolls.assessment[1].id);
+            const before = foundry.utils.deepClone(state());
+            await withDice([0.05], () => rollAgainKeepBetter(assessment));
+            const tooLate = F("l5r4.ui.requests.replacedTooLate", { name: target.name });
+            assert.isTrue(
+              await waitFor(() => game.messages.contents.at(-1).content.includes(tooLate)),
+              "Focus already depends on the Assessment"
+            );
+            assert.deepEqual(state().rolls, before.rolls);
           })
         );
 
@@ -1438,7 +1938,7 @@ export function registerCombatTests(quench) {
                 tn: target.system.armorTn.current
               }).then(async message => (await answered, message));
             };
-            const label = T("l5r4.equipment.weapons.meleeRange");
+            const label = T("l5r4.equipment.weapons.rangedInMelee");
             const index = getCheckContext(actor, {
               kind: "attack",
               weapon: bow,
@@ -1447,6 +1947,37 @@ export function registerCombatTests(quench) {
             assert.isAtLeast(index, 0, "offered, unticked");
             assert.equal((await shoot({})).rolls[0].total, 36, "6k4 of nines");
             assert.equal((await shoot({ [`modifier.${index}`]: true })).rolls[0].total, 26);
+          })
+        );
+
+        // #149
+        // game-rules/32_attack_and_defense.md, p.82
+        it(
+          "should take -10 on any ranged attack at a target in melee range, and none on a melee attack",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const label = T("l5r4.equipment.weapons.rangedInMelee");
+            const index = getCheckContext(actor, {
+              kind: "attack",
+              weapon: katana,
+              target
+            }).modifiers.findIndex(m => m.label === label);
+            assert.isAtLeast(index, 0, "offered for a weapon that is not a bow");
+            const strike = choices => {
+              const answered = answerCheckDialog({ [`modifier.${index}`]: true, ...choices });
+              return rollCheck({
+                actor,
+                kind: "attack",
+                label: "Thrown katana",
+                base: { roll: 6, keep: 4 },
+                weapon: katana,
+                target,
+                tn: target.system.armorTn.current
+              }).then(async message => (await answered, message));
+            };
+            assert.equal((await strike({ isRanged: true })).rolls[0].total, 26, "thrown: -10");
+            assert.equal((await strike({ isRanged: false })).rolls[0].total, 36, "melee: none");
           })
         );
 
@@ -1460,6 +1991,29 @@ export function registerCombatTests(quench) {
             assert.equal(rider.system.armorTn.current, 24);
             await rider.toggleStatusEffect("mounted", { active: true });
             assert.equal(rider.system.armorTn.current, 32);
+          })
+        );
+
+        // #152
+        // game-rules/41_conditional_effects.md, p.89
+        it(
+          "should keep an NPC's armor when Grappled or Stunned sets its Armor TN to 5 + armor",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({
+                name: "Combat armored NPC",
+                system: { armor: { armorTn: 18, bonus: 3, reduction: 1 } }
+              })
+            );
+            assert.deepInclude(npc.system.armorTn, { base: 15, bonus: 3, current: 18 });
+            for (const status of ["grappled", "stunned"]) {
+              await npc.toggleStatusEffect(status, { active: true });
+              assert.equal(npc.system.armorTn.current, 8, `${status}: 5 + 3 armor`);
+              await npc.toggleStatusEffect(status, { active: false });
+            }
+            await npc.update({ "system.armor.bonus": 0 });
+            await npc.toggleStatusEffect("grappled", { active: true });
+            assert.equal(npc.system.armorTn.current, 5, "no armor entered: 5");
           })
         );
       });
@@ -1520,18 +2074,7 @@ export function registerCombatTests(quench) {
               })
             );
             assert.deepInclude(npc.system.initiative, { roll: 2, keep: 2 }, "the stored pool");
-            // Migrations report what they changed on console.warn; hold that line back so cleanTest sees the rest
-            const warn = console.warn;
-            const held = [];
-            console.warn = (...args) => held.push(args.join(" "));
-            try {
-              await migrateNpcInitiative([npc], "quench");
-            } finally {
-              console.warn = warn;
-            }
-            assert.deepEqual(held, [
-              "l5r4-enhanced | 1 NPCs now roll the Initiative formula (quench)"
-            ]);
+            await migrateNpcInitiative(npc);
             assert.deepInclude(npc.system.initiative, { roll: 4, keep: 3 });
           })
         );

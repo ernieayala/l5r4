@@ -120,6 +120,13 @@ export const CHOICE_LIST_VALUES = Object.freeze({
 });
 
 /**
+ * Other names a rule may give a Skill type, by the type Skills store (module/config/localization.js SKILL_TYPES):
+ * the rules guide writes `skill-type:merchant` for the Merchant Skills, stored as "merch" (#173).
+ * @type {Readonly<Record<string, string>>}
+ */
+export const SKILL_TYPE_ALIASES = Object.freeze({ merchant: "merch" });
+
+/**
  * Attack ranges a RollModifier or ArmorTN rule can be limited to.
  * @type {ReadonlyArray<string>}
  */

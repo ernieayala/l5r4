@@ -45,7 +45,7 @@ describe("prepareNpcManualWounds", () => {
 
 describe("getWoundLevelsForCount", () => {
   describe("Valid inputs", () => {
-    it("should return 2 levels for count 1", () => {
+    it("should give Healthy and Out for a count below 2", () => {
       // ARRANGE
       const count = 1;
 
@@ -57,16 +57,14 @@ describe("getWoundLevelsForCount", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("should return 3 levels for count 2", () => {
-      // ARRANGE
-      const count = 2;
-
-      // ACT
-      const result = getWoundLevelsForCount(count);
-
-      // ASSERT
-      expect(result).toEqual(["healthy", "nicked", "out"]);
-      expect(result).toHaveLength(3);
+    // #155: the count includes Out, so every count from 2 to 8 gives its own list (Ernie's ruling)
+    it("should give as many ranks as the count, Out included, each count its own list", () => {
+      expect(getWoundLevelsForCount(2)).toEqual(["healthy", "out"]);
+      expect(getWoundLevelsForCount(3)).toEqual(["healthy", "nicked", "out"]);
+      expect(getWoundLevelsForCount(4)).toEqual(["healthy", "nicked", "grazed", "out"]);
+      for (let count = 2; count <= 8; count++) {
+        expect(getWoundLevelsForCount(count)).toHaveLength(count);
+      }
     });
 
     it("should return 8 levels for count 8", () => {
@@ -92,7 +90,7 @@ describe("getWoundLevelsForCount", () => {
   });
 
   describe("Edge cases", () => {
-    it("should clamp count below 1 to 1", () => {
+    it("should clamp count below 2 to 2", () => {
       // ARRANGE
       const count = 0;
 

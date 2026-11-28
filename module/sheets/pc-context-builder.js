@@ -1,12 +1,12 @@
 /**
  * @module sheets/pc-context-builder
- * @description Shapes a PC's items for the character sheet's `_prepareContext()`: sorts each item type by the
+ * @description Shapes an actor's items for the PC and NPC sheets' `_prepareContext()`: sorts each item type by the
  * user's stored sort preference, lists the Mastery Abilities a skill's rank unlocks (ranks 3, 5, 7), and reads the
  * bio items, stance, effective Traits, and collapsed sections. It returns plain objects for the Handlebars
  * templates and never changes a document.
  */
 
-import { SYS_ID } from "../config/constants.js";
+import { SYS_ID, WEAPON_TYPES } from "../config/constants.js";
 import { SORT_KEYS } from "../config/sort-keys.js";
 import { applySortPref } from "../utils/sorting.js";
 import { toInt } from "../utils/type-coercion.js";
@@ -96,8 +96,8 @@ export class PcContextBuilder {
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} allItems - Array of all items from actor.items (any types)
    * @returns {{[type: string]: Item[]}} Sorted item collections by type: skills, spells, advantages,
-   *   disadvantages, items (items and commonItems), katas, kihos, tattoos, techniques, armors, weapons, and bows;
-   *   skills, spells, weapons, and bows carry their pre-calculated formulas
+   *   disadvantages, items (items and commonItems), katas, kihos, tattoos, techniques, armors, and weapons (legacy
+   *   bows included); skills, spells, and weapons carry their pre-calculated formulas
    */
   static buildSortedItems(actor, allItems) {
     const getItemsOfType = t => allItems.filter(i => i.type === t);
@@ -118,8 +118,11 @@ export class PcContextBuilder {
       tattoos: sortedOf("tattoos", getItemsOfType("tattoo")),
       techniques: sortedOf("techniques", getItemsOfType("technique")),
       armors: sortedOf("armors", getItemsOfType("armor")),
-      weapons: this.#getSortedWeapons(actor, getItemsOfType("weapon")),
-      bows: this.#getSortedWeapons(actor, getItemsOfType("bow"))
+      // A stored item of the legacy bow type lists with the weapons it became (#185)
+      weapons: this.#getSortedWeapons(
+        actor,
+        allItems.filter(i => WEAPON_TYPES.includes(i.type))
+      )
     };
   }
 
@@ -321,28 +324,27 @@ export class PcContextBuilder {
   }
 
   /**
-   * Extract bio items (clan, family, school) from actor items.
-   *
-   * Bio items define character identity and provide mechanical bonuses:
-   * - **Clan**: Determines available families and clan-specific abilities
-   * - **Family**: Grants +1 to one trait (e.g., Hida → Stamina +1)
-   * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
-   *
-   * A character has one Clan and one Family, and one School or more: a School added beside another (Multiple
-   * Schools, an Advanced School) is listed after the first (roadmap/STAGE-18 decision 11).
+   * The actor's Clan, Family, and School items, for the Bio rows. A PC's new Clan or Family replaces the old
+   * (module/services/purchase.js), but an NPC, or an item made from the Add dialog, can hold more than one, so each
+   * type is a list and none is hidden. Every School comes first School first (a School added beside another, Multiple
+   * Schools or an Advanced School, after it; roadmap/STAGE-18 decision 11), with the School Skills its Techniques wait
+   * for, which a second School keeps in `flags.l5r4-enhanced.waitingFor`
+   * (module/documents/item/lifecycle/second-school.js).
    *
    * @param {Item[]} allItems - Array of all items from actor.items
-   * @returns {{clan: Item|null, family: Item|null, schools: Item[]}} Bio items by type, null where the actor has
-   *   none; every School, the first School first
+   * @returns {{bioClans: Item[], bioFamilies: Item[], bioSchools: Array<{item: Item, waitingFor: string[]}>}}
    */
-  static getBioItems(allItems) {
+  static buildBioFields(allItems) {
     const getItemsOfType = t => allItems.filter(i => i.type === t);
     const isSecond = school => school.getFlag(SYS_ID, "secondSchool") === true;
     const schools = getItemsOfType("school");
     return {
-      clan: getItemsOfType("clan")[0] ?? null,
-      family: getItemsOfType("family")[0] ?? null,
-      schools: [...schools.filter(s => !isSecond(s)), ...schools.filter(isSecond)]
+      bioClans: getItemsOfType("clan"),
+      bioFamilies: getItemsOfType("family"),
+      bioSchools: [...schools.filter(s => !isSecond(s)), ...schools.filter(isSecond)].map(item => ({
+        item,
+        waitingFor: item.getFlag(SYS_ID, "waitingFor") ?? []
+      }))
     };
   }
 

@@ -45,7 +45,13 @@ export default class NpcData extends ActorData {
       damage1: damageField(2, 2),
       damage2: damageField(2, 2),
       damage3: damageField(0, 0),
-      armor: new SchemaField({ armorTn: numberField(10), reduction: numberField(0) }),
+      // `bonus` is the part of the entered Armor TN that is armor worn, which Grappled, Stunned, and "ignores armor"
+      // effects read; 0, the default, counts the whole Armor TN as the NPC's own (#152)
+      armor: new SchemaField({
+        armorTn: numberField(10),
+        reduction: numberField(0),
+        bonus: numberField(0)
+      }),
       nrWoundLvls: numberField(3),
       woundMode: stringField("manual"),
       manualWoundLevels: manualWoundLevelsField(),

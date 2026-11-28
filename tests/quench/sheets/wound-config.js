@@ -16,6 +16,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import WoundConfigApplication from "../../../module/apps/wound-config.js";
+import ArmorConfigApplication from "../../../module/apps/armor-config.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 
 /**
@@ -282,6 +283,107 @@ export function registerWoundConfigTests(quench) {
 
           // Dialog should be cleaned up
           assert.isFalse(dialog.rendered, "Dialog not rendered");
+        });
+      });
+
+      // #184: a configuration window shows and saves the stored value, so a rule's bonus is never saved into it
+      describe("Configuration windows edit stored values", () => {
+        let actor, dialog;
+
+        afterEach(async () => {
+          if (dialog?.rendered) {
+            await dialog.close({ animate: false });
+          }
+          await actor?.delete();
+          actor = dialog = null;
+        });
+
+        /**
+         * Type a value into a window's field and wait for the actor's update.
+         * @param {string} name - The field's name
+         * @param {number} value
+         */
+        const typeInto = async (name, value) => {
+          const input = dialog.element.querySelector(`[name="${name}"]`);
+          // The update that saves this field, not one the item's creation started
+          const updated = new Promise(resolve => {
+            const hook = Hooks.on("updateActor", (doc, changes) => {
+              if (doc === actor && foundry.utils.hasProperty(changes, `system.${name}`)) {
+                Hooks.off("updateActor", hook);
+                resolve();
+              }
+            });
+          });
+          input.value = String(value);
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+          await updated;
+        };
+        // The field's group is the element holding its label; the hint is the group's paragraph
+        const hintOf = name =>
+          dialog.element
+            .querySelector(`[name="${name}"]`)
+            .closest(":has(> label)")
+            .querySelector(":scope > p")?.textContent;
+
+        it("should show the stored Wound modifiers with the rule's share as a hint, and save them", async () => {
+          actor = await createTestPC({
+            name: "Wound config: stored values",
+            system: { woundsMod: 2, woundsPenaltyMod: 1 }
+          });
+          await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Wound config rule",
+              type: "advantage",
+              system: { rules: [{ key: "Wounds", perRank: 3, penalty: 1 }] }
+            }
+          ]);
+          assert.equal(actor.system.woundsMod, 5, "2 stored + 3 from the rule");
+          dialog = new WoundConfigApplication(actor);
+          await dialog.render(true);
+
+          assert.equal(dialog.element.querySelector('[name="woundsMod"]').value, "2");
+          assert.include(hintOf("woundsMod"), "+3");
+          assert.include(hintOf("woundsMod"), "5");
+          assert.notExists(hintOf("woundsMultiplier"), "nothing adds to the multiplier");
+
+          await typeInto("woundsPenaltyMod", 4);
+          assert.equal(actor._source.system.woundsPenaltyMod, 4);
+          assert.equal(actor.system.woundsPenaltyMod, 5, "the rule's 1 counted once");
+          await typeInto("woundsMultiplier", 3);
+          assert.equal(actor._source.system.woundsMod, 2, "the rule's 3 never saved into storage");
+        });
+
+        it("should leave an NPC's custom maximum blank until one is stored", async () => {
+          actor = await createTestNPC({
+            name: "Wound config: no custom max",
+            system: { woundMode: "manual" }
+          });
+          dialog = new WoundConfigApplication(actor);
+          await dialog.render(true);
+          const max = dialog.element.querySelector('[name="wounds.max"]');
+          assert.equal(max.value, "");
+          assert.equal(max.placeholder, String(actor.system.woundLevels.out.value));
+          assert.isAbove(actor.system.wounds.max, 0, "preparation falls back to the Out threshold");
+        });
+
+        it("should show the stored Armor TN modifier with an effect's share as a hint", async () => {
+          actor = await createTestPC({ name: "Armor config: stored values" });
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Armor config change",
+              system: { changes: [{ key: "system.armorTn.mod", type: "add", value: "5" }] }
+            }
+          ]);
+          dialog = new ArmorConfigApplication(actor);
+          await dialog.render(true);
+          assert.equal(dialog.element.querySelector('[name="armorTn.mod"]').value, "0");
+          assert.include(hintOf("armorTn.mod"), "+5");
+          await typeInto("armorTn.reductionMod", 1);
+          assert.equal(
+            actor._source.system.armorTn.mod,
+            0,
+            "the effect's 5 never saved into storage"
+          );
         });
       });
 

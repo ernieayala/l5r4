@@ -2,8 +2,14 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { CHAT_TEMPLATES } from "../../module/config/templates.js";
 import { APPLY_EFFECT_QUERY, applyEffect } from "../../module/services/effects/apply.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
+import {
+  SPEND_VOID_QUERY,
+  spendVoidPoint
+} from "../../module/services/dice/resources/void-points.js";
 import { startDuel } from "../../module/services/combat/duel.js";
+import { startFlow } from "../../module/services/combat/flow.js";
 import { contestRollsOf } from "../../module/services/combat/contest-rolls.js";
+import { CUSTOM_EMPHASES_QUERY } from "../../module/services/custom-emphases.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications, withGmAnswer } from "./helpers.js";
 
@@ -257,6 +263,160 @@ export function registerRequestsTests(quench) {
         );
       });
 
+      // #170: GM-side writes to one actor run one at a time, each reading the stored values in its turn
+      describe("Writes to one actor at the same time", function () {
+        // Each test rolls damage and waits on several writes, past Mocha's 2 s default
+        this.timeout(10_000);
+        const askDamage = request => CONFIG.queries[`${SYS_ID}.damage`](request, { user: player });
+        const askVoid = (actor, count = 1) =>
+          CONFIG.queries[SPEND_VOID_QUERY]({ actorUuid: actor.uuid, count }, { user: player });
+
+        /** A damage roll by a character of the player's against `target`, 2k2 of nines = 18. */
+        const playersDamage = async target =>
+          track(
+            await rollCheck({
+              actor: await playersCharacter(),
+              kind: "damage",
+              label: "Requests damage",
+              base: { roll: 2, keep: 2 },
+              target,
+              askForOptions: false
+            })
+          );
+
+        /** The result card a damage roll's application posted, tracked for deletion. */
+        const resultOf = damage =>
+          track(
+            game.messages.contents.findLast(
+              m => m.getFlag(SYS_ID, "damageResult")?.damageMessageId === damage.id
+            )
+          );
+
+        it(
+          "should keep both of two hits applied together",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: two hits" }));
+            const first = await playersDamage(target);
+            const second = await playersDamage(target);
+            await Promise.all(
+              [first, second].map(damage =>
+                askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid })
+              )
+            );
+            assert.equal(target._source.system.suffered, 36, "18 and 18");
+            resultOf(first);
+            resultOf(second);
+          })
+        );
+
+        it(
+          "should undo one hit while another lands, keeping the other",
+          clean(async () => {
+            const target = track(await createTestNPC({ name: "Requests: undo and hit" }));
+            const first = await playersDamage(target);
+            const second = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: first.id, actorUuid: target.uuid });
+            await Promise.all([
+              askDamage({ action: "undo", messageId: resultOf(first).id }),
+              askDamage({ action: "apply", messageId: second.id, actorUuid: target.uuid })
+            ]);
+            assert.equal(target._source.system.suffered, 18, "the second hit only");
+            resultOf(second);
+          })
+        );
+
+        it(
+          "should spend two Void Points for a roll's spend and a damage card's spend made together",
+          clean(async () => {
+            const target = await playersCharacter();
+            await target.update({ "system.rings.void.value": 2 });
+            const damage = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
+            const [spend] = await Promise.all([
+              askVoid(target),
+              askDamage({ action: "void", messageId: resultOf(damage).id })
+            ]);
+            assert.isTrue(spend.spent);
+            assert.equal(target._source.system.rings.void.value, 0, "one point each");
+            assert.equal(target._source.system.suffered, 8, "18 - 10");
+          })
+        );
+
+        it(
+          "should spend a damage card's Void Point once for two clicks",
+          clean(async () => {
+            const target = await playersCharacter();
+            await target.update({ "system.rings.void.value": 2 });
+            const damage = await playersDamage(target);
+            await askDamage({ action: "apply", messageId: damage.id, actorUuid: target.uuid });
+            const card = resultOf(damage);
+            let updates = 0;
+            const hook = Hooks.on("updateActor", actor => {
+              if (actor === target) {
+                updates++;
+              }
+            });
+            try {
+              await Promise.all([
+                askDamage({ action: "void", messageId: card.id }),
+                askDamage({ action: "void", messageId: card.id })
+              ]);
+            } finally {
+              Hooks.off("updateActor", hook);
+            }
+            assert.equal(updates, 1, "one spend written");
+            assert.equal(target._source.system.rings.void.value, 1);
+            assert.equal(target._source.system.suffered, 8);
+          })
+        );
+
+        it(
+          "should spend a player's Void Points on the GM, one request after another",
+          clean(async () => {
+            const actor = await playersCharacter();
+            await actor.update({ "system.rings.void.value": 1 });
+            const answers = await Promise.all([askVoid(actor), askVoid(actor)]);
+            assert.deepEqual(
+              answers.map(a => a.spent),
+              [true, false],
+              "the second finds the point gone"
+            );
+            assert.deepEqual(answers[1], { spent: false, current: 0, overLimit: false });
+            assert.equal(actor._source.system.rings.void.value, 0);
+          })
+        );
+
+        it(
+          "should refuse a Void Point spend for a character the player does not own, or a bad count",
+          clean(async () => {
+            const stranger = track(
+              await createTestPC({
+                name: "Requests: stranger's Void",
+                system: { rings: { void: { rank: 2, value: 2 } } }
+              })
+            );
+            const own = await playersCharacter();
+            await own.update({ "system.rings.void.value": 2 });
+            assert.equal(await refusalOf(askVoid(stranger)), "l5r4.ui.requests.notYourVoid");
+            assert.equal(await refusalOf(askVoid(own, 0)), "l5r4.ui.requests.notVoidSpend");
+            assert.equal(await refusalOf(askVoid(own, "1")), "l5r4.ui.requests.notVoidSpend");
+            assert.equal(stranger._source.system.rings.void.value, 2, "the stranger's untouched");
+            assert.equal(own._source.system.rings.void.value, 2, "a bad count takes nothing");
+          })
+        );
+
+        it(
+          "should spend a Void Point through spendVoidPoint and the queue a request uses together",
+          clean(async () => {
+            const actor = await playersCharacter();
+            await actor.update({ "system.rings.void.value": 1 });
+            const [local, asked] = await Promise.all([spendVoidPoint(actor), askVoid(actor)]);
+            assert.deepEqual([local.success, asked.spent], [true, false]);
+            assert.equal(actor._source.system.rings.void.value, 0);
+          })
+        );
+      });
+
       describe("Duel and grapple cards", () => {
         const askStep = (card, data) =>
           CONFIG.queries[`${SYS_ID}.flow`]({ messageId: card.id, data }, { user: player });
@@ -312,6 +472,101 @@ export function registerRequestsTests(quench) {
               "l5r4.ui.requests.notDuelistRoll",
               "the slot is filled"
             );
+          })
+        );
+
+        // #164: a card's steps run one at a time, so two sent together are both kept
+        it(
+          "should keep both duelists' rolls sent at the same moment",
+          clean(async () => {
+            const [first, second] = [await playersCharacter(), await playersCharacter()];
+            const card = track(await startDuel(first, second));
+            const [a, b] = [await assessment(first), await assessment(second)];
+            const gmStep = data =>
+              CONFIG.queries[`${SYS_ID}.flow`]({ messageId: card.id, data }, { user: game.user });
+            await Promise.all([
+              gmStep({ action: "roll", duelist: 0, rollId: a.id }),
+              gmStep({ action: "roll", duelist: 1, rollId: b.id })
+            ]);
+            assert.equal(card.getFlag(SYS_ID, "flow").state.stage, "focus", "both recorded");
+          })
+        );
+
+        // #164, #223: the GM corrects a card; a player cannot
+        it(
+          "should let the GM redo a duel step and end a grapple whose side is gone",
+          clean(async () => {
+            const duelist = await playersCharacter();
+            const other = track(await createTestPC({ name: "Requests: redo duelist" }));
+            const card = track(await startDuel(duelist, other));
+            const roll = await assessment(duelist);
+            await askStep(card, { action: "roll", duelist: 0, rollId: roll.id });
+            assert.equal(
+              await refusalOf(askStep(card, { action: "redo" })),
+              "l5r4.ui.requests.gmCorrects"
+            );
+            await CONFIG.queries[`${SYS_ID}.flow`](
+              { messageId: card.id, data: { action: "redo" } },
+              { user: game.user }
+            );
+            assert.isNull(card.getFlag(SYS_ID, "flow").state.rolls.assessment[0], "cleared");
+
+            const grappler = track(await createTestPC({ name: "Requests: grappler" }));
+            const gone = await createTestPC({ name: "Requests: gone" });
+            for (const actor of [grappler, gone]) {
+              await applyEffect(actor, "grappled");
+            }
+            const state = {
+              sides: [grappler.uuid, gone.uuid],
+              skill: "jiujutsu",
+              weapon: null,
+              control: 0,
+              rolls: [null, null],
+              log: [],
+              over: false
+            };
+            const grapple = track(await startFlow("grapple", state, grappler));
+            await gone.delete();
+            await CONFIG.queries[`${SYS_ID}.flow`](
+              { messageId: grapple.id, data: { action: "end" } },
+              { user: game.user }
+            );
+            assert.isTrue(grapple.getFlag(SYS_ID, "flow").state.over, "ended");
+            assert.isFalse(grappler.statuses.has("grappled"), "the survivor is free");
+          })
+        );
+
+        // #164: the second strike only while the duelist stands
+        // game-rules/39_iaijutsu_dueling.md, p.87
+        it(
+          "should offer no strike to a duelist who is Dead",
+          clean(async () => {
+            const duelist = await playersCharacter();
+            const other = track(await createTestPC({ name: "Requests: fallen duelist" }));
+            const card = track(await startDuel(duelist, other));
+            const flow = card.getFlag(SYS_ID, "flow");
+            await card.setFlag(SYS_ID, "flow", {
+              ...flow,
+              state: { ...flow.state, stage: "strike", firstStrike: null }
+            });
+            await other.toggleStatusEffect("dead", { active: true });
+            const roll = track(
+              await rollCheck({
+                actor: other,
+                kind: "attack",
+                label: "Requests strike",
+                base: { roll: 2, keep: 2 },
+                target: duelist,
+                askForOptions: false
+              })
+            );
+            const refusal = await refusalOf(
+              CONFIG.queries[`${SYS_ID}.flow`](
+                { messageId: card.id, data: { action: "roll", duelist: 1, rollId: roll.id } },
+                { user: game.user }
+              )
+            );
+            assert.equal(refusal, "l5r4.ui.requests.notDuelistRoll");
           })
         );
       });
@@ -444,6 +699,37 @@ export function registerRequestsTests(quench) {
             });
             assert.equal(refusal, "l5r4.ui.requests.declined");
             assert.lengthOf(asked, 1);
+          })
+        );
+      });
+
+      // #188, Ernie's ruling: a player's change to the custom Emphases goes to the GM, who writes it
+      describe("Custom Emphases", () => {
+        it(
+          "should write a player's add, rename, and delete, and refuse one that no longer fits",
+          clean(async () => {
+            const saved = game.settings.get(SYS_ID, "customEmphases");
+            const query = CONFIG.queries[CUSTOM_EMPHASES_QUERY];
+            const list = () => game.settings.get(SYS_ID, "customEmphases");
+            try {
+              await game.settings.set(SYS_ID, "customEmphases", ["Gossip"]);
+              await query({ kind: "add", name: "Défense" }, { user: player });
+              assert.deepEqual(list(), ["Gossip", "Défense"]);
+              await query(
+                { kind: "rename", name: "Gossip", newName: "Lore: Rumor" },
+                { user: player }
+              );
+              assert.deepEqual(list(), ["Lore: Rumor", "Défense"]);
+              await query({ kind: "delete", name: "Défense" }, { user: player });
+              assert.deepEqual(list(), ["Lore: Rumor"]);
+              const refusal = await refusalOf(
+                query({ kind: "delete", name: "Gone" }, { user: player })
+              );
+              assert.equal(refusal, "l5r4.ui.requests.emphasisChanged");
+              assert.deepEqual(list(), ["Lore: Rumor"]);
+            } finally {
+              await game.settings.set(SYS_ID, "customEmphases", saved);
+            }
           })
         );
       });

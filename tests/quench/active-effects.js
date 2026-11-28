@@ -43,14 +43,17 @@ async function historyTraitXp(actor, trait) {
 }
 
 /**
- * Resolves on the next update of the actor, so a click handler that does not return its promise can be awaited.
+ * Resolves once the actor has been updated `count` more times, so a click handler that does not return its promise
+ * can be awaited.
  * @param {Actor} actor  The actor to watch.
+ * @param {number} [count=1]  The updates the click makes
  * @returns {Promise<void>}
  */
-function nextUpdate(actor) {
+function nextUpdate(actor, count = 1) {
+  let left = count;
   return new Promise(resolve => {
     const id = Hooks.on("updateActor", doc => {
-      if (doc.id === actor.id) {
+      if (doc.id === actor.id && --left === 0) {
         Hooks.off("updateActor", id);
         resolve();
       }
@@ -440,7 +443,8 @@ export function registerActiveEffectsTests(quench) {
 
         it("should spend the stored Void Points and add to the stored Wounds on Reduce with Void", async () => {
           const html = await setUp("Active effects: reduce wounds");
-          const updated = nextUpdate(actor);
+          // The Void Point through the one Void Point spend, then the Wounds (#170)
+          const updated = nextUpdate(actor, 2);
           html.querySelector("[data-action='reduce-wounds-void']").click();
           await updated;
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
@@ -457,7 +461,7 @@ export function registerActiveEffectsTests(quench) {
           html.querySelector("[data-action='apply-wounds']").click();
           await updated;
           assert.equal(actor._source.system.suffered, 99, "stored 0 + 99, the card's 500 clamped");
-          updated = nextUpdate(actor);
+          updated = nextUpdate(actor, 2);
           html.querySelector("[data-action='reduce-wounds-void']").click();
           await updated;
           assert.equal(actor._source.system.suffered, 99 + 89, "stored 99 + (99 - 10)");
@@ -563,7 +567,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.setFlag(SYS_ID, "xpFreeTraitBase", { str: 1 });
           await actor.setFlag(SYS_ID, "xpRetroactiveVersion", 123);
           assert.equal(actor.system._xp.breakdown.traits, 0, "the flag hides the bought rank");
-          await migrateEffectFreeTraitBase([actor], "quench");
+          await migrateEffectFreeTraitBase(actor);
           assert.equal(actor.getFlag(SYS_ID, "xpFreeTraitBase").str, 0);
           assert.equal(actor.getFlag(SYS_ID, "xpRetroactiveVersion"), 0, "history rebuilds");
           assert.equal(actor.system._xp.breakdown.traits, 20, "Strength 4 to 5 costs 4 x 5");

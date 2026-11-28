@@ -183,6 +183,25 @@ export function getWeaponSkillTrait(actor, weapon) {
 }
 
 /**
+ * The Skills a weapon's sheet offers to attack with, as label by stored value: each of the owner's Skill names, with
+ * the one an attack would match to the stored Skill keyed by the stored text, and a stored Skill the owner lacks as
+ * a choice of its own, so saving the sheet keeps the weapon's Skill either way.
+ * @param {string[]} skillNames - The owner's Skill names
+ * @param {string} storedSkill - The weapon's `system.associatedSkill`
+ * @returns {Record<string, string>}
+ */
+export function getWeaponSkillChoices(skillNames, storedSkill) {
+  const choices = {};
+  for (const name of skillNames) {
+    choices[isSameSkillName(name, storedSkill) ? storedSkill : name] = name;
+  }
+  if (storedSkill && !Object.hasOwn(choices, storedSkill)) {
+    choices[storedSkill] = storedSkill;
+  }
+  return choices;
+}
+
+/**
  * The actor's Skill item of a name, matched without case; none for an empty name.
  * @param {object} actor - Foundry actor document
  * @param {string} skillName - The Skill's name
@@ -192,14 +211,17 @@ function getOwnedSkill(actor, skillName) {
   if (!(skillName && skillName.trim() && actor.items?.find)) {
     return null;
   }
-  const skillNameLower = skillName.toLowerCase();
-  return actor.items.find(i => {
-    if (i.type !== "skill") {
-      return false;
-    }
-    const itemName = toString(i.name);
-    return itemName.toLowerCase() === skillNameLower;
-  });
+  return actor.items.find(i => i.type === "skill" && isSameSkillName(toString(i.name), skillName));
+}
+
+/**
+ * Whether two names name the same Skill: an attack matches its weapon's Skill without case.
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function isSameSkillName(a, b) {
+  return a.toLowerCase() === b.toLowerCase();
 }
 
 /**

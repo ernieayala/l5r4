@@ -38,6 +38,10 @@ Core sets the faces in `resources/app/public/css/foundry2.css:262-301`.
 
 Signika carries tabular figures (`tnum` in `public/fonts/signika/signika-regular.woff2`), so T5 takes effect wherever the body or number face sets digits. Modesto Condensed has no `tnum`; the Ring rank is one number per disc, so it needs none. Core's Amiri (`--font-h2`) is for core's prose; the system does not set it.
 
+### Cyrillic
+
+No face core ships has Cyrillic, so a Russian label or heading in Modesto Condensed fell back to the platform's serif beside the Latin text (#161). `scss/base/_fonts.scss` adds PT Sans Narrow (SIL Open Font License, `assets/fonts/pt-sans-narrow/OFL.txt`) to the Modesto Condensed family for the Cyrillic range alone (`unicode-range`), in its regular and bold weights. A Latin glyph still comes from core's face and a Cyrillic one from PT Sans Narrow, so the tokens above stay as they are. It is the one face the system ships; its `font-family` names core's family, the single exception to T1.
+
 ## Type scale
 
 Core's window text is 14 px (`foundry2.css:7066`) at line height 1.25 (`foundry2.css:21`). Every step but `rank` is a core size variable.

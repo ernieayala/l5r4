@@ -1754,6 +1754,7 @@
       "pages": "275, 277-279",
       "status": "automated",
       "code": [
+        "module/documents/actor/calculations/taint-system.js",
         "module/documents/actor/rules.js",
         "module/services/dice/check/chat-actions.js",
         "module/services/dice/check/roll-check.js",
@@ -1950,7 +1951,8 @@
   "untested": {
     "actions": {},
     "settings": {
-      "lastMigratedVersion": "Hidden; only the ready hook's migration gate writes it (dist/l5r4-enhanced.js), on a world opened by a newer version. The world-upgrade batch reads it after a real upgrade (tests/quench/world-upgrade.js)"
+      "forceMigration": "Turning it on reruns every migration step on every document of the world at the next load, so a Quench run would rewrite the test world. The force path runs per actor in tests/quench/workflows/migration-edge-cases.js; the ready hook's force and reset run in the 3.2.1 fixture world (tests/quench/world-upgrade.js)",
+      "lastMigratedVersion": "Hidden; 4.0.0 and earlier wrote it, and the migration now only reads it, for Scenes no runner marked (module/setup/migrations.js migrateScene). The world-upgrade batch covers a world that still holds it (tests/quench/world-upgrade.js)"
     }
   }
 }

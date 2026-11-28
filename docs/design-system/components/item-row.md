@@ -33,7 +33,7 @@ Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss
 
 | Subtype | Columns |
 | --- | --- |
-| `skill` | name, rank `column-60`, Trait `column-120`, roll `column-60`, Emphases `1fr`, controls |
+| `skill` | name `1.3fr`, rank `column-60`, Trait `column-150` (the longest translated Trait, with its name in the select's tooltip), roll `column-60`, Emphases `1fr`, controls |
 | `weapon` | name, attack `column-80`, damage `column-80`, arrow `column-150`, controls |
 | `spell` | name, Ring `column-80`, Mastery Level `column-60`, cast `column-60`, controls |
 | `armor` | name, `column-80`, `column-100`, `column-100`, controls |

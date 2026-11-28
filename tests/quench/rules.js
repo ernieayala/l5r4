@@ -1,6 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { RULE_KEYS } from "../../module/config/rule-keys.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
+import { buildRuleView, parseRuleForm } from "../../module/documents/rule-fields.js";
 import { FamilyBonusService } from "../../module/services/family-bonus.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { getFormulaBonus } from "../../module/utils/mechanics.js";
@@ -11,7 +12,11 @@ import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
-import { migrateUnlinkedTokens } from "../../module/setup/migrations/actors/unlinked-tokens.js";
+import {
+  migrateEffectSkillAttackRules,
+  migrateItemSkillAttackRules
+} from "../../module/setup/migrations/items/skill-attack-rules.js";
+import { getTokenDeltaDocuments } from "../../module/setup/migrations/actors/unlinked-tokens.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
@@ -56,7 +61,7 @@ const MINIMAL_RULES = {
   ActionCost: { key: "ActionCost", selector: "attack" },
   Cost: { key: "Cost", selector: "self" },
   Ledger: { key: "Ledger" },
-  Prerequisite: { key: "Prerequisite" },
+  Prerequisite: { key: "Prerequisite", requires: ["clan:crane"] },
   ChoiceSet: { key: "ChoiceSet" },
   GrantItem: { key: "GrantItem", uuid: "Item.quench" }
 };
@@ -204,6 +209,44 @@ export function registerRulesTests(quench) {
             () => createRule({ key: "DiceRule", selector: "x", explode: "x" }),
             /explode/
           );
+        });
+
+        // #172
+        it("should reject a field the key does not have, a formula that does not parse, and an empty requires", () => {
+          assert.throws(
+            () => createRule({ key: "RollModifier", selector: "attack", roll: 1, rnage: "melee" }),
+            /Unknown field "rnage" on RollModifier/
+          );
+          assert.throws(
+            () => createRule({ key: "RollModifier", selector: "attack", roll: "abc" }),
+            /number or a formula/
+          );
+          assert.throws(
+            () => createRule({ key: "TNModifier", selector: "any", value: "toString(1)" }),
+            /number or a formula/
+          );
+          assert.throws(() => createRule({ key: "Prerequisite", requires: [] }), /requires/);
+          assert.throws(() => createRule({ key: "Prerequisite" }), /requires/);
+          assert.equal(
+            createRule({ key: "TNModifier", selector: "any", value: "1 / @x" }).value,
+            "1 / @x"
+          );
+        });
+
+        // #172
+        it("should show the error in the editor's view, and give a cleared value field its default", () => {
+          assert.match(
+            buildRuleView({ key: "RollModifier", selector: "attack", roll: "abc" }).error,
+            /number or a formula/
+          );
+          assert.match(
+            buildRuleView({ key: "RollModifier", selector: "attack", rnage: "melee" }).error,
+            /Unknown field/
+          );
+          const freeRaise = { key: "FreeRaise", selector: "any", value: 2 };
+          assert.equal(parseRuleForm(freeRaise, { value: "" }).value, 1, "FreeRaise's default");
+          assert.equal(parseRuleForm(freeRaise, { value: " 3 " }).value, 3);
+          assert.isNull(buildRuleView(parseRuleForm(freeRaise, { value: "" })).error);
         });
       });
 
@@ -493,6 +536,48 @@ export function registerRulesTests(quench) {
           })
         );
 
+        // #147
+        // game-rules/89_shadowlands_taint.md, p.278-279
+        // game-rules/31_combat_round.md, p.81
+        it(
+          "should add a Lost character's Taint Rank to the Initiative rolled, PC and NPC",
+          clean(async () => {
+            const pc = track(
+              await createTestPC({
+                name: "Rule engine: lost initiative",
+                system: { traits: { ref: 3 }, insight: { autoCalculate: false, rank: 2 } }
+              })
+            );
+            const npc = track(
+              await createTestNPC({
+                name: "Rule engine: lost initiative NPC",
+                system: { traits: { ref: 3 } }
+              })
+            );
+            const combat = await foundry.documents.Combat.implementation.create({ scene: null });
+            try {
+              // The combat returns its combatants in turn order, not the order given
+              const combatants = await combat.createEmbeddedDocuments("Combatant", [
+                { actorId: pc.id },
+                { actorId: npc.id }
+              ]);
+              const formulaOf = actor =>
+                combatants.find(c => c.actorId === actor.id)._getInitiativeFormula();
+              const formulas = () => [formulaOf(pc), formulaOf(npc)];
+              await pc.update({ "system.shadowTaint.rank": 4 });
+              await npc.update({ "system.shadowTaint.rank": 4 });
+              assert.deepEqual(formulas(), ["5d10xa10k3", "4d10xa10k3"], "Rank 4 is not Lost");
+              await pc.update({ "system.shadowTaint.rank": 5 });
+              await npc.update({ "system.shadowTaint.rank": 5 });
+              assert.deepEqual(formulas(), ["5d10xa10k3+5", "4d10xa10k3+5"], "Lost at Rank 5");
+              await pc.update({ "system.rings.void.rank": 6 });
+              assert.equal(formulas()[0], "5d10xa10k3", "a Ring at 6 holds out until Rank 7");
+            } finally {
+              await combat.delete();
+            }
+          })
+        );
+
         // Void Points held drop to a maximum the Taint lowers (#124)
         // game-rules/89_shadowlands_taint.md, p.278-279
         it(
@@ -708,21 +793,25 @@ export function registerRulesTests(quench) {
       };
 
       /**
-       * Run migrateItemRules, holding back its summary warning (migrations report what they changed on
-       * console.warn) so cleanTest still catches any other warning.
+       * Run migrateItemRules on each item, in one migration run.
        * @param {Item[]} items
+       * @returns {Promise<string[]>} What the run noted for the GM
        */
       const migrateItems = async items => {
-        const warn = console.warn;
-        const held = [];
-        console.warn = (...args) => held.push(args.join(" "));
-        try {
-          await migrateItemRules(items, "quench");
-        } finally {
-          console.warn = warn;
+        const run = { force: false, migrated: 0, failed: 0, notes: [] };
+        for (const item of items) {
+          await migrateItemRules(item, run);
         }
-        for (const message of held) {
-          assert.match(message, /Moved the mechanics of \d+ items into rules/);
+        return run.notes;
+      };
+
+      /**
+       * Run migrateStatusEffectRules on each of an actor's effects.
+       * @param {Actor} actor
+       */
+      const migrateEffects = async actor => {
+        for (const effect of actor.effects) {
+          await migrateStatusEffectRules(effect);
         }
       };
 
@@ -816,7 +905,7 @@ export function registerRulesTests(quench) {
               [`flags.${SYS_ID}.fearRank`]: 3
             });
             assert.equal(actor.system.armorTn.current, before, "no rules, no bonus");
-            await migrateStatusEffectRules([actor], "quench");
+            await migrateEffects(actor);
             assert.equal(actor.system.armorTn.current, before + actor.system.rings.air);
             assert.equal(stance.system.group, "stance");
             assert.equal(fear.system.level, 3, "Fear Rank moved to the level");
@@ -826,7 +915,7 @@ export function registerRulesTests(quench) {
               -3,
               "Fear 3: -3k0"
             );
-            await migrateStatusEffectRules([actor], "quench");
+            await migrateEffects(actor);
             assert.lengthOf(stance._source.system.rules, 1, "running again adds nothing");
           })
         );
@@ -860,7 +949,9 @@ export function registerRulesTests(quench) {
               foundry.documents.ActiveEffect.registry.delete(fear);
               // Core copies the actor's effects into the delta when the token's first own effect is made
               const deltaIds = token.delta.effects.map(e => e.id);
-              await migrateUnlinkedTokens([token], "quench");
+              for (const effect of getTokenDeltaDocuments(token).effects) {
+                await migrateStatusEffectRules(effect);
+              }
               const migrated = token.delta.effects.get(fear.id);
               assert.equal(migrated.system.level, 2);
               assert.isNotEmpty(migrated.system.rules);
@@ -940,6 +1031,276 @@ export function registerRulesTests(quench) {
             { key: "Note", selector: "attack", text: "Kept" }
           ]);
           await item.delete();
+        });
+
+        // #141
+        it("should stay in the JSON view with the text as typed when Switch view cannot parse it", async () => {
+          const [item] = await Item.createDocuments([ruleItem([], "Quench sheet switch view")]);
+          const errors = [];
+          const notify = ui.notifications.notify;
+          ui.notifications.notify = function (message, type, options = {}) {
+            if (type === "error") {
+              errors.push(message);
+            }
+            return notify.call(this, message, type, { ...options, console: false });
+          };
+          const sheet = item.sheet;
+          try {
+            sheet.rulesMode = "json";
+            await sheet.render({ force: true });
+            sheet.element.querySelector("textarea[name=rulesJson]").value = "[{";
+            sheet.element.querySelector('[data-action="toggle-rules-view"]').click();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            assert.equal(sheet.rulesMode, "json", "the view does not switch");
+            assert.equal(
+              sheet.element.querySelector("textarea[name=rulesJson]").value,
+              "[{",
+              "the text is as typed"
+            );
+            assert.lengthOf(errors, 1, "the error says why");
+            assert.match(errors[0], /not valid JSON/);
+          } finally {
+            ui.notifications.notify = notify;
+            await sheet.close({ animate: false });
+            await item.delete();
+          }
+        });
+      });
+
+      // #174: what a rule applies to
+      describe("Rule scope", () => {
+        it("should apply a legacy bow's roll rules only to rolls made with it", async () => {
+          const actor = track(await createTestPC({ name: "Rules: archer" }));
+          const [bow] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Rules: old bow",
+              type: "bow",
+              system: { rules: [{ key: "FreeRaise", selector: "attack", value: 1 }] }
+            }
+          ]);
+          assert.equal(getCheckContext(actor, { kind: "attack" }).freeRaises, 0, "another attack");
+          assert.equal(getCheckContext(actor, { kind: "attack", weapon: bow }).freeRaises, 1);
+        });
+
+        it("should price a kata by its own `self` Cost rule while it is not in use", async () => {
+          const actor = track(await createTestPC({ name: "Rules: kata buyer" }));
+          await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Rules: cheap kata",
+              type: "kata",
+              system: {
+                ring: "air",
+                mastery: 3,
+                rules: [{ key: "Cost", selector: "self", value: "@cost - 1" }]
+              }
+            }
+          ]);
+          const entry = actor.system._xp.entries.find(e => e.name === "Rules: cheap kata");
+          assert.equal(entry?.delta, 2, "Mastery 3, less 1");
+        });
+
+        it("should keep an effect's `self` Cost rule from pricing Trait ranks", async () => {
+          const actor = track(
+            await createTestPC({ name: "Rules: free ranks", system: { traits: { ref: 3 } } })
+          );
+          const before = actor.system._xp.spent;
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Rules: stray self cost",
+              system: { rules: [{ key: "Cost", selector: "self", value: "@cost * 0" }] }
+            }
+          ]);
+          assert.equal(actor.system._xp.spent, before, "no rank becomes free");
+        });
+
+        it("should flag a Resource for anything but the Round's Void Points", () => {
+          assert.throws(() => createRule({ key: "Resource", slug: "focus" }), /slug/);
+          assert.throws(() => createRule({ key: "Resource", slug: "void", per: "day" }), /per/);
+        });
+      });
+
+      // #173: selectors reach the rolls they name, whatever the case and spacing
+      describe("Rule selectors", () => {
+        /** The flat bonus a check's modifiers give, by label. */
+        const bonusesOf = (actor, spec) =>
+          Object.fromEntries(getCheckContext(actor, spec).modifiers.map(m => [m.label, m.total]));
+
+        it("should give an attack with a Weapon Skill the skill rules, and a stat block's attack none", async () => {
+          const actor = track(await createTestPC({ name: "Rules: skill selector" }));
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Kenjutsu", 2, "agi"),
+            {
+              name: "Rules: every Skill roll",
+              type: "commonItem",
+              system: {
+                rules: [{ key: "RollModifier", selector: "skill", total: 3, label: "All" }]
+              }
+            }
+          ]);
+          assert.equal(bonusesOf(actor, { kind: "skill", skill: "kenjutsu" }).All, 3);
+          assert.equal(bonusesOf(actor, { kind: "attack", skill: "kenjutsu" }).All, 3);
+          assert.notProperty(bonusesOf(actor, { kind: "attack" }), "All");
+        });
+
+        it("should read selectors and Skill names in any case and spacing, and merchant as merch", async () => {
+          const actor = track(await createTestPC({ name: "Rules: selector case" }));
+          await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Commerce ", 2, "int", { system: { type: "merch", rollBonus: 1 } }),
+            {
+              name: "Rules: written loosely",
+              type: "commonItem",
+              system: {
+                rules: [
+                  { key: "RollModifier", selector: " Skill:COMMERCE", total: 1, label: "Name" },
+                  { key: "RollModifier", selector: "skill-type:merchant", total: 2, label: "Type" }
+                ]
+              }
+            }
+          ]);
+          const bonuses = bonusesOf(actor, { kind: "skill", skill: "Commerce" });
+          assert.equal(bonuses.Name, 1);
+          assert.equal(bonuses.Type, 2);
+          assert.isTrue(
+            getCheckContext(actor, { kind: "skill", skill: "commerce" }).modifiers.some(
+              m => m.label === "Commerce" && m.roll === 1
+            ),
+            "the Skill's own roll bonus"
+          );
+        });
+
+        it("should flag a condition that is no status id and a save naming no Ring or Trait", () => {
+          assert.throws(
+            () => createRule({ key: "ConditionImmunity", condition: "Prone" }),
+            /status id/
+          );
+          assert.throws(
+            () => createRule({ key: "ApplyCondition", selector: "attack", condition: "dazd" }),
+            /status id/
+          );
+          assert.equal(
+            createRule({ key: "ConditionImmunity", condition: "prone" }).condition,
+            "prone"
+          );
+          assert.throws(() => createRule({ key: "PeriodicSave", roll: "trait:xyz" }), /roll/);
+          assert.equal(createRule({ key: "PeriodicSave", roll: "trait:wil" }).roll, "trait:wil");
+        });
+      });
+
+      // #175: the Wound Rank is found after the Wounds rules and before every other rule
+      describe("Rule timing", () => {
+        /** A PC with Earth 2 (Healthy holds 10 Wounds) and `rules` on an item. */
+        const wounded = async (suffered, rules) => {
+          const actor = track(
+            await createTestPC({
+              name: "Rules: wound timing",
+              system: { traits: { sta: 2, wil: 2 }, suffered }
+            })
+          );
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Rules: wound timing", type: "commonItem", system: { rules } }
+          ]);
+          return actor;
+        };
+        const whileNicked = {
+          key: "ArmorTN",
+          value: 5,
+          label: "Nicked",
+          predicate: ["wound:nicked"]
+        };
+
+        it("should let an Armor TN rule test the Wound Rank", async () => {
+          const healthy = await wounded(0, [whileNicked]);
+          const nicked = await wounded(12, [whileNicked]);
+          assert.isTrue(nicked.rollOptions.has("wound:nicked"));
+          assert.equal(
+            nicked.system.armorTn.current,
+            healthy.system.armorTn.current + 5,
+            "+5 while Nicked"
+          );
+        });
+
+        it("should find the Wound Rank with the Wounds rules counted", async () => {
+          const actor = await wounded(12, [
+            { key: "Wounds", perRank: 5 },
+            { ...whileNicked, predicate: ["wound:healthy"], label: "Healthy" }
+          ]);
+          assert.isTrue(actor.rollOptions.has("wound:healthy"), "Healthy holds 15 with the rule");
+          assert.include(
+            actor.armorRules.map(r => r.value),
+            5,
+            "the rule testing it sees Healthy"
+          );
+        });
+
+        it("should flag what a Wounds or TraitAdjust rule can never see", () => {
+          assert.throws(
+            () => createRule({ key: "Wounds", perRank: 1, predicate: ["wound:nicked"] }),
+            /cannot test wound:/
+          );
+          assert.throws(
+            () =>
+              createRule({
+                key: "TraitAdjust",
+                trait: "str",
+                value: 1,
+                predicate: [{ gte: ["ring:fire", 3] }]
+              }),
+            /cannot test ring:/
+          );
+          assert.throws(
+            () => createRule({ key: "TraitAdjust", trait: "str", value: "@rings.air" }),
+            /runs before/
+          );
+          assert.equal(
+            createRule({ key: "TraitAdjust", trait: "void", value: "@rings.void.rank" }).value,
+            "@rings.void.rank"
+          );
+        });
+      });
+
+      // #173: an attack now reads "skill" rules, so the world's copies of a rule written for both lose the double
+      describe("Skill and attack rules in stored data", () => {
+        const twins = [
+          { key: "TNModifier", selector: "skill", value: 5, predicate: ["consumed-perfection"] },
+          { key: "TNModifier", selector: "attack", value: 5, predicate: ["consumed-perfection"] },
+          { key: "TNModifier", selector: "spell", value: 5, predicate: ["consumed-perfection"] }
+        ];
+
+        it("should drop an item's attack copy and leave its other rules", async () => {
+          const actor = track(await createTestPC({ name: "Rules: twin item" }));
+          const [item] = await actor.createEmbeddedDocuments("Item", [
+            { name: "Rules: written twice", type: "disadvantage", system: { rules: twins } }
+          ]);
+          await migrateItemSkillAttackRules(item);
+          assert.deepEqual(
+            item._source.system.rules.map(r => r.selector),
+            ["skill", "spell"]
+          );
+          await migrateItemSkillAttackRules(item);
+          assert.lengthOf(item._source.system.rules, 2, "a second run changes nothing");
+        });
+
+        it("should keep a stored Fatigued's skill rule off attacks, so an attack takes the penalty once", async () => {
+          const actor = track(await createTestPC({ name: "Rules: old Fatigued" }));
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
+          const old = [
+            { key: "TNModifier", selector: "skill", value: "5 * @level" },
+            { key: "TNModifier", selector: "attack", value: "5 * @level" }
+          ];
+          const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Rules: Fatigued from 4.0.0",
+              statuses: ["fatigued"],
+              system: { level: 1, rules: old }
+            }
+          ]);
+          const tnOf = spec =>
+            getCheckContext(actor, spec).tnModifiers.reduce((sum, m) => sum + m.value, 0);
+          assert.equal(tnOf({ kind: "attack", skill: "kenjutsu" }), 10, "before: counted twice");
+          await migrateEffectSkillAttackRules(effect);
+          assert.equal(tnOf({ kind: "attack", skill: "kenjutsu" }), 5);
+          assert.equal(tnOf({ kind: "attack" }), 5, "a stat block's attack");
+          assert.equal(tnOf({ kind: "skill", skill: "kenjutsu" }), 5);
         });
       });
     },

@@ -162,7 +162,7 @@ Decision 2 fixes every name stored in world data or used outside the system. The
 
 | Fixed name | Kind | Breaks |
 | --- | --- | --- |
-| `nrWoundLvls`, `woundLevels`, `manualWoundLevels`, `visibleManualWoundLevels` | Actor `system` fields | `WoundLvls` |
+| `nrWoundLvls`, `woundLevels`, `manualWoundLevels` | Actor `system` fields | `WoundLvls` |
 | `freeRaisesToTN` | `roll` chat message field `tn.freeRaisesToTN` | `TN` |
 | `TNModifier`, `ArmorTN` | Rule keys in `system.rules` | `TN` |
 | `damageRoll`, `damageKeep`, `derivedDamageRoll`, `derivedDamageKeep` | Item `system` fields | Roll & Keep stems |

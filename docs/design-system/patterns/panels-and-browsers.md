@@ -132,6 +132,12 @@ Conforming, `data-action="update-field"` (`templates/apps/armor-config.hbs`): ev
 
 Non-conforming, modeled: a Save button added to the Armor configuration, which already saved each field as it changed, so the button does nothing a user can see. Under the actions model each button reads as its verb (`content/voice.md`, Buttons): `data-action="add-xp"` (`templates/apps/xp-manager.hbs`) labels its add button "Add XP" (`l5r4.apps.xpManager.addXp`), never "OK".
 
+A configuration window shows and saves the stored value (`actor._source.system`), never the prepared one: what rules and Active Effects add shows under the field as the Added hint (`components/form-field.md`; `templates/apps/_partials/_added-hint.hbs`, from `buildAddedValues` in `module/utils/added-values.js`), so saving never writes the addition into storage. Enforced by review and the `sheets.wound-config` Quench batch.
+
+Conforming, `source.woundsMod` with `(lookup added "woundsMod")` (`templates/apps/wound-config.hbs`).
+
+Non-conforming, modeled: `value="{{system.woundsMod}}"`, the prepared value with a Wounds rule's bonus in it, which the next change saves back.
+
 ### 3. Rows share one shape
 
 A row that shows a document is image, text column, then controls at the row's end. The image is `--l5r4-size-item-icon` square with `alt=""`; the name is bold; details sit below at `meta` size; the text column shrinks and wraps (`min-width: 0`). A control acts on its row through `closest("[data-uuid]")`, never through the row's index. Enforced by `tests/conventions/templates.test.js` (`<img>` has `alt`) and review; the gallery shows a row of each window.

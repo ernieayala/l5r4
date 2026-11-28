@@ -6,9 +6,10 @@
  */
 
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
-import { onFearClick } from "../../services/fear.js";
+import { onFearClick } from "../../services/fear-card.js";
 import { askConfirm } from "../../services/dialog.js";
 import NpcAttackConfigApplication from "../../apps/npc-attack-config.js";
+import { openWindow } from "./app-launcher-handler.js";
 
 /**
  * Handler class for NPC-specific sheet actions. Each method takes the sheet's handler context, the event, and the
@@ -18,7 +19,7 @@ export class NpcActionsHandler {
   /**
    * Initiates a Fear resistance test against this NPC.
    *
-   * Triggers Fear tests for all currently selected tokens (excluding the NPC itself).
+   * Posts one Fear card for all currently selected tokens (excluding the NPC itself), from which each owner rolls.
    * Selected characters make Raw Willpower rolls vs TN (5 + 5×Fear Rank), adding their
    * Honor Rank to the roll.
    *
@@ -73,9 +74,10 @@ export class NpcActionsHandler {
       return;
     }
 
-    const editor = new NpcAttackConfigApplication(context.actor, attackKey);
-
-    editor.render(true);
+    // An editor already open for this slot comes to the front (#189)
+    await openWindow(NpcAttackConfigApplication.getWindowId(context.actor, attackKey), () => {
+      return new NpcAttackConfigApplication(context.actor, attackKey);
+    });
   }
 
   /**

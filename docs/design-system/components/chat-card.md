@@ -20,7 +20,7 @@ A posted message stores its HTML (Stage 17 decision 2). Every class and `data-*`
 | Root classes | `chat-card`, `l5r4-roll`, `l5r4-check`, `l5r4-check-request`, `l5r4-damage-result`, `l5r4-effect-prompt`, `l5r4-flow-card`, `healing-card`, `weapon` |
 | Part classes | `dice-flavor`, `card-content`, `check-applied`, `check-note`, `check-free-raises`, `check-conditions`, `damage-actions`, `flow-actions`, `l5r4-tn-result`, `l5r4-check-damage`, `l5r4-check-request-text`, `l5r4-damage-button`, `-undone`, `-gap-sm` |
 | Core classes | `flexrow` inside the button rows; `fa-solid fa-dice-d10` on the request card |
-| Actions | `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `apply-condition`, `check-damage`, `honor-roll`, `check-request-roll`, `damage-void`, `damage-undo`, `effect-prompt`; on cards posted before 4.0.0 `apply-wounds`, `reduce-wounds-void` |
+| Actions | `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `apply-condition`, `check-damage`, `honor-roll`, `check-request-roll`, `initiative-request-roll`, `damage-void`, `damage-undo`, `effect-prompt`; on cards posted before 4.0.0 `apply-wounds`, `reduce-wounds-void` |
 | Data attributes | `data-flow-action`, `data-duelist`, `data-side`, `data-index`; on cards posted before 4.0.0 `data-damage`, `data-actor-id`, `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id` |
 
 The full list, with item cards, is in [naming.md](../../code-system/naming.md#fixed-names). `tests/conventions/templates.test.js` and `tests/conventions/actions.test.js` exempt these names by list.
@@ -42,7 +42,7 @@ The full list, with item cards, is in [naming.md](../../code-system/naming.md#fi
 | Variant | Template | Page |
 | --- | --- | --- |
 | Check card | `templates/chat/check.hbs` | [check-card.md](check-card.md) |
-| Request card | `templates/chat/check-request.hbs` | [request-card.md](request-card.md) |
+| Request card | `templates/chat/check-request.hbs`, `templates/chat/initiative-request.hbs` | [request-card.md](request-card.md) |
 | Damage result | `templates/chat/damage-result.hbs` | [damage-result.md](damage-result.md) |
 | Effect prompt | `templates/chat/effect-prompt.hbs` | [effect-prompt.md](effect-prompt.md) |
 | Flow card | `templates/chat/flow.hbs` | [flow-card.md](flow-card.md) |

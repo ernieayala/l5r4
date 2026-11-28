@@ -5,6 +5,12 @@ const rule = (track, direction, value, source = "Rule") => ({ track, direction, 
 
 // Ledger rules
 describe("getLedgerChange", () => {
+  // #172: a Ledger rule on an effect reads the effect's level
+  it("should read @level from the effect carrying the rule", () => {
+    const rules = [{ ...rule("honor", "gain", "@points * @level"), level: 3 }];
+    expect(getLedgerChange({ track: "honor", points: 2, rules }).points).toBe(6);
+  });
+
   it("should leave a change alone without rules", () => {
     expect(getLedgerChange({ track: "honor", points: 4, rules: [] })).toEqual({
       points: 4,

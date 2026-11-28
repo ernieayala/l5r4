@@ -1,11 +1,24 @@
 <section class="l5r4-xp-manager-body standard-form">
+  {{#if error}}
+    {{!-- XP that could not be calculated shows why, never numbers that look real (#145) --}}
+    <p class="l5r4-xp-manager-error" role="alert">
+      <i class="fa-solid fa-circle-exclamation" inert></i>
+      {{error}}
+    </p>
+  {{else}}
   <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.summary"}}</h3>
     {{!-- A computed value is text, not a disabled field (foundations/states.md rule 6) --}}
     <div class="form-group">
       <label>{{localize "l5r4.character.experience.usedTotal"}}</label>
-      <span class="l5r4-xp-manager-total">{{xp.spent}}/{{xp.total}}</span>
+      <span class="l5r4-xp-manager-total" data-xp-total>{{xp.spent}}/{{xp.total}}</span>
     </div>
+    {{#if xp.overspent}}
+      <p class="l5r4-xp-manager-warning" role="note">
+        <i class="l5r4-xp-manager-warning-icon fa-solid fa-triangle-exclamation" inert></i>
+        {{localize "l5r4.character.experience.overspent" over=xp.overspent}}
+      </p>
+    {{/if}}
   </div>
   <ul class="l5r4-xp-manager-breakdown">
     <li><span><strong>{{localize "l5r4.character.experience.breakdown.base"}}</strong>:</span>
@@ -145,4 +158,5 @@
       {{/each}}
     </section>
   </div>
+  {{/if}}
 </section>

@@ -5,7 +5,9 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import { getClamped } from "../../utils/type-coercion.js";
+import { warnAtLimit } from "./trait-handler.js";
 
 /**
  * Handles Void Point adjustments and visual representation updates.
@@ -46,6 +48,7 @@ export class VoidPointsHandler {
     const cur = context.actor._source.system.rings.void.value;
     const next = getClamped(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
     if (next === cur) {
+      warnAtLimit(T("l5r4.ui.mechanics.rings.voidPoints"), delta);
       return;
     }
 

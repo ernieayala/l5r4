@@ -15,11 +15,11 @@ import {
   onPreUpdateChangeOrigin
 } from "../../../module/services/change-origin.js";
 import {
-  onCreateActiveEffectAnimation,
+  onActiveEffectAnimation,
+  onCanvasReadyAnimation,
   onCreateChatMessageAnimation,
-  onDeleteActiveEffectAnimation,
   onDeleteActorAnimation,
-  onUpdateActiveEffectAnimation
+  onDrawTokenAnimation
 } from "../../../module/services/animations/hooks.js";
 import {
   isJb2aAvailable,
@@ -38,7 +38,9 @@ import {
   bindCheckCard,
   onGetChatMessageContextOptions
 } from "../../../module/services/dice/check/chat-actions.js";
+import { onUpdateActorHonorRoll } from "../../../module/services/dice/check/honor-roll.js";
 import { bindCheckRequestCard } from "../../../module/services/check-request.js";
+import { bindInitiativeRequestCard } from "../../../module/services/initiative-request.js";
 import {
   onPreUpdateActorScrollingText,
   onUpdateActorScrollingText
@@ -97,7 +99,11 @@ export function registerHookWiringTests(quench) {
             onPreUpdateActorWounds,
             onPreUpdateActorScrollingText
           ]);
-          assertWiredInOrder("updateActor", [onUpdateActorWounds, onUpdateActorScrollingText]);
+          assertWiredInOrder("updateActor", [
+            onUpdateActorWounds,
+            onUpdateActorHonorRoll,
+            onUpdateActorScrollingText
+          ]);
           assertWiredInOrder("createActiveEffect", [onCreateActiveEffectFullDefense]);
         });
 
@@ -122,10 +128,12 @@ export function registerHookWiringTests(quench) {
         it("should wire the animation hooks only when Sequencer and JB2A are both active", () => {
           const wired = isSequencerAvailable() && isJb2aAvailable();
           for (const [hook, fn] of [
-            ["createActiveEffect", onCreateActiveEffectAnimation],
-            ["updateActiveEffect", onUpdateActiveEffectAnimation],
-            ["deleteActiveEffect", onDeleteActiveEffectAnimation],
+            ["createActiveEffect", onActiveEffectAnimation],
+            ["updateActiveEffect", onActiveEffectAnimation],
+            ["deleteActiveEffect", onActiveEffectAnimation],
             ["deleteActor", onDeleteActorAnimation],
+            ["canvasReady", onCanvasReadyAnimation],
+            ["drawToken", onDrawTokenAnimation],
             ["createChatMessage", onCreateChatMessageAnimation]
           ]) {
             assert.equal(positionOf(hook, fn) >= 0, wired, `${fn.name} on ${hook}`);
@@ -143,6 +151,7 @@ export function registerHookWiringTests(quench) {
             bindAttackCard,
             bindDamageCards,
             bindFlowCards,
+            bindInitiativeRequestCard,
             bindLegacyDamageCard
           ]);
         });
@@ -152,9 +161,11 @@ export function registerHookWiringTests(quench) {
           assertWiredInOrder("getChatMessageContextOptions", [onGetChatMessageContextOptions]);
         });
 
-        it("should register the damage and flow GM queries", () => {
+        it("should register the damage, flow, and Void Point GM queries", () => {
           assert.isFunction(CONFIG.queries[`${SYS_ID}.damage`]);
           assert.isFunction(CONFIG.queries[`${SYS_ID}.flow`]);
+          assert.isFunction(CONFIG.queries[`${SYS_ID}.replaceContestRoll`]);
+          assert.isFunction(CONFIG.queries[`${SYS_ID}.spendVoid`]);
         });
       });
 

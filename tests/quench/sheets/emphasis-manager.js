@@ -599,6 +599,132 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
 
+      // #141: an error or a custom Emphasis change never throws away what the user entered
+      describe("What the user entered is kept", () => {
+        let skillItem, dialog;
+
+        beforeEach(async () => {
+          await game.settings.set("l5r4-enhanced", "customEmphases", ["Quench Taken"]);
+          skillItem = await Item.create(createSkillData("Kenjutsu", 3, "agi"));
+          dialog = new EmphasisManager({ item: skillItem });
+          await dialog.render(true);
+        });
+
+        afterEach(async () => {
+          if (dialog?.rendered) {
+            await dialog.close({ animate: false });
+          }
+          await skillItem?.delete();
+          await game.settings.set("l5r4-enhanced", "customEmphases", []);
+        });
+
+        /** The manager's checkbox for an Emphasis, in the window as rendered now. */
+        const box = name => dialog.element.querySelector(`input[name="emphasis.${name}"]`);
+
+        /** Type into the custom Emphasis dialog's field as the user would. */
+        const typeName = (form, text) => {
+          const field = form.elements.emphasisName;
+          field.value = text;
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+        };
+
+        /** Open the custom Emphasis dialog from a manager button; resolves the dialog's form and its button. */
+        const openNameDialog = selector => {
+          const opened = new Promise(resolve =>
+            Hooks.once("renderDialogV2", app => {
+              const form = app.element.querySelector("form");
+              resolve({ form, ok: form.querySelector('[data-action="ok"]') });
+            })
+          );
+          dialog.element.querySelector(selector).click();
+          return opened;
+        };
+
+        it("should keep unsaved ticks when a custom Emphasis is added", async () => {
+          box("Katana").checked = true;
+          const rendered = new Promise(resolve =>
+            Hooks.once("renderEmphasisManagerApplication", resolve)
+          );
+          const { form, ok } = await openNameDialog('[data-action="add-emphasis"]');
+          typeName(form, "Quench New");
+          ok.click();
+          await rendered;
+          assert.exists(box("Quench New"), "the new Emphasis is listed");
+          assert.isTrue(box("Katana").checked, "the unsaved tick survives the re-render");
+        });
+
+        it("should keep an unsaved tick under the new name when a custom Emphasis is renamed", async () => {
+          box("Quench Taken").checked = true;
+          const rendered = new Promise(resolve =>
+            Hooks.once("renderEmphasisManagerApplication", resolve)
+          );
+          const { form, ok } = await openNameDialog(
+            '[data-action="edit-emphasis"][data-emphasis-name="Quench Taken"]'
+          );
+          typeName(form, "Quench Renamed");
+          ok.click();
+          await rendered;
+          assert.isTrue(box("Quench Renamed").checked);
+        });
+
+        it("should say why a name cannot be saved and keep it as typed", async () => {
+          const { form, ok } = await openNameDialog('[data-action="add-emphasis"]');
+          const message = form.querySelector("[data-emphasis-name-error]");
+          assert.isTrue(ok.disabled, "nothing to save yet");
+          assert.isTrue(message.hidden, "no reason before anything is typed");
+          typeName(form, "Quench Taken");
+          assert.isTrue(ok.disabled, "a taken name cannot be saved");
+          assert.isFalse(message.hidden);
+          assert.equal(
+            message.textContent.trim(),
+            game.i18n.localize("l5r4.apps.emphasisManager.errors.nameTaken", {
+              name: "Quench Taken"
+            })
+          );
+          assert.equal(form.elements.emphasisName.getAttribute("aria-invalid"), "true");
+          typeName(form, "Quench Bad@");
+          assert.equal(
+            message.textContent.trim(),
+            game.i18n.localize("l5r4.apps.emphasisManager.errors.nameCharacters")
+          );
+          assert.equal(form.elements.emphasisName.value, "Quench Bad@", "the text is as typed");
+          typeName(form, "Quench Free");
+          assert.isFalse(ok.disabled);
+          assert.isTrue(message.hidden);
+          assert.isFalse(form.elements.emphasisName.hasAttribute("aria-invalid"));
+          form.closest("dialog").querySelector('[data-action="close"]')?.click();
+        });
+
+        it("should stay open with the ticks when the save fails", async () => {
+          box("Katana").checked = true;
+          const update = skillItem.update;
+          const error = console.error;
+          const notify = ui.notifications.notify;
+          const errors = [];
+          ui.notifications.notify = function (text, type, options = {}) {
+            if (type === "error") {
+              errors.push(text);
+            }
+            return notify.call(this, text, type, { ...options, console: false });
+          };
+          skillItem.update = () => Promise.reject(new Error("Quench: refused"));
+          console.error = () => {};
+          try {
+            dialog.element.requestSubmit();
+            await new Promise(resolve => setTimeout(resolve, 400));
+          } finally {
+            skillItem.update = update;
+            console.error = error;
+            ui.notifications.notify = notify;
+          }
+          assert.isTrue(dialog.rendered, "the window stays open");
+          assert.isTrue(box("Katana").checked);
+          assert.deepEqual(errors, [
+            game.i18n.localize("l5r4.apps.emphasisManager.errors.updateFailed")
+          ]);
+        });
+      });
+
       describe("Integration with the item system", () => {
         let skillItem, dialog;
 

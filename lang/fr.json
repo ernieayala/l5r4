@@ -376,7 +376,6 @@
         "custom": "Personnalisée",
         "emphasisName": "Nom de l'Emphase",
         "errors": {
-          "saveFailed": "Échec de la sauvegarde de l'Emphase personnalisée",
           "updateFailed": "Échec de la mise à jour du gestionnaire d'Emphases"
         },
         "hint": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
@@ -501,7 +500,7 @@
         "errors": {
           "toggleFailed": "Échec du changement de type de mouvement"
         },
-        "feet": "pieds",
+        "feetValue": "{n} pieds",
         "maximum": "Mouvement Maximum",
         "title": "Mouvement"
       },
@@ -625,7 +624,6 @@
         "explodes": "Les dés explosent",
         "explodesHint": "Désactivé pour les armes dont les dés de dégâts n'explosent jamais, comme les shuriken.",
         "fallbackTrait": "Trait de repli",
-        "meleeRange": "Arc contre une cible à portée de mêlée",
         "minStrength": "Force minimum",
         "range": "Portée",
         "rangedAttack": "Attaque à Distance",
@@ -709,16 +707,6 @@
         "createEffect": "Échec de la création de l'effet",
         "deleteEffect": "Échec de la suppression de l'effet.",
         "toggleEffect": "Échec de l'activation ou de la désactivation de l'effet"
-      },
-      "migration": {
-        "compendiumIconsUpdated": {
-          "one": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image.",
-          "other": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image."
-        },
-        "iconsUpdated": {
-          "one": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde.",
-          "other": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde."
-        }
       },
       "settings": {
         "designGallery": {

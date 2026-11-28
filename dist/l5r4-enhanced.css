@@ -157,6 +157,31 @@
   }
 }
 /**
+ * Fonts
+ * Core's display face, Modesto Condensed, has no Cyrillic, so Russian labels and headings fell back to the platform's
+ * serif beside it (#161). These faces add PT Sans Narrow (SIL Open Font License, assets/fonts/pt-sans-narrow/OFL.txt)
+ * under the same family name for the Cyrillic range alone: a Latin glyph still comes from core's face, a Cyrillic one
+ * from this one (foundations/typography.md, Cyrillic).
+ */
+@font-face {
+  font-display: swap;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list -- The face extends core's family by name */
+  font-family: "Modesto Condensed";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../assets/fonts/pt-sans-narrow/PT_Sans-Narrow-Web-Regular.ttf") format("truetype");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-display: swap;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list -- The face extends core's family by name */
+  font-family: "Modesto Condensed";
+  font-style: normal;
+  font-weight: bold;
+  src: url("../assets/fonts/pt-sans-narrow/PT_Sans-Narrow-Web-Bold.ttf") format("truetype");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/**
  * Base Reset
  * System-specific browser resets and base element styling
  */
@@ -460,6 +485,16 @@ body > * {
   width: calc(100% - 2px);
 }
 
+.l5r4-form-field-warning {
+  color: var(--l5r4-color-warning);
+}
+
+.l5r4-form-field-error {
+  color: var(--l5r4-color-danger);
+  font-size: var(--l5r4-font-size-meta);
+  margin: 0;
+}
+
 /**
  * Button
  * The roll button: a label under a brush-stroke face whose sprite plays on hover (components/button.md)
@@ -723,7 +758,7 @@ body > * {
   grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);
 }
 .l5r4-item-row-list.-skill .l5r4-item-row {
-  grid-template-columns: 1fr var(--l5r4-size-column-60) var(--l5r4-size-column-120) var(--l5r4-size-column-60) 1fr var(--l5r4-size-column-controls);
+  grid-template-columns: 1.3fr var(--l5r4-size-column-60) var(--l5r4-size-column-150) var(--l5r4-size-column-60) 1fr var(--l5r4-size-column-controls);
 }
 .l5r4-item-row-list.-spell .l5r4-item-row {
   grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-60) var(--l5r4-size-column-60) var(--l5r4-size-column-controls);
@@ -1962,6 +1997,10 @@ body > * {
 }
 .l5r4-xp-manager .l5r4-xp-manager-warning-icon {
   color: var(--l5r4-color-warning);
+}
+.l5r4-xp-manager .l5r4-xp-manager-error {
+  color: var(--l5r4-color-danger);
+  margin: 0;
 }
 .l5r4-xp-manager .l5r4-xp-manager-empty {
   font-style: italic;

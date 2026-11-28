@@ -353,6 +353,40 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
+        // #191
+        describe("Changes it makes", () => {
+          /** Tick the conditions in the window's checkboxes, as the multi-checkbox reports a change. */
+          const tick = (manager, ids) => manager._onCheckboxChange({ target: { value: ids } });
+          const holding = id => actor.effects.filter(e => e.statuses.has(id));
+
+          it("should leave alone a status the window does not offer", async () => {
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              { name: "Module status", statuses: ["l5r4QuenchModuleStatus"] }
+            ]);
+            const manager = new ConditionManagerApplication(actor);
+            await tick(manager, ["dazed"]);
+            assert.lengthOf(holding("l5r4QuenchModuleStatus"), 1, "the other effect stays");
+            assert.lengthOf(holding("dazed"), 1);
+          });
+
+          it("should add each of two conditions ticked quickly once", async () => {
+            const manager = new ConditionManagerApplication(actor);
+            await Promise.all([tick(manager, ["dazed"]), tick(manager, ["dazed", "prone"])]);
+            assert.lengthOf(holding("dazed"), 1, "one Dazed");
+            assert.lengthOf(holding("prone"), 1, "one Prone");
+          });
+
+          it("should enable a disabled condition that is ticked, not add a second", async () => {
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              { name: "Stunned", statuses: ["stunned"], disabled: true }
+            ]);
+            const manager = new ConditionManagerApplication(actor);
+            await tick(manager, ["stunned"]);
+            assert.lengthOf(holding("stunned"), 1);
+            assert.isFalse(holding("stunned")[0].disabled, "the effect is on");
+          });
+        });
+
         describe("Edge cases", () => {
           it("should handle disabled effects correctly", async () => {
             // ARRANGE - Create a disabled effect

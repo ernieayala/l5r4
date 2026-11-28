@@ -32,18 +32,42 @@ export function rollDataKey(name) {
  * resolves to 3; "@rings.air + @skills.defense.rank" with Air 3 and Defense 2 resolves to 5.
  * @param {number|string} value - A number or a formula.
  * @param {object} rollData - The actor's roll data.
- * @returns {number}
- * @throws {Error} When the formula does not parse.
+ * @returns {number} A finite number
+ * @throws {Error} When the formula does not parse, or the value is not a finite number (1/0, 0/0) (#172).
  */
 export function getRuleValue(value, rollData) {
-  if (typeof value === "number") {
-    return value;
+  const text = typeof value === "number" ? null : String(value ?? "").trim();
+  const result = text === null ? value : text ? getFormulaValue(text, rollData ?? {}) : 0;
+  if (!Number.isFinite(result)) {
+    throw new Error(`"${value}" is not a finite number`);
   }
-  const text = String(value ?? "").trim();
-  if (!text) {
-    return 0;
+  return result;
+}
+
+/**
+ * Whether text is a formula that parses: numbers, @ paths, the operators, parentheses, and the functions. Its value
+ * is not checked, which only the actor's data settles: "1 / @rings.air" parses (#172).
+ * @param {string} text
+ * @returns {boolean}
+ */
+export function isRuleFormula(text) {
+  try {
+    getFormulaValue(String(text).trim(), {});
+    return true;
+  } catch {
+    return false;
   }
-  return getFormulaValue(text, rollData ?? {});
+}
+
+/**
+ * The data a rule's formulas read: the actor's roll data, plus `@level` for a rule on an effect with a level, such as
+ * a Fear Rank, wherever the rule's value resolves (#172).
+ * @param {object} rollData - The actor's roll data
+ * @param {number} [level] - The level of the effect carrying the rule
+ * @returns {object}
+ */
+export function buildRuleRollData(rollData, level) {
+  return level === undefined ? rollData : { ...rollData, level };
 }
 
 /**
@@ -176,7 +200,8 @@ function parseFactor(parser) {
   if (/^\d/.test(token)) {
     return Number(token);
   }
-  if (token in FUNCTIONS) {
+  // Own names only: `in` would admit Object.prototype's, such as toString and constructor (#172)
+  if (Object.hasOwn(FUNCTIONS, token)) {
     return parseCall(parser, token);
   }
   throw new Error(`Unknown name "${token}" in "${parser.formula}"`);

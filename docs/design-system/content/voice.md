@@ -134,7 +134,7 @@ The stored field for a Wound Rank is `woundLevel` (a fixed name, decision 2); on
 | Conforming | "You cannot Guard in the Full Attack Stance" | `l5r4.ui.combat.guardFullAttack` (`lang/en.json`) |
 | Non-conforming | "You do not have permission to roll damage for this actor" (write "You cannot roll damage for {name}") | `l5r4.ui.notifications.noPermissionDamage` (`lang/en.json`) |
 | Non-conforming | "Are you sure you want to delete {name}?" (write "Remove {name}?") | modeled on `l5r4.ui.dialogs.deleteItem.content` (`lang/en.json`) |
-| Non-conforming | "L5R4 Migration: Updated {count} world image path(s)." | modeled on `l5r4.system.migration.iconsUpdated` (`lang/en.json`) |
+| Non-conforming | "L5R4 Migration: Updated {count} document(s)." | modeled on `l5r4.system.migration.migrated` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js` fails `n't` and a leading "L5R4" in values; review for the rest.
 

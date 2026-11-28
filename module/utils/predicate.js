@@ -34,6 +34,20 @@ export function testPredicate(predicate, options) {
 }
 
 /**
+ * Whether a predicate tests an option starting with one of the prefixes, in any term: "wound:nicked",
+ * `{ not: "wound:out" }`, and `{ gte: ["ring:fire", 3] }` all test the prefixes "wound:" or "ring:". A rule's options
+ * are prepared in steps, so this tells which step a rule must wait for (#175).
+ * @param {Array<string|object>} predicate
+ * @param {string[]} prefixes - Option prefixes, each ending in ":"
+ * @returns {boolean}
+ */
+export function hasOptionPrefix(predicate, prefixes) {
+  return (predicate ?? [])
+    .flatMap(getTermOptions)
+    .some(name => prefixes.some(prefix => name.startsWith(prefix)));
+}
+
+/**
  * Whether one term holds for the options.
  * @param {string|object} term
  * @param {Set<string>} options
@@ -68,4 +82,24 @@ function testTerm(term, options) {
     }
   }
   return false;
+}
+
+/**
+ * The options a term names: the string itself, each name inside `not`, `or`, and `and`, and a comparison's prefix
+ * followed by ":".
+ * @param {string|object} term
+ * @returns {string[]}
+ */
+function getTermOptions(term) {
+  if (typeof term === "string") {
+    return [term];
+  }
+  if (!term || typeof term !== "object") {
+    return [];
+  }
+  return Object.entries(term).flatMap(([operator, value]) =>
+    operator in COMPARISONS
+      ? [`${value?.[0]}:`]
+      : (Array.isArray(value) ? value : [value]).flatMap(getTermOptions)
+  );
 }

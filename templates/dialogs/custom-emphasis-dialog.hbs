@@ -1,4 +1,15 @@
 <div class="l5r4-custom-emphasis-dialog form-group">
   <label>{{localize "l5r4.apps.emphasisManager.emphasisName"}}:</label>
-  <input type="text" name="emphasisName" value="{{currentName}}" autofocus />
+  <input
+    type="text"
+    name="emphasisName"
+    value="{{currentName}}"
+    aria-describedby="{{formId}}-emphasis-name-error"
+    autofocus
+  />
 </div>
+{{!-- Why the name cannot be saved, filled in as it is typed; the button waits until it can (#141) --}}
+<p class="l5r4-form-field-error" id="{{formId}}-emphasis-name-error" data-emphasis-name-error hidden>
+  <i class="fa-solid fa-circle-exclamation" inert></i>
+  <span data-emphasis-name-error-text></span>
+</p>

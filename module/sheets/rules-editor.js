@@ -91,19 +91,25 @@ export const RULES_EDITOR_ACTIONS = Object.freeze({
     await updateRules(this, rules => rules.filter((_rule, i) => i !== index));
   },
 
-  /** Switch between the forms and the JSON, keeping what the form holds. */
+  /**
+   * Switch between the forms and the JSON, keeping what the form holds. JSON that does not parse keeps the JSON view
+   * with the text as typed, and the error says why (#141).
+   */
   async "toggle-rules-view"() {
-    await updateRules(this, rules => rules);
+    if (!(await updateRules(this, rules => rules))) {
+      return;
+    }
     this.rulesMode = this.rulesMode === "json" ? "form" : "json";
     await this.render();
   }
 });
 
 /**
- * Save the sheet's form with its rules changed: what the form holds is taken in first.
+ * Save the sheet's form with its rules changed: what the form holds is taken in first. Text that does not parse is
+ * shown as an error and nothing is saved.
  * @param {DocumentSheetV2} sheet
  * @param {function(object[]): object[]} change - From the current rules to the new ones
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} Whether the rules were saved
  */
 async function updateRules(sheet, change) {
   try {
@@ -114,7 +120,9 @@ async function updateRules(sheet, change) {
     );
     const rules = data.system?.rules ?? sheet.document._source.system.rules;
     await sheet.submit({ updateData: { system: { rules: change([...rules]) } } });
+    return true;
   } catch (err) {
     ui.notifications?.error(err.message);
+    return false;
   }
 }

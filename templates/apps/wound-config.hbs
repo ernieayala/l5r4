@@ -5,63 +5,68 @@
         <label>{{localize "l5r4.ui.mechanics.wounds.woundMode"}}</label>
         <div class="form-fields">
           <select name="woundMode" data-action="update-field" data-type="String">
-            <option value="manual" {{#if (eq woundMode "manual")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.manual"}}</option>
-            <option value="formula" {{#if (eq woundMode "formula")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.formula"}}</option>
+            <option value="manual" {{#if (eq source.woundMode "manual")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.manual"}}</option>
+            <option value="formula" {{#if (eq source.woundMode "formula")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.formula"}}</option>
           </select>
         </div>
       </div>
 
-      {{#if (eq woundMode "manual")}}
+      {{#if (eq source.woundMode "manual")}}
+        {{!-- Blank while no custom maximum is stored; the placeholder is the Out threshold it falls back to --}}
         <div class="form-group">
           <label>{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</label>
           <div class="form-fields">
-            <input type="number" name="wounds.max" placeholder="" value="{{#if (gt wounds.max 0)}}{{wounds.max}}{{/if}}" data-action="update-field" data-type="Number" min="0" />
+            <input type="number" name="wounds.max" placeholder="{{outThreshold}}" value="{{#if (gt source.wounds.max 0)}}{{source.wounds.max}}{{/if}}" data-action="update-field" data-type="Number" min="0" />
           </div>
         </div>
       {{/if}}
 
-      {{#if (eq woundMode "formula")}}
+      {{#if (eq source.woundMode "formula")}}
         <div class="form-group">
-          <label>{{localize "l5r4.ui.sheets.woundLevels"}}</label>
+          <label>{{localize "l5r4.ui.sheets.woundLevelCount"}}</label>
           <div class="form-fields">
             <select name="nrWoundLvls" data-action="update-field" data-type="Number">
-              {{selectOptions config.npcNumberWoundLevels selected=nrWoundLvls}}
+              {{selectOptions config.npcNumberWoundLevels selected=source.nrWoundLvls}}
             </select>
           </div>
         </div>
       {{/if}}
     {{/if}}
 
-    {{#if (or (eq actor.type "pc") (eq woundMode "formula"))}}
+    {{#if (or (eq actor.type "pc") (eq source.woundMode "formula"))}}
       <div class="form-group">
         <label>{{localize "l5r4.ui.mechanics.wounds.earthMultiplier"}}</label>
         <div class="form-fields">
-          <input type="number" name="woundsMultiplier" value="{{woundsMultiplier}}" data-action="update-field" data-type="Number" />
+          <input type="number" name="woundsMultiplier" value="{{source.woundsMultiplier}}" data-action="update-field" data-type="Number" />
         </div>
+        {{> "systems/l5r4-enhanced/templates/apps/_partials/_added-hint.hbs" added=(lookup added "woundsMultiplier")}}
       </div>
       <div class="form-group">
         <label>{{localize "l5r4.ui.mechanics.wounds.woundBonus"}}</label>
         <div class="form-fields">
-          <input type="number" name="woundsMod" value="{{woundsMod}}" data-action="update-field" data-type="Number" />
+          <input type="number" name="woundsMod" value="{{source.woundsMod}}" data-action="update-field" data-type="Number" />
         </div>
+        {{> "systems/l5r4-enhanced/templates/apps/_partials/_added-hint.hbs" added=(lookup added "woundsMod")}}
       </div>
       <div class="form-group">
         <label>{{localize "l5r4.apps.woundConfig.penaltyModifier"}}</label>
         <div class="form-fields">
-          <input type="number" name="woundsPenaltyMod" value="{{woundsPenaltyMod}}" data-action="update-field" data-type="Number" />
+          <input type="number" name="woundsPenaltyMod" value="{{source.woundsPenaltyMod}}" data-action="update-field" data-type="Number" />
         </div>
+        {{> "systems/l5r4-enhanced/templates/apps/_partials/_added-hint.hbs" added=(lookup added "woundsPenaltyMod")}}
       </div>
       <div class="form-group">
         <label>{{localize "l5r4.apps.woundConfig.rateModifier"}}</label>
         <div class="form-fields">
-          <input type="number" name="wounds.mod" value="{{wounds.mod}}" data-action="update-field" data-type="Number" />
+          <input type="number" name="wounds.mod" value="{{source.wounds.mod}}" data-action="update-field" data-type="Number" />
         </div>
+        {{> "systems/l5r4-enhanced/templates/apps/_partials/_added-hint.hbs" added=(lookup added "wounds.mod")}}
       </div>
     {{/if}}
 
-    {{#if (and (eq actor.type "npc") (eq woundMode "manual"))}}
+    {{#if (and (eq actor.type "npc") (eq source.woundMode "manual"))}}
       <div class="l5r4-grid">
-        {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=visibleManualWoundLevels editable=true}}
+        {{> "systems/l5r4-enhanced/templates/actor/_partials/_wound-track.hbs" levels=source.manualWoundLevels editable=true}}
       </div>
     {{/if}}
   </div>

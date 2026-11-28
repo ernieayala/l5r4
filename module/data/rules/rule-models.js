@@ -9,6 +9,7 @@ import {
   ADJUSTABLE_TRAITS,
   ARMOR_TN_MODES,
   ATTACK_RANGES,
+  CHOICE_LIST_VALUES,
   CHOICE_LISTS,
   LEDGER_DIRECTIONS,
   LEDGER_TRACKS,
@@ -17,9 +18,27 @@ import {
   SAVE_EVENTS,
   SAVE_FAILURES
 } from "../../config/rule-keys.js";
-import { USE_PERIODS } from "../../utils/effects.js";
-import { selectorField, typeField, valueField } from "../fields.js";
+import { predicateField, selectorField, typeField, valueField } from "../fields.js";
 import RuleData from "./rule-data.js";
+
+/**
+ * Roll options a TraitAdjust rule can never see: it runs at the end of the "initial" effect phase, before the Rings,
+ * Traits with their changes, Insight, School Rank, and Wound Rank are worked out (#175).
+ * @type {ReadonlyArray<string>}
+ */
+const TRAIT_ADJUST_UNSEEN_OPTIONS = Object.freeze([
+  "ring:",
+  "trait:",
+  "insight:",
+  "school-rank:",
+  "wound:"
+]);
+
+/**
+ * Formula paths a TraitAdjust value reads before they are worked out: the four Rings (`@rings.air`, `@air`) and
+ * Insight. `@rings.void.rank` is stored, so it reads as it should (#175).
+ */
+const TRAIT_ADJUST_UNSEEN_PATHS = /@(rings\.)?(air|earth|fire|water)\b|@insight\b/;
 
 /**
  * +XkY or +N on rolls matching `selector`. With `range`, only attacks of that range. An `optional` modifier is
@@ -136,11 +155,19 @@ export class SpiritRule extends RuleData {
   }
 }
 
-/** Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. */
+/**
+ * Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. The Wound Rank is found from these,
+ * so a Wounds rule cannot test it (module/documents/actor/rules.js, #175).
+ */
 export class WoundsRule extends RuleData {
   /** @override */
   static defineSchema() {
-    return { ...super.defineSchema(), perRank: valueField(0), penalty: valueField(0) };
+    return {
+      ...super.defineSchema(),
+      predicate: predicateField(["wound:"]),
+      perRank: valueField(0),
+      penalty: valueField(0)
+    };
   }
 }
 
@@ -201,15 +228,20 @@ export class SubstituteRule extends RuleData {
   }
 }
 
-/** A Trait or the Void Ring raised or lowered, with everything derived from it. */
+/**
+ * A Trait or the Void Ring raised or lowered, with everything derived from it. It runs before the Rings, Insight, and
+ * Wound Rank are worked out from the Traits, so it cannot test them or read the four Rings or Insight in its value
+ * (module/documents/actor/rules.js, #175).
+ */
 export class TraitAdjustRule extends RuleData {
   /** @override */
   static defineSchema() {
     const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
+      predicate: predicateField([...TRAIT_ADJUST_UNSEEN_OPTIONS]),
       trait: new StringField({ required: true, blank: false, choices: ADJUSTABLE_TRAITS }),
-      value: valueField(0)
+      value: valueField(0, TRAIT_ADJUST_UNSEEN_PATHS)
     };
   }
 }
@@ -262,11 +294,11 @@ export class MovementRule extends RuleData {
 export class ApplyConditionRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { NumberField, StringField } = getDataFields();
+    const { NumberField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
-      condition: new StringField({ required: true, blank: false }),
+      condition: statusField(),
       // The condition's level, as a Fear Rank; null for a condition without one
       level: new NumberField({
         required: true,
@@ -283,11 +315,7 @@ export class ApplyConditionRule extends RuleData {
 export class ConditionImmunityRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = getDataFields();
-    return {
-      ...super.defineSchema(),
-      condition: new StringField({ required: true, blank: false })
-    };
+    return { ...super.defineSchema(), condition: statusField() };
   }
 }
 
@@ -305,10 +333,15 @@ export class PeriodicSaveRule extends RuleData {
       ...super.defineSchema(),
       event: new StringField({ required: true, initial: "roundEnd", choices: SAVE_EVENTS }),
       // "ring:earth" or "trait:wil"
+      // One of the Rings or Traits by key, so "trait:xyz" is an error rather than a roll that never happens (#173)
       roll: new StringField({
         required: true,
         blank: false,
-        validate: value => /^(ring:(air|earth|fire|water|void)|trait:[a-z]{3})$/.test(value),
+        validate: value =>
+          [
+            ...CHOICE_LIST_VALUES.rings.map(ring => `ring:${ring}`),
+            ...CHOICE_LIST_VALUES.traits.map(trait => `trait:${trait}`)
+          ].includes(value),
         validationError:
           'must be "ring:" and a Ring, such as "ring:earth", or "trait:" and a Trait, such as "trait:wil"'
       }),
@@ -321,8 +354,9 @@ export class PeriodicSaveRule extends RuleData {
 }
 
 /**
- * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The slug "void" raises the
- * once-per-Round Void Point limit (STAGE-09 decision 6).
+ * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The one resource the system counts is
+ * the Void Points a Round allows (STAGE-09 decision 6), so the slug is "void" and the period "round"; any other is
+ * flagged rather than kept as a rule that does nothing (Ernie's ruling, #174).
  * game-rules/25_rings_and_traits.md, p.78
  */
 export class ResourceRule extends RuleData {
@@ -331,9 +365,9 @@ export class ResourceRule extends RuleData {
     const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
-      slug: new StringField({ required: true, blank: false }),
+      slug: new StringField({ required: true, initial: "void", choices: ["void"] }),
       max: valueField(1),
-      per: new StringField({ required: true, initial: "round", choices: USE_PERIODS })
+      per: new StringField({ required: true, initial: "round", choices: ["round"] })
     };
   }
 }
@@ -450,8 +484,9 @@ export class LedgerRule extends RuleData {
 }
 
 /**
- * What the owner needs before the item can be added: `requires` is a predicate over the actor's roll options. A GM
- * may add the item anyway. The label explains the requirement to the player.
+ * What the owner needs before the item can be added: `requires` is a predicate over the actor's roll options, with at
+ * least one term, since an empty one would let anyone add the item (#172). A GM may add the item anyway. The label
+ * explains the requirement to the player.
  */
 export class PrerequisiteRule extends RuleData {
   /** @override */
@@ -459,7 +494,10 @@ export class PrerequisiteRule extends RuleData {
     const { ArrayField, AnyField } = getDataFields();
     return {
       ...super.defineSchema(),
-      requires: new ArrayField(new AnyField({ serializable: true, nullable: false }))
+      requires: new ArrayField(new AnyField({ serializable: true, nullable: false }), {
+        validate: value => value.length > 0,
+        validationError: "must list at least one term"
+      })
     };
   }
 }
@@ -570,15 +608,22 @@ if (RULE_KEYS.some(key => !RULE_MODELS[key])) {
 
 /**
  * Validate one stored rule. The model is built from a copy: a DataModel cleans the source it is given in place, which
- * would write every default into the stored rule.
+ * would write every default into the stored rule. A field the key's model does not have is an error: a DataModel
+ * would drop it without a word, so a misspelled `rnage` would leave a modifier on every range (#172).
  * @param {object} source - An entry of `system.rules`.
  * @returns {RuleData}
- * @throws {Error} When the key is unknown or a field fails validation.
+ * @throws {Error} When the key is unknown, a field is unknown, or a field fails validation.
  */
 export function createRule(source) {
   const Model = RULE_MODELS[source?.key];
   if (!Model) {
     throw new Error(`Unknown rule key "${source?.key}"`);
+  }
+  const unknown = Object.keys(source).filter(name => !Object.hasOwn(Model.schema.fields, name));
+  if (unknown.length) {
+    throw new Error(
+      `Unknown field ${unknown.map(name => `"${name}"`).join(", ")} on ${source.key}`
+    );
   }
   return new Model(foundry.utils.deepClone(source), { strict: true });
 }
@@ -595,6 +640,20 @@ function rangeField() {
     nullable: true,
     initial: null,
     choices: ATTACK_RANGES
+  });
+}
+
+/**
+ * A status id, as `CONFIG.statusEffects` registers it: "prone", "fullDefenseStance". Ids are compared as written, so
+ * "Prone" is an error the editor shows rather than a status that never matches (#173).
+ * @returns {foundry.data.fields.StringField}
+ */
+function statusField() {
+  return new (getDataFields().StringField)({
+    required: true,
+    blank: false,
+    validate: value => CONFIG.statusEffects.some(status => status.id === value),
+    validationError: 'must be a status id, such as "prone" or "fatigued"'
   });
 }
 

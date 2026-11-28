@@ -9,7 +9,9 @@
     {{#if spellSlotsRestored}}
       <p><em>{{localize "l5r4.magic.spells.slotsRestored"}}</em></p>
     {{/if}}
-    {{#if voidRestored}}
+    {{#if voidBlockedByFasting}}
+      <p><em>{{localize "l5r4.ui.mechanics.wounds.voidFasting"}}</em></p>
+    {{else if voidRestored}}
       <p><em>{{localize "l5r4.ui.mechanics.wounds.voidRestored" count=voidRestored}}</em></p>
     {{/if}}
   </div>
