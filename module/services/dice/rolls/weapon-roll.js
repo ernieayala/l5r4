@@ -48,6 +48,8 @@ export async function rollWeaponDamage({
     label,
     base: { roll: toInt(roll), keep: toInt(keep) },
     weapon,
+    // No attack names the range here: a bow's damage is ranged, any other weapon's melee (#171)
+    range: weapon ? (weapon.system.isBow ? "ranged" : "melee") : "",
     explode: weapon ? weapon.system.damageExplode : 10,
     modifiers: raises ? [{ label: T("l5r4.ui.check.increasedDamage"), roll: raises }] : [],
     askForOptions

@@ -12,7 +12,7 @@
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getStackedModifiers } from "../../../utils/modifier-stacking.js";
-import { getTn } from "../../../utils/check.js";
+import { getTn, isForRange } from "../../../utils/check.js";
 
 /**
  * The TN changes the roll keeps: a change for the other attack range drops out, as a modifier does; an attack
@@ -29,7 +29,7 @@ export function buildTnModifiers(check, terms) {
   const tnModifiers = isDamage
     ? []
     : ctx.tnModifiers
-        .filter(m => !m.range || m.range === range)
+        .filter(m => isForRange(m, range))
         .map(({ label, value, type, fromTarget }) => ({ label, value, type, fromTarget }));
   const armorBonus = toInt(target?.system.armorTn?.bonus);
   if (maneuvers?.grapple && armorBonus) {
@@ -122,7 +122,6 @@ export function formatShiftedLabel(label, shift) {
 export function buildCheckSystem(check, terms, result) {
   const { pool, roll, tn, tnModifiers, outcome, label } = result;
   const { request, actor, kind, target, ctx, isDamage } = check;
-  const damage = attackDamageOf(request);
   return {
     actorUuid: actor.uuid,
     kind,
@@ -143,10 +142,11 @@ export function buildCheckSystem(check, terms, result) {
     notes: buildCheckNotes(ctx, terms.range),
     conditions: target ? ctx.applyConditions : [],
     ...(terms.maneuvers ? { maneuvers: terms.maneuvers } : {}),
-    ...(damage ? { damage } : {}),
+    ...attackDamageOf(request),
     sources: isDamage ? ctx.damageSources : [],
     ignoreReduction: isDamage ? ctx.ignoreReduction : 0,
-    attackOf: request.attackOf ?? ""
+    attackOf: request.attackOf ?? "",
+    range: terms.range ?? ""
   };
 }
 
@@ -180,14 +180,14 @@ function buildTnRecord(check, terms, { tn, tnModifiers }) {
  * The card's notes: each Note rule's text, a localization key (the system's own, such as Prone's) or a GM's plain
  * text, then the action each ActionCost rule for this range sets.
  * @param {object} ctx - The gathered check context (collect.js)
- * @param {string} range - "melee" or "ranged"
+ * @param {"melee"|"ranged"|null} range - The roll's range; null for a roll with none
  * @returns {string[]}
  */
 function buildCheckNotes(ctx, range) {
   return [
     ...ctx.notes.map(text => T(text)),
     ...ctx.actions
-      .filter(a => !a.range || a.range === range)
+      .filter(a => isForRange(a, range))
       .map(({ label: source, action }) =>
         F("l5r4.ui.check.actionNote", { action: T(`l5r4.ui.check.actions.${action}`), source })
       )
@@ -210,24 +210,27 @@ function storedModifierOf(modifier) {
  * game-rules/32_attack_and_defense.md, p.82
  * game-rules/74_weapons.md, p.199
  * @param {CheckRequest} request
- * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number}|null}
+ * @returns {{damage?: {label: string, roll: number, keep: number, bonus: number, explode: number}}} The message's
+ *   `damage` field, or nothing to spread
  */
 function attackDamageOf(request) {
   if (request.kind !== "attack") {
-    return null;
+    return {};
   }
   if (request.damage) {
-    return { bonus: 0, explode: 10, ...request.damage };
+    return { damage: { bonus: 0, explode: 10, ...request.damage } };
   }
   const weapon = request.weapon;
   if (!weapon) {
-    return null;
+    return {};
   }
   return {
-    label: weapon.name,
-    roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
-    keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
-    bonus: 0,
-    explode: weapon.system.damageExplode
+    damage: {
+      label: weapon.name,
+      roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
+      keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
+      bonus: 0,
+      explode: weapon.system.damageExplode
+    }
   };
 }

@@ -10,6 +10,7 @@
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
+import { isForRange } from "../../../utils/check.js";
 
 /**
  * The modifiers offered to the roller: the gathered ones, the caller's, and a Lost character's Taint Rank, which a
@@ -40,7 +41,7 @@ export function buildCheckModifiers(check) {
  * @param {object} check - From buildCheck (terms.js)
  * @param {object} choices - The dialog's values
  * @param {object} picks
- * @param {string} picks.range - "melee" or "ranged"
+ * @param {"melee"|"ranged"|null} picks.range - The roll's range (terms.js getCheckRange)
  * @param {boolean} picks.embrace - The roller embraces the Taint
  * @param {boolean} picks.voidSkill - A Void Point raises the Skill to Rank 1
  * @param {number} picks.damageFreeRaises - Free Raises on a damage roll that takes them
@@ -58,7 +59,7 @@ export function buildAppliedModifiers(
       ...m,
       enabled: request.askForOptions === false ? m.enabled : Boolean(enabled[i])
     }))
-    .filter(m => !m.range || m.range === range);
+    .filter(m => isForRange(m, range));
   applied.push(...buildManualModifiers(choices));
   if (check.isSkill && choices.socialResistance) {
     const total = toInt(actor.system.honor?.rank);

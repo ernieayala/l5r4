@@ -4,6 +4,8 @@
  * repeated save, the period a use counter counts in, and the Armor TN once ArmorTN rules apply.
  */
 
+import { isForRange } from "./check.js";
+
 /**
  * The TN of a save after a failure: it moves by `step` and stops at `min`. Dazed starts at TN 20 and drops by 5
  * after each failed save, stopping at 5 (STAGE-09 decision 5): 20 becomes 15, and 5 stays 5.
@@ -75,15 +77,16 @@ export function getUsesSpent(stored, key) {
 /**
  * The Armor TN once ArmorTN rules apply (STAGE-09 decision 3).
  *
- * - "add" rules add to the Armor TN; one with a `range` counts only against attacks of that range and is returned
- *   in `vs` for the attacker's roll instead.
+ * - "add" rules add to the Armor TN; one with a `range` counts only against attacks of that range. `vs` holds, for
+ *   each range, what the Armor TN against it differs from `current` by, for the attacker's roll: the range's adds
+ *   stack by type with the others (#171).
  * - "base" rules replace the base when lower (Blinded: Reflexes + 5). Armor, other modifiers, and "add" rules
  *   still apply.
  * - "total" rules set the whole Armor TN to their value plus the armor bonus; nothing else applies (Stunned,
  *   Grappled). The lowest wins.
  *
- * The Armor TN never drops below 5. Reflexes 3 Blinded in light armor (+5) has a base of 8 instead of 20 and a
- * current Armor TN of 13.
+ * The Armor TN never drops below 5, against either range too. Reflexes 3 Blinded in light armor (+5) has a base of 8
+ * instead of 20 and a current Armor TN of 13; Blinded with no armor and Prone has 8, and 5 against melee, not -2.
  * game-rules/32_attack_and_defense.md, p.82
  * game-rules/36_stances.md, p.84
  * game-rules/41_conditional_effects.md, p.89
@@ -100,19 +103,23 @@ export function getArmorTn({ base, armor, other, rules, stack }) {
     const values = rules.filter(r => r.mode === mode).map(r => r.value);
     return values.length ? Math.min(...values) : null;
   };
-  const adds = rules.filter(r => r.mode === "add");
-  const general = stack(
-    adds.filter(r => !r.range).map(r => ({ total: r.value, type: r.type }))
-  ).total;
-  const vs = {
-    melee: adds.filter(r => r.range === "melee").reduce((sum, r) => sum + r.value, 0),
-    ranged: adds.filter(r => r.range === "ranged").reduce((sum, r) => sum + r.value, 0)
-  };
   const total = getLowest("total");
   if (total !== null) {
     return { current: Math.max(5, total + armor), vs: { melee: 0, ranged: 0 }, base: total };
   }
   const replaced = getLowest("base");
   const effectiveBase = replaced === null ? base : Math.min(base, replaced);
-  return { current: Math.max(5, effectiveBase + armor + other + general), vs, base: effectiveBase };
+  const adds = rules.filter(r => r.mode === "add");
+  const getRangeTn = range => {
+    const added = stack(
+      adds.filter(r => isForRange(r, range)).map(r => ({ total: r.value, type: r.type }))
+    ).total;
+    return Math.max(5, effectiveBase + armor + other + added);
+  };
+  const current = getRangeTn(null);
+  return {
+    current,
+    vs: { melee: getRangeTn("melee") - current, ranged: getRangeTn("ranged") - current },
+    base: effectiveBase
+  };
 }

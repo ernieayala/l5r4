@@ -55,6 +55,8 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
     modifiers,
     target,
     attackOf: message.id,
+    // The attack's range, so a rule limited to ranged damage applies to a bow's (#171)
+    range: attack.range,
     askForOptions
   });
 }

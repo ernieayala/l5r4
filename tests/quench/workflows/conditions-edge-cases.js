@@ -211,7 +211,11 @@ export function registerConditionsEdgeCaseTests(quench) {
             "Blinded -3 and Prone -2 rolled dice on ranged"
           );
           assert.equal(actor.system.armorTn.current, 3 + 5, "Blinded base Reflexes + 5");
-          assert.equal(actor.system.armorTn.vs.melee, -10, "Prone counts against melee");
+          assert.equal(
+            actor.system.armorTn.current + actor.system.armorTn.vs.melee,
+            5,
+            "Prone's -10 against melee stops at 5 (#171)"
+          );
         });
 
         it("should handle the conflicting conditions Stunned and Dazed", async () => {

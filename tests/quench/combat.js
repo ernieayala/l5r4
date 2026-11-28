@@ -201,6 +201,93 @@ export function registerCombatTests(quench) {
         html.querySelector(selector).click();
       };
 
+      // #171: a rule's range applies to attacks of that range and to their damage, and to no other roll
+      describe("Rules limited to one range", () => {
+        const labelsOf = message => message.system.modifiers.map(m => m.label);
+
+        /** The attacker with a melee-only bonus on every roll and a ranged-only bonus on damage. */
+        const rangedAttacker = async () => {
+          const { actor, katana } = await attacker();
+          await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Range rules",
+              type: "commonItem",
+              system: {
+                rules: [
+                  {
+                    key: "RollModifier",
+                    selector: "any",
+                    total: 5,
+                    range: "melee",
+                    label: "Melee only"
+                  },
+                  {
+                    key: "RollModifier",
+                    selector: "damage",
+                    total: 7,
+                    range: "ranged",
+                    label: "Ranged damage"
+                  }
+                ]
+              }
+            }
+          ]);
+          return { actor, katana };
+        };
+
+        it(
+          "should leave a range-limited rule off a Skill roll, which has no range",
+          clean(async () => {
+            const { actor } = await rangedAttacker();
+            const roll = await rollCheck({
+              actor,
+              kind: "skill",
+              label: "Kenjutsu",
+              base: { roll: 6, keep: 4 },
+              skill: "kenjutsu",
+              trait: "agi",
+              askForOptions: false
+            });
+            assert.notInclude(labelsOf(roll), "Melee only");
+            assert.equal(roll.system.range, "");
+          })
+        );
+
+        it(
+          "should give a ranged attack's damage the ranged rules, and a melee attack's the melee ones",
+          clean(async () => {
+            const { actor, katana } = await rangedAttacker();
+            const target = await defender();
+            const ranged = await rollCheck({
+              actor,
+              kind: "attack",
+              label: "Thrown",
+              base: { roll: 6, keep: 4 },
+              skill: "kenjutsu",
+              trait: "agi",
+              weapon: katana,
+              target,
+              tn: target.system.armorTn.current,
+              ranged: true,
+              askForOptions: false
+            });
+            assert.equal(ranged.system.range, "ranged");
+            assert.notInclude(labelsOf(ranged), "Melee only");
+            const rangedDamage = await rollDamageFromAttack(ranged, { askForOptions: false });
+            assert.include(labelsOf(rangedDamage), "Ranged damage");
+            assert.notInclude(labelsOf(rangedDamage), "Melee only");
+            assert.equal(rangedDamage.system.range, "ranged");
+
+            const melee = await attack(actor, katana, target);
+            assert.equal(melee.system.range, "melee");
+            assert.include(labelsOf(melee), "Melee only");
+            const meleeDamage = await rollDamageFromAttack(melee, { askForOptions: false });
+            assert.include(labelsOf(meleeDamage), "Melee only");
+            assert.notInclude(labelsOf(meleeDamage), "Ranged damage");
+          })
+        );
+      });
+
       // game-rules/33_wounds.md, p.82
       // game-rules/25_rings_and_traits.md, p.78
       describe("Attack to Wounds", () => {

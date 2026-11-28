@@ -6,10 +6,25 @@ import {
   getMaxRaises,
   parseRollAndKeep,
   getPoolFormula,
-  getTn
+  getTn,
+  isForRange
 } from "../../../module/utils/check.js";
 
 const pool = spec => buildPool(spec);
+
+// #171
+describe("isForRange", () => {
+  it("should apply an entry with no range at any range, and on a roll with none", () => {
+    expect(isForRange({}, "melee")).toBe(true);
+    expect(isForRange({}, null)).toBe(true);
+  });
+
+  it("should apply a range-limited entry only at its range, never on a roll with none", () => {
+    expect(isForRange({ range: "melee" }, "melee")).toBe(true);
+    expect(isForRange({ range: "melee" }, "ranged")).toBe(false);
+    expect(isForRange({ range: "melee" }, null)).toBe(false);
+  });
+});
 
 describe("buildPool", () => {
   // The book's example: Kyujutsu 4, Reflexes 3 is 7k3

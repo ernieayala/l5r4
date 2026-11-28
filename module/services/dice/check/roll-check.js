@@ -65,6 +65,7 @@ import { buildCheck, buildChosenTerms, buildPreparedTerms, getManeuverPayment } 
  *   An attack's damage pool, stored on its message for the damage button
  * @property {string} [attackOf]         The attack message a damage roll belongs to
  * @property {boolean} [ranged=false]    An attack starts as ranged
+ * @property {"melee"|"ranged"|""} [range] A damage roll's attack range; empty or absent for none (#171)
  * @property {boolean} [askForOptions=true] Show the dialog; without it every default applies
  * @property {{template: string, data: object, bind?: function(HTMLFormElement): void}} [extras] Extra dialog fields
  *   for the caller, and what wires their live parts once the dialog renders (a Ring Roll's School Rank check)

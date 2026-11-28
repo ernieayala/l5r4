@@ -105,7 +105,10 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       sources: new ArrayField(stringField()),
       ignoreReduction: numberField(0),
       // The attack a damage roll belongs to
-      attackOf: stringField()
+      attackOf: stringField(),
+      // An attack's range, "melee" or "ranged", which its damage roll keeps; empty for a roll with no range and for an
+      // attack posted before the range was stored (#171)
+      range: stringField()
     };
   }
 

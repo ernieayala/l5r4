@@ -123,4 +123,55 @@ describe("getArmorTn", () => {
         .current
     ).toBe(5);
   });
+
+  // #171: a range-limited add stacks by type like the rest
+  it("should stack typed adds against one range: the largest of a type", () => {
+    const rules = [
+      { mode: "add", value: 3, type: "spell", range: "melee" },
+      { mode: "add", value: 5, type: "spell", range: "melee" }
+    ];
+    expect(getArmorTn({ ...pc, rules }).vs).toEqual({ melee: 5, ranged: 0 });
+  });
+
+  it("should stack a range's typed add with a general one of the same type", () => {
+    const rules = [
+      { mode: "add", value: 5, type: "spell" },
+      { mode: "add", value: 3, type: "spell", range: "melee" }
+    ];
+    const out = getArmorTn({ ...pc, rules });
+    expect(out.current).toBe(30);
+    expect(out.vs, "the +5 of the type already counts").toEqual({ melee: 0, ranged: 0 });
+  });
+
+  // #171: Blinded (Reflexes 3: base 8) and Prone (-10 against melee), no armor
+  // game-rules/41_conditional_effects.md, p.89
+  it("should never go below 5 against one range", () => {
+    const out = getArmorTn({
+      base: 20,
+      armor: 0,
+      other: 0,
+      stack,
+      rules: [
+        { mode: "base", value: 8 },
+        { mode: "add", value: -10, range: "melee" }
+      ]
+    });
+    expect(out.current).toBe(8);
+    expect(out.current + out.vs.melee).toBe(5);
+  });
+
+  it("should floor the Armor TN against a range after its add, not before", () => {
+    const out = getArmorTn({
+      base: 5,
+      armor: 0,
+      other: 0,
+      stack,
+      rules: [
+        { mode: "add", value: -10 },
+        { mode: "add", value: 15, range: "ranged" }
+      ]
+    });
+    expect(out.current).toBe(5);
+    expect(out.current + out.vs.ranged, "5 - 10 + 15").toBe(10);
+  });
 });

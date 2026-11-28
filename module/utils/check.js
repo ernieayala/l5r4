@@ -127,6 +127,17 @@ export function getMaxRaises(voidRing, unskilled = false) {
 }
 
 /**
+ * Whether a modifier, TN change, or action cost applies at a roll's range: one with no range always does, one limited
+ * to a range only at that range, so never on a roll with no range (#171).
+ * @param {{range?: string}} entry
+ * @param {"melee"|"ranged"|null} range - The roll's range
+ * @returns {boolean}
+ */
+export function isForRange(entry, range) {
+  return !entry.range || entry.range === range;
+}
+
+/**
  * The TN a roll must meet. Each declared Raise adds 5; each Free Raise the roller spends on the TN takes 5 off;
  * the Wound Rank's penalty is added; TN modifiers add. A roll with no TN given (0) has none, whatever its Raises: a
  * Raise there counts only in a Contested Roll. A base of 20 with two Raises and a wound penalty of 3 is 33.

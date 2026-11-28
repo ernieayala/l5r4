@@ -14,7 +14,7 @@
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
-import { buildPool, getMaxRaises } from "../../../utils/check.js";
+import { buildPool, getMaxRaises, isForRange } from "../../../utils/check.js";
 import { getRaiseAllocation, getManeuverCost } from "../../../utils/damage.js";
 import { canEmbraceTaint, getHighestRing, getLostBonus } from "../../../utils/taint.js";
 import { getTargets } from "../resources/target-resolver.js";
@@ -60,7 +60,7 @@ export function buildCheck(request) {
     defaultTn: toInt(request.tn ?? 0) || (kind === "attack" ? autoTn : 0),
     emphases: unskilled ? [] : (request.emphases ?? []).filter(Boolean)
   };
-  check.modifiers = buildCheckModifiers(check);
+  check.modifiers = buildOfferedModifiers(check);
   return check;
 }
 
@@ -109,7 +109,7 @@ export function buildDialogContext(check) {
  * @returns {object}
  */
 export function buildChosenTerms(check, choices) {
-  const range = (choices.isRanged ?? Boolean(check.request.ranged)) ? "ranged" : "melee";
+  const range = getCheckRange(check, choices);
   // Embracing the Taint: +1k1 for a point of Taint
   // game-rules/89_shadowlands_taint.md, p.279
   const embrace = check.embraceAllowed && Boolean(choices.embraceTaint);
@@ -184,6 +184,37 @@ export function getManeuverPayment(check, choices, terms) {
   maneuvers.increasedDamage = increasedDamage;
   maneuvers.cost = cost;
   return { maneuvers, cost, affordable };
+}
+
+/**
+ * The modifiers the dialog offers. Only an attack's range changes in the dialog, so any other roll is not offered a
+ * modifier for a range it lacks (#171).
+ * @param {object} check - From buildCheck, before its modifiers
+ * @returns {object[]}
+ */
+function buildOfferedModifiers(check) {
+  const offered = buildCheckModifiers(check);
+  if (check.kind === "attack") {
+    return offered;
+  }
+  const range = getCheckRange(check, {});
+  return offered.filter(m => isForRange(m, range));
+}
+
+/**
+ * The roll's attack range, which range-limited rules, TN changes, and action costs test: an attack's from its Ranged
+ * box (user input), a damage roll's from its attack (#171). Every other roll has none, so a rule limited to one range
+ * never applies to it.
+ * @param {object} check - From buildCheck
+ * @param {object} choices - The dialog's values
+ * @returns {"melee"|"ranged"|null}
+ */
+function getCheckRange(check, choices) {
+  const { kind, request } = check;
+  if (kind === "attack") {
+    return (choices.isRanged ?? Boolean(request.ranged)) ? "ranged" : "melee";
+  }
+  return kind === "damage" && ["melee", "ranged"].includes(request.range) ? request.range : null;
 }
 
 /**

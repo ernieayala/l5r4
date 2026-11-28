@@ -108,7 +108,9 @@ function rollHit(state) {
       ? { roll: weapon.roll, keep: weapon.keep, bonus: weapon.bonus }
       : { roll: strength, keep: 1 },
     explode: weapon?.explode ?? 10,
-    target: other
+    target: other,
+    // The grapplers hold each other, so the Hit is melee damage (#171)
+    range: "melee"
   });
 }
 
