@@ -11,6 +11,7 @@ import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
+import { getWindowId } from "../utils/window-id.js";
 import { getSortPref, getSortPrefs, updateSortPref } from "../services/sort-preferences.js";
 import { askDisadvantageCap } from "../services/xp/disadvantage-cap.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
@@ -63,7 +64,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `xp-manager-${actor.id}`
+      id: XpManagerApplication.getWindowId(actor)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -152,6 +153,15 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
       return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
     }, 0);
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("xp-manager", actor.uuid);
   }
 
   /**

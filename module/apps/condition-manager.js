@@ -10,6 +10,7 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { STANCE_IDS } from "../utils/stances.js";
+import { getWindowId } from "../utils/window-id.js";
 import { applyEffect } from "../services/effects/apply.js";
 
 /**
@@ -51,7 +52,7 @@ export default class ConditionManagerApplication extends foundry.applications.ap
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `condition-manager-${actor.id}`
+      id: ConditionManagerApplication.getWindowId(actor)
     });
 
     super(mergedOptions);
@@ -219,6 +220,15 @@ export default class ConditionManagerApplication extends foundry.applications.ap
       });
       ui.notifications?.error(T("l5r4.apps.conditionManager.errors.updateFailed"));
     }
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("condition-manager", actor.uuid);
   }
 }
 

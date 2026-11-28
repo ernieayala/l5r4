@@ -13,6 +13,7 @@ import { getWeaponSkillChoices } from "../utils/mechanics.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import EmphasisManagerApplication from "../apps/emphasis-manager.js";
+import { openWindow } from "./handlers/app-launcher-handler.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import { RULES_EDITOR_ACTIONS, parseRulesForm, buildRulesEditorContext } from "./rules-editor.js";
 
@@ -404,12 +405,12 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       return;
     }
 
-    const manager = new EmphasisManagerApplication({ item: this.item });
-    await manager.render(true);
-
-    // Wait for dialog to close, then refresh this sheet
-    manager.addEventListener("close", () => {
-      this.render(false);
+    // An Emphasis manager already open for this Skill comes to the front (#189); once one closes, this sheet redraws
+    const id = EmphasisManagerApplication.getWindowId(this.item);
+    await openWindow(id, () => {
+      const manager = new EmphasisManagerApplication({ item: this.item });
+      manager.addEventListener("close", () => this.render(false));
+      return manager;
     });
   }
 

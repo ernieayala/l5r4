@@ -10,6 +10,7 @@ import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { buildAddedValues } from "../utils/added-values.js";
+import { getWindowId } from "../utils/window-id.js";
 import { FieldSaveMixin, toFieldValue } from "../mixins/field-save-mixin.js";
 
 /**
@@ -98,7 +99,7 @@ export default class WoundConfigApplication extends FieldSaveMixin(
     }
 
     const mergedOptions = foundry.utils.mergeObject(options, {
-      id: `wound-config-${actor.id}`
+      id: WoundConfigApplication.getWindowId(actor)
     });
     super(mergedOptions);
     this.actor = actor;
@@ -284,6 +285,15 @@ export default class WoundConfigApplication extends FieldSaveMixin(
     if (event) {
       event.preventDefault();
     }
+  }
+
+  /**
+   * The id of the actor's window, from its UUID, so each token's actor has its own (#189).
+   * @param {Actor} actor
+   * @returns {string}
+   */
+  static getWindowId(actor) {
+    return getWindowId("wound-config", actor.uuid);
   }
 }
 

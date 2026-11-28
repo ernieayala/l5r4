@@ -13,6 +13,7 @@ import { F, T } from "../utils/localization.js";
 import { buildEmphasisList } from "../utils/emphases.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
+import { getWindowId } from "../utils/window-id.js";
 import { askConfirm, askPrompt } from "../services/dialog.js";
 import { updateCustomEmphases, getCustomEmphases } from "../services/custom-emphases.js";
 
@@ -71,11 +72,10 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * @throws {Error} If item is not provided or is not a skill type
    */
   constructor(options = {}) {
-    super(options);
-
     if (!options.item || options.item.type !== "skill") {
       throw new Error("EmphasisManagerApplication requires a skill item");
     }
+    super({ ...options, id: EmphasisManagerApplication.getWindowId(options.item) });
 
     this.item = options.item;
   }
@@ -159,6 +159,15 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     } catch (err) {
       throw new Error(T("l5r4.apps.emphasisManager.errors.updateFailed"), { cause: err });
     }
+  }
+
+  /**
+   * The id of a Skill's Emphasis manager, from the Skill's UUID, so each actor's copy of a Skill has its own (#189).
+   * @param {Item} item - The Skill
+   * @returns {string}
+   */
+  static getWindowId(item) {
+    return getWindowId("emphasis-manager", item.uuid);
   }
 
   /**
