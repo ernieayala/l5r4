@@ -71,6 +71,11 @@ describe("getTraitAdjustTotal", () => {
     expect(getTraitAdjustTotal(rules, "str")).toBe(3);
   });
 
+  // #172
+  it("should count a fractional value as whole ranks, rounded down", () => {
+    expect(getTraitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: 1.5 }], "str")).toBe(1);
+  });
+
   it("should skip a formula and anything that is not a rule", () => {
     expect(
       getTraitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: "@rings.air" }, null], "str")
@@ -153,6 +158,62 @@ describe("getDerivedRuleOutputs", () => {
     };
     const [modifier] = getDerivedRuleOutputs([fear], rollData, new Set()).bag.rollModifiers.any;
     expect(modifier.roll).toBe(-3);
+  });
+
+  // #172: counts of dice, Raises, and ranks are whole; flat amounts are left as they come
+  it("should round counts of dice, Raises, and ranks down", () => {
+    const result = out([
+      rule("RollModifier", {
+        selector: "any",
+        roll: "@rings.air / 2",
+        keep: "-@rings.air / 2",
+        total: "@rings.air / 2",
+        type: "untyped"
+      }),
+      rule("FreeRaise", { selector: "any", value: "@rings.air / 2" }),
+      rule("RaiseRule", { selector: "any", maneuver: null, cost: 0.5, cap: 1.5, minimum: 0 }),
+      rule("UnskilledAs", { selector: "any", rank: 1.9 }),
+      rule("Initiative", { roll: 1.5, keep: 1.5, total: 1.5 }),
+      rule("Movement", { water: -1.5 })
+    ]);
+    const [modifier] = result.bag.rollModifiers.any;
+    expect([modifier.roll, modifier.keep, modifier.total]).toEqual([1, -2, 1.5]);
+    expect(result.bag.freeRaises.any[0].value).toBe(1);
+    expect(result.bag.raiseRules.any[0]).toMatchObject({ cost: 0, cap: 1, minimum: 0 });
+    expect(result.bag.unskilledAs.any[0].rank).toBe(1);
+    expect(result.initiative).toEqual({ roll: 1, keep: 1, total: 1.5 });
+    expect(result.movementWater).toBe(-2);
+  });
+
+  // #172
+  it("should report a rule whose value is not a finite number and leave it out", () => {
+    const result = out([
+      rule("TNModifier", { selector: "any", value: "1/0", type: "untyped" }),
+      rule("ArmorTN", { value: "0/0", type: "untyped", mode: "add", range: null })
+    ]);
+    expect(result.bag.tnModifiers.any).toBeUndefined();
+    expect(result.armor).toEqual([]);
+    expect(result.errors.map(e => e.key)).toEqual(["ArmorTN", "TNModifier"]);
+  });
+
+  // #172: a Cost or Ledger rule on an effect resolves later, and keeps the effect's level for it
+  it("should carry the effect's level to Cost and Ledger rules", () => {
+    const onEffect = r => ({
+      rule: r,
+      source: "Effect",
+      effectUuid: "Actor.a.ActiveEffect.e",
+      level: 2
+    });
+    const result = getDerivedRuleOutputs(
+      [
+        onEffect(rule("Cost", { selector: "emphasis", value: "@cost - @level" })),
+        onEffect(rule("Ledger", { track: "honor", direction: "gain", value: "@points * @level" }))
+      ],
+      rollData,
+      new Set()
+    );
+    expect(result.bag.costs.emphasis[0].level).toBe(2);
+    expect(result.ledger[0].level).toBe(2);
   });
 
   // Blinded

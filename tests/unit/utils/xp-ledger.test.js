@@ -248,6 +248,12 @@ describe("getCostPricer", () => {
     expect(entries[0].delta).toBe(10);
   });
 
+  // #172: a Cost rule on an effect reads the effect's level
+  it("should read @level from the effect carrying the rule", () => {
+    const price = pricer({ emphasis: [cost("emphasis", "@cost - @level", { level: 1 })] });
+    expect(price(["emphasis"], 2)).toBe(1);
+  });
+
   it("should chain rules in order, each seeing the price before it", () => {
     const price = pricer({
       "item:advantage": [cost("item:advantage", "@cost * 2"), cost("item:advantage", "@cost - 1")]

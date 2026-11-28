@@ -201,7 +201,11 @@ function parseFieldValue(field, name, raw) {
     case "select":
       return text === "" ? (field.nullable ? null : field.getInitialValue({})) : text;
     case "value":
-      return text !== "" && Number.isFinite(Number(text)) ? Number(text) : text;
+      // A cleared field takes the field's default, as an untouched one would, rather than an invalid "" (#172)
+      if (text === "") {
+        return field.getInitialValue({});
+      }
+      return Number.isFinite(Number(text)) ? Number(text) : text;
     case "list":
       return text
         .split(",")

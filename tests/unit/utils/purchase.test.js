@@ -27,15 +27,27 @@ describe("getUnmetPrerequisites", () => {
     expect(getUnmetPrerequisites([forNonCrane], new Set())).toHaveLength(1);
   });
 
-  it("should combine requirements with or, and skip rules without a requires list", () => {
+  it("should combine requirements with or", () => {
     const either = {
       key: "Prerequisite",
       requires: [{ or: ["school:kakita bushi", "school:bayushi bushi"] }]
     };
     expect(getUnmetPrerequisites([either], new Set(["school:kakita bushi"]))).toEqual([]);
-    expect(
-      getUnmetPrerequisites([{ key: "Prerequisite", requires: "nope" }, null], new Set())
-    ).toEqual([]);
+  });
+
+  // #172: a Prerequisite that cannot be checked is unmet, so the GM is asked, rather than a pass
+  it("should count a missing, empty, or non-list requires as unmet, and skip what is no rule", () => {
+    const rules = [
+      { key: "Prerequisite", label: "Blank" },
+      { key: "Prerequisite", requires: [] },
+      { key: "Prerequisite", requires: "nope" },
+      null
+    ];
+    expect(getUnmetPrerequisites(rules, new Set())).toEqual([
+      { label: "Blank", requires: null },
+      { label: "", requires: null },
+      { label: "", requires: null }
+    ]);
   });
 });
 

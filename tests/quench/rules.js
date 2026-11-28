@@ -1,6 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { RULE_KEYS } from "../../module/config/rule-keys.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
+import { buildRuleView, parseRuleForm } from "../../module/documents/rule-fields.js";
 import { FamilyBonusService } from "../../module/services/family-bonus.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { getFormulaBonus } from "../../module/utils/mechanics.js";
@@ -56,7 +57,7 @@ const MINIMAL_RULES = {
   ActionCost: { key: "ActionCost", selector: "attack" },
   Cost: { key: "Cost", selector: "self" },
   Ledger: { key: "Ledger" },
-  Prerequisite: { key: "Prerequisite" },
+  Prerequisite: { key: "Prerequisite", requires: ["clan:crane"] },
   ChoiceSet: { key: "ChoiceSet" },
   GrantItem: { key: "GrantItem", uuid: "Item.quench" }
 };
@@ -204,6 +205,44 @@ export function registerRulesTests(quench) {
             () => createRule({ key: "DiceRule", selector: "x", explode: "x" }),
             /explode/
           );
+        });
+
+        // #172
+        it("should reject a field the key does not have, a formula that does not parse, and an empty requires", () => {
+          assert.throws(
+            () => createRule({ key: "RollModifier", selector: "attack", roll: 1, rnage: "melee" }),
+            /Unknown field "rnage" on RollModifier/
+          );
+          assert.throws(
+            () => createRule({ key: "RollModifier", selector: "attack", roll: "abc" }),
+            /number or a formula/
+          );
+          assert.throws(
+            () => createRule({ key: "TNModifier", selector: "any", value: "toString(1)" }),
+            /number or a formula/
+          );
+          assert.throws(() => createRule({ key: "Prerequisite", requires: [] }), /requires/);
+          assert.throws(() => createRule({ key: "Prerequisite" }), /requires/);
+          assert.equal(
+            createRule({ key: "TNModifier", selector: "any", value: "1 / @x" }).value,
+            "1 / @x"
+          );
+        });
+
+        // #172
+        it("should show the error in the editor's view, and give a cleared value field its default", () => {
+          assert.match(
+            buildRuleView({ key: "RollModifier", selector: "attack", roll: "abc" }).error,
+            /number or a formula/
+          );
+          assert.match(
+            buildRuleView({ key: "RollModifier", selector: "attack", rnage: "melee" }).error,
+            /Unknown field/
+          );
+          const freeRaise = { key: "FreeRaise", selector: "any", value: 2 };
+          assert.equal(parseRuleForm(freeRaise, { value: "" }).value, 1, "FreeRaise's default");
+          assert.equal(parseRuleForm(freeRaise, { value: " 3 " }).value, 3);
+          assert.isNull(buildRuleView(parseRuleForm(freeRaise, { value: "" })).error);
         });
       });
 

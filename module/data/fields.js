@@ -7,6 +7,8 @@
  * falls back to the field's initial value when the document loads [src: common/abstract/data.mjs:79-83].
  */
 
+import { isRuleFormula } from "../utils/rule-values.js";
+
 /**
  * A required, non-null number.
  * @param {number} initial
@@ -87,8 +89,9 @@ export function spellSlotsField(initial) {
 }
 
 /**
- * A rule value: a number, or a formula over the actor's roll data (module/utils/rule-values.js).
- * @param {number} initial
+ * A rule value: a number, or a formula over the actor's roll data that parses (module/utils/rule-values.js), so the
+ * rules editor marks "abc" as an error before the rule ever reaches a roll (#172).
+ * @param {number|string} initial
  * @returns {foundry.data.fields.AnyField}
  */
 export function valueField(initial) {
@@ -98,7 +101,7 @@ export function valueField(initial) {
     initial,
     validate: value =>
       (typeof value === "number" && Number.isFinite(value)) ||
-      (typeof value === "string" && value.trim() !== ""),
+      (typeof value === "string" && value.trim() !== "" && isRuleFormula(value)),
     validationError: "must be a number or a formula"
   });
 }

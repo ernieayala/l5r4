@@ -28,7 +28,7 @@ A rule the system cannot use shows its error in red above its fields until it is
 ]
 ```
 
-Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
+Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a field the key does not have such as a misspelled `rnage`, a missing selector, a formula that does not parse) shows its error in the Rules tab and is skipped, with a warning in the browser console naming the item. Clearing a number-or-formula field in the form puts back its default.
 
 Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's roll rules (the ones a roll reads, such as `RollModifier` and `TNModifier`) apply only to rolls made with that weapon: its attacks and its damage. Its other rules apply while it is on the character. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
@@ -73,7 +73,7 @@ Values marked _n/f_ take a number or a formula (see **Formulas**).
 | `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`), `range` | Names on the card of the selected rolls the action they take (p.85); with `range` (`"melee"` or `"ranged"`) only on attacks of that range. The system shows it and does not enforce it |
 | `Cost` | `selector`, `value` _n/f_ | The XP price of what the selector names (see **XP prices**) |
 | `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` _n/f_ | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
-| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
+| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate with at least one term, `label` explains it (see **Character options**). One with an empty `requires` cannot be checked, so it counts as unmet and the GM is asked |
 | `ChoiceSet` | `flag`, `prompt`, `options` or `list`, `filter`, `selection` | A choice asked when the item is added; the item's other rules use the answer as `{choice:<flag>}` (see **Character options**) |
 | `GrantItem` | `uuid`, `rank`, `skillRank`, `emphasis` | An item given with this one: a School's Skills and Techniques (see **Character options**) |
 
@@ -102,7 +102,7 @@ Each roll posts a card holding everything it rolled with. A successful roll with
 
 ### Formulas
 
-A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`.
+A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`. A formula must come to a finite number: one that divides by 0 is an error, and the rule is skipped for as long as it does. A value that counts dice, Raises, or ranks is rounded down: `roll` and `keep` of `RollModifier`, `OpponentModifier`, and `Initiative`; `FreeRaise`; `RaiseRule`'s `cost`, `cap`, and `minimum`; `UnskilledAs`'s `rank`; `TraitAdjust`; and `Movement`. With Reflexes 3, `"@traits.ref / 2"` gives 1 die.
 
 | Path | Value |
 | --- | --- |
@@ -113,7 +113,7 @@ A value can be a formula over the character's data, written as text: `"@rings.ai
 | `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
 | `@insight.rank` | Insight Rank |
 | `@school.rank` | School Rank: the highest of the character's Schools, 0 with none |
-| `@level` | On an Active Effect: its level, such as a Fear Rank |
+| `@level` | On an Active Effect: its level, such as a Fear Rank, in every rule on it, `Cost` and `Ledger` included |
 | `@cost` | In a `Cost` rule: the price before it |
 | `@points` | In a `Ledger` rule: the size of the change before it |
 

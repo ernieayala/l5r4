@@ -9,7 +9,7 @@
 
 import { BAG_KINDS } from "../config/rule-keys.js";
 import { testPredicate } from "./predicate.js";
-import { getRuleValue } from "./rule-values.js";
+import { buildRuleRollData, getRuleValue } from "./rule-values.js";
 
 /**
  * @typedef {object} RuleEntry
@@ -30,29 +30,35 @@ import { getRuleValue } from "./rule-values.js";
 
 /**
  * The fields each rule key's bag entry adds to the shared ones (buildBagEntry): the rule, its entry, and its value
- * resolver in, the key's resolved numbers and settings out.
- * @type {Readonly<Record<string, function(object, RuleEntry, function(*): number): object>>}
+ * resolvers in (`value` for any number, `whole` for a count of dice, Raises, or ranks), the key's resolved numbers and
+ * settings out.
+ * @type {Readonly<Record<string, function(object, RuleEntry, BagResolvers): object>>}
  */
 const BAG_ENTRY_BUILDERS = Object.freeze({
   RollModifier: buildModifierBagFields,
   OpponentModifier: buildModifierBagFields,
-  RaiseRule: (rule, _entry, value) => ({
+  RaiseRule: (rule, _entry, { whole }) => ({
     maneuver: rule.maneuver,
-    cost: value(rule.cost),
-    cap: value(rule.cap),
-    minimum: value(rule.minimum)
+    cost: whole(rule.cost),
+    cap: whole(rule.cap),
+    minimum: whole(rule.minimum)
   }),
-  UnskilledAs: (rule, _entry, value) => ({ rank: value(rule.rank) }),
+  UnskilledAs: (rule, _entry, { whole }) => ({ rank: whole(rule.rank) }),
   ActionCost: rule => ({ action: rule.action, range: rule.range }),
-  // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js)
-  Cost: (rule, entry) => ({ value: rule.value, itemId: entry.itemId ?? null }),
-  TNModifier: (rule, _entry, value) => ({ value: value(rule.value), type: rule.type }),
-  FreeRaise: (rule, _entry, value) => ({ value: value(rule.value) }),
+  // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js); the
+  // effect's level goes with it, for `@level` (#172)
+  Cost: (rule, entry) => ({
+    value: rule.value,
+    itemId: entry.itemId ?? null,
+    ...(entry.level === undefined ? {} : { level: entry.level })
+  }),
+  TNModifier: (rule, _entry, { value }) => ({ value: value(rule.value), type: rule.type }),
+  FreeRaise: (rule, _entry, { whole }) => ({ value: whole(rule.value) }),
   DiceRule: rule => ({ explode: rule.explode, rerollOnes: rule.rerollOnes }),
   Substitute: rule => ({ replace: rule.replace, with: rule.with }),
   Note: rule => ({ text: rule.text }),
   ApplyCondition: rule => ({ condition: rule.condition, level: rule.level }),
-  DamageSource: (rule, _entry, value) => ({
+  DamageSource: (rule, _entry, { value }) => ({
     tags: [...rule.tags],
     ignoreReduction: value(rule.ignoreReduction)
   })
@@ -88,9 +94,9 @@ export function applyRollOptionRules(entries, options) {
 export function getTraitAdjustments(entries, rollData, options) {
   const adjustments = {};
   const errors = [];
-  const value = getValueResolver(rollData);
+  const whole = toWholeResolver(getValueResolver(rollData));
   applyMatchingRules({ entries, keys: ["TraitAdjust"], options, errors }, (rule, entry) => {
-    adjustments[rule.trait] = (adjustments[rule.trait] ?? 0) + value(rule.value, entry);
+    adjustments[rule.trait] = (adjustments[rule.trait] ?? 0) + whole(rule.value, entry);
   });
   return { adjustments, errors };
 }
@@ -108,7 +114,8 @@ export function getTraitAdjustTotal(rules, trait) {
   for (const rule of rules ?? []) {
     const value = Number(rule?.value);
     if (rule?.key === "TraitAdjust" && rule.trait === trait && Number.isFinite(value)) {
-      total += value;
+      // A Trait moves by whole ranks, as getTraitAdjustments counts it (#172)
+      total += Math.floor(value);
     }
   }
   return total;
@@ -143,7 +150,8 @@ export function getTraitAdjustTotal(rules, trait) {
  */
 export function getDerivedRuleOutputs(entries, rollData, options) {
   const errors = [];
-  const pass = { entries, options, errors, value: getValueResolver(rollData) };
+  const value = getValueResolver(rollData);
+  const pass = { entries, options, errors, value, whole: toWholeResolver(value) };
   return {
     ...getArmorRuleOutputs(pass),
     defenses: getDefenseRuleOutputs(pass),
@@ -161,6 +169,14 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
  * @property {Set<string>} options
  * @property {RuleError[]} errors - Extended in place
  * @property {function(*, RuleEntry): number} value - Resolves one entry's value
+ * @property {function(*, RuleEntry): number} whole - Resolves one entry's count of dice, Raises, or ranks
+ */
+
+/**
+ * One entry's value resolvers, for a bag entry's builder.
+ * @typedef {object} BagResolvers
+ * @property {function(*): number} value - Any number
+ * @property {function(*): number} whole - A count of dice, Raises, or ranks, rounded down
  */
 
 /**
@@ -212,10 +228,10 @@ function getDefenseRuleOutputs(pass) {
  * @returns {{movementWater: number, woundsPerRank: number, woundPenalty: number, initiative: object}}
  */
 function getActorRuleOutputs(pass) {
-  const { value } = pass;
+  const { value, whole } = pass;
   let movementWater = 0;
   applyMatchingRules({ ...pass, keys: ["Movement"] }, (rule, entry) => {
-    movementWater += value(rule.water, entry);
+    movementWater += whole(rule.water, entry);
   });
   let woundsPerRank = 0;
   let woundPenalty = 0;
@@ -228,8 +244,8 @@ function getActorRuleOutputs(pass) {
   const initiative = { roll: 0, keep: 0, total: 0 };
   applyMatchingRules({ ...pass, keys: ["Initiative"] }, (rule, entry) => {
     const [roll, keep, total] = [
-      value(rule.roll, entry),
-      value(rule.keep, entry),
+      whole(rule.roll, entry),
+      whole(rule.keep, entry),
       value(rule.total, entry)
     ];
     initiative.roll += roll;
@@ -288,7 +304,9 @@ function getTrackRuleOutputs(pass) {
       track: rule.track,
       direction: rule.direction,
       value: rule.value,
-      source: entry.source
+      source: entry.source,
+      // The effect's level, for `@level` when the change is sized (module/utils/ledger.js, #172)
+      ...(entry.level === undefined ? {} : { level: entry.level })
     });
   });
   return { resources, ledger };
@@ -300,11 +318,14 @@ function getTrackRuleOutputs(pass) {
  * @returns {Record<string, Record<string, object[]>>}
  */
 function buildRuleBag(pass) {
-  const { value } = pass;
+  const { value, whole } = pass;
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
   applyMatchingRules({ ...pass, keys: Object.keys(BAG_KINDS), options: null }, (rule, entry) => {
     // Resolve first, so a rule whose value fails leaves no trace in the bag
-    const output = buildBagEntry(rule, entry, v => value(v, entry));
+    const output = buildBagEntry(rule, entry, {
+      value: v => value(v, entry),
+      whole: v => whole(v, entry)
+    });
     (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
   });
   return bag;
@@ -316,11 +337,17 @@ function buildRuleBag(pass) {
  * @returns {function(*, RuleEntry): number}
  */
 function getValueResolver(rollData) {
-  return (value, entry) =>
-    getRuleValue(
-      value,
-      entry?.level === undefined ? rollData : { ...rollData, level: entry.level }
-    );
+  return (value, entry) => getRuleValue(value, buildRuleRollData(rollData, entry?.level));
+}
+
+/**
+ * A resolver for counts of dice, Raises, and ranks, which are whole: the value rounded down, so `@traits.ref / 2`
+ * with Reflexes 3 is 1 (#172).
+ * @param {function(*, RuleEntry): number} value - From getValueResolver
+ * @returns {function(*, RuleEntry): number}
+ */
+function toWholeResolver(value) {
+  return (v, entry) => Math.floor(value(v, entry));
 }
 
 /**
@@ -351,10 +378,10 @@ function applyMatchingRules({ entries, keys, options, errors }, fn) {
  * target's options), and label.
  * @param {object} rule
  * @param {RuleEntry} entry
- * @param {function(*): number} value
+ * @param {BagResolvers} resolve
  * @returns {object}
  */
-function buildBagEntry(rule, entry, value) {
+function buildBagEntry(rule, entry, resolve) {
   const base = {
     label: rule.label || entry.source,
     source: entry.source,
@@ -364,21 +391,21 @@ function buildBagEntry(rule, entry, value) {
   if (!Object.hasOwn(BAG_ENTRY_BUILDERS, rule.key)) {
     throw new Error(`No bag entry for ${rule.key}`);
   }
-  return { ...base, ...BAG_ENTRY_BUILDERS[rule.key](rule, entry, value) };
+  return { ...base, ...BAG_ENTRY_BUILDERS[rule.key](rule, entry, resolve) };
 }
 
 /**
- * A RollModifier's or OpponentModifier's bag fields: its resolved dice and total, type, range, whether the roller
- * may tick it, and the effect a ticked `consumes` modifier ends.
+ * A RollModifier's or OpponentModifier's bag fields: its resolved dice (whole) and total, type, range, whether the
+ * roller may tick it, and the effect a ticked `consumes` modifier ends.
  * @param {object} rule
  * @param {RuleEntry} entry
- * @param {function(*): number} value
+ * @param {BagResolvers} resolve
  * @returns {object}
  */
-function buildModifierBagFields(rule, entry, value) {
+function buildModifierBagFields(rule, entry, { value, whole }) {
   return {
-    roll: value(rule.roll),
-    keep: value(rule.keep),
+    roll: whole(rule.roll),
+    keep: whole(rule.keep),
     total: value(rule.total),
     type: rule.type,
     range: rule.range,

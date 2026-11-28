@@ -1311,7 +1311,8 @@
         "schoolReplace": "Replace",
         "schoolTitle": "A second School",
         "unmet": "{name} needs: {list}",
-        "unmetTitle": "Prerequisites not met"
+        "unmetTitle": "Prerequisites not met",
+        "unreadablePrerequisite": "{label} (a Prerequisite rule with nothing in requires, which cannot be checked)"
       },
       "requests": {
         "allowRequest": "Allow it anyway?",

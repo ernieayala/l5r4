@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getRuleValue, rollDataKey } from "../../../module/utils/rule-values.js";
+import {
+  buildRuleRollData,
+  getRuleValue,
+  isRuleFormula,
+  rollDataKey
+} from "../../../module/utils/rule-values.js";
 
 const rollData = {
   rings: { air: 3, fire: 2 },
@@ -54,6 +59,44 @@ describe("getRuleValue", () => {
     expect(() => getRuleValue("(1 + 2", rollData)).toThrow(/Expected/);
     expect(() => getRuleValue("1 +", rollData)).toThrow(/ends early/);
     expect(() => getRuleValue("1 2", rollData)).toThrow(/Unexpected "2"/);
+  });
+
+  // #172
+  it("should throw on a value that is not a finite number", () => {
+    expect(() => getRuleValue("1/0", rollData)).toThrow(/finite/);
+    expect(() => getRuleValue("0/0", rollData)).toThrow(/finite/);
+    expect(() => getRuleValue(Infinity, rollData)).toThrow(/finite/);
+    expect(() => getRuleValue(NaN, rollData)).toThrow(/finite/);
+  });
+
+  // #172
+  it("should not take Object.prototype's names for functions", () => {
+    for (const name of ["toString", "constructor", "valueOf", "hasOwnProperty"]) {
+      expect(() => getRuleValue(`${name}(1)`, rollData)).toThrow(/Unknown name/);
+    }
+  });
+});
+
+// #172
+describe("isRuleFormula", () => {
+  it("should accept a formula that parses, whatever it comes to", () => {
+    expect(isRuleFormula("@rings.air + 1")).toBe(true);
+    expect(isRuleFormula("1 / @rings.air")).toBe(true);
+    expect(isRuleFormula("floor(@honor.rank / 2)")).toBe(true);
+  });
+
+  it("should refuse text that does not parse", () => {
+    expect(isRuleFormula("abc")).toBe(false);
+    expect(isRuleFormula("1 +")).toBe(false);
+    expect(isRuleFormula("toString(1)")).toBe(false);
+  });
+});
+
+// #172
+describe("buildRuleRollData", () => {
+  it("should add @level only for a rule with a level", () => {
+    expect(buildRuleRollData(rollData, 2).level).toBe(2);
+    expect(buildRuleRollData(rollData)).toBe(rollData);
   });
 });
 

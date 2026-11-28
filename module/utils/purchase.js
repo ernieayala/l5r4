@@ -11,17 +11,23 @@ import { testPredicate } from "./predicate.js";
 
 /**
  * The Prerequisite rules an actor does not meet: each rule whose own predicate holds (when it applies) and whose
- * `requires` does not. A "Kenjutsu 3" Prerequisite is unmet for a buyer with Kenjutsu 2.
+ * `requires` does not. A "Kenjutsu 3" Prerequisite is unmet for a buyer with Kenjutsu 2. A rule whose `requires` is
+ * missing, empty, or not a list cannot be checked, so it counts as unmet with `requires` null, rather than letting
+ * anyone add the item (#172).
  * @param {object[]} rules - An item's raw `system.rules`
  * @param {Set<string>} options - The buyer's roll options
- * @returns {Array<{label: string, requires: Array}>}
+ * @returns {Array<{label: string, requires: Array|null}>}
  */
 export function getUnmetPrerequisites(rules, options) {
+  const isReadable = rule => Array.isArray(rule.requires) && rule.requires.length > 0;
   return (rules ?? [])
-    .filter(rule => rule?.key === "Prerequisite" && Array.isArray(rule.requires))
+    .filter(rule => rule?.key === "Prerequisite")
     .filter(rule => testPredicate(Array.isArray(rule.predicate) ? rule.predicate : [], options))
-    .filter(rule => !testPredicate(rule.requires, options))
-    .map(rule => ({ label: String(rule.label ?? ""), requires: rule.requires }));
+    .filter(rule => !isReadable(rule) || !testPredicate(rule.requires, options))
+    .map(rule => ({
+      label: String(rule.label ?? ""),
+      requires: isReadable(rule) ? rule.requires : null
+    }));
 }
 
 /**

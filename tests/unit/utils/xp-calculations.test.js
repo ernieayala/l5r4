@@ -68,9 +68,10 @@ describe("getCreationFreeBonus", () => {
       expect(getCreationFreeBonus(actor, "sta")).toBe(0);
     });
 
-    it("should handle fractional bonuses", () => {
-      const actor = { items: [ruleItem("family", "agi", 0.5)], getFlag: () => null };
-      expect(getCreationFreeBonus(actor, "agi")).toBe(0.5);
+    // #172: a Trait moves by whole ranks, so a fractional bonus rounds down, as the engine applies it
+    it("should round a fractional bonus down", () => {
+      const actor = { items: [ruleItem("family", "agi", 1.5)], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "agi")).toBe(1);
     });
 
     // #156, Ernie's ruling: the creation bonus belongs to the School a character starts in

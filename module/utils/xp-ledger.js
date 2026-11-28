@@ -14,7 +14,7 @@ import {
   VOID_XP_MULTIPLIER
 } from "../config/game-mechanics.js";
 import { getBagEntries } from "./rule-bag.js";
-import { getRuleValue } from "./rule-values.js";
+import { buildRuleRollData, getRuleValue } from "./rule-values.js";
 
 /** The breakdown categories XP is spent on; Disadvantages give XP, so they are not among them. */
 const SPENT_CATEGORIES = Object.freeze([
@@ -110,7 +110,10 @@ export function getCostPricer({ costs, options, rollData, report = () => {} }) {
     let price = base;
     for (const rule of rules) {
       try {
-        price = getRuleValue(rule.value, { ...rollData, cost: price });
+        price = getRuleValue(rule.value, {
+          ...buildRuleRollData(rollData, rule.level),
+          cost: price
+        });
       } catch (err) {
         report(rule.source, err.message);
       }

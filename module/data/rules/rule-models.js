@@ -450,8 +450,9 @@ export class LedgerRule extends RuleData {
 }
 
 /**
- * What the owner needs before the item can be added: `requires` is a predicate over the actor's roll options. A GM
- * may add the item anyway. The label explains the requirement to the player.
+ * What the owner needs before the item can be added: `requires` is a predicate over the actor's roll options, with at
+ * least one term, since an empty one would let anyone add the item (#172). A GM may add the item anyway. The label
+ * explains the requirement to the player.
  */
 export class PrerequisiteRule extends RuleData {
   /** @override */
@@ -459,7 +460,10 @@ export class PrerequisiteRule extends RuleData {
     const { ArrayField, AnyField } = getDataFields();
     return {
       ...super.defineSchema(),
-      requires: new ArrayField(new AnyField({ serializable: true, nullable: false }))
+      requires: new ArrayField(new AnyField({ serializable: true, nullable: false }), {
+        validate: value => value.length > 0,
+        validationError: "must list at least one term"
+      })
     };
   }
 }
@@ -570,15 +574,22 @@ if (RULE_KEYS.some(key => !RULE_MODELS[key])) {
 
 /**
  * Validate one stored rule. The model is built from a copy: a DataModel cleans the source it is given in place, which
- * would write every default into the stored rule.
+ * would write every default into the stored rule. A field the key's model does not have is an error: a DataModel
+ * would drop it without a word, so a misspelled `rnage` would leave a modifier on every range (#172).
  * @param {object} source - An entry of `system.rules`.
  * @returns {RuleData}
- * @throws {Error} When the key is unknown or a field fails validation.
+ * @throws {Error} When the key is unknown, a field is unknown, or a field fails validation.
  */
 export function createRule(source) {
   const Model = RULE_MODELS[source?.key];
   if (!Model) {
     throw new Error(`Unknown rule key "${source?.key}"`);
+  }
+  const unknown = Object.keys(source).filter(name => !Object.hasOwn(Model.schema.fields, name));
+  if (unknown.length) {
+    throw new Error(
+      `Unknown field ${unknown.map(name => `"${name}"`).join(", ")} on ${source.key}`
+    );
   }
   return new Model(foundry.utils.deepClone(source), { strict: true });
 }

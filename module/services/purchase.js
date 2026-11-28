@@ -137,8 +137,8 @@ function buildSecondSchoolData(data) {
  * @returns {Promise<boolean>}
  */
 async function canAddItem(actor, data, rules) {
-  const unmet = getUnmetPrerequisites(rules, actor.rollOptions).map(
-    p => p.label || JSON.stringify(p.requires)
+  const unmet = getUnmetPrerequisites(rules, actor.rollOptions).map(p =>
+    formatUnmetPrerequisite(p, data.name)
   );
   if (data.type === "kiho") {
     unmet.push(...getUnmetKihoMastery(actor, data.system));
@@ -165,6 +165,20 @@ async function canAddItem(actor, data, rules) {
     no: { label: T("l5r4.ui.common.cancel") }
   });
   return Boolean(bypass);
+}
+
+/**
+ * An unmet Prerequisite as the buyer and the GM read it: its label, else its `requires`. One that cannot be checked
+ * says so, so the GM decides with the item's rules in view (#172).
+ * @param {{label: string, requires: Array|null}} prerequisite - From getUnmetPrerequisites
+ * @param {string} itemName - The item being added, for a rule with no label
+ * @returns {string}
+ */
+function formatUnmetPrerequisite({ label, requires }, itemName) {
+  if (requires === null) {
+    return F("l5r4.ui.purchase.unreadablePrerequisite", { label: label || itemName });
+  }
+  return label || JSON.stringify(requires);
 }
 
 /**
