@@ -1042,6 +1042,8 @@
         "immune": "{name} is immune to {effect}",
         "noGM": "No GM is connected to apply that effect",
         "promptAnswered": "That roll has already been made",
+        "promptLapsedRound": "That save was for an earlier Round; a save is made once a Round",
+        "promptLapsedStance": "The character has left the Full Defense Stance, so that roll gives no bonus",
         "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
         "saveText": "{roll} roll against TN {tn}.",
         "saveTitle": "{effect}: save",

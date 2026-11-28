@@ -21,6 +21,7 @@ import {
   createArmorData,
   createSpellData
 } from "../../fixtures/item-fixtures.js";
+import L5R4ActiveEffectConfig from "../../../module/sheets/active-effect-config.js";
 import { cleanTest, waitFor } from "../helpers.js";
 
 /**
@@ -460,6 +461,11 @@ export function registerItemSheetTests(quench) {
             const [effect] = item.effects;
             control('[data-action="edit-effect"]', effect).click();
             assert.isTrue(await waitFor(() => configsOf(effect).some(app => app.rendered)));
+            // The system's sheet, with its Rules tab, as the effect's own sheet opens it (#179)
+            assert.isTrue(
+              configsOf(effect).every(app => app instanceof L5R4ActiveEffectConfig),
+              "the sheet with the Rules tab"
+            );
           })
         );
 

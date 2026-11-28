@@ -263,7 +263,9 @@ export function registerRequestsTests(quench) {
       });
 
       // #170: GM-side writes to one actor run one at a time, each reading the stored values in its turn
-      describe("Writes to one actor at the same time", () => {
+      describe("Writes to one actor at the same time", function () {
+        // Each test rolls damage and waits on several writes, past Mocha's 2 s default
+        this.timeout(10_000);
         const askDamage = request => CONFIG.queries[`${SYS_ID}.damage`](request, { user: player });
         const askVoid = (actor, count = 1) =>
           CONFIG.queries[SPEND_VOID_QUERY]({ actorUuid: actor.uuid, count }, { user: player });
