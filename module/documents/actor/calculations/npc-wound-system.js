@@ -86,9 +86,10 @@ export function prepareCurrentWoundLevelByMode(sys, order, { sCapped, woundMode 
 }
 
 /**
- * Prepare the Wound Ranks the sheet shows: `sys.visibleManualWoundLevels`, the manual entries for the wound
- * settings table, and `sys.visibleWoundLevels`, the active manual ranks in manual mode or, in formula mode, the
- * ranks computed again from the current Earth Ring and modifiers with the current rank marked.
+ * Prepare the Wound Ranks the sheet shows, `sys.visibleWoundLevels`: the active manual ranks in manual mode or, in
+ * formula mode, the ranks computed again from the current Earth Ring and modifiers with the current rank marked. The
+ * wound settings table edits the stored manual ranks (module/apps/wound-config.js), and the prepared wound levels
+ * stay as the wound mode made them: formula thresholds in formula mode (#38).
  * @param {object} sys - Actor's system data
  * @param {string[]} order - Ordered array of wound level keys
  */
@@ -98,15 +99,6 @@ export function prepareVisibleWoundLevels(sys, order) {
   const baseVisibleOrder = getWoundLevelsForCount(toInt(sys.nrWoundLvls) || 3);
 
   sys.visibleWoundLevels = {};
-  sys.visibleManualWoundLevels = {};
-
-  // The manual levels for the wound settings table (templates/apps/wound-config.hbs). The prepared wound levels
-  // stay as the wound mode made them: formula thresholds in formula mode (#38)
-  for (const key of order) {
-    if (sys.manualWoundLevels && sys.manualWoundLevels[key]) {
-      sys.visibleManualWoundLevels[key] = sys.manualWoundLevels[key];
-    }
-  }
 
   if (isManualMode) {
     // Manual mode: show only active levels

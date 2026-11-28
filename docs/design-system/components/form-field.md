@@ -4,7 +4,7 @@ A label and the value it names: an input the viewer types into, a select, a chec
 
 | Item | Detail |
 | --- | --- |
-| Partial | None: a field is two or three elements, written where it shows. Fields two windows share are one partial: `templates/item/_partials/_advantage-details.hbs` (an Advantage's and a Disadvantage's type and cost), `templates/item/_partials/_mastery-details.hbs` (a kata's and a kiho's Ring and Mastery Level), `templates/apps/_partials/_wealth-change.hbs` (the wealth manager's amount and denomination, parameter `field`) |
+| Partial | None: a field is two or three elements, written where it shows. Fields two windows share are one partial: `templates/item/_partials/_advantage-details.hbs` (an Advantage's and a Disadvantage's type and cost), `templates/item/_partials/_mastery-details.hbs` (a kata's and a kiho's Ring and Mastery Level), `templates/apps/_partials/_wealth-change.hbs` (the wealth manager's amount and denomination, parameter `field`), `templates/apps/_partials/_added-hint.hbs` (the Added hint, parameter `added`) |
 | SCSS | `scss/components/_form-field.scss`: the header label, the value box, and the Invalid message. The sheets' bare-input reset is in `scss/sheets/_actor-sheet.scss`, at no class weight, so a component's field rule wins |
 | Block class | `l5r4-form-field` on the inline field. Core's `form-group`, `form-fields`, `<label>` stay as core names them |
 | Shows in | The PC and NPC header (`l5r4-pc-info` (`templates/actor/_partials/_stats.hbs`), `l5r4-pc-info` (`templates/actor/_partials/_stats-npc.hbs`)), item sheet tabs, apps, dialogs, item rows (`data-field="system.trait"` (`templates/cards/skill.hbs`), `data-field="system.arrow"` (`templates/cards/weapon.hbs`)), grid value cells (`grid.md`) |
@@ -40,6 +40,7 @@ Core field (apps, dialogs, item sheet):
 | Inline | `l5r4-form-field` | Header fields on the PC and NPC sheets |
 | Read-only | `l5r4-form-field` holding `l5r4-form-field-value` | A computed value: Clan, School, Insight, XP spent of total |
 | Invalid message | `l5r4-form-field-error` after a field | Why what was typed cannot be saved |
+| Added hint | `hint l5r4-form-field-added` after a configuration field's inputs | What rules and Active Effects add to the stored value the field edits, and the total: "Rules and effects add +3, for 5 in all." (`l5r4.ui.mechanics.addedByRules`). Absent when nothing is added (`patterns/panels-and-browsers.md` rule 2) |
 | Core | `form-group` | Every field in apps, dialogs, and the item sheet |
 | Row select | A `<select data-action="update-item-field">` in an item row cell | A stored field edited in place: a Skill's Trait, a bow's arrow |
 | Grid value | An input in a `l5r4-grid-value` cell | Sidebar values: Wounds suffered, NPC Armor TN, Fear Rank (`grid.md`) |

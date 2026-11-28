@@ -9,7 +9,19 @@ import { SYS_ID } from "../config/constants.js";
 import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
 import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
+import { buildAddedValues } from "../utils/added-values.js";
 import { FieldSaveMixin, toFieldValue } from "../mixins/field-save-mixin.js";
+
+/**
+ * The number fields rules and Active Effects can add to, by their form names.
+ * @constant {string[]}
+ */
+const ADDED_FIELDS = Object.freeze([
+  "woundsMultiplier",
+  "woundsMod",
+  "woundsPenaltyMod",
+  "wounds.mod"
+]);
 
 /**
  * Valid wound calculation modes.
@@ -104,8 +116,10 @@ export default class WoundConfigApplication extends FieldSaveMixin(
   }
 
   /**
-   * Prepare context data for rendering the wound configuration form.
-   * Retrieves wound mode, multipliers, modifiers, and NPC wound levels.
+   * Prepare context data for rendering the wound configuration form. The form edits the stored values (`source`):
+   * the prepared ones hold what Wounds rules and Active Effects add, and writing them back would count that twice.
+   * What they add shows as a hint under each field (`added`), and the custom maximum stays blank until one is
+   * stored, its placeholder the Out threshold it falls back to (#184).
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with wound configuration data
@@ -117,25 +131,17 @@ export default class WoundConfigApplication extends FieldSaveMixin(
       return this._getFallbackContext();
     }
 
-    const sys = this.actor?.system ?? {};
-
     try {
-      const context = {
+      const source = this.actor._source.system;
+      return {
         actor: this.actor,
-        system: sys,
-        woundMode: sys.woundMode ?? "manual",
-        nrWoundLvls: sys.nrWoundLvls ?? 3,
-        woundsMultiplier: sys.woundsMultiplier ?? 2,
-        woundsMod: sys.woundsMod ?? 0,
-        woundsPenaltyMod: sys.woundsPenaltyMod ?? 0,
-        wounds: sys.wounds ?? {},
-        visibleManualWoundLevels: sys.visibleManualWoundLevels ?? {},
+        source,
+        added: buildAddedValues(source, this.actor.system, ADDED_FIELDS),
+        outThreshold: this.actor.system.woundLevels.out?.value,
         config: {
           npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
         }
       };
-
-      return context;
     } catch (err) {
       logError("Failed to prepare wound config context", err, {
         actorId: this.actor?.id
@@ -153,14 +159,16 @@ export default class WoundConfigApplication extends FieldSaveMixin(
   _getFallbackContext() {
     return {
       actor: this.actor,
-      system: {},
-      woundMode: "manual",
-      nrWoundLvls: 3,
-      woundsMultiplier: 2,
-      woundsMod: 0,
-      woundsPenaltyMod: 0,
-      wounds: {},
-      visibleManualWoundLevels: {},
+      source: {
+        woundMode: "manual",
+        nrWoundLvls: 3,
+        woundsMultiplier: 2,
+        woundsMod: 0,
+        woundsPenaltyMod: 0,
+        wounds: {},
+        manualWoundLevels: {}
+      },
+      added: {},
       config: {
         npcNumberWoundLevels: NPC_NUMBER_WOUND_LEVELS
       }

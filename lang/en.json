@@ -263,6 +263,7 @@
           "expandSection": "Section expand control",
           "failureHonorRoll": "Failure, with the Honor Roll",
           "fearLink": "Fear link",
+          "fieldAddedRules": "Field with what rules add",
           "flowOver": "Flow over",
           "formView": "Form view, one rule invalid",
           "fullDefense": "Full Defense roll",
@@ -1134,6 +1135,7 @@
         "traitMacro": "{name}: {traitName}"
       },
       "mechanics": {
+        "addedByRules": "Rules and effects add {value}, for {total} in all.",
         "combat": {
           "attack": "Attack",
           "attackSlot": "Attack {slot}",

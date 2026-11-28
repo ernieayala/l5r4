@@ -255,6 +255,7 @@ export const PRELOAD_TEMPLATES = Object.freeze([
   `${PATHS.templates}/apps/compendium-browser-results.hbs`,
   `${PATHS.templates}/apps/compendium-browser-open.hbs`,
   `${PATHS.templates}/apps/_partials/_wealth-change.hbs`,
+  `${PATHS.templates}/apps/_partials/_added-hint.hbs`,
 
   // Design gallery (module/apps/design-gallery.js): its parts include these partials
   `${PATHS.templates}/apps/design-gallery/_partials/_sample.hbs`,
