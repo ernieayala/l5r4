@@ -50,7 +50,6 @@ export const GALLERY_CONTEXTS = Object.freeze({
     enriched: { notes: "" },
     skills: [],
     weapons: [],
-    bows: [],
     armors: [],
     items: [],
     spells: [],

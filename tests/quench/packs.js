@@ -1264,6 +1264,28 @@ export function registerPacksTests(quench) {
         );
       });
 
+      // #185
+      describe("Posted item cards", () => {
+        it(
+          "should name a Void Skill's Trait and show a bow's Strength in words",
+          clean(async () => {
+            const { item: meditation } = await holding("skills", "Meditation");
+            const skillCard = await meditation.roll();
+            assert.include(skillCard.content, game.i18n.localize("l5r4.ui.mechanics.rings.void"));
+            assert.notInclude(skillCard.content, "l5r4.");
+            const { item: bow } = await holding("weapons", "Dai-kyu");
+            const bowCard = new DOMParser().parseFromString(
+              (await bow.roll()).content,
+              "text/html"
+            );
+            const strength = [...bowCard.querySelectorAll("p")].find(p =>
+              p.textContent.includes(game.i18n.localize("l5r4.ui.mechanics.traits.str"))
+            );
+            assert.include(strength?.textContent, "4", "the bow's own Strength");
+          })
+        );
+      });
+
       describe("Compendium browser", () => {
         /** The open browser, on a tab. */
         const openOn = async tab => {
@@ -1291,6 +1313,25 @@ export function registerPacksTests(quench) {
               const row = app.element.querySelector("[data-uuid]");
               assert.include(row.textContent, "DR 3k2");
               assert.include(row.textContent, "Core Rulebook p.204");
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        // #185: the Universal spells' Ring "all" reads apart from the option that clears the filter
+        it(
+          "should name the Universal spells' Ring in the Spells tab's Ring filter",
+          clean(async () => {
+            const app = await openOn("spells");
+            try {
+              const option = app.element.querySelector(
+                "[data-browser-filter='ring'] option[value='all']"
+              );
+              assert.equal(
+                option.textContent.trim(),
+                game.i18n.localize("l5r4.magic.spells.universal")
+              );
             } finally {
               await app.close({ animate: false });
             }

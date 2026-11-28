@@ -2,7 +2,7 @@
 items (patterns/sheets.md rule 4), so no item an actor holds is hidden (#183). Parameters: the sheet context's lists
 (PcContextBuilder.buildSortedItems), and wealth (the PC's money, which keeps the items section, with its wealth fields,
 showing when it has no items). --}}
-{{#if (or weapons.length bows.length)}}
+{{#if weapons.length}}
   {{> "systems/l5r4-enhanced/templates/actor/_partials/_weapon-section.hbs"}}
 {{/if}}
 {{#if armors.length}}

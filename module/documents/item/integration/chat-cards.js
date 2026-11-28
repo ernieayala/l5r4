@@ -8,6 +8,7 @@ import { CHAT_CARD_TEMPLATES } from "../../../config/item-types.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { F, R } from "../../../utils/localization.js";
 import { summaryOf } from "../../summary.js";
+import { prepareItemSheetOptions } from "./sheet-data.js";
 
 /**
  * Render an item as a chat card in the Foundry VTT chat log.
@@ -34,9 +35,16 @@ export async function renderItemChatCard(item) {
     return;
   }
 
-  // The card, then what the item's rules do and the book page it cites (roadmap/STAGE-15)
+  // The card, then what the item's rules do and the book page it cites (roadmap/STAGE-15). The card reads the option
+  // lists the sheets give it as `config`, such as a Skill's Trait, Void included (#185)
+  const card = prepareItemSheetOptions({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    system: item.system
+  });
   const html =
-    (await R(templatePath, item)) + (await R(CHAT_TEMPLATES.itemSummary, summaryOf(item.system)));
+    (await R(templatePath, card)) + (await R(CHAT_TEMPLATES.itemSummary, summaryOf(item.system)));
 
   // Localize item type label from TYPES.Item.{type} key, with title-case fallback
   // Uses optional chaining for has() as defensive check for older Foundry versions

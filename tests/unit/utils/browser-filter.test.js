@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BROWSER_FILTERS, BROWSER_TABS } from "../../../module/config/browser.js";
-import { SKILL_TRAITS } from "../../../module/config/localization.js";
+import { SKILL_TRAITS, SPELL_RINGS } from "../../../module/config/localization.js";
 import {
   getBrowserIndexFields,
   getEntryNumbers,
@@ -122,6 +122,14 @@ describe("BROWSER_FILTERS", () => {
     for (const key of Object.keys(SKILL_TRAITS)) {
       expect(BROWSER_FILTERS.trait.labels[key], key).toBe(SKILL_TRAITS[key]);
     }
+  });
+
+  // #185: the Universal spells' Ring is "all"
+  it("should label every Ring a spell can hold, all apart from the filter's own All", () => {
+    for (const key of Object.keys(SPELL_RINGS)) {
+      expect(BROWSER_FILTERS.ring.labels[key], key).toBeTruthy();
+    }
+    expect(BROWSER_FILTERS.ring.labels.all).not.toBe("l5r4.ui.common.all");
   });
 });
 

@@ -44,7 +44,7 @@
     {{/if}}
   {{/if}}
   {{#unless inSheet}}
-    <p><strong>{{localize "l5r4.character.skills.properties.trait"}}:</strong> {{localize (concat "l5r4.ui.mechanics.traits." system.trait)}}</p>
+    <p><strong>{{localize "l5r4.character.skills.properties.trait"}}:</strong> {{localize (lookup @root.config.traits system.trait)}}</p>
     <p><strong>{{localize "l5r4.character.skills.properties.type"}}:</strong> {{localize (concat "l5r4.character.skillTypes." system.type)}}</p>
 {{> "systems/l5r4-enhanced/templates/cards/_partials/_text-section.hbs" label="l5r4.ui.sheets.rulesSummary" text=system.specialRules}}
     {{#if (gte system.rank 3)}}

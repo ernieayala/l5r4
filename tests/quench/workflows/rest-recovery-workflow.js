@@ -488,6 +488,24 @@ export function registerRestRecoveryWorkflowTests(quench) {
           assert.exists(stillFasting, "Fasting condition persists");
         });
 
+        // #185
+        it("should say on the rest card that Fasting kept the Void Points from returning", async () => {
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Fasting", statuses: ["fasting"] }
+          ]);
+          const posted = new Promise(resolve => Hooks.once("createChatMessage", resolve));
+          await applyLongRest(actor);
+          const message = await posted;
+          try {
+            assert.include(
+              message.content,
+              game.i18n.localize("l5r4.ui.mechanics.wounds.voidFasting")
+            );
+          } finally {
+            await message.delete();
+          }
+        });
+
         it("should allow wounds to heal while fasting", async () => {
           // ARRANGE - Wounded and fasting
           await actor.update({ "system.suffered": 15 });

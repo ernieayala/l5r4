@@ -6,7 +6,7 @@
  * templates and never changes a document.
  */
 
-import { SYS_ID } from "../config/constants.js";
+import { SYS_ID, WEAPON_TYPES } from "../config/constants.js";
 import { SORT_KEYS } from "../config/sort-keys.js";
 import { applySortPref } from "../utils/sorting.js";
 import { toInt } from "../utils/type-coercion.js";
@@ -96,8 +96,8 @@ export class PcContextBuilder {
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} allItems - Array of all items from actor.items (any types)
    * @returns {{[type: string]: Item[]}} Sorted item collections by type: skills, spells, advantages,
-   *   disadvantages, items (items and commonItems), katas, kihos, tattoos, techniques, armors, weapons, and bows;
-   *   skills, spells, weapons, and bows carry their pre-calculated formulas
+   *   disadvantages, items (items and commonItems), katas, kihos, tattoos, techniques, armors, and weapons (legacy
+   *   bows included); skills, spells, and weapons carry their pre-calculated formulas
    */
   static buildSortedItems(actor, allItems) {
     const getItemsOfType = t => allItems.filter(i => i.type === t);
@@ -118,8 +118,11 @@ export class PcContextBuilder {
       tattoos: sortedOf("tattoos", getItemsOfType("tattoo")),
       techniques: sortedOf("techniques", getItemsOfType("technique")),
       armors: sortedOf("armors", getItemsOfType("armor")),
-      weapons: this.#getSortedWeapons(actor, getItemsOfType("weapon")),
-      bows: this.#getSortedWeapons(actor, getItemsOfType("bow"))
+      // A stored item of the legacy bow type lists with the weapons it became (#185)
+      weapons: this.#getSortedWeapons(
+        actor,
+        allItems.filter(i => WEAPON_TYPES.includes(i.type))
+      )
     };
   }
 

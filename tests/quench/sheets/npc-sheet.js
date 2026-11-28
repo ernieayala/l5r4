@@ -644,6 +644,8 @@ export function registerNpcSheetTests(quench) {
         it("should show a row for every item the NPC holds, whatever its type", async () => {
           const types = [
             "weapon",
+            // A stored item of the legacy bow type lists with the weapons (#185)
+            "bow",
             "armor",
             "commonItem",
             "spell",

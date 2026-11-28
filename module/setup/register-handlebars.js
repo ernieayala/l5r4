@@ -145,15 +145,16 @@ function formatConcatenated(...args) {
  * Join array helper.
  * Joins array elements with a separator, filtering out falsy values.
  *
- * Template usage: `{{join array ", "}}`.
+ * Template usage: `{{join array ", "}}`, or `{{join array}}` for ", ". Handlebars passes its options object as the
+ * last argument, so a call with no separator gets that object, never a string, and joins with ", " (#185).
  *
  * @param {Array} array - Array to join
- * @param {string} separator - Separator string (default: ", ")
+ * @param {string|object} separator - Separator string, or Handlebars' options when none is given
  * @returns {string} Joined string with falsy values filtered out
  */
-function formatJoined(array, separator = ", ") {
+function formatJoined(array, separator) {
   if (!Array.isArray(array)) {
     return "";
   }
-  return array.filter(Boolean).join(separator);
+  return array.filter(Boolean).join(typeof separator === "string" ? separator : ", ");
 }
